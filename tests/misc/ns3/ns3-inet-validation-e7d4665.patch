@@ -1,0 +1,1267 @@
+diff --git a/examples/wireless/inet-wireless-udp.cc b/examples/wireless/inet-wireless-udp.cc
+new file mode 100644
+index 0000000..25f9280
+--- /dev/null
++++ b/examples/wireless/inet-wireless-udp.cc
+@@ -0,0 +1,239 @@
++#include "ns3/core-module.h"
++#include "ns3/network-module.h"
++#include "ns3/applications-module.h"
++#include "ns3/wifi-module.h"
++#include "ns3/mobility-module.h"
++#include "ns3/ipv4-global-routing-helper.h"
++#include "ns3/internet-module.h"
++
++using namespace ns3;
++
++NS_LOG_COMPONENT_DEFINE("inet-wireless-udp");
++
++static int lastSeq = -1;
++static int lastAC = 5;
++static const char *AC[] = {"AC_BE", "AC_BK", "AC_VI", "AC_VO", "AC_BE_NQOS", "NA"};
++
++void TagMarker(uint8_t tid, Ptr<const Packet> packet)
++{
++    QosTag qosTag;
++    qosTag.SetTid(tid);
++    packet->AddPacketTag(qosTag);
++}
++
++void PhyTxTrace(std::string context, Ptr<const Packet> packet, WifiMode mode, WifiPreamble preamble, uint8_t txPower)
++{
++    lastSeq = -1;
++    lastAC = 5;
++    PacketMetadata::ItemIterator i = packet->BeginItem();
++    while (i.HasNext()) {
++        PacketMetadata::Item item = i.Next();
++        if (!item.isFragment && item.type == PacketMetadata::Item::HEADER) {
++            if (item.tid == SeqTsHeader::GetTypeId()) {
++                SeqTsHeader header;
++                header.Deserialize(item.current);
++                lastSeq = header.GetSeq();
++            }
++            else if (item.tid == WifiMacHeader::GetTypeId()) {
++                WifiMacHeader header;
++                header.Deserialize(item.current);
++                if (header.IsQosData())
++                    lastAC = QosUtilsMapTidToAc(header.GetQosTid());
++                else
++                    lastAC = 5;
++            }
++        }
++    }
++}
++
++void PhyStateTrace(std::string context, Time start, Time duration, enum WifiPhy::State state)
++{
++    if (state == WifiPhy::TX)
++        std::cout << "TX: node = " << context.at(10) << ", ac = " << AC[lastAC] << ", seq = " << lastSeq << ", start = " << start.GetPicoSeconds() << ", duration = " << duration.GetPicoSeconds() << std::endl;
++}
++
++void PopulateArpCache()
++{
++    Ptr<ArpCache> arp = CreateObject<ArpCache>();
++    arp->SetAliveTimeout(Seconds(3600 * 24 * 365));
++    for (NodeList::Iterator i = NodeList::Begin(); i != NodeList::End(); ++i) {
++        Ptr<Ipv4L3Protocol> ip = (*i)->GetObject<Ipv4L3Protocol>();
++        NS_ASSERT(ip != 0);
++        ObjectVectorValue interfaces;
++        ip->GetAttribute("InterfaceList", interfaces);
++        for (ObjectVectorValue::Iterator j = interfaces.Begin(); j != interfaces.End(); j++) {
++            Ptr<Ipv4Interface> ipIface = StaticCast<Ipv4Interface, Object>((*j).second);
++            NS_ASSERT(ipIface != 0);
++            Ptr<NetDevice> device = ipIface->GetDevice();
++            NS_ASSERT(device != 0);
++            Mac48Address addr = Mac48Address::ConvertFrom(device->GetAddress());
++            for (uint32_t k = 0; k < ipIface->GetNAddresses(); k++) {
++                Ipv4Address ipAddr = ipIface->GetAddress(k).GetLocal();
++                if (ipAddr == Ipv4Address::GetLoopback())
++                    continue;
++                ArpCache::Entry * entry = arp->Add(ipAddr);
++                entry->SetMacAddresss(addr);
++                entry->MarkPermanent();
++                std::cout << "Added ARP cache entry, ip = " << ipAddr << ", mac = " << addr << std::endl;
++            }
++        }
++    }
++    for (NodeList::Iterator i = NodeList::Begin(); i != NodeList::End(); ++i) {
++        Ptr<Ipv4L3Protocol> ip = (*i)->GetObject<Ipv4L3Protocol>();
++        NS_ASSERT(ip != 0);
++        ObjectVectorValue interfaces;
++        ip->GetAttribute("InterfaceList", interfaces);
++        for (ObjectVectorValue::Iterator j = interfaces.Begin(); j != interfaces.End(); j++) {
++            Ptr<Ipv4Interface> ipIface = StaticCast<Ipv4Interface, Object>((*j).second);
++            ipIface->SetAttribute("ArpCache", PointerValue(arp));
++        }
++    }
++}
++
++int main(int argc, char *argv[])
++{
++    Time::SetResolution(Time::PS);
++    Packet::EnableChecking();
++
++    // parameters
++    int numClients = 1;
++    double simulationTime = 1.0; //seconds
++    uint32_t messageLength = 1000; //byte
++    double sendInterval = 0.0001; //seconds
++    double cliAppStartTime = 0.5; //seconds
++    double cliAppStartDelta = 0.001; //seconds
++    double serverYPos = 3000;
++    bool qosEnabled = false;
++    int numApps = 1;
++    CommandLine cmd;
++    cmd.AddValue("withQos", "With QOS", qosEnabled);
++    cmd.AddValue("simulationTime", "Simulation time in seconds", simulationTime);
++    cmd.AddValue("numClients", "Number of client nodes", numClients);
++    cmd.AddValue("numApps", "Number of applications [1..4]", numApps);
++    cmd.AddValue("serverYPos", "Server node Y position", serverYPos);
++    cmd.AddValue("appStartTime", "Application start time in first client", cliAppStartTime);
++    cmd.AddValue("appStartDelta", "Application start time delta for other clients", cliAppStartDelta);
++    cmd.AddValue("sendInterval", "Send interval in seconds", sendInterval);
++    cmd.Parse(argc, argv);
++    NS_ASSERT(numApps >= 1 && numApps <= 4);
++    int ports[4] = { 5000, 4000, 80, 21 };
++    uint8_t tagVector[4] = { UP_VO, UP_VI, UP_BE, UP_BK };
++
++    // node
++    NodeContainer wifiSrvNode;
++    NodeContainer wifiCliNode;
++    wifiSrvNode.Create(1);
++    wifiCliNode.Create(numClients);
++
++    // phy
++    YansWifiChannelHelper channel = YansWifiChannelHelper::Default();
++    YansWifiPhyHelper phy = YansWifiPhyHelper::Default();
++//    phy.Set("TxPowerStart", DoubleValue(200));
++//    phy.Set("TxPowerEnd", DoubleValue(200));
++    phy.SetChannel(channel.Create());
++    phy.SetPcapDataLinkType(YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
++
++    WifiHelper wifi = WifiHelper::Default();
++    wifi.SetStandard(WIFI_PHY_STANDARD_80211a);
++    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
++        "DataMode", StringValue("OfdmRate54Mbps"),
++        "ControlMode", StringValue("OfdmRate6Mbps"));
++
++    Config::SetDefault("ns3::WifiMacQueue::MaxPacketNumber", UintegerValue(10000));
++
++    Ssid ssid = Ssid("ns3-80211a");
++    WifiMacHelper *macPtr = NULL;
++
++    // mac
++    QosWifiMacHelper macQ = QosWifiMacHelper::Default();
++    NqosWifiMacHelper macNq = NqosWifiMacHelper::Default();
++
++    if (qosEnabled) {
++        macQ.SetType("ns3::AdhocWifiMac", "Ssid", SsidValue(ssid));
++        macPtr = &macQ;
++    }
++    else {
++        macNq.SetType("ns3::AdhocWifiMac", "Ssid", SsidValue(ssid));
++        macPtr = &macNq;
++    }
++
++    // device
++    NetDeviceContainer srvDevice = wifi.Install(phy, *macPtr, wifiSrvNode);
++    NetDeviceContainer cliDevice = wifi.Install(phy, *macPtr, wifiCliNode);
++    NetDeviceContainer devices;
++    devices.Add(srvDevice);
++    devices.Add(cliDevice);
++
++    // random sequences must be the same as in INET
++    wifi.AssignStreams(srvDevice, 0);
++    wifi.AssignStreams(cliDevice, 6);
++
++    // mobility
++    MobilityHelper mobility;
++    Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator>();
++    positionAlloc->Add(Vector(15.0, serverYPos, 0.0)); // server
++    for (int i = 0; i < numClients; i++) {
++        positionAlloc->Add(Vector(10.0 + i * 10.0, 10.0, 0.0)); // clients
++    }
++    mobility.SetPositionAllocator(positionAlloc);
++    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
++    mobility.Install(wifiSrvNode);
++    mobility.Install(wifiCliNode);
++
++    // internet stack
++    InternetStackHelper stack;
++    stack.Install(wifiSrvNode);
++    stack.Install(wifiCliNode);
++
++    // IP addresses
++    Ipv4AddressHelper address;
++    address.SetBase("192.168.1.0", "255.255.255.0");
++
++    Ipv4InterfaceContainer srvNodeInterface = address.Assign(srvDevice);
++    Ipv4InterfaceContainer cliNodesInterface = address.Assign(cliDevice);
++
++    // server apps
++    ApplicationContainer serverApp;
++    for (int i = 0; i < numApps; i++) {
++        UdpServerHelper myServer(ports[i]);
++        serverApp.Add(myServer.Install(wifiSrvNode.Get(0)));
++    }
++    serverApp.Start(Seconds(0.0));
++    serverApp.Stop(Seconds(simulationTime));
++
++    // client apps
++    ApplicationContainer clientApps;
++    for (int i = 0; i < numApps; i++) {
++        UdpClientHelper myClient(srvNodeInterface.GetAddress(0), ports[i]);
++        myClient.SetAttribute("MaxPackets", UintegerValue(400000u));
++        myClient.SetAttribute("Interval", TimeValue(Seconds(sendInterval))); //packets/s
++        myClient.SetAttribute("PacketSize", UintegerValue(messageLength));
++        ApplicationContainer c = myClient.Install(wifiCliNode);
++        for (int j = 0; j < (int) c.GetN(); j++) {
++            Ptr<Application> app = c.Get(j);
++            app->SetStartTime(Seconds(cliAppStartTime + j * cliAppStartDelta));
++        }
++        for (int j = 0; j < (int) c.GetN(); j++) {
++            Ptr<UdpClient> udpclientapp;
++            udpclientapp = DynamicCast<UdpClient>(c.Get(j));
++            udpclientapp->TraceConnectWithoutContext("Tx", MakeBoundCallback(&TagMarker, tagVector[i]));
++        }
++        clientApps.Add(c);
++    }
++    clientApps.Stop(Seconds(simulationTime));
++
++    // global routing and arp cache
++    PopulateArpCache();
++    Ipv4GlobalRoutingHelper::PopulateRoutingTables();
++
++    Config::Connect("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback(&PhyStateTrace));
++    Config::Connect("/NodeList/*/DeviceList/*/Phy/State/Tx", MakeCallback(&PhyTxTrace));
++
++    // simulation
++    Simulator::Stop(Seconds(simulationTime));
++    Simulator::Run();
++    Simulator::Destroy();
++
++    return 0;
++}
++
+diff --git a/examples/wireless/wifi-backoff.cc b/examples/wireless/wifi-backoff.cc
+new file mode 100644
+index 0000000..68bc0fb
+--- /dev/null
++++ b/examples/wireless/wifi-backoff.cc
+@@ -0,0 +1,162 @@
++#include "ns3/applications-module.h"
++#include "ns3/core-module.h"
++#include "ns3/internet-module.h"
++#include "ns3/ipv4-global-routing-helper.h"
++#include "ns3/mobility-module.h"
++#include "ns3/network-module.h"
++#include "ns3/wifi-module.h"
++
++using namespace ns3;
++
++NS_LOG_COMPONENT_DEFINE("wifi-backoff");
++
++void TagMarker(uint8_t tid, Ptr<const Packet> packet)
++{
++    QosTag qosTag;
++    qosTag.SetTid(tid);
++    packet->AddPacketTag(qosTag);
++}
++
++void PhyStateTrace(std::string context, Time start, Time duration, enum WifiPhy::State state)
++{
++    if (state == WifiPhy::TX)
++        std::cout << "START = " << start << std::endl;
++}
++
++void PopulateArpCache()
++{
++    Ptr<ArpCache> arp = CreateObject<ArpCache>();
++    arp->SetAliveTimeout(Seconds(3600 * 24 * 365));
++    for (NodeList::Iterator i = NodeList::Begin(); i != NodeList::End(); ++i) {
++        Ptr<Ipv4L3Protocol> ip = (*i)->GetObject<Ipv4L3Protocol>();
++        NS_ASSERT(ip != 0);
++        ObjectVectorValue interfaces;
++        ip->GetAttribute("InterfaceList", interfaces);
++        for (ObjectVectorValue::Iterator j = interfaces.Begin(); j != interfaces.End(); j++) {
++            Ptr<Ipv4Interface> ipIface = StaticCast<Ipv4Interface, Object>((*j).second);
++            NS_ASSERT(ipIface != 0);
++            Ptr<NetDevice> device = ipIface->GetDevice();
++            NS_ASSERT(device != 0);
++            Mac48Address addr = Mac48Address::ConvertFrom(device->GetAddress());
++            for (uint32_t k = 0; k < ipIface->GetNAddresses(); k++) {
++                Ipv4Address ipAddr = ipIface->GetAddress(k).GetLocal();
++                if (ipAddr == Ipv4Address::GetLoopback())
++                    continue;
++                ArpCache::Entry * entry = arp->Add(ipAddr);
++                entry->SetMacAddresss(addr);
++                entry->MarkPermanent();
++            }
++        }
++    }
++    for (NodeList::Iterator i = NodeList::Begin(); i != NodeList::End(); ++i) {
++        Ptr<Ipv4L3Protocol> ip = (*i)->GetObject<Ipv4L3Protocol>();
++        NS_ASSERT(ip != 0);
++        ObjectVectorValue interfaces;
++        ip->GetAttribute("InterfaceList", interfaces);
++        for (ObjectVectorValue::Iterator j = interfaces.Begin(); j != interfaces.End(); j++) {
++            Ptr<Ipv4Interface> ipIface = StaticCast<Ipv4Interface, Object>((*j).second);
++            ipIface->SetAttribute("ArpCache", PointerValue(arp));
++        }
++    }
++}
++
++void test(bool separateClients)
++{
++    std::cout << "Separate clients: " << separateClients << std::endl;
++    // Nodes
++    NodeContainer wifiSrvNode;
++    NodeContainer wifiCliNode1;
++    NodeContainer wifiCliNode2;
++    wifiSrvNode.Create(1);
++    wifiCliNode1.Create(1);
++    wifiCliNode2.Create(1);
++
++    // Wifi
++    YansWifiChannelHelper channel = YansWifiChannelHelper::Default();
++    YansWifiPhyHelper phy = YansWifiPhyHelper::Default();
++    phy.SetChannel(channel.Create());
++    phy.SetPcapDataLinkType(YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
++
++    WifiHelper wifi = WifiHelper::Default();
++    wifi.SetStandard(WIFI_PHY_STANDARD_80211a);     // WIFI_PHY_STANDARD_80211g
++    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
++        "DataMode", StringValue("OfdmRate54Mbps"),       // ErpOfdmRate54Mbps
++        "ControlMode", StringValue("OfdmRate6Mbps"));    // ErpOfdmRate6Mbps
++
++    QosWifiMacHelper mac = QosWifiMacHelper::Default();
++    Config::SetDefault("ns3::WifiRemoteStationManager::MaxSlrc", UintegerValue(1));
++
++    Ssid ssid = Ssid("ns3-80211a");
++    mac.SetType("ns3::AdhocWifiMac", "Ssid", SsidValue(ssid));
++    NetDeviceContainer srvDevice = wifi.Install(phy, mac, wifiSrvNode);
++    NetDeviceContainer cli1Device = wifi.Install(phy, mac, wifiCliNode1);
++    NetDeviceContainer cli2Device = wifi.Install(phy, mac, wifiCliNode2);
++
++    // Assign the same random streams so that they draw the same backoff periods
++    wifi.AssignStreams(cli1Device, 666);
++    wifi.AssignStreams(cli2Device, 666);
++
++    // Mobility.
++    Ptr<ListPositionAllocator> positionAllocator = CreateObject<ListPositionAllocator>();
++    positionAllocator->Add(Vector(10000.0, 0.0, 0.0));
++    positionAllocator->Add(Vector(0.0, 0.0, 0.0));
++    positionAllocator->Add(Vector(0.0, 0.0, 0.0));
++    MobilityHelper mobility;
++    mobility.SetPositionAllocator(positionAllocator);
++    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
++    mobility.Install(wifiSrvNode);
++    mobility.Install(wifiCliNode1);
++    mobility.Install(wifiCliNode2);
++
++    // Internet stack
++    InternetStackHelper stack;
++    stack.Install(wifiSrvNode);
++    stack.Install(wifiCliNode1);
++    stack.Install(wifiCliNode2);
++
++    Ipv4AddressHelper address;
++    address.SetBase("192.168.1.0", "255.255.255.0");
++    Ipv4InterfaceContainer srvNodeInterface = address.Assign(srvDevice);
++    address.Assign(cli1Device);
++    address.Assign(cli2Device);
++
++    // Applications
++    UdpClientHelper clientHelper1(srvNodeInterface.GetAddress(0), 5000);
++    clientHelper1.SetAttribute("MaxPackets", UintegerValue(1u));
++    clientHelper1.SetAttribute("PacketSize", UintegerValue(1000));
++    ApplicationContainer clientApp1 = clientHelper1.Install(wifiCliNode1);
++    clientApp1.Start(Seconds(1.0));
++    Ptr<UdpClient> udpClient1;
++    udpClient1 = DynamicCast<UdpClient>(clientApp1.Get(0));
++    udpClient1->TraceConnectWithoutContext("Tx",  MakeBoundCallback(&TagMarker, UP_VO));
++
++    UdpClientHelper clientHelper2(srvNodeInterface.GetAddress(0), 4000);
++    clientHelper2.SetAttribute("MaxPackets", UintegerValue(1u));
++    clientHelper2.SetAttribute("PacketSize", UintegerValue(1000));
++    ApplicationContainer clientApp2 = clientHelper2.Install(separateClients ? wifiCliNode2 : wifiCliNode1);
++    clientApp2.Start(Seconds(1.000001)); // 1us delay to receive the voice packet and backoff
++    Ptr<UdpClient> udpClient2;
++    udpClient2 = DynamicCast<UdpClient>(clientApp2.Get(0));
++    udpClient2->TraceConnectWithoutContext("Tx",  MakeBoundCallback(&TagMarker, UP_VI));
++
++    PopulateArpCache();
++    Ipv4GlobalRoutingHelper::PopulateRoutingTables();
++
++    Config::Connect("/NodeList/*/DeviceList/*/Phy/State/State", MakeCallback(&PhyStateTrace));
++
++    Simulator::Stop(Seconds(5.0));
++    Simulator::Run();
++    Simulator::Destroy();
++}
++
++int main(int argc, char *argv[])
++{
++    Packet::EnableChecking();
++    Time::SetResolution(Time::PS);
++
++    test(false);
++    test(true);
++
++    return 0;
++}
++
+diff --git a/examples/wireless/wscript b/examples/wireless/wscript
+index 1336e41..e70024b 100644
+--- a/examples/wireless/wscript
++++ b/examples/wireless/wscript
+@@ -84,3 +84,9 @@ def build(bld):
+ 
+     obj = bld.create_ns3_program('simple-ht-hidden-stations', ['internet', 'mobility', 'wifi', 'applications'])    
+     obj.source = 'simple-ht-hidden-stations.cc'
++
++    obj = bld.create_ns3_program('inet-wireless-udp', ['internet', 'mobility', 'wifi', 'applications'])
++    obj.source = 'inet-wireless-udp.cc'
++
++    obj = bld.create_ns3_program('wifi-backoff', ['internet', 'mobility', 'wifi', 'applications'])
++    obj.source = 'wifi-backoff.cc'
+diff --git a/src/applications/model/udp-client.cc b/src/applications/model/udp-client.cc
+index 49347c3..415ab99 100644
+--- a/src/applications/model/udp-client.cc
++++ b/src/applications/model/udp-client.cc
+@@ -69,6 +69,9 @@ UdpClient::GetTypeId (void)
+                    UintegerValue (1024),
+                    MakeUintegerAccessor (&UdpClient::m_size),
+                    MakeUintegerChecker<uint32_t> (12,1500))
++    .AddTraceSource ("Tx", "A new packet is created and is sent",
++                   MakeTraceSourceAccessor (&UdpClient::m_txTrace),
++                   "ns3::Packet::TracedCallback")
+   ;
+   return tid;
+ }
+@@ -169,6 +172,7 @@ UdpClient::Send (void)
+       peerAddressStringStream << Ipv6Address::ConvertFrom (m_peerAddress);
+     }
+ 
++  m_txTrace (p);
+   if ((m_socket->Send (p)) >= 0)
+     {
+       ++m_sent;
+diff --git a/src/applications/model/udp-client.h b/src/applications/model/udp-client.h
+index 642d033..6d13df0 100644
+--- a/src/applications/model/udp-client.h
++++ b/src/applications/model/udp-client.h
+@@ -27,6 +27,7 @@
+ #include "ns3/event-id.h"
+ #include "ns3/ptr.h"
+ #include "ns3/ipv4-address.h"
++#include "ns3/traced-callback.h"
+ 
+ namespace ns3 {
+ 
+@@ -95,6 +96,8 @@ private:
+   uint16_t m_peerPort; //!< Remote peer port
+   EventId m_sendEvent; //!< Event to send the next packet
+ 
++  /// Traced Callback: transmitted packets.
++  TracedCallback<Ptr<const Packet> > m_txTrace;
+ };
+ 
+ } // namespace ns3
+diff --git a/src/core/model/clcg32.cc b/src/core/model/clcg32.cc
+new file mode 100644
+index 0000000..964736d
+--- /dev/null
++++ b/src/core/model/clcg32.cc
+@@ -0,0 +1,121 @@
++#include "ns3/clcg32.h"
++
++int cLCG32::nextId = 0;
++
++void cLCG32::initialize(int seedSet, int rngId, int numRngs)
++{
++    int autoSeedIndex = seedSet * numRngs + rngId;
++    autoSeedIndex = autoSeedIndex % 256;
++    seed = autoSeeds[autoSeedIndex];
++}
++
++void cLCG32::selfTest()
++{
++    seed = 1;
++    for (int i = 0; i < 10000; i++)
++        intRand();
++}
++
++unsigned long cLCG32::intRand()
++{
++    numDrawn++;
++    const long int a = 16807, q = 127773, r = 2836;
++    seed = a * (seed % q) - r * (seed / q);
++    if (seed <= 0)
++        seed += LCG32_MAX + 1;
++    return seed - 1;  // shift range [1..2^31-2] to [0..2^31-3]
++}
++
++unsigned long cLCG32::intRandMax()
++{
++    return LCG32_MAX - 1;  // 2^31-3
++}
++
++unsigned long cLCG32::intRand(unsigned long n)
++{
++    // code from MersenneTwister.h, Richard J. Wagner rjwagner@writeme.com
++    // Find which bits are used in n
++    unsigned long used = n - 1;
++    used |= used >> 1;
++    used |= used >> 2;
++    used |= used >> 4;
++    used |= used >> 8;
++    used |= used >> 16;
++
++    // Draw numbers until one is found in [0,n]
++    unsigned long i;
++    do
++        i = intRand() & used;  // toss unused bits to shorten search
++    while (i >= n);
++    return i;
++}
++
++double cLCG32::doubleRand()
++{
++    return (double)intRand() * (1.0 / LCG32_MAX);
++}
++
++double cLCG32::doubleRandNonz()
++{
++    return (double)(intRand() + 1) * (1.0 / (LCG32_MAX + 1));
++}
++
++double cLCG32::doubleRandIncl1()
++{
++    return (double)intRand() * (1.0 / (LCG32_MAX - 1));
++}
++
++long cLCG32::autoSeeds[] = {
++    1L, 1331238991L, 1550655590L, 930627303L, 766698560L, 372156336L,
++    1645116277L, 1635860990L, 1154667137L, 692982627L, 1961833381L,
++    713190994L, 460575272L, 1298018763L, 1497719440L, 2030952567L,
++    901595110L, 631930165L, 354421844L, 1213737427L, 1800697079L,
++    795809157L, 821079954L, 1624537871L, 1918430133L, 861482464L,
++    1736896562L, 1220028201L, 634729389L, 456922549L, 23246132L,
++    979545543L, 1008653149L, 1156436224L, 1689665648L, 1604778030L,
++    1628735393L, 1949577498L, 550023088L, 1726571906L, 1267216792L,
++    1750609806L, 314116942L, 736299588L, 2095003524L, 1281569003L,
++    356484144L, 1423591576L, 2140958617L, 1577658393L, 1116852912L,
++    1865734753L, 1701937813L, 301264580L, 171817360L, 1809513683L,
++    360646631L, 546534802L, 1652205397L, 136501886L, 605448579L,
++    1857604347L, 1223969344L, 668104522L, 1821072732L, 738721927L,
++    1237280745L, 1753702432L, 2125855022L, 1259255700L, 935058038L,
++    1325807218L, 1151620124L, 585222105L, 1970906347L, 1267057970L,
++    66562942L, 1959090863L, 1503754591L, 114059398L, 2007872839L,
++    1886985293L, 1870986444L, 2110445215L, 1375265396L, 1512926254L,
++    470646700L, 1951555990L, 500432100L, 1843528576L, 347147950L,
++    1431668171L, 929595364L, 1507452793L, 800443847L, 1428656866L,
++    5715478L, 1607979231L, 2032092669L, 37809413L, 996425830L,
++    1010869813L, 1884232020L, 312192738L, 1821061493L, 462270727L,
++    248900140L, 678804905L, 905130946L, 1892339752L, 1307421505L,
++    491642575L, 1091346202L, 1076664921L, 1140141037L, 122447008L,
++    1244153851L, 1382627577L, 611793617L, 1989326495L, 808278095L,
++    1352281487L, 2106046913L, 1731628906L, 1226683843L, 1683200486L,
++    90274853L, 1676390615L, 2147466840L, 498396356L, 2140522509L,
++    1217803227L, 1146667727L, 788324559L, 1530171233L, 317473611L,
++    319146380L, 992289339L, 2077765218L, 652681396L, 789950931L,
++    485020132L, 632682054L, 32775496L, 1683083109L, 603834907L,
++    351704670L, 1809710911L, 171230418L, 1511135464L, 1986612391L,
++    1646573708L, 1411714374L, 1546459273L, 872179784L, 1307370996L,
++    801917373L, 2051724276L, 144283230L, 1535180348L, 1949917822L,
++    650872229L, 113201992L, 890256110L, 1965781805L, 1903960687L,
++    679060319L, 452497769L, 630187802L, 174438105L, 1298843779L,
++    961082145L, 1565131991L, 2078229636L, 50366922L, 959177042L,
++    144513213L, 1423462005L, 207666443L, 152219823L, 13354949L,
++    412643566L, 631135695L, 166938633L, 958408264L, 1324624652L,
++    494931978L, 1472820641L, 1150735880L, 1508483704L, 1640573652L,
++    359288909L, 1315013967L, 1051019865L, 1254156333L, 1883764098L,
++    587564032L, 1288274932L, 1912367727L, 1595891993L, 2138169990L,
++    1794668172L, 2059764593L, 1152025509L, 115613893L, 926625010L,
++    131630606L, 706594585L, 1386707532L, 1624163092L, 2081362360L,
++    1882152641L, 1428465736L, 602313149L, 1170668648L, 863700348L,
++    931140599L, 1856765731L, 197473249L, 507314638L, 1381732824L,
++    252975355L, 925311926L, 1726193892L, 576725369L, 774762078L,
++    198434005L, 192355221L, 1296038143L, 1201667973L, 653782169L,
++    1426685702L, 1503907840L, 211726157L, 33491376L, 906578176L,
++    238345926L, 1826083853L, 1366925216L, 480315631L, 1549695660L,
++    1337366022L, 1793656969L, 1469954017L, 1701980729L, 98857548L,
++    1883864564L, 1709982325L, 251608257L, 1171967839L, 642486710L,
++    1358844649L, 1115145546L, 1398997376L, 1021484058L, 2035865982L,
++};
++
+diff --git a/src/core/model/clcg32.h b/src/core/model/clcg32.h
+new file mode 100644
+index 0000000..64badc9
+--- /dev/null
++++ b/src/core/model/clcg32.h
+@@ -0,0 +1,71 @@
++#ifndef __NS3_CLCG32_H
++#define __NS3_CLCG32_H
++
++#define LCG32_MAX  0x7ffffffeL  /* = 2^31-2 */
++
++/**
++ * Implements a 32-bit (2^31-2 cycle length) linear congruential random
++ * number generator.
++ *    - Range:              1 ... 2^31-2
++ *    - Period length:      2^31-2
++ *    - Method:             x=(x * 7^5) mod (2^31-1)
++ *    - Required hardware:  exactly 32-bit integer aritmetics
++ *    - To check:           if  x[0]=1  then  x[10000]=1,043,618,065
++ *
++ * Source:  Raj Jain: The Art of Computer Systems Performance Analysis
++ * (John Wiley & Sons, 1991) pp 441-444, 455.
++ */
++class cLCG32
++{
++  public:
++    int id;
++  protected:
++    static int nextId;
++    long numDrawn;
++    long seed;
++
++    // 256 pre-generated seeds, spaced 8,388,608 values in the sequence.
++    // This covers the whole RNG period. Enough for 128 runs with 2 RNGs
++    // each, or 64 runs with 4 RNGs each -- assuming one run never uses
++    // more than 8 million random numbers per RNG.
++    static long autoSeeds[256];
++
++  public:
++    cLCG32() : id(nextId++), numDrawn(0), seed(0) { initialize(0, 0, 0); }
++    virtual ~cLCG32() {}
++
++    /** Sets up the RNG. */
++    virtual void initialize(int seedSet, int rngId, int numRngs);
++
++    /** Tests correctness of the RNG */
++    virtual void selfTest();
++
++    /**
++     * Returns how many random numbers have been drawn from this RNG.
++     * Subclasses should increment numDrawn in the intRand(), etc. methods.
++     */
++    virtual unsigned long getNumbersDrawn() const  {return numDrawn;}
++
++    /** Random integer in the range [0,intRandMax()] */
++    virtual unsigned long intRand();
++
++    /** Maximum value that can be returned by intRand() */
++    virtual unsigned long intRandMax();
++
++    /** Random integer in [0,n), n < intRandMax() */
++    virtual unsigned long intRand(unsigned long n);
++
++    /** Random double on the [0,1) interval */
++    virtual double doubleRand();
++
++    /** Random double on the (0,1) interval */
++    virtual double doubleRandNonz();
++
++    /** Random double on the [0,1] interval */
++    virtual double doubleRandIncl1();
++};
++
++
++#endif
++
++
+diff --git a/src/core/wscript b/src/core/wscript
+index 1535d66..8c41388 100644
+--- a/src/core/wscript
++++ b/src/core/wscript
+@@ -160,6 +160,7 @@ def build(bld):
+         'model/random-variable-stream.cc',
+         'model/rng-seed-manager.cc',
+         'model/rng-stream.cc',
++        'model/clcg32.cc',
+         'model/command-line.cc',
+         'model/type-name.cc',
+         'model/attribute.cc',
+@@ -256,6 +257,7 @@ def build(bld):
+         'model/random-variable-stream.h',
+         'model/rng-seed-manager.h',
+         'model/rng-stream.h',
++        'model/clcg32.h',
+         'model/command-line.h',
+         'model/type-name.h',
+         'model/type-traits.h',
+diff --git a/src/wifi/bindings/modulegen__gcc_ILP32.py b/src/wifi/bindings/modulegen__gcc_ILP32.py
+index 9ba4c4e..380cdad 100644
+--- a/src/wifi/bindings/modulegen__gcc_ILP32.py
++++ b/src/wifi/bindings/modulegen__gcc_ILP32.py
+@@ -8890,7 +8890,7 @@ def register_Ns3WifiRemoteStationManager_methods(root_module, cls):
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportDataFailed(ns3::Mac48Address address, ns3::WifiMacHeader const * header) [member function]
+     cls.add_method('ReportDataFailed', 
+                    'void', 
+-                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header')])
++                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header'), param('ns3::Ptr< ns3::Packet const >', 'p')])
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportDataOk(ns3::Mac48Address address, ns3::WifiMacHeader const * header, double ackSnr, ns3::WifiMode ackMode, double dataSnr) [member function]
+     cls.add_method('ReportDataOk', 
+                    'void', 
+@@ -8898,7 +8898,7 @@ def register_Ns3WifiRemoteStationManager_methods(root_module, cls):
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportFinalDataFailed(ns3::Mac48Address address, ns3::WifiMacHeader const * header) [member function]
+     cls.add_method('ReportFinalDataFailed', 
+                    'void', 
+-                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header')])
++                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header'), param('ns3::Ptr< ns3::Packet const >', 'p')])
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportFinalRtsFailed(ns3::Mac48Address address, ns3::WifiMacHeader const * header) [member function]
+     cls.add_method('ReportFinalRtsFailed', 
+                    'void', 
+diff --git a/src/wifi/bindings/modulegen__gcc_LP64.py b/src/wifi/bindings/modulegen__gcc_LP64.py
+index 9ba4c4e..380cdad 100644
+--- a/src/wifi/bindings/modulegen__gcc_LP64.py
++++ b/src/wifi/bindings/modulegen__gcc_LP64.py
+@@ -8890,7 +8890,7 @@ def register_Ns3WifiRemoteStationManager_methods(root_module, cls):
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportDataFailed(ns3::Mac48Address address, ns3::WifiMacHeader const * header) [member function]
+     cls.add_method('ReportDataFailed', 
+                    'void', 
+-                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header')])
++                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header'), param('ns3::Ptr< ns3::Packet const >', 'p')])
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportDataOk(ns3::Mac48Address address, ns3::WifiMacHeader const * header, double ackSnr, ns3::WifiMode ackMode, double dataSnr) [member function]
+     cls.add_method('ReportDataOk', 
+                    'void', 
+@@ -8898,7 +8898,7 @@ def register_Ns3WifiRemoteStationManager_methods(root_module, cls):
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportFinalDataFailed(ns3::Mac48Address address, ns3::WifiMacHeader const * header) [member function]
+     cls.add_method('ReportFinalDataFailed', 
+                    'void', 
+-                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header')])
++                   [param('ns3::Mac48Address', 'address'), param('ns3::WifiMacHeader const *', 'header'), param('ns3::Ptr< ns3::Packet const >', 'p')])
+     ## wifi-remote-station-manager.h (module 'wifi'): void ns3::WifiRemoteStationManager::ReportFinalRtsFailed(ns3::Mac48Address address, ns3::WifiMacHeader const * header) [member function]
+     cls.add_method('ReportFinalRtsFailed', 
+                    'void', 
+diff --git a/src/wifi/model/block-ack-manager.cc b/src/wifi/model/block-ack-manager.cc
+index 52ef1b9..c4956d0 100644
+--- a/src/wifi/model/block-ack-manager.cc
++++ b/src/wifi/model/block-ack-manager.cc
+@@ -606,7 +606,7 @@ BlockAckManager::NotifyGotBlockAck (const CtrlBAckResponseHeader *blockAck, Mac4
+                           (*it).second.first.SetStartingSequence (sequenceFirstLost);
+                         }
+                       //notify remote station of unsuccessful transmission
+-                      m_stationManager->ReportDataFailed ((*queueIt).hdr.GetAddr1 (), &(*queueIt).hdr);
++                      m_stationManager->ReportDataFailed ((*queueIt).hdr.GetAddr1 (), &(*queueIt).hdr, (*queueIt).packet);
+                       if (!m_txFailedCallback.IsNull ())
+                         {
+                           m_txFailedCallback ((*queueIt).hdr);
+diff --git a/src/wifi/model/dca-txop.cc b/src/wifi/model/dca-txop.cc
+index dfce078..9c356b8 100644
+--- a/src/wifi/model/dca-txop.cc
++++ b/src/wifi/model/dca-txop.cc
+@@ -624,7 +624,7 @@ DcaTxop::MissedAck (void)
+   if (!NeedDataRetransmission ())
+     {
+       NS_LOG_DEBUG ("Ack Fail");
+-      m_stationManager->ReportFinalDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr);
++      m_stationManager->ReportFinalDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
+       if (!m_txFailedCallback.IsNull ())
+         {
+           m_txFailedCallback (m_currentHdr);
+diff --git a/src/wifi/model/dcf-manager.cc b/src/wifi/model/dcf-manager.cc
+index f77b625..2f98d5b 100644
+--- a/src/wifi/model/dcf-manager.cc
++++ b/src/wifi/model/dcf-manager.cc
+@@ -214,6 +214,10 @@ public:
+   {
+     m_dcf->NotifyNavResetNow (duration);
+   }
++  virtual void TxNavStart (Time duration)
++  {
++    m_dcf->NotifyTxNavStartNow(duration);
++  }
+   virtual void AckTimeoutStart (Time duration)
+   {
+     m_dcf->NotifyAckTimeoutStartNow (duration);
+@@ -297,10 +301,12 @@ private:
+  ****************************************************************/
+ 
+ DcfManager::DcfManager ()
+-  : m_lastAckTimeoutEnd (MicroSeconds (0)),
++  : m_grantedState(0),
++    m_lastAckTimeoutEnd (MicroSeconds (0)),
+     m_lastCtsTimeoutEnd (MicroSeconds (0)),
+     m_lastNavStart (MicroSeconds (0)),
+     m_lastNavDuration (MicroSeconds (0)),
++    m_lastTxNavDuration (MicroSeconds (0)),
+     m_lastRxStart (MicroSeconds (0)),
+     m_lastRxDuration (MicroSeconds (0)),
+     m_lastRxReceivedOk (true),
+@@ -452,6 +458,20 @@ DcfManager::MostRecent (Time a, Time b, Time c, Time d, Time e, Time f, Time g)
+   return retval;
+ }
+ 
++Time
++DcfManager::MostRecent (Time a, Time b, Time c, Time d, Time e, Time f, Time g, Time h) const
++{
++  NS_LOG_FUNCTION (this << a << b << c << d << e << f << g << h);
++  Time i = Max (a, b);
++  Time j = Max (c, d);
++  Time k = Max (e, f);
++  Time l = Max (g, h);
++  Time m = Max (i, j);
++  Time n = Max (k, l);
++  Time retval = Max (m, n);
++  return retval;
++}
++
+ bool
+ DcfManager::IsBusy (void) const
+ {
+@@ -547,6 +567,7 @@ DcfManager::DoGrantAccess (void)
+            * could change the global state of the manager, and, thus, could change
+            * the result of the calculations.
+            */
++          m_grantedState = state;
+           state->NotifyAccessGranted ();
+           for (std::vector<DcfState *>::const_iterator k = internalCollisionStates.begin ();
+                k != internalCollisionStates.end (); k++)
+@@ -569,7 +590,7 @@ DcfManager::AccessTimeout (void)
+ }
+ 
+ Time
+-DcfManager::GetAccessGrantStart (void) const
++DcfManager::GetAccessGrantStart (DcfState *state) const
+ {
+   NS_LOG_FUNCTION (this);
+   Time rxAccessStart;
+@@ -587,13 +608,15 @@ DcfManager::GetAccessGrantStart (void) const
+     }
+   Time busyAccessStart = m_lastBusyStart + m_lastBusyDuration + m_sifs;
+   Time txAccessStart = m_lastTxStart + m_lastTxDuration + m_sifs;
++  Time txNavAccessStart = m_grantedState == state ? Seconds(0) : m_lastTxStart + m_lastTxDuration + m_lastTxNavDuration + m_sifs;
+   Time navAccessStart = m_lastNavStart + m_lastNavDuration + m_sifs;
+-  Time ackTimeoutAccessStart = m_lastAckTimeoutEnd + m_sifs;
++  Time ackTimeoutAccessStart = m_grantedState == state ? m_lastAckTimeoutEnd + m_sifs : Seconds(0);
+   Time ctsTimeoutAccessStart = m_lastCtsTimeoutEnd + m_sifs;
+   Time switchingAccessStart = m_lastSwitchingStart + m_lastSwitchingDuration + m_sifs;
+   Time accessGrantedStart = MostRecent (rxAccessStart,
+                                         busyAccessStart,
+                                         txAccessStart,
++                                        txNavAccessStart,
+                                         navAccessStart,
+                                         ackTimeoutAccessStart,
+                                         ctsTimeoutAccessStart,
+@@ -612,7 +635,7 @@ DcfManager::GetBackoffStartFor (DcfState *state)
+ {
+   NS_LOG_FUNCTION (this << state);
+   Time mostRecentEvent = MostRecent (state->GetBackoffStart (),
+-                                     GetAccessGrantStart () + MicroSeconds (state->GetAifsn () * m_slotTimeUs));
++                                     GetAccessGrantStart (state) + MicroSeconds (state->GetAifsn () * m_slotTimeUs));
+ 
+   return mostRecentEvent;
+ }
+@@ -878,6 +901,12 @@ DcfManager::NotifyNavStartNow (Time duration)
+       m_lastNavDuration = duration;
+     }
+ }
++void
++DcfManager::NotifyTxNavStartNow (Time duration)
++{
++  NS_LOG_FUNCTION (this << duration);
++  m_lastTxNavDuration = duration;
++}
+ 
+ void
+ DcfManager::NotifyAckTimeoutStartNow (Time duration)
+diff --git a/src/wifi/model/dcf-manager.h b/src/wifi/model/dcf-manager.h
+index 10ea55b..feacde1 100644
+--- a/src/wifi/model/dcf-manager.h
++++ b/src/wifi/model/dcf-manager.h
+@@ -383,6 +383,12 @@ public:
+    */
+   void NotifyNavStartNow (Time duration);
+   /**
++   * \param duration the value of the transmitted NAV.
++   *
++   * Called at start of tx
++   */
++  void NotifyTxNavStartNow (Time duration);
++  /**
+    * Notify that ACK timer has started for the given duration.
+    *
+    * \param duration
+@@ -467,12 +473,27 @@ private:
+    */
+   Time MostRecent (Time a, Time b, Time c, Time d, Time e, Time f, Time g) const;
+   /**
++   * Return the most recent time.
++   *
++   * \param a
++   * \param b
++   * \param c
++   * \param d
++   * \param e
++   * \param f
++   * \param g
++   * \param h
++   *
++   * \return the most recent time
++   */
++  Time MostRecent (Time a, Time b, Time c, Time d, Time e, Time f, Time g, Time h) const;
++  /**
+    * Access will never be granted to the medium _before_
+    * the time returned by this method.
+    *
+    * \returns the absolute time at which access could start to be granted
+    */
+-  Time GetAccessGrantStart (void) const;
++  Time GetAccessGrantStart (DcfState *state) const;
+   /**
+    * Return the time when the backoff procedure
+    * started for the given DcfState.
+@@ -518,10 +539,12 @@ private:
+   typedef std::vector<DcfState *> States;
+ 
+   States m_states;
++  DcfState *m_grantedState;
+   Time m_lastAckTimeoutEnd;
+   Time m_lastCtsTimeoutEnd;
+   Time m_lastNavStart;
+   Time m_lastNavDuration;
++  Time m_lastTxNavDuration;
+   Time m_lastRxStart;
+   Time m_lastRxDuration;
+   bool m_lastRxReceivedOk;
+diff --git a/src/wifi/model/edca-txop-n.cc b/src/wifi/model/edca-txop-n.cc
+index e4f7ab5..1e6aafa 100644
+--- a/src/wifi/model/edca-txop-n.cc
++++ b/src/wifi/model/edca-txop-n.cc
+@@ -470,7 +470,7 @@ EdcaTxopN::RemoveRetransmitPacket (uint8_t tid, Mac48Address recipient, uint16_t
+ }
+ 
+ void
+-EdcaTxopN::NotifyAccessGranted (void)
++EdcaTxopN::EnsurePacketDequeued (void)
+ {
+   NS_LOG_FUNCTION (this);
+   if (m_currentPacket == 0)
+@@ -520,6 +520,13 @@ EdcaTxopN::NotifyAccessGranted (void)
+             }
+         }
+     }
++}
++
++void
++EdcaTxopN::NotifyAccessGranted (void)
++{
++  NS_LOG_FUNCTION (this);
++  EnsurePacketDequeued();
+   MacLowTransmissionParameters params;
+   params.DisableOverrideDurationId ();
+   if (m_currentHdr.GetAddr1 ().IsGroup ())
+@@ -643,7 +650,11 @@ EdcaTxopN::NotifyAccessGranted (void)
+ void EdcaTxopN::NotifyInternalCollision (void)
+ {
+   NS_LOG_FUNCTION (this);
+-  NotifyCollision ();
++  std::cout << "IC: " << "ac = ???" << ", seq = ??? " << std::endl;
++  std::cout << "RE: " << "ac = ???" << ", seq = ??? " << std::endl;
++  EnsurePacketDequeued ();
++  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
++  MissedAck();
+ }
+ 
+ void
+@@ -821,7 +832,7 @@ EdcaTxopN::MissedAck (void)
+   if (!NeedDataRetransmission ())
+     {
+       NS_LOG_DEBUG ("Ack Fail");
+-      m_stationManager->ReportFinalDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr);
++      m_stationManager->ReportFinalDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
+       bool resetCurrentPacket = true;
+       if (!m_txFailedCallback.IsNull ())
+         {
+diff --git a/src/wifi/model/edca-txop-n.h b/src/wifi/model/edca-txop-n.h
+index ad5917f..2127c1f 100644
+--- a/src/wifi/model/edca-txop-n.h
++++ b/src/wifi/model/edca-txop-n.h
+@@ -203,6 +203,7 @@ public:
+    *         false otherwise
+    */
+   bool NeedsAccess (void) const;
++  void EnsurePacketDequeued (void);
+   /**
+    * Notify the EDCAF that access has been granted.
+    */
+diff --git a/src/wifi/model/mac-low.cc b/src/wifi/model/mac-low.cc
+index d968de8..07683bc 100644
+--- a/src/wifi/model/mac-low.cc
++++ b/src/wifi/model/mac-low.cc
+@@ -1549,6 +1549,15 @@ MacLow::DoNavStartNow (Time duration)
+ }
+ 
+ void
++MacLow::NotifyTxNavStartNow (Time duration)
++{
++  for (DcfListenersCI i = m_dcfListeners.begin (); i != m_dcfListeners.end (); i++)
++    {
++      (*i)->TxNavStart (duration);
++    }
++}
++
++void
+ MacLow::NotifyAckTimeoutStartNow (Time duration)
+ {
+   for (DcfListenersCI i = m_dcfListeners.begin (); i != m_dcfListeners.end (); i++)
+@@ -1595,6 +1604,7 @@ MacLow::ForwardDown (Ptr<const Packet> packet, const WifiMacHeader* hdr,
+                 ", mode=" << txVector.GetMode  () <<
+                 ", duration=" << hdr->GetDuration () <<
+                 ", seq=0x" << std::hex << m_currentHdr.GetSequenceControl () << std::dec);
++  NotifyTxNavStartNow(hdr->GetDuration());
+   if (!m_ampdu || hdr->IsRts ())
+     {
+       m_phy->SendPacket (packet, txVector, preamble, 0, 0);
+@@ -1701,7 +1711,7 @@ MacLow::NormalAckTimeout (void)
+   /// \todo should check that there was no rx start before now.
+   /// we should restart a new ack timeout now until the expected
+   /// end of rx if there was a rx start before now.
+-  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr);
++  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
+   MacLowTransmissionListener *listener = m_listener;
+   m_listener = 0;
+   m_sentMpdus = 0;
+@@ -1714,7 +1724,7 @@ void
+ MacLow::FastAckTimeout (void)
+ {
+   NS_LOG_FUNCTION (this);
+-  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr);
++  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
+   MacLowTransmissionListener *listener = m_listener;
+   m_listener = 0;
+   if (m_phy->IsStateIdle ())
+@@ -1734,7 +1744,7 @@ MacLow::BlockAckTimeout (void)
+   NS_LOG_FUNCTION (this);
+   NS_LOG_DEBUG ("block ack timeout");
+ 
+-  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr);
++  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
+   MacLowTransmissionListener *listener = m_listener;
+   m_listener = 0;
+   m_sentMpdus = 0;
+@@ -1747,7 +1757,7 @@ void
+ MacLow::SuperFastAckTimeout ()
+ {
+   NS_LOG_FUNCTION (this);
+-  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr);
++  m_stationManager->ReportDataFailed (m_currentHdr.GetAddr1 (), &m_currentHdr, m_currentPacket);
+   MacLowTransmissionListener *listener = m_listener;
+   m_listener = 0;
+   if (m_phy->IsStateIdle ())
+@@ -1999,7 +2009,8 @@ MacLow::SendDataPacket (void)
+     }
+ 
+   ForwardDown (m_currentPacket, &m_currentHdr, dataTxVector, preamble);
+-  m_currentPacket = 0;
++// KLUDGE: uncommented to be able to pass it to reportDataFailed
++// m_currentPacket = 0;
+ }
+ 
+ bool
+diff --git a/src/wifi/model/mac-low.h b/src/wifi/model/mac-low.h
+index 53e5a25..4c9bb69 100644
+--- a/src/wifi/model/mac-low.h
++++ b/src/wifi/model/mac-low.h
+@@ -165,6 +165,12 @@ public:
+    */
+   virtual void NavReset (Time duration) = 0;
+   /**
++   * Notify that TXNAV has started for the given duration.
++   *
++   * \param duration duration of TXNAV timer
++   */
++  virtual void TxNavStart (Time duration) = 0;
++  /**
+    * Notify that ACK timeout has started for a given duration.
+    *
+    * \param duration duration of ACK timeout
+@@ -1045,6 +1051,12 @@ private:
+    */
+   bool IsNavZero (void) const;
+   /**
++   * Start TXNAV with the given duration.
++   *
++   * \param duration
++   */
++  void NotifyTxNavStartNow (Time duration);
++  /**
+    * Notify DcfManager (via DcfListener) that
+    * ACK timer should be started for the given
+    * duration.
+diff --git a/src/wifi/model/random-stream.cc b/src/wifi/model/random-stream.cc
+index 3fe8619..83cdccc 100644
+--- a/src/wifi/model/random-stream.cc
++++ b/src/wifi/model/random-stream.cc
+@@ -20,6 +20,7 @@
+ 
+ #include "random-stream.h"
+ #include "ns3/assert.h"
++#include "ns3/simulator.h"
+ #include <cmath>
+ 
+ namespace ns3 {
+@@ -28,22 +29,27 @@ RandomStream::~RandomStream ()
+ {
+ }
+ 
+-
+ RealRandomStream::RealRandomStream ()
+ {
+   m_stream = CreateObject<UniformRandomVariable> ();
++  m_lcg32.initialize(0, 0, 0);
+ }
+ 
+ uint32_t
+ RealRandomStream::GetNext (uint32_t min, uint32_t max)
+ {
+-  return m_stream->GetInteger (min, max);
++  NS_ASSERT(min == 0);
++  uint32_t v = m_lcg32.intRand(max + 1);
++  static const char*AC[] = {"AC_BE_NQOS", "AC_VO", "AC_VI", "AC_BK", "AC_BE"};
++  std::cout << "GB: " << "ac = " << AC[m_lcg32.id % 5] << ", cw = " << max << ", slots = " << v << ", nth = " << m_lcg32.getNumbersDrawn() << std::endl;
++  return v;
+ }
+ 
+ int64_t
+ RealRandomStream::AssignStreams (int64_t stream)
+ {
+   m_stream->SetStream (stream);
++  m_lcg32.initialize(0, stream, 0);
+   return 1;
+ }
+ 
+diff --git a/src/wifi/model/random-stream.h b/src/wifi/model/random-stream.h
+index 6998d89..e76c8fd 100644
+--- a/src/wifi/model/random-stream.h
++++ b/src/wifi/model/random-stream.h
+@@ -24,6 +24,7 @@
+ #include <stdint.h>
+ #include <list>
+ #include "ns3/random-variable-stream.h"
++#include "ns3/clcg32.h"
+ 
+ namespace ns3 {
+ 
+@@ -60,6 +61,9 @@ public:
+ 
+ class RealRandomStream : public RandomStream
+ {
++private:
++  cLCG32 m_lcg32;
++
+ public:
+   RealRandomStream ();
+   virtual uint32_t GetNext (uint32_t min, uint32_t max);
+diff --git a/src/wifi/model/wifi-mac.cc b/src/wifi/model/wifi-mac.cc
+index a5bc952..287229a 100644
+--- a/src/wifi/model/wifi-mac.cc
++++ b/src/wifi/model/wifi-mac.cc
+@@ -331,8 +331,8 @@ WifiMac::Configure80211a (void)
+   SetSlot (MicroSeconds (9));
+   SetEifsNoDifs (MicroSeconds (16 + 44));
+   SetPifs (MicroSeconds (16 + 9));
+-  SetCtsTimeout (MicroSeconds (16 + 44 + 9 + GetDefaultMaxPropagationDelay ().GetMicroSeconds () * 2));
+-  SetAckTimeout (MicroSeconds (16 + 44 + 9 + GetDefaultMaxPropagationDelay ().GetMicroSeconds () * 2));
++  SetCtsTimeout (MicroSeconds (16 + 44 + 9));
++  SetAckTimeout (MicroSeconds (16 + 44 + 9));
+ }
+ 
+ void
+diff --git a/src/wifi/model/wifi-remote-station-manager.cc b/src/wifi/model/wifi-remote-station-manager.cc
+index e748f54..89f41a9 100644
+--- a/src/wifi/model/wifi-remote-station-manager.cc
++++ b/src/wifi/model/wifi-remote-station-manager.cc
+@@ -30,6 +30,7 @@
+ #include "ns3/wifi-phy.h"
+ #include "ns3/wifi-mac.h"
+ #include "ns3/trace-source-accessor.h"
++#include "ns3/seq-ts-header.h"
+ #include "wifi-mac-header.h"
+ #include "wifi-mac-trailer.h"
+ 
+@@ -707,8 +708,27 @@ WifiRemoteStationManager::ReportRtsFailed (Mac48Address address, const WifiMacHe
+   DoReportRtsFailed (station);
+ }
+ 
++static int getSeq(const Ptr<const Packet> packet)
++{
++  int seq = -1;
++  if (packet.operator->()) {
++      PacketMetadata::ItemIterator i = packet->BeginItem();
++      while (i.HasNext()) {
++          PacketMetadata::Item item = i.Next();
++          if (!item.isFragment && item.type == PacketMetadata::Item::HEADER) {
++              if (item.tid == SeqTsHeader::GetTypeId()) {
++                  SeqTsHeader header;
++                  header.Deserialize(item.current);
++                  seq = header.GetSeq();
++              }
++          }
++      }
++  }
++  return seq;
++}
++
+ void
+-WifiRemoteStationManager::ReportDataFailed (Mac48Address address, const WifiMacHeader *header)
++WifiRemoteStationManager::ReportDataFailed (Mac48Address address, const WifiMacHeader *header, const Ptr<const Packet> packet)
+ {
+   NS_LOG_FUNCTION (this << address << *header);
+   NS_ASSERT (!address.IsGroup ());
+@@ -716,6 +736,10 @@ WifiRemoteStationManager::ReportDataFailed (Mac48Address address, const WifiMacH
+   station->m_slrc++;
+   m_macTxDataFailed (address);
+   DoReportDataFailed (station);
++  static const char *ac[] = {"AC_BE", "AC_BK", "AC_VI", "AC_VO", "AC_BE_NQOS", "???"};
++  int index = header->IsQosData() ? QosUtilsMapTidToAc(header->GetQosTid()) : 5;
++  int seq = getSeq(packet);
++  std::cout << "RE: " << "ac = " << ac[index] << ", seq = " << seq << ", num = " << station->m_slrc << std::endl;
+ }
+ 
+ void
+@@ -755,7 +779,7 @@ WifiRemoteStationManager::ReportFinalRtsFailed (Mac48Address address, const Wifi
+ }
+ 
+ void
+-WifiRemoteStationManager::ReportFinalDataFailed (Mac48Address address, const WifiMacHeader *header)
++WifiRemoteStationManager::ReportFinalDataFailed (Mac48Address address, const WifiMacHeader *header, const Ptr<const Packet> packet)
+ {
+   NS_LOG_FUNCTION (this << address << *header);
+   NS_ASSERT (!address.IsGroup ());
+@@ -764,6 +788,10 @@ WifiRemoteStationManager::ReportFinalDataFailed (Mac48Address address, const Wif
+   station->m_slrc = 0;
+   m_macTxFinalDataFailed (address);
+   DoReportFinalDataFailed (station);
++  static const char *ac[] = {"AC_BE", "AC_BK", "AC_VI", "AC_VO", "AC_BE_NQOS", "???"};
++  int index = header->IsQosData() ? QosUtilsMapTidToAc(header->GetQosTid()) : 5;
++  int seq = getSeq(packet);
++  std::cout << "CA: " << "ac = " << ac[index] << ", seq = " << seq << std::endl;
+ }
+ 
+ void
+diff --git a/src/wifi/model/wifi-remote-station-manager.h b/src/wifi/model/wifi-remote-station-manager.h
+index e6136cc..bda2b27 100644
+--- a/src/wifi/model/wifi-remote-station-manager.h
++++ b/src/wifi/model/wifi-remote-station-manager.h
+@@ -437,7 +437,7 @@ public:
+    * \param address the address of the receiver
+    * \param header MAC header of the DATA packet
+    */
+-  void ReportDataFailed (Mac48Address address, const WifiMacHeader *header);
++  void ReportDataFailed (Mac48Address address, const WifiMacHeader *header, const Ptr<const Packet> packet);
+   /**
+    * Should be invoked whenever we receive the Cts associated to an RTS
+    * we just sent. Note that we also get the SNR of the RTS we sent since
+@@ -478,7 +478,7 @@ public:
+    * \param address the address of the receiver
+    * \param header MAC header of the DATA packet
+    */
+-  void ReportFinalDataFailed (Mac48Address address, const WifiMacHeader *header);
++  void ReportFinalDataFailed (Mac48Address address, const WifiMacHeader *header, const Ptr<const Packet> packet);
+ 
+   /**
+    * \param address remote address

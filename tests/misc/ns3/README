@@ -1,9 +1,20 @@
-This folder contain NS3 vs. INET comparison tests.
+This folder contains the NS3 vs INET 802.11 validation tests.
+-------------------------------------------------------------
+
+The tested scenarios should run in both simulators through the same trajectories 
+generating exactly the same packets at exactly the same time. Both simulator
+must be instrumented to generate the required log files for the comparison.
+NS3 must be patched while INET should be built with the NS3_VALIDATION macro defined.
 
 Steps to run the tests:
- - checkout the topic/ns3-comparison branch from INET
- - clone the patched NS3 repository from git@github.com:/omnetpp/ns3
- - compiled NS3 using the official mechanism (./build.py --enable-examples)
- - create 'ns3' symlink in this folder to your NS3 folder
- - execute runtest *.test to run all tests
+
+ - Make sure you are running OMNeT++ 5.0 or later (will NOT work properly with 4.6).
+ - Download ns3.24.1 and extract it into a directory of your choice.
+ - Create a symlink named 'ns3' in this folder pointing to your NS3 installation folder
+ - Copy ns3-inet-validation-XXXXX.patch to the ns3 directory and patch the sources with
+   $ patch -p1 <ns3-inet-validation-XXXXX.patch
+ - Rebuild INET with the -DNS3_VALIDATION macro added to the CFLAGS variable.
+   To do this, uncomment the appropriate line in 'src/makefrags'.
+ - Compile NS3 using the official mechanism (./build.py --enable-examples)
+ - Execute 'runtest *.test' to run all tests
 

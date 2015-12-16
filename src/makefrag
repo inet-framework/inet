@@ -38,5 +38,8 @@ ifneq (,$(findstring -DWITH_VOIPSTREAM,$(COPTS)))
   endif
 endif
 
+# uncomment this if you want to run the NS3 vs INET 802.11 cross validation tests in the 'tests/misc/ns3' folder.
+# CFLAGS += -DNS3_VALIDATION
+
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
