@@ -46,7 +46,9 @@ class Ieee80211Frame;
 
 
 /**
- * Implements the IEEE 802.11 MAC.
+ * Implements the IEEE 802.11 MAC. The features, standards compliance and
+ * exact operation of the MAC depend on the plugged-in components (see IUpperMac,
+ * IRx, ITx, IContention and other interface classes).
  */
 class INET_API Ieee80211Mac : public MACProtocolBase, public IMacRadioInterface
 {

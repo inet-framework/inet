@@ -28,6 +28,15 @@ class IRateControl;
 class Ieee80211Frame;
 class Ieee80211DataOrMgmtFrame;
 
+/**
+ * Abstract interface for statistics collection within the 802.11 MAC.
+ * IStatistics is notified of various events that occur in the MAC,
+ * and it is up to the concrete IStatistics implementation to decide
+ * what statistics to collect from them.
+ *
+ * Note that dynamic rate control algorithms (IRateControl) also plug into
+ * IStatistics, because due to the nature of its input.
+ */
 class INET_API IStatistics
 {
     public:

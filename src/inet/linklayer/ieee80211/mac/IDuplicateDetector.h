@@ -27,6 +27,11 @@ namespace ieee80211 {
 
 class Ieee80211DataOrMgmtFrame;
 
+/**
+ * Abstract interface to encapsulate the behavior of assigning sequence numbers
+ * to transmitted frames and detecting duplicates in the stream of received
+ * frames.
+ */
 class INET_API IDuplicateDetector
 {
     public:

@@ -23,6 +23,9 @@
 namespace inet {
 namespace ieee80211 {
 
+/**
+ * A basic implementation of statistics collection (IStatistics).
+ */
 class INET_API BasicStatistics : public IStatistics, public cSimpleModule
 {
     private:

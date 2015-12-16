@@ -32,6 +32,9 @@ class ITx;
 class IContention;
 class IStatistics;
 
+/**
+ * The default implementation of IRx.
+ */
 class INET_API Rx : public cSimpleModule, public IRx
 {
     protected:

@@ -30,6 +30,9 @@ class IMacRadioInterface;
 class IRx;
 class IStatistics;
 
+/**
+ * The default implementation of ITx.
+ */
 class INET_API Tx : public cSimpleModule, public ITx
 {
     protected:

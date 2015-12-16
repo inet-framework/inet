@@ -28,6 +28,7 @@ namespace ieee80211 {
 /**
  * The default implementation of a collision controller, best suitable for
  * demonstration and debugging purposes. It uses per-AC timers.
+ * For better performance, use OptimizedCollisionController.
  */
 class INET_API CollisionController : public cSimpleModule, public ICollisionController
 {

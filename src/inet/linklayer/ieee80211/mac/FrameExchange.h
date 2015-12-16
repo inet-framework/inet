@@ -35,6 +35,9 @@ class IContention;
 class IRx;
 class IStatistics;
 
+/**
+ * A collection of information needed by frame exchanges (FrameExchange class) to operate.
+ */
 class INET_API FrameExchangeContext
 {
     public:

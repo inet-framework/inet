@@ -34,6 +34,9 @@ class IMacRadioInterface;
 class IRx;
 class IStatistics;
 
+/**
+ * The default implementation of IContention.
+ */
 class INET_API Contention : public cSimpleModule, public IContention, protected ICollisionController::ICallback
 {
     public:
