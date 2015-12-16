@@ -1,31 +1,66 @@
 Recent changes in the INET Framework
 ====================================
 
+
 INET-3.2 (Dec, 2015) - Stable
 -----------------------------
 
-This release requires either OMNeT++ 4.6 or 5.0b3 or later. (Earlier test
+This release requires either OMNeT++ 4.6, or 5.0b3 or later. (Earlier test
 versions of OMNeT++ will not work.)
+
+IEEE 802.11 MAC model:
+
+ - After further refinement, new features, several bugfixes and validation
+   testing, the new MAC model was made the default one. It was also renamed
+   from Ieee80211NewMac to Ieee80211Mac, while the old Ieee80211Mac became
+   Ieee80211OldMac.
+
+ - Improvements on the new MAC model include:
+   * Added fragmentation support;
+   * Added Onoe, ARF, AARF rate control algorithms;
+   * Implemented early Ack timeout;
+
+ - Validation: Several validation tests were run against the ns-3 Wifi model.
+   In the tested configurations, it was ensured that new Mac model behaves
+   *exactly* as the ns-3 model (that is, timestamped packet logs match exactly).
+   Discrepancies were resolved with bugfixes in our code, in the ns-3 code,
+   or both. Bugs found in ns-3 were reported in the ns-3 bugtracker.
+   See tests/misc/ns3.
+
+Physical layer:
+
+ - Added support for the simulation of separate signal parts in the Radio.
+   The preamble, header and data parts can be optionally simulated
+   separately. This results in a more accurate simulation, because a
+   reception may be aborted before the data part is received.
+
+ - Added separate preambleDuration parameters to each radio transmitter for more
+   flexible configuration.
+
+ - Added Ieee80211IdealRadio, an ideal channel model (aka unit disc radio)
+   suitable for use with Ieee80211Mac.
 
 Fixes:
 
-- The voipstream app has been updated to work with the ffmpeg version
-  distributed in Ubuntu 15.10
-- Added some INET_API macros to compile properly on Windows.
-- QoSClassifier example no longer needs the 802.11 project feature.
-- BPDU packet length was incorrectly set sometimes in the 802.1d model.
-- Fixed incorrect sign of lastSpeed in some mobility models.
-- Added support for the simulation of separate signal parts in the Radio.
- 	The preamble, header and data parts can be optionally simulated
- 	separately. This results in a more accurate simulation, because a
- 	reception may be aborted before the data part is received.
-- Added separate preambleDuration parameters to each radio transmitter for more
-  flexible configuration.
-- Fixed PER computation in NetworkConfiguratorBase.
-- Added a simplified 802.11 model using ideal transmissions and medium.
-- Fixed missing byte length in AODV and added control packet length configuration.
-- RTT initialization was fixed in TCP (Vegas, Westwood) because the original
-  value caused "out of range" with the overflow check introduced in OMNeT++ 5.0b3.
+ - Fixed PER computation in NetworkConfiguratorBase.
+
+ - Fixed missing byte length in AODV and added control packet length configuration.
+
+ - RTT initialization was fixed in TCP (Vegas, Westwood) because the original
+   value caused "out of range" error with the overflow check introduced in
+   OMNeT++ 5.0b3.
+
+ - BPDU packet length was incorrectly set sometimes in the 802.1d model.
+
+ - Fixed incorrect sign of lastSpeed in some mobility models.
+
+ - The VoIPStream app has been updated to work with the ffmpeg version
+   distributed in Ubuntu 15.10
+
+ - Added some INET_API macros to compile properly on Windows.
+
+ - QoSClassifier example no longer needs the 802.11 project feature.
+
 
 INET-3.1.1 (Oct, 2015) - Stable
 -------------------------------
@@ -33,6 +68,7 @@ INET-3.1.1 (Oct, 2015) - Stable
 Changes:
 
   - Fixed build problem on Windows
+
 
 INET-3.1.0 (Oct, 2015) - Stable
 -------------------------------
@@ -128,6 +164,7 @@ Applications:
 
 Network Layer:
  - Refactored IPv4/IPv6 options to use TLVOptions structure.
+
 
 INET-2.99.1 (May, 2015) - Development
 -------------------------------------
@@ -354,6 +391,7 @@ Examples:
  - Also added a simple hypothetical APSK radio example that supports configurable
    packet-level, bit-level, and symbol-level simulations for model verification.
  - Added a work in progress Wireless tutorial in the tutorials/wireless folder.
+
 
 INET-2.99.0 (November 2014) - Development
 -----------------------------------------
@@ -599,6 +637,7 @@ Directory reorganization:
  - applications/httptools/ has been split up to several subdirectories: browser/,
    server/, configurator/, common/.
 
+
 INET 2.6 (March 05, 2015) - Stable
 ----------------------------------
 
@@ -651,7 +690,6 @@ Changes:
    - Added packet printers that can dump packet data in OMNeT++ 4.5/Tkenv
      in the packet trace window.
    - Fixed non-conformant 802.11 WAITACK timeout computation
-
 
 
 INET-2.3.0 (March 17, 2014)
@@ -1052,6 +1090,7 @@ between the network and link layer protocols.
 The Ext-interface, TraCI, Mobility and Ping modules received some minor fixes.
 See ChangeLogs in individual source folders for more information.
 
+
 INET-1.99.5 (June 22, 2012)
 ---------------------------
 
@@ -1168,6 +1207,7 @@ Changes in link layer
 
 Small fixes in MACAddress, PPP, IPv4NetworkConfigurator, VoIPTool,
 Mobility, BatteryModule
+
 
 INET-1.99.4 (March 20, 2012)
 ----------------------------
