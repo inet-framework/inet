@@ -28,8 +28,6 @@
 
 	Added socketDeleted() to TCPSocket::CallbackInterface.
 
------------ lines above this marker have been added from git log -----------
-
 2014-11-07  ------ inet-2.99.0 released ------
 
 2014-09-18  Andras Varga

@@ -1,5 +1,72 @@
 ====== inet-3.x ======
 
+2015-12-09  Zoltan Bojthe
+
+	Folder renamed from "newmac" to "mac"
+
+2015-12-07  Andras Varga
+
+	CollisionController was rewritten to use per-AC timers, to make its
+	operation easier to follow in the IDE's Sequence Chart Tool.
+
+	Existing collision controller (that used a single timer) was renamed
+	to OptimizedCollisionController.
+
+2015-12-09  Andras Varga
+
+	Architecture change: all frame transmissions now go via a Tx, and
+	ContentionTx only does contention. (ContentionTx was also renamed
+	to plain Contention.)
+
+2015-11-03  Andras Varga
+
+	Fix: frames we transmit should set the NAV too (to prevent
+	one AC from transmitting while another AC owns the channel)
+
+2015-10-26  Zoltan Bojthe
+
+	UpperMac: added parameters: fragmenterClass, reassemblyClass
+
+2015-10-28  Zoltan Bojthe
+
+	Fix: MAC queue length limit should not apply to management frames.
+
+	This fixes the following bug: under heavy load, APs were unable to send
+	out beacon frames. Beacon frames generated in the Mgmt module were
+	discarded in the MAC because the queue was completely filled with data
+	frames.
+
+2015-10-22  Andras Varga
+
+	BasicFragmentation rewritten; BasicReassembly edited
+
+2015-10-22  Zoltan Bojthe
+
+	Added fragmentation support
+
+2015-10-22  Benjamin Seregi
+
+	Added Onoe, ARF, AARF rate control algorithms
+
+2015-10-16  Andras Varga
+
+	Added rate selection and rate control support: IRateSelection,
+	IRateControl, IStatistics
+
+2015-12-04  Andras Varga
+
+	Implemented early Ack timeout.
+
+	Ack timeout should expire when reception of Ack is supposed to begin.
+	When it does, we check whether a frame reception is in progress, and if
+	not, we immediately retransmit. Otherwise, we wait until the whole frame
+	has arrived (whether it was correctly received or not), and retransmit if
+	it was NOT an Ack.
+
+2015-10-15  Zoltan Bojthe
+
+	DuplicateDetector: LegacyDD and QosDD to store fragmentNumbers
+
 2015-10-26  ------ inet-3.1.1 released ------
 
 2015-10-15  ------ inet-3.1.0 released ------
@@ -83,4 +150,3 @@
 	It is only the MAC that been replaced with new code. Other parts have
 	been reused in near intact form: 802.11 frame formats, 802.11 radio
 	implementation, descriptions of PHY modes, mgmt modules, etc.
-

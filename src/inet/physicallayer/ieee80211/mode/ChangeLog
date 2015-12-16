@@ -1,5 +1,33 @@
 ====== inet-3.x ======
 
+2015-11-11  Zoltan Bojthe
+
+	IIeee80211Moded: removed getAifsTime(), getDifsTime(), getEifsTime(),
+	getPifsTime(). These computations were moved into the MAC.
+
+2015-10-26  Andras Varga
+
+	Ieee80211ModeSet: new methods
+
+	getSlowestMandatoryMode(), getFastestMandatoryMode(),
+	getSlowerMandatoryMode(), getFasterMandatoryMode()
+
+2015-10-27  Andras Varga
+
+	Ieee80211ModeSet: name changed from char to string
+
+2015-10-08  Andras Varga
+
+	Ieee80211Mode: added name string.
+
+2015-11-12  Levente Meszaros
+
+	Radio: Added support for the simulation of separate signal parts.
+
+	The preamble, header and data parts can be optionally simulated
+	separately. This is results in more accurate simulation, because a
+	reception may be aborted before the data part is received.
+
 2015-10-26  ------ inet-3.1.1 released ------
 
 2015-10-15  ------ inet-3.1.0 released ------

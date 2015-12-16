@@ -89,8 +89,6 @@
 
 	MACAddressTableAccess: MACAddressTable access name changed to macTable.
 
------------ lines above this marker have been added from git log -----------
-
 2013-11-07  Benjamin Seregi
 
 	EtherSwitch: added both STP and RSTP protocols. These protocols

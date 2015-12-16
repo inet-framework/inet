@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-11-03  Till Steinbach
+
+	Added INET_API Macro to serializers
+
 2015-10-26  ------ inet-3.1.1 released ------
 
 2015-10-15  ------ inet-3.1.0 released ------

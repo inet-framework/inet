@@ -1,5 +1,65 @@
 ====== inet-3.x ======
 
+2015-12-09  Zoltan Bojthe
+
+	Existing 802.11 MAC implementation deprecated:
+	- folder "mac" was renamed to "oldmac"
+	- Ieee80211Mac was renamed to Ieee80211OldMac
+
+	The new, modular MAC implementation is now the default one.
+
+2015-11-06  Zoltan Bojthe
+
+	Frame name changes: "wlan-ack" to "ACK", etc.
+
+2015-11-05  Zoltan Bojthe
+
+	Fixed names of watches (in "edcCAF[i].numSent", replace "i"
+	with actual numeric index)
+
+2015-11-04  Zoltan Bojthe
+
+	Change: don't draw a random number if computeBackoffPeriod() is called
+	with msg==nullptr. Changes fingerprint, but does not affect model
+	behavior.
+
+2015-11-04  Zoltan Bojthe
+
+	Removed classifier ("classifier" NED parameter is now unused), use
+	nic.classifierType instead
+
+2015-11-04  Zoltan Bojthe
+
+	Change default access category to AC_BE ("defaultAC" parameter default
+	value changed from 0 to 1)
+
+2015-11-04  Zoltan Bojthe
+
+	Added watch (slottime)
+
+2015-11-04  Zoltan Bojthe
+
+	Fix EDCA "backoff" variable initial value (false->true)
+
+2015-11-02  Levente Meszaros
+
+	802.11: Fixed incorrect destination state after receiving a WLAN ACK.
+
+	The 'examples/adhoc/ieee80211' folder contains a simple example: a
+	wireless host sends ping requests to another. The ping replies always
+	arrived incorrectly after a zero length backoff period.
+
+	The following happened in the MAC module which sends the ping replies:
+
+	After the reception of the last WLAN ACK of the last ping reply the MAC
+	changed to DEFER state. This started an incorrect DIFS period, then a
+	backoff period, and since there was no frame in the queue, finally the
+	MAC changed to IDLE state. At the end of this process the backoff counter
+	was zero. When the next ping reply arrived from the higher layer the MAC
+	incorrectly continued the remaining backoff period. Thus, the MAC module
+	always sent out the ping replies after a zero length backoff period.
+
+
 2015-10-26  ------ inet-3.1.1 released ------
 
 2015-10-15  ------ inet-3.1.0 released ------

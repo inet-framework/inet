@@ -1,5 +1,20 @@
 ====== inet-3.x ======
 
+2015-12-08  Levente Meszaros
+
+	Radio: Removed superfluous computation that was previously put there to
+	keep the fingerprint.
+
+2015-12-08  Levente Meszaros
+
+	Radio: Fixed PER computation in NetworkConfiguratorBase.
+
+	Added computeReceptionIndication to IReceiver interface.
+
+2015-11-12  Levente Meszaros
+
+	Configurator: Adapted to new separate signal part reception model.
+
 2015-10-26  ------ inet-3.1.1 released ------
 
 2015-10-15  ------ inet-3.1.0 released ------
