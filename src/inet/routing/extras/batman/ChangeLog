@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-12-16  ------ inet-3.2.0 released ------
+
 2015-11-27  Zoltan Bojthe
 
 	simtime-related 5.x compatibility fix: SIMTIME_RAW

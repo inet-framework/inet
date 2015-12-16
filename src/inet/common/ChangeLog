@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-12-16  ------ inet-3.2.0 released ------
+
 2015-12-08  Levente Meszaros
 
 	Common: Added 'required' parameter to getModuleFromPar and

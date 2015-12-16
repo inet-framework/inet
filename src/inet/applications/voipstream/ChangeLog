@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-12-16  ------ inet-3.2.0 released ------
+
 2015-12-03  Zoltan Bojthe
 
 	Shows libav... library versions at initialize()

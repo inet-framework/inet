@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2015-12-16  ------ inet-3.2.0 released ------
+
 2015-10-28  Andras Varga
 
 	ExampleQoSClassifier fix: it accidentally required the 802.11 project
