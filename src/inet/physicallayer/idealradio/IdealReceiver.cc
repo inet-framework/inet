@@ -18,6 +18,7 @@
 #include "inet/physicallayer/idealradio/IdealReceiver.h"
 #include "inet/physicallayer/idealradio/IdealListening.h"
 #include "inet/physicallayer/idealradio/IdealReception.h"
+#include "inet/physicallayer/idealradio/IdealNoise.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 
@@ -87,11 +88,12 @@ bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, co
 const ReceptionIndication *IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
 {
     auto indication = new ReceptionIndication();
-//    // TODO: revive
-//    double errorRate = isReceptionSuccessful ? 0 : 1;
-//    indication->setSymbolErrorRate(errorRate);
-//    indication->setBitErrorRate(errorRate);
-//    indication->setPacketErrorRate(errorRate);
+    auto reception = check_and_cast<const IdealReception *>(snir->getReception());
+    auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
+    double errorRate = reception->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
+    indication->setSymbolErrorRate(errorRate);
+    indication->setBitErrorRate(errorRate);
+    indication->setPacketErrorRate(errorRate);
     return indication;
 }
 

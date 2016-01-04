@@ -18,6 +18,8 @@
 #include "inet/physicallayer/idealradio/IdealAnalogModel.h"
 #include "inet/physicallayer/idealradio/IdealTransmission.h"
 #include "inet/physicallayer/idealradio/IdealReception.h"
+#include "inet/physicallayer/idealradio/IdealNoise.h"
+#include "inet/physicallayer/idealradio/IdealSNIR.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
@@ -56,12 +58,16 @@ const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio
 
 const INoise *IdealAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
-    return nullptr;
+    bool isInterfering = false;
+    for (auto interferingReception : *interference->getInterferingReceptions())
+        if (check_and_cast<const IdealReception *>(interferingReception)->getPower() >= IdealReception::POWER_INTERFERING)
+            isInterfering = true;
+    return new IdealNoise(listening->getStartTime(), listening->getEndTime(), isInterfering);
 }
 
 const ISNIR *IdealAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
-    return nullptr;
+    return new IdealSNIR(reception, noise);
 }
 
 } // namespace physicallayer
