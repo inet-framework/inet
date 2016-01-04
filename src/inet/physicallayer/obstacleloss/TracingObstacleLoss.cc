@@ -105,12 +105,14 @@ double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz 
         totalLoss *= computeDielectricLoss(material, frequency, m(intersectionDistance));
         if (!normal1.isUnspecified()) {
             double angle1 = (intersection1 - intersection2).angle(normal1);
-            totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
+            if (!std::isnan(angle1))
+                totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
         }
         // TODO: this returns NaN because n1 > n2
 //        if (!normal2.isUnspecified()) {
 //            double angle2 = (intersection2 - intersection1).angle(normal2);
-//            totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
+//            if (!std::isnan(angle2))
+//                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
 //        }
         fireObstaclePenetrated(object, intersection1, intersection2, normal1, normal2);
     }
