@@ -20,6 +20,7 @@
 #include "FrameExchanges.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/FSMA.h"
+#include "inet/common/NotifierConsts.h"
 #include "IContention.h"
 #include "ITx.h"
 #include "IRx.h"
@@ -248,6 +249,7 @@ void SendDataWithAckFrameExchange::retry()
     else {
         statistics->frameTransmissionUnsuccessfulGivingUp(dataFrame, retryCount);
         fail();
+        ownerModule->emit(NF_LINK_BREAK, dataFrame);
 
 #ifdef NS3_VALIDATION
         if (*lastSeq == '0' && defaultAccessCategory == 1)
