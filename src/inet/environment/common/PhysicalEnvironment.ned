@@ -92,6 +92,10 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       the object. They are primarily useful for hiding objects in the graphical
 //       user interface. The default value is empty.
 //
+//    - @texture
+//       This optional attribute specifies an image that is drawn on the faces of
+//       the object. The default value specifies no texture.
+//
 //  - <shape>
 //    This element defines a shape that might be used by multiple physical objects.
 //
@@ -156,6 +160,7 @@ import inet.environment.contract.IPhysicalEnvironment;
 module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
+        string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
         string objectCacheType = default("GridObjectCache");  // TODO should be empty by default as GridObjectCache require finite space* parameters which is not always present
         string groundType = default("");
         double temperature @unit(K) = default(293K);
