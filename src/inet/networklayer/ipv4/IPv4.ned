@@ -97,6 +97,12 @@ simple IPv4
         bool forceBroadcast = default(false);
         bool useProxyARP = default(true);
         @display("i=block/routing");
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetFromUpperDropped](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetFromLowerDropped](type=cPacket);
         @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Datagram);
         @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Datagram);
         @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Datagram);

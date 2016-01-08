@@ -34,6 +34,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {
 
@@ -168,6 +169,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
 {
     ASSERT(datagram);
     ASSERT(fromIE);
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, datagram);
 
     //
     // "Prerouting"
@@ -277,6 +279,7 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
             int protocol = bogusPacket->getTransportProtocol();
             int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(packet, "transportOut", gateindex);
+            emit(LayeredProtocolBase::packetSentToUpperSignal, packet);
             break;
         }
 
@@ -285,6 +288,7 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
             // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
             int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
             send(packet, "transportOut", gateindex);
+            emit(LayeredProtocolBase::packetSentToUpperSignal, packet);
             break;
         }
     }
@@ -293,6 +297,7 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
 void IPv4::handlePacketFromHL(cPacket *packet)
 {
     EV_INFO << "Received " << packet << " from upper layer.\n";
+    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
 
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
@@ -621,7 +626,9 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
         if (gateindex >= 0) {
             cGate *outGate = gate("transportOut", gateindex);
             if (outGate->isPathOK()) {
-                send(decapsulate(datagram), outGate);
+                cPacket *packet = decapsulate(datagram);
+                send(packet, outGate);
+                emit(LayeredProtocolBase::packetSentToUpperSignal, packet);
                 numLocalDeliver++;
                 return;
             }
@@ -1160,6 +1167,7 @@ void IPv4::sendOnTransportOutGateByProtocolId(cPacket *packet, int protocolId)
     int gateindex = mapping.getOutputGateForProtocol(protocolId);
     cGate *outGate = gate("transportOut", gateindex);
     send(packet, outGate);
+    emit(LayeredProtocolBase::packetSentToUpperSignal, packet);
 }
 
 void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
