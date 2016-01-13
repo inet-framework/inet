@@ -52,6 +52,8 @@ void CollisionController::scheduleTransmissionRequest(int txIndex, simtime_t txS
         timer[txIndex]->setSchedulingPriority(1000); // low priority, i.e. processed later than most events for the same time
     }
 
+    callback[txindex] = cb;
+
     ASSERT(!timer[txIndex]->isScheduled());
     scheduleAt(txStartTime, timer[txIndex]);
 }
