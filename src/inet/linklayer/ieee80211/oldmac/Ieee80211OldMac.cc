@@ -697,7 +697,7 @@ void Ieee80211OldMac::handleLowerPacket(cPacket *msg)
     }
     emit(NF_LINK_FULL_PROMISCUOUS, msg);
     validRecMode = false;
-    if (cinfo) {
+    if (cinfo && cinfo->getMode()) {
         recFrameModulation = cinfo->getMode();
         if (!std::isnan(recFrameModulation->getDataMode()->getNetBitrate().get()))
             validRecMode = true;

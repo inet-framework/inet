@@ -69,6 +69,11 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
 
 const ReceptionIndication *ReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
+    return createReceptionIndication();
+}
+
+ReceptionIndication *ReceiverBase::createReceptionIndication() const
+{
     return new ReceptionIndication();
 }
 
