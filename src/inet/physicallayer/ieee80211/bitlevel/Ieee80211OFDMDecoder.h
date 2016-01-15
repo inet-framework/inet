@@ -36,10 +36,10 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMDecoder : public IDecoder
 {
   protected:
-    const Ieee80211OFDMCode *code;
-    const IScrambler *descrambler;
-    const IFECCoder *fecDecoder;
-    const IInterleaver *deinterleaver;
+    const Ieee80211OFDMCode *code = nullptr;
+    const IScrambler *descrambler = nullptr;
+    const IFECCoder *fecDecoder = nullptr;
+    const IInterleaver *deinterleaver = nullptr;
 
   protected:
     const IReceptionPacketModel *createPacketModel(const BitVector *decodedBits, const IScrambling *scrambling, const IForwardErrorCorrection *fec, const IInterleaving *interleaving) const;

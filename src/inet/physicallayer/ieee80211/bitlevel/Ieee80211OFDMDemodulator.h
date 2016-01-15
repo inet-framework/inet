@@ -34,7 +34,7 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMDemodulator : public IDemodulator
 {
   protected:
-    const Ieee80211OFDMModulation *subcarrierModulation;
+    const Ieee80211OFDMModulation *subcarrierModulation = nullptr;
 
   protected:
     BitVector demodulateSymbol(const Ieee80211OFDMSymbol *signalSymbol) const;

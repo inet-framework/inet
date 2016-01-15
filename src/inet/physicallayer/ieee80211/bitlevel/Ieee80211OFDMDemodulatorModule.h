@@ -29,7 +29,7 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMDemodulatorModule : public IDemodulator, public cSimpleModule
 {
   protected:
-    const Ieee80211OFDMDemodulator *ofdmDemodulator;
+    const Ieee80211OFDMDemodulator *ofdmDemodulator = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

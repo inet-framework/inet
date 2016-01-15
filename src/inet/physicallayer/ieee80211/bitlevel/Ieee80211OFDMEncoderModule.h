@@ -27,11 +27,11 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMEncoderModule : public IEncoder, public cSimpleModule
 {
   protected:
-    const Ieee80211OFDMEncoder *encoder;
-    const IScrambler *scrambler;
-    const IFECCoder *convolutionalCoder;
-    const IInterleaver *interleaver;
-    const Ieee80211OFDMCode *code;
+    const Ieee80211OFDMEncoder *encoder = nullptr;
+    const IScrambler *scrambler = nullptr;
+    const IFECCoder *convolutionalCoder = nullptr;
+    const IInterleaver *interleaver = nullptr;
+    const Ieee80211OFDMCode *code = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

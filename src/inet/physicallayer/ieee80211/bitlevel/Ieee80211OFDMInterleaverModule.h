@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMInterleaverModule : public cSimpleModule, public IInterleaver
 {
   protected:
-    const Ieee80211OFDMInterleaver *interleaver;
+    const Ieee80211OFDMInterleaver *interleaver = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

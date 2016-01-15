@@ -39,7 +39,7 @@ class INET_API Ieee80211OFDMInterleaver : public IInterleaver
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
     int s;
-    const Ieee80211OFDMInterleaving *interleaving;
+    const Ieee80211OFDMInterleaving *interleaving = nullptr;
 
   public:
     Ieee80211OFDMInterleaver(const Ieee80211OFDMInterleaving *interleaving);

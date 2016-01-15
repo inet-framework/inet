@@ -34,10 +34,10 @@ namespace physicallayer {
 class INET_API Ieee80211OFDMEncoder : public IEncoder
 {
   protected:
-    const IFECCoder *convolutionalCoder;
-    const IInterleaver *interleaver;
-    const IScrambler *scrambler;
-    const Ieee80211OFDMCode *code;
+    const IFECCoder *convolutionalCoder = nullptr;
+    const IInterleaver *interleaver = nullptr;
+    const IScrambler *scrambler = nullptr;
+    const Ieee80211OFDMCode *code = nullptr;
 
   public:
     Ieee80211OFDMEncoder(const Ieee80211OFDMCode *code);
