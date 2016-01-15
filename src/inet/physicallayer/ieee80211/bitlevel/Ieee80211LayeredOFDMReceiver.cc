@@ -456,10 +456,6 @@ bool Ieee80211LayeredOFDMReceiver::computeIsReceptionPossible(const IListening *
 Ieee80211LayeredOFDMReceiver::~Ieee80211LayeredOFDMReceiver()
 {
     if (!isCompliant) {
-        delete mode->getDataMode()->getModulation();
-        delete mode->getDataMode()->getCode();
-        delete mode->getSignalMode()->getModulation();
-        delete mode->getSignalMode()->getCode();
         delete mode->getPreambleMode();
         delete mode->getSignalMode();
         delete mode->getDataMode();
