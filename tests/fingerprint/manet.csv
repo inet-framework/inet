@@ -20,14 +20,13 @@
 /examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,         100s,            250e-23e6 f568-85ac/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,               100s,            31e4-b289 023f-2a04/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOFau -r 0,              100s,            226a-864f 84e8-88ed/tplx
-# /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,               100s,            9d02-6e8d  # unstable fingerprint
+# /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,               100s,            9d02-6e8d  # unstable fingerprint   # AODVUU extended
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0,                100s,            6f17-2796 68ed-0fec/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0,                 5s,              865f-4238 68ae-b0ac/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSDV_2 -r 0,               5s,              59cd-8027 5113-084d/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c Batman -r 0,               2s,              4d00-a537 512c-3839/tplx
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c General -r 0,           10s,             7cf3-f858 5944-eb2f/tplx
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMOUM -r 0,            10s,             fbad-3960 d806-58ba/tplx
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c AODVUU -r 0,            10s,             e8c9-e2a1 ee9b-0714/tplx
+/examples/manetrouting/net80211_control/, -f omnetpp.ini -c AODVUU -r 0,            10s,             e8c9-e2a1 ee9b-0714/tplx   # AODVUU extended
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DSRUU -r 0,             10s,             da0d-a3c5 975b-f5f5/tplx
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c OLSR -r 0,              10s,             7cf3-f858 5944-eb2f/tplx
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DSDV_2 -r 0,            3s,              72aa-5b9f 091c-dde4/tplx

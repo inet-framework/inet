@@ -408,6 +408,6 @@
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              89cf-5da4 3c3b-902f/tplx
 
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             f0e1-082a ba25-16e5/tplx
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             5a9f-0ed5 32bf-d5e3/tplx
+# /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0000-0000   # Throughput2 extended
 
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            06dd-0652 8c9c-47b7/tplx
