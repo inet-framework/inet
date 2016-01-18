@@ -1,0 +1,8 @@
+This example demonstrates how to display physical objects present in the
+physical environment. The physical objects are defined in a separate XML file.
+
+The network doesn't contain any communication related modules such as network
+nodes. It only contains two modules: a physical environment, and a visualizer.
+
+When you run the example, you should see a simple apartment that has three rooms
+and a few windows.

@@ -1,0 +1,11 @@
+This example demonstrates how to display currently ongoing transmissions,
+ongoing receptions, and radio signals as they propagate through the medium.
+
+The adhoc wireless network contains 3 nodes, a source, an intermediate node, and
+a destination. The source node continuously pings the destination node through
+the intermediate node.
+
+When you run the example, the medium visualizer displays an animated gif at the
+nodes which are currently transmitting or receiving a signal. Moreover, it also
+shows the signals as semi-transparent rings growing over time as they propagate
+through the medium.
