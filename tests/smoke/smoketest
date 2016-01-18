@@ -162,7 +162,7 @@ class SmokeTestCase(SimulationTestCase):
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
         memcheckPrefix = ""
         if memcheck:
-            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " "
+            memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + inetRoot + "/tests/smoke/valgrind.supp "
         command = memcheckPrefix + opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false"

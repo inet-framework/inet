@@ -1,0 +1,17 @@
+{
+   nedparser
+   Memcheck:Overlap
+   fun:memcpy@@GLIBC_2.14
+   ...
+   fun:_Z11ned2yyparsev
+   ...
+}
+
+{
+   libgobject
+   Memcheck:Leak
+   ...
+   fun:call_init
+   fun:_dl_init
+   ...
+}
