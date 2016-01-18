@@ -51,6 +51,9 @@ DcfUpperMac::~DcfUpperMac()
     delete duplicateDetection;
     delete fragmenter;
     delete reassembly;
+    delete params;
+    delete utils;
+    delete [] contention;
 }
 
 void DcfUpperMac::initialize()

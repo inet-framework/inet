@@ -56,12 +56,12 @@ class INET_API DcfUpperMac : public cSimpleModule, public IUpperMac, protected I
         typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
     protected:
-        IMacParameters *params;
-        MacUtils *utils;
+        IMacParameters *params = nullptr;
+        MacUtils *utils = nullptr;
         Ieee80211Mac *mac = nullptr;
         IRx *rx = nullptr;
-        ITx *tx;
-        IContention **contention;
+        ITx *tx = nullptr;
+        IContention **contention = nullptr;
 
         int maxQueueSize;
         int fragmentationThreshold = 2346;

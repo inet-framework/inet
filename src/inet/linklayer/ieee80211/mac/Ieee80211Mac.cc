@@ -47,6 +47,7 @@ Ieee80211Mac::~Ieee80211Mac()
 {
     if (pendingRadioConfigMsg)
         delete pendingRadioConfigMsg;
+    delete [] contention;
 }
 
 void Ieee80211Mac::initialize(int stage)

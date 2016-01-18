@@ -52,11 +52,14 @@ EdcaUpperMac::~EdcaUpperMac()
     delete duplicateDetection;
     delete fragmenter;
     delete reassembly;
+    delete utils;
+    delete [] contention;
 
     int numACs = params->isEdcaEnabled() ? 4 : 1;
     for (int i = 0; i < numACs; i++) {
         delete acData[i].frameExchange;
     }
+    delete params;
     delete[] acData;
 }
 

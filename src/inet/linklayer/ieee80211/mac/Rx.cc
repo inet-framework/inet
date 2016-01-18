@@ -35,6 +35,7 @@ Rx::Rx()
 Rx::~Rx()
 {
     delete cancelEvent(endNavTimer);
+    delete [] contention;
 }
 
 void Rx::initialize()
