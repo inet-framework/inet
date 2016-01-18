@@ -163,7 +163,7 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            1896-996d 4f9f-6cc2/tplx
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            0c08-7fc0 8a00-1828/tplx
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            493f-1497 8f40-9c16/tplx
-# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            6597-eebe   # TCP_common extended
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            0000-0000   # TCP_common extended
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            8d5e-2539 8d66-beaf/tplx
 
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              9819-b538 ed86-c129/tplx
@@ -270,14 +270,14 @@
 /examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0,         10000s,          f77a-858e 4b3c-6272/tplx
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility1 -r 0,        10000s,          1869-7cb5 910a-0363/tplx
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility2 -r 0,        10000s,          1869-7cb5 910a-0363/tplx
-# /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility -r 0,     10000s,          97f0-d649   # ConstSpeedMobility extended
+# /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility -r 0,     ---100s,          0000-0000   # ConstSpeedMobility extended
 /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility01 -r 0,   10000s,          97f0-d649 2f65-d1f5/tplx
 /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1 -r 0,    10000s,          7851-b2df 2d97-5865/tplx
 /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility10 -r 0,   10000s,          7e9c-962b 063d-aae4/tplx
 /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility100 -r 0,  10000s,          7c13-72a6 e07c-cf8a/tplx
 /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1000 -r 0, 10000s,          7c13-72a6 e07c-cf8a/tplx
 /examples/mobility/,                 -f omnetpp.ini -c GaussMarkovMobility -r 0,    10000s,          f77a-858e 4b3c-6272/tplx
-# /examples/mobility/,                 -f omnetpp.ini -c LinearMobility -r 0,         10000s,          80f0-f079
+# /examples/mobility/,                 -f omnetpp.ini -c LinearMobility -r 0,         ---100s,         0000-0000   # LinearMobility extended
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility01 -r 0,       10000s,          80f0-f079 4860-beb1/tplx
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility1 -r 0,        10000s,          3425-3fa3 c433-b32d/tplx
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility10 -r 0,       10000s,          89b3-b0e6 ecf3-5334/tplx
@@ -353,10 +353,10 @@
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         7a37-2331 2624-d0b8/tplx
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,         dc4e-8f34 905b-6989/tplx
 
-# /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0bd5-71a8    # unstable fingerprint
-# /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           67ec-ff51    # unstable fingerprint
-# /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           a7c1-0e5b    # unstable fingerprint
-# /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            feed-b09b    # unstable fingerprint
+# /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
+# /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0000-0000    # unstable fingerprint
+# /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           0000-0000    # unstable fingerprint
+# /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
 
 # /examples/sctp/cmttest/,             -f fingerprints.ini -c General -r 0,           ---100s,         0000-0000
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            8b35-54b4 0663-44b4/tplx
@@ -435,10 +435,10 @@
 
 /examples/wireless/ratecontroltest/, -f omnetpp.ini -c Mac -r 0,                    100s,         d814-e46f 3e1b-8152/tplx
 
-#/examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
-#/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         c032-16b8
-#/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      100s,         1031-2cf4
-#/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 200s,         2f90-ebb3
+# /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
+# /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         0000-0000
+# /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      100s,         0000-0000
+# /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 200s,         0000-0000
 
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              058e-fc6e b30d-bb16/tplx
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              89cf-5da4 3c3b-902f/tplx

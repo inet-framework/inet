@@ -11,7 +11,7 @@
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                10s,             c764-dd2a 5591-006d/tplx
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOFau -r 0,                10s,             6e4b-1c47 d387-6030/tplx
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOUM -r 0,                 10s,             3bd6-62b5 714f-8e9e/tplx
-# /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c AODVUU -r 0,                 10s,             6a17-abf7    #unstable fingerprint
+# /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c AODVUU -r 0,                 10s,             0000-0000    #unstable fingerprint
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0,                  10s,             3905-b8c2 1542-7807/tplx
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0,                   10s,             5e3f-71a4 43be-80e4/tplx
 # /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR_ETX -r 0,               ---100s,         0000-0000
@@ -29,7 +29,7 @@
 
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,               100s,            31e4-b289 023f-2a04/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOFau -r 0,              100s,            226a-864f 84e8-88ed/tplx
-# /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,               100s,            9d02-6e8d  # unstable fingerprint   # AODVUU extended
+# /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,               100s,            0000-0000  # unstable fingerprint   # AODVUU extended
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0,                100s,            6f17-2796 68ed-0fec/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0,                 5s,              865f-4238 68ae-b0ac/tplx
 # /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR_ETX -r 0,                 5s,              0000-0000
