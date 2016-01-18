@@ -514,7 +514,7 @@ void PhysicalEnvironment::updateCanvas()
 #if OMNETPP_VERSION >= 0x500
             figure->setLineOpacity(object->getOpacity());
             figure->setFillOpacity(object->getOpacity());
-            figure->setScaleLineWidth(false);
+            figure->setZoomLineWidth(false);
 #endif
             std::string tags("physical_object ");
             if (object->getTags())
@@ -568,9 +568,9 @@ void PhysicalEnvironment::updateCanvas()
         yAxis->setEndArrowHead(cFigure::ARROW_BARBED);
         zAxis->setEndArrowHead(cFigure::ARROW_BARBED);
 #if OMNETPP_VERSION >= 0x500
-        xAxis->setScaleLineWidth(false);
-        yAxis->setScaleLineWidth(false);
-        zAxis->setScaleLineWidth(false);
+        xAxis->setZoomLineWidth(false);
+        yAxis->setZoomLineWidth(false);
+        zAxis->setZoomLineWidth(false);
 #endif
         xAxis->setStart(computeCanvasPoint(Coord::ZERO));
         yAxis->setStart(computeCanvasPoint(Coord::ZERO));
@@ -632,7 +632,7 @@ void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::v
 #if OMNETPP_VERSION >= 0x500
         figure->setLineOpacity(object->getOpacity());
         figure->setFillOpacity(object->getOpacity());
-        figure->setScaleLineWidth(false);
+        figure->setZoomLineWidth(false);
 #endif
         std::string tags("physical_object ");
         if (object->getTags())

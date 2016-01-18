@@ -99,7 +99,7 @@ void MovingMobilityBase::updateVisualRepresentation()
 #if OMNETPP_VERSION >= 0x500
             cFigure::Color color = cFigure::GOOD_DARK_COLORS[getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
             movementLine->setLineColor(color);
-            movementLine->setScaleLineWidth(false);
+            movementLine->setZoomLineWidth(false);
 #else
             movementLine->setLineColor(cFigure::BLACK);
 #endif

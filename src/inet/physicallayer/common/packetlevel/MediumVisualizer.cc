@@ -136,7 +136,7 @@ void MediumVisualizer::addTransmission(const ITransmission *transmission)
         communicationFigure->setFilled(true);
         communicationFigure->setFillOpacity(0.5);
         communicationFigure->setLineOpacity(0.5);
-        communicationFigure->setScaleLineWidth(false);
+        communicationFigure->setZoomLineWidth(false);
         cLabelFigure *nameFigure = new cLabelFigure();
         nameFigure->setPosition(position);
 #else
@@ -186,7 +186,7 @@ void MediumVisualizer::receivePacket(const IReceptionResult *result)
             communicationFigure->setEndArrowHead(cFigure::ARROW_BARBED);
             communicationFigure->setLineWidth(1);
 #if OMNETPP_VERSION >= 0x500
-            communicationFigure->setScaleLineWidth(false);
+            communicationFigure->setZoomLineWidth(false);
 #endif
             communicationTrail->addFigure(communicationFigure);
         }
