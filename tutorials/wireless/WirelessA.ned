@@ -18,6 +18,7 @@ package inet.tutorials.wireless;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 
 // - create a network and specify the size to 500x500
@@ -28,15 +29,18 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 network WirelessA
 {
     @display("bgb=500,500");
-    @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red;label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
+    @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red; label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
     string hostType = default("WirelessHost");
     string mediumType = default("IdealRadioMedium");
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=50,50");
+        }
         configurator: IPv4NetworkConfigurator {
-            @display("p=149,29");
+            @display("p=200,50");
         }
         radioMedium: <mediumType> like IRadioMedium {
-            @display("p=309,24");
+            @display("p=350,50");
         }
         hostA: <hostType> like INetworkNode {
             @display("p=50,250");
