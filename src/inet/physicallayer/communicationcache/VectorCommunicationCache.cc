@@ -32,10 +32,8 @@ VectorCommunicationCache::VectorCommunicationCache() :
 
 VectorCommunicationCache::~VectorCommunicationCache()
 {
-    for (auto &transmissionCacheEntry : transmissionCache) {
-        delete transmissionCacheEntry.frame;
+    for (auto &transmissionCacheEntry : transmissionCache)
         delete static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
-    }
 }
 
 VectorCommunicationCache::RadioCacheEntry *VectorCommunicationCache::getRadioCacheEntry(const IRadio *radio)
@@ -144,7 +142,6 @@ void VectorCommunicationCache::removeNonInterferingTransmissions()
     baseTransmissionId += transmissionIndex;
     for (auto it = transmissionCache.cbegin(); it != transmissionCache.cbegin() + transmissionIndex; it++) {
         const TransmissionCacheEntry &transmissionCacheEntry = *it;
-        delete transmissionCacheEntry.frame;
         delete static_cast<std::vector<ReceptionCacheEntry> *>(transmissionCacheEntry.receptionCacheEntries);
     }
     transmissionCache.erase(transmissionCache.begin(), transmissionCache.begin() + transmissionIndex);

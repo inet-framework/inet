@@ -262,6 +262,16 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void addTransmission(const IRadio *transmitter, const ITransmission *transmission);
 
     /**
+     * Creates a new radio frame for the transmitter.
+     */
+    virtual IRadioFrame *createTransmitterRadioFrame(const IRadio *radio, cPacket *macFrame);
+
+    /**
+     * Creates a new radio frame for a receiver.
+     */
+    virtual IRadioFrame *createReceiverRadioFrame(const ITransmission *transmission);
+
+    /**
      * Sends a copy of the provided radio frame to all affected receivers on
      * the radio medium.
      */

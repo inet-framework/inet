@@ -168,7 +168,7 @@ void MediumVisualizer::removeTransmission(const ITransmission *transmission)
 
 void MediumVisualizer::receivePacket(const IReceptionResult *result)
 {
-    bool isReceptionSuccessful;
+    bool isReceptionSuccessful = true;
     for (auto decision : *result->getDecisions())
         isReceptionSuccessful &= decision->isReceptionSuccessful();
     if (isReceptionSuccessful) {

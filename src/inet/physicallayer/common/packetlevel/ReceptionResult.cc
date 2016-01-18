@@ -37,6 +37,7 @@ ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<
 ReceptionResult::~ReceptionResult()
 {
     delete macFrame;
+    delete decisions;
 }
 
 std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) const
