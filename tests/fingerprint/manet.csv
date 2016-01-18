@@ -18,6 +18,7 @@
 /examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            cf55-8e70 1e3b-07ca/tplx
 /examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            a765-7aeb 6f8b-43b1/tplx
 /examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,         100s,            250e-23e6 f568-85ac/tplx
+
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,               100s,            31e4-b289 023f-2a04/tplx
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOFau -r 0,              100s,            226a-864f 84e8-88ed/tplx
 # /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,               100s,            9d02-6e8d  # unstable fingerprint   # AODVUU extended

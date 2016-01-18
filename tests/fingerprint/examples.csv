@@ -92,16 +92,16 @@
 
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             309a-5ada 8ae4-9979/tplx
 
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             a6f0-46eb 54aa-1dfa/tplx
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             6ffa-c297 f433-5d56/tplx
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             8ed7-faea 85ac-df6f/tplx
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             a6f0-46eb 54aa-1dfa/tplx
 
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            2fc6-a6c7 50b5-4709/tplx
 /examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             cd16-9d0b 7349-3e4f/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             932c-9062 9d93-9160/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             1cc3-48bb 96bb-654a/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             18fd-c880 f3f1-9633/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        7775-28ad 2567-d386/tplx
-/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            2fc6-a6c7 50b5-4709/tplx
 
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            b4fd-7612 049f-3c69/tplx
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            b4fd-7612 049f-3c69/tplx
@@ -134,13 +134,13 @@
 
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         981d-c7bd d718-76dc/tplx
 /examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           5s,              4da1-2153 5938-a1c1/tplx
-/examples/inet/nclients/,            -f fingerprints2.ini -c General -r 0,          50s,             af5a-0b58 f2c0-8a0b/tplx
 /examples/inet/nclients/,            -f fingerprints.ini -c General -r 0,           50s,             867f-fcce e953-6ec1/tplx
+/examples/inet/nclients/,            -f fingerprints2.ini -c General -r 0,          50s,             af5a-0b58 f2c0-8a0b/tplx
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             64a2-489c 6cdd-f008/tplx
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             575d-717d 86f4-8488/tplx
-/examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           6190-261e 1523-72fa/tplx
-/examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            167a-3240 f7c1-5932/tplx
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             d629-1f7c da60-1129/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            167a-3240 f7c1-5932/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           6190-261e 1523-72fa/tplx
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             6327-5d2c dbcf-43c2/tplx
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           66a3-a647 f042-928b/tplx
@@ -323,8 +323,8 @@
 
 /examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            b7f7-2a0d d77e-7210/tplx
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            777d-0117 87f6-d555/tplx
-/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            ec02-3e44 6bd8-ee17/tplx
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            647e-f0fc 9f3d-6868/tplx
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            ec02-3e44 6bd8-ee17/tplx
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario1 -r 0,              100s,            b2e2-93e1 fa67-565f/tplx
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario2 -r 0,              150s,            19ac-f402 811c-1e3d/tplx
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            5a58-ae8e baec-0b7c/tplx
@@ -372,24 +372,24 @@
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             e691-fac9 d9f1-084c/tplx
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000   # [Config Ping2] # __interactive__
 
+/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            ac60-6946 bb11-cb67/tplx
+
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            dab7-8c68 07f5-3ee2/tplx
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            4d26-05ec 0dc3-4073/tplx
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            1c3d-7975 e85a-8529/tplx
 
-/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            ac60-6946 bb11-cb67/tplx
-
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithIdealRadio -r 0,               100s,             220c-31c2 41ef-fcc0/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKScalarRadio -r 0,          100s,             9c6b-27e3 41ef-fcc0/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKDimensionalRadio -r 0,     100s,             9c6b-27e3 41ef-fcc0/tplx
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,                   100s,             4656-18b8 31f5-a3f8/tplx
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0,              100s,             f2d8-7751 31f5-a3f8/tplx
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0,         100s,             f2d8-7751 31f5-a3f8/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithIdealRadio -r 0,                   100s,             3366-caa1 0bb1-e272/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithAPSKScalarRadio -r 0,              100s,             46ad-62a6 0bb1-e272/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithAPSKDimensionalRadio -r 0,         100s,             46ad-62a6 0bb1-e272/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithIdealRadio -r 0,                   100s,             2ebe-aa8a 61b9-f31e/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKScalarRadio -r 0,              100s,             7c0d-ca03 61b9-f31e/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKDimensionalRadio -r 0,         100s,             7c0d-ca03 61b9-f31e/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,                   100s,             4656-18b8 31f5-a3f8/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0,              100s,             f2d8-7751 31f5-a3f8/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0,         100s,             f2d8-7751 31f5-a3f8/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,           100s,             0a2a-8d5f 6d4b-7727/tplx
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,             b817-18f0 90db-5977/tplx
 
