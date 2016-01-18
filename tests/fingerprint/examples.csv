@@ -151,7 +151,7 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            1896-996d 4f9f-6cc2/tplx
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            0c08-7fc0 8a00-1828/tplx
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            493f-1497 8f40-9c16/tplx
-#/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            6597-eebe   # TCP_common extended
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            6597-eebe   # TCP_common extended
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            8d5e-2539 8d66-beaf/tplx
 
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              9819-b538 ed86-c129/tplx
