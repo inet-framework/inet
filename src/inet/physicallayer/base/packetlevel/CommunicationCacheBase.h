@@ -146,21 +146,21 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
 
     /** @name Reception cache */
     //@{
-    virtual const IArrival *getCachedArrival(const IRadio *radio, const ITransmission *transmission) override;
-    virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) override;
-    virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission) override;
+    virtual const IArrival *getCachedArrival(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedArrival(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival) override;
+    virtual void removeCachedArrival(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const Interval *getCachedInterval(const IRadio *radio, const ITransmission *transmission) override;
-    virtual void setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval) override;
-    virtual void removeCachedInterval(const IRadio *radio, const ITransmission *transmission) override;
+    virtual const Interval *getCachedInterval(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval) override;
+    virtual void removeCachedInterval(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission) override;
-    virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening) override;
-    virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission) override;
+    virtual const IListening *getCachedListening(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedListening(const IRadio *receiver, const ITransmission *transmission, const IListening *listening) override;
+    virtual void removeCachedListening(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) override;
-    virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception) override;
-    virtual void removeCachedReception(const IRadio *radio, const ITransmission *transmission) override;
+    virtual const IReception *getCachedReception(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedReception(const IRadio *receiver, const ITransmission *transmission, const IReception *reception) override;
+    virtual void removeCachedReception(const IRadio *receiver, const ITransmission *transmission) override;
 
     virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) override;
     virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference) override;
@@ -174,17 +174,17 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) override;
     virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override;
-    virtual void setCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision) override;
-    virtual void removeCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override;
+    virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) override;
+    virtual void setCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision) override;
+    virtual void removeCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) override;
 
-    virtual const IReceptionResult *getCachedReceptionResult(const IRadio *radio, const ITransmission *transmission) override;
-    virtual void setCachedReceptionResult(const IRadio *radio, const ITransmission *transmission, const IReceptionResult *receptionResult) override;
-    virtual void removeCachedReceptionResult(const IRadio *radio, const ITransmission *transmission) override;
+    virtual const IReceptionResult *getCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission, const IReceptionResult *receptionResult) override;
+    virtual void removeCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission) override;
 
-    virtual const IRadioFrame *getCachedFrame(const IRadio *radio, const ITransmission *transmission) override;
-    virtual void setCachedFrame(const IRadio *radio, const ITransmission *transmission, const IRadioFrame *frame) override;
-    virtual void removeCachedFrame(const IRadio *radio, const ITransmission *transmission) override;
+    virtual const IRadioFrame *getCachedFrame(const IRadio *receiver, const ITransmission *transmission) override;
+    virtual void setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const IRadioFrame *frame) override;
+    virtual void removeCachedFrame(const IRadio *receiver, const ITransmission *transmission) override;
     //@}
 };
 

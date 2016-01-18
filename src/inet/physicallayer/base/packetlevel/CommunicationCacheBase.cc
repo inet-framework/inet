@@ -212,175 +212,175 @@ void CommunicationCacheBase::removeCachedFigure(const ITransmission *transmissio
     getTransmissionCacheEntry(transmission)->figure = nullptr;
 }
 
-const IArrival *CommunicationCacheBase::getCachedArrival(const IRadio *radio, const ITransmission *transmission)
+const IArrival *CommunicationCacheBase::getCachedArrival(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->arrival : nullptr;
 }
 
-void CommunicationCacheBase::setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival)
+void CommunicationCacheBase::setCachedArrival(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->arrival = arrival;
 }
 
-void CommunicationCacheBase::removeCachedArrival(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedArrival(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->arrival = nullptr;
 }
 
-const Interval *CommunicationCacheBase::getCachedInterval(const IRadio *radio, const ITransmission *transmission)
+const Interval *CommunicationCacheBase::getCachedInterval(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->interval : nullptr;
 }
 
-void CommunicationCacheBase::setCachedInterval(const IRadio *radio, const ITransmission *transmission, const Interval *interval)
+void CommunicationCacheBase::setCachedInterval(const IRadio *receiver, const ITransmission *transmission, const Interval *interval)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->interval = interval;
-    RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);
+    RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(receiver);
     if (radioCacheEntry->receptionIntervals == nullptr)
         radioCacheEntry->receptionIntervals = new IntervalTree();
     radioCacheEntry->receptionIntervals->insert(interval);
 }
 
-void CommunicationCacheBase::removeCachedInterval(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedInterval(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->interval = nullptr;
 }
 
-const IListening *CommunicationCacheBase::getCachedListening(const IRadio *radio, const ITransmission *transmission)
+const IListening *CommunicationCacheBase::getCachedListening(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->listening : nullptr;
 }
 
-void CommunicationCacheBase::setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening)
+void CommunicationCacheBase::setCachedListening(const IRadio *receiver, const ITransmission *transmission, const IListening *listening)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->listening = listening;
 }
 
-void CommunicationCacheBase::removeCachedListening(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedListening(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->listening = nullptr;
 }
 
-const IReception *CommunicationCacheBase::getCachedReception(const IRadio *radio, const ITransmission *transmission)
+const IReception *CommunicationCacheBase::getCachedReception(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->reception : nullptr;
 }
 
-void CommunicationCacheBase::setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception)
+void CommunicationCacheBase::setCachedReception(const IRadio *receiver, const ITransmission *transmission, const IReception *reception)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->reception = reception;
 }
 
-void CommunicationCacheBase::removeCachedReception(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedReception(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->reception = nullptr;
 }
 
-const IInterference *CommunicationCacheBase::getCachedInterference(const IRadio *radio, const ITransmission *transmission)
+const IInterference *CommunicationCacheBase::getCachedInterference(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->interference : nullptr;
 }
 
-void CommunicationCacheBase::setCachedInterference(const IRadio *radio, const ITransmission *transmission, const IInterference *interference)
+void CommunicationCacheBase::setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->interference = interference;
 }
 
-void CommunicationCacheBase::removeCachedInterference(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedInterference(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->interference = nullptr;
 }
 
-const INoise *CommunicationCacheBase::getCachedNoise(const IRadio *radio, const ITransmission *transmission)
+const INoise *CommunicationCacheBase::getCachedNoise(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->noise : nullptr;
 }
 
-void CommunicationCacheBase::setCachedNoise(const IRadio *radio, const ITransmission *transmission, const INoise *noise)
+void CommunicationCacheBase::setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->noise = noise;
 }
 
-void CommunicationCacheBase::removeCachedNoise(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedNoise(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->noise = nullptr;
 }
 
-const ISNIR *CommunicationCacheBase::getCachedSNIR(const IRadio *radio, const ITransmission *transmission)
+const ISNIR *CommunicationCacheBase::getCachedSNIR(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->snir : nullptr;
 }
 
-void CommunicationCacheBase::setCachedSNIR(const IRadio *radio, const ITransmission *transmission, const ISNIR *snir)
+void CommunicationCacheBase::setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->snir = snir;
 }
 
-void CommunicationCacheBase::removeCachedSNIR(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->snir = nullptr;
 }
 
-const IReceptionDecision *CommunicationCacheBase::getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part)
+const IReceptionDecision *CommunicationCacheBase::getCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->receptionDecisions.resize(part + 1);
     return cacheEntry ? cacheEntry->receptionDecisions[part] : nullptr;
 }
 
-void CommunicationCacheBase::setCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision)
+void CommunicationCacheBase::setCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else {
@@ -389,55 +389,55 @@ void CommunicationCacheBase::setCachedReceptionDecision(const IRadio *radio, con
     }
 }
 
-void CommunicationCacheBase::removeCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part)
+void CommunicationCacheBase::removeCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr) {
         cacheEntry->receptionDecisions.resize(part + 1);
         cacheEntry->receptionDecisions[part] = nullptr;
     }
 }
 
-const IReceptionResult *CommunicationCacheBase::getCachedReceptionResult(const IRadio *radio, const ITransmission *transmission)
+const IReceptionResult *CommunicationCacheBase::getCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->receptionResult : nullptr;
 }
 
-void CommunicationCacheBase::setCachedReceptionResult(const IRadio *radio, const ITransmission *transmission, const IReceptionResult *receptionResult)
+void CommunicationCacheBase::setCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission, const IReceptionResult *receptionResult)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->receptionResult = receptionResult;
 }
 
-void CommunicationCacheBase::removeCachedReceptionResult(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->receptionResult = nullptr;
 }
 
-const IRadioFrame *CommunicationCacheBase::getCachedFrame(const IRadio *radio, const ITransmission *transmission)
+const IRadioFrame *CommunicationCacheBase::getCachedFrame(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->frame : nullptr;
 }
 
-void CommunicationCacheBase::setCachedFrame(const IRadio *radio, const ITransmission *transmission, const IRadioFrame *frame)
+void CommunicationCacheBase::setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const IRadioFrame *frame)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
         cacheEntry->frame = frame;
 }
 
-void CommunicationCacheBase::removeCachedFrame(const IRadio *radio, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedFrame(const IRadio *receiver, const ITransmission *transmission)
 {
-    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
         cacheEntry->frame = nullptr;
 }
