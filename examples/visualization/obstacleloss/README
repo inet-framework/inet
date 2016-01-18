@@ -1,0 +1,12 @@
+This example demonstrates how to display obstacle loss that happens during radio
+signal propagation. Obstacle loss is twofold: dielectric loss is caused by the
+object's material, reflection loss is caused by entering and leaving the object.  
+
+The ad-hoc wireless network contains 2 nodes. The source node continuously pings
+the destination node through a simple physical wall. Both nodes move up and down
+but they always stay at the opposite sides of the wall.
+
+When you run the example, the obstacle loss visualizer displays the intersections
+between the radio signal propagation path and the physical object. It also shows
+the face normal vectors for the intersections where the signal enters or leaves
+the object.

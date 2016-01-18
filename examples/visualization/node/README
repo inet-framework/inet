@@ -1,0 +1,8 @@
+This example demonstrates how to display external 3D models for network nodes.
+It requires OSG support from OMNeT++ 5.0 or later.
+
+The network contains a number of standard hosts. The network nodes don't communicate
+at all, because it's not essential in this example.
+
+When you run the example, you should see a number of very simple 3D animated
+humanoid models which represent the nodes in the network.

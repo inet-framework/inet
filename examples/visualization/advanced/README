@@ -1,0 +1,8 @@
+This example demonstrates how to use visualizer simple modules on their own, how
+to disable visualizer simple modules from the default integrated visualizer, and
+how to configure multiple visualizers to display the same simulation in multiple
+different ways simultaneously.
+
+The network doesn't contain any communication related modules such as network
+nodes. It only contains a physical environment module and one or more visualizer
+modules.
