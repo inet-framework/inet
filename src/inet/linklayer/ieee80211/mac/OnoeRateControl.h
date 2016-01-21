@@ -42,10 +42,11 @@ class INET_API OnoeRateControl : public RateControlBase, public cSimpleModule
         int credit = 0;
 
     protected:
-        void handleMessage(cMessage *msg);
+        virtual void handleMessage(cMessage *msg) override;
         void computeMode();
         void resetStatisticalVariables();
         void computeModeIfTimerIsExpired();
+        void updateDisplayString();
 
     public:
         void initialize(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *initialMode) override;

@@ -33,6 +33,12 @@ void OnoeRateControl::initialize(const Ieee80211ModeSet* modeSet, const IIeee802
     WATCH(numOfSuccTransmissions);
     WATCH(numOfGivenUpTransmissions);
     WATCH(avgRetriesPerFrame);
+    updateDisplayString();
+}
+
+void OnoeRateControl::updateDisplayString()
+{
+    getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
 
 void OnoeRateControl::resetStatisticalVariables()
@@ -81,6 +87,8 @@ void OnoeRateControl::computeMode()
         if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1)
         {
             currentMode = decreaseRateIfPossible(currentMode);
+            updateDisplayString();
+            EV_DETAIL << "Decreased rate to " << *currentMode << endl;
             credit = 0;
         }
         else if (avgRetriesPerFrame >= 0.1)
@@ -91,6 +99,8 @@ void OnoeRateControl::computeMode()
         if (credit >= 10)
         {
             currentMode = increaseRateIfPossible(currentMode);
+            updateDisplayString();
+            EV_DETAIL << "Increased rate to " << *currentMode << endl;
             credit = 0;
         }
 

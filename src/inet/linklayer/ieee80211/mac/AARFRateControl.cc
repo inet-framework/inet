@@ -39,11 +39,17 @@ void AARFRateControl::initialize(const Ieee80211ModeSet* modeSet, const IIeee802
     WATCH(interval);
     WATCH(probing);
     WATCH(numberOfConsSuccTransmissions);
+    updateDisplayString();
 }
 
 void AARFRateControl::handleMessage(cMessage* msg)
 {
     throw cRuntimeError("This module doesn't handle self messages");
+}
+
+void AARFRateControl::updateDisplayString()
+{
+    getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
 
 void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, const IIeee80211Mode* mode, int retryCount, bool isSuccessful, bool isGivenUp)
@@ -54,6 +60,8 @@ void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, const IIeee8
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
+        updateDisplayString();
+        EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         multiplyIncreaseThreshold(factor);
         resetTimer();
     }
@@ -61,6 +69,8 @@ void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, const IIeee8
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
+        updateDisplayString();
+        EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         resetIncreaseThreshdold();
         resetTimer();
     }
@@ -71,6 +81,8 @@ void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, const IIeee8
     {
         numberOfConsSuccTransmissions = 0;
         currentMode = increaseRateIfPossible(currentMode);
+        updateDisplayString();
+        EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
         probing = true;
     }
@@ -100,6 +112,8 @@ void AARFRateControl::increaseRateIfTimerIsExpired()
     if (simTime() - timer >= interval)
     {
         currentMode = increaseRateIfPossible(currentMode);
+        updateDisplayString();
+        EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
     }
 }

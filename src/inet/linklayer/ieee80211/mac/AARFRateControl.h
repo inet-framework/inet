@@ -42,11 +42,12 @@ class INET_API AARFRateControl : public RateControlBase, public cSimpleModule
         int numberOfConsSuccTransmissions = 0;
 
     protected:
-        void handleMessage(cMessage *msg);
+        virtual void handleMessage(cMessage *msg) override;
         void multiplyIncreaseThreshold(double factor);
         void resetIncreaseThreshdold();
         void resetTimer();
         void increaseRateIfTimerIsExpired();
+        void updateDisplayString();
 
     public:
         void initialize(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *initialMode) override;
