@@ -111,6 +111,7 @@ double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz 
 //            double angle2 = (intersection2 - intersection1).angle(normal2);
 //            totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
 //        }
+        fireObstaclePenetrated(object, intersection1, intersection2, normal1, normal2);
     }
     return totalLoss;
 }
@@ -136,6 +137,12 @@ TracingObstacleLoss::TotalObstacleLossComputation::TotalObstacleLossComputation(
 void TracingObstacleLoss::TotalObstacleLossComputation::visit(const cObject *object) const
 {
     totalLoss *= obstacleLoss->computeObjectLoss(check_and_cast<const IPhysicalObject *>(object), frequency, transmissionPosition, receptionPosition);
+}
+
+void TracingObstacleLoss::fireObstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const
+{
+    for (auto listener : listeners)
+        listener->obstaclePenetrated(object, intersection1, intersection2, normal1, normal2);
 }
 
 } // namespace physicallayer
