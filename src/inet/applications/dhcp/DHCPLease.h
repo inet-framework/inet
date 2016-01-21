@@ -28,7 +28,7 @@ namespace inet {
 /**
  * Describes a DHCP lease.
  */
-class DHCPLease
+class INET_API DHCPLease
 {
   public:
     long xid = -1;

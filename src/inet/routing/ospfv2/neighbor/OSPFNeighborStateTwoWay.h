@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFNEIGHBORSTATETWOWAY_H
 #define __INET_OSPFNEIGHBORSTATETWOWAY_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"
 
 namespace inet {
 
 namespace ospf {
 
-class NeighborStateTwoWay : public NeighborState
+class INET_API NeighborStateTwoWay : public NeighborState
 {
   public:
     virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event) override;

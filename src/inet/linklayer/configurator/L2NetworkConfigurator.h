@@ -34,7 +34,7 @@ namespace inet {
 /**
  * Computes L2 configuration of the network. See the NED definition for details.
  */
-class L2NetworkConfigurator : public cSimpleModule
+class INET_API L2NetworkConfigurator : public cSimpleModule
 {
   public:
     L2NetworkConfigurator() { }

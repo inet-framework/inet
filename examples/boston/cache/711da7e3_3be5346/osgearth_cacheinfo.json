@@ -1,0 +1,25 @@
+{
+   "cache_profile" : {
+      "num_tiles_high_at_lod_0" : "1",
+      "num_tiles_wide_at_lod_0" : "2",
+      "srs" : "+proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs ",
+      "vdatum" : {},
+      "xmax" : "180",
+      "xmin" : "-180",
+      "ymax" : "90",
+      "ymin" : "-90"
+   },
+   "cachebin_id" : "711da7e3_3be5346",
+   "source_driver" : "xyz",
+   "source_name" : "osm_mapnik",
+   "source_profile" : {
+      "num_tiles_high_at_lod_0" : "1",
+      "num_tiles_wide_at_lod_0" : "1",
+      "srs" : "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +towgs84=0,0,0,0,0,0,0 +wktext +no_defs",
+      "vdatum" : {},
+      "xmax" : "20037508.342789251357",
+      "xmin" : "-20037508.342789251357",
+      "ymax" : "20037508.342789251357",
+      "ymin" : "-20037508.342789251357"
+   }
+}

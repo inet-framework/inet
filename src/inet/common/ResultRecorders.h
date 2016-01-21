@@ -26,7 +26,7 @@ namespace inet {
 /**
  * Listener for counting the occurrences of signals with the same attribute
  */
-class SIM_API GroupCountRecorder : public cResultRecorder
+class INET_API GroupCountRecorder : public cResultRecorder
 {
     protected:
         std::map<std::string,long> groupcounts;

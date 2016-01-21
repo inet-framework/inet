@@ -33,7 +33,7 @@ class INET_API IPv4OptionSerializerBase : public cOwnedObject
     virtual TLVOptionBase *deserializeOption(Buffer &b, Context& c) = 0;
 };
 
-class IPv4OptionDefaultSerializer : public IPv4OptionSerializerBase
+class INET_API IPv4OptionDefaultSerializer : public IPv4OptionSerializerBase
 {
   public:
     IPv4OptionDefaultSerializer(const char *name = nullptr) : IPv4OptionSerializerBase(name) {}
@@ -75,7 +75,7 @@ INET_API extern IPv4OptionSerializerRegistrationList ipv4OptionSerializers; ///<
 /**
  * Converts between IPv4Datagram and binary (network byte order) IPv4 header.
  */
-class IPv4Serializer : public SerializerBase
+class INET_API IPv4Serializer : public SerializerBase
 {
   protected:
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;

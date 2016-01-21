@@ -52,7 +52,7 @@ class InterfaceEntry;
  *
  * See NED file for more info.
  */
-class LinkStateRouting : public cSimpleModule, public cListener
+class INET_API LinkStateRouting : public cSimpleModule, public cListener
 {
   protected:
     TED *tedmod = nullptr;

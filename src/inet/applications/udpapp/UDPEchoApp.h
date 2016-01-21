@@ -28,7 +28,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class UDPEchoApp : public ApplicationBase
+class INET_API UDPEchoApp : public ApplicationBase
 {
   protected:
     UDPSocket socket;

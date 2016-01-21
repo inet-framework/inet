@@ -32,7 +32,7 @@ namespace inet {
 
 namespace ospf {
 
-class RoutingTableEntry : public IPv4Route
+class INET_API RoutingTableEntry : public IPv4Route
 {
   public:
     enum RoutingPathType {

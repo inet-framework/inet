@@ -18,12 +18,14 @@
 #ifndef __INET_ITRANSPORTPACKET_H
 #define __INET_ITRANSPORTPACKET_H
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
 
 /**
  * This interface provides an abstraction for different transport layer packets.
  */
-class ITransportPacket
+class INET_API ITransportPacket
 {
   public:
     virtual ~ITransportPacket() {}

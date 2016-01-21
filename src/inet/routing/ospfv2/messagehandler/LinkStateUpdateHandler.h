@@ -18,6 +18,7 @@
 #ifndef __INET_LINKSTATEUPDATEHANDLER_H
 #define __INET_LINKSTATEUPDATEHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 
@@ -25,7 +26,7 @@ namespace inet {
 
 namespace ospf {
 
-class LinkStateUpdateHandler : public IMessageHandler
+class INET_API LinkStateUpdateHandler : public IMessageHandler
 {
   private:
     struct AcknowledgementFlags

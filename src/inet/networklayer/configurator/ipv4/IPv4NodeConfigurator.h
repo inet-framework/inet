@@ -36,7 +36,7 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle
+class INET_API IPv4NodeConfigurator : public cSimpleModule, public ILifecycle
 {
   protected:
     NodeStatus *nodeStatus;

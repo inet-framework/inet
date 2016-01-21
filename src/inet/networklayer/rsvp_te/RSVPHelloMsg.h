@@ -36,7 +36,7 @@ namespace inet {
 // that's not good. we don't use kind, because kind
 // is used by IP QoS mechanism (use DS field for IP QoS instead???)
 
-class RSVPHelloMsg : public RSVPHelloMsg_Base
+class INET_API RSVPHelloMsg : public RSVPHelloMsg_Base
 {
   public:
     RSVPHelloMsg(const char *name = nullptr, int kind = RSVP_TRAFFIC) : RSVPHelloMsg_Base(name, kind) {}

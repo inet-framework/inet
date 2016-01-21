@@ -18,6 +18,7 @@
 #ifndef __INET_IMESSAGEHANDLER_H
 #define __INET_IMESSAGEHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/OSPFPacket_m.h"
 
 namespace inet {
@@ -28,7 +29,7 @@ class Router;
 class Interface;
 class Neighbor;
 
-class IMessageHandler
+class INET_API IMessageHandler
 {
   protected:
     Router *router;

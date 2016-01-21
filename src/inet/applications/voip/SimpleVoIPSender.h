@@ -31,7 +31,7 @@ namespace inet {
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class SimpleVoIPSender : public cSimpleModule, public ILifecycle
+class INET_API SimpleVoIPSender : public cSimpleModule, public ILifecycle
 {
   private:
     UDPSocket socket;

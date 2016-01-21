@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/router/LSA.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/interface/OSPFInterface.h"
@@ -33,7 +34,7 @@ namespace ospf {
 
 class Router;
 
-class Area : public cObject
+class INET_API Area : public cObject
 {
   private:
     IInterfaceTable *ift;

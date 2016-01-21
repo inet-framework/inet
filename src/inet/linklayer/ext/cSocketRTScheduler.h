@@ -42,7 +42,7 @@
 
 namespace inet {
 
-class cSocketRTScheduler : public cScheduler
+class INET_API cSocketRTScheduler : public cScheduler
 {
   protected:
     int fd;

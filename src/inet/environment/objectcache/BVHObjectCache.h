@@ -28,7 +28,7 @@ namespace inet {
 
 namespace physicalenvironment {
 
-class BVHObjectCache : public IObjectCache, public cModule
+class INET_API BVHObjectCache : public IObjectCache, public cModule
 {
   protected:
     /** @name Parameters */

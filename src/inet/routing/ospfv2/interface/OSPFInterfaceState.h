@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFINTERFACESTATE_H
 #define __INET_OSPFINTERFACESTATE_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/interface/OSPFInterface.h"
 
 namespace inet {
 
 namespace ospf {
 
-class InterfaceState
+class INET_API InterfaceState
 {
   protected:
     void changeState(Interface *intf, InterfaceState *newState, InterfaceState *currentState);

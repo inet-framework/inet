@@ -53,7 +53,7 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class HttpController : public cSimpleModule
+class INET_API HttpController : public cSimpleModule
 {
   protected:
     enum ServerStatus { SS_NORMAL, SS_SPECIAL };

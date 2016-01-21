@@ -28,7 +28,7 @@ namespace inet {
 
 namespace rtp {
 
-class RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
+class INET_API RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 {
   public:
     RTCPReceiverReportPacket(const char *name = nullptr, int kind = 0);
@@ -42,7 +42,7 @@ class RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
     virtual void addReceptionReport(ReceptionReport *report);
 };
 
-class RTCPSDESPacket : public RTCPSDESPacket_Base
+class INET_API RTCPSDESPacket : public RTCPSDESPacket_Base
 {
   public:
     RTCPSDESPacket(const char *name = nullptr, int kind = 0);
@@ -53,7 +53,7 @@ class RTCPSDESPacket : public RTCPSDESPacket_Base
     void addSDESChunk(SDESChunk *sdesChunk);
 };
 
-class RTCPByePacket : public RTCPByePacket_Base
+class INET_API RTCPByePacket : public RTCPByePacket_Base
 {
   public:
     RTCPByePacket(const char *name = nullptr, int kind = 0);

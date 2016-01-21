@@ -24,7 +24,7 @@ namespace inet {
 
 namespace bgp {
 
-class BGPUpdateMessage : public BGPUpdateMessage_Base
+class INET_API BGPUpdateMessage : public BGPUpdateMessage_Base
 {
   protected:
     unsigned short computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs);

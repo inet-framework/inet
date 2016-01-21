@@ -65,7 +65,7 @@ double IntegralFunction(double x, void *params);
  *  More detailed description and validation can be found in
  *      http://www.nsnam.org/~pei/80211b.pdf
  */
-class DsssErrorRateModel
+class INET_API DsssErrorRateModel
 {
   private:
     static const double spectralEfficiency1bit;

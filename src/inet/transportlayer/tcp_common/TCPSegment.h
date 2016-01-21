@@ -37,7 +37,7 @@ inline uint32 seqMin(uint32 a, uint32 b) { return ((b - a) < (1UL << 31)) ? a : 
 inline uint32 seqMax(uint32 a, uint32 b) { return ((a - b) < (1UL << 31)) ? a : b; }
 //@}
 
-class Sack : public Sack_Base
+class INET_API Sack : public Sack_Base
 {
   public:
     Sack() : Sack_Base() {}

@@ -23,7 +23,7 @@ namespace inet {
 /**
  * Class that carries raw bytes.
  */
-class ByteArray : public ByteArray_Base
+class INET_API ByteArray : public ByteArray_Base
 {
   public:
     /**

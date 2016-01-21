@@ -22,7 +22,7 @@ namespace inet {
 /**
  * Buffer that carries BytesArrays.
  */
-class ByteArrayBuffer : public cObject
+class INET_API ByteArrayBuffer : public cObject
 {
   protected:
     typedef std::list<ByteArray> DataList;

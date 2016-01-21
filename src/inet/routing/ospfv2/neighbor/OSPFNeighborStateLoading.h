@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFNEIGHBORSTATELOADING_H
 #define __INET_OSPFNEIGHBORSTATELOADING_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"
 
 namespace inet {
 
 namespace ospf {
 
-class NeighborStateLoading : public NeighborState
+class INET_API NeighborStateLoading : public NeighborState
 {
   public:
     virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event) override;

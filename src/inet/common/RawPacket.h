@@ -22,7 +22,7 @@ namespace inet {
 /**
  * Message that carries raw bytes. Used with emulation-related features.
  */
-class RawPacket : public RawPacket_Base
+class INET_API RawPacket : public RawPacket_Base
 {
   public:
     /**

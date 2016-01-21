@@ -45,7 +45,7 @@ class InterfaceEntry;
  *
  * See NED file for more details.
  */
-class ExtInterface : public MACBase
+class INET_API ExtInterface : public MACBase
 {
   protected:
     bool connected;

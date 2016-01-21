@@ -37,7 +37,7 @@ class SimpleVoIPPacket;
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
+class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
 {
   private:
     class VoIPPacketInfo

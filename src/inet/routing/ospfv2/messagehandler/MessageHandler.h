@@ -18,6 +18,7 @@
 #ifndef __INET_MESSAGEHANDLER_H
 #define __INET_MESSAGEHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
@@ -32,7 +33,7 @@ namespace inet {
 
 namespace ospf {
 
-class MessageHandler : public IMessageHandler
+class INET_API MessageHandler : public IMessageHandler
 {
   private:
     cSimpleModule *ospfModule;

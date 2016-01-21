@@ -31,7 +31,7 @@ namespace sctp {
 
 #define MAX_GAP_COUNT    500
 
-class SCTPSimpleGapList
+class INET_API SCTPSimpleGapList
 {
   public:
     SCTPSimpleGapList();
@@ -75,7 +75,7 @@ class SCTPSimpleGapList
 
 inline std::ostream& operator<<(std::ostream& ostr, const SCTPSimpleGapList& gapList) { gapList.print(ostr); return ostr; }
 
-class SCTPGapList
+class INET_API SCTPGapList
 {
   public:
     SCTPGapList();

@@ -36,7 +36,7 @@ namespace ospf {
 class InterfaceState;
 class Area;
 
-class Interface
+class INET_API Interface
 {
   public:
     enum InterfaceEventType {

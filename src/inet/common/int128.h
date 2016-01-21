@@ -35,7 +35,7 @@
 namespace inet {
 
 // CLASS
-class Int128
+class INET_API Int128
 {
   private:
     // Binary correct representation of signed 128bit integer

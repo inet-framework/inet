@@ -28,7 +28,7 @@ namespace inet {
  * This class adds convenience get() and set() methods to the generated
  * base class, but no extra data.
  */
-class RSVPPacket : public RSVPPacket_Base
+class INET_API RSVPPacket : public RSVPPacket_Base
 {
   public:
     RSVPPacket(const char *name = nullptr, int kind = 0) : RSVPPacket_Base(name, RSVP_TRAFFIC) { this->rsvpKind_var = kind; }

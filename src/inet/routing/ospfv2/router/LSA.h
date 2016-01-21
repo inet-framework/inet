@@ -21,6 +21,7 @@
 #include <math.h>
 #include <vector>
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/OSPFPacket_m.h"
 
@@ -35,7 +36,7 @@ struct NextHop
     RouterID advertisingRouter;
 };
 
-class RoutingInfo
+class INET_API RoutingInfo
 {
   private:
     std::vector<NextHop> nextHops;
@@ -57,7 +58,7 @@ class RoutingInfo
     OSPFLSA *getParent() const { return parent; }
 };
 
-class LSATrackingInfo
+class INET_API LSATrackingInfo
 {
   public:
     enum InstallSource {
@@ -80,7 +81,7 @@ class LSATrackingInfo
     unsigned long getInstallTime() const { return installTime; }
 };
 
-class RouterLSA : public OSPFRouterLSA,
+class INET_API RouterLSA : public OSPFRouterLSA,
     public RoutingInfo,
     public LSATrackingInfo
 {
@@ -96,7 +97,7 @@ class RouterLSA : public OSPFRouterLSA,
     bool differsFrom(const OSPFRouterLSA *routerLSA) const;
 };
 
-class NetworkLSA : public OSPFNetworkLSA,
+class INET_API NetworkLSA : public OSPFNetworkLSA,
     public RoutingInfo,
     public LSATrackingInfo
 {
@@ -112,7 +113,7 @@ class NetworkLSA : public OSPFNetworkLSA,
     bool differsFrom(const OSPFNetworkLSA *networkLSA) const;
 };
 
-class SummaryLSA : public OSPFSummaryLSA,
+class INET_API SummaryLSA : public OSPFSummaryLSA,
     public RoutingInfo,
     public LSATrackingInfo
 {
@@ -134,7 +135,7 @@ class SummaryLSA : public OSPFSummaryLSA,
     bool differsFrom(const OSPFSummaryLSA *summaryLSA) const;
 };
 
-class ASExternalLSA : public OSPFASExternalLSA,
+class INET_API ASExternalLSA : public OSPFASExternalLSA,
     public RoutingInfo,
     public LSATrackingInfo
 {

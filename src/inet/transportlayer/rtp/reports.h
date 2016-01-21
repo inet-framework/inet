@@ -34,7 +34,7 @@ namespace rtp {
  * The class SenderReport represents an RTP sender report as contained
  * in an RTCPSenderReportPacket.
  */
-class SenderReport : public SenderReport_Base
+class INET_API SenderReport : public SenderReport_Base
 {
   public:
     SenderReport() : SenderReport_Base() {}
@@ -59,7 +59,7 @@ class SenderReport : public SenderReport_Base
  * The class ReceptionReport represents an RTP receiver report stored
  * in an RTPSenderReportPacket or RTPReceiverReport.
  */
-class ReceptionReport : public ReceptionReport_Base
+class INET_API ReceptionReport : public ReceptionReport_Base
 {
   public:
     ReceptionReport() : ReceptionReport_Base() {}

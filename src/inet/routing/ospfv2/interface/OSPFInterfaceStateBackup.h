@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFINTERFACESTATEBACKUP_H
 #define __INET_OSPFINTERFACESTATEBACKUP_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/interface/OSPFInterfaceState.h"
 
 namespace inet {
 
 namespace ospf {
 
-class InterfaceStateBackup : public InterfaceState
+class INET_API InterfaceStateBackup : public InterfaceState
 {
   public:
     virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;

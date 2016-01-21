@@ -27,7 +27,7 @@ namespace rtp {
 /**
  * This class is used for communication between submodules of the RTP layer module.
  */
-class RTPInnerPacket : public RTPInnerPacket_Base
+class INET_API RTPInnerPacket : public RTPInnerPacket_Base
 {
   public:
     RTPInnerPacket(const char *name = nullptr, int kind = 0) : RTPInnerPacket_Base(name, kind) {}

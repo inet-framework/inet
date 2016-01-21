@@ -27,7 +27,7 @@ namespace inet {
  * This class provides network datagram multiplexing based on the the datagram
  * runtime type or on the type of attached control info.
  */
-class NetworkDatagramMultiplexer : public cSimpleModule
+class INET_API NetworkDatagramMultiplexer : public cSimpleModule
 {
   public:
     NetworkDatagramMultiplexer() {}

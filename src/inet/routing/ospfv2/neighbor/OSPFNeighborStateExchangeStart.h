@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFNEIGHBORSTATEEXCHANGESTART_H
 #define __INET_OSPFNEIGHBORSTATEEXCHANGESTART_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"
 
 namespace inet {
 
 namespace ospf {
 
-class NeighborStateExchangeStart : public NeighborState
+class INET_API NeighborStateExchangeStart : public NeighborState
 {
   public:
     virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event) override;

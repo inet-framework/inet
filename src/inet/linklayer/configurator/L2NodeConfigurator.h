@@ -27,7 +27,7 @@ namespace inet {
 /**
  * Configures L2 data of a node. See the NED definition for details.
  */
-class L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cListener
+class INET_API L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cListener
 {
   protected:
     NodeStatus *nodeStatus;

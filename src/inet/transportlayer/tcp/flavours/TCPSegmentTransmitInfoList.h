@@ -28,7 +28,7 @@ namespace inet {
 
 namespace tcp {
 
-class TCPSegmentTransmitInfoList
+class INET_API TCPSegmentTransmitInfoList
 {
   public:
     class Item

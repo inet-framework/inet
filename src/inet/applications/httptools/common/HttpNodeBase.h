@@ -53,7 +53,7 @@ enum LOG_FORMAT { lf_short, lf_long };
  *
  * @author Kristjan V. Jonsson (kristjanvj@gmail.com)
  */
-class HttpNodeBase : public cSimpleModule, public ILifecycle
+class INET_API HttpNodeBase : public cSimpleModule, public ILifecycle
 {
   protected:
     unsigned long linkSpeed = 0;    // the link speed in bits per second. Only needed for direct message passing transmission delay calculations

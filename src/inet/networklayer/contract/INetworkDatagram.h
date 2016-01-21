@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class INetworkDatagram
+class INET_API INetworkDatagram
 {
   public:
     virtual ~INetworkDatagram() {}

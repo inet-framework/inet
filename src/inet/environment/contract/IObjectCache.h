@@ -30,7 +30,7 @@ namespace physicalenvironment {
  * This interface provides abstractions for efficient physical object cache data
  * structures.
  */
-class IObjectCache
+class INET_API IObjectCache
 {
   public:
     /**

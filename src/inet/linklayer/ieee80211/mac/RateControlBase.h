@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class RateControlBase : public IRateControl
+class INET_API RateControlBase : public IRateControl
 {
     protected:
         const Ieee80211ModeSet *modeSet = nullptr;

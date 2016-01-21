@@ -28,7 +28,7 @@ namespace inet {
 
 namespace rtp {
 
-class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
+class INET_API RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
 {
   public:
     RTCPSenderReportPacket(const char *name = nullptr, int kind = 0);

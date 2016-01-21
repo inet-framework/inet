@@ -28,7 +28,7 @@ namespace inet {
 // Forward declarations:
 class InterfaceEntry;
 
-class TunInterface : public MACBase
+class INET_API TunInterface : public MACBase
 {
     protected:
         static simsignal_t packetSentToLowerSignal;

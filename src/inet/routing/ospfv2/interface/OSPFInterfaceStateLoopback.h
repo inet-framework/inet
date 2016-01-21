@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFINTERFACESTATELOOPBACK_H
 #define __INET_OSPFINTERFACESTATELOOPBACK_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/interface/OSPFInterfaceState.h"
 
 namespace inet {
 
 namespace ospf {
 
-class InterfaceStateLoopback : public InterfaceState
+class INET_API InterfaceStateLoopback : public InterfaceState
 {
   public:
     virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;

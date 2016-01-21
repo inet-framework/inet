@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class NeighborListNeighborCache : public cSimpleModule, public INeighborCache
+class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
     struct RadioEntry

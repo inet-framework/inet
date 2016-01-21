@@ -35,7 +35,7 @@ class IPv6Datagram;
  * Note: The file is currently recorded in the "classic" format,
  * not in the "Next Generation" file format also on tcpdump.org.
  */
-class PcapDump
+class INET_API PcapDump
 {
   protected:
     FILE *dumpfile = nullptr;    // pcap file

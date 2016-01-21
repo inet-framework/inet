@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFINTERFACESTATEWAITING_H
 #define __INET_OSPFINTERFACESTATEWAITING_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/interface/OSPFInterfaceState.h"
 
 namespace inet {
 
 namespace ospf {
 
-class InterfaceStateWaiting : public InterfaceState
+class INET_API InterfaceStateWaiting : public InterfaceState
 {
   public:
     virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;

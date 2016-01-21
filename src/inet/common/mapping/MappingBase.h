@@ -691,7 +691,7 @@ class INET_API Argument
  * @author Karl Wessel
  * @ingroup mapping
  */
-class NoNextIteratorException
+class INET_API NoNextIteratorException
 {
 };
 

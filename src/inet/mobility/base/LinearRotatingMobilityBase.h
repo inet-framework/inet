@@ -20,7 +20,7 @@
 
 namespace inet {
 
-class LinearRotatingMobilityBase : public RotatingMobilityBase
+class INET_API LinearRotatingMobilityBase : public RotatingMobilityBase
 {
   protected:
     /** @brief End position of current linear movement. */

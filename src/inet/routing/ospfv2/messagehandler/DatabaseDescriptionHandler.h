@@ -18,13 +18,14 @@
 #ifndef __INET_DATABASEDESCRIPTIONHANDLER_H
 #define __INET_DATABASEDESCRIPTIONHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 
 namespace ospf {
 
-class DatabaseDescriptionHandler : public IMessageHandler
+class INET_API DatabaseDescriptionHandler : public IMessageHandler
 {
   private:
     bool processDDPacket(OSPFDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart);

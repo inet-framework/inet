@@ -23,7 +23,7 @@
 namespace inet {
 
 // This is the interface for data structure visitors
-class IVisitor
+class INET_API IVisitor
 {
     public:
         virtual void visit(const cObject *) const = 0;

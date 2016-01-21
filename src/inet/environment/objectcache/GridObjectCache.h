@@ -28,7 +28,7 @@ namespace inet {
 
 namespace physicalenvironment {
 
-class GridObjectCache : public IObjectCache, public cModule
+class INET_API GridObjectCache : public IObjectCache, public cModule
 {
   protected:
     /** @name Parameters */

@@ -18,13 +18,14 @@
 #ifndef __INET_OSPFNEIGHBORSTATE_H
 #define __INET_OSPFNEIGHBORSTATE_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
 
 namespace inet {
 
 namespace ospf {
 
-class NeighborState
+class INET_API NeighborState
 {
   protected:
     void changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState);

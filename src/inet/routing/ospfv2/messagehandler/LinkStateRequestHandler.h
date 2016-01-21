@@ -18,13 +18,14 @@
 #ifndef __INET_LINKSTATEREQUESTHANDLER_H
 #define __INET_LINKSTATEREQUESTHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 
 namespace ospf {
 
-class LinkStateRequestHandler : public IMessageHandler
+class INET_API LinkStateRequestHandler : public IMessageHandler
 {
   public:
     LinkStateRequestHandler(Router *containingRouter);

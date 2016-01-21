@@ -31,7 +31,7 @@ namespace rtp {
  * Following RTP header fields exist but aren't used: padding, extension,
  * csrcCount. The csrcList can't be used because csrcCount is always 0.
  */
-class RTPPacket : public RTPPacket_Base
+class INET_API RTPPacket : public RTPPacket_Base
 {
   public:
     RTPPacket(const char *name = nullptr, int kind = 0) : RTPPacket_Base(name, kind) {}

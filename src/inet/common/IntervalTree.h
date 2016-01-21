@@ -67,7 +67,7 @@ struct Interval
 };
 
 /// @brief The node for interval tree
-class IntervalTreeNode
+class INET_API IntervalTreeNode
 {
     friend class IntervalTree;
     friend class IntervalTreeTest;
@@ -118,7 +118,7 @@ struct it_recursion_node
 };
 
 /// @brief Interval tree
-class IntervalTree
+class INET_API IntervalTree
 {
     friend class IntervalTreeTest;
 

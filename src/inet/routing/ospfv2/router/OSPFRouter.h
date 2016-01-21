@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/router/LSA.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OSPFArea.h"
@@ -38,7 +39,7 @@ namespace ospf {
 /**
  * Represents the full OSPF data structure as laid out in RFC2328.
  */
-class Router
+class INET_API Router
 {
   private:
     IInterfaceTable *ift;

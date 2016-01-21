@@ -33,7 +33,7 @@ class InterfaceEntry;
  *
  * See NED file for more info.
  */
-class TED : public cSimpleModule, public ILifecycle
+class INET_API TED : public cSimpleModule, public ILifecycle
 {
   public:
     /**

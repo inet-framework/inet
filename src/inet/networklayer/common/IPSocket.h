@@ -26,7 +26,7 @@ namespace inet {
 /**
  * TODO
  */
-class IPSocket
+class INET_API IPSocket
 {
   private:
     cGate *gateToIP;

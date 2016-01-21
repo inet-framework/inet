@@ -18,13 +18,14 @@
 #ifndef __INET_LINKSTATEACKNOWLEDGEMENTHANDLER_H
 #define __INET_LINKSTATEACKNOWLEDGEMENTHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 
 namespace ospf {
 
-class LinkStateAcknowledgementHandler : public IMessageHandler
+class INET_API LinkStateAcknowledgementHandler : public IMessageHandler
 {
   public:
     LinkStateAcknowledgementHandler(Router *containingRouter);

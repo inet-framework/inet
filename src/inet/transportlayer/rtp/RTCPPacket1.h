@@ -28,7 +28,7 @@ namespace inet {
 
 namespace rtp {
 
-class RTCPPacket : public RTCPPacket_Base
+class INET_API RTCPPacket : public RTCPPacket_Base
 {
   public:
     RTCPPacket(const char *name = nullptr, int kind = 0) : RTCPPacket_Base(name, kind) {};
@@ -45,7 +45,7 @@ class RTCPPacket : public RTCPPacket_Base
     virtual void setRtcpLength(int rtcpLength_var) override { throw cRuntimeError("Don't use setRtcpLength()!"); };
 };
 
-class RTCPCompoundPacket : public RTCPCompoundPacket_Base
+class INET_API RTCPCompoundPacket : public RTCPCompoundPacket_Base
 {
   public:
     RTCPCompoundPacket(const char *name = nullptr, int kind = 0) : RTCPCompoundPacket_Base(name, kind) {};

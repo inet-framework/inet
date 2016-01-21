@@ -28,7 +28,7 @@ namespace inet {
 /**
  * Implementation of Random Early Detection (RED).
  */
-class REDDropper : public AlgorithmicDropperBase
+class INET_API REDDropper : public AlgorithmicDropperBase
 {
   protected:
     double wq = 0.0;

@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class MultiNetworkLayerLowerMultiplexer : public cSimpleModule
+class INET_API MultiNetworkLayerLowerMultiplexer : public cSimpleModule
 {
   public:
     MultiNetworkLayerLowerMultiplexer() {}

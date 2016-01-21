@@ -18,13 +18,14 @@
 #ifndef __INET_HELLOHANDLER_H
 #define __INET_HELLOHANDLER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/messagehandler/IMessageHandler.h"
 
 namespace inet {
 
 namespace ospf {
 
-class HelloHandler : public IMessageHandler
+class INET_API HelloHandler : public IMessageHandler
 {
   public:
     HelloHandler(Router *containingRouter);

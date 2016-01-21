@@ -25,7 +25,7 @@ namespace inet {
 /**
  * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
  */
-class MACAddressTable : public cSimpleModule, public IMACAddressTable
+class INET_API MACAddressTable : public cSimpleModule, public IMACAddressTable
 {
   protected:
     struct AddressEntry

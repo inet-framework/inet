@@ -29,39 +29,39 @@ namespace utils {
 /**
  *  Converts an integer to string.
  */
-std::string ltostr(long i);    //XXX make an ultostr as well, to be consistent with atoul
+INET_API std::string ltostr(long i);    //XXX make an ultostr as well, to be consistent with atoul
 
 /**
  *  Converts a double to string
  */
-std::string dtostr(double d);
+INET_API std::string dtostr(double d);
 
 /**
  *  Converts string to double
  */
-double atod(const char *s);
+INET_API double atod(const char *s);
 
 /**
  *  Converts string to unsigned long
  */
-unsigned long atoul(const char *s);
+INET_API unsigned long atoul(const char *s);
 
 /**
  * Removes non-alphanumeric characters from the given string.
  */
-std::string stripnonalnum(const char *s);
+INET_API std::string stripnonalnum(const char *s);
 
 /**
  * Accepts a printf-like argument list, and returns the result in a string.
  * The limit is 1024 chars.
  */
-std::string stringf(const char *fmt, ...);
+INET_API std::string stringf(const char *fmt, ...);
 
 /**
  * Accepts a vprintf-like argument list, and returns the result in a string.
  * The limit is 1024 chars.
  */
-std::string vstringf(const char *fmt, va_list& args);
+INET_API std::string vstringf(const char *fmt, va_list& args);
 
 /**
  * Rounding up to the nearest multiple of a number.
@@ -71,12 +71,12 @@ inline int roundUp(int numToRound, int multiple) { return ((numToRound + multipl
 /**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
  */
-cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
+INET_API cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
 
 /**
  * Like cObjectFactory::createOne(), except it starts searching for the class in the given namespace
  */
-cObject *createOne(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
+INET_API cObject *createOne(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
 
 /**
  * Duplicate a packet together with its control info. (cPacket's dup() ignores the control info,

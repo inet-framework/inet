@@ -193,7 +193,7 @@ struct binary_expression {
 };
 
 
-class PacketDrillConfig
+class INET_API PacketDrillConfig
 {
     public:
         PacketDrillConfig();
@@ -217,7 +217,7 @@ class PacketDrillConfig
 };
 
 
-class PacketDrillPacket
+class INET_API PacketDrillPacket
 {
     public:
         PacketDrillPacket();
@@ -234,7 +234,7 @@ class PacketDrillPacket
         void setInetPacket(cPacket *pkt) { inetPacket = pkt->dup(); delete pkt;};
 };
 
-class PacketDrillEvent : public cObject
+class INET_API PacketDrillEvent : public cObject
 {
     public:
         PacketDrillEvent(enum event_t type_);
@@ -278,7 +278,7 @@ class PacketDrillEvent : public cObject
 };
 
 
-class PacketDrillExpression : public cObject
+class INET_API PacketDrillExpression : public cObject
 {
     public:
         PacketDrillExpression(enum expression_t type_);
@@ -315,7 +315,7 @@ class PacketDrillExpression : public cObject
 };
 
 
-class PacketDrillScript
+class INET_API PacketDrillScript
 {
     public:
         PacketDrillScript(const char* file);
@@ -341,7 +341,7 @@ class PacketDrillScript
         void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); };
 };
 
-class PacketDrillStruct: public cObject
+class INET_API PacketDrillStruct: public cObject
 {
     public:
         PacketDrillStruct();
@@ -358,7 +358,7 @@ class PacketDrillStruct: public cObject
         uint32 value2;
 };
 
-class PacketDrillTcpOption : public cObject
+class INET_API PacketDrillTcpOption : public cObject
 {
     public:
         PacketDrillTcpOption(uint16 kind_, uint16 length_);

@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
+class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
 {
   public:
     typedef std::vector<const IRadio *> Radios;

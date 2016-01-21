@@ -22,7 +22,7 @@
 
 namespace inet {
 
-class IPv6RoutingHeader : public IPv6RoutingHeader_Base
+class INET_API IPv6RoutingHeader : public IPv6RoutingHeader_Base
 {
   public:
     IPv6RoutingHeader() : IPv6RoutingHeader_Base() {}

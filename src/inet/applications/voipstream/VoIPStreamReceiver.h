@@ -45,7 +45,7 @@ extern "C" {
 
 namespace inet {
 
-class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
+class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
 {
   public:
     VoIPStreamReceiver() {}

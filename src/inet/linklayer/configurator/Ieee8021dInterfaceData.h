@@ -31,7 +31,7 @@ namespace inet {
 /**
  * Per-interface data needed by the STP and RSTP protocols.
  */
-class Ieee8021dInterfaceData : public InterfaceProtocolData
+class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 {
   public:
     enum PortRole { ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT };

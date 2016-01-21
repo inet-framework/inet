@@ -20,6 +20,7 @@
 
 #include <list>
 
+#include "inet/common/INETDefs.h"
 #include "inet/routing/ospfv2/router/LSA.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/OSPFPacket_m.h"
@@ -32,7 +33,7 @@ namespace ospf {
 class NeighborState;
 class Interface;
 
-class Neighbor
+class INET_API Neighbor
 {
     friend class NeighborState;
 

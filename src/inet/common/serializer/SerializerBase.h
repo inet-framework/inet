@@ -49,7 +49,7 @@ enum {  // from libpcap
  * class for data transfer from any serializers to subserializers
  * e.g. store IP addresses in IP serializers for TCP serializer
  */
-class Context
+class INET_API Context
 {
   public:
     const void *l3AddressesPtr = nullptr;

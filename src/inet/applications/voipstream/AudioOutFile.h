@@ -34,7 +34,7 @@ namespace inet {
 /**
  * Records audio into a file.
  */
-class AudioOutFile
+class INET_API AudioOutFile
 {
   public:
     AudioOutFile() : opened(false), audio_st(nullptr), oc(nullptr) {};
