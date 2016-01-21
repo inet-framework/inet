@@ -392,8 +392,14 @@ void Radio::endTransmission()
 
 void Radio::abortTransmission()
 {
+    auto part = (IRadioSignal::SignalPart)transmissionTimer->getKind();
+    auto radioFrame = static_cast<RadioFrame *>(transmissionTimer->getContextPointer());
+    auto transmission = radioFrame->getTransmission();
+    EV_INFO << "Transmission aborted: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     EV_WARN << "Aborting ongoing transmissions is not supported" << endl;
     cancelEvent(transmissionTimer);
+    updateTransceiverState();
+    updateTransceiverPart();
 }
 
 RadioFrame *Radio::createRadioFrame(cPacket *packet) const
@@ -477,9 +483,13 @@ void Radio::endReception(cMessage *timer)
 void Radio::abortReception(cMessage *timer)
 {
     auto radioFrame = static_cast<RadioFrame *>(timer->getControlInfo());
+    auto part = (IRadioSignal::SignalPart)timer->getKind();
     auto reception = radioFrame->getReception();
-    EV_INFO << "Aborting ongoing reception " << reception << endl;
-    receptionTimer = nullptr;
+    EV_INFO << "Reception aborted: for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+    if (timer == receptionTimer)
+        receptionTimer = nullptr;
+    updateTransceiverState();
+    updateTransceiverPart();
 }
 
 void Radio::captureReception(cMessage *timer)
