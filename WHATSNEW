@@ -1,6 +1,16 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.2.1 (Jan, 2016) - Stable
+-------------------------------
+
+Changes: 
+
+  - 802.11 MAC model: EDCA, rate control crashes fixed
+  - Radio: Fixed handling of abort reception/transmission.
+  - Added missing INET_API defines
+  - Physical layer: Fixed memory issues detected by valgrind
+
 
 INET-3.2 (Dec, 2015) - Stable
 -----------------------------
