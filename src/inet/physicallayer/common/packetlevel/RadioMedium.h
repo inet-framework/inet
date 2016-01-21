@@ -18,16 +18,17 @@
 #ifndef __INET_RADIOMEDIUM_H
 #define __INET_RADIOMEDIUM_H
 
-#include <algorithm>
 #include "inet/common/IntervalTree.h"
-#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
+#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
 #include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
-#include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
-#include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
+#include <algorithm>
 
 namespace inet {
 
@@ -39,6 +40,25 @@ namespace physicallayer {
 // TODO: add tests for various optimization configurations
 class INET_API RadioMedium : public cSimpleModule, public cListener, public IRadioMedium
 {
+  friend Radio;
+
+  public:
+    class INET_API IMediumListener {
+      public:
+        virtual void radioAdded(const IRadio *radio) = 0;
+        virtual void radioRemoved(const IRadio *radio) = 0;
+
+        virtual void transmissionAdded(const ITransmission *transmission) = 0;
+        virtual void transmissionRemoved(const ITransmission *transmission) = 0;
+
+        virtual void transmissionStarted(const ITransmission *transmission) = 0;
+        virtual void transmissionEnded(const ITransmission *transmission) = 0;
+        virtual void receptionStarted(const IReception *reception) = 0;
+        virtual void receptionEnded(const IReception *reception) = 0;
+
+        virtual void packetReceived(const IReceptionResult *result) = 0;
+    };
+
   protected:
     enum RangeFilterKind {
         RANGE_FILTER_ANYWHERE,
@@ -129,6 +149,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * removed from the beginning. This list doesn't contain nullptr values.
      */
     std::vector<const ITransmission *> transmissions;
+    /**
+     * TODO
+     */
+    std::vector<IMediumListener *> listeners;
     //@}
 
     /** @name Cache */
@@ -309,11 +333,30 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IListeningDecision *computeListeningDecision(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
     //@}
 
+    /** @name Notification */
+    //@{
+    virtual void fireRadioAdded(const IRadio *radio) const;
+    virtual void fireRadioRemoved(const IRadio *radio) const;
+
+    virtual void fireTransmissionAdded(const ITransmission *transmission) const;
+    virtual void fireTransmissionRemoved(const ITransmission *transmission) const;
+
+    virtual void fireTransmissionStarted(const ITransmission *transmission) const;
+    virtual void fireTransmissionEnded(const ITransmission *transmission) const;
+    virtual void fireReceptionStarted(const IReception *reception) const;
+    virtual void fireReceptionEnded(const IReception *reception) const;
+
+    virtual void firePacketReceived(const IReceptionResult *result) const;
+    //@}
+
   public:
     RadioMedium();
     virtual ~RadioMedium();
 
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
+
+    virtual void addListener(IMediumListener *listener) { listeners.push_back(listener); }
+    virtual void removeListener(IMediumListener *listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
 
     virtual const IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }
