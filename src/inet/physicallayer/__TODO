@@ -1,9 +1,10 @@
+ - extract analog model from transmission/reception to avoid having too many classes
+ - always add a PhyFrame, even in the simple case? or better yet rename RadioFrame to PhyFrame and make them the transmission/reception the analog model of it
  - rename speed to velocity (speed is scalar)
  - rename loss to gain?
  - consider renaming sensitivity to minReceptionPower, or some other unification
  - consider generalizing the implementation from radio to radio/cable physical layer with naming, directories etc.
  - create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
- - extend receiver interface to allow a separate decision for the detection of preambles during synchronization
  - provide capture during reception (switching to another transmission)
  - remove those interfaces which are unlikely to have multiple different implementations
  - we don't know the end position at the time of the transmission begin, we can only have a guess
@@ -57,6 +58,7 @@ model:
  - modem (modulation scheme, preamble symbol length)
  - shaper (?)
  - converter (power, carrier frequency, bandwidth)
+ - preamble/pilot/sychronization
 
 transmission:
  - packet model (length, bits)
@@ -87,5 +89,4 @@ algorithms:
 missing:
  - doppler shift
  - polarization
- - preamble/pilot/sychronization
  - mimo, antenna gain
