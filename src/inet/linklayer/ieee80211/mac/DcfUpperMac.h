@@ -89,7 +89,7 @@ class INET_API DcfUpperMac : public cSimpleModule, public IUpperMac, protected I
 
     public:
         DcfUpperMac();
-        ~DcfUpperMac();
+        virtual ~DcfUpperMac();
         virtual void upperFrameReceived(Ieee80211DataOrMgmtFrame *frame) override;
         virtual void lowerFrameReceived(Ieee80211Frame *frame) override;
         virtual void corruptedFrameReceived() override;

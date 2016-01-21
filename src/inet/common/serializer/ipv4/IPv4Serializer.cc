@@ -383,7 +383,7 @@ void IPv4Serializer::serializeOptions(const IPv4Datagram *dgram, Buffer& b, Cont
             optionsLength += option->getLength();
         }
     }    // if options present
-    if (dgram->getHeaderLength() < IP_HEADER_BYTES + optionsLength)
+    if (dgram->getHeaderLength() < (int)(IP_HEADER_BYTES + optionsLength))
         throw cRuntimeError("Serializing an IPv4 packet with wrong headerLength value: not enough for store options.\n");
     //padding:
     if (b.getRemainingSize()) {

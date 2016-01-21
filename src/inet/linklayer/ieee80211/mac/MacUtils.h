@@ -49,6 +49,7 @@ class INET_API MacUtils
 
     public:
         MacUtils(IMacParameters *params, IRateSelection *rateSelection);
+        virtual ~MacUtils() {};
 
         virtual simtime_t getAckDuration() const;
         virtual simtime_t getCtsDuration() const;

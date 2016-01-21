@@ -257,7 +257,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 TCPSegment* tcp = check_and_cast<TCPSegment*>(ip->decapsulate());
                 tcp->setAckNo(tcp->getAckNo() + relSequenceOut);
                 if (tcp->getHeaderOptionArraySize() > 0) {
-                    for (int i = 0; i < tcp->getHeaderOptionArraySize(); i++) {
+                    for (unsigned int i = 0; i < tcp->getHeaderOptionArraySize(); i++) {
                         if (tcp->getHeaderOption(i)->getKind() == TCPOPT_TIMESTAMP) {
                             TCPOptionTimestamp *option = new TCPOptionTimestamp();
                             option->setEchoedTimestamp(peerTS);
@@ -895,13 +895,13 @@ bool PacketDrillApp::compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp
         }
         if (storedTcp->getHeaderOptionArraySize() != liveTcp->getHeaderOptionArraySize()) {
             TCPOption *liveOption;
-            for (int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
+            for (unsigned int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
                 liveOption = liveTcp->getHeaderOption(i);
             }
             return false;
         } else {
             TCPOption *storedOption, *liveOption;
-            for (int i = 0; i < storedTcp->getHeaderOptionArraySize(); i++) {
+            for (unsigned int i = 0; i < storedTcp->getHeaderOptionArraySize(); i++) {
                 storedOption = storedTcp->getHeaderOption(i);
                 liveOption = liveTcp->getHeaderOption(i);
                 if (storedOption->getKind() == liveOption->getKind()) {

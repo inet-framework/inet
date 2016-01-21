@@ -136,7 +136,7 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
                 option->setLength(length);
                 option->setSackItemArraySize(length / 8);
                 unsigned int count = 0;
-                for (unsigned int i = 0; i < 2 * opt->getBlockList()->getLength(); i += 2) {
+                for (int i = 0; i < 2 * opt->getBlockList()->getLength(); i += 2) {
                     SackItem si;
                     si.setStart(((PacketDrillStruct *) opt->getBlockList()->get(i))->getValue1());
                     si.setEnd(((PacketDrillStruct *) opt->getBlockList()->get(i))->getValue2());

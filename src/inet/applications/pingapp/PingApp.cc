@@ -156,7 +156,7 @@ void PingApp::handleMessage(cMessage *msg)
         }
 
         if (msg->getKind() == PING_CHANGE_ADDR) {
-            if (destAddrIdx >= destAddresses.size())
+            if (destAddrIdx >= (int)destAddresses.size())
                 return;
             destAddr = destAddresses[destAddrIdx];
             EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
@@ -173,7 +173,7 @@ void PingApp::handleMessage(cMessage *msg)
             // choose next dest address
             destAddrIdx++;
             msg->setKind(PING_CHANGE_ADDR);
-            if (destAddrIdx >= destAddresses.size()) {
+            if (destAddrIdx >= (int)destAddresses.size()) {
                 if (continuous) {
                     destAddrIdx = destAddrIdx % destAddresses.size();
                 }
