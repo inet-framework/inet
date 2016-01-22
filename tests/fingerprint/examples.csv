@@ -433,7 +433,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c oldMacEdca -r 0,             10s,         c064-ed23 253d-7cd4/tplx
 /examples/wireless/qos/,             -f omnetpp.ini -c MacEdca -r 0,                10s,         4b39-f5c6 8449-b43d/tplx
 
-/examples/wireless/ratecontroltest/, -f omnetpp.ini -c Mac -r 0,                    100s,         d814-e46f 3e1b-8152/tplx
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,         d814-e46f 3e1b-8152/tplx
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
 # /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         0000-0000

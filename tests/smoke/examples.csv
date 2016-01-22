@@ -457,7 +457,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c Mac -r 0
 /examples/wireless/qos/,             -f omnetpp.ini -c oldMacEdca -r 0
 /examples/wireless/qos/,             -f omnetpp.ini -c MacEdca -r 0
-/examples/wireless/ratecontroltest/, -f omnetpp.ini -c Mac -r 0
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0   # AbstractIdealMac extended
 /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0
 /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0

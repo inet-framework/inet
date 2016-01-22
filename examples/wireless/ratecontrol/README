@@ -1,0 +1,9 @@
+This exmaple demonstrates the IEEE 802.11 rate control algorhitm.
+
+The scenario contains two mobile nodes following each other around a 
+thick wall that blocks the communication between the hosts when they
+are on the opposite side. To follow how the data rate is changing, open 
+the 'cliHost[0].wlan.mac' module and watch how the actual mode is changing
+above the 'rateControl' module. The transmission rate will raise to 54Mbps
+when the two nodes can see each other and quickly drop to 1Mbps once they
+cannot communicate.
