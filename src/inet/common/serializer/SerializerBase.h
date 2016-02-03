@@ -141,7 +141,7 @@ class INET_API SerializerRegistrationList : public cNamedObject, noncopyable
 INET_API extern SerializerRegistrationList serializers; ///< List of packet serializers (SerializerBase)
 
 #define Register_Serializer(SERIALIZABLECLASSNAME, PROTOCOLGROUP, PROTOCOLID, SERIALIZERCLASSNAME)   \
-        EXECUTE_ON_STARTUP(serializers.add(opp_typename(typeid(SERIALIZABLECLASSNAME)), \
+        EXECUTE_ON_STARTUP(inet::serializer::serializers.add(opp_typename(typeid(SERIALIZABLECLASSNAME)), \
                 PROTOCOLGROUP, PROTOCOLID, new SERIALIZERCLASSNAME(#SERIALIZABLECLASSNAME)););
 
 } // namespace serializer
