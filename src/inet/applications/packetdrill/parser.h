@@ -59,11 +59,44 @@ extern int yydebug;
     VAL = 269,
     SACKOK = 270,
     OPTION = 271,
-    MYFLOAT = 272,
-    INTEGER = 273,
-    HEX_INTEGER = 274,
-    MYWORD = 275,
-    MYSTRING = 276
+    CHUNK = 272,
+    MYDATA = 273,
+    MYINIT = 274,
+    MYINIT_ACK = 275,
+    MYHEARTBEAT = 276,
+    MYHEARTBEAT_ACK = 277,
+    MYABORT = 278,
+    MYSHUTDOWN = 279,
+    MYSHUTDOWN_ACK = 280,
+    MYERROR = 281,
+    MYCOOKIE_ECHO = 282,
+    MYCOOKIE_ACK = 283,
+    MYSHUTDOWN_COMPLETE = 284,
+    HEARTBEAT_INFORMATION = 285,
+    CAUSE_INFO = 286,
+    MYSACK = 287,
+    STATE_COOKIE = 288,
+    PARAMETER = 289,
+    MYSCTP = 290,
+    TYPE = 291,
+    FLAGS = 292,
+    LEN = 293,
+    TAG = 294,
+    A_RWND = 295,
+    OS = 296,
+    IS = 297,
+    TSN = 298,
+    SID = 299,
+    SSN = 300,
+    PPID = 301,
+    CUM_TSN = 302,
+    GAPS = 303,
+    DUPS = 304,
+    MYFLOAT = 305,
+    INTEGER = 306,
+    HEX_INTEGER = 307,
+    MYWORD = 308,
+    MYSTRING = 309
   };
 #endif
 
@@ -72,7 +105,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 215 "parser.y" /* yacc.c:1909  */
+#line 213 "parser.y" /* yacc.c:1909  */
 
     int64 integer;
     double floating;
@@ -96,10 +129,17 @@ union YYSTYPE
     PacketDrillExpression *expression;
     cQueue *expression_list;
     PacketDrillTcpOption *tcp_option;
+    PacketDrillSctpParameter *sctp_parameter;
     cQueue *tcp_options;
     struct errno_spec *errno_info;
+    cQueue *sctp_chunk_list;
+    cQueue *sctp_parameter_list;
+    cQueue *sack_block_list;
+    PacketDrillBytes *byte_list;
+    uint8 byte;
+    PacketDrillSctpChunk *sctp_chunk;
 
-#line 103 "parser.h" /* yacc.c:1909  */
+#line 143 "parser.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
