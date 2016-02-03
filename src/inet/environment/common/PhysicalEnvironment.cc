@@ -564,9 +564,15 @@ void PhysicalEnvironment::updateCanvas()
         xAxis->setLineWidth(1);
         yAxis->setLineWidth(1);
         zAxis->setLineWidth(1);
+#if OMNETPP_VERSION >= 0x500 && OMNETPP_BUILDNUM >= 1006
+        xAxis->setEndArrowhead(cFigure::ARROW_BARBED);
+        yAxis->setEndArrowhead(cFigure::ARROW_BARBED);
+        zAxis->setEndArrowhead(cFigure::ARROW_BARBED);
+#else
         xAxis->setEndArrowHead(cFigure::ARROW_BARBED);
         yAxis->setEndArrowHead(cFigure::ARROW_BARBED);
         zAxis->setEndArrowHead(cFigure::ARROW_BARBED);
+#endif
 #if OMNETPP_VERSION >= 0x500
         xAxis->setZoomLineWidth(false);
         yAxis->setZoomLineWidth(false);

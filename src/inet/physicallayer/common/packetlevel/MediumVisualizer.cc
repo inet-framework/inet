@@ -183,7 +183,11 @@ void MediumVisualizer::receivePacket(const IReceptionResult *result)
             communicationFigure->setStart(start);
             communicationFigure->setEnd(end);
             communicationFigure->setLineColor(cFigure::BLUE);
+#if OMNETPP_VERSION >= 0x500 && OMNETPP_BUILDNUM >= 1006
+            communicationFigure->setEndArrowhead(cFigure::ARROW_BARBED);
+#else
             communicationFigure->setEndArrowHead(cFigure::ARROW_BARBED);
+#endif
             communicationFigure->setLineWidth(1);
 #if OMNETPP_VERSION >= 0x500
             communicationFigure->setZoomLineWidth(false);
