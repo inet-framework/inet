@@ -36,7 +36,6 @@ class PacketDrillScript;
 
 namespace inet {
 
-using namespace tcp;
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
@@ -130,7 +129,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         bool compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp);
 
-        bool compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp);
+        bool compareTcpPacket(tcp::TCPSegment *storedTcp, tcp::TCPSegment *liveTcp);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,

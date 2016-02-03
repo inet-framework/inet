@@ -31,6 +31,8 @@ Define_Module(PacketDrillApp);
 
 namespace inet {
 
+using namespace tcp;
+
 #define MSGKIND_START  0
 #define MSGKIND_EVENT  1
 

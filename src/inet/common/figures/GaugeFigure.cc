@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include "GaugeFigure.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namsepace
+// for the moment commented out as omnet cannot instatiate it from a namespace
 using namespace inet;
 // namespace inet {
 
