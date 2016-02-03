@@ -631,8 +631,8 @@ int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, ch
             break;
         case IP_PROT_SCTP:
         {
-            sctpSocket.setInboundStreams(par("inboundStreams"));
-            sctpSocket.setOutboundStreams(par("outboundStreams"));
+            sctpSocket.setInboundStreams((int)par("inboundStreams"));
+            sctpSocket.setOutboundStreams((int)par("outboundStreams"));
             sctpSocket.listen(true, 0, 0, true);
             listenSet = true;
             break;
@@ -740,8 +740,8 @@ int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, c
             tcpSocket.connect(remoteAddress, remotePort);
             break;
         case IP_PROT_SCTP: {
-            sctpSocket.setInboundStreams(par("inboundStreams"));
-            sctpSocket.setOutboundStreams(par("outboundStreams"));
+            sctpSocket.setInboundStreams((int)par("inboundStreams"));
+            sctpSocket.setOutboundStreams((int)par("outboundStreams"));
             sctpSocket.connect(remoteAddress, remotePort, false, 0, 0);
             break;
             }
