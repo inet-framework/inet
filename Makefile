@@ -16,13 +16,13 @@ MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET --no-deep-includes -I.
 makefiles: makefiles-so
 
 makefiles-so:
-	@FEATURE_OPTIONS=`./inet_featuretool makemakeargs` && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$(./inet_featuretool makemakeargs) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 makefiles-lib:
-	@FEATURE_OPTIONS=`./inet_featuretool makemakeargs` && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$(./inet_featuretool makemakeargs) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 makefiles-exe:
-	@FEATURE_OPTIONS=`./inet_featuretool makemakeargs` && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$(./inet_featuretool makemakeargs) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

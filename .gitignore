@@ -25,6 +25,9 @@ src/Makefile.vc
 *.vec
 *.vci
 .buildlog*
+# local files not to be committed
+.oppfeaturestate
+.nedexclusions
 # ignore binary files
 out/
 *.so
