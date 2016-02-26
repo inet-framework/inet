@@ -52,7 +52,7 @@ void TCPDump::initialize()
 
 void TCPDump::handleMessage(cMessage *msg)
 {
-    if (!getEnvir()->isDisabled() && msg->isPacket()) {
+    if (msg->isPacket()) {
         bool l2r = msg->arrivedOn("hlIn");
         tcpdump.dumpPacket(l2r, PK(msg));
     }

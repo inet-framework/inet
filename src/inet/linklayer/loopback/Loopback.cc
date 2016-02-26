@@ -111,21 +111,14 @@ bool Loopback::isUpperMsg(cMessage *msg)
 
 void Loopback::updateDisplayString()
 {
-    if (getEnvir()->isDisabled()) {
-        // speed up things
-        getDisplayString().setTagArg("t", 0, "");
-    }
-    else {
-        /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
-                IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
-                sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
-         */
-        char buf[80];
-        sprintf(buf, "rcv:%ld snt:%ld", numRcvdOK, numSent);
+    /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
+            IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
+            sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
+     */
+    char buf[80];
+    sprintf(buf, "rcv:%ld snt:%ld", numRcvdOK, numSent);
 
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 } // namespace inet
-

@@ -123,10 +123,8 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
 void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 {
-    if (!getEnvir()->isDisabled()) {
-        EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
-        packetDumper.dumpPacket(l2r, msg);
-    }
+    EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
+    packetDumper.dumpPacket(l2r, msg);
 
 #if defined(WITH_IPv4) || defined(WITH_IPv6)
     if (!pcapDumper.isOpen())
