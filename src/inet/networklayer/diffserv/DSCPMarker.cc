@@ -16,6 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/diffserv/DSCPMarker.h"
+
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
@@ -25,7 +27,6 @@
 #endif // ifdef WITH_IPv6
 
 #include "inet/networklayer/diffserv/DSCP_m.h"
-#include "inet/networklayer/diffserv/DSCPMarker.h"
 
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 
@@ -102,4 +103,3 @@ bool DSCPMarker::markPacket(cPacket *packet, int dscp)
 }
 
 } // namespace inet
-

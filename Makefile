@@ -1,28 +1,28 @@
 .PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy
 
-all: checkmakefiles
+all: checkmakefiles src/inet/features.h 
 	cd src && $(MAKE) all
 
 clean: checkmakefiles
 	cd src && $(MAKE) clean
 
 cleanall: checkmakefiles
-	cd src && $(MAKE) MODE=release clean
-	cd src && $(MAKE) MODE=debug clean
-	rm -f src/Makefile
+	@cd src && $(MAKE) MODE=release clean
+	@cd src && $(MAKE) MODE=debug clean
+	@rm -f src/Makefile src/inet/features.h
 
 MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET --no-deep-includes -I.
 
-makefiles: makefiles-so
+makefiles: src/inet/features.h makefiles-so
 
 makefiles-so:
-	@FEATURE_OPTIONS=$$(./inet_featuretool makemakeargs) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$(./inet_featuretool options -f -l) && cd src && opp_makemake --make-so $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 makefiles-lib:
-	@FEATURE_OPTIONS=$$(./inet_featuretool makemakeargs) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$(./inet_featuretool options -f -l) && cd src && opp_makemake --make-lib $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 makefiles-exe:
-	@FEATURE_OPTIONS=$$(./inet_featuretool makemakeargs) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
+	@FEATURE_OPTIONS=$$(./inet_featuretool options -f -l) && cd src && opp_makemake $(MAKEMAKE_OPTIONS) $$FEATURE_OPTIONS
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
@@ -33,6 +33,10 @@ checkmakefiles:
 	echo; \
 	exit 1; \
 	fi
+
+# generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
+src/inet/features.h: .oppfeaturestate .oppfeatures
+	@./inet_featuretool defines >src/inet/features.h
 
 doxy:
 	doxygen doxy.cfg

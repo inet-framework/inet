@@ -18,6 +18,9 @@
 #ifndef __INET_INETDEFS_H
 #define __INET_INETDEFS_H
 
+// feature defines generated based on the actual feature enablement
+#include "inet/features.h"
+
 //
 // General definitions.
 //
