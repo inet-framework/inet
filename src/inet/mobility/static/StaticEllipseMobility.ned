@@ -21,6 +21,8 @@ import inet.mobility.base.MobilityBase;
 
 //
 // Places all hosts on a ellipse based on an given area over constraintAreaMin and constraintAreaMax.
+// The construction is based on Steiner's generation of a conic.
+// The number of hosts must be a multiple of 4.
 // constraintAreaMax.x and constraintAreaMax.y should't be infinity.
 // If constraintAreaMin.x or constraintAreaMin.y is infinity 0 is assumed.
 //
