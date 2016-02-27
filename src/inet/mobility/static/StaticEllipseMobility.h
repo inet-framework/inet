@@ -31,12 +31,10 @@ namespace inet {
  * @attention constraintAreaMax.x and constraintAreaMax.y should't be infinity.
  * @note If constraintAreaMin.x or constraintAreaMin.y is infinity 0 is assumed.
  */
-class StaticEllipseMobility : public StationaryMobility
-{
+class StaticEllipseMobility: public StationaryMobility {
 private:
     // A 2D point.
-    struct Point2D
-    {
+    struct Point2D {
         // The x coordinate.
         double x;
 
@@ -45,8 +43,7 @@ private:
     };
 
     // A 2D line defined by two points.
-    struct Line2D
-    {
+    struct Line2D {
         // The first point.
         Point2D a;
 
@@ -61,7 +58,7 @@ private:
     // The construction is based on Steiner's generation of a conic.
     // An area should be defined over the Parameters constraintAreaMax.x and constraintAreaMax.y unequal infinity.
     // The number of hosts must be a multiple of 4.
-    virtual void setAreaPosition(int numHosts);
+    virtual void setAreaPosition(int numHosts, bool clockwise, int shift);
 
 protected:
     /**

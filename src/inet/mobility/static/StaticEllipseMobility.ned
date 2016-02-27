@@ -31,6 +31,8 @@ simple StaticEllipseMobility extends MobilityBase
     parameters:
         int numHosts;
         double initialZ @unit(m) = default(0m);
+        bool clockwise = default(true);
+        int shift = default(0);
 
         @class(StaticEllipseMobility);
 }
