@@ -5,6 +5,7 @@ NClientsEth example network is used, with one client.
 The client sends an 5000 bytes in an UDP datagram to the server.
 It is checked that the server receives the datagram.
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: {}.ini
 [General]
 ned-path = ../../../../examples;../../../../src
@@ -34,14 +35,18 @@ cmdenv-express-mode=false
 **.eth[*].queueType = "DropTailQueue" # in routers
 **.eth[*].queue.dataQueue.frameCapacity = 10  # in routers
 **.eth[*].mac.duplexEnabled = true
-
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 This fragment completes the datagram.
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

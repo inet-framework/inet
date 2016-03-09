@@ -5,6 +5,7 @@ NClients example network is used, with one client.
 The client sends a packet with a given ToS.
 It is checked that the server receives the datagram with the correct ToS value.
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: {}.ini
 [General]
 ned-path = ../../../../examples;../../../../src
@@ -31,7 +32,9 @@ cmdenv-express-mode = false
 **.srv.udpApp[*].typename = "UDPSink"
 **.srv.udpApp[0].localPort = 1000
 
-
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 Received packet: \(cPacket\)UDPBasicAppData-0 .* ToS=53
 %#--------------------------------------------------------------------------------------------------------------

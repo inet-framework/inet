@@ -44,6 +44,7 @@ network Test
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /DEBUG: //
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Running simulation...
 ** Event #1  T=0   Test.host.networkLayer.ip (IPv4, id=12)
@@ -65,7 +66,7 @@ Doing stage 6/8 of operation inet::NodeShutdownOperation on Test.host
 Doing stage 7/8 of operation inet::NodeShutdownOperation on Test.host
 Test.host shut down
 
-<!> No more events -- simulation ended at event #4, t=3.
+<!> No more events -- simulation ended at event #3, t=3.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

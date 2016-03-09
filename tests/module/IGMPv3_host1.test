@@ -62,21 +62,21 @@ IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 I 10.0.0.1.
 %#
 %postrun-command: grep ".*[Ss]tate" test.out > igmp.out || true
 %contains: igmp.out
-[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
-[test] DETAIL:     Old state: INCLUDE().
-[test] DETAIL:     New state: INCLUDE(10.0.0.1,10.0.0.2).
-[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
-[test] DETAIL:     Old state: INCLUDE(10.0.0.1,10.0.0.2).
-[test] DETAIL:     New state: INCLUDE(10.0.0.1).
-[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
-[test] DETAIL:     Old state: INCLUDE(10.0.0.1).
-[test] DETAIL:     New state: EXCLUDE(10.0.0.2).
-[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
-[test] DETAIL:     Old state: EXCLUDE(10.0.0.2).
-[test] DETAIL:     New state: EXCLUDE(10.0.0.1,10.0.0.2).
-[test] DETAIL: State of group '225.0.0.1' on interface 'eth0' has changed:
-[test] DETAIL:     Old state: EXCLUDE(10.0.0.1,10.0.0.2).
-[test] DETAIL:     New state: INCLUDE(10.0.0.1).
+State of group '225.0.0.1' on interface 'eth0' has changed:
+    Old state: INCLUDE().
+    New state: INCLUDE(10.0.0.1,10.0.0.2).
+State of group '225.0.0.1' on interface 'eth0' has changed:
+    Old state: INCLUDE(10.0.0.1,10.0.0.2).
+    New state: INCLUDE(10.0.0.1).
+State of group '225.0.0.1' on interface 'eth0' has changed:
+    Old state: INCLUDE(10.0.0.1).
+    New state: EXCLUDE(10.0.0.2).
+State of group '225.0.0.1' on interface 'eth0' has changed:
+    Old state: EXCLUDE(10.0.0.2).
+    New state: EXCLUDE(10.0.0.1,10.0.0.2).
+State of group '225.0.0.1' on interface 'eth0' has changed:
+    Old state: EXCLUDE(10.0.0.1,10.0.0.2).
+    New state: INCLUDE(10.0.0.1).
 
 %#
 %# Now check that the IGMP module sent the reports immediately

@@ -10,7 +10,7 @@ Testing Add-IP:
 network=multihomed
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
+#cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false
@@ -63,8 +63,6 @@ ned-path = .;../../../../src;../../lib
 # sctp settings
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 **.sctp.addIP = true
-
-
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca

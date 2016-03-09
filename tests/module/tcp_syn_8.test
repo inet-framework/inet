@@ -15,12 +15,12 @@ Test that:
 ned-path = .;../../../../src;../../lib
 
 #[Cmdenv]
-cmdenv-event-banners=false
+#cmdenv-event-banners=false
 cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-####cmdenv-log-format="%c %C@"
+cmdenv-log-format="[%c]: "
 
 *.cli_app.tOpen=0s
 *.srv_app.tOpen=0s
@@ -38,10 +38,9 @@ include ../../lib/defaults.ini
 open FILE, '<test.out';
 while($sor = <FILE>)
 {
-    if ($sor =~ /(^\[)/)
+    if ($sor =~ /^\[testing\]: (.*)$/)
     {
-        $sor =~ s/^\[testing\] DEBUG: //;
-        print $sor;
+        print "$1\n";
     }
 }
 %#--------------------------------------------------------------------------------------------------------------
@@ -70,11 +69,11 @@ cli_tcp: ESTABLISHED --> CLOSED  (on RCV_RST)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
-TcpTestNet1.cli_app: received 0 bytes in 0 packets
-TcpTestNet1.cli_tcp: finishing with 0 connections open.
-TcpTestNet1.srv_tcp: finishing with 1 connections open.
-TcpTestNet1.srv_app: received 0 bytes in 0 packets
-[100.004] tcpdump finished, A:7 B:6 segments
+[]: TcpTestNet1.cli_app: received 0 bytes in 0 packets
+[]: TcpTestNet1.cli_tcp: finishing with 0 connections open.
+[]: TcpTestNet1.srv_tcp: finishing with 1 connections open.
+[]: TcpTestNet1.srv_app: received 0 bytes in 0 packets
+[testing]: [100.004] tcpdump finished, A:7 B:6 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

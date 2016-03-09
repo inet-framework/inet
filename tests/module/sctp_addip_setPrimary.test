@@ -12,7 +12,6 @@ Retransmissions should then be visible on the second path.
 network=multihomed
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false

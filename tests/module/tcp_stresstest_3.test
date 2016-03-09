@@ -18,8 +18,8 @@ cmdenv-express-mode=false
 *.testing=true
 
 ####cmdenv-log-format=""
-*.tcptester.cmdenv-ev-output=true
-**.cmdenv-ev-output=false
+#*.tcptester.cmdenv-log-level=DEBUG
+#**.cmdenv-log-level=OFF
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=655360B  # 640K

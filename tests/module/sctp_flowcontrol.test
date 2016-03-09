@@ -11,7 +11,6 @@ messages with higher TSNs have to be dropped to make room for the expected ones.
 network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false

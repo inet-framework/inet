@@ -15,8 +15,9 @@ cmdenv-express-mode=false
 *.testing=true
 ####cmdenv-log-format="%c %C@"
 
-*.tcptester.cmdenv-ev-output=true
-**.cmdenv-ev-output=false
+*.tcptester.cmdenv-log-level=DEBUG
+*.*_app.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
 
 # script format: "time numbytes; time numbytes; ..."
 *.cli_app.sendScript="1.00 2; 1.01 4; 1.02 8; 1.03 16; 1.04 32; 2.00 64; 2.01 128; 2.02 256; 2.03 512"
@@ -37,8 +38,6 @@ include ../../lib/defaults.ini
 %contains: stdout
 Calling finish() at end of Run #0...
 TcpTestNet1.cli_app: received 0 bytes in 0 packets
-TcpTestNet1.cli_tcp: finishing with 1 connections open.
-TcpTestNet1.srv_tcp: finishing with 1 connections open.
 TcpTestNet1.srv_app: received 1022 bytes in 4 packets
 [2.408] tcpdump finished, A:6 B:5 segments
 

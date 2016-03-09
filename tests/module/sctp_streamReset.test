@@ -12,7 +12,6 @@ reset requests performed.
 network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false

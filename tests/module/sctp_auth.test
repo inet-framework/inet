@@ -14,7 +14,6 @@ The number of rejected AUTH chunks should be equal to 0.
 network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false

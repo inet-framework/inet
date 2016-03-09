@@ -6,6 +6,7 @@ The client sends a packet with a given TTL.
 It is checked that the server receives the datagram with the
 given TTL minus the number of hops.
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: {}.ini
 [General]
 ned-path = ../../../../examples;../../../../src
@@ -32,7 +33,9 @@ cmdenv-express-mode = false
 **.srv.udpApp[*].typename = "UDPSink"
 **.srv.udpApp[0].localPort = 1000
 
-
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 Received packet: \(cPacket\)UDPBasicAppData-0 .* TTL=74
 %#--------------------------------------------------------------------------------------------------------------

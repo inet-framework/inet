@@ -1,6 +1,7 @@
 %description:
 Tests UDPSocket::bind() can not be called more than once on a socket.
 
+%#--------------------------------------------------------------------------------------------------------------
 %file: TestApp.cc
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
@@ -28,6 +29,7 @@ void TestApp::activity()
 
 }
 
+%#--------------------------------------------------------------------------------------------------------------
 %file: TestApp.ned
 import inet.applications.contract.IUDPApp;
 
@@ -38,13 +40,13 @@ simple TestApp like IUDPApp
         output udpOut;
 }
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
 ned-path = .;../../../../src;../../lib
 network = SimpleTestNetwork
 cmdenv-express-mode = false
 cmdenv-event-banner-details = true
-cmdenv-module-messages = true
 **.client.numUdpApps = 1
 **.client.udpApp[0].typename = "TestApp"
 

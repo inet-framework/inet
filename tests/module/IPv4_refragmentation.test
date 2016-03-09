@@ -5,6 +5,7 @@ NClientsEth example network is used, with one client.
 The client sends an 5000 bytes in an UDP datagram to the server.
 It is checked that the server receives the datagram.
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: {}.ini
 [General]
 ned-path = ../../../../examples;../../../../src
@@ -34,8 +35,12 @@ cmdenv-express-mode=false
 *.r2.ppp[*].ppp.mtu = 1205B
 *.r*.ppp[*].ppp.mtu = 2205B
 
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 This fragment completes the datagram.
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
 %#--------------------------------------------------------------------------------------------------------------

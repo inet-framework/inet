@@ -19,8 +19,8 @@ cmdenv-express-mode=false
 *.testing=true
 
 ####cmdenv-log-format=""
-*.tcptester.cmdenv-ev-output=true
-**.cmdenv-ev-output=false
+#*.tcptester.cmdenv-log-level=DEBUG
+#**.cmdenv-log-level=OFF
 
 # script format: "time numbytes; time numbytes; ..."
 *.cli_app.sendScript="1 1; 1 100; 1 4000; 1 16000; 1 10; 1 1; 1 1; 1 1; 1 64000; 1 10;\

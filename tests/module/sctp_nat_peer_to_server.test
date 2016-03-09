@@ -10,7 +10,6 @@ Testing SCTP_NAT: One peer sends data over two separate paths and two NATs to a 
 network=multinat
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false

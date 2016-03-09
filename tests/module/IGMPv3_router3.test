@@ -68,35 +68,37 @@ network=TestIGMPNetwork
 
 %#--------------------------------------------------------------------------------------------------------------
 
+%subst: /DETAIL: //
+
 %#
 %# Check that Group-Specific or Group-and-Source-Specific Queries are sent.
 %#
-%postrun-command: grep "DETAIL: \(Router State\|New Router State\|Received.*report\)" test.out > igmp.out || true
+%postrun-command: grep "\(Router State\|New Router State\|Received.*report\)" test.out > igmp.out || true
 %contains: igmp.out
-DETAIL: Router State is INCLUDE().
-DETAIL: Received ALLOW(10.0.0.1,10.0.0.2) report.
-DETAIL: New Router State is INCLUDE(10.0.0.1,10.0.0.2).
-DETAIL: Router State is INCLUDE(10.0.0.1,10.0.0.2).
-DETAIL: Received BLOCK(10.0.0.1) report.
-DETAIL: New Router State is INCLUDE(10.0.0.1,10.0.0.2).
-DETAIL: Router State is INCLUDE(10.0.0.1,10.0.0.2).
-DETAIL: Received TO_IN(10.0.0.3) report.
-DETAIL: New Router State is INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3).
-DETAIL: Router State is INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3).
-DETAIL: Received TO_EX(10.0.0.3,10.0.0.4) report.
-DETAIL: New Router State is EXCLUDE(10.0.0.3;10.0.0.4).
-DETAIL: Router State is EXCLUDE(10.0.0.3;10.0.0.4).
-DETAIL: Received ALLOW(10.0.0.4) report.
-DETAIL: New Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
-DETAIL: Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
-DETAIL: Received BLOCK(10.0.0.4) report.
-DETAIL: New Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
-DETAIL: Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
-DETAIL: Received TO_EX(10.0.0.1,10.0.0.3) report.
-DETAIL: New Router State is EXCLUDE(10.0.0.1,10.0.0.3;).
-DETAIL: Router State is EXCLUDE(10.0.0.1,10.0.0.3;).
-DETAIL: Received TO_IN(10.0.0.1,10.0.0.2) report.
-DETAIL: New Router State is EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;).
+Router State is INCLUDE().
+Received ALLOW(10.0.0.1,10.0.0.2) report.
+New Router State is INCLUDE(10.0.0.1,10.0.0.2).
+Router State is INCLUDE(10.0.0.1,10.0.0.2).
+Received BLOCK(10.0.0.1) report.
+New Router State is INCLUDE(10.0.0.1,10.0.0.2).
+Router State is INCLUDE(10.0.0.1,10.0.0.2).
+Received TO_IN(10.0.0.3) report.
+New Router State is INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3).
+Router State is INCLUDE(10.0.0.1,10.0.0.2,10.0.0.3).
+Received TO_EX(10.0.0.3,10.0.0.4) report.
+New Router State is EXCLUDE(10.0.0.3;10.0.0.4).
+Router State is EXCLUDE(10.0.0.3;10.0.0.4).
+Received ALLOW(10.0.0.4) report.
+New Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
+Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
+Received BLOCK(10.0.0.4) report.
+New Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
+Router State is EXCLUDE(10.0.0.3,10.0.0.4;).
+Received TO_EX(10.0.0.1,10.0.0.3) report.
+New Router State is EXCLUDE(10.0.0.1,10.0.0.3;).
+Router State is EXCLUDE(10.0.0.1,10.0.0.3;).
+Received TO_IN(10.0.0.1,10.0.0.2) report.
+New Router State is EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;).
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -84,6 +84,9 @@ network Test
 </scenario>
 
 %#--------------------------------------------------------------------------------------------------------------
+%subst: /DEBUG: //
+%#--------------------------------------------------------------------------------------------------------------
+
 %#--------------------------------------------------------------------------------------------------------------
 %# sender[0]
 %#--------------------------------------------------------------------------------------------------------------
@@ -103,14 +106,14 @@ Doing stage 4/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Doing stage 5/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Doing stage 6/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Starting application
-DEBUG: Test\.sender\[0\]\.srv registering DSAP 241
+Test\.sender\[0\]\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event \#\d+  T=2   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
-DEBUG: Test\.sender\[0\]\.cli registering DSAP 240
+Test\.sender\[0\]\.cli registering DSAP 240
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -189,7 +192,7 @@ Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event \#\d+  T=1.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
-DEBUG: Test\.sender\[1\]\.cli registering DSAP 240
+Test\.sender\[1\]\.cli registering DSAP 240
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -251,14 +254,14 @@ Doing stage 4/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Doing stage 5/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Doing stage 6/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Starting application
-DEBUG: Test\.sender\[1\]\.srv registering DSAP 241
+Test\.sender\[1\]\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Test.sender\[1\] started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event \#\d+  T=6\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
-DEBUG: Test\.sender\[1\]\.cli registering DSAP 240
+Test\.sender\[1\]\.cli registering DSAP 240
 Generating packet `req-\d+-9'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
@@ -311,7 +314,7 @@ Doing stage 4/8 of operation inet::NodeStartOperation on Test\.recip
 Doing stage 5/8 of operation inet::NodeStartOperation on Test\.recip
 Doing stage 6/8 of operation inet::NodeStartOperation on Test\.recip
 Starting application
-DEBUG: Test\.recip\.srv registering DSAP 241
+Test\.recip\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  T=
@@ -345,7 +348,7 @@ Doing stage 4/8 of operation inet::NodeStartOperation on Test\.recip
 Doing stage 5/8 of operation inet::NodeStartOperation on Test\.recip
 Doing stage 6/8 of operation inet::NodeStartOperation on Test\.recip
 Starting application
-DEBUG: Test\.recip\.srv registering DSAP 241
+Test\.recip\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  T=

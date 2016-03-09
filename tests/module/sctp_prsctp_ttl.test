@@ -10,7 +10,6 @@ Testing PR-SCTP: prMethod=PR_TTL prValue=0.5 se lifetime
 network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 **.testing = false

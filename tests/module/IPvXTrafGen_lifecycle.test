@@ -3,6 +3,8 @@
 Test shutdown and startup operations on IPvXTrafGen/IPvXTrafSink modules.
 
 sender[0] and recip start at down
+
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
 [General]
@@ -38,9 +40,8 @@ cmdenv-express-mode = false
 **.ppp[*].queueType = "DropTailQueue" # in routers
 **.ppp[*].queue.frameCapacity = 10  # in routers
 
-
+%#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-
 
 import inet.applications.generic.IIPvXTrafficGenerator;
 import inet.common.lifecycle.LifecycleController;
@@ -88,8 +89,7 @@ network Test
         sender[0].pppg++ <--> {  datarate = 1Mbps; delay = 10us; } <--> recip.pppg++;
         sender[1].pppg++ <--> {  datarate = 1Mbps; delay = 10us; } <--> recip.pppg++;
 }
-
-
+%#--------------------------------------------------------------------------------------------------------------
 %file: scenario.xml
 
 <scenario>
@@ -102,7 +102,9 @@ network Test
     <tell t="5.0" module="lifecycleController" target="sender[1]" operation="NodeShutdownOperation"/>
     <tell t="6.0" module="lifecycleController" target="sender[1]" operation="NodeStartOperation"/>
 </scenario>
-
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 
 \*\* Event \#\d+  T=1   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
@@ -201,14 +203,17 @@ Sending packet: \(cPacket\)appData-10
 ?\*\* Event \#\d+  T=6   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
 Sending packet: \(cPacket\)appData-10
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
 scalar Test.sender[0].trafGen 	sentPk:count 	15
 attr
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
 scalar Test.sender[1].trafGen 	sentPk:count 	13
 attr
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
 scalar Test.recip.trafGen 	rcvdPk:count 	21
 attr

@@ -40,18 +40,32 @@ void TCPTesterBase::initialize()
 
 void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
 {
-    if (getEnvir()->isDisabled()) return;
+#if OMNETPP_VERSION < 0x0500
+    if (getEnvir()->isDisabled())
+        return;
+#else
+    if (getEnvir()->isExpressMode())
+        return;
+#endif
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
+    std::ostringstream out;
+    tcpdump.setOutStream(out);
     tcpdump.tcpDump(fromA, lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
+    EV_DEBUG_C("testing") << out.str();
+    tcpdump.setOutStream(EVSTREAM);
 }
 
 void TCPTesterBase::finish()
 {
     char buf[128];
     sprintf(buf,"tcpdump finished, A:%d B:%d segments",fromASeq,fromBSeq);
+    std::ostringstream out;
+    tcpdump.setOutStream(out);
     tcpdump.dump("", buf);
+    EV_DEBUG_C("testing") << out.str();
+    tcpdump.setOutStream(EVSTREAM);
 }
 
 
