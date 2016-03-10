@@ -92,17 +92,17 @@ class INET_API cSocketRTScheduler : public cScheduler
     /**
      * Returns the first event in the Future Event Set.
      */
-    virtual cEvent *guessNextEvent();
+    virtual cEvent *guessNextEvent() override;
 
     /**
      * Scheduler function -- it comes from the cScheduler interface.
      */
-    virtual cEvent *takeNextEvent();
+    virtual cEvent *takeNextEvent() override;
 
     /**
      * Scheduler function -- it comes from the cScheduler interface.
      */
-    virtual void putBackEvent(cEvent *event);
+    virtual void putBackEvent(cEvent *event) override;
 #else // if OMNETPP_VERSION >= 0x0500
       /**
        * Scheduler function -- it comes from cScheduler interface.
