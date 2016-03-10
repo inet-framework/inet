@@ -38,7 +38,7 @@ class INET_API TLVOptions : public TLVOptions_Base
     ~TLVOptions() { clear(); }
     TLVOptions(const TLVOptions& other) : TLVOptions_Base(other) { copy(other); }
     TLVOptions& operator=(const TLVOptions& other) { if (this != &other) { TLVOptions_Base::operator=(other); clear(); copy(other); } return *this; }
-    virtual TLVOptions *dup() const { return new TLVOptions(*this); }
+    virtual TLVOptions *dup() const override { return new TLVOptions(*this); }
 
     int size() const { return optionVector.size(); }
 
@@ -84,13 +84,13 @@ class INET_API TLVOptions : public TLVOptions_Base
     int findByType(short int type, int firstPos=0) const;
 
     // redefine and implement pure virtual functions from TLVOptions_Base
-    virtual void setTlvOptionArraySize(unsigned int size) { throw cRuntimeError("Do not use it!"); }
-    virtual unsigned int getTlvOptionArraySize() const { return size(); }
-    virtual TLVOptionBase& getTlvOption(unsigned int k) { return at(k); }
-    virtual void setTlvOption(unsigned int k, const TLVOptionBase& tlvOption)  { throw cRuntimeError("Do not use it!"); }
+    virtual void setTlvOptionArraySize(unsigned int size) override { throw cRuntimeError("Do not use it!"); }
+    virtual unsigned int getTlvOptionArraySize() const override { return size(); }
+    virtual TLVOptionBase& getTlvOption(unsigned int k) override { return at(k); }
+    virtual void setTlvOption(unsigned int k, const TLVOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
 
-    virtual void parsimPack(cCommBuffer *b);
-    virtual void parsimUnpack(cCommBuffer *b);
+    virtual void parsimPack(cCommBuffer *b) const override;
+    virtual void parsimUnpack(cCommBuffer *b) override;
 };
 
 } // namespace inet
