@@ -14,7 +14,7 @@ When NighborCache_Off test is OK, but some other NeighborCache test is FAILED, t
  - NeighborCache_*.test files should be same except the %extraargs line.
  - verify the used NeighborCache code in failed simulation.
 %#--------------------------------------------------------------------------------------------------------------
-%extraargs: -c NeighborList
+%extraargs: -c NoCache
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
