@@ -30,16 +30,16 @@ class INET_API TestIGMP : public IGMPv2, public IScriptable
 //     IGMPRouterState currentRouterGroupState;
   protected:
     typedef IPv4InterfaceData::IPv4AddressVector IPv4AddressVector;
-    virtual void initialize(int stage);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG);
-    virtual void configureInterface(InterfaceEntry *ie);
-    virtual void processIgmpMessage(IGMPMessage *msg);
-    virtual void processHostGroupTimer(cMessage *msg);
-    virtual void processQueryTimer(cMessage *msg);
-    virtual void processLeaveTimer(cMessage *msg);
-    virtual void processRexmtTimer(cMessage *msg);
-    virtual void processCommand(const cXMLElement &node);
-    virtual void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest);
+    virtual void initialize(int stage) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void configureInterface(InterfaceEntry *ie) override;
+    virtual void processIgmpMessage(IGMPMessage *msg) override;
+    virtual void processHostGroupTimer(cMessage *msg) override;
+    virtual void processQueryTimer(cMessage *msg) override;
+    virtual void processLeaveTimer(cMessage *msg) override;
+    virtual void processRexmtTimer(cMessage *msg) override;
+    virtual void processCommand(const cXMLElement &node) override;
+    virtual void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest) override;
   private:
     void dumpMulticastGroups(const char* name, const char *ifname, IPv4AddressVector groups);
     void startEvent(const char *event, int stateMask, InterfaceEntry *ie, const IPv4Address *group = NULL);
