@@ -340,7 +340,7 @@ double GPSR::getVectorAngle(Coord vector)
 {
     double angle = atan2(-vector.y, vector.x);
     if (angle < 0)
-        angle += 2 * PI;
+        angle += 2 * M_PI;
     return angle;
 }
 
@@ -453,14 +453,14 @@ L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeig
 {
     EV_DEBUG << "Finding next planar neighbor (counter clockwise): startAddress = " << startNeighborAddress << ", startAngle = " << startNeighborAngle << endl;
     L3Address bestNeighborAddress = startNeighborAddress;
-    double bestNeighborAngleDifference = 2 * PI;
+    double bestNeighborAngleDifference = 2 * M_PI;
     std::vector<L3Address> neighborAddresses = getPlanarNeighbors();
     for (auto it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
         const L3Address& neighborAddress = *it;
         double neighborAngle = getNeighborAngle(neighborAddress);
         double neighborAngleDifference = neighborAngle - startNeighborAngle;
         if (neighborAngleDifference < 0)
-            neighborAngleDifference += 2 * PI;
+            neighborAngleDifference += 2 * M_PI;
         EV_DEBUG << "Trying next planar neighbor (counter clockwise): address = " << neighborAddress << ", angle = " << neighborAngle << endl;
         if (neighborAngleDifference != 0 && neighborAngleDifference < bestNeighborAngleDifference) {
             bestNeighborAngleDifference = neighborAngleDifference;
