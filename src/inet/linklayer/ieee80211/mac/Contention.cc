@@ -83,13 +83,13 @@ void Contention::initialize(int stage)
         WATCH(endEifsTime);
         WATCH(backoffSlots);
         WATCH(scheduledTransmissionTime);
-        WATCH(channelLastBusyTime);
+        WATCH(lastChannelBusyTime);
         WATCH(mediumFree);
         updateDisplayString();
     }
     else if (stage == INITSTAGE_LAST) {
         if (!par("initialChannelBusy") && simTime() == 0)
-            channelLastBusyTime = simTime() - SimTime().getMaxTime() / 2;
+            lastChannelBusyTime = simTime() - SimTime().getMaxTime() / 2;
     }
 }
 
@@ -221,7 +221,7 @@ void Contention::mediumStateChanged(bool mediumFree)
 {
     Enter_Method_Silent(mediumFree ? "medium FREE" : "medium BUSY");
     this->mediumFree = mediumFree;
-    channelLastBusyTime = simTime();
+    lastChannelBusyTime = simTime();
     handleWithFSM(MEDIUM_STATE_CHANGED, nullptr);
 }
 
@@ -281,7 +281,7 @@ void Contention::scheduleTransmissionRequest()
 
     if (initialBackoffOptimization && fsm.getState() == IDLE) {
         // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
-        simtime_t elapsedFreeChannelTime = now - channelLastBusyTime;
+        simtime_t elapsedFreeChannelTime = now - lastChannelBusyTime;
         simtime_t elapsedIdleTime = now - lastIdleStartTime;
         backoffOptimizationDelta = std::min(waitInterval, std::min(elapsedFreeChannelTime, elapsedIdleTime));
         if (backoffOptimizationDelta > SIMTIME_ZERO)
