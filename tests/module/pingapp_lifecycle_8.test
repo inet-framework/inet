@@ -45,14 +45,14 @@ network Test
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=0   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=0   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
 Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
 Sending ping request #0 to lower layer\.
 .*
-\*\* Event #\d+  T=2   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=2   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
 Sending ping request #2 to lower layer\.
 .*
-\*\* Event #\d+  T=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test\.host

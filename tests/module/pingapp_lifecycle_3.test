@@ -45,7 +45,7 @@ network Test
 
 %contains-regex: stdout
 
-.*Event #\d+  T=6 .*
+.*Event #\d+  t=6 .*
 .*
 Test.host starting up
 .*

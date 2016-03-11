@@ -91,11 +91,11 @@ network Test
 %# sender[0]
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
-\*\* Event \#\d+  T=[01](\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=[01](\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] starting up
@@ -109,67 +109,67 @@ Starting application
 Test\.sender\[0\]\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] started
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=2   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Test\.sender\[0\]\.cli registering DSAP 240
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=2\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-2'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=3   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-3'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=3\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-4'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=4   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-5'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=4\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-6'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-7'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=5\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=5\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-8'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=6   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-9'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=6\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-10'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=7   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-11'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=7\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-12'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=8   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-13'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=8\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8\.5   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-14'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=9   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=9   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
@@ -184,47 +184,47 @@ Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
 Test\.sender\[0\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
-\*\* Event \#\d+  T=9(\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=9(\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %# sender[1]
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=1.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=1.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Test\.sender\[1\]\.cli registering DSAP 240
 Generating packet `req-\d+-1'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=1\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=1\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-2'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=2\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-3'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=2\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-4'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=3\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-5'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=3\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=3\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-6'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=4\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-7'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=4\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-8'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=5\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=5\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
@@ -239,11 +239,11 @@ Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
-\*\* Event \#\d+  T=5(\.d+)?   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=5(\.d+)?   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=6\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=6\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Test\.sender\[1\] starting up
@@ -257,35 +257,35 @@ Starting application
 Test\.sender\[1\]\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Test.sender\[1\] started
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=6\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Test\.sender\[1\]\.cli registering DSAP 240
 Generating packet `req-\d+-9'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=6\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=6\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-10'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=7\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-11'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=7\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=7\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-12'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=8\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8\.1   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-13'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event \#\d+  T=8\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
+\*\* Event \#\d+  t=8\.6   Test\.sender\[1\]\.cli \(EtherAppCli, id=\d+\)
 Generating packet `req-\d+-14'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=9\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=9\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
@@ -303,7 +303,7 @@ Test\.sender\[1\] shut down
 %# recip
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=1\.7   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=1\.7   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip starting up
@@ -317,10 +317,10 @@ Starting application
 Test\.recip\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip started
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=3\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=3\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.recip
 Test\.recip shutting down
@@ -333,11 +333,11 @@ Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.recip
 Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.recip
 Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.recip
 Test\.recip shut down
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=4\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=4\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip starting up
@@ -351,13 +351,13 @@ Starting application
 Test\.recip\.srv registering DSAP 241
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip started
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %# switch
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=7\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=7\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.switch
 Test\.switch shutting down
@@ -369,10 +369,10 @@ Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.switch
 Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.switch
 Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.switch
 Test\.switch shut down
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=8\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+\*\* Event #\d+  t=8\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.switch
 Test\.switch starting up
@@ -384,7 +384,7 @@ Doing stage 5/8 of operation inet::NodeStartOperation on Test\.switch
 Doing stage 6/8 of operation inet::NodeStartOperation on Test\.switch
 Doing stage 7/8 of operation inet::NodeStartOperation on Test\.switch
 Test\.switch started
-\*\* Event #\d+  T=
+\*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %# result.sca
