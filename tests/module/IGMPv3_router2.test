@@ -11,7 +11,7 @@ See RFC 3376 6.4.2.
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = false
-#cmdenv-log-format = "%t %N: "
+#cmdenv-log-prefix = "%t %N: "
 
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"

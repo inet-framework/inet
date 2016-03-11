@@ -13,7 +13,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-####cmdenv-log-format="%c %C@"
+####cmdenv-log-prefix="%c %C@"
 
 *.tcptester.cmdenv-log-level=DEBUG
 *.*_app.cmdenv-log-level=DEBUG

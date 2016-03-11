@@ -13,7 +13,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-####cmdenv-log-format="%c %C@"
+####cmdenv-log-prefix="%c %C@"
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=16384B # sixteen 1024-byte segments

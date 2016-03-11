@@ -49,7 +49,7 @@ simple TestApp like IUDPApp
 ned-path = .;../../../../src;../../lib
 network = SimpleTestNetwork
 cmdenv-express-mode = false
-cmdenv-log-format = "C:%C: "
+cmdenv-log-prefix = "C:%C: "
 **.client.numUdpApps = 1
 **.client.udpApp[0].typename = "TestApp"
 

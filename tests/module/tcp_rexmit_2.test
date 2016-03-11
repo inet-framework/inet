@@ -15,7 +15,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="[%c]: "
+cmdenv-log-prefix="[%c]: "
 
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=100B

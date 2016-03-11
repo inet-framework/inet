@@ -14,7 +14,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
-cmdenv-log-format="[%c]: "
+cmdenv-log-prefix="[%c]: "
 
 *.cli_app.tClose=2s
 *.srv_app.tClose=2s
