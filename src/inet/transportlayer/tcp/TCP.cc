@@ -96,7 +96,8 @@ void TCP::initialize(int stage)
         useDataNotification = par("useDataNotification");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *host = findContainingNode(this);
+        NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_TCP);
