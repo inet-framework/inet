@@ -84,7 +84,10 @@ void Contention::initialize(int stage)
         WATCH(backoffSlots);
         WATCH(scheduledTransmissionTime);
         WATCH(lastChannelBusyTime);
+        WATCH(lastIdleStartTime);
+        WATCH(backoffOptimizationDelta);
         WATCH(mediumFree);
+        WATCH(initialBackoffOptimization);
         updateDisplayString();
     }
     else if (stage == INITSTAGE_LAST) {
