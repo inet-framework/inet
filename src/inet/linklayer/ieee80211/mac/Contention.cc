@@ -53,37 +53,44 @@ void collectContentionModules(cModule *firstContentionModule, IContention **& co
     contentionTx[count] = nullptr;
 }
 
-void Contention::initialize()
+void Contention::initialize(int stage)
 {
-    mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
-    upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
-    collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
-    statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
-    initialBackoffOptimization = par("initialBackoffOptimization");
+    if (stage == INITSTAGE_LOCAL) {
+        mac = check_and_cast<IMacRadioInterface *>(getModuleByPath(par("macModule")));
+        upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
+        collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
+        statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
+        initialBackoffOptimization = par("initialBackoffOptimization");
+        lastIdleStartTime = simTime() - SimTime::getMaxTime() / 2;
 
-    txIndex = getIndex();
-    if (txIndex > 0 && !collisionController)
-        throw cRuntimeError("No collision controller module -- one is needed when multiple Contention instances are present");
+        txIndex = getIndex();
+        if (txIndex > 0 && !collisionController)
+            throw cRuntimeError("No collision controller module -- one is needed when multiple Contention instances are present");
 
-    if (!collisionController)
-        startTxEvent = new cMessage("startTx");
+        if (!collisionController)
+            startTxEvent = new cMessage("startTx");
 
-    fsm.setName("fsm");
-    fsm.setState(IDLE, "IDLE");
+        fsm.setName("fsm");
+        fsm.setState(IDLE, "IDLE");
 
-    WATCH(txIndex);
-    WATCH(ifs);
-    WATCH(eifs);
-    WATCH(cwMin);
-    WATCH(cwMax);
-    WATCH(slotTime);
-    WATCH(retryCount);
-    WATCH(endEifsTime);
-    WATCH(backoffSlots);
-    WATCH(scheduledTransmissionTime);
-    WATCH(channelLastBusyTime);
-    WATCH(mediumFree);
-    updateDisplayString();
+        WATCH(txIndex);
+        WATCH(ifs);
+        WATCH(eifs);
+        WATCH(cwMin);
+        WATCH(cwMax);
+        WATCH(slotTime);
+        WATCH(retryCount);
+        WATCH(endEifsTime);
+        WATCH(backoffSlots);
+        WATCH(scheduledTransmissionTime);
+        WATCH(channelLastBusyTime);
+        WATCH(mediumFree);
+        updateDisplayString();
+    }
+    else if (stage == INITSTAGE_LAST) {
+        if (!par("initialChannelBusy") && simTime() == 0)
+            channelLastBusyTime = simTime() - SimTime().getMaxTime() / 2;
+    }
 }
 
 Contention::~Contention()

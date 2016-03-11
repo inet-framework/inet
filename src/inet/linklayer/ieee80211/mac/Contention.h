@@ -72,7 +72,8 @@ class INET_API Contention : public cSimpleModule, public IContention, protected 
         bool initialBackoffOptimization = true;
 
     protected:
-        virtual void initialize() override;
+        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+        virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
         virtual void transmissionGranted(int txIndex) override; // called back from collision controller
         virtual void internalCollision(int txIndex) override; // called back from collision controller
