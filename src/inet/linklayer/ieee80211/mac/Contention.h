@@ -69,7 +69,7 @@ class INET_API Contention : public cSimpleModule, public IContention, protected 
         simtime_t lastIdleStartTime = SIMTIME_ZERO;
         simtime_t backoffOptimizationDelta = SIMTIME_ZERO;
         bool mediumFree = false;
-        bool initialBackoffOptimization = true;
+        bool backoffOptimization = true;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

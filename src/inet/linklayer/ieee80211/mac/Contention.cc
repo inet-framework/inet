@@ -60,7 +60,7 @@ void Contention::initialize(int stage)
         upperMac = check_and_cast<IUpperMac *>(getModuleByPath(par("upperMacModule")));
         collisionController = dynamic_cast<ICollisionController *>(getModuleByPath(par("collisionControllerModule")));
         statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
-        initialBackoffOptimization = par("initialBackoffOptimization");
+        backoffOptimization = par("backoffOptimization");
         lastIdleStartTime = simTime() - SimTime::getMaxTime() / 2;
 
         txIndex = getIndex();
@@ -87,7 +87,7 @@ void Contention::initialize(int stage)
         WATCH(lastIdleStartTime);
         WATCH(backoffOptimizationDelta);
         WATCH(mediumFree);
-        WATCH(initialBackoffOptimization);
+        WATCH(backoffOptimization);
         updateDisplayString();
     }
     else if (stage == INITSTAGE_LAST) {
@@ -282,7 +282,7 @@ void Contention::scheduleTransmissionRequest()
     bool useEifs = endEifsTime > now + ifs;
     simtime_t waitInterval = (useEifs ? eifs : ifs) + backoffSlots * slotTime;
 
-    if (initialBackoffOptimization && fsm.getState() == IDLE) {
+    if (backoffOptimization && fsm.getState() == IDLE) {
         // we can pretend the frame has arrived into the queue a little bit earlier, and may be able to start transmitting immediately
         simtime_t elapsedFreeChannelTime = now - lastChannelBusyTime;
         simtime_t elapsedIdleTime = now - lastIdleStartTime;
