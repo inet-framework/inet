@@ -35,6 +35,9 @@ ned-path = .;../../../../src
 **.mobility.constraintAreaMaxY = 1000m
 **.mobility.constraintAreaMaxZ = 0m
 
+# mac
+**.ctn[*].initialChannelBusy = false
+
 # radio
 **.radio.receiver.energyDetection = -100dBm
 
