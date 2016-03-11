@@ -51,9 +51,9 @@ tutorial is based on in the INET Examples directory (inet/examples/ethernet/arpt
 <a name="launching"/><h3>Launching the ARPTest simulation</h3>
 
 <p>
-You can find the <i>arptest2</i> project folder in the project explorer panel of the OmNet++ IDE.
-To run the simulation, right click on <i>omnetpp.ini</i> and select <i>run as</i >, and click <i>OmNet++ Simulation</i>.
-In the <i>Set Up inifile Configuration</i>, make sure <i>ARTPtest</i> is selected as config name, and click OK.
+You can find the <i>arptest2</i> project folder in the project explorer panel of the OMNeT++ IDE.
+To run the simulation, right click on <i>omnetpp.ini</i> and select <i>run as</i >, and click <i>OMNeT++ Simulation</i>.
+In the <i>Set Up inifile Configuration</i>, make sure <i>ARPtest</i> is selected as config name, and click OK.
 </p>
 
 <p class="img"><a href="images/ide.png"><img src="thumbs/ide.png"/></a></p>
@@ -69,7 +69,7 @@ The picture you see will look like this.
 <p>
 This is the realtime simulation environment (tkenv/qtenv). The bottom panel displays
 log messages from the simulation model (output from <tt>ev &lt;&lt;</tt> statements
-in the C++ code will write there), and the left-hand displays the model
+in the C++ code will write there), and the left-hand panel displays the model
 objects in a foldable tree form. There's a 2-line status bar at the top
 (we'll look at it later), and a toolbar to access frequently used functions
 of the GUI. The central panel displays the simulation model.
@@ -78,7 +78,7 @@ of the GUI. The central panel displays the simulation model.
 <a name="running"/><h3>Let's run the simulation!</h3>
 
 <p>
-Click on the "Run" button on the main window's toolbar, or hit F5.
+Click on the "Run" button on the toolbar, or hit F5.
 </p>
 
 <p class="img"><img src="images/tb-run.gif"/></p>
@@ -122,8 +122,8 @@ sign icon (or by hitting F8), and resume it ("Run" icon or F5).
 
 <p>The "Fast" icon or (F6) will turn off message animation and
 update the graphics only every 10 events or so (the exact number
-can be configured in the Simulation Options dialog,
-Options menu, accessible from via the toolbar as well). The "Express"
+can be configured in the Simulation Execution dialog,
+File menu/Preferences/General tab, accessible from the toolbar as well, with the wrench symbol). The "Express"
 icon provides the highest speed: it turns off all GUI functions while the
 simulation is running, even writing to the log is turned off.
 Express mode updates the display every 1000 events or so
