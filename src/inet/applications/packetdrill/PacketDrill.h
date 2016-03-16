@@ -25,12 +25,10 @@
 #include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/networklayer/ipv4/IPv4Datagram_m.h"
-#include "inet/transportlayer/sctp/SCTPMessage.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
 #include "PacketDrillApp.h"
 
 namespace inet {
-using namespace sctp;
+
 class PacketDrillApp;
 }
 
@@ -50,33 +48,6 @@ class INET_API PacketDrill
                                        const char *flags, uint32 startSequence,
                                        uint16 tcpPayloadBytes, uint32 ackSequence,
                                        int32 window, cQueue *tcpOptions, char **error);
-
-        static cPacket* buildSCTPPacket(int address_family, enum direction_t direction,
-                                        cQueue *chunks);
-
-        static PacketDrillSctpChunk* buildDataChunk(int64 flgs, int64 len, int64 tsn, int64 sid, int64 ssn, int64 ppid);
-
-        static PacketDrillSctpChunk* buildInitChunk(int64 flgs, int64 tag, int64 a_rwnd, int64 os, int64 is, int64 tsn, cQueue *parameters);
-
-        static PacketDrillSctpChunk* buildInitAckChunk(int64 flgs, int64 tag, int64 a_rwnd, int64 os, int64 is, int64 tsn, cQueue *parameters);
-
-        static PacketDrillSctpChunk* buildSackChunk(int64 flgs, int64 cum_tsn, int64 a_rwnd, cQueue *gaps, cQueue *dups);
-
-        static PacketDrillSctpChunk* buildCookieEchoChunk(int64 flgs, int64 len, PacketDrillBytes *cookie);
-
-        static PacketDrillSctpChunk* buildCookieAckChunk(int64 flgs);
-
-        static PacketDrillSctpChunk* buildShutdownChunk(int64 flgs, int64 cum_tsn);
-
-        static PacketDrillSctpChunk* buildShutdownAckChunk(int64 flgs);
-
-        static PacketDrillSctpChunk* buildShutdownCompleteChunk(int64 flgs);
-
-        static PacketDrillSctpChunk* buildAbortChunk(int64 flgs);
-
-        static PacketDrillSctpChunk* buildHeartbeatChunk(int64 flgs, PacketDrillSctpParameter *info);
-
-        static PacketDrillSctpChunk* buildHeartbeatAckChunk(int64 flgs, PacketDrillSctpParameter *info);
 
         static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 

@@ -21,14 +21,11 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/common/ByteArray.h"
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
  #include <sys/socket.h>
 #endif
-#include "inet/transportlayer/sctp/SCTPMessage.h"
 
 using namespace inet;
-using namespace sctp;
 
 /* For tables mapping symbolic strace strings to the corresponding
  * integer values.
@@ -51,62 +48,6 @@ struct int_symbol {
 #define TCPOPT_TIMESTAMP          8
 #define TCPOLEN_TIMESTAMP         10
 #define TCPOPT_EXP                254    /* Experimental */
-
-#define SCTP_DATA_CHUNK_TYPE                0x00
-#define SCTP_INIT_CHUNK_TYPE                0x01
-#define SCTP_INIT_ACK_CHUNK_TYPE            0x02
-#define SCTP_SACK_CHUNK_TYPE                0x03
-#define SCTP_HEARTBEAT_CHUNK_TYPE           0x04
-#define SCTP_HEARTBEAT_ACK_CHUNK_TYPE       0x05
-#define SCTP_ABORT_CHUNK_TYPE               0x06
-#define SCTP_SHUTDOWN_CHUNK_TYPE            0x07
-#define SCTP_SHUTDOWN_ACK_CHUNK_TYPE        0x08
-#define SCTP_ERROR_CHUNK_TYPE               0x09
-#define SCTP_COOKIE_ECHO_CHUNK_TYPE         0x0a
-#define SCTP_COOKIE_ACK_CHUNK_TYPE          0x0b
-#define SCTP_SHUTDOWN_COMPLETE_CHUNK_TYPE   0x0e
-
-#define SCTP_DATA_CHUNK_I_BIT               0x08
-#define SCTP_DATA_CHUNK_U_BIT               0x04
-#define SCTP_DATA_CHUNK_B_BIT               0x02
-#define SCTP_DATA_CHUNK_E_BIT               0x01
-
-#define SCTP_ABORT_CHUNK_T_BIT              0x01
-#define SCTP_SHUTDOWN_COMPLETE_CHUNK_T_BIT  0x01
-
-#define MAX_SCTP_CHUNK_BYTES                0xffff
-
-#define FLAG_CHUNK_TYPE_NOCHECK                 0x00000001
-#define FLAG_CHUNK_FLAGS_NOCHECK                0x00000002
-#define FLAG_CHUNK_LENGTH_NOCHECK               0x00000004
-#define FLAG_CHUNK_VALUE_NOCHECK                0x00000008
-
-#define FLAG_INIT_CHUNK_TAG_NOCHECK             0x00000100
-#define FLAG_INIT_CHUNK_A_RWND_NOCHECK          0x00000200
-#define FLAG_INIT_CHUNK_OS_NOCHECK              0x00000400
-#define FLAG_INIT_CHUNK_IS_NOCHECK              0x00000800
-#define FLAG_INIT_CHUNK_TSN_NOCHECK             0x00001000
-#define FLAG_INIT_CHUNK_OPT_PARAM_NOCHECK       0x00002000
-
-#define FLAG_INIT_ACK_CHUNK_TAG_NOCHECK         0x00000100
-#define FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK      0x00000200
-#define FLAG_INIT_ACK_CHUNK_OS_NOCHECK          0x00000400
-#define FLAG_INIT_ACK_CHUNK_IS_NOCHECK          0x00000800
-#define FLAG_INIT_ACK_CHUNK_TSN_NOCHECK         0x00001000
-#define FLAG_INIT_ACK_CHUNK_OPT_PARAM_NOCHECK   0x00002000
-
-#define FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK     0x00000100
-
-#define FLAG_DATA_CHUNK_TSN_NOCHECK             0x00000100
-#define FLAG_DATA_CHUNK_SID_NOCHECK             0x00000200
-#define FLAG_DATA_CHUNK_SSN_NOCHECK             0x00000400
-#define FLAG_DATA_CHUNK_PPID_NOCHECK            0x00000800
-
-
-#define FLAG_SACK_CHUNK_CUM_TSN_NOCHECK         0x00000100
-#define FLAG_SACK_CHUNK_A_RWND_NOCHECK          0x00000200
-#define FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK      0x00000400
-#define FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK        0x00000800
 
 enum direction_t {
     DIRECTION_INVALID,
@@ -417,20 +358,6 @@ class INET_API PacketDrillStruct: public cObject
         uint32 value2;
 };
 
-class INET_API PacketDrillBytes: public cObject
-{
-    public:
-        PacketDrillBytes();
-        PacketDrillBytes(uint8 byte);
-
-        void appendByte(uint8 byte);
-        uint32 getListLength() { return listLength; };
-
-    private:
-        ByteArray byteList;
-        uint32 listLength;
-};
-
 class INET_API PacketDrillTcpOption : public cObject
 {
     public:
@@ -465,39 +392,6 @@ class INET_API PacketDrillTcpOption : public cObject
         void setBlockList(cQueue *bList) { blockList = bList; };
         uint16 getBlockCount() { return blockCount; };
         void increaseBlockCount() { blockCount++; };
-};
-
-class INET_API PacketDrillSctpChunk : public cObject
-{
-    public:
-        PacketDrillSctpChunk(uint8 type_, SCTPChunk *sctpChunk);
-
-    private:
-        uint8 type;
-        SCTPChunk *chunk;
-
-    public:
-        uint8 getType() { return type; };
-        SCTPChunk *getChunk() { return chunk; };
-};
-
-class INET_API PacketDrillSctpParameter : public cObject
-{
-    public:
-        PacketDrillSctpParameter(int16 len_, void* content_);
-
-    private:
-        int32 parameterValue;
-        cQueue* parameterList;
-        int16 parameterLength;
-        uint32 flags;
-
-    public:
-        int32 getValue() { return parameterValue; };
-        cQueue* getList() { return parameterList; };
-        uint32 getFlags() { return flags; };
-        void setFlags(uint32 flgs_) { flags = flgs_; };
-        int16 getLength() { return parameterLength; };
 };
 
 #endif

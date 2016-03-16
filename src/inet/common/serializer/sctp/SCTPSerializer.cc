@@ -524,6 +524,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIPv4().getInt()) + sizeof(uint32);
                         hbi->type = htons(1);    // mandatory
+                        hbi->length = htons(infolen + 4);
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbc) + 8);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
                         ipv4addr->length = htons(8);
@@ -535,6 +536,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     if (addr.getType() == L3Address::IPv6) {
                         infolen = 20 + sizeof(uint32);
                         hbi->type = htons(1);    // mandatory
+                        hbi->length = htons(infolen + 4);
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbc) + 8);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
                         ipv6addr->length = htons(20);
@@ -545,17 +547,9 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
 #endif // ifdef WITH_IPv6
                     ASSERT(infolen != 0);
-                    HBI_TIME(hbi) = htonl((uint32)time.dbl()); 
-                    int temp = 0;        
-                    if (heartbeatChunk->getInfoArraySize() > 0) {
-                        temp = heartbeatChunk->getInfoArraySize() - infolen;
-                        for (int32 j = 0; j < temp; j++) {
-                            HBI_INFO(hbi)[j] = heartbeatChunk->getInfo(j);
-                        }
-                    }
-                    hbi->length = htons(infolen + temp + 4);
-                    hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + temp + 4);
-                    writtenbytes += sizeof(struct heartbeat_chunk) + infolen + temp  + 4;
+                    HBI_TIME(hbi) = htonl((uint32)time.dbl());
+                    hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
+                    writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;
                     break;
                 }
 

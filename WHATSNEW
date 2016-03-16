@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.2.2 (March, 2016) - Stable
+INET-3.2.3 (March, 2016) - Stable
 ---------------------------------
 
 This is a minor maintenance release that requires either OMNeT++ 4.6, 
@@ -9,7 +9,6 @@ or 5.0rc or later. (Earlier test versions of OMNeT++ will not work.)
 
 Changes: 
 
-  - packetdrill: added SCTP support (by Irene Rungeler)
   - build: updated inet_featuretool (the same like the opp_featuretool in OMNeT++ 5.0 rc)
   - several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
   - smoke and fingerprint tests are running on both OMNeT++ 4.6 and 5.0

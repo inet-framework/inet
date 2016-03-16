@@ -152,7 +152,6 @@ class INET_API SCTPSocket
     void setOutboundStreams(int streams) { outboundStreams = streams; };
     void setInboundStreams(int streams) { inboundStreams = streams; };
     int getOutboundStreams() { return outboundStreams; };
-    int getInboundStreams() { return inboundStreams; };
     int getLastStream() { return lastStream; };
     void setStreamPriority(uint32 stream, uint32 priority);
 

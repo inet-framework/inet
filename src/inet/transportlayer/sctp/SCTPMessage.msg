@@ -51,7 +51,6 @@ message SCTPChunk extends cPacket
     @customize(false);
     // Chunk Type
     uint8 chunkType;
-    uint32 flags;
 }
 
 message SCTPInitChunk extends SCTPChunk
