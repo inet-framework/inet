@@ -10,32 +10,37 @@ Test serializing frames
 #include <stdio.h>
 #include <iostream>
 #include "inet/common/serializer/SerializerBase.h"
+#include "inet/common/serializer/headerserializers/EthernetCRC.h"
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 
 %global:
+
+using namespace inet;
+
+using namespace inet::serializer;
 
 #define PCAP_MAGIC      0xa1b2c3d4
 
 /* "libpcap" file header (minus magic number). */
 struct pcap_hdr
 {
-    uint32 magic;    /* magic */
-    uint16 version_major;    /* major version number */
-    uint16 version_minor;    /* minor version number */
-    uint32 thiszone;    /* GMT to local correction */
-    uint32 sigfigs;    /* accuracy of timestamps */
-    uint32 snaplen;    /* max length of captured packets, in octets */
-    uint32 network;    /* data link type */
+    uint32_t magic;    /* magic */
+    uint16_t version_major;    /* major version number */
+    uint16_t version_minor;    /* minor version number */
+    uint32_t thiszone;    /* GMT to local correction */
+    uint32_t sigfigs;    /* accuracy of timestamps */
+    uint32_t snaplen;    /* max length of captured packets, in octets */
+    uint32_t network;    /* data link type */
 };
 
 /* "libpcap" record header. */
 struct pcaprec_hdr
 {
-    int32 ts_sec;    /* timestamp seconds */
-    uint32 ts_usec;    /* timestamp microseconds */
-    uint32 incl_len;    /* number of octets of packet saved in file */
-    uint32 orig_len;    /* actual length of packet */
+    int32_t ts_sec;    /* timestamp seconds */
+    uint32_t ts_usec;    /* timestamp microseconds */
+    uint32_t incl_len;    /* number of octets of packet saved in file */
+    uint32_t orig_len;    /* actual length of packet */
 };
 
 
@@ -46,24 +51,22 @@ uint16_t swapByteOrder16(uint16_t v)
 
 uint32_t swapByteOrder32(uint32_t v)
 {
-    return ((v & 0xFF) << 24) | ((v & 0xFF00) << 8) | ((v & 0xFF0000) >> 8) | ((v & 0xFF000000) >> 24);
+    return ((v & 0xFFL) << 24) | ((v & 0xFF00L) << 8) | ((v & 0xFF0000L) >> 8) | ((v & 0xFF000000L) >> 24);
 }
-
-using namespace inet::serializer;
 
 static void printobject(cObject* object)
 {
     EV << object->getClassName() << ":" << endl;
     cClassDescriptor *descriptor = object->getDescriptor();
-    for (int i = 0; i < descriptor->getFieldCount(object); i++) {
-        EV << "    " << descriptor->getFieldName(object, i) << ": ";
-        if (descriptor->getFieldIsArray(object, i)) {
-            for (int j = 0; j < descriptor->getArraySize(object, i); j++) {
-                EV << "      [" << j << "]: " << descriptor->getFieldAsString(object,i,j) << endl;
+    for (int i = 0; i < descriptor->getFieldCount(); i++) {
+        EV << "    " << descriptor->getFieldName(i) << ": ";
+        if (descriptor->getFieldIsArray(i)) {
+            for (int j = 0; j < descriptor->getFieldArraySize(object, i); j++) {
+                EV << "      [" << j << "]: " << descriptor->getFieldValueAsString(object,i,j) << endl;
             }
         }
         else
-            EV << descriptor->getFieldAsString(object,i,0) << endl;
+            EV << descriptor->getFieldValueAsString(object,i,0) << endl;
     }
 }
 
@@ -72,8 +75,8 @@ static void testRecord(const char* filename, bool fcs = true)
     FILE *pcapFile;
     struct pcap_hdr fileHeader;
     struct pcaprec_hdr recordHeader;
-    static uint8 readBuf[60000];
-    static uint8 writeBuf[60000];
+    static uint8_t readBuf[60000];
+    static uint8_t writeBuf[60000];
 
     memset((void*)&readBuf, 0, sizeof(readBuf));
     memset((void*)&writeBuf, 0, sizeof(writeBuf));
@@ -116,23 +119,32 @@ static void testRecord(const char* filename, bool fcs = true)
     fread(&readBuf, recordHeader.incl_len, 1, pcapFile);
     fclose(pcapFile);
 
-    uint32 serializedLength = 0;
+    uint32_t serializedLength = 0;
 
-    Buffer rb(readBuf, recordHeader.incl_len);
+    uint32_t incl_len = recordHeader.incl_len;
+    if (fileHeader.network == LINKTYPE_ETHERNET && recordHeader.incl_len == recordHeader.orig_len) {
+        Buffer b(readBuf, incl_len + 4);
+        b.seek(incl_len);
+        uint32_t fcs = ethernetCRC(b._getBuf(), b.getPos());
+        b.writeUint32(fcs);
+        incl_len = b.getPos();
+    }
+    Buffer rb(readBuf, incl_len);
     Buffer wb(writeBuf, sizeof(writeBuf));
     Context c;
-    cPacket *frame = SerializerBase::parse(rb, c, LINKTYPE, fileHeader.network, 0);
+    cPacket *frame = SerializerBase::lookupAndDeserialize(rb, c, LINKTYPE, fileHeader.network);
+    ASSERT(frame);
     for (cPacket *temp = frame; temp; temp = temp->getEncapsulatedPacket())
         printobject(temp);
-    SerializerBase::serialize(frame, wb, c, LINKTYPE, fileHeader.network, 0);
+    SerializerBase::lookupAndSerialize(frame, wb, c, LINKTYPE, fileHeader.network);
     serializedLength = wb.getPos();
     delete frame;
 
-    if(recordHeader.incl_len == serializedLength)
+    if(incl_len == serializedLength)
         EV << "Frame lengths are the same" << endl;
     else
-        EV << "Frame lengths are not the same: " << recordHeader.incl_len << " ws " << serializedLength << endl;
-    if(recordHeader.incl_len == serializedLength && !memcmp(readBuf, writeBuf, fcs ? serializedLength : serializedLength - 4))
+        EV << "Frame lengths are not the same: " << incl_len << " ws " << serializedLength << endl;
+    if(incl_len == serializedLength && !memcmp(readBuf, writeBuf, fcs ? serializedLength : serializedLength - 4))
         EV << "Frames are the same" << endl;
     else
         EV << "Frames are not the same" << endl;
@@ -141,9 +153,7 @@ static void testRecord(const char* filename, bool fcs = true)
 %activity:
 testRecord("../../pcap/rarp_request.pcap", false);
 testRecord("../../pcap/rarp_req_reply.pcap", false);
-//testRecord("../../pcap/v6.pcap", false);
-testRecord("../../pcap/tcp_ok_capture.pcap", false);
-//testRecord("../../pcap/80211ack.pcap", false);
+testRecord("../../pcap/v6.pcap", false);
 
 %contains-regex: stdout
 === Testing file ../../pcap/rarp_request.pcap
