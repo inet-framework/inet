@@ -94,6 +94,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         bool acceptSet;
         bool establishedPending;
         bool abortSent;
+        bool socketOptionsArrived;
         cPacketQueue *receivedPackets;
         cPacketQueue *outboundPackets;
         simtime_t simStartTime;
@@ -137,6 +138,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         int syscallWrite(struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallAccept(struct syscall_spec *syscall, cQueue *args, char **error);
+
+        int syscallSetsockopt(struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error);
 

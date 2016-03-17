@@ -62,6 +62,7 @@ void PacketDrillApp::initialize(int stage)
         listenSet = false;
         acceptSet = false;
         establishedPending = false;
+        socketOptionsArrived = false;
         receivedPackets = new cPacketQueue("receiveQueue");
         outboundPackets = new cPacketQueue("outboundPackets");
         expectedMessageSize = 0;
@@ -210,6 +211,16 @@ void PacketDrillApp::handleMessage(cMessage *msg)
             }
         } else if (msg->getArrivalGate()->isName("sctpIn")) {
             switch (msg->getKind()) {
+                case SCTP_I_SENDSOCKETOPTIONS: {
+                    sctpSocket.setUserOptions((void*) (msg->getContextPointer()));
+                    socketOptionsArrived = true;
+                    if (!eventTimer->isScheduled() && eventCounter < numEvents - 1) {
+                        eventCounter++;
+                        scheduleEvent();
+                    }
+                    delete msg;
+                    return;
+                }
                 case SCTP_I_ESTABLISHED: {
                     if (listenSet) {
                         if (acceptSet) {
@@ -266,6 +277,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                         eventCounter++;
                         scheduleEvent();
                     }
+                    break;
+                }
+                case SCTP_I_CLOSED: {
                     break;
                 }
                 default: printf("Msg kind %d not implemented\n", msg->getKind());
@@ -460,7 +474,7 @@ void PacketDrillApp::handleTimer(cMessage *msg)
         case MSGKIND_EVENT: {
             PacketDrillEvent *event = (PacketDrillEvent *)msg->getContextPointer();
             runEvent(event);
-            if ((!recvFromSet && outboundPackets->getLength() == 0) &&
+            if ((socketOptionsArrived && !recvFromSet && outboundPackets->getLength() == 0) &&
                 (!eventTimer->isScheduled() && eventCounter < numEvents - 1)) {
                 eventCounter++;
                 scheduleEvent();
@@ -506,6 +520,8 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
         syscallConnect(syscall, args, &error);
     } else if (!strcmp(name, "accept")) {
         syscallAccept(syscall, args, &error);
+    } else if (!strcmp(name, "setsockopt")) {
+        syscallSetsockopt(syscall, args, &error);
     } else {
         EV_INFO << "System call %s not known (yet)." << name;
     }
@@ -629,11 +645,8 @@ int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, ch
             listenSet = true;
             tcpSocket.listenOnce();
             break;
-        case IP_PROT_SCTP:
-        {
-            sctpSocket.setInboundStreams((int)par("inboundStreams"));
-            sctpSocket.setOutboundStreams((int)par("outboundStreams"));
-            sctpSocket.listen(true, 0, 0, true);
+        case IP_PROT_SCTP: {
+            sctpSocket.listen(0, true, 0, true);
             listenSet = true;
             break;
         }
@@ -740,9 +753,7 @@ int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, c
             tcpSocket.connect(remoteAddress, remotePort);
             break;
         case IP_PROT_SCTP: {
-            sctpSocket.setInboundStreams((int)par("inboundStreams"));
-            sctpSocket.setOutboundStreams((int)par("outboundStreams"));
-            sctpSocket.connect(remoteAddress, remotePort, false, 0, 0);
+            sctpSocket.connect(remoteAddress, remotePort, 0, true);
             break;
             }
         default:
@@ -752,6 +763,94 @@ int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, c
     return STATUS_OK;
 }
 
+
+int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args, char **error)
+{
+    int script_fd, level, optname;
+    PacketDrillExpression *exp;
+
+    args->setName("syscallSetsockopt");
+    assert(protocol == IP_PROT_SCTP);
+    if (args->getLength() != 5)
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(0);
+    if (!exp || exp->getS32(&script_fd, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *) args->get(1);
+    if (!exp || exp->getS32(&level, error))
+        return STATUS_ERR;
+    if (level != IPPROTO_SCTP) {
+        return STATUS_ERR;
+    }
+    exp = (PacketDrillExpression *) args->get(2);
+    if (!exp || exp->getS32(&optname, error))
+        return STATUS_ERR;
+
+    exp = (PacketDrillExpression *) args->get(3);
+    switch (exp->getType())
+    {
+        case EXPR_SCTP_INITMSG: {
+            struct sctp_initmsg_expr *initmsg = exp->getInitmsg();
+            sctpSocket.setOutboundStreams(initmsg->sinit_num_ostreams->getNum());
+            sctpSocket.setInboundStreams(initmsg->sinit_max_instreams->getNum());
+            sctpSocket.setMaxInitRetrans(initmsg->sinit_max_attempts->getNum());
+            sctpSocket.setMaxInitRetransTimeout(initmsg->sinit_max_init_timeo->getNum());
+            break;
+        }
+        case EXPR_SCTP_RTOINFO: {
+            struct sctp_rtoinfo_expr *rtoinfo = exp->getRtoinfo();
+            sctpSocket.setRtoInitial(rtoinfo->srto_initial->getNum() * 1.0 / 1000);
+            sctpSocket.setRtoMax(rtoinfo->srto_max->getNum() * 1.0 / 1000);
+            sctpSocket.setRtoMin(rtoinfo->srto_min->getNum() * 1.0 / 1000);
+            break;
+        }
+        case EXPR_SCTP_SACKINFO: {
+            struct sctp_sack_info_expr *sackinfo = exp->getSackinfo();
+            sctpSocket.setSackPeriod(sackinfo->sack_delay->getNum() * 1.0 / 1000);
+            sctpSocket.setSackFrequency(sackinfo->sack_freq->getNum());
+            break;
+        }
+        case EXPR_SCTP_ASSOCVAL:
+            switch (optname)
+            {
+                case SCTP_MAX_BURST: {
+                    struct sctp_assoc_value_expr *burstvalue = exp->getAssocval();
+                    sctpSocket.setMaxBurst(burstvalue->assoc_value->getNum());
+                    break;
+                }
+                case SCTP_MAXSEG: {
+                    struct sctp_assoc_value_expr *assocvalue = exp->getAssocval();
+                    sctpSocket.setFragPoint(assocvalue->assoc_value->getNum());
+                    break;
+                }
+            }
+            break;
+        case EXPR_LIST: {
+            int value;
+
+            if (!exp || exp->getType() != EXPR_LIST)
+            {
+                return STATUS_ERR;
+            }
+            if (exp->getList()->getLength() != 1)
+            {
+                printf("Expected [<integer>] but got multiple elements");
+                return STATUS_ERR;
+            }
+            //PDExpression *exp2 = (PDExpression*)(exp->getList()->get(0));
+            PacketDrillExpression *exp2 = (PacketDrillExpression*) (exp->getList()->pop());
+            exp2->getS32(&value, error);
+            sctpSocket.setNoDelay(value);
+            delete exp2;
+            break;
+        }
+        case EXPR_INTEGER:
+            break;
+        default:
+            printf("Type %d not known\n", exp->getType());
+    }
+    return STATUS_OK;
+}
 
 int PacketDrillApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error)
 {

@@ -42,8 +42,15 @@ struct int_symbol platform_symbols_table[] = {
     { IPPROTO_IP,                       "IPPROTO_IP"                      },
     { IPPROTO_UDP,                      "IPPROTO_UDP"                     },
     { IPPROTO_TCP,                      "IPPROTO_TCP"                     },
-    { IPPROTO_SCTP,                     "IPPROTO_SCTP"                     },
+    { IPPROTO_SCTP,                     "IPPROTO_SCTP"                    },
 
+    /* /usr/include/netinet/sctp.h */
+    { SCTP_RTOINFO,                     "SCTP_RTOINFO"                    },
+    { SCTP_INITMSG,                     "SCTP_INITMSG"                    },
+    { SCTP_NODELAY,                     "SCTP_NODELAY"                    },
+    { SCTP_MAXSEG,                      "SCTP_MAXSEG"                     },
+    { SCTP_DELAYED_SACK,                "SCTP_DELAYED_SACK"               },
+    { SCTP_MAX_BURST,                   "SCTP_MAX_BURST"                  },
     /* Sentinel marking the end of the table. */
     { 0, NULL },
 };

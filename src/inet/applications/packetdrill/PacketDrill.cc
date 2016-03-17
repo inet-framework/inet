@@ -695,6 +695,30 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
         out->setNum(number);
         break;
 
+    case EXPR_SCTP_INITMSG:
+        assert(in->getType() == EXPR_SCTP_INITMSG);
+        assert(out->getType() == EXPR_SCTP_INITMSG);
+        out->setInitmsg(in->getInitmsg());
+        break;
+
+    case EXPR_SCTP_RTOINFO:
+        assert(in->getType() == EXPR_SCTP_RTOINFO);
+        assert(out->getType() == EXPR_SCTP_RTOINFO);
+        out->setRtoinfo(in->getRtoinfo());
+        break;
+
+    case EXPR_SCTP_SACKINFO:
+        assert(in->getType() == EXPR_SCTP_SACKINFO);
+        assert(out->getType() == EXPR_SCTP_SACKINFO);
+        out->setSackinfo(in->getSackinfo());
+        break;
+
+    case EXPR_SCTP_ASSOCVAL:
+        assert(in->getType() == EXPR_SCTP_ASSOCVAL);
+        assert(out->getType() == EXPR_SCTP_ASSOCVAL);
+        out->setAssocval(in->getAssocval());
+        break;
+
     case EXPR_STRING:
         if (out->unescapeCstringExpression(in->getString(), error))
             return STATUS_ERR;

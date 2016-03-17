@@ -38,6 +38,10 @@ struct int_symbol {
     const char *name;
 };
 
+#ifndef IPPROTO_SCTP
+#define IPPROTO_SCTP 132
+#endif
+
 /* TCP option numbers and lengths. */
 #define TCPOPT_EOL                0
 #define TCPOPT_NOP                1
@@ -108,6 +112,14 @@ struct int_symbol {
 #define FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK      0x00000400
 #define FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK        0x00000800
 
+/* SCTP option names */
+#define SCTP_INITMSG   0
+#define SCTP_RTOINFO   1
+#define SCTP_NODELAY   2
+#define SCTP_MAXSEG    3
+#define SCTP_DELAYED_SACK 4
+#define SCTP_MAX_BURST 5
+
 enum direction_t {
     DIRECTION_INVALID,
     DIRECTION_INBOUND,  /* packet coming into the kernel under test */
@@ -177,6 +189,11 @@ enum expression_t {
     EXPR_STRING,          /* double-quoted string in 'string' */
     EXPR_BINARY,          /* binary expression, 2 sub-expressions */
     EXPR_LIST,            /* list of expressions */
+    EXPR_SCTP_RTOINFO, /* struct sctp_rtoinfo for SCTP_RTOINFO */
+    EXPR_SCTP_INITMSG, /* struct sctp_initmsg for SCTP_INITMSG */
+    EXPR_SCTP_ASSOCVAL, /* struct sctp_assoc_value */
+    EXPR_SCTP_SACKINFO, /* struct sctp_sack_info for SCTP_DELAYED_SACK */
+    EXPR_SCTP_NODELAY,
     NUM_EXPR_TYPES,
 };
 
@@ -249,6 +266,35 @@ struct binary_expression {
     char *op;    /* binary operator */
     PacketDrillExpression *lhs;    /* left hand side expression */
     PacketDrillExpression *rhs;    /* right hand side expression */
+};
+
+struct sctp_rtoinfo_expr {
+    PacketDrillExpression *srto_assoc_id;
+    PacketDrillExpression *srto_initial;
+    PacketDrillExpression *srto_max;
+    PacketDrillExpression *srto_min;
+};
+
+/* Parse tree for a sctp_initmsg struct in a [gs]etsockopt syscall. */
+struct sctp_initmsg_expr {
+    PacketDrillExpression *sinit_num_ostreams;
+    PacketDrillExpression *sinit_max_instreams;
+    PacketDrillExpression *sinit_max_attempts;
+    PacketDrillExpression *sinit_max_init_timeo;
+};
+
+
+/* Parse tree for a sctp_assoc_value struct in a [gs]etsockopt syscall. */
+struct sctp_assoc_value_expr {
+    PacketDrillExpression *assoc_id;
+    PacketDrillExpression *assoc_value;
+};
+
+/* Parse tree for a sctp_sack_info struct in a [gs]etsockopt syscall. */
+struct sctp_sack_info_expr {
+    PacketDrillExpression *sack_assoc_id;
+    PacketDrillExpression *sack_delay;
+    PacketDrillExpression *sack_freq;
 };
 
 
@@ -349,8 +395,13 @@ class INET_API PacketDrillExpression : public cObject
             int64 num;
             char *string;
             struct binary_expression *binary;
+            struct sctp_rtoinfo_expr *sctp_rtoinfo;
+            struct sctp_initmsg_expr *sctp_initmsg;
+            struct sctp_assoc_value_expr *sctp_assoc_value;
+            struct sctp_sack_info_expr *sctp_sack_info;
             cQueue *list;
         } value;
+        std::list<int32> optionList;
         const char *format; /* the printf format for printing the value */
 
     public:
@@ -366,6 +417,18 @@ class INET_API PacketDrillExpression : public cObject
         void setList(cQueue* queue) { value.list = queue; };
         struct binary_expression* getBinary() { return value.binary; };
         void setBinary(struct binary_expression* bin) { value.binary = bin; };
+        void insertValue(int64 value_) {
+            optionList.push_back(value_);
+        }
+        void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; };
+        struct sctp_rtoinfo_expr *getRtoinfo() { return value.sctp_rtoinfo; };
+        void setInitmsg(struct sctp_initmsg_expr *exp) { value.sctp_initmsg = exp; };
+        struct sctp_initmsg_expr *getInitmsg() { return value.sctp_initmsg; };
+        void setAssocval(struct sctp_assoc_value_expr *exp) { value.sctp_assoc_value = exp; };
+        struct sctp_assoc_value_expr *getAssocval() { return value.sctp_assoc_value; };
+        void setSackinfo(struct sctp_sack_info_expr *exp) { value.sctp_sack_info = exp; };
+        struct sctp_sack_info_expr *getSackinfo() { return value.sctp_sack_info; };
+        std::list<int32> getOptionList() { return optionList; };
 
         int unescapeCstringExpression(const char *input_string, char **error);
         int getS32(int32 *value, char **error);

@@ -45,7 +45,8 @@ enum SctpCommandCode {
     SCTP_C_STREAM_RESET = 16,    // send StreamResetChunk
     SCTP_C_NAT_INFO = 18,
     SCTP_C_SEND_ASCONF = 19,
-    SCTP_C_SET_STREAM_PRIO = 20
+    SCTP_C_SET_STREAM_PRIO = 20,
+    SCTP_C_GETSOCKETOPTIONS = 21
 };
 
 //
@@ -74,7 +75,8 @@ enum SctpStatusInd {
     SCTP_I_SEND_STREAMS_RESETTED = 17,
     SCTP_I_RCV_STREAMS_RESETTED = 18,
     SCTP_I_RESET_REQUEST_FAILED = 19,
-    SCTP_I_ADDRESS_ADDED = 20    // used for AddIP and multihomed NAT
+    SCTP_I_ADDRESS_ADDED = 20,    // used for AddIP and multihomed NAT
+    SCTP_I_SENDSOCKETOPTIONS = 21
 };
 
 enum SCTPFlags {

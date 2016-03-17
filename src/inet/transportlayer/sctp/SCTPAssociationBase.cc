@@ -47,7 +47,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
         pathErrorThreshold = PATH_MAX_RETRANS;
     }
 
-    pathRto = assoc->getSctpMain()->par("rtoInitial");
+    pathRto = assoc->getSctpMain()->getRtoInitial();
     heartbeatTimeout = pathRto;
     double interval = (double)assoc->getSctpMain()->par("hbInterval");
 
@@ -426,7 +426,7 @@ SCTPStateVariables::SCTPStateVariables()
     disableReneging = false;
     rtxMethod = 0;
     maxBurst = 0;
-    maxBurstVariant = SCTPStateVariables::MBV_UseItOrLoseIt;
+    maxBurstVariant = SCTPStateVariables::MBV_MaxBurst;
     initialWindow = 0;
     allowCMT = false;
     cmtSendAllComparisonFunction = nullptr;
@@ -1298,14 +1298,14 @@ void SCTPAssociation::stateEntered(int32 status)
             state->enableHeartbeats = (bool)sctpMain->par("enableHeartbeats");
             state->sendHeartbeatsOnActivePaths = (bool)sctpMain->par("sendHeartbeatsOnActivePaths");
             state->numGapReports = sctpMain->par("numGapReports");
-            state->maxBurst = (uint32)sctpMain->par("maxBurst");
+            state->maxBurst = (uint32)sctpMain->getMaxBurst();
             state->rtxMethod = sctpMain->par("RTXMethod");
             state->nrSack = (bool)sctpMain->par("nrSack");
             state->disableReneging = (bool)sctpMain->par("disableReneging");
             state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
             state->outgoingSackSeqNum = 0;
             state->incomingSackSeqNum = 0;
-            state->fragPoint = (uint32)sctpMain->par("fragPoint");
+            state->fragPoint = (uint32)sctpMain->getFragPoint();
             state->highSpeedCC = (bool)sctpMain->par("highSpeedCC");
             state->initialWindow = (uint32)sctpMain->par("initialWindow");
             if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {
@@ -1531,8 +1531,8 @@ void SCTPAssociation::stateEntered(int32 status)
             state->bytesToAddPerPeerChunk = sctpMain->par("bytesToAddPerPeerChunk");
             state->tellArwnd = sctpMain->par("tellArwnd");
             state->throughputInterval = (double)sctpMain->par("throughputInterval");
-            sackPeriod = (double)sctpMain->par("sackPeriod");
-            sackFrequency = sctpMain->par("sackFrequency");
+            sackPeriod = (double)sctpMain->getSackPeriod();
+            sackFrequency = sctpMain->getSackFrequency();
             SCTP::AssocStat stat;
             stat.assocId = assocId;
             stat.start = simTime();
