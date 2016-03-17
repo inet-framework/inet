@@ -241,9 +241,9 @@ can double-click on a node (client, server, router) to see its internals.
 </p>
 
 <p class="img">
-<a href="images/client.gif"><img src="thumbs/client.gif"/></a>
-<a href="images/server.gif"><img src="thumbs/server.gif"/></a>
-<a href="images/router.gif"><img src="thumbs/router.gif"/></a>
+<a href="images/client.png"><img src="thumbs/client.png"/></a>
+<a href="images/server.png"><img src="thumbs/server.png"/></a>
+<a href="images/router.png"><img src="thumbs/router.png"/></a>
 </p>
 
 <p>
@@ -251,20 +251,16 @@ Bottom up, the client model contains:
 </p>
 
 <ul>
-    <li>an Ethernet interface (<tt>eth[0]</tt>);
+    <li>an Ethernet interface (<tt>eth[0]</tt>)
+    <li>a loopback interface (<tt>lo0</tt>)
     <li>network layer (<tt>networkLayer</tt>, a further double-click will
         reveal it's basically IP);
-    <li>a pinger application (<tt>pingApp</tt>, defunct in this model);
-    <li>UDP model (<tt>udp</tt>), also not used in the ARPTest model
-        (no applications configured);
     <li>TCP model (<tt>tcp</tt>). The number of connections in various
         TCP states are displayed in blue above the icon;
     <li>an application model (<tt>tcpApp[0]</tt>)
     <li>the <tt>routingTable</tt> module contains, well, the routing table
         (number of unicast+multicast routes displayed above the icon)
-    <li><tt>blackboard</tt> is there for future extensions (it will be used
-        in in the future as a storage place for various parameters and
-        state variables different protocol layers need to share)
+    <li>the <tt>interfaceTable</tt> contains information about network interfaces of the host
 </ul>
 
 <p>
@@ -273,18 +269,17 @@ no routing protocols -- routing is static in this model.)
 </p>
 
 <p>
-If you further double-click on these components (TCP, UDP, etc.),
-most of the time you'll get an <i>inspector window</i> like this.
-</p>
-
-<p class="img"><a href="images/tcpmain.gif"><img src="thumbs/tcpmain.gif"/></a></p>
-
-<p>
+If you further double-click on these components (TCP, UDP, etc.), you can view what modules they are made up from. You can use the arrow buttons in the simulation model window to navigate levels (ie. go up a level). After some levels you get an empty window.
 It means that the component is implemented in C++, and cannot be subdivided
 any further (it is a <i>simple module</i>, as opposed to <i>compund modules</i>
-which are composed of submodules). The inspector window exposes the internals
+which are composed of submodules). If you right click on the simple module and select <i>Open Details</i>, an inspector window like this comes up:
+</p>
+
+<p class="img"><img src="images/tcpmain_v2.png"/></a></p>
+
+The inspector window exposes the internals
 of the module and we'll use it a lot later in this walkthrough, but let's just leave it
-for now.
+for now. You can also view the information presented here in the property viewer panel at the bottom left side of the simulation window. Click on any module and its properties will be displayed there.
 </p>
 
 <p>
