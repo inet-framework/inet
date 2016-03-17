@@ -136,7 +136,7 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
             Context c;
             c.l3AddressesPtr = ipv4addresses;
             c.l3AddressesLength = sizeof(ipv4addresses);
-            cPacket *enc = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, ret->getTransportProtocol(), 0);
+            cPacket *enc = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, ret->getTransportProtocol());
             if (enc) {
                 delete ret->decapsulate();
                 ret->encapsulate(enc);
