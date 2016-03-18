@@ -293,7 +293,7 @@ will be useful for exploring other protocols as well.
 
 <p>
 If we are interested in ARP, it's a bit annoying that we have to wade
-throught all those Ethernet protocol registration messages until we get to the first
+throught all those protocol registration events until we get to the first
 ARP request at 1s. Luckily, you can use the "Run until..." function to
 fast-forward past them.
 </p>
@@ -323,40 +323,34 @@ one event. Double click on the event to open the inspector window (or single cli
 
 <p class="img"><a href="images/nextevent.png"><img src="thumbs/nextevent.png"></a></p>
 
+
 <p>
-Pressing F4 (single-step) repeatedly will take you though the next events.
-You'll see as the application tells TCP to open a connection, as TCP obeys
-and sends a SYN (TCP connection request) packet, as IP encapsulates SYN into
-an IP datagram, and sends it down to the Ethernet interface. We could actually
-peek into those messages and find out about TCP ports and IP addresses and
-lots of interesting things, but let's resist the temptation and concentrate
-on ARP.
+If you right click on a module and choose <i>Open Graphical View</i>, a separate window is opened displaying the module's insides. This is a useful feature because multiple views can be open at the same time. Let's go into the client computer and open a graphical view of <i>networkLayer</i>. Now we can observe as packets arrive at the client module and the path they take in the network layer.
+</p>
+
+<img src="images/graph_view.png">
+
+<p>
+    Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
+
+    You will find the SYN packet sitting at the input of the IP module. The IP module is talking to the routing table one level up and the arp module to the right. This is indicated by the dotted arrows (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
+</p>
+<p>
+    Here we are at the beginning of the interesting part. You may actually take a note that we are at event #25 (it's displayed in the top line of the main window status bar) so that next time you can quickly get here using the "Run until..." dialog (it can stop either at a simulation time or at an event number -- or if you enter both, it'll stop at whichever comes first. Note that you enter the value of the next event you want to observe -- so in this case we enter 26 in the run until dialog).
 </p>
 
 <p class="img">
-<a href="images/cli_activeopen.png"><img src="thumbs/cli_activeopen.png"/></a>
-<a href="images/cli_sendsyn.png"><img src="thumbs/cli_sendsyn.png"/></a>
-<a href="images/cli_encapsyn.png"><img src="thumbs/cli_encapsyn.png"/></a>
-<img src="images/anim_v5.gif">
+
+<img src="images/licecap3.gif">
 </p>
 
-<p>
-You probably noticed that the IP datagram has disappeared in the Ethernet
-interface. This indicates that <tt>eth[0]</tt> is a compound module,
-and if you open it (double-click), you'll find that it consists of 3
-submodules (<tt>arp</tt>, <tt>encap</tt> and <tt>mac</tt>) and the IP datagram
-is sitting on the input of the <tt>arp</tt> module.
-</p>
 
-<p class="img"><a href="images/ethinterface.gif"><img src="thumbs/ethinterface.gif"/></a></p>
 
-<p>
-Here we are at the beginning of the interesting part. You may actually
-take a note that we are at event #94 (it's displayed in the top line of the
-main window status bar) so that next time you can quickly get here
-using the "Run until..." dialog (it can stop either at a simulation time or at
-an event number -- or if you enter both, it'll stop at whichever comes first.)
-</p>
+
+
+
+
+
 
 <a name="arpbegins"/><h3>ARP begins</h3>
 
@@ -369,6 +363,15 @@ contains <tt>arp</tt>'s messages only. Right-click on the <tt>arp</tt> module, a
 select "Module output" from the context menu. A new text window, titled
 "(ARP)arpTest.client.eth[0].arp" will appear.
 </p>
+
+<p>
+    We can see what's going on by checking out the module logs. These
+log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the log panel at the bottom of the main window, but that'll soon be useless because other modules
+dump their output there too. Luckily, we can filter the logs so we can concentrate on messages from modules we are interested in now -- we can do that with the <i>filter window contents</i> button at the top right of the logs panel. Here we can select which module's logs we want to display -- select arp and ip from client/networklayer.
+</p>
+<a href="images/filterlogs.png"><img src="images/filterlogs.png" width=200></a>
+
+
 
 <p class="img"><a href="images/arp-ctxmenu.gif"><img src="thumbs/arp-ctxmenu.gif"/></a></p>
 
