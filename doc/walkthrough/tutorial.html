@@ -44,8 +44,7 @@ written for the OMNeT++/OMNEST simulation environment.
 </p>
 
 <p>
-This tutorial is based on the ARPTest example simulation. You can find the simulation this
-tutorial is based on in the INET Examples directory (inet/examples/ethernet/arptest2/).
+This tutorial is based on the ARPTest example simulation. You can find this example simulation in the INET Examples directory (inet/examples/ethernet/arptest2/).
 </p>
 
 <a name="launching"/><h3>Launching the ARPTest simulation</h3>
@@ -84,17 +83,17 @@ Click on the "Run" button on the toolbar, or hit F5.
 <p class="img"><img src="images/tb-run.gif"/></p>
 
 <p>
-When registering the protocols at the network layers of the two hosts finishes, and simulating the network operation begins.
+When registering the protocols at the network layers of the two hosts finishes, simulating the network operation begins.
 In the model scenario, the client computer
 (laptop icon) opens a TCP connection to the server (server icon) at 1s,
 and starts sending a large data stream at 1.1s. This is configured in the <i>ARPTest.ned</i> file:
 </p>
 
 <p>
-<code>
-    **.client*.tcpApp[0].tOpen = 1s<br>
+<pre class="src">
+    **.client*.tcpApp[0].tOpen = 1s
     **.client*.tcpApp[0].tSend = 1.1s
-</code>
+</pre>
 </p>
 
 <p>
@@ -307,10 +306,10 @@ Restart the simulation (Simulate|Rebuild network), then click the
 
 <p>
 When protocol registration finishes we are still at 0s simulation time, but the first ARP
-request is around 1s, so you can safely enter anything in the Run until dialog between 0 and 1s, so now let's enter 2ms.
+request is around 1s, so you can safely enter anything in the Run until dialog between 0 and 1s, so now let's enter 1ms.
 </p>
 
-<p class="img"><img src="images/dlg-rununtil.gif"/></p>
+<p class="img"><img src="images/dlg-rununtil.png"/></p>
 
 <p>
 After clicking OK, the simulation progresses past the protocol registration period in no time.
@@ -354,44 +353,31 @@ If you right click on a module and choose <i>Open Graphical View</i>, a separate
 
 <a name="arpbegins"/><h3>ARP begins</h3>
 
-<p>
-The <tt>arp</tt> module will tell us what's going on by writing a log. These
-log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the
-main text window, but that'll soon be useless because other modules
-dump their output there too. Luckily, we can open a window which
-contains <tt>arp</tt>'s messages only. Right-click on the <tt>arp</tt> module, and
-select "Module output" from the context menu. A new text window, titled
-"(ARP)arpTest.client.eth[0].arp" will appear.
-</p>
+
 
 <p>
     We can see what's going on by checking out the module logs. These
 log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the log panel at the bottom of the main window, but that'll soon be useless because other modules
 dump their output there too. Luckily, we can filter the logs so we can concentrate on messages from modules we are interested in now -- we can do that with the <i>filter window contents</i> button at the top right of the logs panel. Here we can select which module's logs we want to display -- select arp and ip from client/networklayer.
 </p>
-<a href="images/filterlogs.png"><img src="images/filterlogs.png" width=200></a>
-
-
-
-<p class="img"><a href="images/arp-ctxmenu.gif"><img src="thumbs/arp-ctxmenu.gif"/></a></p>
 
 <p>
-Then press F4 (or click the "Step" icon on the main window's toolbar)
-to perform the next event and let <tt>arp</tt> process the datagram.
+<img src="images/filterlogs.png">
+</p>
+
+<p>
+So we are at event #25, let's press F4 (or click at the <i>step</i> button) for the next event, and let IP process the SYN packet.
 You'll see that:
 </p>
-
 <ul>
-    <li>the datagram disappers inside <tt>arp</tt>;
-    <li><tt>arp</tt> sends an ARP request
-    <li>the <tt>arp</tt> text window comments what happened
+<li>the syn packet disappears in IP
+<li>arp creates an arp request packet
+<li>IP sends the packet
 </ul>
-
 <p>
-At this point your screen will look something like this.
+The logs will look like this:
 </p>
-
-<p class="img"><a href="images/arp-req-sent.gif"><img src="thumbs/arp-req-sent.gif"/></a></p>
+<img src="images/arprequestlogs.png">
 
 <p>
 ARP maps L3 addresses (IP address) to L2 addresses (Ethernet MAC address).
@@ -403,14 +389,13 @@ ARP Request. That's what we have seen here. Let's check it in detail!
 <a name="requestpacket"/><h3>The ARP Request packet</h3>
 
 <p>
-Double-click on the ARP request packet to open its inspector window,
-then click the "Fields" tab.
+Click on the ARP request packet to view it's details in the property viewer panel (bottom left of the main window).
 </p>
 
-<p class="img"><a href="images/arpreq-fields.gif"><img src="thumbs/arpreq-fields.gif"/></a></p>
+<img src="images/arpreq-fields.png"/></p>
 
 <p>
-The "Fields" page shows the contents of the ARP packet: source MAC address,
+It shows the contents of the ARP packet: source MAC address,
 destination MAC address, source IP address, destination IP address.
 The source MAC and IP addresses are our own addresses (in the model,
 autoconfigured MAC addresses begin with "0A AA"); the destination IP
@@ -441,8 +426,7 @@ message ARPPacket
 
 <p>
 Definition via a <tt>.msg</tt> file not only saved a lot of programming effort,
-but it was also necessary for the packet's content to be displayed in the
-"Fields" page.
+but it was also necessary for the packet's content to be displayed in the Details.
 </p>
 
 <p>
@@ -455,7 +439,7 @@ This information is attached to the packet in small data structure called
 "control info". Control info is also a C++ object and similarly to packets,
 its C++ source is generated from <tt>.msg</tt> files.
 You can view the contents of the control info attached to this ARP packet
-by clicking the "Control info" tab in the window.
+by clicking "Control info" in the property viewer.
 </p>
 
 <pre class="src">
@@ -472,7 +456,7 @@ class EtherCtrl
 };
 </pre>
 
-<p class="img"><a href="images/arpreq-ctrlinfo.gif"><img src="thumbs/arpreq-ctrlinfo.gif"/></a></p>
+<img src="images/arpreq-ctrlinfo.png"/></p>
 
 <p>
 It says that source MAC address is not specified (all zero -- in this case
