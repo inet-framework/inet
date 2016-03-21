@@ -332,7 +332,7 @@ If you right click on a module and choose <i>Open Graphical View</i>, a separate
 <p>
     Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
 
-    You will find the SYN packet sitting at the input of the IP module. The IP module is talking to the routing table one level up and the arp module to the right. This is indicated by the dotted arrows (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
+    You will find the SYN packet sitting at the input of the IP module. The IP module is doing a function call the routing table one level up and the arp module to the right. This is indicated by the dotted lines (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
 </p>
 <p>
     Here we are at the beginning of the interesting part. You may actually take a note that we are at event #25 (it's displayed in the top line of the main window status bar) so that next time you can quickly get here using the "Run until..." dialog (it can stop either at a simulation time or at an event number -- or if you enter both, it'll stop at whichever comes first. Note that you enter the value of the next event you want to observe -- so in this case we enter 26 in the run until dialog).
@@ -471,67 +471,52 @@ etherType is set to zero here. <!-- FIXME set etherType to proper value -->
 
 <p>
 While ARP resolution is pending, IP datagrams which wait for it have to be
-buffered somewhere. There's a <tt>"q=1"</tt> label next to the <tt>arp</tt>
-icon -- if you double-click on it (on the <tt>"q=1"</tt> text, not on the icon!),
-an inspector window will open displaying the queue of buffered datagrams.
+buffered somewhere. The <i>IP</i> module is storing the packets while waiting
+for ARP to finish. If you click on the <i>IP</i> module, you can see that it has
+a SYN packet queued.
 </p>
 
 <p class="img">
-<img src="images/arp-icon.gif"/>
-<a href="images/arp-queue.gif"><img src="thumbs/arp-queue.gif"/></a>
+<img src="images/arpqueue.png"/>
 </p>
 
 <p>
-You may double-click on the SYN line again, to view the datagram's contents
+You may double-click on the SYN packet, to view the datagram's contents
 (source and destination IP address, TTL, encapsulated protocol, etc.)
-in an inspector window, much the same way as it worked with the ARP request
-packet. One "extra" is worth mentioning, however: on the "General" page
-you'll find the "Encapsulated message" button which will take you to the
-TCP packet in the datagram -- and you can continue exploring the
-TCP header fields.
+in an inspector window. Here you can find the encapsulated TCP packet. Double click and
+you can explore the TCP header fields.
 </p>
 
-<p class="img"><a href="images/ipdgram.gif"><img src="thumbs/ipdgram.gif"/></a></p>
+<img src="images/TCPpacket.png"/></a></p>
 
 <a name="arpcache"/><h3>The ARP cache</h3>
 
 <p>
-You've noticed the blue letters "1 cache entries, send req:1 repl:0 fail:0"
-above the <tt>arp</tt> icon, and wondering what the ARP cache contains right now.
+You maybe be wondering what the ARP cache contains right now.
 No problem, we can check it out!
 </p>
 
 <p>
-Double-click the <tt>arp</tt> icon (or right-click on it and select "As object..."
-from the context menu). An inspector window will open, with several pages like the
-message inspector -- you'll need the "Contents" page now.
-</p>
-
-<p class="img">
-<a href="images/arp-ctx-asobj.gif"><img src="thumbs/arp-ctx-asobj.gif"/></a>
-<a href="images/arp-contents.gif"><img src="thumbs/arp-contents.gif"/></a>
+Click on the <i>arp</i> icon in client/networklayer, and examine the property viewer.
 </p>
 
 <p>
 The list reveals that we have several counters here for sent and received ARP requests
-etc, a queue for IP datagrams pending ARP resolution -- and also the ARP cache.
-Double-click on the <tt>arpCache</tt> line. Another inspector will open, this time
-the following one:
+etc -- and also the ARP cache.
+Double-click on the <tt>arpCache</tt> line. Another inspector will open, double click on elements to see the arp cache contents.
 </p>
 
 <p class="img">
-<a href="images/arpcache1.gif"><img src="thumbs/arpcache1.gif"/></a>
-<a href="images/arpcache2.gif"><img src="thumbs/arpcache2.gif"/></a>
+<img src="images/ARPcache.png"/></a>
+
 </p>
 
 <p>
 First of all, you'll notice that the cache contains what you'd probably expect:
-one entry, IP address 10.0.0.1, pending resolution. (The "Detailed info" line
-on the first page would show only the first three entries, hence the second page
--- it is also easier to browse if there're many entries in the cache.)
+one entry, IP address 10.0.0.1, pending resolution.
 </p>
 
-<p>
+<p><!do we need this?>
 Second, if you're familiar with C++, you'll notice that the ARP cache is
 implemented with a standard STL <tt>map</tt>. The <i>key</i> in the map
 is <tt>class IPAddress</tt> and the <i>value</i> is
@@ -550,15 +535,16 @@ But let us follow the ARP request further.
 <a name="transmission"/><h3>Transmission over Ethernet</h3>
 
 <p>
-With a further F4 key (or "Step" toolbar button), <tt>encap</tt>
+With a further F4 key (or "Step" toolbar button), the ARP request packet is sent down to the
+ethernet module. You can go into the module to see the packet at the input of the <i>encap</i> module.
+After another F4 key press, the <tt>encap</tt>
 will encapsulate the ARP request into an Ethernet II frame.
-You can verify by double-clicking
+You can verify by going into the queue module, and double clicking
 on the message and opening an inspector that the destination address
 in the frame has been set to broadcast (all FF's). The source address
-is still all zeros, it'll be set by MAC. On the "General" page you
-can verify that the ARP packet has been indeed encapsulated in an
-Ethernet frame. (You can close all other inspector windows now,
-except the <tt>arp</tt> text window.)
+is still all zeros, it'll be set by MAC. You
+can also verify that the ARP packet has been indeed encapsulated in an
+Ethernet frame.
 </p>
 
 <p>
