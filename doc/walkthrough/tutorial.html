@@ -516,8 +516,8 @@ First of all, you'll notice that the cache contains what you'd probably expect:
 one entry, IP address 10.0.0.1, pending resolution.
 </p>
 
-<p><!do we need this?>
-Second, if you're familiar with C++, you'll notice that the ARP cache is
+<p>
+The ARP cache is
 implemented with a standard STL <tt>map</tt>. The <i>key</i> in the map
 is <tt>class IPAddress</tt> and the <i>value</i> is
 <tt>struct ARPCacheEntry</tt> (or rather, a pointer to it). If you'd be
@@ -548,29 +548,27 @@ Ethernet frame.
 </p>
 
 <p>
-The next F4 key, the frame gets into <tt>mac</tt>'s buffer. (Note that
-"q=0" has changed into "q=1" -- if you double-click on the text,
-you'll actually see the queue where the frame is buffered.) But why is it
-not transmitted immediately? If you peek into the log in the main
-window, the solution is there: it says <tt>"wait IFG first"</tt>. IFG stands for
+After a few more steps, the packet leaves the queue and through the mac module, it is transmitted from the client.
+You can watch this if you go to the highest level. The packet moves to router 1. The packet animation
+signifies the start of packet transmission. Notice that after the packet moves to the router, the link
+turns yellow, meaning there is a transmission going on between the client and the router.
+
+Hit step once more and the link color goes back to normal, transmission of the frame is completed,
+this can be seen in the logs as well.
+
+Note the <i>Start of IFG period</i> in the logs.
+IFG stands for
 Inter-Frame Gap in the Ethernet standards, and it is the time needed
 by older Ethernet hardware to switch from receive (carrier sense)
 mode to transmit mode. In the model, end of the IFG is marked with
 an event which can also be seen in "scheduled-events".
-</p>
 
-<p class="img"><a href="images/wait-ifg.gif"><img src="thumbs/wait-ifg.gif"/></a></p>
+The end of the interframe gap period is implemented with a self message -- EndIFG in the scheduled events list. You can see it on the timeline at the top of the main window, and tell that
+it is going to take place 10 microseconds from now (you can also single click events in the timeline to view them in the property viewer and double click to open their inspector windows).
 
-<p>
-Hitting F4 again makes <tt>mac</tt> process the EndIFG event, and
-start transmitting the frame. The icon and also the connection arrow
-turns yellow, indicating that a transmission is going on.
-</p>
+<p class="img"><a href="images/endifg_3.png"><img src="images/endifg_3.png" width="500"></a></p>
 
-<p class="img">
-<img src="images/mac-tx.gif">
-<img src="images/arptest-startrx.gif">
-</p>
+
 
 <p>
 Most actions we've seen so far, from <tt>app</tt>'s TCP Active OPEN
