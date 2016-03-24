@@ -215,7 +215,7 @@ Now that we've dealt with the basics, we can go back to our ARPTest network mode
 You've probably seen something like this:
 </p>
 
-<p class="img"><a href="images/linkcolors.png"><img src="thumbs/linkcolors.png"/></a></p>
+<p class="img"><a href="images/linkcolors_v2.png"><img src="images/linkcolors_v2.png" width=400/></a></p>
 
 <p>
 If a link is yellow, that means the node is transmitting on the link
@@ -227,7 +227,7 @@ Link coloring has been programmed as part of the Ethernet model
 </p>
 
 <p>
-The wandering red frame (around <tt>router5</tt> on the screenshot)
+The wandering red frame (around <tt>router1</tt> on the screenshot)
 has nothing to do with Ethernet -- it simply indicates the location of the
 current/next event in the model, as dictated by the basic
 event processing algorithm of discrete event simulation.
@@ -343,7 +343,11 @@ If you right click on a module and choose <i>Open Graphical View</i>, a separate
 <img src="images/licecap3.gif">
 </p>
 
+<p>
+You can find the <i>run until next event in this module</i> button on the toolbar at the top of the model window. This is a very useful tool if you want to fast-forward to the next thing that will happen in the given module. There is also a fast run version.
+</p>
 
+<p class="img"><img src="images/nextevent_v3.png"></p>
 
 
 
@@ -632,7 +636,7 @@ event accordingly (you can verify it in the "scheduled-events" list).
 </p>
 
 <p class="img">
-<a href="images/router1-rx.gif"><img src="thumbs/router1-rx.gif"/></a>
+<a href="images/router1-rx.gif"><img src="images/router1-rx.gif"/></a>
 <a href="images/router1eth1-rx.gif"><img src="thumbs/router1eth1-rx.gif"/></a>
 </p>
 
@@ -738,7 +742,7 @@ a series of ARP requests and replies get to the server.
 You'd maybe think that the remote TCP's response, SYN+ACK will have easier
 job on the way back, because SYN paved the way for it. But not really:
 it was the IP addresses of routers initiating ARP resolutions that
-made it into the ARP caches, and not the client's IP address 10.0.0.10.
+made it into the ARP caches, and not the client's IP address 10.0.0.26.
 So the series of ARP request/replies repeats as SYN+ACK progresses
 back to the client computer.
 </p>
