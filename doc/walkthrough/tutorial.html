@@ -646,11 +646,17 @@ rip the Ethernet header and pass up the ARP Request packet to <tt>arp</tt>.
 <a name="arpreply"/><h3>ARP Reply</h3>
 
 <p>
-In the next event, <tt>arp</tt> will process the request. Hit F4.
-If you had <tt>arp</tt>'s module output window open, it'll show what happened.
+In the next few event, <tt>arp</tt> will process the request. Hit F4.
+<tt>arp</tt>'s log output will show what happened.
 </p>
 
-<p class="img"><a href="images/arp-reply-sent.gif"><img src="thumbs/arp-reply-sent.gif"/></a></p>
+<p class="img"><a href="images/arp-reply-sent.png"><img src="images/arp-reply-sent.png" width=400/></a></p>
+
+<p><!do we need this?>
+You can check the arp cache and see that a new entry has been added, as indicated by the logs:
+</p>
+
+<p class="img"><img src="images/router-arpcache-entry.png"></p>
 
 <p>
 ARP took the source IP address and source MAC address, and added them
@@ -661,14 +667,14 @@ inspector window, "Params" page -- see below). With proxy ARP, the
 router has to reply to the ARP Request if it can route the address, and
 send back its own MAC address. That's what happened here.</p>
 
-<p class="img"><a href="images/arp-params.gif"><img src="thumbs/arp-params.gif"/></a></p>
+<p class="img"><img src="images/arp-params.png"/></a></p>
 
 <p>
 While ARP processed the request packet, you probably saw a red flashing
 arrow, like this:
 </p>
 
-<p class="img"><a href="images/arp-outputport.gif"><img src="thumbs/arp-outputport.gif"/></a></p>
+<p class="img"><a href="images/arp-outputport.png"><img src="images/arp-outputport.png" width="400"/></a></p>
 
 <p>
 It indicates ARP asking the routing table component whether the address
