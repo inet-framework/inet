@@ -555,16 +555,21 @@ turns yellow, meaning there is a transmission going on between the client and th
 
 Hit step once more and the link color goes back to normal, transmission of the frame is completed,
 this can be seen in the logs as well.
+</p>
 
+<p>
 Note the <i>Start of IFG period</i> in the logs.
 IFG stands for
 Inter-Frame Gap in the Ethernet standards, and it is the time needed
 by older Ethernet hardware to switch from receive (carrier sense)
 mode to transmit mode. In the model, end of the IFG is marked with
 an event which can also be seen in "scheduled-events".
+</p>
 
+<p>
 The end of the interframe gap period is implemented with a self message -- EndIFG in the scheduled events list. You can see it on the timeline at the top of the main window, and tell that
 it is going to take place 10 microseconds from now (you can also single click events in the timeline to view them in the property viewer and double click to open their inspector windows).
+</p>
 
 <p class="img"><a href="images/endifg_3.png"><img src="images/endifg_3.png" width="500"></a></p>
 
@@ -600,7 +605,7 @@ End of transmission is an event you'll find in "scheduled-events", it is
 a self-message scheduled by the transmitting <tt>mac</tt>:
 </p>
 
-<p class="img"><img src="images/endtx-event.gif"></p>
+<p class="img"><img src="images/endtx-event.png"></p>
 
 <p>
 The "start of reception" event will occur in the receiver of course,
@@ -610,7 +615,7 @@ object. You can see in the first line of the status bar, in the
 place in <tt>router1</tt>'s second interface (<tt>eth[1]</tt>).
 </p>
 
-<p class="img"><img src="images/statusbar-startrx.gif"></p>
+<p class="img"><img src="images/statusbar-startrx.png"></p>
 
 <p>
 Open the graphics for this Ethernet interface by double-clicking
