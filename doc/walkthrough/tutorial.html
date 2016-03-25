@@ -753,6 +753,14 @@ But further packets really don't have to go through ARP resolution
 any more.
 </p>
 
+<p>
+After some time, the logs can be quite cluttered ,so you may want to use the <i>Show message/packet traffic</i> feature of the log panel to view packet traffic only. If you enter a module and switch to message/packet traffic view, the viewer shows packets that were send and received by that module. You can also filter which modules' traffic you want to examine. For example, you might be interested in traffic between the client and router 1 only -- you tick these two when you filter the modules, and you will get a result like this:
+</p>
+
+<p class="img"><img src="images/packettraffic_v2.png"></p>
+
+<p>Whereas the logs are created by the <tt>ev <<</tt> statements in the C++ code, this message/packet traffic view is created automatically by the simulation environment -- no additional code necessary. The useful thing about this feature is that you can filter and examine messages and packets even after the simulation has finished.</p>
+
 <a name="discovering"/><h3>Following ARP from the documentation</h3>
 
 <p>
