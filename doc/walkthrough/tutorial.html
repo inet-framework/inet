@@ -327,7 +327,7 @@ one event. Double click on the event to open the inspector window (or single cli
 If you right click on a module and choose <i>Open Graphical View</i>, a separate window is opened displaying the module's insides. This is a useful feature because multiple views can be open at the same time. Let's go into the client computer and open a graphical view of <i>networkLayer</i>. Now we can observe as packets arrive at the client module and the path they take in the network layer.
 </p>
 
-<img src="images/graph_view.png">
+<p class="img"><a href="images/graph_view.png"><img src="images/graph_view.png" width=500></a></p>
 
 <p>
     Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
@@ -344,7 +344,7 @@ If you right click on a module and choose <i>Open Graphical View</i>, a separate
 </p>
 
 <p>
-You can find the <i>run until next event in this module</i> button on the toolbar at the top of the model window. This is a very useful tool if you want to fast-forward to the next thing that will happen in the given module. There is also a fast run version.
+You can find the <i>Run until next event in this module</i> button on the toolbar at the top of the model window. This is a very useful tool if you want to fast-forward to the next thing that will happen in the given module. There is also a fast run version.
 </p>
 
 <p class="img"><img src="images/nextevent_v3.png"></p>
@@ -362,7 +362,7 @@ You can find the <i>run until next event in this module</i> button on the toolba
 <p>
     We can see what's going on by checking out the module logs. These
 log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the log panel at the bottom of the main window, but that'll soon be useless because other modules
-dump their output there too. Luckily, we can filter the logs so we can concentrate on messages from modules we are interested in now -- we can do that with the <i>filter window contents</i> button at the top right of the logs panel. Here we can select which module's logs we want to display -- select arp and ip from client/networklayer.
+dump their output there too. Luckily, we can filter the logs so we can concentrate on messages from modules we are interested in now -- we can do that with the <i>filter window contents</i> button at the top right of the logs panel. Here we can select which module's logs we want to display -- select arp and ip from <tt>client/networkLayer</tt>.
 </p>
 
 <p>
@@ -501,7 +501,7 @@ No problem, we can check it out!
 </p>
 
 <p>
-Click on the <i>arp</i> icon in client/networklayer, and examine the property viewer.
+Click on the <i>arp</i> icon in <tt>client/networkLayer</tt>, and examine the property viewer.
 </p>
 
 <p>
@@ -517,16 +517,17 @@ Double-click on the <tt>arpCache</tt> line. Another inspector will open, double 
 
 <p>
 First of all, you'll notice that the cache contains what you'd probably expect:
-one entry, IP address 10.0.0.1, pending resolution.
+one entry, IP address 10.0.0.25, pending resolution.
 </p>
 
 <p>
 The ARP cache is
-implemented with a standard STL <tt>map</tt>. The <i>key</i> in the map
+implemented with a standard STL <tt>map</tt>. You can check the source code in the OMNeT++ IDE. Press ctrl + shift + R to search for resources, and search for <i>ARP.cc</i> and <i>ARP.h</i>.
+In <i>ARP.cc</i> you can see that the <i>key</i> in the map
 is <tt>class IPAddress</tt> and the <i>value</i> is
-<tt>struct ARPCacheEntry</tt> (or rather, a pointer to it). If you'd be
+<tt>class ARPCacheEntry</tt> (or rather, a pointer to it). If you'd be
 looking in the C++ code to find out what makes STL map able appear like
-this in the GUI, you'd find only one extra statement:
+this in the GUI, you'd find only one extra statement in <i>ARP.h</i>:
 <tt>WATCH_PTRMAP(arpCache)</tt>, plus <tt>&lt;&lt;</tt> operators
 defined for <tt>IPAddress</tt> and <tt>ARPCacheEntry</tt>. That's all
 it takes -- the rest is up to the simulation environment.
