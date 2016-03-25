@@ -320,7 +320,7 @@ object tree (left side of main window) will also reveal that we have only
 one event. Double click on the event to open the inspector window (or single click and check out the property viewer at the bottom left). You can switch to flat mode at the top of the panel to see the details of the event object.
 </p>
 
-<p class="img"><a href="images/nextevent.png"><img src="images/nextevent.png" width=450></a></p>
+<p class="img"><a href="images/nextevent_v2.png"><img src="images/nextevent_v2.png" width=450></a></p>
 
 
 <p>
@@ -440,7 +440,7 @@ the ARP request should be sent to? That's not part of the packet!
 
 <p>
 This information is attached to the packet in small data structure called
-"control info". Control info is also a C++ object and similarly to packets,
+"control info". It is used to pass information between network layers, generally from a higher level to a lower one. Control info is also a C++ object and similarly to packets,
 its C++ source is generated from <tt>.msg</tt> files.
 You can view the contents of the control info attached to this ARP packet
 by clicking "Control info" in the property viewer.
@@ -468,7 +468,7 @@ it'll be filled in by Ethernet) and the destination MAC address is all FF's
 (the Ethernet broadcast address). SSAP and DSAP are unused here (they're for
 802.3 frame type but we use Ethernet II frames in this simulation), and pauseUnits
 has also no significance (only used for telling MAC to send PAUSE frames).
-etherType is set to zero here. <!-- FIXME set etherType to proper value -->
+etherType is set to 2054 here. <!-- FIXME set etherType to proper value --><!do we need this?>
 </p>
 
 <a name="pendingqueue"/><h3>The pending queue</h3>
@@ -759,7 +759,29 @@ After some time, the logs can be quite cluttered ,so you may want to use the <i>
 
 <p class="img"><img src="images/packettraffic_v2.png"></p>
 
-<p>Whereas the logs are created by the <tt>ev <<</tt> statements in the C++ code, this message/packet traffic view is created automatically by the simulation environment -- no additional code necessary. The useful thing about this feature is that you can filter and examine messages and packets even after the simulation has finished.</p>
+<p>
+Whereas the logs are created by the <tt>ev <<</tt> statements in the C++ code, this message/packet traffic view is created automatically by the simulation environment -- no additional code necessary. The useful thing about this feature is that you can filter and examine messages and packets even after the simulation has finished.
+</p>
+
+
+
+<p>
+Packet traffic can be visualized with the <i>Sequence chart tool</i>. In order to use it, you must record an event log -- you can do that by clicking the <i>REC</i> button in the simulation environment (this can be automated by specifying <tt>record-eventlog = true</tt> in <i>omnetpp.ini</i>).
+</p>
+
+<p class="img"><img src="images/rec.png"></p>
+
+<p>
+Before the log data is written to a results file, the finish() function must be invoked. It is invoked automatically when the simulation finishes (if it finished normally without an error), or you can do it manually if you dont want to wait -- click the <i>Conclude simulation</i> button at the top of the simulation environment.
+</p>
+
+<p class="img"><img src="images/finish.png"></p>
+
+<p>
+The event log file will be in arptest2/results. Double click to open the event log and the sequence chart.
+</p>
+
+<p class="img"><a href="images/record-eventlog.png"><img src="images/record-eventlog.png" width=500></a></p>
 
 <a name="discovering"/><h3>Following ARP from the documentation</h3>
 
