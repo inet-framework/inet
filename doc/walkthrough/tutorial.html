@@ -794,40 +794,44 @@ the thing works?
 </p>
 
 <p>
-The answer is: <i>documentation</i>. The INET framework's documentation
-essentially contains the <i>full source code (!!!)</i> -- in an organized,
-readable, searchable and cross-referenced manner.
-If you have the INET Framework demo, then you probably have the full
-documentation as well, in the <tt>Documentation/</tt> folder. You can
-open it from the demo application too:
+The answer is: <i>documentation</i>. You can find the INET reference <a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">here</a>, which contains information about all the INET modules, the module hierarchy, and C++ source documentation.
 </p>
 
-<p class="img"><a href="images/rundemo-doc.gif"><img src="thumbs/rundemo-doc.gif"/></a></p>
+<p class="img"><a href="images/reference.png"><img src="images/reference.png" width=400></a></p>
 
 <p>
-When you open it, you should see in your browser something like the picture
-below. I marked the possible starting points for exploring ARP. Basically,
+You can read the <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual draft</a>. 
+</p>
+
+<p>
+The source code can be searched and examined in the OMNeT++ IDE. Useful functions:
+
+<ul>
+    <li>ctrl + shift + R:   Resource search
+    <li>ctrl + shift + N:   Search for NED type
+    <li>ctrl + H:           File and C++ search
+    <li>ctrl + shift + G:   Usage search (click on a function and press the key combination to show where function is used)
+    <li>You can also ctrl-click functions in the code to open their code
+</ul>
+</p>
+
+<p>
+Possible starting points for exploring ARP would be the <tt>ARP</t> module</tt> itself. Basically,
 if you know what you're looking for (we know now), just click <tt>ARP</tt>
-on the "All modules" list on the left (or click "modules, simple" link
-on the top of that frame, and choose from the shorter list). If you don't
-know, you can start from an example network (here: <tt>ARPTest</tt>),
+on the "Simpe modules" list on the left. If you don't
+know, you can start from an example network (here: <tt>ARPTest</tt>, in "Networks" -- choose the second one for ARPTest2),
 and click on submodules until you find what you're looking for.
 </p>
 
-<p class="img"><a href="images/doc-frontpage.gif"><img src="thumbs/doc-frontpage.gif"/></a></p>
+<p class="img"><a href="images/doc-arp.png"><img src="images/doc-arp.png" width=400/></a></p>
 
 <p>
-ARP's page itself doesn't tell us too much about the ARP protocol or this
-particular implementation (this may improve in the future),
-but it does tell that it's employed as part of <tt>EthernetInterface</tt>
-(and by following that link you can learn where, in turn,
-<tt>EthernetInterface</tt> is used, etc.) and also lists the parameters
-and gates (or ports) (further below, not shown in the screenshot).
-It also contains its NED definition (also further below), and what's important
+ARP's page lists the parameters and gates (or ports) (further below, not shown in the screenshot).
+It also contains its NED definition (also further below). The usage diagram's icons contain links, and will take you to the particular module. And what's important
 for us now, there's a link to the C++ documentation.
 </p>
 
-<p class="img"><a href="images/doc-arp.gif"><img src="thumbs/doc-arp.gif"/></a></p>
+<p class="img"><img src="images/doc-cc.png"></p>
 
 <p>
 Click the "C++ documentation" link. The C++ documentation that emerges
@@ -847,6 +851,8 @@ whenever a message (packet, etc) arrives at the module or a timer goes off
 </p>
 
 <p class="img"><a href="images/doxy-arpclass.gif"><img src="thumbs/doxy-arpclass.gif"/></a></p>
+
+<!not needed from here>
 
 <p>
 As a rule of thumb: whatever large number of functions you see in the
