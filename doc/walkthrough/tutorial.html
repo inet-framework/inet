@@ -553,7 +553,7 @@ Ethernet frame.
 </p>
 
 <p>
-After a few more steps, the packet leaves the queue and through the mac module, it is transmitted from the client.
+After a few more steps, the packet leaves the queue and through the MAC module, it is transmitted from the client.
 You can watch this if you go to the highest level. The packet moves to router 1. The packet animation
 signifies the start of packet transmission. Notice that after the packet moves to the router, the link
 turns yellow, meaning there is a transmission going on between the client and the router.
@@ -668,7 +668,7 @@ ARP took the source IP address and source MAC address, and added them
 to its own ARP cache. Then it had to determine whether to reply to the
 request. The destination IP address was did not belong to the router;
 however, proxy ARP is turned on (you can verify this in the ARP module's
-inspector window, "Params" page -- see below). With proxy ARP, the
+inspector window, "Parameters" section -- see below). With proxy ARP, the
 router has to reply to the ARP Request if it can route the address, and
 send back its own MAC address. That's what happened here.</p>
 
