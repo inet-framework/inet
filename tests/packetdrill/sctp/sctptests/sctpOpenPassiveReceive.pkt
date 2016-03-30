@@ -1,0 +1,20 @@
+// SUT is a server, i.e. it opens a socket, calls bind and listen.
+// A client connects to the server, send data, which the server reads.
+// The client calls Shutdown.
+
++0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0 bind(3, ..., ...) = 0
++0 listen(3, 1) = 0
++0.05 < sctp: INIT[flgs=0, tag=22, a_rwnd=100000, os=200, is=10, tsn=1, ...]
++0 > sctp: INIT_ACK[flgs=0, tag=..., a_rwnd=..., os=10, is=10, tsn=1, ...]
++0.05 < sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
++0 > sctp: COOKIE_ACK[flgs=0]
++0.05 accept(3, ..., ...) = 4
+
++0.1  <  sctp: DATA[flgs=BE, len=1016, tsn=1, sid=0, ssn=0, ppid=0] // Other flags allowed: IU
++0  > sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=99000, gaps=[], dups=[]]
++0 read(4, ..., 1000) = 1000
+
++0.15  < sctp: SHUTDOWN[flgs=0, cum_tsn=0]
++0  > sctp: SHUTDOWN_ACK[flgs=0]
++0.05  < sctp: SHUTDOWN_COMPLETE[flgs=0]

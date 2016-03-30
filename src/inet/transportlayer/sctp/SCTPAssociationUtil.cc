@@ -1999,16 +1999,6 @@ void SCTPAssociation::removePath(const L3Address& addr)
     }
 }
 
-void SCTPAssociation::deleteStreams()
-{
-    for (auto & elem : sendStreams) {
-        elem.second->deleteQueue();
-    }
-    for (auto & elem : receiveStreams) {
-        delete elem.second;
-    }
-}
-
 bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, const bool uBit)
 {
     EV_INFO << simTime() << ":\tmakeRoomForTsn:"
@@ -2611,7 +2601,7 @@ void SCTPAssociation::pmStartPathManagement()
             state->fragPoint = state->assocPmtu;
         }
         initCCParameters(path);
-        path->pathRto = (double)sctpMain->par("rtoInitial");
+        path->pathRto = (double)sctpMain->getRtoInitial();
         path->srtt = path->pathRto;
         path->rttvar = SIMTIME_ZERO;
         /* from now on we may have one update per RTO/SRTT */
@@ -2688,8 +2678,8 @@ void SCTPAssociation::pmRttMeasurement(SCTPPathVariables *path,
                 path->rttvar = rttEstimation.dbl() / 2;
                 path->srtt = rttEstimation;
                 path->pathRto = 3.0 * rttEstimation.dbl();
-                path->pathRto = max(min(path->pathRto.dbl(), (double)sctpMain->par("rtoMax")),
-                            (double)sctpMain->par("rtoMin"));
+                path->pathRto = max(min(path->pathRto.dbl(), (double)sctpMain->getRtoMax()),
+                            (double)sctpMain->getRtoMin());
             }
             else {
                 path->rttvar = (1.0 - (double)sctpMain->par("rtoBeta")) * path->rttvar.dbl()
@@ -2697,8 +2687,8 @@ void SCTPAssociation::pmRttMeasurement(SCTPPathVariables *path,
                 path->srtt = (1.0 - (double)sctpMain->par("rtoAlpha")) * path->srtt.dbl()
                     + (double)sctpMain->par("rtoAlpha") * rttEstimation.dbl();
                 path->pathRto = path->srtt.dbl() + 4.0 * path->rttvar.dbl();
-                path->pathRto = max(min(path->pathRto.dbl(), (double)sctpMain->par("rtoMax")),
-                            (double)sctpMain->par("rtoMin"));
+                path->pathRto = max(min(path->pathRto.dbl(), (double)sctpMain->getRtoMax()),
+                            (double)sctpMain->getRtoMin());
             }
             // RFC 2960, sect. 6.3.1: new RTT measurements SHOULD be made no more
             //                                than once per round-trip.

@@ -236,59 +236,84 @@ void SCTP::handleMessage(cMessage *msg)
     }
     else {    // must be from app
         EV_DEBUG << "must be from app\n";
-        SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
+        if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
+            cPacket* cmsg = new cPacket("SocketOptions", SCTP_I_SENDSOCKETOPTIONS);
+            SCTPCommand* indication = new SCTPCommand("SCTP_I_SENDSOCKETOPTIONS");
+            cmsg->setControlInfo(indication);
+            socketOptions = collectSocketOptions();
+            cmsg->setContextPointer((void*) socketOptions);
+            send(cmsg, "to_appl", 0);
+            delete msg;
+        } else {
+            SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
 
-        int32 appGateIndex;
-        if (controlInfo->getGate() != -1)
-            appGateIndex = controlInfo->getGate();
-        else
-            appGateIndex = msg->getArrivalGate()->getIndex();
-        int32 assocId = controlInfo->getAssocId();
-        EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
-        SCTPAssociation *assoc = findAssocForApp(appGateIndex, assocId);
+            int32 appGateIndex;
+            if (controlInfo->getGate() != -1)
+                appGateIndex = controlInfo->getGate();
+            else
+                appGateIndex = msg->getArrivalGate()->getIndex();
+            int32 assocId = controlInfo->getAssocId();
+            EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
+            SCTPAssociation *assoc = findAssocForApp(appGateIndex, assocId);
 
-        if (!assoc) {
-            EV_INFO << "no assoc found. msg=" << msg->getName() << " number of assocs = " << assocList.size() << "\n";
+            if (!assoc) {
+                EV_INFO << "no assoc found. msg=" << msg->getName() << " number of assocs = " << assocList.size() << "\n";
 
-            if (strcmp(msg->getName(), "PassiveOPEN") == 0 || strcmp(msg->getName(), "Associate") == 0) {
-                if (assocList.size() > 0) {
-                    assoc = nullptr;
-                    SCTPOpenCommand *open = check_and_cast<SCTPOpenCommand *>(controlInfo);
-                    EV_INFO << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
-                    for (auto & elem : assocList) {
-                        EV_DETAIL << "remoteAddr=" << (elem)->remoteAddr << ", remotePort=" << (elem)->remotePort << ", localPort=" << (elem)->localPort << "\n";
-                        if ((elem)->remoteAddr == open->getRemoteAddr() && (elem)->localPort == open->getLocalPort() && (elem)->remotePort == open->getRemotePort()) {
-                            assoc = (elem);
-                            break;
+                if (strcmp(msg->getName(), "PassiveOPEN") == 0 || strcmp(msg->getName(), "Associate") == 0) {
+                    if (assocList.size() > 0) {
+                        assoc = nullptr;
+                        SCTPOpenCommand *open = check_and_cast<SCTPOpenCommand *>(controlInfo);
+                        EV_INFO << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
+                        for (auto & elem : assocList) {
+                            EV_DETAIL << "remoteAddr=" << (elem)->remoteAddr << ", remotePort=" << (elem)->remotePort << ", localPort=" << (elem)->localPort << "\n";
+                            if ((elem)->remoteAddr == open->getRemoteAddr() && (elem)->localPort == open->getLocalPort() && (elem)->remotePort == open->getRemotePort()) {
+                                assoc = (elem);
+                                break;
+                            }
+                        }
+                    }
+                    if (assocList.size() == 0 || assoc == nullptr) {
+                        assoc = new SCTPAssociation(this, appGateIndex, assocId, rt, ift);
+
+                        AppAssocKey key;
+                        key.appGateIndex = appGateIndex;
+                        key.assocId = assocId;
+                        sctpAppAssocMap[key] = assoc;
+                        EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
+                        bool ret = assoc->processAppCommand(msg);
+                        if (!ret) {
+                            removeAssociation(assoc);
                         }
                     }
                 }
-                if (assocList.size() == 0 || assoc == nullptr) {
-                    assoc = new SCTPAssociation(this, appGateIndex, assocId, rt, ift);
+            } else {
+                EV_INFO << "assoc found\n";
+                bool ret = assoc->processAppCommand(msg);
 
-                    AppAssocKey key;
-                    key.appGateIndex = appGateIndex;
-                    key.assocId = assocId;
-                    sctpAppAssocMap[key] = assoc;
-                    EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
-                    bool ret = assoc->processAppCommand(msg);
-                    if (!ret) {
-                        removeAssociation(assoc);
-                    }
-                }
+                if (!ret)
+                    removeAssociation(assoc);
             }
+            delete msg;
         }
-        else {
-            EV_INFO << "assoc found\n";
-            bool ret = assoc->processAppCommand(msg);
-
-            if (!ret)
-                removeAssociation(assoc);
-        }
-        delete msg;
     }
     if (hasGUI())
         updateDisplayString();
+}
+
+SocketOptions* SCTP::collectSocketOptions()
+{
+    SocketOptions* sockOptions = new SocketOptions();
+    sockOptions->maxInitRetrans = (int) par("maxInitRetrans");
+    sockOptions->maxInitRetransTimeout = SCTP_TIMEOUT_INIT_REXMIT_MAX;
+    sockOptions->rtoInitial = (int) par("rtoInitial");
+    sockOptions->rtoMin = (int) par("rtoMin");
+    sockOptions->rtoMax = (int) par("rtoMax");
+    sockOptions->sackFrequency = (int) par("sackFrequency");
+    sockOptions->sackPeriod = (double) par("sackPeriod");
+    sockOptions->maxBurst = (int) par("maxBurst");
+    sockOptions->fragPoint = (int) par("fragPoint");
+    sockOptions->noDelay = ((bool) par("nagleEnabled")) ? 0 : 1;
+    return sockOptions;
 }
 
 void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr)
@@ -759,10 +784,12 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
     bool ok = false;
     bool find = false;
     const int32 id = assoc->assocId;
+printf("sizeAssocMap=%d\n", sizeAssocMap);
+    std::cout << "Deleting SCTP connection " << assoc << " id= " << id << endl;
 
-    EV_INFO << "Deleting SCTP connection " << assoc << " id= " << id << endl;
+ //   printInfoAssocMap();
+ printf("vor sizeAssocMap\n");
 
-    printInfoAssocMap();
     if (sizeAssocMap > 0) {
         auto assocStatMapIterator = assocStatMap.find(assoc->assocId);
         if (assocStatMapIterator != assocStatMap.end()) {
@@ -813,7 +840,6 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
             }
         }
     }
-
     // Write statistics
     char str[128];
     for (auto pathMapIterator = assoc->sctpPathMap.begin();
@@ -927,7 +953,7 @@ void SCTP::finish()
         recordScalar("Drops Because New TSN Greater Than Highest TSN", assoc.numDropsBecauseNewTSNGreaterThanHighestTSN);
         recordScalar("Drops Because No Room In Buffer", assoc.numDropsBecauseNoRoomInBuffer);
         recordScalar("Chunks Reneged", assoc.numChunksReneged);
-        recordScalar("sackPeriod", (simtime_t)par("sackPeriod"));
+        recordScalar("sackPeriod", (simtime_t)socketOptions->sackPeriod);
         recordScalar("Number of AUTH chunks sent", assoc.numAuthChunksSent);
         recordScalar("Number of AUTH chunks accepted", assoc.numAuthChunksAccepted);
         recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);

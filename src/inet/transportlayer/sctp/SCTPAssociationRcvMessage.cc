@@ -238,6 +238,10 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     }
                     delete header;
                     sendAbort();
+                    if (state->sctpmsg) {
+                        delete state->sctpmsg;
+                        state->sctpmsg = nullptr;
+                    }
                     sctpMain->removeAssociation(this);
                     return true;
                 }
@@ -1455,6 +1459,9 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
             (this->*ccFunctions.ccUpdateBytesAcked)(myPath, myPath->newlyAckedBytes,
                     (advanceWindow && dropFilledGap) ? false :
                     advanceWindow);
+            if (state->maxBurstVariant == SCTPStateVariables::MBV_MaxBurst) {
+                myPath->packetsInBurst = 0;
+            }
         }
     }
 
@@ -2856,11 +2863,11 @@ void SCTPAssociation::processErrorArrived(SCTPErrorChunk *errorChunk)
 
 void SCTPAssociation::process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event)
 {
-    if (++state->initRetransCounter > (int32)sctpMain->par("maxInitRetrans")) {
-        EV_INFO << "Retransmission count during connection setup exceeds " << (int32)sctpMain->par("maxInitRetrans") << ", giving up\n";
+    if (++state->initRetransCounter > (int32)sctpMain->getMaxInitRetrans()) {
+        EV_INFO << "Retransmission count during connection setup exceeds " << (int32)sctpMain->getMaxInitRetrans() << ", giving up\n";
         sendIndicationToApp(SCTP_I_CLOSED);
         sendAbort();
-        sctpMain->removeAssociation(this);
+        printf("go and remove association %d\n", assocId);
         return;
     }
     EV_INFO << "Performing retransmission #" << state->initRetransCounter << "\n";
@@ -2878,8 +2885,9 @@ void SCTPAssociation::process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event)
                 stateName(fsm->getState()));
     }
     state->initRexmitTimeout *= 2;
-    if (state->initRexmitTimeout > SCTP_TIMEOUT_INIT_REXMIT_MAX)
-        state->initRexmitTimeout = SCTP_TIMEOUT_INIT_REXMIT_MAX;
+    if (state->initRexmitTimeout > sctpMain->getMaxInitRetransTimeout()) {
+        state->initRexmitTimeout = sctpMain->getMaxInitRetransTimeout();
+    }
     startTimer(T1_InitTimer, state->initRexmitTimeout);
 }
 
@@ -2936,7 +2944,7 @@ void SCTPAssociation::process_TIMEOUT_HEARTBEAT(SCTPPathVariables *path)
     }
 
     /* RTO must be doubled for this path ! */
-    path->pathRto = (simtime_t)min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
+    path->pathRto = (simtime_t)min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
     path->statisticsPathRTO->record(path->pathRto);
     /* check if any thresholds are exceeded, and if so, check if ULP must be notified */
     if (state->errorCount > (uint32)sctpMain->par("assocMaxRetrans")) {
@@ -3001,7 +3009,7 @@ void SCTPAssociation::process_TIMEOUT_RESET(SCTPPathVariables *path)
         retransmitReset();
 
         /* increase the RTO (by doubling it) */
-        path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
+        path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
         path->statisticsPathRTO->record(path->pathRto);
         startTimer(path->ResetTimer, path->pathRto);
     }
@@ -3053,7 +3061,7 @@ void SCTPAssociation::process_TIMEOUT_ASCONF(SCTPPathVariables *path)
         retransmitAsconf();
 
         /* increase the RTO (by doubling it) */
-        path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
+        path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
         path->statisticsPathRTO->record(path->pathRto);
 
         startTimer(path->AsconfTimer, path->pathRto);
@@ -3071,7 +3079,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables *path)
     path->blockingTimeout = -1.0;
 
     // ====== Increase the RTO (by doubling it) ==============================
-    path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
+    path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->getRtoMax());
     path->statisticsPathRTO->record(path->pathRto);
     EV_DETAIL << "Schedule T3 based retransmission for path " << path->remoteAddress
               << " oldest chunk sent " << simTime() - path->oldestChunkSendTime << " ago"

@@ -26,6 +26,8 @@ simple PacketDrillApp
         int remotePort;
         string localAddress;
         string remoteAddress;
+        int inboundStreams = default(17);
+        int outboundStreams = default(1);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         double latency @unit(s) = default(0s);
         @display("i=block/app");

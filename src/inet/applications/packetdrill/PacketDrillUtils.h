@@ -21,11 +21,14 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/common/ByteArray.h"
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
  #include <sys/socket.h>
 #endif
+#include "inet/transportlayer/sctp/SCTPMessage.h"
 
 using namespace inet;
+using namespace sctp;
 
 /* For tables mapping symbolic strace strings to the corresponding
  * integer values.
@@ -34,6 +37,10 @@ struct int_symbol {
     int64 value;
     const char *name;
 };
+
+#ifndef IPPROTO_SCTP
+#define IPPROTO_SCTP 132
+#endif
 
 /* TCP option numbers and lengths. */
 #define TCPOPT_EOL                0
@@ -49,17 +56,74 @@ struct int_symbol {
 #define TCPOLEN_TIMESTAMP         10
 #define TCPOPT_EXP                254    /* Experimental */
 
+#define SCTP_DATA_CHUNK_TYPE                0x00
+#define SCTP_INIT_CHUNK_TYPE                0x01
+#define SCTP_INIT_ACK_CHUNK_TYPE            0x02
+#define SCTP_SACK_CHUNK_TYPE                0x03
+#define SCTP_HEARTBEAT_CHUNK_TYPE           0x04
+#define SCTP_HEARTBEAT_ACK_CHUNK_TYPE       0x05
+#define SCTP_ABORT_CHUNK_TYPE               0x06
+#define SCTP_SHUTDOWN_CHUNK_TYPE            0x07
+#define SCTP_SHUTDOWN_ACK_CHUNK_TYPE        0x08
+#define SCTP_ERROR_CHUNK_TYPE               0x09
+#define SCTP_COOKIE_ECHO_CHUNK_TYPE         0x0a
+#define SCTP_COOKIE_ACK_CHUNK_TYPE          0x0b
+#define SCTP_SHUTDOWN_COMPLETE_CHUNK_TYPE   0x0e
+
+#define SCTP_DATA_CHUNK_I_BIT               0x08
+#define SCTP_DATA_CHUNK_U_BIT               0x04
+#define SCTP_DATA_CHUNK_B_BIT               0x02
+#define SCTP_DATA_CHUNK_E_BIT               0x01
+
+#define SCTP_ABORT_CHUNK_T_BIT              0x01
+#define SCTP_SHUTDOWN_COMPLETE_CHUNK_T_BIT  0x01
+
+#define MAX_SCTP_CHUNK_BYTES                0xffff
+
+#define FLAG_CHUNK_TYPE_NOCHECK                 0x00000001
+#define FLAG_CHUNK_FLAGS_NOCHECK                0x00000002
+#define FLAG_CHUNK_LENGTH_NOCHECK               0x00000004
+#define FLAG_CHUNK_VALUE_NOCHECK                0x00000008
+
+#define FLAG_INIT_CHUNK_TAG_NOCHECK             0x00000100
+#define FLAG_INIT_CHUNK_A_RWND_NOCHECK          0x00000200
+#define FLAG_INIT_CHUNK_OS_NOCHECK              0x00000400
+#define FLAG_INIT_CHUNK_IS_NOCHECK              0x00000800
+#define FLAG_INIT_CHUNK_TSN_NOCHECK             0x00001000
+#define FLAG_INIT_CHUNK_OPT_PARAM_NOCHECK       0x00002000
+
+#define FLAG_INIT_ACK_CHUNK_TAG_NOCHECK         0x00000100
+#define FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK      0x00000200
+#define FLAG_INIT_ACK_CHUNK_OS_NOCHECK          0x00000400
+#define FLAG_INIT_ACK_CHUNK_IS_NOCHECK          0x00000800
+#define FLAG_INIT_ACK_CHUNK_TSN_NOCHECK         0x00001000
+#define FLAG_INIT_ACK_CHUNK_OPT_PARAM_NOCHECK   0x00002000
+
+#define FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK     0x00000100
+
+#define FLAG_DATA_CHUNK_TSN_NOCHECK             0x00000100
+#define FLAG_DATA_CHUNK_SID_NOCHECK             0x00000200
+#define FLAG_DATA_CHUNK_SSN_NOCHECK             0x00000400
+#define FLAG_DATA_CHUNK_PPID_NOCHECK            0x00000800
+
+
+#define FLAG_SACK_CHUNK_CUM_TSN_NOCHECK         0x00000100
+#define FLAG_SACK_CHUNK_A_RWND_NOCHECK          0x00000200
+#define FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK      0x00000400
+#define FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK        0x00000800
+
+/* SCTP option names */
+#define SCTP_INITMSG   0
+#define SCTP_RTOINFO   1
+#define SCTP_NODELAY   2
+#define SCTP_MAXSEG    3
+#define SCTP_DELAYED_SACK 4
+#define SCTP_MAX_BURST 5
+
 enum direction_t {
     DIRECTION_INVALID,
     DIRECTION_INBOUND,  /* packet coming into the kernel under test */
     DIRECTION_OUTBOUND, /* packet leaving the kernel under test */
-};
-
-/* A --name=value option in a script */
-struct option_list {
-    char *name;
-    char *value;
-    struct option_list *next;
 };
 
 
@@ -118,6 +182,11 @@ enum expression_t {
     EXPR_STRING,          /* double-quoted string in 'string' */
     EXPR_BINARY,          /* binary expression, 2 sub-expressions */
     EXPR_LIST,            /* list of expressions */
+    EXPR_SCTP_RTOINFO, /* struct sctp_rtoinfo for SCTP_RTOINFO */
+    EXPR_SCTP_INITMSG, /* struct sctp_initmsg for SCTP_INITMSG */
+    EXPR_SCTP_ASSOCVAL, /* struct sctp_assoc_value */
+    EXPR_SCTP_SACKINFO, /* struct sctp_sack_info for SCTP_DELAYED_SACK */
+    EXPR_SCTP_NODELAY,
     NUM_EXPR_TYPES,
 };
 
@@ -192,6 +261,35 @@ struct binary_expression {
     PacketDrillExpression *rhs;    /* right hand side expression */
 };
 
+struct sctp_rtoinfo_expr {
+    PacketDrillExpression *srto_assoc_id;
+    PacketDrillExpression *srto_initial;
+    PacketDrillExpression *srto_max;
+    PacketDrillExpression *srto_min;
+};
+
+/* Parse tree for a sctp_initmsg struct in a [gs]etsockopt syscall. */
+struct sctp_initmsg_expr {
+    PacketDrillExpression *sinit_num_ostreams;
+    PacketDrillExpression *sinit_max_instreams;
+    PacketDrillExpression *sinit_max_attempts;
+    PacketDrillExpression *sinit_max_init_timeo;
+};
+
+
+/* Parse tree for a sctp_assoc_value struct in a [gs]etsockopt syscall. */
+struct sctp_assoc_value_expr {
+    PacketDrillExpression *assoc_id;
+    PacketDrillExpression *assoc_value;
+};
+
+/* Parse tree for a sctp_sack_info struct in a [gs]etsockopt syscall. */
+struct sctp_sack_info_expr {
+    PacketDrillExpression *sack_assoc_id;
+    PacketDrillExpression *sack_delay;
+    PacketDrillExpression *sack_freq;
+};
+
 
 class INET_API PacketDrillConfig
 {
@@ -210,7 +308,7 @@ class INET_API PacketDrillConfig
 
     public:
         const char* getScriptPath() { return scriptPath; };
-        void setScriptPath(const char* sPath) { scriptPath = (char*)strdup(sPath); };
+        void setScriptPath(const char* sPath) { scriptPath = (char*)sPath; };
         int getWireProtocol() { return wireProtocol; };
         int getSocketDomain() { return socketDomain; };
         int getToleranceUsecs() { return tolerance_usecs; };
@@ -251,7 +349,7 @@ class INET_API PacketDrillEvent : public cObject
         union {
             PacketDrillPacket *packet;
             struct syscall_spec *syscall;
-        } event;    /* pointer to the event */
+        } eventKind;    /* pointer to the event */
 
     public:
         void setLineNumber(int number) { lineNumber = number; };
@@ -271,10 +369,10 @@ class INET_API PacketDrillEvent : public cObject
         enum eventTime_t getTimeType() { return timeType; };
         void setType(enum event_t tt) { type = tt; };
         enum event_t getType() { return type; };
-        PacketDrillPacket* getPacket() { return event.packet; };
-        void setPacket(PacketDrillPacket* packet) { event.packet = packet; };
-        void setSyscall(struct syscall_spec *syscall) { event.syscall = syscall; };
-        struct syscall_spec *getSyscall() { return event.syscall; };
+        PacketDrillPacket* getPacket() { return eventKind.packet; };
+        void setPacket(PacketDrillPacket* packet) { eventKind.packet = packet; };
+        void setSyscall(struct syscall_spec *syscall) { eventKind.syscall = syscall; };
+        struct syscall_spec *getSyscall() { return eventKind.syscall; };
 };
 
 
@@ -290,6 +388,10 @@ class INET_API PacketDrillExpression : public cObject
             int64 num;
             char *string;
             struct binary_expression *binary;
+            struct sctp_rtoinfo_expr *sctp_rtoinfo;
+            struct sctp_initmsg_expr *sctp_initmsg;
+            struct sctp_assoc_value_expr *sctp_assoc_value;
+            struct sctp_sack_info_expr *sctp_sack_info;
             cQueue *list;
         } value;
         const char *format; /* the printf format for printing the value */
@@ -299,14 +401,23 @@ class INET_API PacketDrillExpression : public cObject
         enum expression_t getType() { return type; };
         void setNum(int64 n) { value.num = n; };
         int64 getNum() { return value.num; };
-        void setString(char* str) { value.string = strdup(str); };
-        char* getString() { return strdup(value.string); };
+        void setString(char* str) { value.string = str; };
+        char* getString() { return value.string; };
         void setFormat(const char* format_) { format = format_; };
         const char* getFormat() { return format; };
         cQueue* getList() { return value.list; };
         void setList(cQueue* queue) { value.list = queue; };
         struct binary_expression* getBinary() { return value.binary; };
         void setBinary(struct binary_expression* bin) { value.binary = bin; };
+
+        void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; };
+        struct sctp_rtoinfo_expr *getRtoinfo() { return value.sctp_rtoinfo; };
+        void setInitmsg(struct sctp_initmsg_expr *exp) { value.sctp_initmsg = exp; };
+        struct sctp_initmsg_expr *getInitmsg() { return value.sctp_initmsg; };
+        void setAssocval(struct sctp_assoc_value_expr *exp) { value.sctp_assoc_value = exp; };
+        struct sctp_assoc_value_expr *getAssocval() { return value.sctp_assoc_value; };
+        void setSackinfo(struct sctp_sack_info_expr *exp) { value.sctp_sack_info = exp; };
+        struct sctp_sack_info_expr *getSackinfo() { return value.sctp_sack_info; };
 
         int unescapeCstringExpression(const char *input_string, char **error);
         int getS32(int32 *value, char **error);
@@ -322,7 +433,6 @@ class INET_API PacketDrillScript
         ~PacketDrillScript();
 
     private:
-        struct option_list *optionList;
         cQueue *eventList;
         char *buffer;
         int length;
@@ -336,8 +446,6 @@ class INET_API PacketDrillScript
         int getLength() { return length; };
         const char *getScriptPath() { return scriptPath; };
         cQueue *getEventList() { return eventList; };
-        struct option_list *getOptionList() { return optionList; };
-        void setOptionList(struct option_list *optL) { optionList = optL;};
         void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); };
 };
 
@@ -356,6 +464,20 @@ class INET_API PacketDrillStruct: public cObject
     private:
         uint32 value1;
         uint32 value2;
+};
+
+class INET_API PacketDrillBytes: public cObject
+{
+    public:
+        PacketDrillBytes();
+        PacketDrillBytes(uint8 byte);
+
+        void appendByte(uint8 byte);
+        uint32 getListLength() { return listLength; };
+
+    private:
+        ByteArray byteList;
+        uint32 listLength;
 };
 
 class INET_API PacketDrillTcpOption : public cObject
@@ -392,6 +514,39 @@ class INET_API PacketDrillTcpOption : public cObject
         void setBlockList(cQueue *bList) { blockList = bList; };
         uint16 getBlockCount() { return blockCount; };
         void increaseBlockCount() { blockCount++; };
+};
+
+class INET_API PacketDrillSctpChunk : public cObject
+{
+    public:
+        PacketDrillSctpChunk(uint8 type_, SCTPChunk *sctpChunk);
+
+    private:
+        uint8 type;
+        SCTPChunk *chunk;
+
+    public:
+        uint8 getType() { return type; };
+        SCTPChunk *getChunk() { return chunk; };
+};
+
+class INET_API PacketDrillSctpParameter : public cObject
+{
+    public:
+        PacketDrillSctpParameter(int16 len_, void* content_);
+
+    private:
+        int32 parameterValue;
+        cQueue* parameterList;
+        int16 parameterLength;
+        uint32 flags;
+
+    public:
+        int32 getValue() { return parameterValue; };
+        cQueue* getList() { return parameterList; };
+        uint32 getFlags() { return flags; };
+        void setFlags(uint32 flgs_) { flags = flgs_; };
+        int16 getLength() { return parameterLength; };
 };
 
 #endif
