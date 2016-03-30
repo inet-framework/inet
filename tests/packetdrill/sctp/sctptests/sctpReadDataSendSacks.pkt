@@ -1,0 +1,38 @@
+// SUT reads injected DATA and sends SACKs. One TSN is missing.
+// Gap reports have to be sent.
+
++0       socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0       connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
++0     > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=2048, is=10, tsn=0, ...]
++0.05  < sctp: INIT_ACK[flgs=0, tag=22, a_rwnd=100000, os=2048, is=10, tsn=0, STATE_COOKIE[len=4, val=...]]
++0     > sctp: COOKIE_ECHO[flgs=0, len=4, val=...]
++0.05     < sctp: COOKIE_ACK[flgs=0]
+
+
++0.15  < sctp: DATA[flgs=BE, len=1016, tsn=0, sid=0, ssn=0, ppid=0] // Other flags allowed: IU
++0  read(3, ..., 1000) = 1000
++0  > sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99000, gaps=[], dups=[]]
+
+
++0.05  < sctp: DATA[flgs=BE, len=1016, tsn=2, sid=2, ssn=0, ppid=0]
++0  read(3, ..., 1000) = 1000
++0  > sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99000, gaps=[2 : 2], dups=[]]
+
+
++0.05  < sctp: DATA[flgs=BE, len=1016, tsn=3, sid=3, ssn=0, ppid=0]
++0  read(3, ..., 1000) = 1000
++0  > sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99000, gaps=[2 : 3], dups=[]]
+
+
++0.05  < sctp: DATA[flgs=BE, len=1016, tsn=4, sid=4, ssn=0, ppid=0]
++0  read(3, ..., 1000) = 1000
++0  > sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99000, gaps=[2 : 4], dups=[]]
+
++0.05  < sctp: DATA[flgs=BE, len=1016, tsn=1, sid=1, ssn=0, ppid=0]
++0  read(3, ..., 1000) = 1000
++0.2  > sctp: SACK[flgs=0, cum_tsn=4, a_rwnd=100000, gaps=[], dups=[]]
+
++0.20    close(3) = 0
++0     > sctp: SHUTDOWN[flgs=0, cum_tsn=...]
++0.05  < sctp: SHUTDOWN_ACK[flgs=0]
++0     > sctp: SHUTDOWN_COMPLETE[flgs=0] // Other flags allowed: T, Is SHUTDOWN_COMPLETE[] allowed?

@@ -1,0 +1,11 @@
++0  socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0 setsockopt(3, IPPROTO_SCTP, SCTP_INITMSG, {sinit_num_ostreams=256, sinit_max_instreams=1024, sinit_max_attempts=6, sinit_max_init_timeo=50}, 8) = 0
++0  connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
++0  > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++3  > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++6  > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++12 > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++24 > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++48 > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++50 > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=0, ...]
++50 > sctp: ABORT[flgs=0]

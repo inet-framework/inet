@@ -1,0 +1,54 @@
+%description:
+SUT reads injected DATA and sends SACKs. One TSN is missing.
+Gap reports have to be sent.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+
+[General]
+
+network = PacketDrillSctp
+debug-on-errors = true
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../../src;../../lib
+
+**.scriptFile="../../sctptests/sctpReadDataSendSacks.pkt"
+**.pdhost.tunApp[0].typename = "PacketDrillApp"
+**.pdhost.numSctpTunApps = 1
+**.pdhost.numTunInterfaces = 1
+**.hasSctpTun = true
+
+**.startTime = 2s
+
+**.pdhost.routingTable.routingFile = "../../lib/pdhost.mrt"
+**.pdhost.tunApp[0].localPort = 1000
+**.pdhost.tunApp[0].remotePort = 2000
+**.pdhost.tunApp[0].localAddress = "192.168.0.1"
+**.pdhost.tunApp[0].remoteAddress = "192.168.0.2"
+
+**.pdhost.numPcapRecorders=1
+**.pdhost.pcapRecorder[0].pcapFile="sctpReadDataSendSacks.pcap"
+**.pdhost.pcapRecorder[0].moduleNamePatterns="tun[0]"
+**.pdhost.pcapRecorder[0].sendingSignalNames="packetSentToUpper"
+**.pdhost.pcapRecorder[0].receivingSignalNames="packetReceivedFromUpper"
+**.pdhost.pcapRecorder[0].alwaysFlush = true
+
+**.pdhost.pdApp.latency = 0.01s
+**.pdhost.tunApp[0].outboundStreams = 2048
+**.pdhost.tunApp[0].inboundStreams = 10
+
+**.sctp.arwnd = 100000
+**.sctp.nagleEnabled = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: test.out
+Packetdrill error:
+%#--------------------------------------------------------------------------------------------------------------
+
+
+
+

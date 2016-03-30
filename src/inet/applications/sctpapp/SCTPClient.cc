@@ -109,14 +109,14 @@ void SCTPClient::initialize(int stage)
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
-
+        socket.setOutputGate(gate("sctpOut"));
         if (addresses.size() == 0)
             socket.bind(port);
         else
             socket.bindx(addresses, port);
 
         socket.setCallbackObject(this);
-        socket.setOutputGate(gate("sctpOut"));
+
         setStatusString("waiting");
 
         simtime_t stopTime = par("stopTime");
@@ -466,13 +466,11 @@ void SCTPClient::handleTimer(cMessage *msg)
         case MSGKIND_STOP:
             numRequestsToSend = 0;
             sendAllowed = false;
+            printf("time is over: send abort\n");
             socket.abort();
-            socket.close();
 
             if (timeMsg->isScheduled())
                 cancelEvent(timeMsg);
-
-            socket.close();
 
             if (finishEndsSimulation) {
                 endSimulation();

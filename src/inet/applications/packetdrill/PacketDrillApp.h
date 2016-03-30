@@ -23,6 +23,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
@@ -58,6 +59,11 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
     void increaseIdOutbound() { idOutbound++;};
     const L3Address getLocalAddress() { return localAddress; };
     const L3Address getRemoteAddress() { return remoteAddress; };
+    uint32 getPeerVTag() { return peerVTag; };
+    uint32 getLocalVTag() { return localVTag; };
+    uint32 getPeerCumTsn() { return peerCumTsn; };
+    uint32 getInitPeerTsn() { return initPeerTsn; };
+    simtime_t getPeerHeartbeatTime() { return peerHeartbeatTime; };
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -68,7 +74,6 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         void handleTimer(cMessage *msg) override;
 
     private:
-        const char *scriptFile;
         PacketDrillScript *script;
         PacketDrillConfig *config;
         L3Address localAddress;
@@ -77,14 +82,18 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         int remotePort;
         int protocol;
         int tcpConnId;
+        int sctpAssocId;
         UDPSocket udpSocket;
         TCPSocket tcpSocket;
+        SCTPSocket sctpSocket;
         PacketDrill *pd;
         bool msgArrived;
         bool recvFromSet;
         bool listenSet;
         bool acceptSet;
         bool establishedPending;
+        bool abortSent;
+        bool socketOptionsArrived;
         cPacketQueue *receivedPackets;
         cPacketQueue *outboundPackets;
         simtime_t simStartTime;
@@ -94,10 +103,21 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         uint32 relSequenceOut;
         uint32 peerTS;
         uint16 peerWindow;
+        uint16 peerInStreams;
+        uint16 peerOutStreams;
+        SCTPCookie *peerCookie;
+        uint16 peerCookieLength;
+        uint32 initPeerTsn;
+        uint32 initLocalTsn;
+        uint32 peerCumTsn;
+        uint32 localCumTsn;
         uint32 eventCounter;
         uint32 numEvents;
         uint32 idInbound;
         uint32 idOutbound;
+        uint32 localVTag;
+        uint32 peerVTag;
+        simtime_t peerHeartbeatTime;
         cMessage *eventTimer;
 
 
@@ -118,6 +138,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         int syscallAccept(struct syscall_spec *syscall, cQueue *args, char **error);
 
+        int syscallSetsockopt(struct syscall_spec *syscall, cQueue *args, char **error);
+
         int syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallRead(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error);
@@ -131,6 +153,16 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         bool compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp);
 
         bool compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp);
+
+        bool compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liveSctp);
+
+        bool compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitChunk* liveInitChunk);
+
+        bool compareDataPacket(SCTPDataChunk* storedDataChunk, SCTPDataChunk* liveDataChunk);
+
+        bool compareSackPacket(SCTPSackChunk* storedSackChunk, SCTPSackChunk* liveSackChunk);
+
+        bool compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, SCTPInitAckChunk* liveInitAckChunk);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,
