@@ -63,7 +63,7 @@ In the <i>Set Up inifile Configuration</i>, make sure <i>ARPtest</i> is selected
 The picture you see will look like this.
 </p>
 
-<p class="img"><a href="images/arptest_v2.png"><img src="images/arptest_v2.png" width=400/></a></p>
+<p class="img"><a href="images/arptest_v3.png"><img src="images/arptest_v3.png" width=400/></a></p>
 
 <p>
 This is the realtime simulation environment (tkenv/qtenv). The bottom panel displays
@@ -754,7 +754,7 @@ any more.
 </p>
 
 <p>
-After some time, the logs can be quite cluttered ,so you may want to use the <i>Show message/packet traffic</i> feature of the log panel to view packet traffic only. If you enter a module and switch to message/packet traffic view, the viewer shows packets that were send and received by that module. You can also filter which modules' traffic you want to examine. For example, you might be interested in traffic between the client and router 1 only -- you tick these two when you filter the modules, and you will get a result like this:
+After some time, the logs can be quite cluttered ,so you may want to use the <i>Show message/packet traffic</i> feature of the log panel to view packet traffic only. If you enter a module and switch to message/packet traffic view, the viewer shows packets that were sent and received by that module. You can also filter which modules' traffic you want to examine. For example, you might be interested in traffic between the client and router 1 only -- you tick these two when you filter the modules, and you will get a result like this:
 </p>
 
 <p class="img"><img src="images/packettraffic_v2.png"></p>
@@ -766,22 +766,24 @@ Whereas the logs are created by the <tt>ev <<</tt> statements in the C++ code, t
 
 
 <p>
-Packet traffic can be visualized with the <i>Sequence chart tool</i>. In order to use it, you must record an event log -- you can do that by clicking the <i>REC</i> button in the simulation environment (this can be automated by specifying <tt>record-eventlog = true</tt> in <i>omnetpp.ini</i>).
+Packet traffic can be visualized with the <i>Sequence chart tool</i>. This is created from the event log. In order to use it, you must record an event log -- you can do that by clicking the <i>REC</i> button in the simulation environment (this can be automated by specifying <tt>record-eventlog = true</tt> in <i>omnetpp.ini</i>).
 </p>
 
 <p class="img"><img src="images/rec.png"></p>
 
 <p>
-Before the log data is written to a results file, the finish() function must be invoked. It is invoked automatically when the simulation finishes (if it finished normally without an error), or you can do it manually if you dont want to wait -- click the <i>Conclude simulation</i> button at the top of the simulation environment.
+Before the log data is written to a results file, the finish() function must be invoked. It is invoked automatically when the simulation finishes (if it finished normally without an error), or you can do it manually if you don't want to wait -- click the <i>Conclude simulation</i> button at the top of the simulation environment.
 </p>
 
 <p class="img"><img src="images/finish.png"></p>
 
 <p>
-The event log file will be in arptest2/results. Double click to open the event log and the sequence chart.
+The event log file (.elog) will be in arptest2/results. Double click to open the event log and the sequence chart.
 </p>
 
 <p class="img"><a href="images/record-eventlog.png"><img src="images/record-eventlog.png" width=500></a></p>
+
+<p>In this example sequence chart you can follow the initial SYN packet as it makes its way to the server, and the various ARP requests and replies.</p>
 
 <a name="discovering"/><h3>Following ARP from the documentation</h3>
 
@@ -811,7 +813,7 @@ The source code can be searched and examined in the OMNeT++ IDE. Useful function
     <li>ctrl + shift + N:   Search for NED type
     <li>ctrl + H:           File and C++ search
     <li>ctrl + shift + G:   Usage search (click on a function and press the key combination to show where function is used)
-    <li>You can also ctrl-click functions in the code to open their code
+    <li>You can also ctrl-click functions in the code to open their  source
 </ul>
 </p>
 
@@ -835,8 +837,7 @@ for us now, there's a link to the C++ documentation.
 
 <p>
 Click the "C++ documentation" link. The C++ documentation that emerges
-has been generated from commented C++ source by the Doxygen tool, with its
-<tt>INLINE_SOURCES</tt> option turned on. The sheer size and detail of the
+has been generated from commented C++ source by the Doxygen tool. The sheer size and detail of the
 C++ documentation might be overwhelming to you, but not if you know
 where to start looking.
 </p>
@@ -850,155 +851,14 @@ whenever a message (packet, etc) arrives at the module or a timer goes off
 (a message scheduled by the module itself comes back).
 </p>
 
-<p class="img"><a href="images/doxy-arpclass.gif"><img src="thumbs/doxy-arpclass.gif"/></a></p>
+<p class="img"><a href="images/arp-cc.png"><img src="images/arp-cc.png" width=400/></a></p>
 
 <!not needed from here>
 
 <p>
 As a rule of thumb: whatever large number of functions you see in the
 documentation, always click at <tt>handleMessage()</tt> first. If the
-module code was well written, it'll lead you from there. Let's do that with
-<tt>ARP</tt> as well.
-</p>
-
-<p class="img"><a href="images/doxy-handlemsg.gif"><img src="thumbs/doxy-handlemsg.gif"/></a></p>
-
-<p>
-Function names are displayed in blue -- clicking one will take you to the
-code of that function. Combined with the browser's "Back" button, they offer
-a very convenient way to explore the source.
-</p>
-
-<p>
-Here's what <tt>handleMessage()</tt> says: if the message that arrived is a
-self-message (expired timer), it can only be that an ARP request has timed
-out, and we'll handle it. Otherwise the message can only be a packet which
-we got either from the higher layers (IP) or from the network.
-</p>
-
-<p>
-If it came from the network (arrived on our gate named <tt>"hwIn"</tt>),
-then we must differentiate if it's an ARP packet or something else
-(for example, IP datagram). This is done by trying to <tt>dynamic_cast&lt;&gt;</tt>
-the message to <tt>ARPPacket</tt> -- if the result is not <tt>NULL</tt>,
-it is an ARP packet and we process it accordingly. Otherwise we just process
-it as some other inbound packet (and we'll just pass it up).
-</p>
-
-<p>
-If didn't come it came from the network, then it must be an outbound
-packet, and we process it as such.
-</p>
-
-<p>
-Finally, we update the <i>display string</i> -- a property which controls
-how the module is presented on the GUI. Hence the <tt>if (ev.isGUI())</tt>
-statement in the code: we don't care about that if the simulation is running under
-a command-line user interface (that is, if the simulation program was
-linked with Cmdenv instead of Tkenv -- search for these two words in the
-OMNeT++/OMNEST documentation if you're interested.)
-</p>
-
-<p>
-The display string can also be viewed (and changed) in the GUI: it is on
-the "Info" page of the module's inspector window (the one that opens
-by double-clicking the icon or selecting "As object" from its context menu):
-</p>
-
-<p class="img"><a href="images/arp-dispstr.gif"><img src="thumbs/arp-dispstr.gif"/></a></p>
-
-<p>
-It consist of "tags" separated by semicolons. For example, <tt>"i=..."</tt>
-specifies the icon to display, <tt>"p=..."</tt> specifies position, and
-<tt>"t=..."</tt> specifies the text which appears (by default) in blue
-above the icon. (You can try: change the string on the GUI, press Enter
-or click the green checkmark, and see.) After this introduction, the
-meaning of the <tt>updateDisplayString()</tt> function is obvious:
-it <tt>sprintf</tt>'s together a suitable string, and sets it as value
-of the <tt>"t"</tt> tag, making it appear above the icon. The text will
-contain the number of entries in the <tt>arpCache</tt> variable (an STL map),
-and the values of the <tt>numRequestsSent</tt>, <tt>numRepliesSent</tt> and
-<tt>numFailedResolutions</tt> variables.
-</p>
-
-<p class="img"><a href="images/doxy-updatedispstr.gif"><img src="thumbs/doxy-updatedispstr.gif"/></a></p>
-
-<p>
-After this detour about display strings, let us return to ARP message
-processing. Processing non-ARP packets coming from the network
-will not cause you much surprise: they are just passed up to the higher
-layer (sent via the <tt>"hlOut"</tt> gate) after stripping the Ethernet's
-control info (which tells e.g. the source MAC address -- higher layers
-won't need it). As we already mentioned, the <tt>ev&lt;&lt;</tt> line
-writes to the main window and the module's output (log) window if it's open.
-</p>
-
-<p class="img"><a href="images/doxy-processinbound.gif"><img src="thumbs/doxy-processinbound.gif"/></a></p>
-
-<p>
-Processing an ARP packet (<tt>processARPPacket()</tt>) begins with
-a long comment quoting the message processing logic from RFC 826,
-and code below that follows the recipe almost word-by-word -- you'll
-surely manage to make sense of it.
-</p>
-
-<p class="img"><a href="images/doxy-processarp.gif"><img src="thumbs/doxy-processarp.gif"/></a></p>
-
-<p>
-Instead, let us have a look at the processing of packets coming from higher
-layers, that is, IP datagrams. If the MAC address for the destination IP address
-is in the cache, we just attach it to the packet in an Ethernet control info
-(<tt>EtherCtrl</tt> class), otherwise we have to start the ARP resolution process.
-Here're the crucial parts of the code (the full code has a bit longer if-ladder,
-because timed out cache entries and already pending resolution processes also
-have to be accounted for):
-</p>
-
-<p class="img"><a href="images/doxy-processoutbound.gif"><img src="thumbs/doxy-processoutbound.gif"/></a></p>
-
-<p>
-... extract next hop IP address, or if not present the destination IP address
-into the <tt>nextHop</tt> variable ...
-</p>
-
-<p class="img"><a href="images/doxy-processoutbound1.gif"><img src="thumbs/doxy-processoutbound1.gif"/></a></p>
-
-<p>
-... The code above added to the cache a new entry (which maps <tt>nextHopAddr</tt>
-to the newly added entry, with a blank MAC address and marked as pending),
-sent an ARP Request, and queued up the datagram. Next come some more
-<i>else if ()</i> clauses to check cache entry is not stale and not pending
-resolution, then ....
-</p>
-
-<p class="img"><a href="images/doxy-processoutbound2.gif"><img src="thumbs/doxy-processoutbound2.gif"/></a></p>
-
-<p>
-If you have some experience in using STL classes, reading the code should
-not be too difficult -- otherwise you may want to browse the web for STL tutorials
-or borrow a decent C++ book. (Or borrow a friend who explains it in a few words :))
-</p>
-
-<p>
-In the above code, after we successfully extracted the MAC address out of the cache,
-sending of the IP datagram was done via the <tt>sendPacketToMAC()</tt> function.
-This function has been copied below -- it just creates a control info object,
-puts the MAC address into it, attaches the object to the packet and sends it
-on gate <tt>"hwOut"</tt> which is connected to Ethernet's <tt>encap</tt> and
-<tt>mac</tt> modules.
-</p>
-
-<p class="img"><a href="images/doxy-sendtomac.gif"><img src="thumbs/doxy-sendtomac.gif"/></a></p>
-
-<p>
-Finally, as the last thing in this tutorial, we can have a look at the
-<tt>sendARPRequest()</tt> function which is the meat of the (otherwise very short)
-<tt>initiateARPResolution()</tt> function. It shows how to create
-an ARP packet, fill its fields and send it. (Sending actually uses the
-<tt>sendPacketToMAC()</tt> function from above.)
-</p>
-
-<p class="img"><a href="images/doxy-sendarpreq.gif"><img src="thumbs/doxy-sendarpreq.gif"/></a></p>
+module code was well written, it'll lead you from there. 
 
 <a name="conclusion"/><h3>Conclusion</h3>
 
