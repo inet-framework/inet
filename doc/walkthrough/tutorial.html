@@ -55,7 +55,7 @@ To run the simulation, right click on <i>omnetpp.ini</i> and select <i>run as</i
 In the <i>Set Up inifile Configuration</i>, make sure <i>ARPtest</i> is selected as config name, and click OK.
 </p>
 
-<p class="img"><a href="images/ide.png"><img src="images/ide.png" width=400/></a></p>
+<p class="img"><a href="images/ide.png"><img src="images/ide.png" width=400></a></p>
 
 <a name="gui"/><h3>The GUI at the first glance</h3>
 
@@ -123,7 +123,8 @@ sign icon (or by hitting F8), and resume it ("Run" icon or F5).
 
 <p class="img"><img src="images/tb-run.png"/></p>
 
-<p>The "Fast" icon or (F6) will turn off message animation and
+<p>
+The "Fast" icon or (F6) will turn off message animation and
 update the graphics only in every 500 milliseconds or so (the exact number
 can be configured in the Simulation Execution dialog,
 File menu/Preferences/General tab, accessible from the toolbar as well, with the wrench symbol). The "Express"
@@ -215,7 +216,7 @@ Now that we've dealt with the basics, we can go back to our ARPTest network mode
 You've probably seen something like this:
 </p>
 
-<p class="img"><a href="images/linkcolors_v2.png"><img src="images/linkcolors_v2.png" width=400/></a></p>
+<p class="img"><a href="images/linkcolors_v2.png"><img src="images/linkcolors_v2.png" width=400></a></p>
 
 <p>
 If a link is yellow, that means the node is transmitting on the link
@@ -241,9 +242,9 @@ can double-click on a node (client, server, router) to see its internals.
 </p>
 
 <p class="img">
-<a href="images/client.png"><img src="images/client.png" width=250/></a>
-<a href="images/server.png"><img src="images/server.png" width=250/></a>
-<a href="images/router.png"><img src="images/router.png" width=250/></a>
+<a href="images/client.png"><img src="images/client.png" width=250></a>
+<a href="images/server.png"><img src="images/server.png" width=250></a>
+<a href="images/router.png"><img src="images/router.png" width=250></a>
 </p>
 
 <p>
@@ -330,12 +331,12 @@ If you right click on a module and choose <i>Open Graphical View</i>, a separate
 <p class="img"><a href="images/graph_view.png"><img src="images/graph_view.png" width=500></a></p>
 
 <p>
-    Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
-
-    You will find the SYN packet sitting at the input of the IP module. The IP module is doing a function call the routing table one level up and the arp module to the right. This is indicated by the dotted lines (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
+Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
+You will find the SYN packet sitting at the input of the IP module. The IP module is doing a function call to the routing table one level up and the arp module to the right. This is indicated by the dotted lines (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
 </p>
+
 <p>
-    Here we are at the beginning of the interesting part. You may actually take a note that we are at event #25 (it's displayed in the top line of the main window status bar) so that next time you can quickly get here using the "Run until..." dialog (it can stop either at a simulation time or at an event number -- or if you enter both, it'll stop at whichever comes first. Note that you enter the value of the next event you want to observe -- so in this case we enter 26 in the run until dialog).
+Here we are at the beginning of the interesting part. You may actually take a note that we are at event #25 (it's displayed in the top line of the main window status bar) so that next time you can quickly get here using the "Run until..." dialog (it can stop either at a simulation time or at an event number -- or if you enter both, it'll stop at whichever comes first. Note that you enter the value of the next event you want to observe -- so in this case we enter 26 in the run until dialog).
 </p>
 
 <p class="img">
@@ -360,7 +361,7 @@ You can find the <i>Run until next event in this module</i> button on the toolba
 
 
 <p>
-    We can see what's going on by checking out the module logs. These
+We can see what's going on by checking out the module logs. These
 log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the log panel at the bottom of the main window, but that'll soon be useless because other modules
 dump their output there too. Luckily, we can filter the logs so we can concentrate on messages from modules we are interested in now -- we can do that with the <i>filter window contents</i> button at the top right of the logs panel. Here we can select which module's logs we want to display -- select arp and ip from <tt>client/networkLayer</tt>.
 </p>
@@ -373,15 +374,17 @@ dump their output there too. Luckily, we can filter the logs so we can concentra
 So we are at event #25, let's press F4 (or click at the <i>step</i> button) for the next event, and let IP process the SYN packet.
 You'll see that:
 </p>
+
 <ul>
 <li>the syn packet disappears in IP
 <li>arp creates an arp request packet
 <li>IP sends the packet
 </ul>
+
 <p>
 The logs will look like this:
 </p>
-<img src="images/arprequestlogs.png">
+<p class="img"><img src="images/arprequestlogs.png"></p>
 
 <p>
 ARP maps L3 addresses (IP address) to L2 addresses (Ethernet MAC address).
@@ -396,7 +399,7 @@ ARP Request. That's what we have seen here. Let's check it in detail!
 Click on the ARP request packet to view it's details in the property viewer panel (bottom left of the main window).
 </p>
 
-<img src="images/arpreq-fields.png"/></p>
+<p class="img"><img src="images/arpreq-fields.png"/></p>
 
 <p>
 It shows the contents of the ARP packet: source MAC address,
@@ -460,7 +463,7 @@ class EtherCtrl
 };
 </pre>
 
-<img src="images/arpreq-ctrlinfo.png"/></p>
+<p class="img"><img src="images/arpreq-ctrlinfo.png"/></p>
 
 <p>
 It says that source MAC address is not specified (all zero -- in this case
@@ -480,9 +483,7 @@ for ARP to finish. If you click on the <i>IP</i> module, you can see that it has
 a SYN packet queued.
 </p>
 
-<p class="img">
-<img src="images/arpqueue.png"/>
-</p>
+<p class="img"><img src="images/arpqueue.png"/></p>
 
 <p>
 You may double-click on the SYN packet, to view the datagram's contents
@@ -491,7 +492,7 @@ in an inspector window. Here you can find the encapsulated TCP packet. Double cl
 you can explore the TCP header fields.
 </p>
 
-<img src="images/TCPpacket.png"/></a></p>
+<p class="img"><img src="images/TCPpacket.png"/></a></p>
 
 <a name="arpcache"/><h3>The ARP cache</h3>
 
@@ -510,8 +511,7 @@ etc -- and also the ARP cache.
 Double-click on the <tt>arpCache</tt> line. Another inspector will open, double click on elements to see the arp cache contents.
 </p>
 
-<p class="img">
-<img src="images/ARPcache.png"/></a>
+<p class="img"><img src="images/ARPcache.png"/></p>
 
 </p>
 
@@ -655,7 +655,7 @@ In the next few event, <tt>arp</tt> will process the request. Hit F4.
 <tt>arp</tt>'s log output will show what happened.
 </p>
 
-<p class="img"><a href="images/arp-reply-sent.png"><img src="images/arp-reply-sent.png" width=400/></a></p>
+<p class="img"><a href="images/arp-reply-sent.png"><img src="images/arp-reply-sent.png" width=400></a></p>
 
 <p><!do we need this?>
 You can check the arp cache and see that a new entry has been added, as indicated by the logs:
@@ -670,7 +670,8 @@ request. The destination IP address was did not belong to the router;
 however, proxy ARP is turned on (you can verify this in the ARP module's
 inspector window, "Parameters" section -- see below). With proxy ARP, the
 router has to reply to the ARP Request if it can route the address, and
-send back its own MAC address. That's what happened here.</p>
+send back its own MAC address. That's what happened here.
+</p>
 
 <p class="img"><img src="images/arp-params.png"/></a></p>
 
@@ -679,7 +680,7 @@ While ARP processed the request packet, you probably saw a red flashing
 arrow, like this:
 </p>
 
-<p class="img"><a href="images/arp-outputport.png"><img src="images/arp-outputport.png" width="400"/></a></p>
+<p class="img"><a href="images/arp-outputport.png"><img src="images/arp-outputport.png" width="400"></a></p>
 
 <p>
 It indicates ARP asking the routing table component whether the address
@@ -720,7 +721,7 @@ The datagram carrying the TCP SYN segment that was wainting in the queue
 has been sent down to Ethernet for transmission.
 </p>
 
-<p class="img"><a href="images/arp-resolved.png"><img src="images/arp-resolved.png" width=400/></a></p>
+<p class="img"><a href="images/arp-resolved.png"><img src="images/arp-resolved.png" width=400></a></p>
 
 <p>
 You can even verify that the control info attached to the datagram
@@ -762,8 +763,6 @@ After some time, the logs can be quite cluttered ,so you may want to use the <i>
 <p>
 Whereas the logs are created by the <tt>ev <<</tt> statements in the C++ code, this message/packet traffic view is created automatically by the simulation environment -- no additional code necessary. The useful thing about this feature is that you can filter and examine messages and packets even after the simulation has finished.
 </p>
-
-
 
 <p>
 Packet traffic can be visualized with the <i>Sequence chart tool</i>. This is created from the event log. In order to use it, you must record an event log -- you can do that by clicking the <i>REC</i> button in the simulation environment (this can be automated by specifying <tt>record-eventlog = true</tt> in <i>omnetpp.ini</i>).
@@ -825,7 +824,7 @@ know, you can start from an example network (here: <tt>ARPTest</tt>, in "Network
 and click on submodules until you find what you're looking for.
 </p>
 
-<p class="img"><a href="images/doc-arp.png"><img src="images/doc-arp.png" width=400/></a></p>
+<p class="img"><a href="images/doc-arp.png"><img src="images/doc-arp.png" width=400></a></p>
 
 <p>
 ARP's page lists the parameters and gates (or ports) (further below, not shown in the screenshot).
@@ -851,14 +850,13 @@ whenever a message (packet, etc) arrives at the module or a timer goes off
 (a message scheduled by the module itself comes back).
 </p>
 
-<p class="img"><a href="images/arp-cc.png"><img src="images/arp-cc.png" width=400/></a></p>
-
-<!not needed from here>
+<p class="img"><a href="images/arp-cc.png"><img src="images/arp-cc.png" width=400></a></p>
 
 <p>
 As a rule of thumb: whatever large number of functions you see in the
 documentation, always click at <tt>handleMessage()</tt> first. If the
-module code was well written, it'll lead you from there. 
+module code was well written, it'll lead you from there.
+</p>
 
 <a name="conclusion"/><h3>Conclusion</h3>
 
