@@ -1,6 +1,18 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.2.4 (April, 2016) - stable
+---------------------------------
+
+This is a minor maintenance release that requires either OMNeT++ 4.6,
+or 5.0. (Earlier test versions of OMNeT++ will not work.)
+
+Changes:
+
+  - build: updated inet_featuretool (the same like the opp_featuretool in OMNeT++ 5.0)
+  - minor fixes to make it build under both OMNeT++ 4.6 and 5.0
+
+
 INET-3.2.3 (March, 2016) - Stable
 ---------------------------------
 
