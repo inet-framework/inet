@@ -70,7 +70,7 @@ Then we add the two nodes:
 @until @display("p=450,250");
 @skipline }
 
-We could have just used <tt>INetworkNode</tt>, but we're using parametrized types, so their type and properties can be easily modified from the .ini file. This way we can create the increasingly complex simulations by extending the one used in the previous step. For example, we can switch ideal components to more realistic ones.
+We could have just used <tt>INetworkNode</tt>, but we're using parametrized types, so their types and properties can be easily modified from the .ini file. This way we can create the increasingly complex simulations by extending the one used in the previous step. For example, we can switch ideal components to more realistic ones.
 
 The two nodes want to communicate wirelessly, and for that we need a radio medium module. In this case we add <tt>IdealRadioMedium</tt>. 
 
@@ -78,7 +78,7 @@ The two nodes want to communicate wirelessly, and for that we need a radio mediu
 @skip radioMedium: <mediumType>
 @until @display
 
-This is a simple model of radio transmission -- the success of reception only depends on the distance of the two nodes -- wether or not they are in communication range. In-range packets are always received and out-of-range ones are never.
+This is a simple model of radio transmission -- the success of reception only depends on the distance of the two nodes -- whether or not they are in communication range. In-range packets are always received and out-of-range ones are never.
 
 We can configure this range in the wireless NIC of the host. Let's add a simple wireless NIC to the hosts in the .ini file:
 
@@ -90,7 +90,7 @@ Now set the communication range to 500m:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
-Because we want a simple model, we dont care about interference. The two hosts can transmit simultaneously, but it doesnt affect packet traffic. We turn interference off in the NIC card by specifying the parameter in the .ini file:
+Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesnt affect packet traffic. We turn interference off in the NIC card by specifying the parameter in the .ini file:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
@@ -99,6 +99,8 @@ Finally, we set the transmission bandwidth to 1 Mbps of all radios in the model:
 
 @dontinclude omnetpp.ini
 @skipline **.bitrate = 1Mbps
+
+The radio part is done.
 
 Now let's assign IP addresses to the nodes. We could do that manually, but now we really don't care about what IP address they are getting -- we just want to concentrate on the wireless communication. We let <tt>IPv4Configurator</tt> handle the assignment.
 
@@ -114,13 +116,13 @@ The hosts have to know each other's MAC addresses to communicate, which is handl
 @dontinclude omnetpp.ini
 @skipline **.arpType = "GlobalARP"
 
-We need to set up the nodes in omnetpp.ini to exchange traffic:
+We need to set up UDP applications in the nodes in omnetpp.ini so they can exchange traffic:
 
 @dontinclude omnetpp.ini
 @skip *.hostA.numUdpApps = 1
 @until *.hostA.udpApp[0].sendInterval = exponential(10ms)
 
-The UDPBasicApp generates 1000 byte messages at random intervals, the mean of which is 10ms. Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic.
+The UDPBasicApp generates 1000 byte messages at random intervals, the mean of which is 10ms. Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic (not counting protocol overhead).
 
 The <tt>UDPSink</tt> at the other node just discards received packets:
 
