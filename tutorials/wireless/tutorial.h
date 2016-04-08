@@ -184,6 +184,8 @@ The result is that we have nice bubble animations representing radio transmissio
 
 <img src="step2_v2.gif">
 
+Sources: @ref omnetpp.ini, @ref WirelessA.ned
+
 NEXT: @ref step3
 
 */
@@ -211,6 +213,8 @@ The other hosts are there to relay the data between them, but routing is not yet
 
 <img src="wireless-step3.png">
 
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
 NEXT: @ref step4
 
 */
@@ -218,5 +222,37 @@ NEXT: @ref step4
 /**
 
 @page step4 Step 4 - Set up static routing
+
+UP: @ref step3
+
+The recently added hosts will have to behave like routers, and forward packets from Host A to Host B (and vice-versa). We have to set forwarding:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.forwarding = true
+
+We need to set up static routes. We could do that manually, but that's tedious, so we let the configurator take care of it. 
+
+@dontinclude omnetpp.ini
+@skipline *.configurator.config = xml("<config><interface hosts='**' address='10.0.0.x' netmask='255.255.255.0'/><autoroute metric='errorRate'/></config>")
+
+We tell the configurator to assign IP addresses in the 10.0.0.x range, and to create routes based on the error rate of links between the nodes. In the case of the <tt>IdealRadio</tt> model, this is 1 for nodes that are out of range, and 1e-3 for ones in range. The result will be that nodes that are out of range of each other will send packets to intermediate nodes that can forward them.
+
+Turning off routing table optimizaton, so it is easier to understand:
+
+@dontinclude omnetpp.ini
+@skipline *.configurator.optimizeRoutes = false
+
+Also disable routing table entries generated from the netmask and remove default routes (because it doesn't make sense in this adhoc network):
+
+@dontinclude omnetpp.ini
+@skipline **.routingTable.netmaskRoutes = ""
+
+Now the two nodes can communicate -- you can see that Host R1 relays data to Host B.
+
+The data rate is the same as before -- even though multiple hosts are transmitting at the same time -- because we're still ignoring interference.
+
+<img src="wireless-step4.png">
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 */
