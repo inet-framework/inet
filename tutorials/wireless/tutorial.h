@@ -192,4 +192,31 @@ NEXT: @ref step3
 
 @page step3 Step 3 - Add more nodes and decrease the communication range to 250m
 
+UP: @ref step2
+
+In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.ned:
+
+@dontinclude WirelessB.ned
+@skip network
+@until hostR3
+@skipline }
+@skipline }
+
+We decrease the communication range to 250m, so host A and B are out of range, and cannot communicate directly.
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 250m
+
+The other hosts are there to relay the data between them, but routing is not yet configured. The result is that Host A and B cannot communicate.
+
+<img src="wireless-step3.png">
+
+NEXT: @ref step4
+
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+
+@page step4 Step 4 - Set up static routing
+
 */
