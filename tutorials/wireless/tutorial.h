@@ -32,6 +32,7 @@ NEXT: @ref overview
 @page overview Overview
 UP: @ref contents
 
+<!WIP>
 The tutorial consists of 19 simulation models -- steps 1 to 19. They are based on 3 network topologies, which are defined in the 3 .ned files (WirelessA.ned, WirelessB.ned, WirelessC.ned). They use parametrized types, so their types and properties can be changed from the .ini file. This is what we do here to create the 19 simulation models. Some of them are derived from a previous model.
 
 There are 3 network topologies -- defined in 3 .ned files -- that are increasing in complexity, and an extension of the previous one. They share a single .ini file, where the 19 simulations are created...
@@ -78,7 +79,7 @@ The two nodes want to communicate wirelessly, and for that we need a radio mediu
 @skip radioMedium: <mediumType>
 @until @display
 
-The radioModule in general is responsible for coordinating the radio transmissions in the model. Hosts do not send radio packets to each other, but hand it to the radioMedium, which computes which hosts will receive the transmission and when, based on their positions and distance, taking other physical effects like attenuation and noise into account. It also computes when collisions happen. In the animation, hosts are shown to be sending messages directly to each other for clarity.
+The radio medium in general is responsible for coordinating the radio transmissions in the model. Hosts do not send radio packets to each other, but hand it to the radioMedium, which computes which hosts will receive the transmission and when, based on their positions and distance, taking other physical effects like attenuation and noise into account. It also computes when collisions happen. In the animation, hosts are shown to be sending messages directly to each other for clarity.
 
 <tt>IdealRadioMedium</tt> is a simple model of radio transmission -- the success of reception only depends on the distance of the two nodes -- whether or not they are in communication range. In-range packets are always received and out-of-range ones are never.
 
@@ -92,7 +93,7 @@ Now set the communication range to 500m:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
-Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesnt affect packet traffic. We turn interference off in the NIC card by specifying the parameter in the .ini file:
+Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect packet traffic. We turn interference off in the NIC card by specifying the parameter in the .ini file:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
@@ -124,7 +125,7 @@ We need to set up UDP applications in the nodes in omnetpp.ini so they can excha
 @skip *.hostA.numUdpApps = 1
 @until *.hostA.udpApp[0].sendInterval = exponential(10ms)
 
-The UDPBasicApp generates 1000 byte messages at random intervals, the mean of which is 10ms. Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic (not counting protocol overhead).
+The UDPBasicApp generates 1000 byte messages at random intervals with exponential distribution, the mean of which is 10ms. Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic (not counting protocol overhead).
 
 The <tt>UDPSink</tt> at the other node just discards received packets:
 
@@ -141,7 +142,7 @@ Let's run the simulation. We can see the nodes exchanging UDP packets:
 
 <img src="step1_v4.gif">
 
-The simulation concludes at t=25s, and the throughput instrument indicates that around 2400 packets were sent. A packet with overhead is 1028 bytes, which means the transmission was at around 800 kbps.
+The simulation concludes at t=25s, and the throughput instrument indicates that around 2400 packets were sent. A packet with overhead is 1028 bytes, which means the transmission rate was around 800 kbps.
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
@@ -150,5 +151,45 @@ NEXT: @ref step2
 -----------------------------------------------------------------------------------------------------------------------
 /**
 @page step2 Step 2 - Set up some animations
+
+UP: @ref step1
+
+We would like to visualize radio waves as they propage through space. For that we can use the @opp Canvas API.
+
+Note that the configuration for Step 2 -- <i>Wireless02</i> -- is created by extending <i>Wireless01</i> in omnetpp.ini:
+@dontinclude omnetpp.ini
+@skip [Config Wireless02]
+@until extends
+
+This way we can easily base subsequent steps on the previous ones by adding a few lines to the .ini file. Actually, this is true for all 19 steps -- each is an extension of the previous one.
+
+Let's turn on visualization of transmissions by editing the ini file:
+
+@dontinclude omnetpp.ini
+@skipline *.radioMedium.mediumVisualizer.displayCommunication = true
+
+Packet transfers are visualized by the animation of radio waves, so we don't need the default packet anymations any more. Let's turn them off in qtenv (uncheck animate messages).
+
+In order to get a smooth animation, we need to enable canvas updates and set an update interval:
+
+@dontinclude omnetpp.ini
+@skipline *.radioMedium.mediumVisualizer.updateCanvasInterval = 100ns
+
+Also turn on communication trails, so we can get a fading blue line on successfull communication paths:
+
+@dontinclude omnetpp.ini
+@skipline *.radioMedium.mediumVisualizer.leaveCommunicationTrail = true
+
+The result is that we have nice bubble animations representing radio transmissions:
+
+<img src="step2_v2.gif">
+
+NEXT: @ref step3
+
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+
+@page step3 Step 3 - Add more nodes and decrease the communication range to 250m
 
 */
