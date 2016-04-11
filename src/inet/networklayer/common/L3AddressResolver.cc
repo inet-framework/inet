@@ -255,7 +255,7 @@ L3Address L3AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     else if ((addrType & ADDR_MODULEID) && getInterfaceModuleIdAddress(ret, ie, mask))
         return ret;
     else
-        throw cRuntimeError("L3AddressResolver: unknown addrType %d", addrType);
+        throw cRuntimeError("L3AddressResolver: unknown addrType %d at %s", addrType, ie->getFullPath().c_str());
 
     return ret;
 }
