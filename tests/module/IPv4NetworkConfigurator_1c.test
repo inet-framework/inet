@@ -2,7 +2,7 @@
 
 Tests IPv4NetworkConfigurator for a wired LAN.
 Topology:
-   server <--> router <--> switch <--> clients
+   server <--> router <--> 3 switches in a triangle <--> clients
 
 %file: test.ned
 
@@ -21,15 +21,20 @@ network Test
             parameters:
                 dumpAddresses = true;
         }
+        switch1: EtherSwitch;
+        switch2: EtherSwitch;
+        switch3: EtherSwitch;
         server: StandardHost;
         router: Router;
-        switch: EtherSwitch;
         client[numHosts]: StandardHost;
     connections:
         server.ethg++ <--> Eth10M <--> router.ethg++;
-        router.ethg++ <--> Eth10M <--> switch.ethg++;
+        router.ethg++ <--> Eth10M <--> switch1.ethg++;
+        switch1.ethg++ <--> Eth10M <--> switch2.ethg++;
+        switch2.ethg++ <--> Eth10M <--> switch3.ethg++;
+        switch3.ethg++ <--> Eth10M <--> switch1.ethg++;
         for i=0..numHosts-1 {
-            client[i].ethg++ <--> Eth10M <--> switch.ethg++;
+            client[i].ethg++ <--> Eth10M <--> switch3.ethg++;
         }
 }
 
@@ -52,6 +57,7 @@ Link 1
     client\[0\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.10/29.*}
     client\[1\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.11/29.*}
     client\[2\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.12/29.*}
+
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -4,6 +4,9 @@ Tests IPv4NetworkConfigurator for a wired LAN.
 Topology:
    server <--> router <--> switch <--> clients
 
+Same as IPv4NetworkConfigurator_1.test, except order of modules in NED
+(the switch is the first node module)
+
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
@@ -21,9 +24,9 @@ network Test
             parameters:
                 dumpAddresses = true;
         }
+        switch: EtherSwitch;
         server: StandardHost;
         router: Router;
-        switch: EtherSwitch;
         client[numHosts]: StandardHost;
     connections:
         server.ethg++ <--> Eth10M <--> router.ethg++;
@@ -52,6 +55,7 @@ Link 1
     client\[0\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.10/29.*}
     client\[1\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.11/29.*}
     client\[2\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.12/29.*}
+
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

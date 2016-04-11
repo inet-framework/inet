@@ -84,15 +84,15 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
                 if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
-                    interfacesSeen.insert(interfaceEntry);
                     if (isBridgeNode(node))
                         createInterfaceInfo(topology, node, nullptr, interfaceEntry);
                     else {
+                        interfacesSeen.insert(interfaceEntry);
                         // create a new network link
                         LinkInfo *linkInfo = new LinkInfo();
                         topology.linkInfos.push_back(linkInfo);
                         // store interface as belonging to the new network link
-                        InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
+                        InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, isBridgeNode(node) ? nullptr : linkInfo, interfaceEntry);
                         linkInfo->interfaceInfos.push_back(interfaceInfo);
                         // visit neighbors (and potentially the whole LAN, recursively)
                         if (isWirelessInterface(interfaceEntry)) {
