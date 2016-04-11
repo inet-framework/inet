@@ -35,7 +35,7 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
 {
     unsigned int startPos = b.getPos();
     serialize(pkt, b, c);
-    if (!b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
+    if (c.throwOnSerializedSizeMissmatch && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
         throw cRuntimeError("%s serializer error: packet %s (%s) length is %d but serialized length is %d", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
 
@@ -51,7 +51,7 @@ cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
         pkt = serializers.byteArraySerializer.deserialize(b, context);
     }
     ASSERT(pkt);
-    if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength())) {
+    if (context.throwOnSerializedSizeMissmatch && !pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength())) {
         const char *encclass = pkt->getEncapsulatedPacket() ? pkt->getEncapsulatedPacket()->getClassName() : "<nullptr>";
         throw cRuntimeError("%s deserializer error: packet %s (%s) length is %d but deserialized length is %d (encapsulated packet is %s)", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos, encclass);
     }
