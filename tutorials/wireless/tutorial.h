@@ -15,9 +15,9 @@ If you need more information at any time, feel free to refer to the @opp and INE
 - 	<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET Manual draft</a>
 - 	<a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
 
-The tutorial starts off with a basic simulation model at step 1, and gradually make it more complex and realistic in subsequent steps -- so you can learn about various INET wireless features and what can be achieved with them.
+The tutorial starts off with a basic simulation model at step 1, and gradually makes it more complex and realistic in subsequent steps -- so you can learn about various INET wireless features and what can be achieved with them.
 
-Feel free to try the steps as you progress with the tutorial -- all simulation models are defined in omnetpp.ini
+Feel free to try the steps as you progress with the tutorial -- all simulation models are defined in omnetpp.ini.
 
 @section contents Contents
 
@@ -253,15 +253,21 @@ We refine our model by enabling the simulation of interference:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = false
 
-Set maximum interference range to 500m:
+Set maximum interference range to the double of the communication range, 500m:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxInterferenceRange = 500m
 
-This means that Host A cannot communicate with Host B, but it's transmission will cause interference with other transmissions at Host B.
+This means that Host A cannot communicate with Host B because it is out of range, but its transmission will cause interference with other transmissions at Host B.
+
+<img src="wireless-step5_v2.png">
+
+What happens here is Host A starts sending packets at random intervals, and Host R1 is supposed to relay them to Host B. However, Host R1 is almost constantly in receiving state. R1 gets to transmit when A's random interval between transmissions is by chance greater, but most of the time its transmission do not make it Host B without Host A's transmissions interfering. Meanwhile, R1's send queue is filling up, as it doesn't get the chance to transmit. The result is that only a handful of packets make it to Host B. The throughput is minial -- 40 packets make it out of about 2500, which is about 12 kbps (out of 1 Mbps possible bandwidth).
 
 When you run the simulation, you will see that it's mostly Host A that is transmitting -- Host R1 should be relaying the packets to Host B, but it can't transmit while receiving from Host A. As Host A is generating packets in random intervals, sometimes the interval is great enough for Host R1 to transmit a packet. Most of the time, these packets are not delivered successfully because Host A starts to transmit before Host R1 finished transmitting. So they are cut by interference. Only a handful of packets arrive at Host B.
 <!rewrite>
+
+To minimize interference, we need some kind of media access protocol to govern which host can transmit and when.
 
 
 */
