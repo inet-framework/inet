@@ -235,4 +235,22 @@ The data rate is the same as before -- even though multiple hosts are transmitti
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
+NEXT: @ref step5
+
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+
+@page step5 Step 5 - Take into account the interference between different hosts
+
+UP: @ref step4
+
+We refine our model by enabling the simulation of interference:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].radio.receiver.ignoreInterference = false
+
+
+
+
 */
