@@ -232,6 +232,8 @@ Now the two nodes can communicate -- you can see that Host R1 relays data to Hos
 
 The data rate is the same as before -- even though multiple hosts are transmitting at the same time -- because we're still ignoring interference.
 
+Note that there are blue lines leading to Host R2 and R3 even though they don't transmit. This is because they receive the transmissions at the physical layer, but they discard the packets at the link layer because it is not addressed to them.
+
 <img src="wireless-step4.png">
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned, 
@@ -258,7 +260,8 @@ Set maximum interference range to 500m:
 
 This means that Host A cannot communicate with Host B, but it's transmission will cause interference with other transmissions at Host B.
 
-
+When you run the simulation, you will see that it's mostly Host A that is transmitting -- Host R1 should be relaying the packets to Host B, but it can't transmit while receiving from Host A. As Host A is generating packets in random intervals, sometimes the interval is great enough for Host R1 to transmit a packet. Most of the time, these packets are not delivered successfully because Host A starts to transmit before Host R1 finished transmitting. So they are cut by interference. Only a handful of packets arrive at Host B.
+<!rewrite>
 
 
 */
