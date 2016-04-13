@@ -25,6 +25,7 @@ Feel free to try the steps as you progress with the tutorial -- all simulation m
 -	@ref step2
 -	@ref step3
 -	@ref step4
+-	@ref step5
 
 NEXT: @ref step1
 */
@@ -233,7 +234,7 @@ The data rate is the same as before -- even though multiple hosts are transmitti
 
 <img src="wireless-step4.png">
 
-Sources: @ref omnetpp.ini, @ref WirelessB.ned
+Sources: @ref omnetpp.ini, @ref WirelessB.ned, 
 
 NEXT: @ref step5
 
@@ -249,6 +250,13 @@ We refine our model by enabling the simulation of interference:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = false
+
+Set maximum interference range to 500m:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].radio.transmitter.maxInterferenceRange = 500m
+
+This means that Host A cannot communicate with Host B, but it's transmission will cause interference with other transmissions at Host B.
 
 
 
