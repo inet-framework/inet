@@ -15,37 +15,17 @@ If you need more information at any time, feel free to refer to the @opp and INE
 - 	<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET Manual draft</a>
 - 	<a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
 
+The tutorial starts off with a basic simulation model at step 1, and gradually make it more complex and realistic in subsequent steps -- so you can learn about various INET wireless features and what can be achieved with them.
+
+Feel free to try the steps as you progress with the tutorial -- all simulation models are defined in omnetpp.ini
+
 @section contents Contents
 
--	@ref overview
 -	@ref step1
 -	@ref step2
 -	@ref step3
 -	@ref step4
 
-NEXT: @ref overview
-*/
------------------------------------------------------------------------------------------------------------------------
-
-/**
-
-@page overview Overview
-UP: @ref contents
-
-<!WIP>
-The tutorial consists of 19 simulation models -- steps 1 to 19. They are based on 3 network topologies, which are defined in the 3 .ned files (WirelessA.ned, WirelessB.ned, WirelessC.ned). They use parametrized types, so their types and properties can be changed from the .ini file. This is what we do here to create the 19 simulation models. Some of them are derived from a previous model.
-
-There are 3 network topologies -- defined in 3 .ned files -- that are increasing in complexity, and an extension of the previous one. They share a single .ini file, where the 19 simulations are created...
-
-what do you want to say?
-
-there are 3 ned files, which contain the topology, and they extend each other. The ini file defines the 19 simulation models that increase in complexity. The ned files make use of parametrized types so the settings can be changed from the ini file. they are derived from the previous one as well.
-
-you are welcome to try them, but this tutorial should be enough without that.
-
-The purpose of this tutorial is to show what features of wireless simulations in INET have and what can be built and simulated.
-
-<! write introduction later ><!do we need this at all>
 NEXT: @ref step1
 */
 -----------------------------------------------------------------------------------------------------------------------
