@@ -217,7 +217,7 @@ We need to set up static routes. We could do that manually, but that's tedious, 
 
 We tell the configurator to assign IP addresses in the 10.0.0.x range, and to create routes based on the error rate of links between the nodes. In the case of the <tt>IdealRadio</tt> model, this is 1 for nodes that are out of range, and 1e-3 for ones in range. The result will be that nodes that are out of range of each other will send packets to intermediate nodes that can forward them.
 
-Turning off routing table optimizaton, so it is easier to understand:
+Turning off routing table optimizaton. This way there will be a distinct entry for reaching each host, so the table is easier to understand.
 
 @dontinclude omnetpp.ini
 @skipline *.configurator.optimizeRoutes = false
