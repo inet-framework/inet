@@ -269,5 +269,11 @@ When you run the simulation, you will see that it's mostly Host A that is transm
 
 To minimize interference, we need some kind of media access protocol to govern which host can transmit and when.
 
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
+NEXT: @ref step6
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+@page step6 Step 6 - Use CSMA to better utilize the medium
 */
