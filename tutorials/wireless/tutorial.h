@@ -34,7 +34,7 @@ NEXT: @ref step1
 @page step1 Step 1 - Two nodes communicating via UDP
 UP: @ref overview
 
-In the first scenario, we set up two hosts, with one host sending data wirelessly to the other via UDP. Right now, we don't care if the wireless exchange is realistic or not, just want the hosts to transfer data between each other. There are no collisions, and other phyisical effects -- like attenuation and multipath propagation -- are ignored. The network topology is defined in the .ned files -- in this case WirelessA.ned.
+In the first scenario, we set up two hosts, with one host sending data wirelessly to the other via UDP. Right now, we don't care if the wireless exchange is realistic or not, just want the hosts to transfer data between each other. There are no collisions, and other physical effects -- like attenuation and multipath propagation -- are ignored. The network topology is defined in the .ned files -- in this case WirelessA.ned.
 
 <img src="wireless-step1.png">
 
@@ -44,7 +44,7 @@ First, we create the network environment -- this is where the simulation will ta
 @skip network WirelessA
 @until @display
 
-Then we add the two nodes:
+Then we add the two nodes 400 meters apart:
 
 @dontinclude WirelessA.ned
 @skip hostA: <hostType>
@@ -59,7 +59,7 @@ The two nodes want to communicate wirelessly, and for that we need a radio mediu
 @skip radioMedium: <mediumType>
 @until @display
 
-The radio medium in general is responsible for coordinating the radio transmissions in the model. Hosts do not send radio packets to each other, but hand it to the radioMedium, which computes which hosts will receive the transmission and when, based on their positions and distance, taking other physical effects like attenuation and noise into account. It also computes when collisions happen. In the animation, hosts are shown to be sending messages directly to each other for clarity.
+The radio medium in general is responsible for coordinating the radio transmissions in the model. Hosts do not send radio packets to each other, but hand it to the radioMedium, which computes which hosts will receive the transmission and when, based on their positions and distance, taking other physical effects like attenuation and noise into account. It also computes when collisions happen. This way hosts don't have anything to do with who gets their transmission -- the radioMedium handles that. In the animation, hosts are shown to be sending messages directly to each other for clarity.
 
 <tt>IdealRadioMedium</tt> is a simple model of radio transmission -- the success of reception only depends on the distance of the two nodes -- whether or not they are in communication range. In-range packets are always received and out-of-range ones are never.
 
@@ -94,7 +94,7 @@ Now let's assign IP addresses to the nodes. We could do that manually, but now w
 
 The configurator assigns the IP addresses and sets up static routing between the nodes. The configurator has no gates and does not connect to anything, only stores the routing information. Nodes contain an <tt>IPv4NodeConfigurator</tt>  module that configures hosts' routing tables based on the information stored in the configurator (the <tt>IPv4NodeConfigurator</tt> is included in the <tt>INetworkNode</tt> module by default).
 
-The hosts have to know each other's MAC addresses to communicate, which is handled by the ARP protocol. Since we want to concentrate on the UPD exchange, we can set the MAC addresses even before the simulation begins, to cut the ARP resolution messages by using <i>GlobarARP</i>:
+The hosts have to know each other's MAC addresses to communicate, which is handled by the ARP protocol. Since we want to concentrate on the UPD exchange, we can set the MAC addresses even before the simulation begins to cut the ARP resolution messages, by using <i>GlobarARP</i>:
 
 @dontinclude omnetpp.ini
 @skipline **.arpType = "GlobalARP"
