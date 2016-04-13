@@ -32,7 +32,7 @@ NEXT: @ref step1
 /**
 
 @page step1 Step 1 - Two nodes communicating via UDP
-UP: @ref overview
+UP: @ref step1
 
 In the first scenario, we set up two hosts, with one host sending data wirelessly to the other via UDP. Right now, we don't care if the wireless exchange is realistic or not, just want the hosts to transfer data between each other. There are no collisions, and other physical effects -- like attenuation and multipath propagation -- are ignored. The network topology is defined in the .ned files -- in this case WirelessA.ned.
 
