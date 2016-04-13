@@ -276,4 +276,17 @@ NEXT: @ref step6
 -----------------------------------------------------------------------------------------------------------------------
 /**
 @page step6 Step 6 - Use CSMA to better utilize the medium
+
+With CSMA, Host will sniff into the medium to see if there are ongoing transmissions in their interference range. This is in contrast to the previous step, where they didn't care about if someone else was transmitting. This should improve throughput, as the medium will be utilized better.
+
+We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which can use CSMA:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].typename = "WirelessNic"
+
+<tt>WirelessNic</tt> has <tt>Ieee80211</tt> radio by default, but we still want to use <tt>IdealRadio</tt>:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].radioType = "IdealRadio"
+
 */
