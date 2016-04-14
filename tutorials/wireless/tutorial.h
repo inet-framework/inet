@@ -371,4 +371,39 @@ NEXT: @ref step9
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step9
+@page step9 Step 9 - Install energy management into the nodes
+
+UP: @ref step8
+
+The nodes behave like mobile devices, and we can model their energy consumption and storage.
+
+First set up energy consumption in the node radios:
+
+@dontinclude omnetpp.ini
+@skipline **.energyConsumerType = "StateBasedEnergyConsumer"
+
+The <tt>StateBasedEnergyConsumer</tt> module models radio power consumption according to what state the radio is in -- each state has constant power consumption that can be set by parameters. radio mode, transmitter and receiver state. The consumption is constant and can be set by a parameter.<!rewrite>
+
+Set up energy storage in the nodes -- basically modelling the batteries:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.energyStorageType = "IdealEnergyStorage"
+
+This provides an infinite ammount of energy, can't be fully charged or depleted. We use this because we want to concentrate on the power consumption, not the storage.
+<!rewrite>
+
+<!where to check consumption>
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
+NEXT: @ref step10
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+@page step10 Step 10 - Add obstacles to the environment
+
+UP: @ref step9
+
+*/
+
+*/
