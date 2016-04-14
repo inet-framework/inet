@@ -711,7 +711,6 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
         // if interface parameter does not match existing interface, do not send datagram
         if (rt->getInterfaceByAddress(src) == nullptr) {
             delete datagram;
-            delete controlInfo;
 #ifndef WITH_xMIPv6
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
