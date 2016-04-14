@@ -30,6 +30,8 @@ Feel free to try the steps as you progress with the tutorial -- all simulation m
 -	@ref step7
 -	@ref step8
 -	@ref step9
+-	@ref step10
+-	@ref step11
 
 NEXT: @ref step1
 */
@@ -309,8 +311,9 @@ We need to turn on mac acknowledgements so hosts can detect if a transmission ne
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].mac.useMACAcks = true
 
-<!img>
+<img src="wireless-step6.png">
 <!results>
+Throughput is dramaticly improved by using access control -- <!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -393,6 +396,8 @@ This provides an infinite ammount of energy, can't be fully charged or depleted.
 <!rewrite>
 
 <!where to check consumption>
+The energyBalance variable indicates the energy consumption (host*.energyStorage.energyBalance). The residualCapacity signal can be used as well.
+<!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -403,6 +408,45 @@ NEXT: @ref step10
 @page step10 Step 10 - Add obstacles to the environment
 
 UP: @ref step9
+
+Up until now, the nodes were operating in free space. In the real world, however, there are usually obstacles that decrease signal strength, or reflect radio waves.
+
+Let's add a brick wall to the model that sits between Host A and R1, and see what happens to the transmissions.<!brick or concrete?>
+
+We have to extend <i>WirelessB.ned</i> to include an <tt>environment</tt> module:
+
+@dontinclude WirelessC.ned
+@skip network WirelessC extends WirelessB
+@until @display
+@skipline }
+@skipline }
+
+<!do we need objectcachetype="">
+
+The physical environment module handles the objects that interact with transmission <!rewrite>
+
+Objects can be defined in .xml files (see details in the <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual</a>). Our wall is defined in <i>walls.xml</i>.
+
+@dontinclude walls.xml
+@skip environment
+@until /environment
+
+We need to configure the environment in omnetpp.ini:
+
+@dontinclude omnetpp.ini
+@skipline *.environment.config = xmldoc("walls.xml")
+
+Unfortunatelly, the wall has no effect on the transmissions -- the number of received packets is exactly the same as in the previous step -- because our simple radio model doesn't take obstacles into account. We need a more realistic radio model.
+
+<img src="wireless-step10.png">
+
+Sources: omnetpp.ini, WirelessC.ned, walls.xml
+
+NEXT: @ref step11
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+@page step11 Step 11 - Enhance the accuracy of the radio model
 
 */
 
