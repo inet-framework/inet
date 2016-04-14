@@ -281,7 +281,9 @@ NEXT: @ref step6
 /**
 @page step6 Step 6 - Use CSMA to better utilize the medium
 
-With CSMA, Host will sniff into the medium to see if there are ongoing transmissions in their interference range. This is in contrast to the previous step, where they didn't care about if someone else was transmitting. This should improve throughput, as the medium will be utilized better.
+UP: @ref step5
+
+With CSMA, Hosts will sniff into the medium to see if there are ongoing transmissions in their interference range. This is in contrast to the previous step, where they didn't care about if someone else was transmitting. This should improve throughput, as the medium will be utilized better.
 
 We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which can use CSMA:
 
@@ -293,4 +295,77 @@ We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which c
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radioType = "IdealRadio"
 
+Set mac protocol to CSMA:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].macType = "CSMA"
+
+We need to turn on mac acknowledgements so hosts can detect if a transmission needs resending:
+
+@dontinclude omnetpp.ini
+@skipline *.host*.wlan[*].mac.useMACAcks = true
+
+<!img>
+<!results>
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
+NEXT: @ref step7
 */
+-----------------------------------------------------------------------------------------------------------------------
+/**
+@page step7 Step 7 - Configure node movements
+
+UP: @ref step6
+
+Let's configure the intermediate nodes (R1-3) to move around. We set them to move upwards at a speed of 12 miles per hour:
+
+@dontinclude omnetpp.ini
+@skip mobility
+@until mobility.angle
+
+We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is less than in the previous step, because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
+
+<img src="step7_v5.gif">
+
+A dynamic routing mechanism is needed to reconfigure the routes as nodes move out of range.
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
+NEXT: @ref step8
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+
+@page step8 Step 8 - Configure adhoc routing (AODV)
+
+UP: @ref step7
+
+Let's configure ad-hoc routing with AODV.
+
+We need the <tt>IPv4NetworkConfigurator</tt> to only assign the IP addresses. We turn all other functions off:
+
+@dontinclude omnetpp.ini
+@skip *.configurator.addStaticRoutes = false
+@until Subnet
+
+Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
+
+@dontinclude omnetpp.ini
+@skipline *.hostType = "AODVRouter"
+
+<tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the <tt>AODVRouting</tt> submodule.
+
+Each node works like a router -- they manage their own routing tables and adapt to changes in the network topology.
+
+This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead.
+
+<img src="wireless-step9.png">
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
+NEXT: @ref step9
+*/
+-----------------------------------------------------------------------------------------------------------------------
+/**
+@page step9
