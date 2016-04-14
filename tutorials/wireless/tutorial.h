@@ -43,7 +43,7 @@ In the first scenario, we set up two hosts, with one host sending data wirelessl
 
 <img src="wireless-step1.png">
 
-First, we create the network environment -- this is where the simulation will take place -- and specify its size to 500x500:
+First, we create the network environment -- this is where the simulation will take place -- and specify its size to 500x500 meters:
 
 @dontinclude WirelessA.ned
 @skip network WirelessA
@@ -78,7 +78,7 @@ Now set the communication range to 500m:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
-Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect packet traffic. We turn interference off in the NIC card by specifying the parameter in the .ini file:
+Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect packet traffic. We turn interference off in the NIC by specifying the parameter in the .ini file:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
@@ -97,7 +97,7 @@ Now let's assign IP addresses to the nodes. We could do that manually, but now w
 @until @display
 @skipline }
 
-The configurator assigns the IP addresses and sets up static routing between the nodes. The configurator has no gates and does not connect to anything, only stores the routing information. Nodes contain an <tt>IPv4NodeConfigurator</tt>  module that configures hosts' routing tables based on the information stored in the configurator (the <tt>IPv4NodeConfigurator</tt> is included in the <tt>INetworkNode</tt> module by default).
+The configurator assigns the IP addresses and sets up static routing between the nodes. The configurator has no gates and does not connect to anything, only stores the routing information. Nodes contain an <tt>IPv4NodeConfigurator</tt>  module that configures hosts' routing tables based on the information stored in the network configurator (the <tt>IPv4NodeConfigurator</tt> is included in the <tt>INetworkNode</tt> module by default).
 
 The hosts have to know each other's MAC addresses to communicate, which is handled by the ARP protocol. Since we want to concentrate on the UPD exchange, we can set the MAC addresses even before the simulation begins to cut the ARP resolution messages, by using <i>GlobarARP</i>:
 
@@ -153,7 +153,7 @@ Let's turn on visualization of transmissions by editing the ini file:
 @dontinclude omnetpp.ini
 @skipline *.radioMedium.mediumVisualizer.displayCommunication = true
 
-Packet transfers are visualized by the animation of radio transmissions, so we don't need the default packet anymations any more. Let's turn them off in qtenv (uncheck animate messages).
+Packet transfers are visualized by the animation of radio transmissions, so we don't need the default packet animations any more. Let's turn them off in qtenv (uncheck <i>animate messages</i> in preferences).
 
 In order to get a smooth animation, we need to enable canvas updates and set an update interval:
 
@@ -210,7 +210,7 @@ NEXT: @ref step4
 
 UP: @ref step3
 
-The recently added hosts will have to behave like routers, and forward packets from Host A to Host B (and vice-versa). We have to set forwarding:
+The recently added hosts will have to behave like routers, and forward packets from Host A to Host B. We have to set forwarding:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.forwarding = true
@@ -220,7 +220,7 @@ We need to set up static routes. We could do that manually, but that's tedious, 
 @dontinclude omnetpp.ini
 @skipline *.configurator.config = xml("<config><interface hosts='**' address='10.0.0.x' netmask='255.255.255.0'/><autoroute metric='errorRate'/></config>")
 
-We tell the configurator to assign IP addresses in the 10.0.0.x range, and to create routes based on the error rate of links between the nodes. In the case of the <tt>IdealRadio</tt> model, this is 1 for nodes that are out of range, and 1e-3 for ones in range. The result will be that nodes that are out of range of each other will send packets to intermediate nodes that can forward them.
+We tell the configurator to assign IP addresses in the 10.0.0.x range, and to create routes based on the estimated error rate of links between the nodes. In the case of the <tt>IdealRadio</tt> model, the error rate is 1 for nodes that are out of range, and 1e-3 for ones in range. The result will be that nodes that are out of range of each other will send packets to intermediate nodes that can forward them.
 
 Turning off routing table optimizaton. This way there will be a distinct entry for reaching each host, so the table is easier to understand.
 
