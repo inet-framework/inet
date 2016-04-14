@@ -26,6 +26,10 @@ Feel free to try the steps as you progress with the tutorial -- all simulation m
 -	@ref step3
 -	@ref step4
 -	@ref step5
+-	@ref step6
+-	@ref step7
+-	@ref step8
+-	@ref step9
 
 NEXT: @ref step1
 */
@@ -283,7 +287,7 @@ NEXT: @ref step6
 
 UP: @ref step5
 
-With CSMA, Hosts will sniff into the medium to see if there are ongoing transmissions in their interference range. This is in contrast to the previous step, where they didn't care about if someone else was transmitting. This should improve throughput, as the medium will be utilized better.
+With CSMA, hosts will sniff into the medium to see if there are ongoing transmissions in their interference range. This is in contrast to the previous step, where they didn't care if someone else was transmitting. This should improve throughput, as the medium will be utilized better.
 
 We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which can use CSMA:
 
@@ -355,10 +359,9 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 @skipline *.hostType = "AODVRouter"
 
 <tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the <tt>AODVRouting</tt> submodule.
-
 Each node works like a router -- they manage their own routing tables and adapt to changes in the network topology.
 
-This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead.
+This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead -- but still more than in the previous step.
 
 <img src="wireless-step9.png">
 
