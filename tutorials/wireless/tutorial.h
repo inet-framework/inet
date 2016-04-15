@@ -331,6 +331,8 @@ Let's configure the intermediate nodes (R1-3) to move around. We set them to mov
 @skip mobility
 @until mobility.angle
 
+Run the simulation in fast mode to better see the nodes moving <!rewrite this>
+
 We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is less than in the previous step, because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
 
 <img src="step7_v5.gif">
@@ -448,6 +450,34 @@ NEXT: @ref step11
 -----------------------------------------------------------------------------------------------------------------------
 /**
 @page step11 Step 11 - Enhance the accuracy of the radio model
+
+We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which more realistic. It implements a radio that uses APSK modulation, but it is not using other techniques like forward error correction, interleaving or spreading. Nevertheless, it takes obstacles into account.
+
+So let's switch <tt>IdealRadioMedium</tt> with <tt>APSKScalarRadioMedium</tt>:
+
+@dontinclude omnetpp.ini
+@skipline *.mediumType = "APSKScalarRadioMedium"
+
+Set up some background noise:
+
+@dontinclude omnetpp.ini
+@skipline *.radioMedium.backgroundNoise.power = -110dBm
+
+<tt>APSKRadioMedium</tt> uses <tt>IsotropicScalarBackgroundNoise</tt> by default. This creates background noise that is constant in space, time and frequency.
+
+<!frequency 2 ghz>
+
+Set up <tt>APSKScalarRadio<tt>'s in the nodes and configure each radio:
+
+@dontinclude omnetpp.ini
+@skip *.host*.wlan[*].radioType = "APSKScalarRadio"
+@until *.host*.wlan[*].radio.receiver.snirThreshold = 4dB
+
+@note Each <tt>radioMedium</tt> model has to be used with the corresponding radio model -- this case <tt>APSKScalarRadioMedium</tt> with <tt>APSKScalarRadio</tt>. The same was true with <tt>IdealRadio</tt>.<!do we need this - is it correct - do we need this here and not at idealradio - 
+last 3 lines - preambleduration?>
+
+<!img>
+<!results>
 
 */
 
