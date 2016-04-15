@@ -312,8 +312,8 @@ We need to turn on mac acknowledgements so hosts can detect if a transmission ne
 @skipline *.host*.wlan[*].mac.useMACAcks = true
 
 <img src="wireless-step6.png">
-<!results>
-Throughput is dramaticly improved by using access control -- <!rewrite>
+
+We can see that throughput is increased over the previous step thanks to CSMA -- altough less then in step 4 because of the interference.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -385,18 +385,19 @@ First set up energy consumption in the node radios:
 @dontinclude omnetpp.ini
 @skipline **.energyConsumerType = "StateBasedEnergyConsumer"
 
-The <tt>StateBasedEnergyConsumer</tt> module models radio power consumption according to what state the radio is in -- each state has constant power consumption that can be set by parameters. radio mode, transmitter and receiver state. The consumption is constant and can be set by a parameter.<!rewrite>
+The <tt>StateBasedEnergyConsumer</tt> module models radio power consumption based on states like radio mode, transmitter and receiver state. Each state has a constant power consumption that can be set by a parameter.
 
 Set up energy storage in the nodes -- basically modelling the batteries:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.energyStorageType = "IdealEnergyStorage"
 
-This provides an infinite ammount of energy, can't be fully charged or depleted. We use this because we want to concentrate on the power consumption, not the storage.
-<!rewrite>
+<tt>IdealEnergyStorage</tt> provides an infinite ammount of energy, can't be fully charged or depleted. We use this because we want to concentrate on the power consumption, not the storage.
 
 <!where to check consumption>
-The energyBalance variable indicates the energy consumption (host*.energyStorage.energyBalance). The residualCapacity signal can be used as well.
+The energyBalance variable indicates the energy consumption (host*.energyStorage.energyBalance). You can use the residualCapacity signal to display energy consumption over time.
+
+<img src="wireless-step9-energy.png">
 <!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
