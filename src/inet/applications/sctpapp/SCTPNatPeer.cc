@@ -92,6 +92,7 @@ void SCTPNatPeer::initialize()
     ordered = (bool)par("ordered");
     queueSize = par("queueSize");
     timeoutMsg = new cMessage("SrvAppTimer");
+    clientSocket.setOutputGate(gate("sctpOut"));
     if (addresses.size() == 0) {
         clientSocket.bind(port);
     }
@@ -99,7 +100,6 @@ void SCTPNatPeer::initialize()
         clientSocket.bindx(addresses, port);
     }
     clientSocket.setCallbackObject(this);
-    clientSocket.setOutputGate(gate("sctpOut"));
     rendezvous = (bool)par("rendezvous");
     if ((simtime_t)par("startTime") > 0) {
         cMessage *msg = new cMessage("ConnectTimer");

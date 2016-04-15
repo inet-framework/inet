@@ -40,6 +40,9 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
+            if (msg->getContextPointer() != NULL) {
+                sctpMain->setSocketOptions((SocketOptions*) (msg->getContextPointer()));
+            }
             initAssociation(openCmd);
             state->active = true;
             localAddressList = openCmd->getLocalAddresses();
@@ -85,6 +88,8 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
+            if (msg->getContextPointer() != NULL)
+                sctpMain->setSocketOptions((SocketOptions*) (msg->getContextPointer()));
             initAssociation(openCmd);
             state->fork = openCmd->getFork();
             localAddressList = openCmd->getLocalAddresses();

@@ -30,6 +30,24 @@ namespace inet {
 
 typedef std::vector<L3Address> AddressVector;
 
+typedef struct {
+    int maxInitRetrans;
+    int maxInitRetransTimeout;
+    double rtoInitial;
+    double rtoMin;
+    double rtoMax;
+    int sackFrequency;
+    double sackPeriod;
+    int maxBurst;
+    int fragPoint;
+    int noDelay;
+} SocketOptions;
+
+typedef struct {
+    int inboundStreams;
+    int outboundStreams;
+} AppSocketOptions;
+
 class INET_API SCTPSocket
 {
   public:
@@ -77,9 +95,11 @@ class INET_API SCTPSocket
     AddressVector remoteAddresses;
     int remotePrt;
     int fsmStatus;
-    int inboundStreams;
-    int outboundStreams;
     int lastStream;
+
+    /* parameters used in the socket API */
+    SocketOptions *sOptions;
+    AppSocketOptions *appOptions;
 
     CallbackInterface *cb;
     void *yourPtr;
@@ -149,11 +169,36 @@ class INET_API SCTPSocket
      * can be used. Example: <tt>socket.setOutputGate(gate("sctpOut"));</tt>
      */
     void setOutputGate(cGate *toSctp) { gateToSctp = toSctp; };
-    void setOutboundStreams(int streams) { outboundStreams = streams; };
-    void setInboundStreams(int streams) { inboundStreams = streams; };
-    int getOutboundStreams() { return outboundStreams; };
-    int getLastStream() { return lastStream; };
+
+    /**
+     * Setter and getter methods for socket and API Parameters
+     */
+    void setOutboundStreams(int streams) { appOptions->outboundStreams = streams; };
+    void setInboundStreams(int streams) { appOptions->inboundStreams = streams; };
     void setStreamPriority(uint32 stream, uint32 priority);
+    void setMaxInitRetrans(int option) { sOptions->maxInitRetrans = option; };
+    void setMaxInitRetransTimeout(int option) { sOptions->maxInitRetransTimeout = option; };
+    void setRtoInitial(double option) { sOptions->rtoInitial = option; };
+    void setRtoMin(double option) { sOptions->rtoMin = option; };
+    void setRtoMax(double option) { sOptions->rtoMax = option; };
+    void setSackFrequency(int option) { sOptions->sackFrequency = option; };
+    void setSackPeriod(double option) { sOptions->sackPeriod = option; };
+    void setMaxBurst(int option) { sOptions->maxBurst = option; };
+    void setFragPoint(int option) { sOptions->fragPoint = option; };
+    void setNoDelay(int option) { sOptions->noDelay = option; };
+
+    void setUserOptions(void* msg) { sOptions = (SocketOptions*) msg; };
+
+    int getOutboundStreams() { return appOptions->outboundStreams; };
+    int getInboundStreams() { return appOptions->inboundStreams; };
+    int getLastStream() { return lastStream; };
+    double getRtoInitial() { return sOptions->rtoInitial; };
+    int getMaxInitRetransTimeout() { return sOptions->maxInitRetransTimeout; };
+    int getMaxInitRetrans() { return sOptions->maxInitRetrans; };
+    int getMaxBurst() { return sOptions->maxBurst; };
+    int getFragPoint() { return sOptions->fragPoint; };
+
+    void getSocketOptions();
 
     /**
      * Bind the socket to a local port number.
@@ -185,10 +230,14 @@ class INET_API SCTPSocket
      */
     void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
+    void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false);
+
     /**
      * Active OPEN to the given remote socket.
      */
     void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
+
+    void connect(L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options = false);
 
     /**
      * Active OPEN to the given remote socket.

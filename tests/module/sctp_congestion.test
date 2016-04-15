@@ -47,6 +47,8 @@ ned-path = .;../../../../src;../../lib
 **.sctp_server.sctpApp[*].numPacketsToSendPerClient = 0
 **.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 0
 
+**.finishEndSimulation = true
+
 
 # sctp settings
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
@@ -55,7 +57,7 @@ ned-path = .;../../../../src;../../lib
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-Association 1: number of Fast RTX=[1-9][0-9]*, number of Timer-Based RTX=[1-9][0-9]*
+Association 1: number of Fast RTX=[1-9][0-9][0-9]*, number of Timer-Based RTX=[1-9]*
 %contains-regex: results/General-0.sca
 scalar multihomed.sctp_server.sctp[ \t]*"Number of Bytes received from 3:10.2.1.1"[ \t]*[1-9][0-9]*
 %#--------------------------------------------------------------------------------------------------------------
