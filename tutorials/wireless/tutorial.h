@@ -479,6 +479,18 @@ last 3 lines - preambleduration?>
 <!img>
 <!results>
 
+Now our model takes the objects into account when calculating attenuation. The wall is blocking the transmission between Host A and R1 when R1 gets behind it.<!rewrite>
+
+Sources: @ref omnetpp.ini, @ref WirelessC.ned
+
+NEXT: @ref step12
+*/
+---------------------------------------------------------------------------------------------------
+/**
+@page step12 Step 12 - Configure a more accurate pathloss model
+
+UP: @ref step11
+
 */
 
 */
