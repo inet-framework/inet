@@ -20,8 +20,10 @@ import inet.linklayer.contract.IMACRelayUnit;
 simple MACRelayUnit like IMACRelayUnit
 {
     parameters:
-        @display("i=block/switch");
         string macTablePath = default("^.macTable"); // The path to the MACAddressTable module
+        @display("i=block/switch");
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
