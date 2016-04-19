@@ -44,12 +44,12 @@ LayeredReceptionResult::~LayeredReceptionResult()
 std::ostream& LayeredReceptionResult::printToStream(std::ostream& stream, int level) const
 {
     stream << "LayeredReceptionResult";
-    if (level >= PRINT_LEVEL_TRACE)
-       stream << ", packetModel = " << printObjectToString(packetModel, level - 1)
-              << ", bitModel = " << printObjectToString(bitModel, level - 1)
-              << ", symbolModel = " << printObjectToString(symbolModel, level - 1)
-              << ", sampleModel = " << printObjectToString(sampleModel, level - 1)
-              << ", analogModel = " << printObjectToString(analogModel, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+       stream << ", packetModel = " << printObjectToString(packetModel, level + 1)
+              << ", bitModel = " << printObjectToString(bitModel, level + 1)
+              << ", symbolModel = " << printObjectToString(symbolModel, level + 1)
+              << ", sampleModel = " << printObjectToString(sampleModel, level + 1)
+              << ", analogModel = " << printObjectToString(analogModel, level + 1);
     return stream;
 }
 

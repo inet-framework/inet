@@ -54,7 +54,7 @@ const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t tim
 std::ostream& ConstantSpeedPropagation::printToStream(std::ostream& stream, int level) const
 {
     stream << "ConstantSpeedPropagation";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", ignoreMovementDuringTransmission = " << ignoreMovementDuringTransmission
                << ", ignoreMovementDuringPropagation = " << ignoreMovementDuringPropagation
                << ", ignoreMovementDuringReception = " << ignoreMovementDuringReception;

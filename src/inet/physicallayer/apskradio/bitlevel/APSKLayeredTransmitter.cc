@@ -78,14 +78,14 @@ void APSKLayeredTransmitter::initialize(int stage)
 std::ostream& APSKLayeredTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKLayeredTransmitter";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", levelOfDetail = " << levelOfDetail
                << ", carrierFrequency = " << carrierFrequency;
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", encoder = " << printObjectToString(encoder, level - 1) 
-               << ", modulator = " << printObjectToString(modulator, level - 1) 
-               << ", pulseShaper = " << printObjectToString(pulseShaper, level - 1) 
-               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level - 1) 
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", encoder = " << printObjectToString(encoder, level + 1) 
+               << ", modulator = " << printObjectToString(modulator, level + 1) 
+               << ", pulseShaper = " << printObjectToString(pulseShaper, level + 1) 
+               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level + 1) 
                << ", power = " << power
                << ", bitrate = " << bitrate
                << ", bandwidth = " << bandwidth;

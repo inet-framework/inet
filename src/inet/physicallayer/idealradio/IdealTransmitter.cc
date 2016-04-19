@@ -49,13 +49,13 @@ void IdealTransmitter::initialize(int stage)
 std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealTransmitter";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", preambleDuration = " << preambleDuration
                << ", headerBitLength = " << headerBitLength
                << ", bitrate = " << bitrate;
-    if (level >= PRINT_LEVEL_INFO)
+    if (level <= PRINT_LEVEL_INFO)
         stream << ", maxCommunicationRange = " << maxCommunicationRange;
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", maxInterferenceRange = " << maxInterferenceRange
                << ", maxDetectionRange = " << maxDetectionRange;
     return stream;

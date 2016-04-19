@@ -30,7 +30,7 @@ ScalarReception::ScalarReception(const IRadio *radio, const ITransmission *trans
 std::ostream& ScalarReception::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarReception";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
        stream << ", power = " << power;
     return FlatReceptionBase::printToStream(stream, level);
 }

@@ -30,7 +30,7 @@ DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const Di
 std::ostream& DimensionalSNIR::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalSNIR";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", minSNIR = " << minSNIR;
     return SNIRBase::printToStream(stream, level);
 }

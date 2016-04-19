@@ -30,7 +30,7 @@ ScalarTransmission::ScalarTransmission(const IRadio *transmitter, const cPacket 
 std::ostream& ScalarTransmission::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarTransmission";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
        stream << ", power = " << power;
     return FlatTransmissionBase::printToStream(stream, level);
 }

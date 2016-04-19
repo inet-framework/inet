@@ -153,15 +153,15 @@ void RadioMedium::finish()
 std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
 {
     stream << static_cast<const cSimpleModule *>(this);
-    if (level >= PRINT_LEVEL_TRACE) {
-        stream << ", propagation = " << printObjectToString(propagation, level - 1)
-               << ", pathLoss = " << printObjectToString(pathLoss, level - 1)
-               << ", analogModel = " << printObjectToString(analogModel, level - 1)
-               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level - 1)
-               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level - 1)
-               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level - 1)
-               << ", neighborCache = " << printObjectToString(neighborCache, level - 1)
-               << ", communicationCache = " << printObjectToString(communicationCache, level - 1) ;
+    if (level <= PRINT_LEVEL_TRACE) {
+        stream << ", propagation = " << printObjectToString(propagation, level + 1)
+               << ", pathLoss = " << printObjectToString(pathLoss, level + 1)
+               << ", analogModel = " << printObjectToString(analogModel, level + 1)
+               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level + 1)
+               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level + 1)
+               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level + 1)
+               << ", neighborCache = " << printObjectToString(neighborCache, level + 1)
+               << ", communicationCache = " << printObjectToString(communicationCache, level + 1) ;
     }
     return stream;
 }

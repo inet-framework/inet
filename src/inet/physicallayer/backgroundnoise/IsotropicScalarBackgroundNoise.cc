@@ -41,7 +41,7 @@ void IsotropicScalarBackgroundNoise::initialize(int stage)
 std::ostream& IsotropicScalarBackgroundNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "IsotropicScalarBackgroundNoise";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", power = " << power;
     return stream;
 }

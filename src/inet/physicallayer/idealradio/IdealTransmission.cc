@@ -32,9 +32,9 @@ IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *m
 std::ostream& IdealTransmission::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealTransmission";
-    if (level >= PRINT_LEVEL_INFO)
+    if (level <= PRINT_LEVEL_INFO)
         stream << ", maxCommunicationRange = " << maxCommunicationRange;
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", maxInterferenceRange = " << maxInterferenceRange
                << ", maxDetectionRange = " << maxDetectionRange;
     return TransmissionBase::printToStream(stream, level);

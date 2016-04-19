@@ -43,7 +43,7 @@ ReceptionResult::~ReceptionResult()
 std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionResult";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", indication = " << indication;
     return stream;
 }

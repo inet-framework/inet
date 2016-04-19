@@ -29,7 +29,7 @@ void BreakpointPathLoss::initialize(int stage)
 std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "BreakpointPathLoss";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", L01 = " << l01
                << ", L02 = " << l02
                << ", alpha1 = " << alpha1

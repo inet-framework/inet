@@ -41,8 +41,8 @@ void APSKModulator::initialize(int stage)
 std::ostream& APSKModulator::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKModulator";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", modulation = " << printObjectToString(modulation, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", modulation = " << printObjectToString(modulation, level + 1);
     return stream;
 }
 

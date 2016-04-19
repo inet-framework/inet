@@ -32,10 +32,10 @@ Ieee80211OFDMCode::Ieee80211OFDMCode(const ConvolutionalCode* convolutionalCode,
 std::ostream& Ieee80211OFDMCode::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKCode";
-    if (level >= PRINT_LEVEL_DETAIL)
-        stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level - 1)
-               << ", interleaving = " << printObjectToString(interleaving, level - 1)
-               << ", scrambling = " << printObjectToString(scrambling, level - 1);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << ", convolutionalCode = " << printObjectToString(convolutionalCode, level + 1)
+               << ", interleaving = " << printObjectToString(interleaving, level + 1)
+               << ", scrambling = " << printObjectToString(scrambling, level + 1);
     return stream;
 }
 

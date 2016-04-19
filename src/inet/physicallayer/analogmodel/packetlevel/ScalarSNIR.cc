@@ -32,7 +32,7 @@ ScalarSNIR::ScalarSNIR(const IReception *reception, const INoise *noise) :
 std::ostream& ScalarSNIR::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarSNIR";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", minSNIR = " << minSNIR;
     return stream;
 }

@@ -39,7 +39,7 @@ void NakagamiFading::initialize(int stage)
 std::ostream& NakagamiFading::printToStream(std::ostream& stream, int level) const
 {
     stream << "NakagamiFading";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", alpha = " << alpha
                << ", systemLoss = " << systemLoss
                << ", shapeFactor = " << shapeFactor;

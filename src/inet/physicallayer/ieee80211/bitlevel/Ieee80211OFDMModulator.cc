@@ -50,8 +50,8 @@ Ieee80211OFDMModulator::Ieee80211OFDMModulator(const Ieee80211OFDMModulation *su
 std::ostream& Ieee80211OFDMModulator::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMModulator";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level + 1);
     return stream;
 }
 

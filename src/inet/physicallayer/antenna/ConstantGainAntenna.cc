@@ -39,7 +39,7 @@ void ConstantGainAntenna::initialize(int stage)
 std::ostream& ConstantGainAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "ConstantGainAntenna";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", gain = " << gain;
     return AntennaBase::printToStream(stream, level);
 }

@@ -74,7 +74,7 @@ void GridNeighborCache::handleMessage(cMessage *msg)
 std::ostream& GridNeighborCache::printToStream(std::ostream& stream, int level) const
 {
     stream << "GridNeighborCache";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", cellSize = " << cellSize
                << ", refillPeriod = " << refillPeriod
                << ", maxSpeed = " << maxSpeed;

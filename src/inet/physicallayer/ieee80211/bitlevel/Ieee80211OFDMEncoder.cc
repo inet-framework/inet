@@ -34,11 +34,11 @@ namespace physicallayer {
 std::ostream& Ieee80211OFDMEncoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMEncoder";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", convolutionalCoder = " << printObjectToString(convolutionalCoder, level - 1)
-               << ", interleaver = " << printObjectToString(interleaver, level - 1)
-               << ", scrambler = " << printObjectToString(scrambler, level - 1)
-               << ", code = " << printObjectToString(code, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", convolutionalCoder = " << printObjectToString(convolutionalCoder, level + 1)
+               << ", interleaver = " << printObjectToString(interleaver, level + 1)
+               << ", scrambler = " << printObjectToString(scrambler, level + 1)
+               << ", code = " << printObjectToString(code, level + 1);
     return stream;
 }
 

@@ -43,8 +43,8 @@ void APSKDemodulator::initialize(int stage)
 std::ostream& APSKDemodulator::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKDemodulator";
-    if (level >= PRINT_LEVEL_DETAIL)
-        stream << ", modulation = " << printObjectToString(modulation, level - 1);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << ", modulation = " << printObjectToString(modulation, level + 1);
     return stream;
 }
 

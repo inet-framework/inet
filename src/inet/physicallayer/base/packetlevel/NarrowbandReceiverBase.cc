@@ -49,8 +49,8 @@ void NarrowbandReceiverBase::initialize(int stage)
 
 std::ostream& NarrowbandReceiverBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", modulation = " << printObjectToString(modulation, level - 1)
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", modulation = " << printObjectToString(modulation, level + 1)
                << ", carrierFrequency = " << carrierFrequency
                << ", bandwidth = " << bandwidth;
     return SNIRReceiverBase::printToStream(stream, level);

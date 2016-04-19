@@ -35,7 +35,7 @@ void PropagationBase::initialize(int stage)
 
 std::ostream& PropagationBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", propagationSpeed = " << propagationSpeed;
     return stream;
 }
