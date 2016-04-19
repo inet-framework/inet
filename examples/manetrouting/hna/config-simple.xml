@@ -1,9 +1,0 @@
-<config>
-  <interface hosts="mobileHost[*] gwHost*" names="wlan*" address="20.0.0.x" netmask="255.255.255.0"/>
-  <interface hosts="host1 gwHost1" names="eth*" address="10.0.0.x" netmask="255.255.255.0"/>
-  <interface hosts="host2 gwHost2" names="eth*" address="30.0.0.x" netmask="255.255.255.0"/>
-
-  <route hosts="host1" destination="*" netmask="*" gateway="gwHost1" />
-  <route hosts="host2" destination="*" netmask="*" gateway="gwHost2" />
-</config>
-

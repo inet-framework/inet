@@ -602,25 +602,11 @@
         linkerFlags = ""
         />
     <feature
-        id="MANET"
-        name="MANET routing"
-        description = "AdHoc MANET routing support (AODV, BATMAN, DSR, DSDV, DYMO, DYMO_FAU, OLSR)"
-        initiallyEnabled = "false"
-        requires = "IPv4 IPv6 UDP Ieee80211"
-        labels = "routing manet"
-        nedPackages = "
-                       inet.routing.extras
-                      "
-        extraSourceFolders = ""
-        compileFlags = "-DWITH_MANET"
-        linkerFlags = ""
-        />
-    <feature
         id="MANET_examples"
         name="MANET routing examples"
         description = "Examples for the MANET routing protocols"
         initiallyEnabled = "false"
-        requires = "MANET TCP_INET UDP IPv4"
+        requires = "TCP_INET UDP IPv4 DYMO GPSR"
         labels = "routing manet examples"
         nedPackages = "
                        inet.examples.manetrouting

@@ -15,8 +15,6 @@
 
 package inet.node.inet;
 
-import inet.networklayer.contract.IManetRouting;
-
 
 //
 // A wireless host containing routing, mobility and battery components.
@@ -25,7 +23,7 @@ import inet.networklayer.contract.IManetRouting;
 // and may have TCP/UDP applications installed. Supports ICMP (ping) too.
 //
 // - By default contains a single wireless cards, however it can be configured
-//   by the numRadios parameter. Wirless card type is configured by the
+//   by the numRadios parameter. Wireless card type is configured by the
 //   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessNic
 // - Node mobility can be set using **.mobility.typename
@@ -36,14 +34,5 @@ module AdhocHost extends WirelessHost
     parameters:
         @display("i=device/cellphone");
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");  // use adhoc management
-        string routingProtocol @enum("AODVUU","DYMOUM","DYMO","DSRUU","OLSR","OLSR_ETX","DSDV_2","Batman") = default("");  // used mobile routing protocol. see: inet.networklayer.manetrouting
         forwarding = default(true);
-
-    submodules:
-        manetrouting: <routingProtocol> like IManetRouting if routingProtocol != "" {
-            @display("p=522,307");
-        }
-    connections:
-        networkLayer.transportOut++ --> manetrouting.from_ip if routingProtocol != "";
-        networkLayer.transportIn++ <-- manetrouting.to_ip if routingProtocol != "";
 }
