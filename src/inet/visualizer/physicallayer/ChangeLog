@@ -1,0 +1,4 @@
+2016-01-08  Levente Meszaros
+
+    Added initial implementation:
+    MediumCanvasVisualizer, MediumOsgVisualizer, MediumVisualizer.
