@@ -42,29 +42,29 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
   protected:
     /** @name Cache data structures */
     //@{
-    virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio);
-    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission);
-    virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission);
+    virtual RadioCacheEntry *getRadioCacheEntry(const IRadio *radio) override;
+    virtual TransmissionCacheEntry *getTransmissionCacheEntry(const ITransmission *transmission) override;
+    virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission) override;
     //@}
 
   public:
     MapCommunicationCache();
     virtual ~MapCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level) const { return stream << "MapCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream &stream, int level) const override { return stream << "MapCommunicationCache"; }
 
     /** @name Medium state change notifications */
     //@{
-    virtual void addRadio(const IRadio *radio);
-    virtual void removeRadio(const IRadio *radio);
+    virtual void addRadio(const IRadio *radio) override;
+    virtual void removeRadio(const IRadio *radio) override;
 
-    virtual void addTransmission(const ITransmission *transmission);
-    virtual void removeTransmission(const ITransmission *transmission);
+    virtual void addTransmission(const ITransmission *transmission) override;
+    virtual void removeTransmission(const ITransmission *transmission) override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions();
+    virtual void removeNonInterferingTransmissions() override;
     //@}
 };
 

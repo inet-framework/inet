@@ -32,8 +32,8 @@ class INET_API DPSKModulationBase : public IModulation
   public:
     DPSKModulationBase(unsigned int constellationSize);
 
-    double calculateBER(double snir, Hz bandwidth, bps bitrate) const { throw cRuntimeError("Unimplemented!"); }
-    double calculateSER(double snir, Hz bandwidth, bps bitrate) const { throw cRuntimeError("Unimplemented!"); }
+    double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
+    double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
 
     unsigned int getConstellationSize() const { return constellationSize; }
 };

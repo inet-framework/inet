@@ -39,7 +39,7 @@ class INET_API ScalarDigitalAnalogConverter : public IDigitalAnalogConverter
   public:
     ScalarDigitalAnalogConverter();
 
-    virtual const ITransmissionAnalogModel *convertDigitalToAnalog(const ITransmissionSampleModel *sampleModel) const;
+    virtual const ITransmissionAnalogModel *convertDigitalToAnalog(const ITransmissionSampleModel *sampleModel) const override;
 };
 
 } // namespace physicallayer

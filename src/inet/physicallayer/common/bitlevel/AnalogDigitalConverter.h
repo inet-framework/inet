@@ -38,7 +38,7 @@ class INET_API ScalarAnalogDigitalConverter : public IAnalogDigitalConverter
   public:
     ScalarAnalogDigitalConverter();
 
-    virtual const IReceptionSampleModel *convertAnalogToDigital(const IReceptionAnalogModel *analogModel) const;
+    virtual const IReceptionSampleModel *convertAnalogToDigital(const IReceptionAnalogModel *analogModel) const override;
 };
 
 } // namespace physicallayer

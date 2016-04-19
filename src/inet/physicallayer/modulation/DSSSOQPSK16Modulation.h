@@ -29,8 +29,8 @@ class INET_API DSSSOQPSK16Modulation : public APSKModulationBase
   public:
     DSSSOQPSK16Modulation();
 
-    double calculateBER(double snir, Hz bandwidth, bps bitrate) const;
-    double calculateSER(double snir, Hz bandwidth, bps bitrate) const;
+    double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;
+    double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
 };
 
 } // namespace physicallayer
