@@ -13,12 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
 
 namespace inet {
 
@@ -54,6 +55,7 @@ void MACRelayUnit::handleMessage(cMessage *msg)
     }
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
     // Frame received from MAC unit
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, frame);
     handleAndDispatchFrame(frame);
 }
 
@@ -88,6 +90,7 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
 
     if (outputport >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
+        emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
         send(frame, "ifOut", outputport);
     }
     else {
@@ -98,9 +101,12 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
 
 void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputport)
 {
-    for (int i = 0; i < numPorts; ++i)
-        if (i != inputport)
+    for (int i = 0; i < numPorts; ++i) {
+        if (i != inputport) {
+            emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
             send((EtherFrame *)frame->dup(), "ifOut", i);
+        }
+    }
 
     delete frame;
 }
