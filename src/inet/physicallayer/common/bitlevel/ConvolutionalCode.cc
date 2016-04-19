@@ -38,7 +38,7 @@ ConvolutionalCode::ConvolutionalCode(const char *transferFunctionMatrix, const c
 std::ostream& ConvolutionalCode::printToStream(std::ostream& stream, int level) const
 {
     stream << "ConvolutionalCode";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", codeRatePuncturingK = " << codeRatePuncturingK
                << ", codeRatePuncturingN = " << codeRatePuncturingN;
     return stream;

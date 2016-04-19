@@ -41,7 +41,7 @@ void TwoRayGroundReflection::initialize(int stage)
 std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int level) const
 {
     stream << "TwoRayGroundReflection";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", alpha = " << alpha
                << ", systemLoss = " << systemLoss
                << ", ht = " << ht

@@ -48,9 +48,9 @@ void FlatReceiverBase::initialize(int stage)
 
 std::ostream& FlatReceiverBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", errorModel = " << printObjectToString(errorModel, level - 1);
-    if (level >= PRINT_LEVEL_INFO)
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", errorModel = " << printObjectToString(errorModel, level + 1);
+    if (level <= PRINT_LEVEL_INFO)
         stream << ", energyDetection = " << energyDetection
                << ", sensitivity = " << sensitivity;
     return NarrowbandReceiverBase::printToStream(stream, level);

@@ -30,7 +30,7 @@ NarrowbandNoiseBase::NarrowbandNoiseBase(simtime_t startTime, simtime_t endTime,
 
 std::ostream& NarrowbandNoiseBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", carrierFrequency = " << carrierFrequency
                << ", bandwidth = " << bandwidth;
     return NoiseBase::printToStream(stream, level);

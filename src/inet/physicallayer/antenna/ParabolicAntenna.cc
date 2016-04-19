@@ -43,7 +43,7 @@ void ParabolicAntenna::initialize(int stage)
 std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "ParabolicAntenna";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", maxGain = " << maxGain
                << ", minGain = " << minGain
                << ", beamWidth = " << beamWidth;

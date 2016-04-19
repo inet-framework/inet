@@ -39,9 +39,9 @@ TransmissionBase::TransmissionBase(const IRadio *transmitter, const cPacket *mac
 
 std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", id = " << id;
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", transmitterId = " << transmitter->getId()
                << ", startTime = " << startTime
                << ", endTime = " << endTime

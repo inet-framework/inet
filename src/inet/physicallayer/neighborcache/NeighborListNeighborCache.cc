@@ -51,7 +51,7 @@ void NeighborListNeighborCache::initialize(int stage)
 std::ostream& NeighborListNeighborCache::printToStream(std::ostream& stream, int level) const
 {
     stream << "NeighborListNeighborCache";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", refillPeriod = " << refillPeriod
                << ", range = " << range
                << ", maxSpeed = " << maxSpeed;

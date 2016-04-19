@@ -52,7 +52,7 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
 std::ostream& ConstantTimePropagation::printToStream(std::ostream& stream, int level) const
 {
     stream << "ConstantTimePropagation";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", propagationTime = " << propagationTime;
     return PropagationBase::printToStream(stream, level);
 }

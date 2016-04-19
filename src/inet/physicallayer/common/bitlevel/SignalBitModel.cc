@@ -38,7 +38,7 @@ SignalBitModel::~SignalBitModel()
 std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "SignalBitModel";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", headerBitLength = " << headerBitLength
                << ", headerBitRate = " << headerBitRate
                << ", payloadBitLength = " << payloadBitLength

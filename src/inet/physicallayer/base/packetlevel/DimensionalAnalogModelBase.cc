@@ -43,7 +43,7 @@ void DimensionalAnalogModelBase::initialize(int stage)
 
 std::ostream& DimensionalAnalogModelBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", attenuateWithCarrierFrequency = " << attenuateWithCarrierFrequency
                << ", interpolationMode = " << interpolationMode;
     return stream;

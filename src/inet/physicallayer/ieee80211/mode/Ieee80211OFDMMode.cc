@@ -161,7 +161,7 @@ std::ostream& Ieee80211OFDMSignalMode::printToStream(std::ostream& stream, int l
 std::ostream& Ieee80211OFDMDataMode::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMDataMode";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", netBitrate = " << netBitrate;
     return stream;
 }
@@ -169,11 +169,11 @@ std::ostream& Ieee80211OFDMDataMode::printToStream(std::ostream& stream, int lev
 std::ostream& Ieee80211OFDMMode::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMMode";
-    if (level >= PRINT_LEVEL_DEBUG)
-        stream << ", preambleMode = " << printObjectToString(preambleMode, level - 1)
-               << ", signalMode = " << printObjectToString(signalMode, level - 1);
-    if (level >= PRINT_LEVEL_DETAIL)
-        stream << ", dataMode = " << printObjectToString(dataMode, level - 1);
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << ", preambleMode = " << printObjectToString(preambleMode, level + 1)
+               << ", signalMode = " << printObjectToString(signalMode, level + 1);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << ", dataMode = " << printObjectToString(dataMode, level + 1);
     return stream;
 }
 

@@ -62,7 +62,7 @@ void UWBIRStochasticPathLoss::initialize(int stage)
 std::ostream& UWBIRStochasticPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "UWBIRStochasticPathLoss";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", PL0 = " << PL0
                << ", muGamma = " << muGamma
                << ", muSigma = " << muSigma

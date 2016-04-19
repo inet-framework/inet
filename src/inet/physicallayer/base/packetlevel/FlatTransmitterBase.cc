@@ -43,7 +43,7 @@ void FlatTransmitterBase::initialize(int stage)
 
 std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", preambleDuration = " << preambleDuration
                << ", headerBitLength = " << headerBitLength
                << ", bitrate = " << bitrate

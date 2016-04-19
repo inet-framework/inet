@@ -33,7 +33,7 @@ ReceptionDecision::ReceptionDecision(const IReception *reception, IRadioSignal::
 std::ostream& ReceptionDecision::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionDecision";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << (isReceptionPossible_ ? ", possible" : ", impossible")
                << (isReceptionAttempted_ ? ", attempted" : ", ignored")
                << (isReceptionSuccessful_ ? ", successful" : ", unsuccessful");

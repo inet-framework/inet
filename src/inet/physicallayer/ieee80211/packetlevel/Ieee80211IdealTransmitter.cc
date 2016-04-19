@@ -44,9 +44,9 @@ void Ieee80211IdealTransmitter::initialize(int stage)
 std::ostream& Ieee80211IdealTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211IdealTransmitter";
-    if (level >= PRINT_LEVEL_INFO)
+    if (level <= PRINT_LEVEL_INFO)
         stream << ", maxCommunicationRange = " << maxCommunicationRange;
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", maxInterferenceRange = " << maxInterferenceRange
                << ", maxDetectionRange = " << maxDetectionRange;
     return Ieee80211TransmitterBase::printToStream(stream, level);

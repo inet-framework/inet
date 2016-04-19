@@ -80,15 +80,15 @@ void Ieee80211LayeredOFDMTransmitter::initialize(int stage)
 std::ostream& Ieee80211LayeredOFDMTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211LayeredOFDMTransmitter";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", levelOfDetail = " << levelOfDetail
-               << ", mode = " << printObjectToString(mode, level - 1)
-               << ", signalEncoder = " << printObjectToString(signalEncoder, level - 1)
-               << ", dataEncoder = " << printObjectToString(dataEncoder, level - 1)
-               << ", signalModulator = " << printObjectToString(signalModulator, level - 1)
-               << ", dataModulator = " << printObjectToString(dataModulator, level - 1)
-               << ", pulseShaper = " << printObjectToString(pulseShaper, level - 1)
-               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level - 1)
+               << ", mode = " << printObjectToString(mode, level + 1)
+               << ", signalEncoder = " << printObjectToString(signalEncoder, level + 1)
+               << ", dataEncoder = " << printObjectToString(dataEncoder, level + 1)
+               << ", signalModulator = " << printObjectToString(signalModulator, level + 1)
+               << ", dataModulator = " << printObjectToString(dataModulator, level + 1)
+               << ", pulseShaper = " << printObjectToString(pulseShaper, level + 1)
+               << ", digitalAnalogConverter = " << printObjectToString(digitalAnalogConverter, level + 1)
                << ", isCompliant = " << isCompliant
                << ", bandwidth = " << bandwidth
                << ", channelSpacing = " << channelSpacing

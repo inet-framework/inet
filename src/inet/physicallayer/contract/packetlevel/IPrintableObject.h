@@ -31,11 +31,11 @@ class INET_API IPrintableObject
 {
   public:
     enum PrintLevel {
-        PRINT_LEVEL_INFO,
-        PRINT_LEVEL_DETAIL,
-        PRINT_LEVEL_DEBUG,
         PRINT_LEVEL_TRACE,
-        PRINT_LEVEL_COMPLETE = INT_MAX
+        PRINT_LEVEL_DEBUG,
+        PRINT_LEVEL_DETAIL,
+        PRINT_LEVEL_INFO,
+        PRINT_LEVEL_COMPLETE = INT_MIN
     };
 
   public:
@@ -63,7 +63,7 @@ class INET_API IPrintableObject
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
 #if OMNETPP_VERSION >= 0x0500
-    return object->printToStream(stream, cLog::logLevel - 3);
+    return object->printToStream(stream, cLog::logLevel);
 #else
     return object->printToStream(stream, IPrintableObject::PRINT_LEVEL_DETAIL);
 #endif
@@ -72,7 +72,7 @@ inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *ob
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
 #if OMNETPP_VERSION >= 0x0500
-    return object.printToStream(stream, cLog::logLevel - 3);
+    return object.printToStream(stream, cLog::logLevel);
 #else
     return object.printToStream(stream, IPrintableObject::PRINT_LEVEL_DETAIL);
 #endif

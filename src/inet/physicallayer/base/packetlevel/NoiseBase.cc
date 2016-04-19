@@ -29,7 +29,7 @@ NoiseBase::NoiseBase(simtime_t startTime, simtime_t endTime) :
 
 std::ostream& NoiseBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", startTime = " << startTime
                << ", endTime = " << endTime;
     return stream;

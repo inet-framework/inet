@@ -31,7 +31,7 @@ std::ostream& Ieee80211ScalarTransmission::printToStream(std::ostream& stream, i
 {
     stream << "Ieee80211ScalarTransmission";
     Ieee80211TransmissionBase::printToStream(stream, level);
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
        stream << ", power = " << power;
     return FlatTransmissionBase::printToStream(stream, level);
 }

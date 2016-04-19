@@ -114,7 +114,7 @@ void DimensionalTransmitterBase::initialize(int stage)
 
 std::ostream& DimensionalTransmitterBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", interpolationMode = " << interpolationMode
                << ", dimensions = " << dimensions ;
                // TODO: << "timeGains = " << timeGains

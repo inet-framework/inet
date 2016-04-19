@@ -29,9 +29,9 @@ SNIRBase::SNIRBase(const IReception *reception, const INoise *noise) :
 
 std::ostream& SNIRBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", reception = " << printObjectToString(reception, level - 1) 
-               << ", noise = " << printObjectToString(noise, level - 1) ;
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", reception = " << printObjectToString(reception, level + 1) 
+               << ", noise = " << printObjectToString(noise, level + 1) ;
     return stream;
 }
 

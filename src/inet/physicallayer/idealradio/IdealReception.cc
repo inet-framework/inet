@@ -36,7 +36,7 @@ IdealReception::IdealReception(const IRadio *radio, const ITransmission *transmi
 std::ostream& IdealReception::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealReception";
-    if (level >= PRINT_LEVEL_INFO)
+    if (level <= PRINT_LEVEL_INFO)
         stream << ", power = " << cEnum::get(opp_typename(typeid(IdealReception::Power)))->getStringFor(power) + 6;
     return ReceptionBase::printToStream(stream, level);
 }

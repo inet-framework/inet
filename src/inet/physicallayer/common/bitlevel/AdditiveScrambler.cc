@@ -25,8 +25,8 @@ namespace physicallayer {
 std::ostream& AdditiveScrambler::printToStream(std::ostream& stream, int level) const
 {
     stream << "AdditiveScrambler";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream<< ", scrambling = " << printObjectToString(scrambling, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream<< ", scrambling = " << printObjectToString(scrambling, level + 1);
     return stream;
 }
 
