@@ -396,6 +396,7 @@ void Radio::abortTransmission()
     auto part = (IRadioSignal::SignalPart)transmissionTimer->getKind();
     auto radioFrame = static_cast<RadioFrame *>(transmissionTimer->getContextPointer());
     auto transmission = radioFrame->getTransmission();
+    transmissionTimer->setContextPointer(nullptr);
     EV_INFO << "Transmission aborted: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     EV_WARN << "Aborting ongoing transmissions is not supported" << endl;
     cancelEvent(transmissionTimer);
