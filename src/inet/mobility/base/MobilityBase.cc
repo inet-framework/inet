@@ -20,13 +20,12 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
+#include "inet/common/geometry/common/CoordinateSystem.h"
 #include "inet/common/INETMath.h"
-#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/mobility/base/MobilityBase.h"
+#include "inet/visualizer/mobility/MobilityCanvasVisualizer.h"
 
 namespace inet {
-
-using namespace inet::physicalenvironment;
 
 Register_Abstract_Class(MobilityBase);
 
@@ -61,7 +60,6 @@ MobilityBase::MobilityBase() :
 void MobilityBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-
     EV_TRACE << "initializing MobilityBase stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         constraintAreaMin.x = par("constraintAreaMinX");
@@ -70,18 +68,18 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.x = par("constraintAreaMaxX");
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
-        visualRepresentation = findVisualRepresentation();
-        if (visualRepresentation) {
-            const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
-            if (s && *s)
-                throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
-                                    " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
-        }
+        bool visualizeMobility = par("visualizeMobility");
+        if (visualizeMobility)
+            visualRepresentation = findVisualRepresentation();
         WATCH(constraintAreaMin);
         WATCH(constraintAreaMax);
         WATCH(lastPosition);
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
+        if (visualRepresentation != nullptr) {
+            auto visualizationTarget = visualRepresentation->getParentModule();
+            canvasProjection = CanvasProjection::getCanvasProjection(visualizationTarget->getCanvas());
+        }
         initializeOrientation();
         initializePosition();
     }
@@ -99,17 +97,26 @@ void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
+    auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
     if (hasPar("initFromDisplayString") && par("initFromDisplayString").boolValue() && visualRepresentation) {
-        filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x)
-            && parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
+        const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
+        if (s && *s)
+            throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
+                                " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
+        filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
+                 parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
         if (filled)
             lastPosition.z = 0;
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
-    else if (hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
+    else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
         lastPosition.x = par("initialX");
         lastPosition.y = par("initialY");
         lastPosition.z = par("initialZ");
+        filled = true;
+    }
+    else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
+        lastPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(par("initialLatitude"), par("initialLongitude"), par("initialAltitude")));
         filled = true;
     }
     if (!filled)
@@ -147,6 +154,9 @@ void MobilityBase::handleMessage(cMessage *message)
 void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
+    if (hasGUI() && visualRepresentation != nullptr) {
+        inet::visualizer::MobilityCanvasVisualizer::setPosition(visualRepresentation, canvasProjection->computeCanvasPoint(lastPosition));
+    }
 }
 
 void MobilityBase::emitMobilityStateChangedSignal()
