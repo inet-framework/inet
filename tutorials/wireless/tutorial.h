@@ -337,7 +337,7 @@ Run the simulation in fast mode to better see the nodes moving <!rewrite this>
 
 We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is about 260 kbps, which is less than in the previous step, because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
 
-<img src="step7_v5.gif">
+<img src="step7_2_v3.gif">
 
 A dynamic routing mechanism is needed to reconfigure the routes as nodes move out of range.
 
@@ -471,7 +471,7 @@ Set up some background noise:
 
 <!frequency 2 ghz>
 
-Set up <tt>APSKScalarRadio<tt>'s in the nodes and configure each radio:
+Set up <tt>APSKScalarRadio</tt>'s in the nodes and configure each radio:
 
 @dontinclude omnetpp.ini
 @skip *.host*.wlan[*].radioType = "APSKScalarRadio"
