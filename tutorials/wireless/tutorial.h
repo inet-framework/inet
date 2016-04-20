@@ -236,7 +236,7 @@ Also disable routing table entries generated from the netmask and remove default
 
 Now the two nodes can communicate -- you can see that Host R1 relays data to Host B.
 
-The data rate is the same as before -- even though multiple hosts are transmitting at the same time -- because we're still ignoring interference.
+The data rate is the same as before (800 kbps) -- even though multiple hosts are transmitting at the same time -- because we're still ignoring interference.
 
 Note that there are blue lines leading to Host R2 and R3 even though they don't transmit. This is because they receive the transmissions at the physical layer, but they discard the packets at the link layer because it is not addressed to them.
 
@@ -313,7 +313,7 @@ We need to turn on mac acknowledgements so hosts can detect if a transmission ne
 
 <img src="wireless-step6.png">
 
-We can see that throughput is increased over the previous step thanks to CSMA -- altough less then in step 4 because of the interference.
+We can see that throughput is increased over the previous step (380 kbps) thanks to CSMA -- altough less then in step 4 because of the interference.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -333,7 +333,7 @@ Let's configure the intermediate nodes (R1-3) to move around. We set them to mov
 
 Run the simulation in fast mode to better see the nodes moving <!rewrite this>
 
-We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is less than in the previous step, because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
+We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is less than in the previous step (260 kbps), because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
 
 <img src="step7_v5.gif">
 
@@ -366,7 +366,7 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 <tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the <tt>AODVRouting</tt> submodule.
 Each node works like a router -- they manage their own routing tables and adapt to changes in the network topology.
 
-This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead -- but still more than in the previous step.
+This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead -- but still a little more than in the previous step (290 kbps).
 
 <img src="wireless-step9.png">
 
@@ -451,6 +451,8 @@ NEXT: @ref step11
 /**
 @page step11 Step 11 - Enhance the accuracy of the radio model
 
+UP: @ref step10
+
 We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which more realistic. It implements a radio that uses APSK modulation, but it is not using other techniques like forward error correction, interleaving or spreading. Nevertheless, it takes obstacles into account.
 
 So let's switch <tt>IdealRadioMedium</tt> with <tt>APSKScalarRadioMedium</tt>:
@@ -478,6 +480,7 @@ last 3 lines - preambleduration?>
 
 <!img>
 <!results>
+<!throughput>
 
 Now our model takes the objects into account when calculating attenuation. The wall is blocking the transmission between Host A and R1 when R1 gets behind it.<!rewrite>
 
