@@ -17,6 +17,8 @@
 
 #include "inet/common/queue/OrdinalBasedDuplicator.h"
 
+#include "inet/common/INETUtils.h"
+
 namespace inet {
 
 Define_Module(OrdinalBasedDuplicator);
@@ -56,7 +58,7 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
             EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
-            cMessage *dupmsg = msg->dup();
+            cMessage *dupmsg = utils::dupPacketAndControlInfo(msg);
             emit(duplPkSignal, dupmsg);
             emit(sentPkSignal, dupmsg);
             send(dupmsg, "out");
