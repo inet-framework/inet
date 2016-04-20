@@ -168,6 +168,7 @@ static void testRecord(const char* filename, bool fcs = true)
 %activity:
 testRecord("../../pcap/rarp_request.pcap", false);
 testRecord("../../pcap/rarp_req_reply.pcap", false);
+testRecord("../../pcap/Ethernet_Pause_Frame.pcap", false);
 //testRecord("../../pcap/v6.pcap", false);
 //testRecord("../../pcap/tcp_ok_capture.pcap", false);
 //testRecord("../../pcap/80211ack.pcap", false);
