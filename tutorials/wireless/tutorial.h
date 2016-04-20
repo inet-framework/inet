@@ -313,7 +313,7 @@ We need to turn on mac acknowledgements so hosts can detect if a transmission ne
 
 <img src="wireless-step6.png">
 
-We can see that throughput is increased over the previous step (380 kbps) thanks to CSMA -- altough less then in step 4 because of the interference.
+We can see that throughput is about 380 kbps, so it is increased over the previous step thanks to CSMA -- altough less then in step 4 because of the interference.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -331,9 +331,11 @@ Let's configure the intermediate nodes (R1-3) to move around. We set them to mov
 @skip mobility
 @until mobility.angle
 
+<!more on linearmobility>
+
 Run the simulation in fast mode to better see the nodes moving <!rewrite this>
 
-We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is less than in the previous step (260 kbps), because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
+We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is about 260 kbps, which is less than in the previous step, because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
 
 <img src="step7_v5.gif">
 
@@ -366,7 +368,7 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 <tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the <tt>AODVRouting</tt> submodule.
 Each node works like a router -- they manage their own routing tables and adapt to changes in the network topology.
 
-This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead -- but still a little more than in the previous step (290 kbps).
+This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead <!is that correct>-- but still a little more than in the previous step (290 kbps).
 
 <img src="wireless-step9.png">
 
@@ -387,7 +389,7 @@ First set up energy consumption in the node radios:
 @dontinclude omnetpp.ini
 @skipline **.energyConsumerType = "StateBasedEnergyConsumer"
 
-The <tt>StateBasedEnergyConsumer</tt> module models radio power consumption based on states like radio mode, transmitter and receiver state. Each state has a constant power consumption that can be set by a parameter.
+The <tt>StateBasedEnergyConsumer</tt> module models radio power consumption based on states like radio mode, transmitter and receiver state. Each state has a constant power consumption that can be set by a parameter. Energy use depends on how much time the radio spends in a particular state.
 
 Set up energy storage in the nodes -- basically modelling the batteries:
 
