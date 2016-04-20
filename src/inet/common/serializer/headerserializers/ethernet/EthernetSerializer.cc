@@ -49,7 +49,9 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     }
     else if (dynamic_cast<const EtherFrameWithLLC *>(pkt)) {
         const EtherFrameWithLLC *frame = static_cast<const EtherFrameWithLLC *>(pkt);
-        b.writeUint16(frame->getFrameByteLength());
+        cPacket *encapPkt = frame->getEncapsulatedPacket();
+        unsigned int payloadLengthPos = b.getPos();
+        b.writeUint16(0xFFFF);
         b.writeByte(frame->getSsap());
         b.writeByte(frame->getDsap());
         b.writeByte(frame->getControl());
@@ -59,19 +61,21 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.writeByte(frame->getOrgCode() >> 8);
             b.writeByte(frame->getOrgCode());
             b.writeUint16(frame->getLocalcode());
+            unsigned int payloadLength = b.getRemainingSize(4);
             if (frame->getOrgCode() == 0) {
-                cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), b.getRemainingSize(4));
+                b.writeUint16To(payloadLengthPos, payloadLength);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), payloadLength);
             }
             else {
                 //TODO
-                cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), b.getRemainingSize(4));
+                b.writeUint16To(payloadLengthPos, payloadLength);
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), payloadLength);
             }
         }
         else if (typeid(*frame) == typeid(EtherFrameWithLLC)) {
-            cPacket *encapPkt = frame->getEncapsulatedPacket();
-            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, b.getRemainingSize(4));
+            unsigned int payloadLength = b.getRemainingSize(4);
+            b.writeUint16To(payloadLengthPos, payloadLength);
+            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, payloadLength);
         }
         else {
             throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
@@ -100,20 +104,22 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
     int protocolType = -1;
 
     int frameLength = b.getRemainingSize();
+    unsigned int payloadLength = 0;
     MACAddress destAddr = b.readMACAddress();
     MACAddress srcAddr = b.readMACAddress();
     uint16_t typeOrLength = b.readUint16();
 
     // detect and create the real packet type.
-    if (typeOrLength >= 1536 || typeOrLength == 0) {
+    if (typeOrLength >= 0x0600 || typeOrLength == 0) {
         EthernetIIFrame *ethernetIIPacket = new EthernetIIFrame();
         ethernetIIPacket->setEtherType(typeOrLength);
         protocolGroup = ETHERTYPE;
         protocolType = typeOrLength;
         etherPacket = ethernetIIPacket;
+        payloadLength = b.getRemainingSize(4);
     }
     else {
-        frameLength = typeOrLength;
+        payloadLength = typeOrLength;
         EtherFrameWithLLC *ethLLC = nullptr;
         uint8_t ssap = b.readByte();
         uint8_t dsap = b.readByte();
@@ -138,7 +144,7 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
     etherPacket->setSrc(srcAddr);
     etherPacket->setByteLength(b.getPos() + 4); // +4 for trailing crc
 
-    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, protocolGroup, protocolType, b.getRemainingSize(4));
+    cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, protocolGroup, protocolType, payloadLength);
     ASSERT(encapPacket);
     etherPacket->encapsulate(encapPacket);
     etherPacket->setName(encapPacket->getName());
@@ -160,5 +166,4 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
 } // namespace serializer
 
 } // namespace inet
-
 
