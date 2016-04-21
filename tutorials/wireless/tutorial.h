@@ -80,7 +80,7 @@ Now set the communication range to 500m:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
-Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect packet traffic. We turn interference off in the NIC by specifying the parameter in the .ini file:
+Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect packet traffic (this is not relevant here because Host B doesn't transmit at all, but it will be important later). We turn interference off in the NIC by specifying the parameter in the .ini file:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
@@ -420,11 +420,11 @@ NEXT: @ref step10
 
 UP: @ref step9
 
-Up until now, the nodes were operating in free space. In the real world, however, there are usually obstacles that decrease signal strength, or reflect radio waves.
+Up until now, the nodes were operating in free space. In the real world, however, there are usually obstacles that decrease signal strength, absorb or reflect radio waves.
 
 Let's add a concrete wall to the model that sits between Host A and R1, and see what happens to the transmissions.
 
-We have to extend <i>WirelessB.ned</i> to include an <tt>environment</tt> module:
+We have to extend WirelessB.ned to include an <tt>environment</tt> module:
 
 @dontinclude WirelessC.ned
 @skip network WirelessC extends WirelessB
@@ -432,9 +432,9 @@ We have to extend <i>WirelessB.ned</i> to include an <tt>environment</tt> module
 @skipline }
 @skipline }
 
-The physical environment module handles the objects that interact with transmission <!rewrite>
+The physical environment module implements the objects that interact with transmissions -- various shapes can be created. <!rewrite>
 
-Objects can be defined in .xml files (see details in the <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual</a>). Our wall is defined in <i>walls.xml</i>.
+Objects can be defined in .xml files (see details in the <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual</a>). Our wall is defined in walls.xml.
 
 @dontinclude walls.xml
 @skip environment
@@ -444,6 +444,12 @@ We need to configure the environment in omnetpp.ini:
 
 @dontinclude omnetpp.ini
 @skipline *.physicalEnvironment.config = xmldoc("walls.xml")
+
+To calculate interactions with obstacles, we need an obstacle loss model:
+@dontinclude omnetpp.ini
+@skipline obstacleLoss
+
+<tt>TracingObstacleLoss</tt> models signal loss along a line connecting the transmitter and the receiver, calculating the loss where it intersects obstackles.<!rewrite>
 
 Unfortunatelly, the wall has no effect on the transmissions -- the number of received packets is exactly the same as in the previous step -- because our simple radio model doesn't take obstacles into account. We need a more realistic radio model.
 
@@ -471,7 +477,7 @@ Set up some background noise:
 @dontinclude omnetpp.ini
 @skipline *.radioMedium.backgroundNoise.power = -110dBm
 
-<tt>APSKRadioMedium</tt> uses <tt>IsotropicScalarBackgroundNoise</tt> by default. This creates background noise that is constant in space, time and frequency.
+<tt>APSKRadioMedium</tt> uses <tt>IsotropicScalarBackgroundNoise</tt> by default. This is basically white noise that is constant in space, time and frequency.<!white noise already means every frequency>
 
 <!frequency 2 ghz>
 
