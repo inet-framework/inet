@@ -1,7 +1,7 @@
 /**
 @mainpage Wireless Tutorial for the INET framework
 
-In this tutorial we show you how build wireless simulations in the INET framework. It contains a series of simulation
+In this tutorial we show you how to build wireless simulations in the INET framework. It contains a series of simulation
 models numbered from 1 through 19. The models are of increasing complexity -- they start from the basics and introduce 
 new INET features and concepts related to wireless communication networks.
 
@@ -451,7 +451,7 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 
 <tt>TracingObstacleLoss</tt> models signal loss along a line connecting the transmitter and the receiver, calculating the loss where it intersects obstackles.<!rewrite>
 
-Unfortunatelly, the wall has no effect on the transmissions -- the number of received packets is exactly the same as in the previous step -- because our simple radio model doesn't take obstacles into account. We need a more realistic radio model.
+Unfortunatelly, the wall has no effect on the transmissions -- the number of received packets is exactly the same as in the previous step -- because our simple radio model doesn't interact with obstacles. We need a more realistic radio model.
 
 <img src="wireless-step10-v2.png">
 
@@ -465,7 +465,7 @@ NEXT: @ref step11
 
 UP: @ref step10
 
-We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which more realistic. It implements a radio that uses APSK modulation, but it is not using other techniques like forward error correction, interleaving or spreading. Nevertheless, it takes obstacles into account.
+We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which is more realistic. It implements a radio that uses APSK modulation, but it is not using other techniques like forward error correction, interleaving or spreading. Nevertheless, it models attenuation and obstacle loss.
 
 So let's switch <tt>IdealRadioMedium</tt> with <tt>APSKScalarRadioMedium</tt>:
 
