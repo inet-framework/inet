@@ -13,7 +13,10 @@ src/Makefile.vc
 /examples/*/results/
 /examples/*/*/results/
 /examples/*/*/*/results/
-/examples/*/cache/*
+/examples/*/cache/
+/examples/*/*/cache/
+/tutorials/*/cache/
+/tutorials/*/data/
 /tests/*/work/
 /tests/*/*/work/
 /tests/*/results*/
@@ -43,6 +46,7 @@ out/
 *.idb
 *.manifest
 .qtenv.ini
+.qtenvrc
 .tkenvrc
 .tkenvlog
 .cmdenv-log
