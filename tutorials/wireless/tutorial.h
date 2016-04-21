@@ -198,7 +198,7 @@ We decrease the communication range to 250m, so host A and B are out of range, a
 
 The other hosts are there to relay the data between them, but routing is not yet configured. The result is that Host A and B cannot communicate.
 
-<img src="wireless-step3.png">
+<img src="wireless-step3-v2.png">
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -239,7 +239,7 @@ Turn on route visualization, so we can see colored arrows indicating the routes 
 @dontinclude omnetpp.ini
 @skipline *.visualizer.routeVisualizer.packetNameFilter = "*"
 
-The arrows indicate routes in the network layer -- so now we should see a route going from Host A to B -- while we still have the blue lines that visualize communication paths in the physical layer.
+The arrows indicate routes in the network layer -- so now we should see a route going from Host A to B -- while we still have the blue lines that visualize communication paths in the physical layer. Here we want to display all kinds of packets, hence the "*".
 
 Now the two nodes can communicate -- you can see that Host R1 relays data to Host B.
 
@@ -377,7 +377,7 @@ Each node works like a router -- they manage their own routing tables and adapt 
 
 This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead <!is that correct>-- but still a little more than in the previous step (290 kbps).
 
-<img src="wireless-step9.png">
+<img src="wireless-step8-v2.png">
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -446,11 +446,11 @@ Objects can be defined in .xml files (see details in the <a href="https://omnetp
 We need to configure the environment in omnetpp.ini:
 
 @dontinclude omnetpp.ini
-@skipline *.environment.config = xmldoc("walls.xml")
+@skipline *.physicalEnvironment.config = xmldoc("walls.xml")
 
 Unfortunatelly, the wall has no effect on the transmissions -- the number of received packets is exactly the same as in the previous step -- because our simple radio model doesn't take obstacles into account. We need a more realistic radio model.
 
-<img src="wireless-step10.png">
+<img src="wireless-step10-v2.png">
 
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
