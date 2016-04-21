@@ -95,7 +95,7 @@ The radio part is done.
 Now let's assign IP addresses to the nodes. We could do that manually, but now we really don't care about what IP address they are getting -- we just want to concentrate on the wireless communication. We let <tt>IPv4Configurator</tt> handle the assignment.
 
 @dontinclude WirelessA.ned
-@skip submodules
+@skip configurator:
 @until @display
 @skipline }
 
@@ -123,7 +123,8 @@ The <tt>UDPSink</tt> at the other node just discards received packets:
 We also add a gauge to display the number of packets received by Host B:
 
 @dontinclude WirelessA.ned
-@skipline @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red;label=Number of packets received;
+@skipline @figure
+@skipline moduleName
 
 Let's run the simulation. We can see the nodes exchanging UDP packets:
 
