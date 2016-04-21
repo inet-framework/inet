@@ -154,19 +154,19 @@ This way we can easily base subsequent steps on the previous ones by adding a fe
 Let's turn on visualization of transmissions by editing the ini file:
 
 @dontinclude omnetpp.ini
-@skipline *.radioMedium.mediumVisualizer.displayCommunication = true
+@skipline visualizer
 
 Packet transfers are visualized by the animation of radio transmissions, so we don't need the default packet animations any more. Let's turn them off in qtenv (uncheck <i>animate messages</i> in preferences).
 
 In order to get a smooth animation, we need to enable canvas updates and set an update interval:
 
 @dontinclude omnetpp.ini
-@skipline *.radioMedium.mediumVisualizer.updateCanvasInterval = 100ns
+@skipline Propagation
 
 Also turn on communication trails, so we can get a fading blue line on successfull communication paths:
 
 @dontinclude omnetpp.ini
-@skipline *.radioMedium.mediumVisualizer.leaveCommunicationTrail = true
+@skipline displayCommunicationTrail
 
 The result is that we have nice bubble animations representing radio transmissions, and blue lines indicating communication paths:
 
