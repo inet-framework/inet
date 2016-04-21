@@ -270,7 +270,7 @@ This means that Host A cannot communicate with Host B because it is out of range
 
 Host A starts sending a lot of packets, at nearly the capacity of the medium. R1 is constantly in receiving state -- nothing is controlling who can transmit and when. R1's queue is filling up. It is supposed to relay the packets to B, but can't as long as it is receiving A's transmissions. When A's random send interval is a bit longer, R1 has the chance to send its queued packets to B. Most of the time however, A starts transmitting again and its transmission interferes with R1's at B. Packets only get through to B when the send interval at A is greater than the time it takes for R1 to send a packet. The result is that a very low number of packets get to B successfully. This is extemely low throughput -- 40 packets arrive at B out of around 2500 (about 12 kbps out of the 1 Mbps bandwidth).
 
-@note If you lower the exponential send interval (for example, to 5ms). In this case, A's transmission rate maxes out the medium bandwidth. You will see that no packet arrives to B at all. The opposite happens if you increase the interval beyond 10ms -- more packets get through to B.
+@note If you lower the exponential send interval (for example, to 5ms). In this case, A's transmission rate maxes out the radio bandwidth. You will see that no packet arrives to B at all. The opposite happens if you increase the interval beyond 10ms -- more packets get through to B.
 
 What happens here is Host A starts sending packets at random intervals, and Host R1 is supposed to relay them to Host B. However, Host R1 is almost constantly in receiving state. R1 gets to transmit when A's random interval between transmissions is by chance greater, but most of the time its transmission do not make it Host B without Host A's transmissions interfering. Meanwhile, R1's send queue is filling up, as it doesn't get the chance to transmit. The result is that only a handful of packets make it to Host B. The throughput is minial -- 40 packets make it out of about 2500, which is about 12 kbps (out of 1 Mbps possible bandwidth).
 
@@ -313,7 +313,7 @@ We need to turn on mac acknowledgements so hosts can detect if a transmission ne
 
 <img src="wireless-step6.png">
 
-We can see that throughput is about 380 kbps, so it is increased over the previous step thanks to CSMA -- altough less then in step 4 because of the interference.
+We can see that throughput is about 380 kbps, so it is increased over the previous step thanks to CSMA -- altough less than in step 4 because of the interference.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
