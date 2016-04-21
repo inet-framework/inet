@@ -406,11 +406,9 @@ Set up energy storage in the nodes -- basically modelling the batteries:
 
 <tt>IdealEnergyStorage</tt> provides an infinite ammount of energy, can't be fully charged or depleted. We use this because we want to concentrate on the power consumption, not the storage.
 
-<!where to check consumption>
 The energyBalance variable indicates the energy consumption (host*.energyStorage.energyBalance). You can use the residualCapacity signal to display energy consumption over time.
 
 <img src="wireless-step9-energy.png">
-<!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -424,7 +422,7 @@ UP: @ref step9
 
 Up until now, the nodes were operating in free space. In the real world, however, there are usually obstacles that decrease signal strength, or reflect radio waves.
 
-Let's add a brick wall to the model that sits between Host A and R1, and see what happens to the transmissions.<!brick or concrete?>
+Let's add a concrete wall to the model that sits between Host A and R1, and see what happens to the transmissions.
 
 We have to extend <i>WirelessB.ned</i> to include an <tt>environment</tt> module:
 
@@ -433,8 +431,6 @@ We have to extend <i>WirelessB.ned</i> to include an <tt>environment</tt> module
 @until @display
 @skipline }
 @skipline }
-
-<!do we need objectcachetype="">
 
 The physical environment module handles the objects that interact with transmission <!rewrite>
 
