@@ -318,7 +318,7 @@ We need to turn on mac acknowledgements so hosts can detect if a transmission ne
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].mac.useMACAcks = true
 
-<img src="wireless-step6.png">
+<img src="wireless-step6-v2.png">
 
 We can see that throughput is about 380 kbps, so it is increased over the previous step thanks to CSMA -- altough less than in step 4 because of the interference.
 
