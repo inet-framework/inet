@@ -11,7 +11,7 @@ cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=debug clean
 	@rm -f src/Makefile src/inet/features.h
 
-MAKEMAKE_OPTIONS := -f --deep -o INET -O out -pINET --no-deep-includes -I.
+MAKEMAKE_OPTIONS := -f --deep -o INET -O out --no-deep-includes -I.
 
 makefiles: src/inet/features.h makefiles-so
 
