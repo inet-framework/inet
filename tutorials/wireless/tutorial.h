@@ -273,7 +273,7 @@ Set maximum interference range to the double of the communication range, 500m:
 
 This means that Host A cannot communicate with Host B because it is out of range, but its transmission will cause interference with other transmissions at Host B.
 
-<img src="wireless-step5_v2.png">
+<img src="wireless-step5-v2.png">
 
 Host A starts sending a lot of packets, at nearly the capacity of the medium. R1 is constantly in receiving state -- nothing is controlling who can transmit and when. R1's queue is filling up. It is supposed to relay the packets to B, but can't as long as it is receiving A's transmissions. When A's random send interval is a bit longer, R1 has the chance to send its queued packets to B. Most of the time however, A starts transmitting again and its transmission interferes with R1's at B. Packets only get through to B when the send interval at A is greater than the time it takes for R1 to send a packet. The result is that a very low number of packets get to B successfully. This is extemely low throughput -- 40 packets arrive at B out of around 2500 (about 12 kbps out of the 1 Mbps bandwidth).
 
