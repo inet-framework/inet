@@ -339,9 +339,9 @@ Let's configure the intermediate nodes (R1-3) to move around. We set them to mov
 @skip mobility
 @until mobility.angle
 
-<!more on linearmobility>
+<!more on linearmobility><!do we need more on mobility? should be clear from the code above>
 
-Run the simulation in fast mode to better see the nodes moving <!rewrite this>
+You should run the simulation in fast mode to better see the nodes moving, because they move very slowly if run in normal mode.
 
 We see that data exchange works just like in the previous step until R1 moves out of range of A. Traffic could be routed through R2 and R3, but the routing tables are static, and configured according to the starting positions of the nodes. Throughput is about 260 kbps, which is less than in the previous step, because at around 18 seconds, R1 moves out of range of A thus severing the connection to B.
 
@@ -376,7 +376,7 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 <tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the <tt>AODVRouting</tt> submodule.
 Each node works like a router -- they manage their own routing tables and adapt to changes in the network topology.
 
-This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is a bit less than in step 6 because of the AODV protocol overhead <!is that correct>-- but still a little more than in the previous step (290 kbps).
+This time when R1 gets out of range, the routes are reconfigured and packets keep flowing to B. Throughput is about the same as in step 6 -- even though the connection is not broken here, the AODV protocol adds some overhead to the communication.
 
 <img src="wireless-step8-v2.png">
 
