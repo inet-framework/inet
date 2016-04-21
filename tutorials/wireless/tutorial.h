@@ -234,13 +234,20 @@ Also disable routing table entries generated from the netmask and remove default
 @dontinclude omnetpp.ini
 @skipline **.routingTable.netmaskRoutes = ""
 
+Turn on route visualization, so we can see colored arrows indicating the routes that packets take:
+
+@dontinclude omnetpp.ini
+@skipline *.visualizer.routeVisualizer.packetNameFilter = "*"
+
+The arrows indicate routes in the network layer -- so now we should see a route going from Host A to B -- while we still have the blue lines that visualize communication paths in the physical layer.
+
 Now the two nodes can communicate -- you can see that Host R1 relays data to Host B.
 
 The data rate is the same as before (800 kbps) -- even though multiple hosts are transmitting at the same time -- because we're still ignoring interference.
 
 Note that there are blue lines leading to Host R2 and R3 even though they don't transmit. This is because they receive the transmissions at the physical layer, but they discard the packets at the link layer because it is not addressed to them.
 
-<img src="wireless-step4.png">
+<img src="wireless-step4-v2.png">
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned, 
 
