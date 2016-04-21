@@ -43,7 +43,7 @@ UP: @ref step1
 
 In the first scenario, we set up two hosts, with one host sending data wirelessly to the other via UDP. Right now, we don't care if the wireless exchange is realistic or not, just want the hosts to transfer data between each other. There are no collisions, and other physical effects -- like attenuation and multipath propagation -- are ignored. The network topology is defined in the .ned files -- in this case WirelessA.ned.
 
-<img src="wireless-step1.png">
+<img src="wireless-step1-v2.png">
 
 First, we create the network environment -- this is where the simulation will take place -- and specify its size to 500x500 meters:
 
@@ -169,7 +169,7 @@ Also turn on communication trails, so we can get a fading blue line on successfu
 
 The result is that we have nice bubble animations representing radio transmissions, and blue lines indicating communication paths:
 
-<img src="step2_v2.gif">
+<img src="step2_2_v3.gif">
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
