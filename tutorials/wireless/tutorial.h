@@ -55,10 +55,10 @@ NEXT: @ref step1
 UP: @ref step1
 
 In the first scenario, we set up two hosts, with one host sending a UDP data
-stream wirelessly to the other. Right now, we don't care if the wireless
+stream wirelessly to the other. We don't care if the wireless
 exchange is realistic or not, just want the hosts to transfer data between each
 other. There are no collisions, and other physical effects -- like attenuation
-and multipath propagation -- are ignored. The network topology is defined in the
+and interference -- are ignored. The network topology is defined in the
 .ned files -- in this case WirelessA.ned.
 
 <img src="wireless-step1-v2.png">
@@ -86,7 +86,7 @@ medium module. The radio medium represents the physical medium where
 transmissions occur. It models wireless propagation, interference and
 attenuation. Technically, it computes which hosts will receive the transmission
 and when, based on their positions and distance, taking other physical effects
-like attenuation and noise into account.
+like attenuation and noise into account. It also computes when interference happens.
 
 We want to start with a very simple radio model. In this case we add
 <tt>IdealRadioMedium</tt>.
@@ -106,7 +106,8 @@ This might seem overly simplified and no such thing exists in real life, but it
 is useful when you are not interested in the details of the radio transmission
 itself -- for example, when you want to test routing protocols.
 
-We can configure the communication range in the wireless NIC of the host. Let's
+We can configure the communication range in the wireless network interface card 
+(NIC) of the host. Let's
 add a simple wireless NIC to the hosts in the .ini file:
 
 @dontinclude omnetpp.ini
@@ -133,22 +134,22 @@ Finally, we set the transmission bandwidth to 1 Mbps of all radios in the model:
 
 The radio part is done.
 
-Now let's assign IP addresses to the nodes. We could do that manually, but now
-we really don't care about what IP address they are getting -- we just want to
-concentrate on the wireless communication. We let <tt>IPv4Configurator</tt>
+The <tt>configurator</tt> assigns the IP addresses and sets up static routing between the
+nodes. The configurator has no gates and does not connect to anything, only
+stores the routing information. Nodes contain an <tt>IPv4NodeConfigurator</tt>
+module that configures hosts' routing tables based on the information stored in
+the network configurator (the <tt>IPv4NodeConfigurator</tt> is included in the
+<tt>INetworkNode</tt> module by default).
+
+Now let's assign IP addresses to the nodes. Now we really don't care about what 
+IP address they are getting -- we just want to concentrate on the wireless 
+communication. We let <tt>IPv4Configurator</tt>
 handle the assignment.
 
 @dontinclude WirelessA.ned
 @skip configurator:
 @until @display
 @skipline }
-
-The configurator assigns the IP addresses and sets up static routing between the
-nodes. The configurator has no gates and does not connect to anything, only
-stores the routing information. Nodes contain an <tt>IPv4NodeConfigurator</tt>
-module that configures hosts' routing tables based on the information stored in
-the network configurator (the <tt>IPv4NodeConfigurator</tt> is included in the
-<tt>INetworkNode</tt> module by default).
 
 The hosts have to know each other's MAC addresses to communicate, which is
 handled by the ARP protocol. Since we want to concentrate on the UPD exchange,
