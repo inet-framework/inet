@@ -142,7 +142,7 @@ NEXT: @ref step2
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step2 Step 2 - Set up some animations
+@page step2 Step 2 - Setting up some animations
 
 UP: @ref step1
 
@@ -184,7 +184,7 @@ NEXT: @ref step3
 -----------------------------------------------------------------------------------------------------------------------
 /**
 
-@page step3 Step 3 - Add more nodes and decrease the communication range to 250m
+@page step3 Step 3 - Adding more nodes and decreasing the communication range to 250m
 
 UP: @ref step2
 
@@ -213,7 +213,7 @@ NEXT: @ref step4
 -----------------------------------------------------------------------------------------------------------------------
 /**
 
-@page step4 Step 4 - Set up static routing
+@page step4 Step 4 - Setting up static routing
 
 UP: @ref step3
 
@@ -262,7 +262,7 @@ NEXT: @ref step5
 -----------------------------------------------------------------------------------------------------------------------
 /**
 
-@page step5 Step 5 - Take into account the interference between different hosts
+@page step5 Step 5 - Taking into account the interference between different hosts
 
 UP: @ref step4
 
@@ -297,7 +297,7 @@ NEXT: @ref step6
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step6 Step 6 - Use CSMA to better utilize the medium
+@page step6 Step 6 - Using CSMA to better utilize the medium
 
 UP: @ref step5
 
@@ -333,7 +333,7 @@ NEXT: @ref step7
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step7 Step 7 - Configure node movements
+@page step7 Step 7 - Configuring node movements
 
 UP: @ref step6
 
@@ -360,7 +360,7 @@ NEXT: @ref step8
 -----------------------------------------------------------------------------------------------------------------------
 /**
 
-@page step8 Step 8 - Configure adhoc routing (AODV)
+@page step8 Step 8 - Configuring adhoc routing (AODV)
 
 UP: @ref step7
 
@@ -390,7 +390,7 @@ NEXT: @ref step9
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step9 Step 9 - Install energy management into the nodes
+@page step9 Step 9 - Installing energy management into the nodes
 
 UP: @ref step8
 
@@ -420,7 +420,7 @@ NEXT: @ref step10
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step10 Step 10 - Add obstacles to the environment
+@page step10 Step 10 - Adding obstacles to the environment
 
 UP: @ref step9
 
@@ -465,7 +465,7 @@ NEXT: @ref step11
 */
 -----------------------------------------------------------------------------------------------------------------------
 /**
-@page step11 Step 11 - Enhance the accuracy of the radio model
+@page step11 Step 11 - Enhancing the accuracy of the radio model
 
 UP: @ref step10
 
@@ -506,7 +506,7 @@ NEXT: @ref step12
 */
 ---------------------------------------------------------------------------------------------------
 /**
-@page step12 Step 12 - Configure a more accurate pathloss model
+@page step12 Step 12 - Configuring a more accurate pathloss model
 
 UP: @ref step11
 
