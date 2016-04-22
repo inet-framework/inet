@@ -26,11 +26,8 @@ The tutorial starts off with a basic simulation model at step 1, and gradually
 makes it more complex and realistic in subsequent steps -- so you can learn
 about various INET wireless features and what can be achieved with them.
 
-In the tutorial, each step is a separate configuration, all based on the same
-simulation model.
-
-Feel free to try the steps as you progress with the tutorial -- all simulation
-models are defined in omnetpp.ini.
+In the tutorial, each step is a separate configuration in the same omnetpp.ini file,
+and consecutive steps mostly share the same networks, defined in NED.
 
 @section contents Contents
 
@@ -51,7 +48,7 @@ NEXT: @ref step1
 */--------------------------------------------------------------------------/**
 
 
-@page step1 Step 1 - Two nodes communicating wirelessly
+@page step1 Step 1 - Two hosts communicating wirelessly
 UP: @ref step1
 
 In the first scenario, we set up two hosts, with one host sending a UDP data
@@ -63,88 +60,74 @@ and interference -- are ignored. The network topology is defined in the
 
 <img src="wireless-step1-v2.png">
 
-First, we create the playground and specify its size to 500x500 meters -- this
-will be relevant later:
+WirelessA, the network defined in the above NED file, defines a playground of
+the size 500x500 meters:
 
 @dontinclude WirelessA.ned
 @skip network WirelessA
 @until @display
 
-Then we add the two nodes 400 meters apart:
+It contains two hosts spaced 400 meters apart:
 
 @dontinclude WirelessA.ned
 @skip hostA: <hostType>
 @until @display("p=450,250");
 @skipline }
 
-In @opp <tt>standardHost</tt> is generally used to represent hosts. We define
-only the host interface in the .ned file, so it is parametrizable, because later
-we want to change <tt>standardHost</tt> to something else.
+In @opp, the <tt>StandardHost</tt> NED type is generally used to represent hosts.
+However, later steps will use other NED types for hosts, so the submodule type
+is parameterizable. (<tt>INetworkNode</tt> is the interface for host types.)
 
-The two nodes want to communicate wirelessly, and for that we need a radio
-medium module. The radio medium represents the physical medium where
-transmissions occur. It models wireless propagation, interference and
-attenuation. Technically, it computes which hosts will receive the transmission
-and when, based on their positions and distance, taking other physical effects
-like attenuation and noise into account. It also computes when interference happens.
+All wireless simulations in INET need a radio medium module. This module represents
+the shared physical medium where communication takes place. It is responsible for
+taking signal propagation, attenuation, interference, and other physical phenomena
+into account.
 
-We want to start with a very simple radio model. In this case we add
-<tt>IdealRadioMedium</tt>.
+INET is capable of modeling wireless communication at various levels of detail,
+realized with different radio medium modules. In this step, we use
+the simplest model, a variation of unit disc radio, which is implemented by
+the <tt>IdealRadioMedium</tt> NED type.
 
 @dontinclude WirelessA.ned
 @skip radioMedium: <mediumType>
 @until @display
 
-<tt>IdealRadioMedium</tt> is a simplified radio model, which has the 
-corresponding radio module, <tt>IdealRadio</tt>. In order for the simulation to 
-work, hosts have to have <tt>IdealRadio</tt> as their radio module. 
-<tt>IdealRadio</tt> has a <i>Communication range</i> parameter. The success of
- reception of transmissions only depend on the distance of the two nodes
-  -- whether they are in communication range.
-
-This might seem overly simplified and no such thing exists in real life, but it
-is useful when you are not interested in the details of the radio transmission
-itself -- for example, when you want to test routing protocols.
-
-We can configure the communication range in the wireless network interface card 
-(NIC) of the host. Let's
-add a simple wireless NIC to the hosts in the .ini file:
+In hosts, network interface cards are represented by NIC modules. Radio is part of
+wireless NIC modules. There are various radio modules, and one must always
+use one that are compatiple with the medium module. In this step, hosts contain
+<tt>IdealRadio</tt> as part of IdealWirelessNic.
 
 @dontinclude omnetpp.ini
 @skipline .host*.wlan[*].typename = "IdealWirelessNic"
 
-Now set the communication range to 500m:
+The most important parameter of <tt>IdealRadio</tt> is <i>communication range</i>.
+<tt>IdealRadio</tt> receives a transmission correctly within communication
+range, unless there is an interfering transmission.
+
+@note This might seem overly simplified because such radios and signal propagation do not work
+like that in real life. However, it can be very useful in modeling scenarios where
+details of radio propagation is not of interest.
+
+In this model, the communication range is set to 500m.
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
-Because we want a simple model, we don't care about interference. The two hosts
-can transmit simultaneously, but it doesn't affect reception (this is not
-relevant here because Host B doesn't transmit at all, but it will be important
-later). We turn interference off in the NIC by specifying the parameter in the
-.ini file:
+Interference (in this case, loss of packets due to collision) is also
+modeled by <tt>IdealRadio</tt>. In this step, interference is turned off,
+resulting in pairwise independent duplex communication channels.
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
 
-Finally, we set the transmission bandwidth to 1 Mbps of all radios in the model:
+The radio data rates are set to 1 Mbps.
 
 @dontinclude omnetpp.ini
 @skipline **.bitrate = 1Mbps
 
-The radio part is done.
-
-The <tt>configurator</tt> assigns the IP addresses and sets up static routing between the
-nodes. The configurator has no gates and does not connect to anything, only
-stores the routing information. Nodes contain an <tt>IPv4NodeConfigurator</tt>
-module that configures hosts' routing tables based on the information stored in
-the network configurator (the <tt>IPv4NodeConfigurator</tt> is included in the
-<tt>INetworkNode</tt> module by default).
-
-Now let's assign IP addresses to the nodes. Now we really don't care about what 
-IP address they are getting -- we just want to concentrate on the wireless 
-communication. We let <tt>IPv4Configurator</tt>
-handle the assignment.
+Hosts in the network need IP addresses. IP address assignment in this model
+is handled by an instance of <tt>IPv4NetworkConfigurator</tt>. This module
+also sets up static routing between the hosts.
 
 @dontinclude WirelessA.ned
 @skip configurator:
@@ -152,41 +135,37 @@ handle the assignment.
 @skipline }
 
 The hosts have to know each other's MAC addresses to communicate, which is
-handled by the ARP protocol. Since we want to concentrate on the UPD exchange,
-we can set the MAC addresses even before the simulation begins to cut the ARP
-resolution messages, by using <i>GlobarARP</i>:
+taken care of by using <i>GlobalARP</i>:
 
 @dontinclude omnetpp.ini
 @skipline **.arpType = "GlobalARP"
 
-We need to set up UDP applications in the nodes in omnetpp.ini so they can
-exchange traffic:
+In the model, host A generates UDP packets which are received by host B.
+To this end, host A contains a UDPBasicApp module, which generates 1000-byte UDP
+messages at random intervals with exponential distribution, the mean of which is 10ms.
+Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic (not counting protocol overhead).
 
 @dontinclude omnetpp.ini
 @skip *.hostA.numUdpApps = 1
 @until *.hostA.udpApp[0].sendInterval = exponential(10ms)
 
-The UDPBasicApp generates 1000 byte messages at random intervals with
-exponential distribution, the mean of which is 10ms. Therefore the app is going
-to generate 100 kbyte/s (800 kbps) UDP traffic (not counting protocol overhead).
-
-The <tt>UDPSink</tt> at the other node just discards received packets:
+Host B contains a <tt>UDPSink</tt> application that just discards received packets.
 
 @dontinclude omnetpp.ini
 @skip *.hostB.numUdpApps = 1
 @until *.hostB.udpApp[0].localPort = 5000
 
-We also add a gauge to display the number of packets received by Host B:
+The model also contains a gauge to display the number of packets received by Host B:
 
 @dontinclude WirelessA.ned
 @skipline @figure
 @skipline moduleName
 
-Let's run the simulation. We can see the nodes exchanging UDP packets:
+Here is an animation showing the hosts communicating:
 
 <img src="step1_v4.gif">
 
-The simulation concludes at t=25s, and the throughput instrument indicates that
+When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
 the transmission rate was around 800 kbps.
 
@@ -245,7 +224,7 @@ NEXT: @ref step3
 */--------------------------------------------------------------------------/**
 
 
-@page step3 Step 3 - Adding more nodes and decreasing the communication range 
+@page step3 Step 3 - Adding more nodes and decreasing the communication range
 to 250m
 
 UP: @ref step2
@@ -258,7 +237,7 @@ In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.
 @skipline }
 @skipline }
 
-We decrease the communication range to 250m, so host A and B are out of range, 
+We decrease the communication range to 250m, so host A and B are out of range,
 and cannot communicate directly.
 
 @dontinclude omnetpp.ini
@@ -281,26 +260,26 @@ NEXT: @ref step4
 
 UP: @ref step3
 
-The recently added hosts will have to behave like routers, and forward packets 
+The recently added hosts will have to behave like routers, and forward packets
 from Host A to Host B. We have to set forwarding:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.forwarding = true
 
 We need to set up static routes. We could do that manually, but that's tedious,
- so we let the configurator take care of it. 
+ so we let the configurator take care of it.
 
 @dontinclude omnetpp.ini
 @skipline *.configurator.config = xml("<config><interface hosts='**' address='10.0.0.x' netmask='255.255.255.0'/><autoroute metric='errorRate'/></config>")
 
-We tell the configurator to assign IP addresses in the 10.0.0.x range, and to 
-create routes based on the estimated error rate of links between the nodes. In 
-the case of the <tt>IdealRadio</tt> model, the error rate is 1 for nodes that 
+We tell the configurator to assign IP addresses in the 10.0.0.x range, and to
+create routes based on the estimated error rate of links between the nodes. In
+the case of the <tt>IdealRadio</tt> model, the error rate is 1 for nodes that
 are out of range, and 1e-3 for ones in range. The result will be that nodes that
-are out of range of each other will send packets to intermediate nodes that can 
+are out of range of each other will send packets to intermediate nodes that can
 forward them.
 
-Turning off routing table optimizaton. This way there will be a distinct entry 
+Turning off routing table optimizaton. This way there will be a distinct entry
 for reaching each host, so the table is easier to understand.
 
 @dontinclude omnetpp.ini
@@ -312,31 +291,31 @@ Also disable routing table entries generated from the netmask and remove default
 @dontinclude omnetpp.ini
 @skipline **.routingTable.netmaskRoutes = ""
 
-Turn on route visualization, so we can see colored arrows indicating the routes 
+Turn on route visualization, so we can see colored arrows indicating the routes
 that packets take:
 
 @dontinclude omnetpp.ini
 @skipline *.visualizer.routeVisualizer.packetNameFilter = "*"
 
-The arrows indicate routes in the network layer -- so now we should see a route 
-going from Host A to B -- while we still have the blue lines that visualize 
-communication paths in the physical layer. Here we want to display all kinds of 
+The arrows indicate routes in the network layer -- so now we should see a route
+going from Host A to B -- while we still have the blue lines that visualize
+communication paths in the physical layer. Here we want to display all kinds of
 packets, hence the "*".
 
-Now the two nodes can communicate -- you can see that Host R1 relays data to 
+Now the two nodes can communicate -- you can see that Host R1 relays data to
 Host B.
 
 The data rate is the same as before (800 kbps) -- even though multiple hosts are
  transmitting at the same time -- because we're still ignoring interference.
 
-Note that there are blue lines leading to Host R2 and R3 even though they don't 
-transmit. This is because they receive the transmissions at the physical layer, 
-but they discard the packets at the link layer because it is not addressed to 
+Note that there are blue lines leading to Host R2 and R3 even though they don't
+transmit. This is because they receive the transmissions at the physical layer,
+but they discard the packets at the link layer because it is not addressed to
 them.
 
 <img src="wireless-step4-v2.png">
 
-Sources: @ref omnetpp.ini, @ref WirelessB.ned, 
+Sources: @ref omnetpp.ini, @ref WirelessB.ned,
 
 NEXT: @ref step5
 
@@ -358,7 +337,7 @@ Set maximum interference range to the double of the communication range, 500m:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxInterferenceRange = 500m
 
-This means that Host A cannot communicate with Host B because it is out of 
+This means that Host A cannot communicate with Host B because it is out of
 range, but its transmission will cause interference with other transmissions at Host B.
 
 <img src="wireless-step5-v2.png">
@@ -375,9 +354,9 @@ that a very low number of packets get to B successfully. This is extemely low
 throughput -- 40 packets arrive at B out of around 2500 (about 12 kbps out of
 the 1 Mbps bandwidth).
 
-@note If you lower the exponential send interval (for example, to 5ms). 
-In this case, A's transmission rate maxes out the radio bandwidth. 
-You will see that no packet arrives to B at all. The opposite happens if you 
+@note If you lower the exponential send interval (for example, to 5ms).
+In this case, A's transmission rate maxes out the radio bandwidth.
+You will see that no packet arrives to B at all. The opposite happens if you
 increase the interval beyond 10ms -- more packets get through to B.
 
 What happens here is Host A starts sending packets at random intervals, and Host
@@ -421,7 +400,7 @@ We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which c
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].typename = "WirelessNic"
 
-<tt>WirelessNic</tt> has <tt>Ieee80211</tt> radio by default, but we still 
+<tt>WirelessNic</tt> has <tt>Ieee80211</tt> radio by default, but we still
 want to use <tt>IdealRadio</tt>:
 
 @dontinclude omnetpp.ini
@@ -432,7 +411,7 @@ Set mac protocol to CSMA:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].macType = "CSMA"
 
-We need to turn on mac acknowledgements so hosts can detect if a transmission 
+We need to turn on mac acknowledgements so hosts can detect if a transmission
 needs resending:
 
 @dontinclude omnetpp.ini
@@ -503,8 +482,8 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 @dontinclude omnetpp.ini
 @skipline *.hostType = "AODVRouter"
 
-<tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the 
-<tt>AODVRouting</tt> submodule. Each node works like a router -- they manage 
+<tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the
+<tt>AODVRouting</tt> submodule. Each node works like a router -- they manage
 their own routing tables and adapt to changes in the network topology.
 
 This time when R1 gets out of range, the routes are reconfigured and packets
@@ -542,12 +521,12 @@ Set up energy storage in the nodes -- basically modelling the batteries:
 @dontinclude omnetpp.ini
 @skipline *.host*.energyStorageType = "IdealEnergyStorage"
 
-<tt>IdealEnergyStorage</tt> provides an infinite ammount of energy, can't be 
-fully charged or depleted. We use this because we want to concentrate on the 
+<tt>IdealEnergyStorage</tt> provides an infinite ammount of energy, can't be
+fully charged or depleted. We use this because we want to concentrate on the
 power consumption, not the storage.
 
-The energyBalance variable indicates the energy consumption 
-(host*.energyStorage.energyBalance). You can use the residualCapacity signal 
+The energyBalance variable indicates the energy consumption
+(host*.energyStorage.energyBalance). You can use the residualCapacity signal
 to display energy consumption over time.
 
 <img src="wireless-step9-energy.png">
@@ -562,11 +541,11 @@ NEXT: @ref step10
 
 UP: @ref step9
 
-Up until now, the nodes were operating in free space. In the real world, 
-however, there are usually obstacles that decrease signal strength, absorb or 
+Up until now, the nodes were operating in free space. In the real world,
+however, there are usually obstacles that decrease signal strength, absorb or
 reflect radio waves.
 
-Let's add a concrete wall to the model that sits between Host A and R1, and see 
+Let's add a concrete wall to the model that sits between Host A and R1, and see
 what happens to the transmissions.
 
 We have to extend WirelessB.ned to include an <tt>environment</tt> module:
@@ -577,11 +556,11 @@ We have to extend WirelessB.ned to include an <tt>environment</tt> module:
 @skipline }
 @skipline }
 
-The physical environment module implements the objects that interact with 
+The physical environment module implements the objects that interact with
 transmissions -- various shapes can be created. <!rewrite>
 
-Objects can be defined in .xml files (see details in the 
-<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual</a>). 
+Objects can be defined in .xml files (see details in the
+<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual</a>).
 Our wall is defined in walls.xml.
 
 @dontinclude walls.xml
@@ -601,9 +580,9 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 <transmitter and the receiver, calculating the loss where it intersects
 <obstackles.!rewrite>
 
-Unfortunatelly, the wall has no effect on the transmissions -- the number of 
-received packets is exactly the same as in the previous step -- because our 
-simple radio model doesn't interact with obstacles. We need a more realistic 
+Unfortunatelly, the wall has no effect on the transmissions -- the number of
+received packets is exactly the same as in the previous step -- because our
+simple radio model doesn't interact with obstacles. We need a more realistic
 radio model.
 
 <img src="wireless-step10-v2.png">
@@ -618,9 +597,9 @@ NEXT: @ref step11
 
 UP: @ref step10
 
-We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which is more 
-realistic. It implements a radio that uses APSK modulation, but it is not using 
-other techniques like forward error correction, interleaving or spreading. 
+We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which is more
+realistic. It implements a radio that uses APSK modulation, but it is not using
+other techniques like forward error correction, interleaving or spreading.
 Nevertheless, it models attenuation and obstacle loss.
 
 So let's switch <tt>IdealRadioMedium</tt> with <tt>APSKScalarRadioMedium</tt>:
@@ -633,8 +612,8 @@ Set up some background noise:
 @dontinclude omnetpp.ini
 @skipline *.radioMedium.backgroundNoise.power = -110dBm
 
-<tt>APSKRadioMedium</tt> uses <tt>IsotropicScalarBackgroundNoise</tt> by 
-default. This is basically white noise that is constant in space, time and 
+<tt>APSKRadioMedium</tt> uses <tt>IsotropicScalarBackgroundNoise</tt> by
+default. This is basically white noise that is constant in space, time and
 frequency.<!white noise already means every frequency>
 
 <!frequency 2 ghz>
@@ -645,18 +624,18 @@ Set up <tt>APSKScalarRadio</tt>'s in the nodes and configure each radio:
 @skip *.host*.wlan[*].radioType = "APSKScalarRadio"
 @until *.host*.wlan[*].radio.receiver.snirThreshold = 4dB
 
-@note Each <tt>radioMedium</tt> model has to be used with the corresponding 
-radio model -- this case <tt>APSKScalarRadioMedium</tt> with 
+@note Each <tt>radioMedium</tt> model has to be used with the corresponding
+radio model -- this case <tt>APSKScalarRadioMedium</tt> with
 <tt>APSKScalarRadio</tt>. The same was true with <tt>IdealRadio</tt>.
-<!do we need this - is it correct - do we need this here and not at idealradio - 
+<!do we need this - is it correct - do we need this here and not at idealradio -
 last 3 lines - preambleduration?>
 
 <!img>
 <!results>
 <!throughput>
 
-Now our model takes the objects into account when calculating attenuation. 
-The wall is blocking the transmission between Host A and R1 when R1 gets 
+Now our model takes the objects into account when calculating attenuation.
+The wall is blocking the transmission between Host A and R1 when R1 gets
 behind it.<!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
