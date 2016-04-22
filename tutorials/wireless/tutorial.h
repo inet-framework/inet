@@ -6,7 +6,7 @@ models numbered from 1 through 19. The models are of increasing complexity -- th
 new INET features and concepts related to wireless communication networks.
 
 This is an advanced tutorial, and it assumes that you are familiar with creating and running simulations in @opp and 
-INET. If you are yet not, you can check out the <a href="https://omnetpp.org/doc/omnetpp/tictoc-tutorial/" target="_blank">TicToc Tutorial</a> to get started with using @opp. The <a href="../../../doc/walkthrough/tutorial.html" target="_blank">ARP Tutorial</a> is an introduction to INET and how to work with protocols.
+INET. If you are not yet, you can check out the <a href="https://omnetpp.org/doc/omnetpp/tictoc-tutorial/" target="_blank">TicToc Tutorial</a> to get started with using @opp. The <a href="../../../doc/walkthrough/tutorial.html" target="_blank">ARP Tutorial</a> is an introduction to INET and how to work with protocols.
 
 If you need more information at any time, feel free to refer to the @opp and INET documentation:
 
@@ -16,6 +16,8 @@ If you need more information at any time, feel free to refer to the @opp and INE
 - 	<a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
 
 The tutorial starts off with a basic simulation model at step 1, and gradually makes it more complex and realistic in subsequent steps -- so you can learn about various INET wireless features and what can be achieved with them.
+
+In the tutorial, each step is a separate configuration, all based on the same simulation model.
 
 Feel free to try the steps as you progress with the tutorial -- all simulation models are defined in omnetpp.ini.
 
@@ -38,14 +40,14 @@ NEXT: @ref step1
 -----------------------------------------------------------------------------------------------------------------------
 /**
 
-@page step1 Step 1 - Two nodes communicating via UDP
+@page step1 Step 1 - Two nodes communicating wirelessly
 UP: @ref step1
 
-In the first scenario, we set up two hosts, with one host sending data wirelessly to the other via UDP. Right now, we don't care if the wireless exchange is realistic or not, just want the hosts to transfer data between each other. There are no collisions, and other physical effects -- like attenuation and multipath propagation -- are ignored. The network topology is defined in the .ned files -- in this case WirelessA.ned.
+In the first scenario, we set up two hosts, with one host sending a UDP data stream wirelessly to the other. Right now, we don't care if the wireless exchange is realistic or not, just want the hosts to transfer data between each other. There are no collisions, and other physical effects -- like attenuation and multipath propagation -- are ignored. The network topology is defined in the .ned files -- in this case WirelessA.ned.
 
 <img src="wireless-step1-v2.png">
 
-First, we create the network environment -- this is where the simulation will take place -- and specify its size to 500x500 meters:
+First, we create the playground and specify its size to 500x500 meters -- this will be relevant later:
 
 @dontinclude WirelessA.ned
 @skip network WirelessA
@@ -58,19 +60,21 @@ Then we add the two nodes 400 meters apart:
 @until @display("p=450,250");
 @skipline }
 
-We could have just used <tt>INetworkNode</tt>, but we're using parametrized types, so their types and properties can be easily modified from the .ini file. This way we can create the increasingly complex simulations by extending the one used in the previous step. For example, we can switch ideal components to more realistic ones.
+In @opp <tt>standardHost</tt> is generally used to represent hosts. We define only the host interface in the .ned file, so it is parametrizable, because later we want to change <tt>standardHost</tt> to something else.
 
-The two nodes want to communicate wirelessly, and for that we need a radio medium module. In this case we add <tt>IdealRadioMedium</tt>. 
+The two nodes want to communicate wirelessly, and for that we need a radio medium module. The radio medium represents the physical medium where transmissions occur. It models wireless propagation, interference and attenuation. Technically, it computes which hosts will receive the transmission and when, based on their positions and distance, taking other physical effects like attenuation and noise into account. 
+
+We want to start with a very simple radio model. In this case we add <tt>IdealRadioMedium</tt>. 
 
 @dontinclude WirelessA.ned
 @skip radioMedium: <mediumType>
 @until @display
 
-The radio medium in general is responsible for coordinating the radio transmissions in the model. Hosts do not send radio packets to each other, but hand it to the radioMedium, which computes which hosts will receive the transmission and when, based on their positions and distance, taking other physical effects like attenuation and noise into account. It also computes when collisions happen. This way hosts don't have anything to do with who gets their transmission -- the radioMedium handles that. In the animation, hosts are shown to be sending messages directly to each other for clarity.
+<tt>IdealRadioMedium</tt> is a simplified radio model, which has the corresponding radio module, <tt>IdealRadio</tt>. In order for the simulation to work, hosts have to have <tt>IdealRadio</tt> as their radio module. <tt>IdealRadio</tt> has a <i>Communication range</i> parameter. The success of reception of transmissions only depend on the distance of the two nodes -- whether they are in communication range.
 
-<tt>IdealRadioMedium</tt> is a simple model of radio transmission -- the success of reception only depends on the distance of the two nodes -- whether or not they are in communication range. In-range packets are always received and out-of-range ones are never.
+This might seem overly simplified and no such thing exists in real life, but it is useful when you are not interested in the details of the radio transmission itself -- for example, when you want to test routing protocols.
 
-We can configure this range in the wireless NIC of the host. Let's add a simple wireless NIC to the hosts in the .ini file:
+We can configure the communication range in the wireless NIC of the host. Let's add a simple wireless NIC to the hosts in the .ini file:
 
 @dontinclude omnetpp.ini
 @skipline .host*.wlan[*].typename = "IdealWirelessNic"
@@ -80,7 +84,7 @@ Now set the communication range to 500m:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
-Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect packet traffic (this is not relevant here because Host B doesn't transmit at all, but it will be important later). We turn interference off in the NIC by specifying the parameter in the .ini file:
+Because we want a simple model, we don't care about interference. The two hosts can transmit simultaneously, but it doesn't affect reception (this is not relevant here because Host B doesn't transmit at all, but it will be important later). We turn interference off in the NIC by specifying the parameter in the .ini file:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
