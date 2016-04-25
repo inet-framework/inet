@@ -806,7 +806,7 @@ void EtherMAC::frameReceptionComplete()
 void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
 {
     // strip physical layer overhead (preamble, SFD, carrier extension) from frame
-    frame->setByteLength(frame->getFrameByteLength());
+    frame->addByteLength(-(PREAMBLE_BYTES + SFD_BYTES));
 
     // statistics
     unsigned long curBytes = frame->getByteLength();

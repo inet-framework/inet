@@ -333,7 +333,7 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     emit(packetReceivedFromLowerSignal, frame);
 
     // strip physical layer overhead (preamble, SFD) from frame
-    frame->setByteLength(frame->getFrameByteLength());
+    frame->addByteLength(-(PREAMBLE_BYTES + SFD_BYTES));
 
     // statistics
     unsigned long curBytes = frame->getByteLength();

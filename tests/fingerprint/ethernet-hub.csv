@@ -7,8 +7,8 @@
 .,                                   -f ethernet-hub.ini -r 5,                     ,                 a318-2fce 9b55-8e81/tplx
 .,                                   -f ethernet-hub.ini -r 6,                     ,                 eceb-32f2 194a-0040/tplx
 .,                                   -f ethernet-hub.ini -r 7,                     ,                 e56a-482d 8a64-f71d/tplx
-.,                                   -f ethernet-hub.ini -r 8,                     ,                 9af6-418c 33ce-7fc4/tplx
-.,                                   -f ethernet-hub.ini -r 9,                     ,                 a03a-bc5c 10e2-9ffc/tplx
-.,                                   -f ethernet-hub.ini -r 10,                    ,                 29f4-d758 2ac0-b6b1/tplx
-.,                                   -f ethernet-hub.ini -r 11,                    ,                 323f-c467 3608-fc70/tplx
+.,                                   -f ethernet-hub.ini -r 8,                     ,                 9af6-418c 08b2-32b0/tplx
+.,                                   -f ethernet-hub.ini -r 9,                     ,                 a03a-bc5c 91ea-e5f3/tplx
+.,                                   -f ethernet-hub.ini -r 10,                    ,                 29f4-d758 6578-d621/tplx
+.,                                   -f ethernet-hub.ini -r 11,                    ,                 323f-c467 79f7-1040/tplx
 #.,                                   -f ethernet-hub.ini -r 12,                    ,                 0000

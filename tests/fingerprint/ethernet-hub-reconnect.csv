@@ -7,8 +7,8 @@
 .,                                   -f ethernet-hub-reconnect.ini -r 5,           ,                 c276-0c26 76e2-dbd9/tplx
 .,                                   -f ethernet-hub-reconnect.ini -r 6,           ,                 5676-652b c111-0884/tplx
 .,                                   -f ethernet-hub-reconnect.ini -r 7,           ,                 90a7-ec75 96d2-162b/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 8,           ,                 d38b-6e69 f30e-d1e0/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 9,           ,                 50d7-593a f0ef-cb11/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 10,          ,                 2c17-c4fd 060a-967e/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 11,          ,                 02c5-60bb 13b6-cb28/tplx
+.,                                   -f ethernet-hub-reconnect.ini -r 8,           ,                 d38b-6e69 eae6-7953/tplx
+.,                                   -f ethernet-hub-reconnect.ini -r 9,           ,                 50d7-593a 2d3e-211a/tplx
+.,                                   -f ethernet-hub-reconnect.ini -r 10,          ,                 2c17-c4fd 36f0-c094/tplx
+.,                                   -f ethernet-hub-reconnect.ini -r 11,          ,                 02c5-60bb 25ce-a1d1/tplx
 #.,                                   -f ethernet-hub-reconnect.ini -r 12,          ,                 0000

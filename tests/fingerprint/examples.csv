@@ -124,7 +124,7 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          6382-0694 1f99-0a66/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3078-dde1 0e06-8d2a/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          2f85-e7ba 786a-d7bf/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          e4e8-e836 123c-f408/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          e4e8-e836 3173-7645/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          4ac0-a5d5 507a-714c/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          0530-f6bf e2ac-4b55/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          b069-7ede d0bd-2554/tplx
