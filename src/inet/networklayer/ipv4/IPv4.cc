@@ -65,7 +65,6 @@ void IPv4::initialize(int stage)
         arpInGate = gate("arpIn");
         arpOutGate = gate("arpOut");
         transportInGateBaseId = gateBaseId("transportIn");
-        queueOutGateBaseId = gateBaseId("queueOut");
 
         defaultTimeToLive = par("timeToLive");
         defaultMCTimeToLive = par("multicastTimeToLive");
@@ -887,7 +886,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
 void IPv4::sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie)
 {
     EV_INFO << "Sending " << packet << " to output interface = " << ie->getName() << ".\n";
-    send(packet, queueOutGateBaseId + ie->getNetworkLayerGateIndex());
+    send(packet, "queueOut");
 }
 
 // NetFilter:

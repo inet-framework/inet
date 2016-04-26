@@ -70,7 +70,6 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     cGate *arpInGate = nullptr;
     cGate *arpOutGate = nullptr;
     int transportInGateBaseId = -1;
-    int queueOutGateBaseId = -1;
 
     // config
     int defaultTimeToLive = -1;
