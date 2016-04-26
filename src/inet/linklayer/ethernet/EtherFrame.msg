@@ -34,7 +34,7 @@ enum SAPCode;
 
 //
 // This class should never be instantiated by the models, only specific
-// subclasses: EtherJam, EtherIFG and EtherPhyFrame.
+// subclasses: EtherJam, EtherFilledIFG and EtherPhyFrame.
 //
 packet EtherTraffic
 {
@@ -143,9 +143,8 @@ packet EtherPauseFrame extends EtherFrame
     int pauseTime; // in 512 bit-time units
 }
 
-// Mod1
-// Ethernet 802.1Q Tag. VLAN
 //
+// Ethernet 802.1Q Tag.
 //
 packet Ethernet1QTag
 {
@@ -160,9 +159,8 @@ packet Ethernet1QTag
 }
 
 
-// Mod1
-// Ethernet 802.1ah header.
 //
+// Ethernet 802.1ah header.
 //
 packet Ethernet1ahITag
 {

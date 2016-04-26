@@ -558,7 +558,7 @@ void EtherMAC::handleEndTxPeriod()
     delete curTxFrame;
     curTxFrame = nullptr;
     lastTxFinishTime = simTime();
-    getNextFrameFromQueue();    //TODO move getNextFrameFromQueue() to the end of IFG (See issue #163, https://github.com/inet-framework/inet/issues/163)
+    getNextFrameFromQueue();  // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
     if (!duplexMode) {
