@@ -20,6 +20,9 @@
 
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 
+#include "inet/common/RawPacket.h"
+#include "inet/common/serializer/SerializerBase.h"
+#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/ModuleAccess.h"
@@ -31,14 +34,6 @@
 namespace inet {
 
 const double EtherMACBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
-
-/*
-   double      txrate;
-   int         maxFramesInBurst;
-   int64       maxBytesInBurst;
-   int64       frameMinBytes;
-   int64       otherFrameMinBytes;     // minimal frame length in burst mode, after first frame
- */
 
 const EtherMACBase::EtherDescr EtherMACBase::nullEtherDescr = {
     0.0,
@@ -393,6 +388,23 @@ void EtherMACBase::processConnectDisconnect()
         receiveState = RX_IDLE_STATE;
         emit(receiveStateSignal, RX_IDLE_STATE);
     }
+}
+
+EtherFrame *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
+{
+    cPacket *frame = phyFrame->decapsulate();
+    delete phyFrame;
+
+    if (RawPacket *rawPacket = dynamic_cast<RawPacket *>(frame)) {
+        using namespace serializer;
+        Buffer b(rawPacket->getByteArray().getDataPtr(), rawPacket->getByteArray().getDataArraySize());
+        Context c;
+        frame = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET);
+        if (!frame)
+            throw cRuntimeError("Could not deserialize RawPacket '%s' as Ethernet frame", rawPacket->getName());
+        delete rawPacket;
+    }
+    return check_and_cast<EtherFrame *>(frame);
 }
 
 void EtherMACBase::flushQueue()

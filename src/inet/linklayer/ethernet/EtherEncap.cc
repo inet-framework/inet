@@ -106,7 +106,6 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         snapFrame->setOrgCode(0);
         if (etherctrl)
             snapFrame->setLocalcode(etherctrl->getEtherType());
-        snapFrame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH);
         frame = snapFrame;
     }
     else {
@@ -116,10 +115,11 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         eth2Frame->setDest(controlInfo->getDestinationAddress());
         if (etherctrl)
             eth2Frame->setEtherType(etherctrl->getEtherType());
-        eth2Frame->setByteLength(ETHER_MAC_FRAME_BYTES);
         frame = eth2Frame;
     }
     delete controlInfo;
+
+    ASSERT(frame->getByteLength() > 0); // length comes from msg file
 
     frame->encapsulate(msg);
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)

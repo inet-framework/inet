@@ -152,7 +152,6 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
         etherPacket->addByteLength(b.getRemainingSize() - 4);
         b.accessNBytes(b.getRemainingSize() - 4);
     }
-    etherPacket->setFrameByteLength(frameLength);
     uint32_t calculatedFcs = ethernetCRC(b._getBuf(), b.getPos());
     uint32_t receivedFcs = b.readUint32();
     EV_DEBUG << "Calculated FCS: " << calculatedFcs << ", received FCS: " << receivedFcs << endl;

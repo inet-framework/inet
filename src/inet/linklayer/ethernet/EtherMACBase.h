@@ -33,6 +33,7 @@ namespace inet {
 
 // Forward declarations:
 class EtherFrame;
+class EtherPhyFrame;
 class EtherTraffic;
 class InterfaceEntry;
 
@@ -158,8 +159,8 @@ class INET_API EtherMACBase : public MACBase
     // statistics
     unsigned long numFramesSent = 0;
     unsigned long numFramesReceivedOK = 0;
-    unsigned long numBytesSent = 0;    // includes Ethernet frame bytes with preamble
-    unsigned long numBytesReceivedOK = 0;    // includes Ethernet frame bytes with preamble
+    unsigned long numBytesSent = 0;    // includes Ethernet frame bytes with padding and FCS
+    unsigned long numBytesReceivedOK = 0;    // includes Ethernet frame bytes with padding and FCS
     unsigned long numFramesFromHL = 0;    // packets received from higher layer (LLC or MACRelayUnit)
     unsigned long numDroppedPkFromHLIfaceDown = 0;    // packets from higher layer dropped because interface down or not connected
     unsigned long numDroppedIfaceDown = 0;    // packets from network layer dropped because interface down or not connected
@@ -230,6 +231,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
+    virtual EtherFrame *decapsulate(EtherPhyFrame* phyFrame);   // also drops phyFrame
 
     // MACBase
     virtual InterfaceEntry *createInterfaceEntry() override;

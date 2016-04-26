@@ -21,9 +21,7 @@
 
 #include "inet/linklayer/ethernet/EtherMAC.h"
 
-#include "inet/common/RawPacket.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/common/serializer/SerializerBase.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -205,10 +203,7 @@ void EtherMAC::handleMessage(cMessage *msg)
 
 void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 {
-    if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES); // "padding"
-
-    frame->setFrameByteLength(frame->getByteLength());
+    ASSERT(frame->getByteLength() >= MIN_ETHERNET_FRAME_BYTES);
 
     EV_INFO << "Received " << frame << " from upper layer." << endl;
 
@@ -337,11 +332,14 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
 
     if (!connected || disabled) {
         EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
-        if (dynamic_cast<EtherFrame *>(msg) || dynamic_cast<RawPacket *>(msg)) {    // do not count JAM and IFG packets
-            emit(dropPkIfaceDownSignal, msg);
+        if (EtherPhyFrame *phyFrame = dynamic_cast<EtherPhyFrame *>(msg)) {    // do not count JAM and IFG packets
+            EtherFrame *frame = decapsulate(phyFrame);
+            emit(dropPkIfaceDownSignal, frame);
+            delete frame;
             numDroppedIfaceDown++;
         }
-        delete msg;
+        else
+            delete msg;
 
         return;
     }
@@ -486,14 +484,15 @@ void EtherMAC::startFrameTransmission()
         frame->setByteLength(minFrameLength);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
-    frame->addByteLength(PREAMBLE_BYTES + SFD_BYTES);
+    EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
+    phyFrame->encapsulate(frame);
 
     if (hasGUI())
         updateConnectionColor(TRANSMITTING_STATE);
 
-    currentSendPkTreeID = frame->getTreeId();
-    int64_t sentFrameByteLength = frame->getByteLength();
-    send(frame, physOutGate);
+    currentSendPkTreeID = phyFrame->getTreeId();
+    int64_t sentFrameByteLength = phyFrame->getByteLength();
+    send(phyFrame, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)
     if (!duplexMode && receiveState != RX_IDLE_STATE) {
@@ -549,7 +548,7 @@ void EtherMAC::handleEndTxPeriod()
         emit(txPausePkUnitsSignal, ((EtherPauseFrame *)curTxFrame)->getPauseTime());
     }
     else {
-        unsigned long curBytes = curTxFrame->getFrameByteLength();
+        unsigned long curBytes = curTxFrame->getByteLength();
         numFramesSent++;
         numBytesSent += curBytes;
         emit(txPkSignal, curTxFrame);
@@ -656,7 +655,7 @@ void EtherMAC::sendJamSignal()
     jam->setAbortedPkTreeID(currentSendPkTreeID);
 
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
-    emit(packetSentToLowerSignal, jam);
+    //emit(packetSentToLowerSignal, jam);
     send(jam, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
@@ -761,17 +760,6 @@ void EtherMAC::handleEndPausePeriod()
 
 void EtherMAC::frameReceptionComplete()
 {
-    if (dynamic_cast<RawPacket *>(frameBeingReceived)) {
-        using namespace serializer;
-        RawPacket *rp = static_cast<RawPacket *>(frameBeingReceived);
-        Buffer b(rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
-        Context c;
-        cPacket *deserializedPk = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET);
-        if (deserializedPk) {
-            delete rp;
-            frameBeingReceived = deserializedPk;
-        }
-    }
     EtherTraffic *msg = check_and_cast<EtherTraffic *>(frameBeingReceived);
     frameBeingReceived = nullptr;
 
@@ -780,15 +768,15 @@ void EtherMAC::frameReceptionComplete()
         return;
     }
 
-    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
+    bool hasBitError = msg->hasBitError();
 
+    EtherFrame *frame = decapsulate(check_and_cast<EtherPhyFrame *>(msg));
     emit(packetReceivedFromLowerSignal, frame);
 
-    // bit errors
-    if (frame->hasBitError()) {
+    if (hasBitError) {
         numDroppedBitError++;
         emit(dropPkBitErrorSignal, frame);
-        delete msg;
+        delete frame;
         return;
     }
 
@@ -806,9 +794,6 @@ void EtherMAC::frameReceptionComplete()
 
 void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
 {
-    // strip physical layer overhead (preamble, SFD, carrier extension) from frame
-    frame->addByteLength(-(PREAMBLE_BYTES + SFD_BYTES));
-
     // statistics
     unsigned long curBytes = frame->getByteLength();
     numFramesReceivedOK++;
