@@ -763,7 +763,7 @@ void EtherMAC::frameReceptionComplete()
     EtherTraffic *msg = check_and_cast<EtherTraffic *>(frameBeingReceived);
     frameBeingReceived = nullptr;
 
-    if (dynamic_cast<EtherIFG *>(msg) != nullptr) {
+    if (dynamic_cast<EtherFilledIFG *>(msg) != nullptr) {
         delete msg;
         return;
     }
@@ -862,7 +862,7 @@ void EtherMAC::fillIFGIfInBurst()
             <= curEtherDescr->maxBytesInBurst)
         )
     {
-        EtherIFG *gap = new EtherIFG("IFG");
+        EtherFilledIFG *gap = new EtherFilledIFG("FilledIFG");
         bytesSentInBurst += gap->getByteLength();
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);

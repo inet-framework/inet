@@ -52,7 +52,7 @@ packet EtherJam extends EtherTraffic
 // Represents a filled inter-frame gap in burst mode.
 // Also used for calculating IFG times.
 //
-packet EtherIFG extends EtherTraffic
+packet EtherFilledIFG extends EtherTraffic
 {
     bitLength = INTERFRAME_GAP_BITS;
 }

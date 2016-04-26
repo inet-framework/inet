@@ -155,7 +155,7 @@
 // of a jam signal, so actually ~EtherMAC has to wait for the duration
 // of the jamming before assuming the channel is free again.
 //
-// In burst mode, filled inter-frame gaps are represented with EtherIFG
+// In burst mode, filled inter-frame gaps are represented with EtherFilledIFG
 // packets.
 //
 // Carrier extension is modelled by simply adding to the frame length,
