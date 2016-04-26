@@ -543,9 +543,9 @@ void EtherMAC::handleEndTxPeriod()
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    if (dynamic_cast<EtherPauseFrame *>(curTxFrame) != nullptr) {
+    if (EtherPauseFrame *pauseFrame = dynamic_cast<EtherPauseFrame *>(curTxFrame)) {
         numPauseFramesSent++;
-        emit(txPausePkUnitsSignal, ((EtherPauseFrame *)curTxFrame)->getPauseTime());
+        emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
     }
     else {
         unsigned long curBytes = curTxFrame->getByteLength();
