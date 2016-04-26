@@ -873,7 +873,7 @@ void EtherMAC::fillIFGIfInBurst()
         && (simTime() == endIFGMsg->getSendingTime())
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-        && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + curTxFrame->getByteLength()
+        && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + PREAMBLE_BYTES + SFD_BYTES + curTxFrame->getByteLength()
             <= curEtherDescr->maxBytesInBurst)
         )
     {
