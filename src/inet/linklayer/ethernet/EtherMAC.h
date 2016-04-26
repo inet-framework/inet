@@ -101,7 +101,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processMsgFromNetwork(cPacket *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void fillIFGIfInBurst();
-    virtual void scheduleEndTxPeriod(EtherFrame *);
+    virtual void scheduleEndTxPeriod(int64_t sentFrameByteLength);
     virtual void scheduleEndRxPeriod(cPacket *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
