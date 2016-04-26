@@ -863,6 +863,8 @@ void EtherMAC::fillIFGIfInBurst()
     if (!frameBursting)
         return;
 
+    EV_TRACE << "fillIFGIfInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
+
     if (curTxFrame
         && endIFGMsg->isScheduled()
         && (transmitState == WAIT_IFG_STATE)
