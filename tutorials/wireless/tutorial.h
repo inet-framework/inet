@@ -163,7 +163,7 @@ The model also contains a gauge to display the number of packets received by Hos
 
 Here is an animation showing the hosts communicating:
 
-<img src="step1_v4.gif">
+<img src="step1_3_v5.gif">
 
 When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
