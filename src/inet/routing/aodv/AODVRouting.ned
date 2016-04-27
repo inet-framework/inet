@@ -38,7 +38,7 @@ simple AODVRouting
 {
     parameters:
         @display("i=block/network2");
-        string routingTableModule = default("^.routingTable");
+        string routingTableModule = default("^.networkLayer.routingTable");
         string interfaceTableModule = default("^.interfaceTable");
         string networkProtocolModule = default("^.networkLayer.ip");
 
