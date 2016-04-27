@@ -193,12 +193,13 @@ through space.
 
 <b>Configuration</b>
 
-The configuration for Step 2 -- <i>Wireless02</i> -- is created by
-extending <i>Wireless01</i> in omnetpp.ini: 
+Steps in this tutorial build on each other. In omnetpp.ini, the configuration
+<i>Wireless02</i> extends <i>Wireless01</i>.
+This way, subsequent steps can be based on the previous ones by adding a
+few lines to the .ini file.
 
 @dontinclude omnetpp.ini
-@skip
-[Config Wireless02]
+@skip [Config Wireless02]
 @until extends
 
 Visualizations are impemented by the <tt>Visualizer</tt> module.
@@ -275,8 +276,8 @@ NEXT: @ref step4
 
 UP: @ref step3
 
-The recently added hosts will have to behave like routers, and forward packets
-from Host A to Host B. We have to set forwarding:
+The recently added hosts will need to act like routers, and forward packets
+from Host A to Host B. We have to set IPv4 forwarding:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.forwarding = true
