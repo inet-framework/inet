@@ -51,6 +51,8 @@ NEXT: @ref step1
 @page step1 Step 1 - Two hosts communicating wirelessly
 UP: @ref step1
 
+<b>Goals</b>
+
 In the first scenario, we set up two hosts, with one host sending a UDP data
 stream wirelessly to the other. We don't care if the wireless
 exchange is realistic or not, just want the hosts to transfer data between each
@@ -59,6 +61,8 @@ and interference -- are ignored. The network topology is defined in the
 .ned files -- in this case WirelessA.ned.
 
 <img src="wireless-step1-v2.png">
+
+<b>Configuration</b>
 
 WirelessA, the network defined in the above NED file, defines a playground of
 the size 500x500 meters:
@@ -160,6 +164,8 @@ The model also contains a gauge to display the number of packets received by Hos
 @dontinclude WirelessA.ned
 @skipline @figure
 @skipline moduleName
+
+<b>Results</b>
 
 Here is an animation showing the hosts communicating:
 
