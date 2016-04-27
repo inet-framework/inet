@@ -1,0 +1,13 @@
+
+body,td,p,ul,ol,li,h1,h2,h3,h4 {font-family:arial,sans-serif }
+body,td,p,ul,ol,li { font-size:11pt }
+body { background-color:#E0E0E0 }
+
+h1 { font-size:18pt; text-align:center }
+p.img { padding-left:10pt }
+pre.comment { font-size:10pt; padding-left:5pt }
+pre.src { font-size:9pt; background:#D8D8D8; padding:5pt; border:1px solid; border-color:#a0a0a0 }
+th { font-size:10pt; text-align:left; vertical-align:top; background:#E0E0f0 }
+td { font-size:10pt; text-align:left; vertical-align:top }
+tt { font-family:Courier,Courier New,Fixed,Terminal }
+img { border:none }
