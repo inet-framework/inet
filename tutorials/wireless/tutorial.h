@@ -94,7 +94,7 @@ the <tt>IdealRadioMedium</tt> NED type.
 
 In hosts, network interface cards are represented by NIC modules. Radio is part of
 wireless NIC modules. There are various radio modules, and one must always
-use one that are compatiple with the medium module. In this step, hosts contain
+use one that is compatible with the medium module. In this step, hosts contain
 <tt>IdealRadio</tt> as part of IdealWirelessNic.
 
 @dontinclude omnetpp.ini
