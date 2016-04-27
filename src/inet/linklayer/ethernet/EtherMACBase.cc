@@ -192,7 +192,7 @@ void EtherMACBase::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerInterface();    // needs MAC address
+        registerInterface();    // needs MAC address    //FIXME why not called in MACBase::initialize()?
         initializeQueueModule();
         readChannelParameters(true);
     }
