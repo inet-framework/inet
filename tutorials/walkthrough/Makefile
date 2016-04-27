@@ -9,7 +9,7 @@ DOXYGEN=doxygen
 all:
 	rm -rf out
 	mkdir out
-	$(DOXYGEN) walkthrough.doxyfile
-	cp *.gif *.png out
+	$(DOXYGEN)
+	cp images/*.gif images/*.png out
 clean:
 	-rm -rf out
