@@ -194,14 +194,14 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
     // route packet
 
     if (fromIE->isLoopback()) {
-        reassembleAndDeliver(datagram);
+        reassembleAndDeliver(datagram, fromIE);
     }
     else if (destAddr.isMulticast()) {
         // check for local delivery
         // Note: multicast routers will receive IGMP datagrams even if their interface is not joined to the group
         if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr) ||
             (rt->isMulticastForwardingEnabled() && datagram->getTransportProtocol() == IP_PROT_IGMP))
-            reassembleAndDeliver(datagram->dup());
+            reassembleAndDeliver(datagram->dup(), fromIE);
         else
             EV_WARN << "Skip local delivery of multicast datagram (input interface not in multicast group)\n";
 
@@ -227,7 +227,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
         // check for local delivery; we must accept also packets coming from the interfaces that
         // do not yet have an IP address assigned. This happens during DHCP requests.
         if (rt->isLocalAddress(destAddr) || fromIE->ipv4Data()->getIPAddress().isUnspecified()) {
-            reassembleAndDeliver(datagram);
+            reassembleAndDeliver(datagram, fromIE);
         }
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
@@ -235,7 +235,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
                 fragmentPostRouting(datagram->dup(), broadcastIE, IPv4Address::ALLONES_ADDRESS);
 
             EV_INFO << "Broadcast received\n";
-            reassembleAndDeliver(datagram);
+            reassembleAndDeliver(datagram, fromIE);
         }
         else if (!rt->isForwardingEnabled()) {
             EV_WARN << "forwarding off, dropping packet\n";
@@ -559,7 +559,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     }
 }
 
-void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
+void IPv4::reassembleAndDeliver(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
 {
     EV_INFO << "Delivering " << datagram << " locally.\n";
 
@@ -589,22 +589,22 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
         return;
     }
 
-    reassembleAndDeliverFinish(datagram);
+    reassembleAndDeliverFinish(datagram, fromIE);
 }
 
-void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
+void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
 {
     // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
 
     if (protocol == IP_PROT_ICMP) {
         // incoming ICMP packets are handled specially
-        handleIncomingICMP(check_and_cast<ICMPMessage *>(decapsulate(datagram)));
+        handleIncomingICMP(check_and_cast<ICMPMessage *>(decapsulate(datagram, fromIE)));
         numLocalDeliver++;
     }
     else if (protocol == IP_PROT_IP) {
         // tunnelled IP packets are handled separately
-        send(decapsulate(datagram), "preRoutingOut");    //FIXME There is no "preRoutingOut" gate in the IPv4 module.
+        send(decapsulate(datagram, fromIE), "preRoutingOut");    //FIXME There is no "preRoutingOut" gate in the IPv4 module.
     }
     else {
         int gateindex = mapping.findOutputGateForProtocol(protocol);
@@ -624,10 +624,9 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
     }
 }
 
-cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
+cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
 {
     // decapsulate transport packet
-    const InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
     cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
@@ -945,7 +944,7 @@ void IPv4::reinjectQueuedDatagram(const INetworkDatagram *datagram)
                     break;
 
                 case INetfilter::IHook::LOCALIN:
-                    reassembleAndDeliverFinish(datagram);
+                    reassembleAndDeliverFinish(datagram, iter->inIE);
                     break;
 
                 case INetfilter::IHook::FORWARD:

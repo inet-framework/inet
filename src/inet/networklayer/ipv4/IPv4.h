@@ -194,15 +194,15 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void reassembleAndDeliver(IPv4Datagram *datagram);
+    virtual void reassembleAndDeliver(IPv4Datagram *datagram, const InterfaceEntry *fromIE);
 
     // called after LOCAL_IN Hook (used for reinject, too)
-    virtual void reassembleAndDeliverFinish(IPv4Datagram *datagram);
+    virtual void reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPv4ControlInfo.
      */
-    virtual cPacket *decapsulate(IPv4Datagram *datagram);
+    virtual cPacket *decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE);
 
     /**
      * Call PostRouting Hook and continue with fragmentAndSend() if accepted
