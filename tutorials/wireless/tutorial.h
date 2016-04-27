@@ -185,39 +185,48 @@ NEXT: @ref step2
 
 UP: @ref step1
 
-We would like to visualize radio waves as they propage through space. For that
-we can use the @opp Canvas API.
+<b>Goals</b>
 
-Note that the configuration for Step 2 -- <i>Wireless02</i> -- is created by
-extending <i>Wireless01</i> in omnetpp.ini: @dontinclude omnetpp.ini @skip
-[Config Wireless02] @until extends
+Transmissions can be visualized in the simulation environment. The configuration
+for this step will set up animations that show transmissions as they propagate
+through space.
 
-This way we can easily base subsequent steps on the previous ones by adding a
-few lines to the .ini file. Actually, this is true for all 19 steps -- each is
-an extension of the previous one.
+<b>Configuration</b>
 
-Let's turn on visualization of transmissions by editing the ini file:
+The configuration for Step 2 -- <i>Wireless02</i> -- is created by
+extending <i>Wireless01</i> in omnetpp.ini: 
+
+@dontinclude omnetpp.ini
+@skip
+[Config Wireless02]
+@until extends
+
+Visualizations are impemented by the <tt>Visualizer</tt> module.
+
+Visualization of transmissions are enabled by editing the ini file:
 
 @dontinclude omnetpp.ini
 @skipline visualizer
 
-Packet transfers are visualized by the animation of radio transmissions, so we
-don't need the default packet animations any more. Let's turn them off in qtenv
-(uncheck <i>animate messages</i> in preferences).
+This displays transmissions as colored rings emanating from hosts. Since this
+is sufficient to represent transmissions visually, it is advisable to turn off
+<i>animate messages</i> in qtenv.
 
-In order to get a smooth animation, we need to enable canvas updates and set an
-update interval:
+In order to get a smooth animation, canvas updates have to be enabled and an
+update interval has to be set:
 
 @dontinclude omnetpp.ini
 @skipline Propagation
 
-Also turn on communication trails, so we can get a fading blue line on
-successfull communication paths:
+Communication trails are enabled, which are fading blue lines on
+successful physical layer communication paths:
 
 @dontinclude omnetpp.ini
 @skipline displayCommunicationTrail
 
-The result is that we have nice bubble animations representing radio
+<b>Results</b>
+
+This results in bubble animations representing radio
 transmissions, and blue lines indicating communication paths:
 
 <img src="step2_2_v3.gif">
