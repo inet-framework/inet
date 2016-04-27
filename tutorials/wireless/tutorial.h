@@ -53,12 +53,11 @@ UP: @ref step1
 
 <b>Goals</b>
 
-In the first scenario, we set up two hosts, with one host sending a UDP data
-stream wirelessly to the other. We don't care if the wireless
-exchange is realistic or not, just want the hosts to transfer data between each
-other. There are no collisions, and other physical effects -- like attenuation
-and interference -- are ignored. The network topology is defined in the
-.ned files -- in this case WirelessA.ned.
+In the first scenario, two hosts are set up, with one host sending a UDP data
+stream wirelessly to the other. The wireless exchange is not modeled realistically
+in this step, the goal is only to have one host send data to the other.
+There are no collisions, and other physical effects -- like attenuation
+and interference -- are ignored.
 
 <img src="wireless-step1-v2.png">
 
