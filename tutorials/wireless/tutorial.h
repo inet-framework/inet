@@ -1,18 +1,18 @@
 /**
 @mainpage Wireless Tutorial for the INET framework
 
-In this tutorial we show you how to build wireless simulations in the INET
-framework. It contains a series of simulation models numbered from 1 through 19.
+In this tutorial, we show you how to build wireless simulations in the INET
+framework. The tutorial contains a series of simulation models numbered from 1 through 19.
 The models are of increasing complexity -- they start from the basics and
-introduce  new INET features and concepts related to wireless communication
+in each step, they introduce new INET features and concepts related to wireless communication
 networks.
 
 This is an advanced tutorial, and it assumes that you are familiar with creating
-and running simulations in @opp and  INET. If you are not yet, you can check out
+and running simulations in @opp and  INET. If you aren't, you can check out
 the <a href="https://omnetpp.org/doc/omnetpp/tictoc-tutorial/"
 target="_blank">TicToc Tutorial</a> to get started with using @opp. The <a
-href="../../../doc/walkthrough/tutorial.html" target="_blank">ARP Tutorial</a>
-is an introduction to INET and how to work with protocols.
+href="../../../doc/walkthrough/tutorial.html" target="_blank">INET Walkthrough</a>
+is an introduction to INET and working with protocols.
 
 If you need more information at any time, feel free to refer to the @opp and
 INET documentation:
@@ -21,10 +21,6 @@ INET documentation:
 -	<a href="https://omnetpp.org/doc/omnetpp/api/index.html" target="_blank">@opp API Reference</a>
 - 	<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET Manual draft</a>
 - 	<a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
-
-The tutorial starts off with a basic simulation model at step 1, and gradually
-makes it more complex and realistic in subsequent steps -- so you can learn
-about various INET wireless features and what can be achieved with them.
 
 In the tutorial, each step is a separate configuration in the same omnetpp.ini file,
 and consecutive steps mostly share the same networks, defined in NED.
@@ -56,8 +52,8 @@ UP: @ref step1
 In the first scenario, two hosts are set up, with one host sending a UDP data
 stream wirelessly to the other. The wireless exchange is not modeled realistically
 in this step, the goal is only to have one host send data to the other.
-There are no collisions, and other physical effects -- like attenuation
-and interference -- are ignored.
+There are no collisions, and physical effects like attenuation
+and interference are ignored.
 
 <img src="wireless-step1-v2.png">
 
