@@ -39,9 +39,7 @@ You can find the <i>arptest2</i> project folder in the project explorer panel of
 To run the simulation, right click on <i>omnetpp.ini</i> and select <i>run as</i >, and click <i>OMNeT++ Simulation</i>.
 In the <i>Set Up inifile Configuration</i>, make sure <i>ARPtest</i> is selected as config name, and click OK.
 
-@htmlonly
-<a href="ide.png"><img src="ide.png" width=400></a>
-@endhtmlonly
+<img src="ide.png" width="800">
 
 NEXT: @ref gui
 */
@@ -53,9 +51,7 @@ UP: @ref launching
 
 The picture you see will look like this.
 
-@htmlonly
-<a href="arptest_v3.png"><img src="arptest_v3.png" width=400></a>
-@endhtmlonly
+<img src="arptest_v3.png">
 
 This is the realtime simulation environment (tkenv/qtenv). The bottom panel displays
 log messages from the simulation model (output from <tt>ev &lt;&lt;</tt> statements
@@ -221,9 +217,7 @@ UP: @ref restart
 
 You've probably seen something like this:
 
-@htmlonly
-<a href="linkcolors_v2.png"><img src="linkcolors_v2.png" width=400></a>
-@endhtmlonly
+<img src="linkcolors_v2.png">
 
 If a link is yellow, that means the node is transmitting on the link
 (if a node has collided and while it's backing off, the link is colored
@@ -253,9 +247,11 @@ can double-click on a node (client, server, router) to see its internals.
 
 
 @htmlonly
-<a href="client.png"><img src="client.png" width=250></a>
-<a href="server.png"><img src="server.png" width=250></a>
-<a href="router.png"><img src="router.png" width=250></a>
+<center>
+<a href="client.png"><img src="client.png" width=350></a>
+<a href="server.png"><img src="server.png" width=350></a>
+<a href="router.png"><img src="router.png" width=350></a>
+</center>
 @endhtmlonly
 
 
@@ -336,16 +332,12 @@ in the client PC's tcpApp, at t=1s simulation time (which will be 1s from the cu
 object tree (left side of main window) will also reveal that we have only
 one event. Double click on the event to open the inspector window (or single click and check out the property viewer at the bottom left). You can switch to flat mode at the top of the panel to see the details of the event object.
 
-@htmlonly
-<a href="nextevent_v2.png"><img src="nextevent_v2.png" width=450></a>
-@endhtmlonly
+<img src="nextevent_v2.png">
 
 
 If you right click on a module and choose <i>Open Graphical View</i>, a separate window is opened displaying the module's insides. This is a useful feature because multiple views can be open at the same time. Let's go into the client computer and open a graphical view of <i>networkLayer</i>. Now we can observe as packets arrive at the client module and the path they take in the network layer.
 
-@htmlonly
-<a href="graph_view.png"><img src="graph_view.png" width=500></a>
-@endhtmlonly
+<img src="graph_view.png">
 
 Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
 You will find the SYN packet sitting at the input of the IP module. The IP module is doing a function call to the routing table one level up and the arp module to the right. This is indicated by the dotted lines (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
@@ -612,9 +604,7 @@ an event which can also be seen in "scheduled-events".
 The end of the interframe gap period is implemented with a self message -- EndIFG in the scheduled events list. You can see it on the timeline at the top of the main window, and tell that
 it is going to take place 10 microseconds from now (you can also single click events in the timeline to view them in the property viewer and double click to open their inspector windows).
 
-@htmlonly
-<a href="endifg_3.png"><img src="endifg_3.png" width="500"></a>
-@endhtmlonly
+<img src="endifg_3.png">
 
 
 
@@ -674,8 +664,10 @@ event accordingly (you can verify it in the "scheduled-events" list).
 
 
 @htmlonly
-<a href="router1-rx.gif"><img src="router1-rx.gif"/></a>
-<a href="router1eth1-rx.gif"><img src="thumbs/router1eth1-rx.gif"/></a>
+<center>
+<img src="router1-rx.gif"/>
+<img src="thumbs/router1eth1-rx.gif"/>
+</center>
 @endhtmlonly
 
 
@@ -696,9 +688,7 @@ UP: @ref transmission
 In the next few event, <tt>arp</tt> will process the request. Hit F4.
 <tt>arp</tt>'s log output will show what happened.
 
-@htmlonly
-<a href="arp-reply-sent.png"><img src="arp-reply-sent.png" width=400></a>
-@endhtmlonly
+<img src="arp-reply-sent.png">
 
 <!do we need this?>
 You can check the arp cache and see that a new entry has been added, as indicated by the logs:
@@ -722,9 +712,7 @@ send back its own MAC address. That's what happened here.
 While ARP processed the request packet, you probably saw a red flashing
 arrow, like this:
 
-@htmlonly
-<a href="arp-outputport.png"><img src="arp-outputport.png" width="400"></a>
-@endhtmlonly
+<img src="arp-outputport.png">
 
 It indicates ARP asking the routing table component whether the address
 10.0.0.1 is routable, as part of the proxy ARP process. (More precisely,
@@ -768,9 +756,7 @@ last update time, but age is more practical when displayed.)
 The datagram carrying the TCP SYN segment that was wainting in the queue
 has been sent down to Ethernet for transmission.
 
-@htmlonly
-<a href="arp-resolved.png"><img src="arp-resolved.png" width=400></a>
-@endhtmlonly
+<img src="arp-resolved.png">
 
 You can even verify that the control info attached to the datagram
 indeed contains the MAC address just received via ARP.
@@ -833,9 +819,7 @@ Before the log data is written to a results file, the finish() function must be 
 
 The event log file (.elog) will be in arptest2/results. Double click to open the event log and the sequence chart.
 
-@htmlonly
-<a href="record-eventlog.png"><img src="record-eventlog.png" width=500></a>
-@endhtmlonly
+<img src="record-eventlog.png" width="1000px">
 
 In this example sequence chart you can follow the initial SYN packet as it makes its way to the server, and the various ARP requests and replies.
 
@@ -858,9 +842,7 @@ the thing works?
 
 The answer is: <i>documentation</i>. You can find the INET reference <a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">here</a>, which contains information about all the INET modules, the module hierarchy, and C++ source documentation.
 
-@htmlonly
-<a href="reference.png"><img src="reference.png" width=400></a>
-@endhtmlonly
+<img src="reference.png">
 
 You can read the <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual draft</a>.
 
@@ -884,16 +866,14 @@ on the "Simpe modules" list on the left. If you don't
 know, you can start from an example network (here: <tt>ARPTest</tt>, in "Networks" -- choose the second one for ARPTest2),
 and click on submodules until you find what you're looking for.
 
-@htmlonly
-<a href="doc-arp.png"><img src="doc-arp.png" width=400></a>
-@endhtmlonly
+<img src="doc-arp.png" width="1000px">
 
 ARP's page lists the parameters and gates (or ports) (further below, not shown in the screenshot).
 It also contains its NED definition (also further below). The usage diagram's icons contain links, and will take you to the particular module. And what's important
 for us now, there's a link to the C++ documentation.
 
 
-<img src="doc-cc.png">
+<img src="doc-cc.png" width="1000px">
 
 
 Click the "C++ documentation" link. The C++ documentation that emerges
@@ -910,9 +890,7 @@ heading). <tt>handleMessage(cMessage*)</tt> is the function that gets invoked
 whenever a message (packet, etc) arrives at the module or a timer goes off
 (a message scheduled by the module itself comes back).
 
-@htmlonly
-<a href="arp-cc.png"><img src="arp-cc.png" width=400></a>
-@endhtmlonly
+<img src="arp-cc.png" width="1000px">
 
 As a rule of thumb: whatever large number of functions you see in the
 documentation, always click at <tt>handleMessage()</tt> first. If the
