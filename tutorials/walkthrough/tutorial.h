@@ -873,7 +873,7 @@ It also contains its NED definition (also further below). The usage diagram's ic
 for us now, there's a link to the C++ documentation.
 
 
-<img src="doc-cc.png" width="1000px">
+<img src="doc-cc.png">
 
 
 Click the "C++ documentation" link. The C++ documentation that emerges
