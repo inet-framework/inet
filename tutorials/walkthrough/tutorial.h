@@ -1,14 +1,17 @@
 /**
 @mainpage INET Framework for OMNEST/OMNeT++<br>A Guided Tour
 
-The purpose of this tutorial is to get you familiar with the INET framework,
-a simulation model suite for TCP/IP and Internet-related protocols,
-written for the OMNeT++/OMNEST simulation environment.
 
-This tutorial is based on the ARPTest example simulation. You can find this example simulation in the INET Examples directory (inet/examples/ethernet/arptest2/).
+This tutorial introduces the reader to using the INET Framework by taking
+them through the process of running and exploring an example simulation.
+
+We will use the model of an Ethernet-based network containing switches,
+routers, and IP-based hosts. In the model, hosts exchange information over
+TCP.
 
 @section contents Contents
 
+-   @ref intro
 -   @ref launching
 -   @ref gui
 -   @ref running
@@ -27,6 +30,43 @@ This tutorial is based on the ARPTest example simulation. You can find this exam
 -   @ref discovering
 -   @ref conclusion
 
+NEXT: @ref intro
+*/
+-------------------------------------------------------------------------------
+/**
+@page intro Introducing the model
+
+UP: @ref contents
+
+The tutorial will use the ARPTest model, which can be found in the
+`inet/examples/ethernet/arptest2/` folder of the INET project. The model
+consists of a NED file that defines the network topology, and an
+omnetpp.ini file that configures it. Otherwise the model contains only
+standard INET components such as StandardHost.
+
+The network looks like this when the NED file is opened in the graphical
+editor in the IDE:
+
+<img src="nededitor.png">
+
+Some explanations. In the model, MAC addresses are assigned automatically
+to Ethernet interfaces at the start of the simulation, by incrementing a
+counter. Ethernet link speeds are set by using appropriately configured
+channels  At the IP level, the model uses static routing. Assigning IP
+addresses and adding static routes is done by a separate configurator
+module. TCP traffic is configured in the ini file by adding application
+modules to the hosts.
+
+Here is the NED source:
+
+@include ARPTest.ned
+
+And we will use this configuration file:
+
+@include omnetpp.ini
+
+
+
 NEXT: @ref launching
 */
 -------------------------------------------------------------------------------
@@ -35,11 +75,19 @@ NEXT: @ref launching
 
 UP: @ref contents
 
-You can find the <i>arptest2</i> project folder in the project explorer panel of the OMNeT++ IDE.
-To run the simulation, right click on <i>omnetpp.ini</i> and select <i>run as</i >, and click <i>OMNeT++ Simulation</i>.
-In the <i>Set Up inifile Configuration</i>, make sure <i>ARPtest</i> is selected as config name, and click OK.
+We assume that the INET framework has already been built from sources. If
+not, it can be built in the IDE using the Ctrl+B keyboard shortcut.
+
+There are several variations on how one can launch the simulation from the
+IDE. One way is to select omnetpp.ini in Project Explorer, and click the Run
+button on the toolbar. Alternatively, one can select the NED file or the
+containing folder, and click Run. (In this case, the IDE will ask which ini
+file to use if there are more than one.) One can also right-click the
+omnetpp.ini file, select Run As from the menu, then choose OMNeT++ Simulation.
 
 <img src="ide.png">
+
+
 
 NEXT: @ref gui
 */
@@ -49,11 +97,20 @@ NEXT: @ref gui
 
 UP: @ref launching
 
-The picture you see will look like this.
+When launching is successful, a new window, similar to the one shown below,
+will appear. The window belongs to the running simulation program, which contains the
+OMNeT++ simulation kernel, the compiled code for the components of the INET
+Framework, and a graphical runtime environment (Qtenv or Tkenv). This
+program is able to run any INET simulation if one provides the necessary
+NED and INI files for it. Note that the GUI and the simulation are running
+in the same process, so if the simulation crashes due to a programming error,
+it also brings down the GUI with it. Also note that the GUI is optional,
+one can also run simulations using a command line interface, which is
+useful for example for batch runs.
 
 <img src="arptest.png">
 
-This is the realtime simulation environment (tkenv/qtenv). The bottom panel displays
+This is the runtime simulation environment (tkenv/qtenv). The bottom panel displays
 log messages from the simulation model (output from <tt>ev &lt;&lt;</tt> statements
 in the C++ code will write there), and the left-hand panel displays the model
 objects in a foldable tree form. There's a status bar at the top and at the bottom
