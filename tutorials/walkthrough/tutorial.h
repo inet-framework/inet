@@ -39,7 +39,7 @@ You can find the <i>arptest2</i> project folder in the project explorer panel of
 To run the simulation, right click on <i>omnetpp.ini</i> and select <i>run as</i >, and click <i>OMNeT++ Simulation</i>.
 In the <i>Set Up inifile Configuration</i>, make sure <i>ARPtest</i> is selected as config name, and click OK.
 
-<img src="ide.png" width="800">
+<img src="ide.png">
 
 NEXT: @ref gui
 */
@@ -51,7 +51,7 @@ UP: @ref launching
 
 The picture you see will look like this.
 
-<img src="arptest_v3.png">
+<img src="arptest.png">
 
 This is the realtime simulation environment (tkenv/qtenv). The bottom panel displays
 log messages from the simulation model (output from <tt>ev &lt;&lt;</tt> statements
@@ -356,7 +356,7 @@ Here we are at the beginning of the interesting part. You may actually take a no
 You can find the <i>Run until next event in this module</i> button on the toolbar at the top of the model window. This is a very useful tool if you want to fast-forward to the next thing that will happen in the given module. There is also a fast run version.
 
 
-<img src="nextevent_v3.png">
+<img src="nextevent.png">
 
 NEXT: @ref arpbegins
 */
@@ -604,7 +604,7 @@ an event which can also be seen in "scheduled-events".
 The end of the interframe gap period is implemented with a self message -- EndIFG in the scheduled events list. You can see it on the timeline at the top of the main window, and tell that
 it is going to take place 10 microseconds from now (you can also single click events in the timeline to view them in the property viewer and double click to open their inspector windows).
 
-<img src="endifg_3.png">
+<img src="endifg.png">
 
 
 
@@ -819,7 +819,7 @@ Before the log data is written to a results file, the finish() function must be 
 
 The event log file (.elog) will be in arptest2/results. Double click to open the event log and the sequence chart.
 
-<img src="record-eventlog.png" width="1000px">
+<img src="sequencechart.png" width="1000px">
 
 In this example sequence chart you can follow the initial SYN packet as it makes its way to the server, and the various ARP requests and replies.
 
