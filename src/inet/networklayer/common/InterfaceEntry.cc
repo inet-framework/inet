@@ -87,6 +87,7 @@ std::string InterfaceEntry::info() const
 {
     std::stringstream out;
     out << (getName()[0] ? getName() : "*");
+    out << " id=" << getInterfaceId();
     if (getNetworkLayerGateIndex() == -1)
         out << "  on:-";
     else
