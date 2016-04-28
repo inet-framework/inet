@@ -109,7 +109,7 @@ Let us examine the Qtenv user interface a little.
 
 The top of the window contains the following elements below the menu bar:
 
-- *Toolbar*: The toolbar lets you access the most frequently used functions,
+- *Toolbar*: The toolbar lets one access the most frequently used functions,
   such as stepping, running and stopping the simulation.
 - *Status bar*: Two rows of various fields and gauges, displaying the current event number,
   simulation time, information about the next simulation event, and other details.
@@ -128,41 +128,32 @@ The main window is divided into the following areas:
   or messages sent between modules; in *Log* mode, it displays the log written by modules
   (using `EV<<` statements) during simulation. Mode switching buttons are on the local toolbar.
 
-Additionally, you can open inspector windows that float on top of the main window.
+Additionally, one can open inspector windows that float on top of the main window.
 
 NEXT: @ref running
 */
 -------------------------------------------------------------------------------
 /**
-@page running Let's run the simulation!
+@page running Running the simulation
 
 UP: @ref launching
+
+In this step we'll explore how one can run the simulation.
 
 Click on the "Run" button on the toolbar, or hit F5.
 
 <img src="tb-run.png"/>
 
-When registering the protocols at the network layers of the two hosts finishes, simulating the network operation begins.
-In the model scenario, the client computer
-(laptop icon) opens a TCP connection to the server (server icon) at 1s,
-and starts sending a large data stream at 1.1s. This is configured in the <i>ARPTest.ned</i> file:
-
-<pre class="src">
-    **.client*.tcpApp[0].tOpen = 1s
-    **.client*.tcpApp[0].tSend = 1.1s
-</pre>
-
-The server will just echo the data
-sent by the client.
-
 Since the underlying network is Ethernet, before being able to send
 the TCP SYN packet the client has to perform an ARP request
 to learn the MAC address for the default router. After some more messaging,
 the TCP connection will be established and data transfer begins.
+We'll explore these events later.
 
-We'll explore these happenings in the network later, but for now just
-sit back and watch the simulation. You can make the animation faster
-or slower by adjusting the slider at the top of the network window.
+TODO what animation???
+
+You can make the animation faster or slower by adjusting the slider at the
+top of the network window.
 
 <img src="animspeed.png"/>
 
@@ -188,15 +179,15 @@ Express mode updates the display every 1000 miliseconds or so
 
 <img src="dlg-simoptions1.png"/>
 
-In Express mode you can only stop the simulation by clicking the
+In Express mode one can only stop the simulation by clicking the
 "Big Red STOP Button" (see below). Simulation speed in Express mode may
 significantly depend on the state of the "auto update inspectors" checkbox.
 
 <img src="dlg-stopexpress.png"/>
 
-You can read the speed of the simulation on the the main
-window status bar. Ev/sec tells you how many events your CPU crunches
-in a second -- this depends on the strength of your hardware, on the
+One can read the speed of the simulation on the the main
+window status bar. Ev/sec tells one how many events the CPU crunches
+in a second -- this depends on the strength of the hardware, on the
 amount processing (C++ code) to be done for an average event
 (refer to the <tt>handleMessage(cMessage *)</tt> functions in the model
 source), and on the run mode (Normal, Fast or Express). It is not unusual
@@ -206,13 +197,13 @@ for the Express mode to be 100-200 times faster than Fast mode.
 
 The other two readings on that status bar are simsec/sec (how many simulated
 seconds the model progresses in one "real" second) and ev/simsec (how many events
-your model contains per simulated second). The simsec/sec value is useful
-for estimating how long your simulation will take. Ev/simsec is independent
-of whether you use Normal, Fast or Express mode, and it only depends
-on the nature and size of your model (ATM cell-level simulations will have
+the model contains per simulated second). The simsec/sec value is useful
+for estimating how long the simulation will take. Ev/simsec is independent
+of whether the simulation runs in Normal, Fast or Express mode, and it only depends
+on the nature and size of the model (ATM cell-level simulations will have
 a few magnitudes higher ev/simsec values than call center simulations.)
 
-While in Expess mode, you'll probably get the following dialog after a while:
+While in Expess mode, the following dialog will appear after a while:
 
 <img src="dlg-nomoreevents.png"/>
 
@@ -231,14 +222,10 @@ meaning that some component in the model called the <tt>endSimulation()</tt>
 C++ function -- for example when it detects that desired statistical accuracy
 has been reached).
 
-In both cases you can restart the simulation using the "Rebuild network"
-command on the Simulate menu. In fact, you can do that any time to start over.
+In both cases, one can restart the simulation using the "Rebuild network"
+command on the Simulate menu. In fact, one can do that any time to start over.
 
 <img src="m-restart.png"/>
-
-Note that some simulation models (none in INET, hopefully) may crash when
-you restart the simulation. This is usually due to badly written destructor
-code in the model C++ sources.
 
 Now that we've dealt with the basics, we can go back to our ARPTest network model.
 
@@ -250,8 +237,7 @@ NEXT: @ref inside
 
 UP: @ref running
 
-I bet you've found it out already, but here it is for the record: you
-can double-click on a node (client, server, router) to see its internals.
+One can double-click on a node (client, server, router) to see its internals.
 
 @htmlonly
 <center>
@@ -276,23 +262,29 @@ Bottom up, the client model contains:
     <li>the <tt>interfaceTable</tt> contains information about network interfaces of the host
 </ul>
 
-A router is similar, but obviously it has nothing from L3 up. (You also see
-no routing protocols -- routing is static in this model.)
+A router is similar, but obviously it has nothing from L3 up. (There is also no routing protocol,
+because this example uses static routing.)
 
-If you further double-click on these components (TCP, UDP, etc.), you can view what modules they are made up from. You can use the arrow buttons in the simulation model window to navigate levels (ie. go up a level). After some levels you get an empty window.
-It means that the component is implemented in C++, and cannot be subdivided
-any further (it is a <i>simple module</i>, as opposed to <i>compund modules</i>
-which are composed of submodules). If you right click on the simple module and select <i>Open Details</i>, an inspector window like this comes up:
+Further double-clicking on these components (TCP, UDP, etc.) will reveal
+what modules they are composed of. One can use the arrow buttons in the
+local toolbar to navigate levels (i.e. go up a level). After some levels
+one gets an empty window. It means that the component is implemented in
+C++, and cannot be subdivided any further (it is a <i>simple module</i>, as
+opposed to <i>compund modules</i> which are composed of submodules).
+Right-clicking the simple module and selecting <i>Open Details</i> will
+open an inspector window like this:
 
 <img src="tcpmain_v2.png"/></a>
 
-The inspector window exposes the internals
-of the module and we'll use it a lot later in this walkthrough, but let's just leave it
-for now. You can also view the information presented here in the property viewer panel at the bottom left side of the simulation window. Click on any module and its properties will be displayed there.
+The inspector window exposes the internals of the module and we'll use it a
+lot later in this walkthrough, but let's just leave it for now. You can
+also view the information presented here in the property viewer panel (???????????) at
+the bottom left side of the simulation window. Click on any module and its
+properties will be displayed there.
 
-The ARPTest simulation is quite complex in that it has TCP, IP, ARP
-and Ethernet in it. In this walkthrough we'll go for ARP, but the steps you learn
-will be useful for exploring other protocols as well.
+The ARPTest simulation is quite complex in that it has TCP, IP, ARP and
+Ethernet in it. In this walkthrough we'll go for ARP, but the steps learned
+here will be useful for exploring other protocols as well.
 
 NEXT: @ref steps
 */
