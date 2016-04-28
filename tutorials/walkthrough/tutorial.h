@@ -87,16 +87,6 @@ omnetpp.ini file, select Run As from the menu, then choose OMNeT++ Simulation.
 
 <img src="ide.png">
 
-
-
-NEXT: @ref gui
-*/
--------------------------------------------------------------------------------
-/**
-@page gui The GUI at the first glance
-
-UP: @ref launching
-
 When launching is successful, a new window, similar to the one shown below,
 will appear. The window belongs to the running simulation program, which contains the
 OMNeT++ simulation kernel, the compiled code for the components of the INET
@@ -110,12 +100,40 @@ useful for example for batch runs.
 
 <img src="arptest.png">
 
-This is the runtime simulation environment (tkenv/qtenv). The bottom panel displays
-log messages from the simulation model (output from <tt>ev &lt;&lt;</tt> statements
-in the C++ code will write there), and the left-hand panel displays the model
-objects in a foldable tree form. There's a status bar at the top and at the bottom
-(we'll look at it later), and a toolbar to access frequently used functions
-of the GUI. The central panel displays the simulation model.
+NEXT: @ref gui
+*/
+-------------------------------------------------------------------------------
+/**
+@page gui The GUI at the first glance
+
+UP: @ref launching
+
+Let us examine the Qtenv user interface a little.
+
+<img src="qtenv-parts.png">
+
+The top of the window contains the following elements below the menu bar:
+
+- *Toolbar*: The toolbar lets you access the most frequently used functions,
+  such as stepping, running and stopping the simulation.
+- *Status bar*: Two rows of various fields and gauges, displaying the current event number,
+  simulation time, information about the next simulation event, and other details.
+  When the simulation is running, it displays performance data like the number of
+  events processed per second. The second row can be turned off to free up vertical space.
+- *Timeline*: Displays the contents of the Future Events Set (FES) on a logarithmic time scale.
+  The timeline can be turned off to free up vertical space.
+
+The main window is divided into the following areas:
+
+- *Object Navigator*: Displays the hierarchy of objects in the current simulation and in the FES.
+- *Object Inspector*: Displays the contents and properties of the selected object.
+- *Network Display*: Displays the network or any module graphically. This is also where
+  animation takes place.
+- *Log Viewer*: It has two modes. In *Messages* mode, it displays the log of packets
+  or messages sent between modules; in *Log* mode, it displays the log written by modules
+  (using `EV<<` statements) during simulation. Mode switching buttons are on the local toolbar.
+
+Additionally, you can open inspector windows that float on top of the main window.
 
 NEXT: @ref running
 */
