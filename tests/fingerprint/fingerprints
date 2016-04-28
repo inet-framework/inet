@@ -109,7 +109,17 @@ class FingerprintTestCaseGenerator():
                 ff = open(failedFile, 'w')
                 ff.write(failedContents)
                 ff.close()
-                print "Check " + failedFile + " for errors and failed fingerprints"
+                print "Check " + failedFile + " for failed fingerprints"
+
+    def writeErrorCSVFiles(self):
+        for csvFile, simulations in self.fileToSimulationsMap.iteritems():
+            errorContents = self.formatErrorSimulationsTable(csvFile, simulations)
+            if errorContents:
+                errorFile = csvFile + ".ERROR"
+                ff = open(errorFile, 'w')
+                ff.write(errorContents)
+                ff.close()
+                print "Check " + errorFile + " for errors"
 
     def escape(self, str):
         if re.search(r'[\r\n\",]', str):
@@ -159,14 +169,6 @@ class FingerprintTestCaseGenerator():
         lines.insert(0, '')     # csv line count is 1..n; insert an empty item --> lines[1] is the first line
         result = []
 
-        containsErrors = False
-        for simulation in simulations:
-            if 'exitcode' in simulation and simulation['exitcode'] != 0:
-                if not containsErrors:
-                    containsErrors = True
-                    result.append("# Errors:\n");
-                result.append(lines[simulation['line']])
-
         containsFailures = False
         for simulation in simulations:
             if 'computedFingerprint' in simulation:
@@ -177,7 +179,24 @@ class FingerprintTestCaseGenerator():
                         containsFailures = True
                         result.append("# Failures:\n");
                     result.append(lines[simulation['line']])
-        return ''.join(result) if containsErrors or containsFailures else None
+        return ''.join(result) if containsFailures else None
+
+    def formatErrorSimulationsTable(self, csvFile, simulations):
+        ff = open(csvFile, 'r')
+        lines = ff.readlines()
+        ff.close()
+        lines.insert(0, '')     # csv line count is 1..n; insert an empty item --> lines[1] is the first line
+        result = []
+
+        containsErrors = False
+        for simulation in simulations:
+            if 'exitcode' in simulation and simulation['exitcode'] != 0:
+                if not containsErrors:
+                    containsErrors = True
+                    result.append("# Errors:\n");
+                result.append(lines[simulation['line']])
+
+        return ''.join(result) if containsErrors else None
 
 
 class SimulationResult:
@@ -582,6 +601,7 @@ if __name__ == "__main__":
 
     print
     generator.writeUpdatedCSVFiles()
+    generator.writeErrorCSVFiles()
     generator.writeFailedCSVFiles()
 
     print "Log has been saved to %s" % logFile
