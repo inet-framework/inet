@@ -12,7 +12,7 @@
 //
 
 
-package inet.examples.ethernet.arptest;
+package inet.tutorials.walkthrough;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.EtherSwitch;

@@ -54,9 +54,12 @@ addresses and adding static routes is done by a separate configurator
 module. TCP traffic is configured in the ini file by adding application
 modules to the hosts.
 
-Here is the NED source:
+Here is the interesting part of the NED source:
 
-@include ARPTest.ned
+@dontinclude ARPTest.ned
+@skip network ARPTest
+@until server.pppg
+@skipline }
 
 And we will use this configuration file:
 
@@ -150,17 +153,19 @@ to learn the MAC address for the default router. After some more messaging,
 the TCP connection will be established and data transfer begins.
 We'll explore these events later.
 
-TODO what animation???
+Qtenv animates packet transfers, packets are represented by red dots.
 
-You can make the animation faster or slower by adjusting the slider at the
+<img src="animation.gif">
+
+One can make the animation faster or slower by adjusting the slider at the
 top of the network window.
 
 <img src="animspeed.png"/>
 
-You can stop the simulation by clicking the red "STOP" traffic
-sign icon (or by hitting F8), and resume it ("Run" icon or F5).
+The simulation can be stopped by clicking the red "STOP" traffic
+sign icon (or by hitting F8), resumed by clicking the "Run" icon or pressing F5.
 
-TODO explain single-stepping (F4)
+The 'step' button (F4) can be used to execute one event only.
 
 The wandering red frame (around `router1` on the screenshot) simply
 indicates the location of the current/next event in the model, as dictated
@@ -277,8 +282,8 @@ open an inspector window like this:
 <img src="tcpmain_v2.png"/></a>
 
 The inspector window exposes the internals of the module and we'll use it a
-lot later in this walkthrough, but let's just leave it for now. You can
-also view the information presented here in the property viewer panel (???????????) at
+lot later in this walkthrough, but let's just leave it for now. One can
+also view the information presented here in the object inspector panel at
 the bottom left side of the simulation window. Click on any module and its
 properties will be displayed there.
 
@@ -296,7 +301,7 @@ UP: @ref inside
 
 If we are interested in ARP, it's a bit annoying that we have to wade
 throught all those protocol registration events until we get to the first
-ARP request at 1s. Luckily, you can use the "Run until..." function to
+ARP request at 1s. Luckily, one can use the "Run until..." function to
 fast-forward past them.
 
 Restart the simulation (Simulate|Rebuild network), then click the
@@ -305,7 +310,7 @@ Restart the simulation (Simulate|Rebuild network), then click the
 <img src="tb-rununtil.png"/>
 
 When protocol registration finishes we are still at 0s simulation time, but the first ARP
-request is around 1s, so you can safely enter anything in the Run until dialog between 0 and 1s, so now let's enter 1ms.
+request is around 1s, so it is safe to enter anything in the Run until dialog between 0 and 1s, so now let's enter 1ms.
 
 <img src="dlg-rununtil.png"/>
 
@@ -314,15 +319,15 @@ Then, both the red frame around the laptop icon (the next event marker) and the
 status bar at the top will show that the next event is going to be a timer event, take place
 in the client PC's tcpApp, at t=1s simulation time (which will be 1s from the current time, as indicated by the +1s in brackets). Opening "scheduled-events" in the
 object tree (left side of main window) will also reveal that we have only
-one event. Double click on the event to open the inspector window (or single click and check out the property viewer at the bottom left). You can switch to flat mode at the top of the panel to see the details of the event object.
+one event. Double click on the event to open the inspector window (or single click and check out the object inspector at the bottom left). One can switch to flat mode at the top of the panel to see the details of the event object.
 
 <img src="nextevent_v2.png">
 
-If you right click on a module and choose <i>Open Graphical View</i>, a separate window is opened displaying the module's insides. This is a useful feature because multiple views can be open at the same time. Let's go into the client computer and open a graphical view of <i>networkLayer</i>. Now we can observe as packets arrive at the client module and the path they take in the network layer.
+Right-clicking on a module and choosing <i>Open Graphical View</i> opens a separate window displaying the module's insides. This is a useful feature because multiple views can be open at the same time. Let's go into the client computer and open a graphical view of <i>networkLayer</i>. Now we can observe as packets arrive at the client module and the path they take in the network layer.
 
 <img src="graph_view.png">
 
-Pressing F4 (single-step) repeatedly will take you through the next events. You'll see as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
+Pressing F4 (single-step) repeatedly will take one through the next events. It can be seen as the application tells TCP to open a connection, as TCP obeys and sends a SYN (TCP connection request) packet. You can follow this packet as it enters the network layer.
 You will find the SYN packet sitting at the input of the IP module. The IP module is doing a function call to the routing table one level up and the arp module to the right. This is indicated by the dotted lines (this isn't part of normal packet traffic, but how network operation is implemented behind the scenes).
 
 Here we are at the beginning of the interesting part. You may actually take a note that we are at event #25 (it's displayed in the top line of the main window status bar) so that next time you can quickly get here using the "Run until..." dialog (it can stop either at a simulation time or at an event number -- or if you enter both, it'll stop at whichever comes first. Note that you enter the value of the next event you want to observe -- so in this case we enter 26 in the run until dialog).
@@ -373,7 +378,7 @@ NEXT: @ref requestpacket
 
 UP: @ref arpbegins
 
-Click on the ARP request packet to view it's details in the property viewer panel (bottom left of the main window).
+Click on the ARP request packet to view it's details in the object inspector panel (bottom left of the main window).
 
 <img src="arpreq-fields.png"/>
 
@@ -413,7 +418,7 @@ This information is attached to the packet in small data structure called
 "control info". It is used to pass information between network layers, generally from a higher level to a lower one. Control info is also a C++ object and similarly to packets,
 its C++ source is generated from <tt>.msg</tt> files.
 You can view the contents of the control info attached to this ARP packet
-by clicking "Control info" in the property viewer.
+by clicking "Control info" in the object inspector.
 
 <pre class="src">
 <i>// file: EtherCtrl.msg</i>
@@ -471,7 +476,7 @@ UP: @ref pendingqueue
 You maybe be wondering what the ARP cache contains right now.
 No problem, we can check it out!
 
-Click on the <i>arp</i> icon in <tt>client/networkLayer</tt>, and examine the property viewer.
+Click on the <i>arp</i> icon in <tt>client/networkLayer</tt>, and examine the object inspector.
 
 The list reveals that we have several counters here for sent and received ARP requests
 etc -- and also the ARP cache.
@@ -530,7 +535,7 @@ mode to transmit mode. In the model, end of the IFG is marked with
 an event which can also be seen in "scheduled-events".
 
 The end of the interframe gap period is implemented with a self message -- EndIFG in the scheduled events list. You can see it on the timeline at the top of the main window, and tell that
-it is going to take place 10 microseconds from now (you can also single click events in the timeline to view them in the property viewer and double click to open their inspector windows).
+it is going to take place 10 microseconds from now (you can also single click events in the timeline to view them in the object inspector and double click to open their inspector windows).
 
 <img src="endifg.png">
 
