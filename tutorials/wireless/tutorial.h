@@ -47,31 +47,27 @@ NEXT: @ref step1
 @page step1 Step 1 - Two hosts communicating wirelessly
 UP: @ref step1
 
-<b>Goals</b>
+@section step1goals Goals
 
-In the first scenario, two hosts are set up, with one host sending a UDP data
-stream wirelessly to the other. The wireless exchange is not modeled realistically
-in this step, the goal is only to have one host send data to the other.
-There are no collisions, and physical effects like attenuation
-and interference are ignored.
+In the first step, we want to create a network that contains two hosts, with one host sending a UDP data stream wirelessly to the other.
+Our goal is to create a very simple model, which we can make more realistic in later steps.
+There are no collisions in this model, and physical effects like attenuation and interference are ignored.
 
 <img src="wireless-step1-v2.png">
 
-<b>Configuration</b>
+@section step1implementation Implementation
 
-WirelessA, the network defined in the above NED file, defines a playground of
-the size 500x500 meters:
+This step uses the WirelessA network, which is defined in the WirelessA.ned file.
 
 @dontinclude WirelessA.ned
 @skip network WirelessA
-@until @display
-
-It contains two hosts spaced 400 meters apart:
-
-@dontinclude WirelessA.ned
-@skip hostA: <hostType>
-@until @display("p=450,250");
+@until hostB:
+@skipline display
 @skipline }
+
+This network defines a playground of the size 500x500 meters.
+
+It contains two hosts spaced 400 meters apart. The distance will be relevant in later steps.
 
 In @opp, the <tt>StandardHost</tt> NED type is generally used to represent hosts.
 However, later steps will use other NED types for hosts, so the submodule type
@@ -86,10 +82,6 @@ INET is capable of modeling wireless communication at various levels of detail,
 realized with different radio medium modules. In this step, we use
 the simplest model, a variation of unit disc radio, which is implemented by
 the <tt>IdealRadioMedium</tt> NED type.
-
-@dontinclude WirelessA.ned
-@skip radioMedium: <mediumType>
-@until @display
 
 In hosts, network interface cards are represented by NIC modules. Radio is part of
 wireless NIC modules. There are various radio modules, and one must always
