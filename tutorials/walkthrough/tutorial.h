@@ -249,6 +249,8 @@ One can double-click on a node (client, server, router) to see its internals.
 <a href="client.png"><img src="client.png" width=350></a>
 <a href="server.png"><img src="server.png" width=350></a>
 <a href="router.png"><img src="router.png" width=350></a>
+<a href="switch.png"><img src="switch.png" width=500></a>
+<a href="net.png"><img src="net.png" width=400></a>
 </center>
 @endhtmlonly
 
