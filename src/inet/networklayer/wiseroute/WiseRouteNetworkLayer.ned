@@ -33,10 +33,10 @@ module WiseRouteNetworkLayer like INetworkLayer
         @display("i=block/fork");
 
     gates:
-        input ifIn[] @labels(INetworkDatagram);
-        output ifOut[] @labels(INetworkDatagram);
-        input transportIn[] @labels(ITransportPacket/down);
-        output transportOut[] @labels(ITransportPacket/up);
+        input ifIn @labels(INetworkDatagram);
+        output ifOut @labels(INetworkDatagram);
+        input transportIn @labels(ITransportPacket/down);
+        output transportOut @labels(ITransportPacket/up);
         input pingIn[] @labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
 
@@ -48,9 +48,6 @@ module WiseRouteNetworkLayer like INetworkLayer
             parameters:
                 arpModule = "^.arp";
                 @display("p=85,95;q=queue");
-            gates:
-                lowerLayerIn[sizeof(ifIn)];
-                lowerLayerOut[sizeof(ifOut)];
         }
         echo: EchoProtocol {
             parameters:

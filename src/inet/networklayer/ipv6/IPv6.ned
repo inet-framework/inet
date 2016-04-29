@@ -76,10 +76,10 @@ simple IPv6
         double procDelay @unit("s") = default(0s);
         @display("i=block/network2");
     gates:
-        input transportIn[] @labels(IPv6ControlInfo/down,TCPSegment,UDPPacket);
-        output transportOut[] @labels(IPv6ControlInfo/up,TCPSegment,UDPPacket);
-        input queueIn[] @labels(IPv6Datagram);
-        output queueOut[] @labels(IPv6Datagram);
+        input transportIn @labels(IPv6ControlInfo/down,TCPSegment,UDPPacket);
+        output transportOut @labels(IPv6ControlInfo/up,TCPSegment,UDPPacket);
+        input queueIn @labels(IPv6Datagram);
+        output queueOut @labels(IPv6Datagram);
         input ndIn;
         output ndOut;
         // tunneling gates - CB

@@ -102,10 +102,10 @@ simple IPv4
         @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Datagram);
         @signal[NF_IPv4_MDATA_REGISTER](type=IPv4Datagram);
     gates:
-        input transportIn[] @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);
-        output transportOut[] @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);
+        input transportIn @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);
+        output transportOut @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);
         input arpIn @labels(ARPPacket+Ieee802Ctrl);
         output arpOut @labels(ARPPacket+Ieee802Ctrl,IPv4Datagram+Ieee802Ctrl);
-        input queueIn[] @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
-        output queueOut[] @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
+        input queueIn @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
+        output queueOut @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
 }

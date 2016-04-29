@@ -45,10 +45,10 @@ module IPv6NetworkLayer like INetworkLayer
         *.ipv6TunnelingModule = default(absPath(".iptunneling"));
         @display("i=block/fork");
     gates:
-        input ifIn[] @labels(INetworkDatagram);
-        output ifOut[] @labels(INetworkDatagram);
-        input transportIn[] @labels(IPv4ControlInfo/down);
-        output transportOut[] @labels(IPv4ControlInfo/up);
+        input ifIn @labels(INetworkDatagram);
+        output ifOut @labels(INetworkDatagram);
+        input transportIn @labels(IPv4ControlInfo/down);
+        output transportOut @labels(IPv4ControlInfo/up);
         input pingIn[] @labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
     submodules:
@@ -60,9 +60,6 @@ module IPv6NetworkLayer like INetworkLayer
         ipv6: IPv6 {
             parameters:
                 @display("p=84,129");
-            gates:
-                queueIn[sizeof(ifIn)];
-                queueOut[sizeof(ifIn)];
         }
         icmpv6: ICMPv6 {
             parameters:

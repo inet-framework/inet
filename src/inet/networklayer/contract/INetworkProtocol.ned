@@ -26,8 +26,8 @@ moduleinterface INetworkProtocol
     parameters:
         @display("i=block/fork");
     gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }

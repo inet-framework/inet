@@ -34,10 +34,10 @@ module GenericNetworkLayer like INetworkLayer
         *.arpModule = default(absPath(".arp"));
         @display("i=block/fork");
     gates:
-        input ifIn[] @labels(INetworkDatagram);
-        output ifOut[] @labels(INetworkDatagram);
-        input transportIn[] @labels(IPv4ControlInfo/down);
-        output transportOut[] @labels(IPv4ControlInfo/up);
+        input ifIn @labels(INetworkDatagram);
+        output ifOut @labels(INetworkDatagram);
+        input transportIn @labels(IPv4ControlInfo/down);
+        output transportOut @labels(IPv4ControlInfo/up);
         input pingIn[] @labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
 
@@ -49,9 +49,6 @@ module GenericNetworkLayer like INetworkLayer
         gnp: GenericNetworkProtocol {
             parameters:
                 @display("p=85,95;q=queue");
-            gates:
-                queueIn[sizeof(ifIn)];
-                queueOut[sizeof(ifOut)];
         }
         echo: EchoProtocol {
             parameters:
