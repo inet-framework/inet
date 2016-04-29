@@ -332,7 +332,7 @@ Here we are at the beginning of the interesting part. You may actually take a no
 
 @htmlonly
 <center>
-<a href="licecap3.gif" data-lightbox="licecap3.gif"><img src="licecap3.gif" width=600></a>
+<a href="arpreq.gif" data-lightbox="arpreq.gif"><img src="arpreq.gif" width=600></a>
 </center>
 @endhtmlonly
 
