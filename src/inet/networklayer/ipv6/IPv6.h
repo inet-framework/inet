@@ -215,11 +215,6 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
-     * Handle message
-     */
-    virtual void handleMessage(cMessage *msg) override;
-
-    /**
      * Processing of IPv6 datagrams. Called when a datagram reaches the front
      * of the queue.
      */

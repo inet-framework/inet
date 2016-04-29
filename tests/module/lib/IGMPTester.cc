@@ -8,10 +8,8 @@
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/ipv4/IGMPMessage.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 
 using namespace std;
 
@@ -138,12 +136,6 @@ void IGMPTester::initialize(int stage)
 
 void IGMPTester::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
-    {
-        delete msg;
-        return;
-    }
-
     IGMPMessage *igmpMsg = check_and_cast<IGMPMessage*>(msg);
     EV << "IGMPTester: Received: " << igmpMsg << ".\n";
     delete msg;

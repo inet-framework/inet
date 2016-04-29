@@ -21,7 +21,6 @@
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 #include "inet/routing/pim/PIMSplitter.h"
 
 namespace inet {
@@ -63,15 +62,9 @@ void PIMSplitter::handleMessage(cMessage *msg)
             throw cRuntimeError("PIMSplitter: received unknown packet '%s (%s)' from the network layer.", msg->getName(), msg->getClassName());
     }
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
-        if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
-            // Drop protocol registrations, splitter register PIM protocol itself
-            delete msg;
-        }
-        else {
-            // Send other packets to the network layer
-            EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
-            send(msg, ipOut);
-        }
+        // Send other packets to the network layer
+        EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
+        send(msg, ipOut);
     }
     else
         throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");

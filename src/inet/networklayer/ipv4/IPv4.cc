@@ -118,12 +118,7 @@ void IPv4::updateDisplayString()
 
 void IPv4::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
-        RegisterTransportProtocolCommand *command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
-        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
-        delete msg;
-    }
-    else if (!msg->isSelfMessage() && msg->getArrivalGate()->isName("arpIn"))
+    if (!msg->isSelfMessage() && msg->getArrivalGate()->isName("arpIn"))
         endService(PK(msg));
     else
         QueueBase::handleMessage(msg);

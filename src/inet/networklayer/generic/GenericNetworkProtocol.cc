@@ -25,7 +25,6 @@
 #include "inet/networklayer/generic/GenericRoutingTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/networklayer/common/IPSocket.h"
 
 namespace inet {
 
@@ -82,17 +81,6 @@ void GenericNetworkProtocol::updateDisplayString()
     if (numUnroutable > 0)
         sprintf(buf + strlen(buf), "UNROUTABLE:%d ", numUnroutable);
     getDisplayString().setTagArg("t", 0, buf);
-}
-
-void GenericNetworkProtocol::handleMessage(cMessage *msg)
-{
-    if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
-        RegisterTransportProtocolCommand *command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
-        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
-        delete msg;
-    }
-    else
-        QueueBase::handleMessage(msg);
 }
 
 void GenericNetworkProtocol::endService(cPacket *pk)

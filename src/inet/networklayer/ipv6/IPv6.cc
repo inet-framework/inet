@@ -119,21 +119,6 @@ void IPv6::updateDisplayString()
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void IPv6::handleMessage(cMessage *msg)
-{
-    if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
-        RegisterTransportProtocolCommand *command = static_cast<RegisterTransportProtocolCommand *>(msg);
-        if (msg->getArrivalGate()->isName("transportIn")) {
-            mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
-        }
-        else
-            throw cRuntimeError("RegisterTransportProtocolCommand %d arrived invalid gate '%s'", command->getProtocol(), msg->getArrivalGate()->getFullName());
-        delete msg;
-    }
-    else
-        QueueBase::handleMessage(msg);
-}
-
 void IPv6::endService(cPacket *msg)
 {
 #ifdef WITH_xMIPv6
