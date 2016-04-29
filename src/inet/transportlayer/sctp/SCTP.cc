@@ -21,7 +21,6 @@
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/serializer/sctp/SCTPSerializer.h"
 
@@ -103,10 +102,6 @@ void SCTP::initialize(int stage)
         if (netw->hasPar("testTimeout")) {
             testTimeout = (simtime_t)netw->par("testTimeout");
         }
-    }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        IPSocket socket(gate("to_ip"));
-        socket.registerProtocol(IP_PROT_SCTP);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER_2) {
         if (par("udpEncapsEnabled").boolValue()) {

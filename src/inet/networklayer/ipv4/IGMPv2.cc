@@ -17,7 +17,6 @@
 //
 
 #include "inet/networklayer/ipv4/IGMPv2.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
@@ -388,10 +387,6 @@ void IGMPv2::initialize(int stage)
         }
         cModule *host = getContainingNode(this);
         host->subscribe(NF_INTERFACE_CREATED, this);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
-        IPSocket ipSocket(gate("ipOut"));
-        ipSocket.registerProtocol(IP_PROT_IGMP);
     }
 }
 

@@ -18,7 +18,6 @@
 //          Tamas Borbely (tomi@omnetpp.org)
 
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/common/InterfaceTable.h"
@@ -94,9 +93,6 @@ void PIMBase::initialize(int stage)
 bool PIMBase::handleNodeStart(IDoneCallback *doneCallback)
 {
     generationID = intrand(UINT32_MAX);
-
-    IPSocket ipSocket(gate("ipOut"));
-    ipSocket.registerProtocol(IP_PROT_PIM);
 
     // to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
     isEnabled = false;

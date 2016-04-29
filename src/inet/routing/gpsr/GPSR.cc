@@ -19,7 +19,6 @@
 
 #include "inet/routing/gpsr/GPSR.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -90,8 +89,6 @@ void GPSR::initialize(int stage)
         positionByteLength = par("positionByteLength");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        IPSocket socket(gate("ipOut"));
-        socket.registerProtocol(IP_PROT_MANET);
 
         globalPositionTable.clear();
         host->subscribe(NF_LINK_BREAK, this);

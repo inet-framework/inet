@@ -17,7 +17,6 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/ted/LinkStateRouting.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/NotifierConsts.h"
@@ -66,9 +65,6 @@ void LinkStateRouting::initialize(int stage)
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
-
-        IPSocket socket(gate("ipOut"));
-        socket.registerProtocol(IP_PROT_OSPF);
     }
 }
 

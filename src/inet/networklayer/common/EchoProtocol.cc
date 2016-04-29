@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "inet/networklayer/common/EchoProtocol.h"
-#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
 
@@ -28,11 +28,6 @@ Define_Module(EchoProtocol);
 void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-
-    if (stage == INITSTAGE_NETWORK_LAYER_2) {
-        IPSocket socket(gate("sendOut"));
-        socket.registerProtocol(IP_PROT_ICMP);
-    }
 }
 
 void EchoProtocol::handleMessage(cMessage *msg)

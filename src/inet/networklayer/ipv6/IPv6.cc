@@ -20,7 +20,6 @@
 
 #include "inet/networklayer/ipv6/IPv6.h"
 
-#include "inet/networklayer/common/IPSocket.h"
 
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"

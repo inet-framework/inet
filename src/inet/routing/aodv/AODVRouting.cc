@@ -40,7 +40,6 @@
 #include "inet/linklayer/bmac/BMacFrame_m.h"
 #endif // ifdef WITH_BMAC
 
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -90,10 +89,7 @@ void AODVRouting::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-
         addressType = getSelfIPAddress().getAddressType();
-        IPSocket socket(gate("ipOut"));
-        socket.registerProtocol(IP_PROT_MANET);
         networkProtocol->registerHook(0, this);
         host->subscribe(NF_LINK_BREAK, this);
 

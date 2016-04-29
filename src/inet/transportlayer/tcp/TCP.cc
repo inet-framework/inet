@@ -17,7 +17,6 @@
 
 #include "inet/transportlayer/tcp/TCP.h"
 
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
@@ -99,8 +98,6 @@ void TCP::initialize(int stage)
         cModule *host = findContainingNode(this);
         NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        IPSocket ipSocket(gate("ipOut"));
-        ipSocket.registerProtocol(IP_PROT_TCP);
     }
 }
 

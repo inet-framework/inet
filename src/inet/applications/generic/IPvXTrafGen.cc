@@ -21,7 +21,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
@@ -64,9 +63,6 @@ void IPvXTrafGen::initialize(int stage)
         WATCH(numReceived);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        IPSocket ipSocket(gate("ipOut"));
-        ipSocket.registerProtocol(protocol);
-
         timer = new cMessage("sendTimer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
