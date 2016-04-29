@@ -42,27 +42,12 @@ module NetPerfMeterHost extends TransportLayerNodeBase
     parameters:
         @display("i=device/pc2");
         int numNetPerfMeterApps = default(0);   // T.D. 17.11.09
-        string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
-        string udpType = default(firstAvailable("UDP", "UDP_None"));
-        string sctpType = default(firstAvailable("SCTP", "SCTP_None"));
         forwarding = default(false);  // disable routing by default
 
     submodules:
         netPerfMeterApp[numNetPerfMeterApps]: <default("NetPerfMeter")> like INetPerfMeterApp {  // T.D. 17.11.09
             parameters:
                 @display("p=262,36");
-        }
-
-        tcp: <tcpType> like ITCP if (numNetPerfMeterApps > 0) {
-            parameters:
-                @display("p=147,141");
-        }
-        udp: <udpType> like IUDP if (numNetPerfMeterApps > 0) {
-            parameters:
-                @display("p=329,141");
-        }
-        sctp: <sctpType> like ISCTP if (numNetPerfMeterApps > 0) {
-            @display("p=527,141");
         }
 
     connections allowunconnected:
@@ -74,11 +59,4 @@ module NetPerfMeterHost extends TransportLayerNodeBase
             netPerfMeterApp[i].udpOut --> udp.appIn++;
             netPerfMeterApp[i].udpIn <-- udp.appOut++;
         }
-
-        tcp.ipOut --> networkLayer.transportIn++ if (numNetPerfMeterApps > 0);
-        tcp.ipIn <-- networkLayer.transportOut++ if (numNetPerfMeterApps > 0);
-        udp.ipOut --> networkLayer.transportIn++ if (numNetPerfMeterApps > 0);
-        udp.ipIn <-- networkLayer.transportOut++ if (numNetPerfMeterApps > 0);
-        sctp.to_ip --> networkLayer.transportIn++ if (numNetPerfMeterApps > 0);
-        networkLayer.transportOut++ --> sctp.from_ip if (numNetPerfMeterApps > 0);
 }

@@ -57,8 +57,6 @@ module Router extends TransportLayerNodeBase
         bool hasRIP = default(false);
         bool hasBGP = default(false);
         bool hasPIM = default(false);
-        string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
-        string udpType = default("UDP");
 
     submodules:
         ospf: <"OSPFRouting"> like IIPRouting if hasOSPF {
@@ -70,16 +68,9 @@ module Router extends TransportLayerNodeBase
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=214,80;i=block/network");
         }
-        tcp: <tcpType> like ITCP if hasBGP && tcpType != "" {
-            parameters:
-                @display("p=214,180;i=block/transport");
-        }
         rip: <"RIPRouting"> like IUDPApp if hasRIP {
             parameters:
                 @display("p=404,80");
-        }
-        udp: <udpType> like IUDP if hasRIP {
-            @display("p=404,180");
         }
         pim: <"PIMRouting"> like IPIMRouting if hasPIM {
             @display("p=175,287");
@@ -94,17 +85,11 @@ module Router extends TransportLayerNodeBase
         if hasBGP {
             bgp.tcpOut --> tcp.appIn++;
             bgp.tcpIn <-- tcp.appOut++;
-
-            tcp.ipOut --> networkLayer.transportIn++;
-            tcp.ipIn <-- networkLayer.transportOut++;
         }
 
         if hasRIP {
             rip.udpOut --> udp.appIn++;
             rip.udpIn <-- udp.appOut++;
-
-            udp.ipOut --> networkLayer.transportIn++;
-            udp.ipIn <-- networkLayer.transportOut++;
         }
 
         if hasPIM {
