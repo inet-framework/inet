@@ -35,7 +35,7 @@ TCP.
 @section intro Introducing the model
 
 The tutorial will use the ARPTest model, which can be found in the
-`inet/examples/ethernet/arptest2/` folder of the INET project. The model
+`inet/examples/ethernet/arptest/` folder of the INET project. The model
 consists of a NED file that defines the network topology, and an
 omnetpp.ini file that configures it. Otherwise the model contains only
 standard INET components such as StandardHost.
@@ -65,6 +65,8 @@ Here is the interesting part of the NED source:
 And we will use this configuration file:
 
 @include omnetpp.ini
+
+<!------------------------------------------------------------------------>
 
 @section launching Launching the ARPTest simulation
 
@@ -101,6 +103,8 @@ useful for example for batch runs.
 </center>
 @endhtmlonly
 
+<!------------------------------------------------------------------------>
+
 @section gui The GUI at the first glance
 
 Let us examine the Qtenv user interface a little.
@@ -133,6 +137,8 @@ The main window is divided into the following areas:
   (using `EV<<` statements) during simulation. Mode switching buttons are on the local toolbar.
 
 Additionally, one can open inspector windows that float on top of the main window.
+
+<!------------------------------------------------------------------------>
 
 @section running Running the simulation
 
@@ -231,6 +237,8 @@ command on the Simulate menu. In fact, one can do that any time to start over.
 
 Now that we've dealt with the basics, we can go back to our ARPTest network model.
 
+<!------------------------------------------------------------------------>
+
 @section inside What is inside the hosts and routers?
 
 One can double-click on a node (client, server, router) to see its internals.
@@ -286,6 +294,8 @@ properties will be displayed there.
 The ARPTest simulation is quite complex in that it has TCP, IP, ARP and
 Ethernet in it. In this walkthrough we'll go for ARP, but the steps learned
 here will be useful for exploring other protocols as well.
+
+<!------------------------------------------------------------------------>
 
 @section steps Steps towards exploring ARP
 
@@ -343,6 +353,8 @@ You can find the <i>Run until next event in this module</i> button on the toolba
 <img src="nextevent.png">
 </center>
 
+<!------------------------------------------------------------------------>
+
 @section arpbegins ARP begins
 
 We can see what's going on by checking out the module logs. These
@@ -376,6 +388,8 @@ ARP maps L3 addresses (IP address) to L2 addresses (Ethernet MAC address).
 It uses a lookup table (ARP cache) for this purpose, but if an IP address
 is not found in the table, ARP has to ask around by sending a broadcast
 ARP Request. That's what we have seen here. Let's check it in detail!
+
+<!------------------------------------------------------------------------>
 
 @section requestpacket The ARP Request packet
 
@@ -444,6 +458,8 @@ it'll be filled in by Ethernet) and the destination MAC address is all FF's
 has also no significance (only used for telling MAC to send PAUSE frames).
 etherType is set to 2054 here. <!-- FIXME set etherType to proper value --><!do we need this?>
 
+<!------------------------------------------------------------------------>
+
 @section pendingqueue The pending queue
 
 While ARP resolution is pending, IP datagrams which wait for it have to be
@@ -459,6 +475,8 @@ in an inspector window. Here you can find the encapsulated TCP packet. Double cl
 you can explore the TCP header fields.
 
 <img src="TCPpacket.png"/></a>
+
+<!------------------------------------------------------------------------>
 
 @section arpcache The ARP cache
 
@@ -488,6 +506,8 @@ defined for <tt>IPAddress</tt> and <tt>ARPCacheEntry</tt>. That's all
 it takes -- the rest is up to the simulation environment.
 
 But let us follow the ARP request further.
+
+<!------------------------------------------------------------------------>
 
 @section transmission Transmission over Ethernet
 
@@ -586,6 +606,8 @@ finish transmission, the <tt>router1</tt>'s <tt>mac</tt> will complete
 reception, and it will pass up the frame to <tt>encap</tt> which in turn will
 rip the Ethernet header and pass up the ARP Request packet to <tt>arp</tt>.
 
+<!------------------------------------------------------------------------>
+
 @section arpreply ARP Reply
 
 In the next few event, <tt>arp</tt> will process the request. Hit F4.
@@ -645,6 +667,8 @@ MAC address field contains the MAC address of this interface.
 The next few F4 keypresses will transmit the ARP Reply over Ethernet
 back to the client's ARP.
 
+<!------------------------------------------------------------------------>
+
 @section procreply Processing the ARP Reply
 
 Results of processing the ARP reply can be seen in the next screenshot.
@@ -666,6 +690,8 @@ You can even verify that the control info attached to the datagram
 indeed contains the MAC address just received via ARP.
 
 <img src="syn-ctrlinfo.png"/></a>
+
+<!------------------------------------------------------------------------>
 
 @section syn The client's SYN gets to the server
 
@@ -720,6 +746,8 @@ The event log file (.elog) will be in arptest2/results. Double click to open the
 @endhtmlonly
 
 In this example sequence chart you can follow the initial SYN packet as it makes its way to the server, and the various ARP requests and replies.
+
+<!------------------------------------------------------------------------>
 
 @section discovering Following ARP from the documentation
 
@@ -796,6 +824,8 @@ whenever a message (packet, etc) arrives at the module or a timer goes off
 As a rule of thumb: whatever large number of functions you see in the
 documentation, always click at <tt>handleMessage()</tt> first. If the
 module code was well written, it'll lead you from there.
+
+<!------------------------------------------------------------------------>
 
 @section conclusion Conclusion
 
