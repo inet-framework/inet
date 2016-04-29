@@ -27,13 +27,7 @@ TCP.
 -   @ref discovering
 -   @ref conclusion
 
-NEXT: @ref intro
-*/
--------------------------------------------------------------------------------
-/**
-@page intro Introducing the model
-
-UP: @ref contents
+@section intro Introducing the model
 
 The tutorial will use the ARPTest model, which can be found in the
 `inet/examples/ethernet/arptest2/` folder of the INET project. The model
@@ -65,13 +59,7 @@ And we will use this configuration file:
 
 @include omnetpp.ini
 
-NEXT: @ref launching
-*/
--------------------------------------------------------------------------------
-/**
-@page launching Launching the ARPTest simulation
-
-UP: @ref contents
+@section launching Launching the ARPTest simulation
 
 We assume that the INET framework has already been built from sources. If
 not, it can be built in the IDE using the Ctrl+B keyboard shortcut.
@@ -98,13 +86,7 @@ useful for example for batch runs.
 
 <img src="arptest.png">
 
-NEXT: @ref gui
-*/
--------------------------------------------------------------------------------
-/**
-@page gui The GUI at the first glance
-
-UP: @ref launching
+@section gui The GUI at the first glance
 
 Let us examine the Qtenv user interface a little.
 
@@ -133,13 +115,7 @@ The main window is divided into the following areas:
 
 Additionally, one can open inspector windows that float on top of the main window.
 
-NEXT: @ref running
-*/
--------------------------------------------------------------------------------
-/**
-@page running Running the simulation
-
-UP: @ref launching
+@section running Running the simulation
 
 In this step we'll explore how one can run the simulation.
 
@@ -234,13 +210,7 @@ command on the Simulate menu. In fact, one can do that any time to start over.
 
 Now that we've dealt with the basics, we can go back to our ARPTest network model.
 
-NEXT: @ref inside
-*/
--------------------------------------------------------------------------------
-/**
-@page inside What is inside the hosts and routers?
-
-UP: @ref running
+@section inside What is inside the hosts and routers?
 
 One can double-click on a node (client, server, router) to see its internals.
 
@@ -293,13 +263,7 @@ The ARPTest simulation is quite complex in that it has TCP, IP, ARP and
 Ethernet in it. In this walkthrough we'll go for ARP, but the steps learned
 here will be useful for exploring other protocols as well.
 
-NEXT: @ref steps
-*/
--------------------------------------------------------------------------------
-/**
-@page steps Steps towards exploring ARP
-
-UP: @ref inside
+@section steps Steps towards exploring ARP
 
 If we are interested in ARP, it's a bit annoying that we have to wade
 throught all those protocol registration events until we get to the first
@@ -340,13 +304,7 @@ You can find the <i>Run until next event in this module</i> button on the toolba
 
 <img src="nextevent.png">
 
-NEXT: @ref arpbegins
-*/
--------------------------------------------------------------------------------
-/**
-@page arpbegins ARP begins
-
-UP: @ref steps
+@section arpbegins ARP begins
 
 We can see what's going on by checking out the module logs. These
 log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the log panel at the bottom of the main window, but that'll soon be useless because other modules
@@ -372,13 +330,7 @@ It uses a lookup table (ARP cache) for this purpose, but if an IP address
 is not found in the table, ARP has to ask around by sending a broadcast
 ARP Request. That's what we have seen here. Let's check it in detail!
 
-NEXT: @ref requestpacket
-*/
--------------------------------------------------------------------------------
-/**
-@page requestpacket The ARP Request packet
-
-UP: @ref arpbegins
+@section requestpacket The ARP Request packet
 
 Click on the ARP request packet to view it's details in the object inspector panel (bottom left of the main window).
 
@@ -445,13 +397,7 @@ it'll be filled in by Ethernet) and the destination MAC address is all FF's
 has also no significance (only used for telling MAC to send PAUSE frames).
 etherType is set to 2054 here. <!-- FIXME set etherType to proper value --><!do we need this?>
 
-NEXT: @ref pendingqueue
-*/
--------------------------------------------------------------------------------
-/**
-@page pendingqueue The pending queue
-
-UP: @ref arpbegins
+@section pendingqueue The pending queue
 
 While ARP resolution is pending, IP datagrams which wait for it have to be
 buffered somewhere. The <i>IP</i> module is storing the packets while waiting
@@ -467,13 +413,7 @@ you can explore the TCP header fields.
 
 <img src="TCPpacket.png"/></a>
 
-NEXT: @ref arpcache
-*/
--------------------------------------------------------------------------------
-/**
-@page arpcache The ARP cache
-
-UP: @ref pendingqueue
+@section arpcache The ARP cache
 
 You maybe be wondering what the ARP cache contains right now.
 No problem, we can check it out!
@@ -502,13 +442,7 @@ it takes -- the rest is up to the simulation environment.
 
 But let us follow the ARP request further.
 
-NEXT: @ref transmission
-*/
--------------------------------------------------------------------------------
-/**
-@page transmission Transmission over Ethernet
-
-UP: @ref arpcache
+@section transmission Transmission over Ethernet
 
 With a further F4 key (or "Step" toolbar button), the ARP request packet is sent down to the
 ethernet module. You can go into the module to see the packet at the input of the <i>encap</i> module.
@@ -597,13 +531,7 @@ finish transmission, the <tt>router1</tt>'s <tt>mac</tt> will complete
 reception, and it will pass up the frame to <tt>encap</tt> which in turn will
 rip the Ethernet header and pass up the ARP Request packet to <tt>arp</tt>.
 
-NEXT: @ref arpreply
-*/
--------------------------------------------------------------------------------
-/**
-@page arpreply ARP Reply
-
-UP: @ref transmission
+@section arpreply ARP Reply
 
 In the next few event, <tt>arp</tt> will process the request. Hit F4.
 <tt>arp</tt>'s log output will show what happened.
@@ -650,13 +578,7 @@ MAC address field contains the MAC address of this interface.
 The next few F4 keypresses will transmit the ARP Reply over Ethernet
 back to the client's ARP.
 
-NEXT: @ref procreply
-*/
--------------------------------------------------------------------------------
-/**
-@page procreply Processing the ARP Reply
-
-UP: @ref arpreply
+@section procreply Processing the ARP Reply
 
 Results of processing the ARP reply can be seen in the next screenshot.
 The MAC address of the router's Ethernet interface has been added to the
@@ -674,13 +596,7 @@ indeed contains the MAC address just received via ARP.
 
 <img src="syn-ctrlinfo.png"/></a>
 
-NEXT: @ref syn
-*/
--------------------------------------------------------------------------------
-/**
-@page syn The client's SYN gets to the server
-
-UP: @ref procreply
+@section syn The client's SYN gets to the server
 
 Now that ARP has done its job, you can hit F5 (or click "Run" on the main
 window toolbar), sit back and watch as the SYN packet makes its way to the
@@ -718,13 +634,7 @@ The event log file (.elog) will be in arptest2/results. Double click to open the
 
 In this example sequence chart you can follow the initial SYN packet as it makes its way to the server, and the various ARP requests and replies.
 
-NEXT: @ref discovering
-*/
--------------------------------------------------------------------------------
-/**
-@page discovering Following ARP from the documentation
-
-UP: @ref syn
+@section discovering Following ARP from the documentation
 
 In the above guided tour, you've seen how to run a simulation model,
 view logs, examine packet contents, look at queues, and explore internal
@@ -780,13 +690,7 @@ As a rule of thumb: whatever large number of functions you see in the
 documentation, always click at <tt>handleMessage()</tt> first. If the
 module code was well written, it'll lead you from there.
 
-NEXT: @ref conclusion
-*/
--------------------------------------------------------------------------------
-/**
-@page conclusion Conclusion
-
-Up: @ref discovering
+@section conclusion Conclusion
 
 While ARP might not be the most important protocol on earth, it was chosen as the
 topic of this tutorial because it is simple enough to be presented in such
