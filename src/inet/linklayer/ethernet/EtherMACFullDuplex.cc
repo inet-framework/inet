@@ -113,8 +113,7 @@ void EtherMACFullDuplex::startFrameTransmission()
         frame->setByteLength(curEtherDescr->frameMinBytes);     // extra padding
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
-    EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
-    phyFrame->encapsulate(frame);
+    EtherPhyFrame *phyFrame = encapsulate(frame);
 
     // send
     EV_INFO << "Transmission of " << frame << " started.\n";

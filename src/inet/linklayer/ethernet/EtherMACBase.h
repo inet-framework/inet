@@ -231,6 +231,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
+    virtual EtherPhyFrame *encapsulate(EtherFrame* phyFrame);
     virtual EtherFrame *decapsulate(EtherPhyFrame* phyFrame);   // also drops phyFrame
 
     // MACBase

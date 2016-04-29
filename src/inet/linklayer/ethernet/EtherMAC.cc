@@ -484,8 +484,7 @@ void EtherMAC::startFrameTransmission()
         frame->setByteLength(minFrameLength);
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
-    EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
-    phyFrame->encapsulate(frame);
+    EtherPhyFrame *phyFrame = encapsulate(frame);
 
     if (hasGUI())
         updateConnectionColor(TRANSMITTING_STATE);

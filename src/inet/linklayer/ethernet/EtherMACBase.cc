@@ -390,6 +390,13 @@ void EtherMACBase::processConnectDisconnect()
     }
 }
 
+EtherPhyFrame *EtherMACBase::encapsulate(EtherFrame* frame)
+{
+    EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
+    phyFrame->encapsulate(frame);
+    return phyFrame;
+}
+
 EtherFrame *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
 {
     cPacket *frame = phyFrame->decapsulate();
