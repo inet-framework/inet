@@ -3,7 +3,7 @@
 <!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
-    <message occurence="2"/> <!-- tcp: PassiveOPEN, ActiveOPEN -->
+    <message occurence="3"/> <!-- tcp: PassiveOPEN, ActiveOPEN Accept -->
     <message occurence="1">
         <fieldValue name="className" value="inet::bgp::BGPOpenMessage"/>
         <fieldValue name="byteLength" value="29"/>
