@@ -49,15 +49,64 @@ UP: @ref step1
 
 @section step1goals Goals
 
-In the first step, we want to create a network that contains two hosts, with one host sending a UDP data stream wirelessly to the other.
-Our goal is to create a very simple model, which we can make more realistic in later steps.
-There are no collisions in this model, and physical effects like attenuation and interference are ignored.
+In the first step, we want to create a network that contains two hosts,
+with one host sending a UDP data stream wirelessly to the other. Our goal
+is to keep the physical layer and lower layer protocol models as simple
+and possible.
+
+We'll make the model more realistic in later step.
+
+@section step1implementation The model
+
+In this step we use the model depicted below.
 
 <img src="wireless-step1-v2.png">
 
-@section step1implementation Implementation
+The model contains a playground of the size 500x500 meters, with two hosts
+spaced 400 meters apart. (The distance will be relevant in later steps.)
 
-This step uses the WirelessA network, which is defined in the WirelessA.ned file.
+In INET, hosts are usually represented with the `StandardHost` NED type,
+which is a generic template for TCP/IP hosts. It contains protocol
+components like TCP, UDP and IP, slots for plugging in application models,
+and various network interfaces (NICs). In this model, we configure the
+hosts to use `UDPBasicApp` for UDP traffic generation, and
+`IdealWirelessNic` for network interface.
+
+As one can see, there are additional modules in the network. They are
+responsible for tasks like visualization and configuring the IP layer.
+We'll return to them in later steps, but for now we concentrate on the
+module called `radioMedium`.
+
+All wireless simulations in INET need a radio medium module. This module
+represents the shared physical medium where communication takes place. It
+is responsible for taking signal propagation, attenuation, interference,
+and other physical phenomena into account.
+
+INET can model the wireless physical layer at at various levels of detail,
+realized with different radio medium modules. In this step, we use
+`IdealRadioMedium`, which is the simplest model. It implements a variation
+of unit disc radio, meaning that physical phenomena like signal attenuation
+are ignored, and the communication range is simply specified in meters.
+Transmissions within range are always correctly received unless collisions
+occur. Modeling collisions (overlapping transmissions causing reception
+failure) and interference range (a range where the signal cannot be
+received correctly, but still collides with other signals causing their
+reception to fail) are optional.
+
+In this model, we turn off collisions and interference. Naturally, this model
+of the physical layer has little correspondence to reality. However, it has its
+uses in the simulation. Its simplicity and its consequent predictability are
+an advantage in scenarios where realistic modeling of the physical layer is not
+a primary concern, for example in the modeling of ad-hoc routing protocols.
+Simulations using `IdealRadioMedium` also run faster than more realistic ones,
+due to the low computational cost.
+
+In hosts, network interface cards are represented by NIC modules. Radio is part of
+wireless NIC modules. There are various radio modules, and one must always
+use one that is compatible with the medium module. In this step, hosts contain
+<tt>IdealRadio</tt> as part of IdealWirelessNic.
+
+Here is the complete NED file that describes the above WirelessA network:
 
 @dontinclude WirelessA.ned
 @skip network WirelessA
@@ -65,28 +114,12 @@ This step uses the WirelessA network, which is defined in the WirelessA.ned file
 @skipline display
 @skipline }
 
-This network defines a playground of the size 500x500 meters.
+One can notice that in the source, hosts use the `INetworkNode` NED type
+and not the promised `StandardHost`. This is because later steps will use
+other NED types for hosts, so we leave host type is parameterizable
+(`INetworkNode<` is the interface which all host types implement.). The
+actual NED type is given in the `omnetpp.ini` file to be `StandardHost`.
 
-It contains two hosts spaced 400 meters apart. The distance will be relevant in later steps.
-
-In @opp, the <tt>StandardHost</tt> NED type is generally used to represent hosts.
-However, later steps will use other NED types for hosts, so the submodule type
-is parameterizable. (<tt>INetworkNode</tt> is the interface for host types.)
-
-All wireless simulations in INET need a radio medium module. This module represents
-the shared physical medium where communication takes place. It is responsible for
-taking signal propagation, attenuation, interference, and other physical phenomena
-into account.
-
-INET is capable of modeling wireless communication at various levels of detail,
-realized with different radio medium modules. In this step, we use
-the simplest model, a variation of unit disc radio, which is implemented by
-the <tt>IdealRadioMedium</tt> NED type.
-
-In hosts, network interface cards are represented by NIC modules. Radio is part of
-wireless NIC modules. There are various radio modules, and one must always
-use one that is compatible with the medium module. In this step, hosts contain
-<tt>IdealRadio</tt> as part of IdealWirelessNic.
 
 @dontinclude omnetpp.ini
 @skipline .host*.wlan[*].typename = "IdealWirelessNic"
