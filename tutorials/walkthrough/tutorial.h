@@ -43,11 +43,9 @@ standard INET components such as StandardHost.
 The network looks like this when the NED file is opened in the graphical
 editor in the IDE:
 
-@htmlonly
 <center>
-<a href="nededitor.png" data-lightbox="nededitor.png"><img src="nededitor.png"></a>
+<img src="nededitor.png">
 </center>
-@endhtmlonly
 
 Some explanations. In the model, MAC addresses are assigned automatically
 to Ethernet interfaces at the start of the simulation, by incrementing a
@@ -80,11 +78,11 @@ containing folder, and click Run. (In this case, the IDE will ask which ini
 file to use if there are more than one.) One can also right-click the
 omnetpp.ini file, select Run As from the menu, then choose OMNeT++ Simulation.
 
-@htmlonly
+
 <center>
-<a href="ide.png" data-lightbox="ide.png"><img src="ide.png"></a>
+<img src="ide.png">
 </center>
-@endhtmlonly
+
 
 When launching is successful, a new window, similar to the one shown below,
 will appear. The window belongs to the running simulation program, which contains the
@@ -99,7 +97,7 @@ useful for example for batch runs.
 
 @htmlonly
 <center>
-<a href="arptest.png" data-lightbox="arptest.png"><img src="arptest.png"></a>
+<a href="arptest.png" data-lightbox="arptest.png"><img src="arptest.png" width="600"></a>
 </center>
 @endhtmlonly
 
@@ -109,7 +107,7 @@ Let us examine the Qtenv user interface a little.
 
 @htmlonly
 <center>
-<a href="qtenv-parts.png" data-lightbox="qtenv-parts.png"><img src="qtenv-parts.png"></a>
+<a href="qtenv-parts.png" data-lightbox="qtenv-parts.png"><img src="qtenv-parts.png" width="600"></a>
 </center>
 @endhtmlonly
 
@@ -152,11 +150,9 @@ We'll explore these events later.
 
 Qtenv animates packet transfers, packets are represented by red dots.
 
-@htmlonly
 <center>
-<a href="animation.gif" data-lightbox="animation.gif"><img src="animation.gif"></a>
+<img src="animation.gif"></a>
 </center>
-@endhtmlonly
 
 One can make the animation faster or slower by adjusting the slider at the
 top of the network window.
@@ -241,11 +237,13 @@ One can double-click on a node (client, server, router) to see its internals.
 
 @htmlonly
 <center>
-<a href="client.png"><img src="client.png" width=350></a>
-<a href="server.png"><img src="server.png" width=350></a>
-<a href="router.png"><img src="router.png" width=350></a>
-<a href="switch.png"><img src="switch.png" width=500></a>
-<a href="net.png"><img src="net.png" width=400></a>
+<a href="client.png" data-lightbox="inside"><img src="client.png" height=250></a>
+<a href="server.png" data-lightbox="inside"><img src="server.png" height=250></a>
+<a href="router.png" data-lightbox="inside"><img src="router.png" height=250></a>
+<a href="net.png" data-lightbox="inside"><img src="net.png" height=250></a>
+<a href="switch.png" data-lightbox="inside"><img src="switch.png" height=150></a>
+
+
 
 </center>
 @endhtmlonly
@@ -315,7 +313,7 @@ one event. Double click on the event to open the inspector window (or single cli
 
 @htmlonly
 <center>
-<a href="nextevent_v2.png" data-lightbox="nextevent_v2.png"><img src="nextevent_v2.png"></a>
+<a href="nextevent_v2.png" data-lightbox="nextevent_v2.png"><img src="nextevent_v2.png" width=600></a>
 </center>
 @endhtmlonly
 
@@ -323,7 +321,7 @@ Right-clicking on a module and choosing <i>Open Graphical View</i> opens a separ
 
 @htmlonly
 <center>
-<a href="graph_view.png" data-lightbox="graph_view.png"><img src="graph_view.png"></a>
+<a href="graph_view.png" data-lightbox="graph_view.png"><img src="graph_view.png" width=600></a>
 </center>
 @endhtmlonly
 
@@ -334,17 +332,16 @@ Here we are at the beginning of the interesting part. You may actually take a no
 
 @htmlonly
 <center>
-<a href="licecap3.gif" data-lightbox="licecap3.gif"><img src="licecap3.gif"></a>
+<a href="licecap3.gif" data-lightbox="licecap3.gif"><img src="licecap3.gif" width=600></a>
 </center>
 @endhtmlonly
 
 You can find the <i>Run until next event in this module</i> button on the toolbar at the top of the model window. This is a very useful tool if you want to fast-forward to the next thing that will happen in the given module. There is also a fast run version.
 
-@htmlonly
+
 <center>
-<a href="nextevent.png" data-lightbox="nextevent.png"><img src="nextevent.png"></a>
+<img src="nextevent.png">
 </center>
-@endhtmlonly
 
 @section arpbegins ARP begins
 
@@ -352,11 +349,11 @@ We can see what's going on by checking out the module logs. These
 log messages (output via <tt>ev &lt;&lt;</tt> from the C++ code) will appear in the log panel at the bottom of the main window, but that'll soon be useless because other modules
 dump their output there too. Luckily, we can filter the logs so we can concentrate on messages from modules we are interested in now -- we can do that with the <i>filter window contents</i> button at the top right of the logs panel. Here we can select which module's logs we want to display -- select arp and ip from <tt>client/networkLayer</tt>.
 
-@htmlonly
+
 <center>
-<a href="filterlogs.png" data-lightbox="filterlogs.png"><img src="filterlogs.png"></a>
+<img src="filterlogs.png">
 </center>
-@endhtmlonly
+
 
 So we are at event #25, let's press F4 (or click at the <i>step</i> button) for the next event, and let IP process the SYN packet.
 You'll see that:
@@ -371,7 +368,7 @@ The logs will look like this:
 
 @htmlonly
 <center>
-<a href="arprequestlogs.png" data-lightbox="arprequestlogs.png"><img src="arprequestlogs.png"></a>
+<a href="arprequestlogs.png" data-lightbox="arprequestlogs.png"><img src="arprequestlogs.png" width=800></a>
 </center>
 @endhtmlonly
 
@@ -525,7 +522,7 @@ it is going to take place 10 microseconds from now (you can also single click ev
 
 @htmlonly
 <center>
-<a href="endifg.png" data-lightbox="endifg.png"><img src="endifg.png"></a>
+<a href="endifg.png" data-lightbox="endifg.png"><img src="endifg.png" width=600></a>
 </center>
 @endhtmlonly
 
@@ -553,11 +550,9 @@ frame message object in fact) represents the <i>beginning</i> of the frame.
 End of transmission is an event you'll find in "scheduled-events", it is
 a self-message scheduled by the transmitting <tt>mac</tt>:
 
-@htmlonly
 <center>
-<a href="endtx-event.png" data-lightbox="endtx-event.png"><img src="endtx-event.png"></a>
+<img src="endtx-event.png">
 </center>
-@endhtmlonly
 
 The "start of reception" event will occur in the receiver of course,
 and will be represented by the arrival of the Ethernet frame message
@@ -565,11 +560,9 @@ object. You can see in the first line of the status bar, in the
 "next event" field that it's going to be the next event, and will take
 place in <tt>router1</tt>'s second interface (<tt>eth[1]</tt>).
 
-@htmlonly
 <center>
-<a href="statusbar-startrx.png" data-lightbox="statusbar-startrx.png"><img src="statusbar-startrx.png"></a>
+<img src="statusbar-startrx.png">
 </center>
-@endhtmlonly
 
 Open the graphics for this Ethernet interface by double-clicking
 on <tt>router1</tt>, then on <tt>eth[1]</tt> (just follow the red frames
