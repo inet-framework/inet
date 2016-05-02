@@ -9,7 +9,7 @@ DOXYGEN=doxygen
 all:
 	rm -rf out
 	mkdir out
-	$(DOXYGEN) wirelesstutorial.doxyfile
+	$(DOXYGEN)
 	cp *.gif *.png out
 clean:
 	-rm -rf out
