@@ -54,6 +54,9 @@ module StandardHost extends TransportLayerNodeBase
         int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
         int numPingApps = default(0);  // no of PING apps. Specify the app types in INI file with pingApp[0..1].typename="PingApp" syntax
         bool hasTun = default(numTunInterfaces > 0);
+        hasUdp = default(numUdpApps > 0);
+        hasTcp = default(numTcpApps > 0);
+        hasSctp = default(numSctpApps > 0);
         forwarding = default(false);  // disable routing by default
         networkLayer.proxyARP = default(false);
     submodules:

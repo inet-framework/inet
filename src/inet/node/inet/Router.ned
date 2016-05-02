@@ -57,6 +57,8 @@ module Router extends TransportLayerNodeBase
         bool hasRIP = default(false);
         bool hasBGP = default(false);
         bool hasPIM = default(false);
+        hasUdp = default(hasRIP);
+        hasTcp = default(hasBGP);
 
     submodules:
         ospf: <"OSPFRouting"> like IIPRouting if hasOSPF {
