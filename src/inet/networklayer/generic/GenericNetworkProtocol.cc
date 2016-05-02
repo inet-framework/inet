@@ -63,6 +63,9 @@ void GenericNetworkProtocol::initialize()
     defaultHopLimit = par("hopLimit");
     numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
+    registerProtocol(Protocol::gnp, gate("transportOut"));
+    registerProtocol(Protocol::gnp, gate("queueOut"));
+
     WATCH(numLocalDeliver);
     WATCH(numDropped);
     WATCH(numUnroutable);

@@ -17,6 +17,7 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -88,12 +89,13 @@ void PIMBase::initialize(int stage)
         holdTime = par("holdTime");
         designatedRouterPriority = mode == PIMInterface::SparseMode ? par("designatedRouterPriority") : -1;
     }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+        registerProtocol(Protocol::pim, gate("ipOut"));
 }
 
 bool PIMBase::handleNodeStart(IDoneCallback *doneCallback)
 {
     generationID = intrand(UINT32_MAX);
-
     // to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
     isEnabled = false;
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {

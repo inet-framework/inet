@@ -16,6 +16,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ted/LinkStateRouting.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -65,6 +66,7 @@ void LinkStateRouting::initialize(int stage)
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
+        registerProtocol(Protocol::ospf, gate("ipOut"));
     }
 }
 

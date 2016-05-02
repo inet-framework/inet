@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
@@ -36,6 +37,8 @@ Define_Module(ICMP);
 void ICMP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_NETWORK_LAYER)
+        registerProtocol(Protocol::icmpv4, gate("sendOut"));
 }
 
 void ICMP::handleMessage(cMessage *msg)

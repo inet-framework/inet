@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/IGMPv2.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -387,6 +388,7 @@ void IGMPv2::initialize(int stage)
         }
         cModule *host = getContainingNode(this);
         host->subscribe(NF_INTERFACE_CREATED, this);
+        registerProtocol(Protocol::igmp, gate("ipOut"));
     }
 }
 

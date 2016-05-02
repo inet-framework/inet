@@ -17,6 +17,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/routing/gpsr/GPSR.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/common/INETUtils.h"
@@ -89,7 +90,7 @@ void GPSR::initialize(int stage)
         positionByteLength = par("positionByteLength");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-
+        registerProtocol(Protocol::manet, gate("ipOut"));
         globalPositionTable.clear();
         host->subscribe(NF_LINK_BREAK, this);
         addressType = getSelfAddress().getAddressType();

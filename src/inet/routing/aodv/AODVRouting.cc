@@ -16,6 +16,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/routing/aodv/AODVRouting.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
@@ -90,6 +91,7 @@ void AODVRouting::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         addressType = getSelfIPAddress().getAddressType();
+        registerProtocol(Protocol::manet, gate("ipOut"));
         networkProtocol->registerHook(0, this);
         host->subscribe(NF_LINK_BREAK, this);
 

@@ -18,6 +18,7 @@
 //
 
 #include "inet/common/INETMath.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/routing/dymo/DYMO.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
@@ -139,6 +140,7 @@ void DYMO::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        registerProtocol(Protocol::manet, gate("ipOut"));
         host->subscribe(NF_LINK_BREAK, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);

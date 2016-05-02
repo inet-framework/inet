@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/icmpv6/ICMPv6.h"
@@ -46,6 +47,7 @@ void ICMPv6::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        registerProtocol(Protocol::icmpv6, gate("ipv6Out"));
     }
 }
 

@@ -27,6 +27,7 @@
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
@@ -238,6 +239,7 @@ void TCP_NSC::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        registerProtocol(Protocol::tcp, gate("ipOut"));
     }
     else if (stage == INITSTAGE_LAST) {
         isAliveM = true;

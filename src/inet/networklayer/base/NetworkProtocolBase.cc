@@ -29,6 +29,10 @@ void NetworkProtocolBase::initialize(int stage)
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        registerProtocol(Protocol::gnp, gate("upperLayerOut"));
+        registerProtocol(Protocol::gnp, gate("lowerLayerOut"));
+    }
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message, int transportProtocol)

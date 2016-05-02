@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <string>
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/transportlayer/udp/UDP.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -139,6 +140,8 @@ void UDP::initialize(int stage)
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        registerProtocol(Protocol::udp, gate("ipOut"));
+        // TODO: registerProtocol(Protocol::udp, gate("appOut", 0));
     }
 }
 

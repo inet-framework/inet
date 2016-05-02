@@ -20,7 +20,9 @@
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
@@ -40,6 +42,8 @@ void IPvXTrafSink::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        int protocol = par("protocol");
+        registerProtocol(*ProtocolGroup::ipprotocol.getProtocol(protocol), gate("ipOut"));
     }
 }
 

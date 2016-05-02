@@ -12,6 +12,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/rsvp_te/RSVP.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -77,6 +78,7 @@ void RSVP::initialize(int stage)
 
         // process traffic configuration
         readTrafficFromXML(par("traffic").xmlValue());
+        registerProtocol(Protocol::rsvp, gate("ipOut"));
     }
 }
 

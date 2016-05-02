@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <memory.h>
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/routing/ospfv2/OSPFRouting.h"
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
@@ -54,6 +55,7 @@ void OSPFRouting::initialize(int stage)
         isUp = isNodeUp();
         if (isUp)
             createOspfRouter();
+        registerProtocol(Protocol::ospf, gate("ipOut"));
     }
 }
 
