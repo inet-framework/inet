@@ -44,6 +44,26 @@ class INET_API EthernetSerializer : public SerializerBase
     EthernetSerializer(const char *name = nullptr) : SerializerBase(name) {}
 };
 
+/**
+ * Converts between EtherFrame and binary (network byte order) Ethernet header.
+ */
+class INET_API EtherPhySerializer : public SerializerBase
+{
+  protected:
+    /**
+     * Serializes an EtherFrame for transmission on the wire.
+     */
+    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+
+    /**
+     * Puts a packet sniffed from the wire into an EtherFrame.
+     */
+    virtual cPacket *deserialize(const Buffer &b, Context& context) override;
+
+  public:
+    EtherPhySerializer(const char *name = nullptr) : SerializerBase(name) {}
+};
+
 } // namespace serializer
 
 } // namespace inet

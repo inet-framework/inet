@@ -37,12 +37,17 @@ enum ProtocolGroup {
     GLOBAL = 1,
     IP_PROT,
     ETHERTYPE,
-    LINKTYPE
+    LINKTYPE,
+    PHYTYPE
 };
 
 enum {  // from libpcap
     LINKTYPE_ETHERNET = 1,
     LINKTYPE_IEEE802_11 = 105
+};
+
+enum {
+    PHYTYPE_ETHERNET = 1
 };
 
 /**

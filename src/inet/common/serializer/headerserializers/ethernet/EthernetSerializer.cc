@@ -34,6 +34,8 @@ namespace serializer {
 
 Register_Serializer(EtherFrame, LINKTYPE, LINKTYPE_ETHERNET, EthernetSerializer);
 
+Register_Serializer(EtherPhyFrame, PHYTYPE, PHYTYPE_ETHERNET, EtherPhySerializer);
+
 void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
@@ -160,6 +162,35 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
     if (etherPacket->getByteLength() != frameLength)
         etherPacket->setBitError(true);
     return etherPacket;
+}
+
+void EtherPhySerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
+{
+    ASSERT(b.getPos() == 0);
+    const EtherPhyFrame *ethPkt = check_and_cast<const EtherPhyFrame *>(pkt);
+    b.fillNBytes(PREAMBLE_BYTES, 0x55);      // preamble
+    b.writeByte(0xD5);          // SFD
+    cPacket *encapPkt = ethPkt->getEncapsulatedPacket();
+    SerializerBase::lookupAndSerialize(encapPkt, b, c, LINKTYPE, LINKTYPE_ETHERNET, b.getRemainingSize());
+}
+
+cPacket* EtherPhySerializer::deserialize(const Buffer &b, Context& c)
+{
+    ASSERT(b.getPos() == 0);
+    EtherPhyFrame *etherPhyFrame = nullptr;
+    char buff[PREAMBLE_BYTES + SFD_BYTES + 1];
+    b.readNBytes(PREAMBLE_BYTES + SFD_BYTES, buff);
+    if (0 == memcmp(buff, "0x550x550x550x550x550x550x550xD5", PREAMBLE_BYTES + SFD_BYTES)) {
+        etherPhyFrame = new EtherPhyFrame();
+        cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET, b.getRemainingSize());
+        ASSERT(encapPacket);
+        etherPhyFrame->encapsulate(encapPacket);
+        etherPhyFrame->setName(encapPacket->getName());
+    }
+    else {
+        b.seek(0);
+    }
+    return etherPhyFrame;
 }
 
 } // namespace serializer
