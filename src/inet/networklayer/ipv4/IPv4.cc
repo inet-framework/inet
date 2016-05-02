@@ -104,6 +104,12 @@ void IPv4::initialize(int stage)
     }
 }
 
+void IPv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+{
+    Enter_Method("handleRegisterProtocol");
+    mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
+}
+
 void IPv4::updateDisplayString()
 {
     char buf[80] = "";

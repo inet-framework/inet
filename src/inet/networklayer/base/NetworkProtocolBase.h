@@ -21,11 +21,12 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ProtocolMap.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-class INET_API NetworkProtocolBase : public LayeredProtocolBase
+class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtocolRegistrationListener
 {
   protected:
     ProtocolMapping protocolMapping;
@@ -45,6 +46,9 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
     virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
     virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+
+  public:
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 };
 
 } // namespace inet

@@ -22,6 +22,7 @@
 #include <list>
 #include <map>
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/common/queue/QueueBase.h"
@@ -42,7 +43,7 @@ namespace inet {
  */
 // TODO: rename this and its friends to something that is more specific
 // TODO: that expresses to some extent how this network protocol works
-class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, public INetworkProtocol
+class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, public INetworkProtocol, public IProtocolRegistrationListener
 {
   protected:
     /**
@@ -153,6 +154,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
   public:
     GenericNetworkProtocol();
     ~GenericNetworkProtocol();
+
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(int priority, IHook *hook) override;

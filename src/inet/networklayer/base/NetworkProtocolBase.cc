@@ -35,6 +35,11 @@ void NetworkProtocolBase::initialize(int stage)
     }
 }
 
+void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *gate) {
+    Enter_Method("handleRegisterProtocol");
+    protocolMapping.addProtocolMapping(protocol.getId(), gate->getIndex());
+}
+
 void NetworkProtocolBase::sendUp(cMessage *message, int transportProtocol)
 {
     if (message->isPacket())

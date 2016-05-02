@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -41,7 +42,7 @@ class IIPv4RoutingTable;
 /**
  * Implements the IPv4 protocol.
  */
-class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkProtocol, public cListener
+class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
 {
   public:
     /**
@@ -229,6 +230,8 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
   public:
     IPv4();
     virtual ~IPv4();
+
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

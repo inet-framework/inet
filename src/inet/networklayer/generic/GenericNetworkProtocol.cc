@@ -72,6 +72,12 @@ void GenericNetworkProtocol::initialize()
     WATCH(numForwarded);
 }
 
+void GenericNetworkProtocol::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+{
+    Enter_Method("handleRegisterProtocol");
+    mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
+}
+
 void GenericNetworkProtocol::updateDisplayString()
 {
     char buf[80] = "";

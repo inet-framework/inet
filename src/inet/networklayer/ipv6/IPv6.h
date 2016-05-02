@@ -19,6 +19,7 @@
 #define __INET_IPV6_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/common/queue/QueueBase.h"
@@ -39,7 +40,7 @@ class ICMPv6Message;
 /**
  * IPv6 implementation.
  */
-class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, public INetworkProtocol
+class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, public INetworkProtocol, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -200,6 +201,8 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
   public:
     IPv6();
     ~IPv6();
+
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;
