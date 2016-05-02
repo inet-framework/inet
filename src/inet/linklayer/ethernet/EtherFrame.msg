@@ -67,6 +67,7 @@ packet EtherFilledIFG extends EtherTraffic
 //
 packet EtherPhyFrame extends EtherTraffic
 {
+    @customize(true);
     byteLength = PREAMBLE_BYTES + SFD_BYTES;
 }
 
