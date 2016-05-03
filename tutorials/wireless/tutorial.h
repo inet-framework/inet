@@ -46,7 +46,7 @@ NEXT: @ref step1
 @page step1 Step 1 - Two hosts communicating wirelessly
 PREV: <a href="index.html" class="el">Introduction</a>
 
-@section step1goals Goals
+@section s1goals Goals
 
 In the first step, we want to create a network that contains two hosts,
 with one host sending a UDP data stream wirelessly to the other. Our goal
@@ -55,7 +55,7 @@ and possible.
 
 We'll make the model more realistic in later step.
 
-@section step1implementation The model
+@section s1model The model
 
 In this step we use the model depicted below.
 
@@ -184,7 +184,7 @@ The model also contains a gauge to display the number of packets received by Hos
 @skipline @figure
 @skipline moduleName
 
-<b>Results</b>
+@section s1results Results
 
 Here is an animation showing the hosts communicating:
 
@@ -204,13 +204,13 @@ NEXT: @ref step2
 
 PREV: @ref step1
 
-<b>Goals</b>
+@section s2goals Goals
 
 Transmissions can be visualized in the simulation environment. The configuration
 for this step will set up animations that show transmissions as they propagate
 through space.
 
-<b>Configuration</b>
+@section s2model The model
 
 Steps in this tutorial build on each other. In omnetpp.ini, the configuration
 <i>Wireless02</i> extends <i>Wireless01</i>.
@@ -244,7 +244,7 @@ successful physical layer communication paths:
 @dontinclude omnetpp.ini
 @skipline displayCommunicationTrail
 
-<b>Results</b>
+@section s2results Results
 
 This results in bubble animations representing radio
 transmissions, and blue lines indicating communication paths:
@@ -264,6 +264,12 @@ to 250m
 
 PREV: @ref step2
 
+@section s3goals Goals
+
+TODO
+
+@section s3model The model
+
 In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.ned:
 
 @dontinclude WirelessB.ned
@@ -277,6 +283,8 @@ and cannot communicate directly.
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 250m
+
+@section s3results Results
 
 The other hosts are there to relay the data between them, but routing is not yet
  configured. The result is that Host A and B cannot communicate.
@@ -294,6 +302,12 @@ NEXT: @ref step4
 @page step4 Step 4 - Setting up static routing
 
 PREV: @ref step3
+
+@section s4goals Goals
+
+TODO
+
+@section s4model The model
 
 The recently added hosts will need to act like routers, and forward packets
 from Host A to Host B. We have to set IPv4 forwarding:
@@ -332,6 +346,8 @@ that packets take:
 @dontinclude omnetpp.ini
 @skipline *.visualizer.routeVisualizer.packetNameFilter = "*"
 
+@section s4results Results
+
 The arrows indicate routes in the network layer -- so now we should see a route
 going from Host A to B -- while we still have the blue lines that visualize
 communication paths in the physical layer. Here we want to display all kinds of
@@ -362,6 +378,12 @@ NEXT: @ref step5
 
 PREV: @ref step4
 
+@section s5goals Goals
+
+TODO
+
+@section s5model The model
+
 We refine our model by enabling the simulation of interference:
 
 @dontinclude omnetpp.ini
@@ -374,6 +396,8 @@ Set maximum interference range to the double of the communication range, 500m:
 
 This means that Host A cannot communicate with Host B because it is out of
 range, but its transmission will cause interference with other transmissions at Host B.
+
+@section s5results Results
 
 <img src="wireless-step5-v2.png">
 
@@ -425,6 +449,12 @@ NEXT: @ref step6
 
 PREV: @ref step5
 
+@section s6goals Goals
+
+TODO
+
+@section s6model The model
+
 With CSMA, hosts will sniff into the medium to see if there are ongoing
 transmissions in their interference range. This is in contrast to the previous
 step, where they didn't care if someone else was transmitting. This should
@@ -452,6 +482,8 @@ needs resending:
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].mac.useMACAcks = true
 
+@section s6results Results
+
 <img src="wireless-step6-v2.png">
 
 We can see that throughput is about 380 kbps, so it is increased over the
@@ -468,12 +500,20 @@ NEXT: @ref step7
 
 PREV: @ref step6
 
+@section s7goals Goals
+
+TODO
+
+@section s7model The model
+
 Let's configure the intermediate nodes (R1-3) to move around. We set them to
 move upwards at a speed of 12 miles per hour:
 
 @dontinclude omnetpp.ini
 @skip mobility
 @until mobility.angle
+
+@section s7results Results
 
 <!more on linearmobility>
 <!do we need more on mobility? should be clear from the code above>
@@ -503,6 +543,12 @@ NEXT: @ref step8
 
 PREV: @ref step7
 
+@section s8goals Goals
+
+TODO
+
+@section s8model The model
+
 Let's configure ad-hoc routing with AODV.
 
 We need the <tt>IPv4NetworkConfigurator</tt> to only assign the IP addresses. We
@@ -521,6 +567,8 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 <tt>AODVRouting</tt> submodule. Each node works like a router -- they manage
 their own routing tables and adapt to changes in the network topology.
 
+@section s8results Results
+
 This time when R1 gets out of range, the routes are reconfigured and packets
 keep flowing to B. Throughput is about the same as in step 6 -- even though the
 connection is not broken here, the AODV protocol adds some overhead to the
@@ -537,6 +585,8 @@ NEXT: @ref step9
 @page step9 Step 9 - Installing energy management into the nodes
 
 PREV: @ref step8
+
+@section s9goals Goals
 
 The nodes behave like mobile devices, and we can model their energy consumption
 and storage.
@@ -564,6 +614,8 @@ The energyBalance variable indicates the energy consumption
 (host*.energyStorage.energyBalance). You can use the residualCapacity signal
 to display energy consumption over time.
 
+@section s9results Results
+
 <img src="wireless-step9-energy.png">
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
@@ -575,6 +627,12 @@ NEXT: @ref step10
 @page step10 Step 10 - Adding obstacles to the environment
 
 PREV: @ref step9
+
+@section s10goals Goals
+
+TODO
+
+@section s10model The model
 
 Up until now, the nodes were operating in free space. In the real world,
 however, there are usually obstacles that decrease signal strength, absorb or
@@ -611,11 +669,13 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 @dontinclude omnetpp.ini
 @skipline obstacleLoss
 
-<tt>TracingObstacleLoss/tt> models signal loss along a line connecting the
-<transmitter and the receiver, calculating the loss where it intersects
-<obstackles.!rewrite>
+@section s5results Results
 
-Unfortunatelly, the wall has no effect on the transmissions -- the number of
+`TracingObstacleLoss` models signal loss along a line connecting the
+transmitter and the receiver, calculating the loss where it intersects
+obstacles. <!rewrite>
+
+Unfortunately, the wall has no effect on the transmissions -- the number of
 received packets is exactly the same as in the previous step -- because our
 simple radio model doesn't interact with obstacles. We need a more realistic
 radio model.
@@ -631,6 +691,12 @@ NEXT: @ref step11
 @page step11 Step 11 - Enhancing the accuracy of the radio model
 
 PREV: @ref step10
+
+@section s11goals Goals
+
+TODO
+
+@section s11model The model
 
 We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which is more
 realistic. It implements a radio that uses APSK modulation, but it is not using
@@ -666,6 +732,9 @@ radio model -- this case <tt>APSKScalarRadioMedium</tt> with
 last 3 lines - preambleduration?>
 
 <!img>
+
+@section s11results Results
+
 <!results>
 <!throughput>
 
@@ -683,6 +752,13 @@ NEXT: @ref step12
 
 PREV: @ref step11
 
-*/
+@section s12goals Goals
+
+TODO
+
+@section s12model The model
+
+@section s12results Results
 
 */
+
