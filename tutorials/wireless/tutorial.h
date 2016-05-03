@@ -38,6 +38,8 @@ and consecutive steps mostly share the same networks, defined in NED.
 - @ref step9
 - @ref step10
 - @ref step11
+- @ref step12
+- @ref step13
 
 NEXT: @ref step1
 
@@ -691,16 +693,16 @@ PREV: @ref step9
 
 @section s10goals Goals
 
-TODO
-
-@section s10model The model
-
 Up until now, the nodes were operating in free space. In the real world,
 however, there are usually obstacles that decrease signal strength, absorb or
 reflect radio waves.
 
 Let's add a concrete wall to the model that sits between Host A and R1, and see
 what happens to the transmissions.
+
+TODO
+
+@section s10model The model
 
 We have to extend WirelessB.ned to include an <tt>environment</tt> module:
 
@@ -819,7 +821,31 @@ TODO
 
 @section s12model The model
 
+TODO
+
 @section s12results Results
+
+TODO
+
+NEXT: @ref step13
+
+<!------------------------------------------------------------------------>
+
+@page step13 Step 13 - Enhancing the antenna with some constant gain
+
+PREV: @ref step12
+
+@section s13goals Goals
+
+TODO
+
+@section s13model The model
+
+TODO
+
+@section s13results Results
+
+TODO
 
 */
 
