@@ -17,35 +17,34 @@ is an introduction to INET and working with protocols.
 If you need more information at any time, feel free to refer to the @opp and
 INET documentation:
 
-- 	<a href="https://omnetpp.org/doc/omnetpp/manual/usman.html" target="_blank">@opp User Manual</a>
--	<a href="https://omnetpp.org/doc/omnetpp/api/index.html" target="_blank">@opp API Reference</a>
-- 	<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET Manual draft</a>
-- 	<a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
+- <a href="https://omnetpp.org/doc/omnetpp/manual/usman.html" target="_blank">@opp User Manual</a>
+- <a href="https://omnetpp.org/doc/omnetpp/api/index.html" target="_blank">@opp API Reference</a>
+- <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET Manual draft</a>
+- <a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
 
 In the tutorial, each step is a separate configuration in the same omnetpp.ini file,
 and consecutive steps mostly share the same networks, defined in NED.
 
 @section contents Contents
 
--	@ref step1
--	@ref step2
--	@ref step3
--	@ref step4
--	@ref step5
--	@ref step6
--	@ref step7
--	@ref step8
--	@ref step9
--	@ref step10
--	@ref step11
+- @ref step1
+- @ref step2
+- @ref step3
+- @ref step4
+- @ref step5
+- @ref step6
+- @ref step7
+- @ref step8
+- @ref step9
+- @ref step10
+- @ref step11
 
 NEXT: @ref step1
 
-*/--------------------------------------------------------------------------/**
-
+<!------------------------------------------------------------------------>
 
 @page step1 Step 1 - Two hosts communicating wirelessly
-UP: @ref step1
+PREV: <a href="index.html" class="el">Introduction</a>
 
 @section step1goals Goals
 
@@ -199,11 +198,11 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 NEXT: @ref step2
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step2 Step 2 - Setting up some animations
 
-UP: @ref step1
+PREV: @ref step1
 
 <b>Goals</b>
 
@@ -257,13 +256,13 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 NEXT: @ref step3
 
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 
 @page step3 Step 3 - Adding more nodes and decreasing the communication range
 to 250m
 
-UP: @ref step2
+PREV: @ref step2
 
 In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.ned:
 
@@ -289,12 +288,12 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 NEXT: @ref step4
 
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 
 @page step4 Step 4 - Setting up static routing
 
-UP: @ref step3
+PREV: @ref step3
 
 The recently added hosts will need to act like routers, and forward packets
 from Host A to Host B. We have to set IPv4 forwarding:
@@ -356,12 +355,12 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned,
 NEXT: @ref step5
 
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 
 @page step5 Step 5 - Taking into account the interference between different hosts
 
-UP: @ref step4
+PREV: @ref step4
 
 We refine our model by enabling the simulation of interference:
 
@@ -420,11 +419,11 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step6
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step6 Step 6 - Using CSMA to better utilize the medium
 
-UP: @ref step5
+PREV: @ref step5
 
 With CSMA, hosts will sniff into the medium to see if there are ongoing
 transmissions in their interference range. This is in contrast to the previous
@@ -463,11 +462,11 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step7
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step7 Step 7 - Configuring node movements
 
-UP: @ref step6
+PREV: @ref step6
 
 Let's configure the intermediate nodes (R1-3) to move around. We set them to
 move upwards at a speed of 12 miles per hour:
@@ -497,12 +496,12 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step8
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 
 @page step8 Step 8 - Configuring adhoc routing (AODV)
 
-UP: @ref step7
+PREV: @ref step7
 
 Let's configure ad-hoc routing with AODV.
 
@@ -533,11 +532,11 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step9
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step9 Step 9 - Installing energy management into the nodes
 
-UP: @ref step8
+PREV: @ref step8
 
 The nodes behave like mobile devices, and we can model their energy consumption
 and storage.
@@ -571,11 +570,11 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step10
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step10 Step 10 - Adding obstacles to the environment
 
-UP: @ref step9
+PREV: @ref step9
 
 Up until now, the nodes were operating in free space. In the real world,
 however, there are usually obstacles that decrease signal strength, absorb or
@@ -627,11 +626,11 @@ Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
 NEXT: @ref step11
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step11 Step 11 - Enhancing the accuracy of the radio model
 
-UP: @ref step10
+PREV: @ref step10
 
 We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which is more
 realistic. It implements a radio that uses APSK modulation, but it is not using
@@ -678,11 +677,11 @@ Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
 NEXT: @ref step12
 
-*/--------------------------------------------------------------------------/**
+<!------------------------------------------------------------------------>
 
 @page step12 Step 12 - Configuring a more accurate pathloss model
 
-UP: @ref step11
+PREV: @ref step11
 
 */
 
