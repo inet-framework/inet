@@ -693,14 +693,21 @@ PREV: @ref step9
 
 @section s10goals Goals
 
-Up until now, the nodes were operating in free space. In the real world,
-however, there are usually obstacles that decrease signal strength, absorb or
-reflect radio waves.
+In an attempt to make our simulation both more realistic and more
+interesting, we add some obstacles to the playground.
 
-Let's add a concrete wall to the model that sits between Host A and R1, and see
-what happens to the transmissions.
+In the real world, objects like walls, trees, buildings and hills act as
+obstacles to radio signal propagation. They absorb and reflect radio waves,
+reducing signal quality and decreasing the chance of successful reception.
 
-TODO
+In this step, we add a concrete wall to the model that sits between host A
+and `R1`, and see what happens. Since our model still uses the ideal radio
+and ideal wireless medium models that do not model physical phenomena,
+obstable modeling will be very simple, too: all obstacles completely absorb
+radio signals that go through them, making reception behind them
+impossible.
+
+TODO jo lenne ha ez tenyleg igy mukodne!
 
 @section s10model The model
 
@@ -757,14 +764,15 @@ PREV: @ref step10
 
 @section s11goals Goals
 
-TODO
+After so many steps, we let go of the ideal radio model, and introduce a
+more realistic one. Our new radio will use APSK modulation, but still
+without other techniques like forward error correction, interleaving or
+spreading. We also want our model of the radio channel to model attenuation
+and obstacle loss.
 
 @section s11model The model
 
-We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio, which is more
-realistic. It implements a radio that uses APSK modulation, but it is not using
-other techniques like forward error correction, interleaving or spreading.
-Nevertheless, it models attenuation and obstacle loss.
+We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio.
 
 So let's switch <tt>IdealRadioMedium</tt> with <tt>APSKScalarRadioMedium</tt>:
 
@@ -817,16 +825,15 @@ PREV: @ref step11
 
 @section s12goals Goals
 
-To make our model even more accurate, let's configure the pathloss model, too.
-By default the medium uses the free space model. We will use the TwoRayGroundReflection
-model here (assuming the we are walking on the ground).
-At this point we could also configure the computation model for the medium (scalar,
-multidimensional) the propagation mode (constant speed, constant time) etc.
-(see the radioMedium's parameters for further detail.)
+By default, the medium uses the free space model. To make our model even
+more accurate, let's configure a more realistic pathloss model, the two-ray
+ground reflection model here (assuming the we are walking on the ground).
 
 @section s12model The model
 
-TODO
+At this point we could also configure the computation model for the medium (scalar,
+multidimensional) the propagation mode (constant speed, constant time) etc.
+(see the radioMedium's parameters for further detail.)
 
 @section s12results Results
 
@@ -842,7 +849,7 @@ PREV: @ref step12
 
 @section s13goals Goals
 
-TODO
+TODO eddig nem volt gain?
 
 @section s13model The model
 
