@@ -260,13 +260,16 @@ NEXT: @ref step3
 
 
 @page step3 Step 3 - Adding more nodes and decreasing the communication range
-to 250m
 
 PREV: @ref step2
 
 @section s3goals Goals
 
-TODO
+Later in this tutorial, we'll want to turn our model into an ad-hoc network
+and experiment with routing. To this end, in this step we add three more
+wireless nodes, and reduce the communication range so that our two original
+hosts cannot reach one another directly. In later steps, we'll set up
+routing and use the extra nodes as relays.
 
 @section s3model The model
 
@@ -305,7 +308,10 @@ PREV: @ref step3
 
 @section s4goals Goals
 
-TODO
+In this step, we set up routing so that packets can flow from host A to B
+and vice versa. For this to happen, the intermediate nodes will need to act
+as a routers. As we still want to keep things simple, we'll use statically
+added routes that remain unchanged throughout the simulation.
 
 @section s4model The model
 
@@ -380,7 +386,24 @@ PREV: @ref step4
 
 @section s5goals Goals
 
-TODO
+In this step, we make our model of the physical layer a little bit more
+realistic. First, we turn on interference modeling in the unit disc radio.
+By interference we mean that if two signals collide (arrive at the receiver
+at the same time), they will become garbled and the reception will fail.
+(Remember that so far we were essentially modeling pairwise duplex
+communication.)
+
+Second, we'll set the interference range of the unit disc radio to be 500m,
+twice as much as the transmission range. The interference range parameter
+acknowledges the fact that radio signals become weaker with distance, and
+there is a range where they can no longer be received correctly, but they
+are still strong enough to interfere with other signals, that is, can cause
+the reception to fail. (For completeness, there is a third range called
+detection range, where signals are too weak to cause interference, but can
+still be detected by the receiver.)
+
+Of course, both changes reduce the throughput of the communication
+channel, so we expect the number of packets that go through to drop.
 
 @section s5model The model
 
@@ -451,14 +474,31 @@ PREV: @ref step5
 
 @section s6goals Goals
 
-TODO
+In this step, we try to increase the efficiency of the communication by
+choosing a medium access (MAC) protocol that is better suited for wireless
+communication.
+
+In the previous step, nodes transmitted on the channel immediately when
+they had something to send, without first listening for ongoing
+transmissions, and this resulted in a lot of collisions and lost packets.
+We improve the communication by using the CSMA protocol, which is based
+on the "sense before transmit" (or "listen before talk") principle.
+
+CSMA (Carrier sense multiple access) is a probabilistic MAC protocol in
+which a node verifies the absence of other traffic before transmitting on
+the shared transmission medium. In this protocol, a node that has data to
+send first waits for the channel to become idle, and then it also waits for
+random backoff period. If the channel was still idle during the backoff,
+the node can actually start transmitting. Otherwise the procedure starts
+over, possibly with an updated range for the backoff period.
+
+We expect that the use of CSMA will improve throughput, as there will be
+less collisions, and the medium will be utilized better.
+
+TODO What about ACKs? Turn them on in a SEPARATE step!
 
 @section s6model The model
 
-With CSMA, hosts will sniff into the medium to see if there are ongoing
-transmissions in their interference range. This is in contrast to the previous
-step, where they didn't care if someone else was transmitting. This should
-improve throughput, as the medium will be utilized better.
 
 We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which can use CSMA:
 
