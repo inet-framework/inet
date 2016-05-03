@@ -542,7 +542,10 @@ PREV: @ref step6
 
 @section s7goals Goals
 
-TODO
+In this step, we make the model more interesting by adding node mobility.
+Namely, we make the intermediate nodes travel north during simulation.
+This will cause them to move out of the range of host A and B, breaking the
+communication path.
 
 @section s7model The model
 
@@ -585,7 +588,16 @@ PREV: @ref step7
 
 @section s8goals Goals
 
-TODO
+In this step, we configure a routing protocol that adapts to the changing
+network topology, and will arrange packets to be routed through `R2` and `R3`
+as `R1` departs.
+
+We'll use AODV (ad hoc on-demand distance vector routing). It is a
+reactive routing protocol, which means its maintenance of the routing
+tables is driven by demand. This is in contrast to proactive routing
+protocols which keep routing tables up to date all the time (or at least
+try to).
+
 
 @section s8model The model
 
@@ -628,8 +640,17 @@ PREV: @ref step8
 
 @section s9goals Goals
 
-The nodes behave like mobile devices, and we can model their energy consumption
-and storage.
+Wireless ad-hoc networks often operate in an energy-constrained
+environment, and thus it is often useful to model the energy consumption of
+the devices. Consider, for example, wireless motes that operate on battery.
+The mote's activity has be planned so that the battery lasts until it can
+be recharged or replaced.
+
+In this step, we augment the nodes with components so that we can model
+(and measure) their energy consumption. For simplicity, we ignore energy
+constraints, and just install infinite energy sources into the nodes.
+
+@section s9model The model
 
 First set up energy consumption in the node radios:
 
