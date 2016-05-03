@@ -382,7 +382,7 @@ NEXT: @ref step5
 <!------------------------------------------------------------------------>
 
 
-@page step5 Step 5 - Taking into account the interference between different hosts
+@page step5 Step 5 - Taking interference into account
 
 PREV: @ref step4
 
@@ -584,7 +584,7 @@ NEXT: @ref step8
 <!------------------------------------------------------------------------>
 
 
-@page step8 Step 8 - Configuring adhoc routing (AODV)
+@page step8 Step 8 - Configuring ad-hoc routing (AODV)
 
 PREV: @ref step7
 
@@ -636,7 +636,7 @@ NEXT: @ref step9
 
 <!------------------------------------------------------------------------>
 
-@page step9 Step 9 - Installing energy management into the nodes
+@page step9 Step 9 - Modeling energy consumption
 
 PREV: @ref step8
 
@@ -751,7 +751,7 @@ NEXT: @ref step11
 
 <!------------------------------------------------------------------------>
 
-@page step11 Step 11 - Enhancing the accuracy of the radio model
+@page step11 Step 11 - Changing to a more realistic radio model
 
 PREV: @ref step10
 
@@ -817,7 +817,12 @@ PREV: @ref step11
 
 @section s12goals Goals
 
-TODO
+To make our model even more accurate, let's configure the pathloss model, too.
+By default the medium uses the free space model. We will use the TwoRayGroundReflection
+model here (assuming the we are walking on the ground).
+At this point we could also configure the computation model for the medium (scalar,
+multidimensional) the propagation mode (constant speed, constant time) etc.
+(see the radioMedium's parameters for further detail.)
 
 @section s12model The model
 
