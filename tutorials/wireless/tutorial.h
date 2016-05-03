@@ -121,6 +121,11 @@ other NED types for hosts, so we leave host type is parameterizable
 (`INetworkNode<` is the interface which all host types implement.). The
 actual NED type is given in the `omnetpp.ini` file to be `StandardHost`.
 
+@dontinclude omnetpp.ini
+@skipline [Config Wireless01]
+@until #end
+
+-------------------
 
 @dontinclude omnetpp.ini
 @skipline .host*.wlan[*].typename = "IdealWirelessNic"
@@ -223,6 +228,10 @@ few lines to the .ini file.
 @skip [Config Wireless02]
 @until extends
 
+@dontinclude omnetpp.ini
+@skipline [Config Wireless02]
+@until #end
+
 Visualizations are impemented by the <tt>Visualizer</tt> module.
 
 Visualization of transmissions are enabled by editing the ini file:
@@ -289,6 +298,10 @@ and cannot communicate directly.
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 250m
 
+@dontinclude omnetpp.ini
+@skipline [Config Wireless03]
+@until #end
+
 @section s3results Results
 
 The other hosts are there to relay the data between them, but routing is not yet
@@ -353,6 +366,10 @@ that packets take:
 
 @dontinclude omnetpp.ini
 @skipline *.visualizer.routeVisualizer.packetNameFilter = "*"
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless04]
+@until #end
 
 @section s4results Results
 
@@ -421,6 +438,10 @@ Set maximum interference range to the double of the communication range, 500m:
 
 This means that Host A cannot communicate with Host B because it is out of
 range, but its transmission will cause interference with other transmissions at Host B.
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless05]
+@until #end
 
 @section s5results Results
 
@@ -501,7 +522,6 @@ TODO What about ACKs? Turn them on in a SEPARATE step!
 
 @section s6model The model
 
-
 We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which can use CSMA:
 
 @dontinclude omnetpp.ini
@@ -523,6 +543,10 @@ needs resending:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].mac.useMACAcks = true
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless06]
+@until #end
 
 @section s6results Results
 
@@ -557,6 +581,10 @@ move upwards at a speed of 12 miles per hour:
 @dontinclude omnetpp.ini
 @skip mobility
 @until mobility.angle
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless07]
+@until #end
 
 @section s7results Results
 
@@ -600,7 +628,6 @@ tables is driven by demand. This is in contrast to proactive routing
 protocols which keep routing tables up to date all the time (or at least
 try to).
 
-
 @section s8model The model
 
 Let's configure ad-hoc routing with AODV.
@@ -620,6 +647,10 @@ Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
 <tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the
 <tt>AODVRouting</tt> submodule. Each node works like a router -- they manage
 their own routing tables and adapt to changes in the network topology.
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless08]
+@until #end
 
 @section s8results Results
 
@@ -676,6 +707,10 @@ power consumption, not the storage.
 The energyBalance variable indicates the energy consumption
 (host*.energyStorage.energyBalance). You can use the residualCapacity signal
 to display energy consumption over time.
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless09]
+@until #end
 
 @section s9results Results
 
@@ -739,7 +774,12 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 @dontinclude omnetpp.ini
 @skipline obstacleLoss
 
-@section s5results Results
+@dontinclude omnetpp.ini
+@skipline [Config Wireless10]
+@until #end
+
+
+@section s10results Results
 
 `TracingObstacleLoss` models signal loss along a line connecting the
 transmitter and the receiver, calculating the loss where it intersects
@@ -804,6 +844,11 @@ last 3 lines - preambleduration?>
 
 <!img>
 
+@dontinclude omnetpp.ini
+@skipline [Config Wireless11]
+@until #end
+
+
 @section s11results Results
 
 <!results>
@@ -835,6 +880,10 @@ At this point we could also configure the computation model for the medium (scal
 multidimensional) the propagation mode (constant speed, constant time) etc.
 (see the radioMedium's parameters for further detail.)
 
+@dontinclude omnetpp.ini
+@skipline [Config Wireless12]
+@until #end
+
 @section s12results Results
 
 TODO
@@ -854,6 +903,10 @@ TODO eddig nem volt gain?
 @section s13model The model
 
 TODO
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless13]
+@until #end
 
 @section s13results Results
 
