@@ -54,7 +54,7 @@ class INET_API IdealObstacleLoss : public cModule, public IObstacleLoss
     /**
      * The physical environment that provides to obstacles.
      */
-    IPhysicalEnvironment *environment = nullptr;
+    IPhysicalEnvironment *physicalEnvironment = nullptr;
     //@}
 
   protected:
