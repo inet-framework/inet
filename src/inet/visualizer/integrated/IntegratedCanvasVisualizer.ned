@@ -48,7 +48,7 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         string networkConnectionVisualizerType = default("NetworkConnectionCanvasVisualizer");
         string mobilityVisualizerType = default("MobilityCanvasVisualizer");
         string mediumVisualizerType = default("MediumCanvasVisualizer");
-        string obsacleLossVisualizerType = default("TracingObstacleLossCanvasVisualizer");
+        string obstacleLossVisualizerType = default("TracingObstacleLossCanvasVisualizer");
         string linkVisualizerType = default("LinkCanvasVisualizer");
         string routeVisualizerType = default("RouteCanvasVisualizer");
         string statisticVisualizerType = default("StatisticCanvasVisualizer");
@@ -77,7 +77,7 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,550");
         }
-        obsacleLossVisualizer: <obsacleLossVisualizerType> like ITracingObstacleLossVisualizer if obsacleLossVisualizerType != "" {
+        obstacleLossVisualizer: <obstacleLossVisualizerType> like ITracingObstacleLossVisualizer if obstacleLossVisualizerType != "" {
             parameters:
                 @display("p=150,650");
         }

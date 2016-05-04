@@ -339,42 +339,27 @@ added routes that remain unchanged throughout the simulation.
 
 @section s4model The model
 
-The recently added hosts will need to act like routers, and forward packets
-from Host A to Host B. We have to set IPv4 forwarding:
+For the recently added hosts to act as routers, IPv4 forwarding is enabled.
 
-@dontinclude omnetpp.ini
-@skipline *.host*.forwarding = true
+It is convenient to use the 'IPv4Configurator' module to configure routing.
+We want the intermediate hosts (R1-R3) to relay data from Host A to B. To keep
+things simple, each host is configured to be in a separate network. This way,
+routing tables contain each individual route between all hosts, making it easier
+to read.
 
-We need to set up static routes. We could do that manually, but that's tedious,
- so we let the configurator take care of it.
-
-@dontinclude omnetpp.ini
-@skipline *.configurator.config = xml("<config><interface hosts='**' address='10.0.0.x' netmask='255.255.255.0'/><autoroute metric='errorRate'/></config>")
-
-We tell the configurator to assign IP addresses in the 10.0.0.x range, and to
+<!rewrite>We tell the configurator to assign IP addresses in the 10.0.0.x range, and to
 create routes based on the estimated error rate of links between the nodes. In
 the case of the <tt>IdealRadio</tt> model, the error rate is 1 for nodes that
 are out of range, and 1e-3 for ones in range. The result will be that nodes that
 are out of range of each other will send packets to intermediate nodes that can
-forward them.
+forward them.<!rewrite>
 
-Turning off routing table optimizaton. This way there will be a distinct entry
-for reaching each host, so the table is easier to understand.
-
-@dontinclude omnetpp.ini
-@skipline *.configurator.optimizeRoutes = false
-
-Also disable routing table entries generated from the netmask and remove default
- routes (because it doesn't make sense in this adhoc network):
-
-@dontinclude omnetpp.ini
-@skipline **.routingTable.netmaskRoutes = ""
-
-Turn on route visualization, so we can see colored arrows indicating the routes
-that packets take:
-
-@dontinclude omnetpp.ini
-@skipline *.visualizer.routeVisualizer.packetNameFilter = "*"
+Routes can be visualized as colored poliarrows (?) by the 'routeVisualizer'
+submodule, which displays active routes. An active route is a route on which a packet has
+been recently sent between the network layers of the two endhosts. The route becomes inactive after
+a certain ammount of time unless it is reinforced by another packet. 
+By specifying "*" in the packetNameFilter parameter, all types of packets
+are visualized.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless04]
@@ -382,21 +367,17 @@ that packets take:
 
 @section s4results Results
 
-The arrows indicate routes in the network layer -- so now we should see a route
-going from Host A to B -- while we still have the blue lines that visualize
-communication paths in the physical layer. Here we want to display all kinds of
-packets, hence the "*".
-
-Now the two nodes can communicate -- you can see that Host R1 relays data to
-Host B.
-
-The data rate is the same as before (800 kbps) -- even though multiple hosts are
- transmitting at the same time -- because we're still ignoring interference.
+Now the two hosts can communicate as Host R1 relays data to
+Host B. The arrows indicate routes in the network layer, there is a route
+going from Host A through R1 to B, tracing the UDP stream.
 
 Note that there are blue lines leading to Host R2 and R3 even though they don't
 transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
+
+The data rate is the same as before (800 kbps) -- even though multiple hosts are
+ transmitting at the same time -- because interference is still ignored.
 
 <img src="wireless-step4-v2.png">
 
