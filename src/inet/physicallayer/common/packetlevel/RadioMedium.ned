@@ -37,6 +37,8 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 module RadioMedium like IRadioMedium
 {
     parameters:
+        string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
+
         // submodule type parameters
         string propagationType;                   // NED type of the propagation model
         string pathLossType;                      // NED type of the path loss model

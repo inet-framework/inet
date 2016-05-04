@@ -97,7 +97,7 @@ network RateControlTest
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        environment: PhysicalEnvironment {
+        physicalEnvironment: PhysicalEnvironment {
             parameters:
                 @display("p=50,50");
         }

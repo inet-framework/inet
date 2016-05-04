@@ -18,6 +18,7 @@
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/geometry/object/LineSegment.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/obstacleloss/TracingObstacleLoss.h"
 
 namespace inet {
@@ -28,7 +29,7 @@ Define_Module(TracingObstacleLoss);
 
 TracingObstacleLoss::TracingObstacleLoss() :
     medium(nullptr),
-    environment(nullptr),
+    physicalEnvironment(nullptr),
     intersectionComputationCount(0),
     intersectionCount(0)
 {
@@ -38,7 +39,7 @@ void TracingObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         medium = check_and_cast<IRadioMedium *>(getParentModule());
-        environment = check_and_cast<IPhysicalEnvironment *>(getModuleByPath(par("environmentModule")));
+        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
     }
 }
 
@@ -120,7 +121,7 @@ double TracingObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
 {
     double totalLoss = 1;
     TotalObstacleLossComputation obstacleLossVisitor(this, frequency, transmissionPosition, receptionPosition);
-    environment->visitObjects(&obstacleLossVisitor, LineSegment(transmissionPosition, receptionPosition));
+    physicalEnvironment->visitObjects(&obstacleLossVisitor, LineSegment(transmissionPosition, receptionPosition));
     totalLoss = obstacleLossVisitor.getTotalLoss();
     return totalLoss;
 }

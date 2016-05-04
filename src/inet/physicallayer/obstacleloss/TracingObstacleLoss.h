@@ -68,7 +68,7 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
     /**
      * The physical environment that provides to obstacles.
      */
-    IPhysicalEnvironment *environment;
+    IPhysicalEnvironment *physicalEnvironment;
     //@}
 
     /** @name Statistics */
