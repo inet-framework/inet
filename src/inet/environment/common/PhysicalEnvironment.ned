@@ -163,9 +163,6 @@ module PhysicalEnvironment like IPhysicalEnvironment
         double spaceMaxX @unit(m) = default(1m/0); // max x position of space, unconstrained by default (positive infinity)
         double spaceMaxY @unit(m) = default(1m/0); // max y position of space, unconstrained by default (positive infinity)
         double spaceMaxZ @unit(m) = default(1m/0); // max z position of space, unconstrained by default (positive infinity)
-        string viewAngle = default("z"); // the angle of view is either x, y, z, isometricN (where 0 <= N < 48 defaults to 0) or three rotation angles separated by spaces (it uses orthographic projection that is the projection is parallel to the normal of the viewing surface)
-        string viewTranslation = default("0 0"); // the translation is applied on the 2 dimensional projection
-        double axisLength @unit(m) = default(0m/0); // the length of the x, y, and z axes
         xml config = default(xml("<config/>"));
         @display("i=misc/town_s");
         @class(PhysicalEnvironment);

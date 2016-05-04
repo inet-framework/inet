@@ -19,7 +19,6 @@
 #define __INET_TRACINGOBSTACLELOSS_H
 
 #include "inet/common/IVisitor.h"
-#include "inet/common/figures/TrailFigure.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
@@ -63,22 +62,9 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
      * The physical environment that provides to obstacles.
      */
     IPhysicalEnvironment *environment;
-    /**
-     * Leaves graphical trail of obstacle intersections.
-     */
-    bool leaveIntersectionTrail;
-    /**
-     * Leaves graphical trail of intersection face normal vectors.
-     */
-    bool leaveFaceNormalVectorTrail;
     //@}
 
-    /** @name Graphics */
     //@{
-    /**
-     * The trail figures that represent the last couple of obstacle intersections.
-     */
-    TrailFigure *intersectionTrail;
     //@}
 
     /** @name Statistics */

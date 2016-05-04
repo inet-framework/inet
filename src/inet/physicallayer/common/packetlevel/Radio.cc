@@ -75,7 +75,6 @@ void Radio::initialize(int stage)
         parseRadioModeSwitchingTimes();
     }
     else if (stage == INITSTAGE_LAST) {
-        updateDisplayString();
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
     }
 }
@@ -592,37 +591,6 @@ void Radio::updateTransceiverPart()
         EV_INFO << "Changing radio transmitted signal part from " << IRadioSignal::getSignalPartName(transmittedSignalPart) << " to " << IRadioSignal::getSignalPartName(newTransmittedPart) << "." << endl;
         transmittedSignalPart = newTransmittedPart;
         emit(transmittedSignalPartChangedSignal, transmittedSignalPart);
-    }
-}
-
-void Radio::updateDisplayString()
-{
-    // draw the interference area and sensitivity area
-    // according pathloss propagation only
-    // we use the radio channel method to calculate interference distance
-    // it should be the methods provided by propagation models, but to
-    // avoid a big modification, we reuse those methods.
-    if (hasGUI() && (displayInterferenceRange || displayCommunicationRange)) {
-        cModule *host = findContainingNode(this);
-        cDisplayString& displayString = host->getDisplayString();
-        if (displayInterferenceRange) {
-            m maxInterferenceRage = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxInterferenceRange(this);
-            char tag[32];
-            sprintf(tag, "r%i1", getId());
-            displayString.removeTag(tag);
-            displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, maxInterferenceRage.get());
-            displayString.setTagArg(tag, 2, "gray");
-        }
-        if (displayCommunicationRange) {
-            m maxCommunicationRange = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxCommunicationRange(this);
-            char tag[32];
-            sprintf(tag, "r%i2", getId());
-            displayString.removeTag(tag);
-            displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, maxCommunicationRange.get());
-            displayString.setTagArg(tag, 2, "blue");
-        }
     }
 }
 

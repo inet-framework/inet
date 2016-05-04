@@ -28,9 +28,7 @@ import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 module TracingObstacleLoss like IObstacleLoss
 {
     parameters:
-        string environmentModule = default("environment"); // the path of the environment model relative to the network
-        bool leaveIntersectionTrail = default(false); // true means the instersections of transmissions and physical objects will be displayed on the canvas of the radio medium
-        bool leaveFaceNormalVectorTrail = default(false); // true means the face normal vectors of instersections will be displayed on the canvas of the radio medium
+        string environmentModule = default("environment");     // the path of the environment model relative to the network
         @display("i=block/control");
         @class(TracingObstacleLoss);
 }

@@ -62,10 +62,6 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission) = 0;
     virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *radioFrame) = 0;
     virtual void removeCachedFrame(const ITransmission *transmission) = 0;
-
-    virtual cFigure *getCachedFigure(const ITransmission *transmission) = 0;
-    virtual void setCachedFigure(const ITransmission *transmission, cFigure *figure) = 0;
-    virtual void removeCachedFigure(const ITransmission *transmission) = 0;
     //@}
 
     /** @name Reception Cache */

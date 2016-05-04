@@ -42,34 +42,15 @@ namespace physicalenvironment {
 class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 {
   protected:
-    class ObjectPositionComparator
-    {
-        protected:
-            const Rotation &viewRotation;
-
-        public:
-            ObjectPositionComparator(const Rotation &viewRotation) : viewRotation(viewRotation) {}
-
-            bool operator() (const PhysicalObject *left, const PhysicalObject *right) const
-            {
-                return viewRotation.rotateVectorClockwise(left->getPosition()).z < viewRotation.rotateVectorClockwise(right->getPosition()).z;
-            }
-    };
-
-  protected:
     /** @name Parameters */
     //@{
     K temperature;
     Coord spaceMin;
     Coord spaceMax;
-    double axisLength;
     //@}
 
     /** @name Internal state */
     //@{
-    EulerAngles viewAngle;
-    Rotation viewRotation;
-    cFigure::Point viewTranslation;
     std::vector<const ShapeBase *> shapes;
     std::vector<const Material *> materials;
     std::vector<const PhysicalObject *> objects;
@@ -84,25 +65,13 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
     std::map<const std::string, const Material *> nameToMaterialMap;
     //@}
 
-    /** @name Graphics */
-    //@{
-    cGroupFigure *objectsLayer;
-    //@}
-
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleParameterChange(const char *name) override;
 
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
-
-    virtual void updateCanvas();
-
-    virtual void computeFacePoints(const PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation);
-    virtual EulerAngles computeViewAngle(const char *viewAngle);
-    virtual cFigure::Point computeViewTranslation(const char *viewTranslation);
 
   public:
     PhysicalEnvironment();
@@ -112,9 +81,6 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
     virtual const Coord& getSpaceMin() const override { return spaceMin; }
     virtual const Coord& getSpaceMax() const override { return spaceMax; }
 
-    virtual const EulerAngles& getViewAngle() const override { return viewAngle; }
-    virtual const Rotation& getViewRotation() const override { return viewRotation; }
-    virtual const cFigure::Point& getViewTranslation() const override { return viewTranslation; }
     virtual const IMaterialRegistry *getMaterialRegistry() const override { return &MaterialRegistry::singleton; }
 
     virtual int getNumObjects() const { return objects.size(); }
