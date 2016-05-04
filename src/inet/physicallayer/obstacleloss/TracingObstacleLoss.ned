@@ -28,7 +28,7 @@ import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 module TracingObstacleLoss like IObstacleLoss
 {
     parameters:
-        string environmentModule = default("environment");     // the path of the environment model relative to the network
+        string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
         @display("i=block/control");
         @class(TracingObstacleLoss);
 }

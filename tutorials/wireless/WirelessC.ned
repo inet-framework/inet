@@ -21,7 +21,7 @@ import inet.environment.common.PhysicalEnvironment;
 network WirelessC extends WirelessB
 {
     submodules:
-        environment: PhysicalEnvironment {
+        physicalEnvironment: PhysicalEnvironment {
             @display("p=429,29");
         }
 }
