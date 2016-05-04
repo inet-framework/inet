@@ -290,7 +290,9 @@ routing and use the extra nodes as relays.
 
 @section s3model The model
 
-In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.ned:
+We need to add 3 more hosts. This could be done by copying end editing the
+network used in the previous steps, but instead we extend WirelessA into
+WirelessB using the inheritance feature of NED:
 
 @dontinclude WirelessB.ned
 @skip network
@@ -298,8 +300,14 @@ In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.
 @skipline }
 @skipline }
 
-We decrease the communication range of all hosts' radios to 250 meters to place hosts A and B out of
-communication range.
+We decrease the communication range of the radios of all hosts to 250
+meters. This will make direct communication between hosts A and B
+impossible, because their distance is 400 meters. The recently added hosts
+are in the correct positions to relay data between hosts A and B, but
+routing is not yet configured. The result is that hosts A and B will not be
+able to communicate at all.
+
+The configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless03]
@@ -307,14 +315,11 @@ communication range.
 
 @section s3results Results
 
-Hosts A and B are placed 400 meters appart, making direct communication between
-the them impossible because of the decrease in communication range of their
-radios. The recently added hosts are in the correct positions to relay data between hosts
-A and B, but routing is not yet configured. The result is that Host A and B
-cannot communicate at all. Hosts R1 and R2 are the only hosts in communication
-range of Host A, so they are the only ones that receive Host A's transmissions.
-This is indicated by the blue lines connecting Host A to R1 and R2, respectively,
-indicating successful receptions in the physical layer.
+As we run the simulation, we can see that hosts R1 and R2 are the only
+hosts in communication range of Host A, so they are the only ones that
+receive Host A's transmissions. This is indicated by the blue lines
+connecting Host A to R1 and R2, respectively, indicating successful
+receptions in the physical layer.
 
 <img src="wireless-step3-v2.png">
 
@@ -341,10 +346,19 @@ added routes that remain unchanged throughout the simulation.
 
 @section s4model The model
 
-For the recently added hosts to act as routers, IPv4 forwarding is enabled.
+<b>Setting up IPv4</b>
 
-It is convenient to use the 'IPv4Configurator' module to configure routing.
-We want the intermediate hosts (R1-R3) to relay data from Host A to B. To keep
+For the recently added hosts to act as routers, IPv4 forwarding needs to be enabled.
+This can be done by setting the `forwarding` parameter of `StandardHost`.
+
+We also need to set up static routing. Static configuration in the INET Framework
+is often done by configurator modules. Static IPv4 configuration, including address
+assignment and adding routes, is usually done using the `IPv4NetworkConfigurator` module.
+The model already has an instance of this module, the `configurator` submodule.
+The configurator can be configured using an XML specification and some additional
+parameters.
+
+TODO  We want the intermediate hosts (R1-R3) to relay data from Host A to B. To keep
 things simple, each host is configured to be in a separate network. This way,
 routing tables contain each individual route between all hosts, making it easier
 to read.
@@ -356,12 +370,14 @@ are out of range, and 1e-3 for ones in range. The result will be that nodes that
 are out of range of each other will send packets to intermediate nodes that can
 forward them.<!rewrite>
 
-Routes can be visualized as colored poliarrows (?) by the 'routeVisualizer'
-submodule, which displays active routes. An active route is a route on which a packet has
-been recently sent between the network layers of the two endhosts. The route becomes inactive after
-a certain ammount of time unless it is reinforced by another packet. 
-By specifying "*" in the packetNameFilter parameter, all types of packets
-are visualized.
+<b>Visualization</b>
+
+Packet paths can be visualized as colored arrows by the `routeVisualizer`
+submodule. This module displays paths where a packet has been recently sent
+between network layers of the two end hosts. The path continually fades and then
+it disappears a certain ammount of time unless it is reinforced by another
+packet. By specifying "*" in the `packetNameFilter` parameter, all types of
+packets are visualized.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless04]
@@ -370,7 +386,7 @@ are visualized.
 @section s4results Results
 
 Now the two hosts can communicate as Host R1 relays data to
-Host B. The arrows indicate routes in the network layer, there is a route
+Host B. The arrows indicate paths in the network layer, there is a path
 going from Host A through R1 to B, tracing the UDP stream.
 
 Note that there are blue lines leading to Host R2 and R3 even though they don't
