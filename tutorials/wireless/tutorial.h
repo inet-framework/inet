@@ -217,9 +217,8 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 @section s2goals Goals
 
-Transmissions can be visualized in the simulation environment. The configuration
-for this step will set up animations that show transmissions as they propagate
-through space.
+To facilitate understanding, we would like to visualize radio transmissions
+and signal propagation.
 
 @section s2model The model
 
@@ -228,15 +227,18 @@ Steps in this tutorial build on each other. In omnetpp.ini, the configuration
 This way, subsequent steps can be based on the previous ones by adding a
 few lines to the .ini file.
 
-@dontinclude omnetpp.ini
-@skip [Config Wireless02]
-@until extends
+Visualization support in INET is implemented as separate modules that
+are optional parts of a network model. There are several kinds of visualizers
+responsible for showing various aspects of the simulation. Visualizers are
+parameterizable, and some visualizers are themselves composed of several
+optional components.
 
-@dontinclude omnetpp.ini
-@skipline [Config Wireless02]
-@until ####
-
-Visualizations are impemented by the <tt>Visualizer</tt> module.
+The `visualizer` submodule in this network is an `IntegratedCanvasVisualizer`,
+which is a compound module that contains all typically useful visualizers as submodules.
+It can display physical objects in the physical environment, movement trail,
+discovered network connectivity, discovered network routes, ongoing
+transmissions, ongoing receptions, propagating radio signals, and
+statistics.
 
 Visualization of transmissions are enabled by editing the ini file:
 
@@ -258,6 +260,12 @@ successful physical layer communication paths:
 
 @dontinclude omnetpp.ini
 @skipline displayCommunicationTrail
+
+Configuration:
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless02]
+@until ####
 
 @section s2results Results
 
