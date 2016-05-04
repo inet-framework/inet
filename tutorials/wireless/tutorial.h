@@ -123,7 +123,7 @@ actual NED type is given in the `omnetpp.ini` file to be `StandardHost`.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless01]
-@until #end
+@until ####
 
 -------------------
 
@@ -230,7 +230,7 @@ few lines to the .ini file.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless02]
-@until #end
+@until ####
 
 Visualizations are impemented by the <tt>Visualizer</tt> module.
 
@@ -300,7 +300,7 @@ and cannot communicate directly.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless03]
-@until #end
+@until ####
 
 @section s3results Results
 
@@ -369,7 +369,7 @@ that packets take:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless04]
-@until #end
+@until ####
 
 @section s4results Results
 
@@ -441,7 +441,7 @@ range, but its transmission will cause interference with other transmissions at 
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless05]
-@until #end
+@until ####
 
 @section s5results Results
 
@@ -546,7 +546,7 @@ needs resending:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless06]
-@until #end
+@until ####
 
 @section s6results Results
 
@@ -584,7 +584,7 @@ move upwards at a speed of 12 miles per hour:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless07]
-@until #end
+@until ####
 
 @section s7results Results
 
@@ -650,7 +650,7 @@ their own routing tables and adapt to changes in the network topology.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless08]
-@until #end
+@until ####
 
 @section s8results Results
 
@@ -710,7 +710,7 @@ to display energy consumption over time.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless09]
-@until #end
+@until ####
 
 @section s9results Results
 
@@ -776,7 +776,7 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless10]
-@until #end
+@until ####
 
 
 @section s10results Results
@@ -846,7 +846,7 @@ last 3 lines - preambleduration?>
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless11]
-@until #end
+@until ####
 
 
 @section s11results Results
@@ -882,7 +882,7 @@ multidimensional) the propagation mode (constant speed, constant time) etc.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless12]
-@until #end
+@until ####
 
 @section s12results Results
 
@@ -906,7 +906,7 @@ TODO
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless13]
-@until #end
+@until ####
 
 @section s13results Results
 
