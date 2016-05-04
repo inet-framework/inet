@@ -29,9 +29,6 @@ Define_Module(TracingObstacleLoss);
 TracingObstacleLoss::TracingObstacleLoss() :
     medium(nullptr),
     environment(nullptr),
-    leaveIntersectionTrail(false),
-    leaveFaceNormalVectorTrail(false),
-    intersectionTrail(nullptr),
     intersectionComputationCount(0),
     intersectionCount(0)
 {
@@ -42,13 +39,6 @@ void TracingObstacleLoss::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         medium = check_and_cast<IRadioMedium *>(getParentModule());
         environment = check_and_cast<IPhysicalEnvironment *>(getModuleByPath(par("environmentModule")));
-        leaveIntersectionTrail = par("leaveIntersectionTrail");
-        leaveFaceNormalVectorTrail = par("leaveFaceNormalVectorTrail");
-        if (leaveIntersectionTrail || leaveFaceNormalVectorTrail) {
-            intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
-            cCanvas *canvas = getSimulation()->getSystemModule()->getCanvas();
-            canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
-        }
     }
 }
 
@@ -110,44 +100,6 @@ double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz 
     {
         intersectionCount++;
         double intersectionDistance = intersection2.distance(intersection1);
-        if (leaveIntersectionTrail || leaveFaceNormalVectorTrail) {
-            Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
-            Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
-            if (leaveIntersectionTrail) {
-                cLineFigure *intersectionLine = new cLineFigure();
-                intersectionLine->setTags("obstacle_intersection recent_history");
-                intersectionLine->setStart(environment->computeCanvasPoint(rotatedIntersection1 + position));
-                intersectionLine->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + position));
-                intersectionLine->setLineColor(cFigure::RED);
-                intersectionLine->setLineWidth(1);
-                intersectionTrail->addFigure(intersectionLine);
-    #if OMNETPP_VERSION >= 0x500
-                intersectionLine->setZoomLineWidth(false);
-    #endif
-            }
-            if (leaveFaceNormalVectorTrail) {
-                normal1 = normal1 / normal1.length() * intersectionDistance / 10;
-                normal2 = normal2 / normal2.length() * intersectionDistance / 10;
-                cLineFigure *normal1Line = new cLineFigure();
-                normal1Line->setStart(environment->computeCanvasPoint(rotatedIntersection1 + position));
-                normal1Line->setEnd(environment->computeCanvasPoint(rotatedIntersection1 + position + rotation.rotateVectorClockwise(normal1)));
-                normal1Line->setLineColor(cFigure::GREY);
-                normal1Line->setTags("obstacle_intersection face_normal_vector recent_history");
-                normal1Line->setLineWidth(1);
-                intersectionTrail->addFigure(normal1Line);
-                cLineFigure *normal2Line = new cLineFigure();
-                normal2Line->setStart(environment->computeCanvasPoint(rotatedIntersection2 + position));
-                normal2Line->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + position + rotation.rotateVectorClockwise(normal2)));
-                normal2Line->setLineColor(cFigure::GREY);
-                normal2Line->setTags("obstacle_intersection face_normal_vector recent_history");
-                normal2Line->setLineWidth(1);
-                intersectionTrail->addFigure(normal2Line);
-    #if OMNETPP_VERSION >= 0x500
-                normal1Line->setZoomLineWidth(false);
-                normal2Line->setZoomLineWidth(false);
-    #endif
-            }
-        }
         const IMaterial *material = object->getMaterial();
         totalLoss *= computeDielectricLoss(material, frequency, m(intersectionDistance));
         if (!normal1.isUnspecified()) {

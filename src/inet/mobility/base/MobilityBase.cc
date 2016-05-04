@@ -147,16 +147,6 @@ void MobilityBase::handleMessage(cMessage *message)
 void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
-    if (hasGUI() && visualRepresentation) {
-        cFigure::Point point = IPhysicalEnvironment::computeCanvasPoint(lastPosition);
-        char buf[32];
-        snprintf(buf, sizeof(buf), "%lf", point.x);
-        buf[sizeof(buf) - 1] = 0;
-        visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
-        snprintf(buf, sizeof(buf), "%lf", point.y);
-        buf[sizeof(buf) - 1] = 0;
-        visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
-    }
 }
 
 void MobilityBase::emitMobilityStateChangedSignal()

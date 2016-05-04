@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include "inet/common/IntervalTree.h"
-#include "inet/common/figures/TrailFigure.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
@@ -28,7 +27,6 @@
 #include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
 #include "inet/physicallayer/common/packetlevel/CommunicationLog.h"
-#include "inet/physicallayer/common/packetlevel/MediumVisualizer.h"
 #include "inet/linklayer/common/MACAddress.h"
 
 namespace inet {
@@ -155,14 +153,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The communication log output recorder.
      */
     CommunicationLog communicationLog;
-    //@}
-
-    /** @name Graphics */
-    //@{
-    /**
-     * The visualizer for the communication on the medium.
-     */
-    MediumVisualizer *mediumVisualizer;
     //@}
 
     /** @name Statistics */
