@@ -41,12 +41,14 @@ and consecutive steps mostly share the same networks, defined in NED.
 - @ref step12
 - @ref step13
 
-NEXT: @ref step1
+@nav{index,step1}
 
 <!------------------------------------------------------------------------>
 
 @page step1 Step 1 - Two hosts communicating wirelessly
 PREV: <a href="index.html" class="el">Introduction</a>
+
+@nav{index,step2}
 
 @section s1goals Goals
 
@@ -205,13 +207,13 @@ the transmission rate was around 800 kbps.
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
-NEXT: @ref step2
+@nav{index,step2}
 
 <!------------------------------------------------------------------------>
 
 @page step2 Step 2 - Setting up some animations
 
-PREV: @ref step1
+@nav{step1,step3}
 
 @section s2goals Goals
 
@@ -268,7 +270,7 @@ transmissions, and blue lines indicating communication paths:
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
-NEXT: @ref step3
+@nav{step1,step3}
 
 
 <!------------------------------------------------------------------------>
@@ -276,7 +278,7 @@ NEXT: @ref step3
 
 @page step3 Step 3 - Adding more nodes and decreasing the communication range
 
-PREV: @ref step2
+@nav{step2,step4}
 
 @section s3goals Goals
 
@@ -320,7 +322,7 @@ indicating successful receptions in the physical layer.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-NEXT: @ref step4
+@nav{step2,step4}
 
 
 <!------------------------------------------------------------------------>
@@ -328,7 +330,7 @@ NEXT: @ref step4
 
 @page step4 Step 4 - Setting up static routing
 
-PREV: @ref step3
+@nav{step3,step5}
 
 @section s4goals Goals
 
@@ -385,7 +387,7 @@ The data rate is the same as before (800 kbps) -- even though multiple hosts are
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned,
 
-NEXT: @ref step5
+@nav{step3,step5}
 
 
 <!------------------------------------------------------------------------>
@@ -393,7 +395,7 @@ NEXT: @ref step5
 
 @page step5 Step 5 - Taking interference into account
 
-PREV: @ref step4
+@nav{step4,step6}
 
 @section s5goals Goals
 
@@ -481,13 +483,13 @@ which host can transmit and when.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-NEXT: @ref step6
+@nav{step4,step6}
 
 <!------------------------------------------------------------------------>
 
 @page step6 Step 6 - Using CSMA to better utilize the medium
 
-PREV: @ref step5
+@nav{step5,step7}
 
 @section s6goals Goals
 
@@ -554,13 +556,13 @@ interference.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-NEXT: @ref step7
+@nav{step5,step7}
 
 <!------------------------------------------------------------------------>
 
 @page step7 Step 7 - Configuring node movements
 
-PREV: @ref step6
+@nav{step6,step8}
 
 @section s7goals Goals
 
@@ -605,14 +607,14 @@ A dynamic routing mechanism is needed to reconfigure the routes as nodes move ou
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-NEXT: @ref step8
+@nav{step6,step8}
 
 <!------------------------------------------------------------------------>
 
 
 @page step8 Step 8 - Configuring ad-hoc routing (AODV)
 
-PREV: @ref step7
+@nav{step7,step9}
 
 @section s8goals Goals
 
@@ -663,13 +665,13 @@ communication.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-NEXT: @ref step9
+@nav{step7,step9}
 
 <!------------------------------------------------------------------------>
 
 @page step9 Step 9 - Modeling energy consumption
 
-PREV: @ref step8
+@nav{step8,step10}
 
 @section s9goals Goals
 
@@ -720,13 +722,13 @@ to display energy consumption over time.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-NEXT: @ref step10
+@nav{step8,step10}
 
 <!------------------------------------------------------------------------>
 
 @page step10 Step 10 - Adding obstacles to the environment
 
-PREV: @ref step9
+@nav{step9,step11}
 
 @section s10goals Goals
 
@@ -798,13 +800,13 @@ radio model.
 
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
-NEXT: @ref step11
+@nav{step9,step11}
 
 <!------------------------------------------------------------------------>
 
 @page step11 Step 11 - Changing to a more realistic radio model
 
-PREV: @ref step10
+@nav{step10,step12}
 
 @section s11goals Goals
 
@@ -866,13 +868,13 @@ behind it.<!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
-NEXT: @ref step12
+@nav{step10,step12}
 
 <!------------------------------------------------------------------------>
 
 @page step12 Step 12 - Configuring a more accurate pathloss model
 
-PREV: @ref step11
+@nav{step11,step13}
 
 @section s12goals Goals
 
@@ -896,13 +898,13 @@ TODO
 
 <b>Number of packets received by host B: 243</b>
 
-NEXT: @ref step13
+@nav{step11,step13}
 
 <!------------------------------------------------------------------------>
 
 @page step13 Step 13 - Enhancing the antenna with some constant gain
 
-PREV: @ref step12
+@nav{step12,index}
 
 @section s13goals Goals
 
@@ -921,6 +923,8 @@ TODO
 TODO
 
 <b>Number of packets received by host B: 942</b>
+
+@nav{step12,index}
 
 */
 
