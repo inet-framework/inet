@@ -58,7 +58,6 @@
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_OSG"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.paths.1304941279" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
@@ -150,7 +149,6 @@
 									<listOptionValue builtIn="false" value="WITH_LMAC"/>
 									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
 									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_OSG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1140951817" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
