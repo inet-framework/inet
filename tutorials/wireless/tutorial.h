@@ -347,8 +347,8 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @section s4goals Goals
 
-In this step, we set up routing so that packets can flow from host A to B
-and vice versa. For this to happen, the intermediate nodes will need to act
+In this step, we set up routing so that packets can flow from host A to B.
+For this to happen, the intermediate nodes will need to act
 as a routers. As we still want to keep things simple, we'll use statically
 added routes that remain unchanged throughout the simulation.
 
@@ -431,7 +431,7 @@ at the same time), they will become garbled and the reception will fail.
 communication.)
 
 Second, we'll set the interference range of the unit disc radio to be 500m,
-twice as much as the transmission range. The interference range parameter
+twice as much as the communication range. The interference range parameter
 acknowledges the fact that radio signals become weaker with distance, and
 there is a range where they can no longer be received correctly, but they
 are still strong enough to interfere with other signals, that is, can cause
@@ -439,7 +439,7 @@ the reception to fail. (For completeness, there is a third range called
 detection range, where signals are too weak to cause interference, but can
 still be detected by the receiver.)
 
-Of course, both changes reduce the throughput of the communication
+Of course, this change reduces the throughput of the communication
 channel, so we expect the number of packets that go through to drop.
 
 @section s5model The model
@@ -517,9 +517,9 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @section s6goals Goals
 
-In this step, we try to increase the efficiency of the communication by
-choosing a medium access (MAC) protocol that is better suited for wireless
-communication.
+In this step, we try to increase the utilization of the communication
+channel by choosing a medium access control (MAC) protocol that is better
+suited for wireless communication.
 
 In the previous step, nodes transmitted on the channel immediately when
 they had something to send, without first listening for ongoing
@@ -527,7 +527,7 @@ transmissions, and this resulted in a lot of collisions and lost packets.
 We improve the communication by using the CSMA protocol, which is based
 on the "sense before transmit" (or "listen before talk") principle.
 
-CSMA (Carrier sense multiple access) is a probabilistic MAC protocol in
+CSMA (carrier sense multiple access) is a probabilistic MAC protocol in
 which a node verifies the absence of other traffic before transmitting on
 the shared transmission medium. In this protocol, a node that has data to
 send first waits for the channel to become idle, and then it also waits for
@@ -592,7 +592,7 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 In this step, we make the model more interesting by adding node mobility.
 Namely, we make the intermediate nodes travel north during simulation.
-This will cause them to move out of the range of host A and B, breaking the
+After a while, they will move out of the range of host A (and B), breaking the
 communication path.
 
 @section s7model The model
@@ -766,11 +766,8 @@ reducing signal quality and decreasing the chance of successful reception.
 In this step, we add a concrete wall to the model that sits between host A
 and `R1`, and see what happens. Since our model still uses the ideal radio
 and ideal wireless medium models that do not model physical phenomena,
-obstable modeling will be very simple, too: all obstacles completely absorb
-radio signals that go through them, making reception behind them
-impossible.
-
-TODO jo lenne ha ez tenyleg igy mukodne!
+obstable modeling will be very simple: all obstacles completely absorb
+radio signals, making reception behind them impossible.
 
 @section s10model The model
 
