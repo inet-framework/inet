@@ -201,6 +201,8 @@ When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
 the transmission rate was around 800 kbps.
 
+<b>Number of packets received by host B: 2422</b>
+
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 NEXT: @ref step2
@@ -262,6 +264,8 @@ transmissions, and blue lines indicating communication paths:
 
 <img src="step2_2_v3.gif">
 
+<b>Number of packets received by host B: 2422</b>
+
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 NEXT: @ref step3
@@ -308,9 +312,11 @@ A and B, but routing is not yet configured. The result is that Host A and B
 cannot communicate at all. Hosts R1 and R2 are the only hosts in communication
 range of Host A, so they are the only ones that receive Host A's transmissions.
 This is indicated by the blue lines connecting Host A to R1 and R2, respectively,
-indicating successful receptions in the physical layer. 
+indicating successful receptions in the physical layer.
 
 <img src="wireless-step3-v2.png">
+
+<b>Number of packets received by host B: 0</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -393,6 +399,8 @@ but they discard the packets at the link layer because it is not addressed to
 them.
 
 <img src="wireless-step4-v2.png">
+
+<b>Number of packets received by host B: 2453</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned,
 
@@ -488,6 +496,8 @@ by interference. Only a handful of packets arrive at Host B. <!rewrite>
 To minimize interference, we need some kind of media access protocol to govern
 which host can transmit and when.
 
+<b>Number of packets received by host B: 40</b>
+
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step6
@@ -559,6 +569,8 @@ We can see that throughput is about 380 kbps, so it is increased over the
 previous step thanks to CSMA -- altough less than in step 4 because of the
 interference.
 
+<b>Number of packets received by host B: 1172</b>
+
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step7
@@ -607,6 +619,8 @@ connection to B.
 <img src="step7_2_v3.gif">
 
 A dynamic routing mechanism is needed to reconfigure the routes as nodes move out of range.
+
+<b>Number of packets received by host B: 787</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -664,6 +678,8 @@ communication.
 
 <img src="wireless-step8-v2.png">
 
+<b>Number of packets received by host B: 890</b>
+
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 NEXT: @ref step9
@@ -718,6 +734,8 @@ to display energy consumption over time.
 @section s9results Results
 
 <img src="wireless-step9-energy.png">
+
+<b>Number of packets received by host B: 980</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -795,6 +813,8 @@ radio model.
 
 <img src="wireless-step10-v2.png">
 
+<b>Number of packets received by host B: 603</b>
+
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
 NEXT: @ref step11
@@ -861,6 +881,8 @@ Now our model takes the objects into account when calculating attenuation.
 The wall is blocking the transmission between Host A and R1 when R1 gets
 behind it.<!rewrite>
 
+<b>Number of packets received by host B: 477</b>
+
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
 NEXT: @ref step12
@@ -891,6 +913,8 @@ multidimensional) the propagation mode (constant speed, constant time) etc.
 
 TODO
 
+<b>Number of packets received by host B: 243</b>
+
 NEXT: @ref step13
 
 <!------------------------------------------------------------------------>
@@ -914,6 +938,8 @@ TODO
 @section s13results Results
 
 TODO
+
+<b>Number of packets received by host B: 942</b>
 
 */
 
