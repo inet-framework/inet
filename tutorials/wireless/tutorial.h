@@ -292,11 +292,8 @@ In this scenario, we add 3 more hosts by extending WirelessA.ned into WirelessB.
 @skipline }
 @skipline }
 
-We decrease the communication range to 250m, so host A and B are out of range,
-and cannot communicate directly.
-
-@dontinclude omnetpp.ini
-@skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 250m
+We decrease the communication range of all hosts' radios to 250 meters to place hosts A and B out of
+communication range.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless03]
@@ -304,8 +301,14 @@ and cannot communicate directly.
 
 @section s3results Results
 
-The other hosts are there to relay the data between them, but routing is not yet
- configured. The result is that Host A and B cannot communicate.
+Hosts A and B are placed 400 meters appart, making direct communication between
+the them impossible because of the decrease in communication range of their
+radios. The recently added hosts are in the correct positions to relay data between hosts
+A and B, but routing is not yet configured. The result is that Host A and B
+cannot communicate at all. Hosts R1 and R2 are the only hosts in communication
+range of Host A, so they are the only ones that receive Host A's transmissions.
+This is indicated by the blue lines connecting Host A to R1 and R2, respectively,
+indicating successful receptions in the physical layer. 
 
 <img src="wireless-step3-v2.png">
 
