@@ -52,6 +52,7 @@ module Router extends TransportLayerNodeBase
 {
     parameters:
         @display("i=abstract/router");
+        @figure[submodules];
         forwarding = true;
         bool hasOSPF = default(false);
         bool hasRIP = default(false);
