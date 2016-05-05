@@ -42,11 +42,11 @@ and consecutive steps mostly share the same networks, defined in NED.
 - @ref step13
 
 @nav{index,step1}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step1 Step 1 - Two hosts communicating wirelessly
-PREV: <a href="index.html" class="el">Introduction</a>
 
 @nav{index,step2}
 
@@ -208,6 +208,7 @@ the transmission rate was around 800 kbps.
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 @nav{index,step2}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -280,9 +281,9 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 @nav{step1,step3}
 
+@fixupini
 
 <!------------------------------------------------------------------------>
-
 
 @page step3 Step 3 - Adding more nodes and decreasing the communication range
 
@@ -337,9 +338,9 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step2,step4}
 
+@fixupini
 
 <!------------------------------------------------------------------------>
-
 
 @page step4 Step 4 - Setting up static routing
 
@@ -413,9 +414,9 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned,
 
 @nav{step3,step5}
 
+@fixupini
 
 <!------------------------------------------------------------------------>
-
 
 @page step5 Step 5 - Taking interference into account
 
@@ -508,6 +509,7 @@ which host can transmit and when.
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step4,step6}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -581,6 +583,7 @@ interference.
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step5,step7}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -632,9 +635,9 @@ A dynamic routing mechanism is needed to reconfigure the routes as nodes move ou
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step6,step8}
+@fixupini
 
 <!------------------------------------------------------------------------>
-
 
 @page step8 Step 8 - Configuring ad-hoc routing (AODV)
 
@@ -690,6 +693,7 @@ communication.
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step7,step9}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -747,6 +751,7 @@ to display energy consumption over time.
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step8,step10}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -822,6 +827,7 @@ radio model.
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
 @nav{step9,step11}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -890,6 +896,7 @@ behind it.<!rewrite>
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
 @nav{step10,step12}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -920,6 +927,7 @@ TODO
 <b>Number of packets received by host B: 243</b>
 
 @nav{step11,step13}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -946,6 +954,7 @@ TODO
 <b>Number of packets received by host B: 942</b>
 
 @nav{step12,index}
+@fixupini
 
 */
 
