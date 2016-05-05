@@ -420,14 +420,14 @@ transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
 
-The data rate is the same as before (800 kbps) -- even though multiple hosts are
- transmitting at the same time -- because interference is still ignored.
+The data rate is the same as before (800 kbps), even though multiple hosts are
+transmitting at the same time, because interference is still ignored.
 
 <img src="wireless-step4-v2.png">
 
 <b>Number of packets received by host B: 2453</b>
 
-Sources: @ref omnetpp.ini, @ref WirelessB.ned,
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @nav{step3,step5}
 
@@ -462,18 +462,15 @@ channel, so we expect the number of packets that go through to drop.
 
 @section s5model The model
 
-We refine our model by enabling the simulation of interference:
+To turn on interference modeling, we set the `ignoreInterference` parameter
+in the receiver part of `IdealRadio` to `false`.
 
-@dontinclude omnetpp.ini
-@skipline *.host*.wlan[*].radio.receiver.ignoreInterference = false
+Interference range is the `maxInterferenceRange` parameter of
+`IdealRadio`'s transmitter part, so we set that to 500m.
 
-Set maximum interference range to the double of the communication range, 500m:
-
-@dontinclude omnetpp.ini
-@skipline *.host*.wlan[*].radio.transmitter.maxInterferenceRange = 500m
-
-This means that Host A cannot communicate with Host B because it is out of
-range, but its transmission will cause interference with other transmissions at Host B.
+We expect that although host B will not be able to receive host A's
+transmissions, those transmission will still cause interference with other
+(e.g. R1's) transmissions at host B.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless05]
