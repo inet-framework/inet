@@ -349,44 +349,61 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 @section s4goals Goals
 
 In this step, we set up routing so that packets can flow from host A to B.
-For this to happen, the intermediate nodes will need to act
-as a routers. As we still want to keep things simple, we'll use statically
-added routes that remain unchanged throughout the simulation.
+For this to happen, the intermediate nodes will need to act as a routers.
+As we still want to keep things simple, we'll use statically added routes
+that remain unchanged throughout the simulation.
+
+We also configure visualization so that we can see the paths packets take
+when traveling from host A to B.
 
 @section s4model The model
 
-<b>Setting up IPv4</b>
+<b>Setting up routing</b>
 
-For the recently added hosts to act as routers, IPv4 forwarding needs to be enabled.
-This can be done by setting the `forwarding` parameter of `StandardHost`.
+For the recently added hosts to act as routers, IPv4 forwarding needs to be
+enabled. This can be done by setting the `forwarding` parameter of
+`StandardHost`.
 
-We also need to set up static routing. Static configuration in the INET Framework
-is often done by configurator modules. Static IPv4 configuration, including address
-assignment and adding routes, is usually done using the `IPv4NetworkConfigurator` module.
-The model already has an instance of this module, the `configurator` submodule.
-The configurator can be configured using an XML specification and some additional
-parameters.
+We also need to set up static routing. Static configuration in the INET
+Framework is often done by configurator modules. Static IPv4 configuration,
+including address assignment and adding routes, is usually done using the
+`IPv4NetworkConfigurator` module. The model already has an instance of this
+module, the `configurator` submodule. The configurator can be configured
+using an XML specification and some additional parameters. Here, the XML
+specification is provided as a string constant inside the ini file.
 
-TODO  We want the intermediate hosts (R1-R3) to relay data from Host A to B. To keep
-things simple, each host is configured to be in a separate network. This way,
-routing tables contain each individual route between all hosts, making it easier
-to read.
-
-<!rewrite>We tell the configurator to assign IP addresses in the 10.0.0.x range, and to
-create routes based on the estimated error rate of links between the nodes. In
-the case of the `IdealRadio` model, the error rate is 1 for nodes that
-are out of range, and 1e-3 for ones in range. The result will be that nodes that
-are out of range of each other will send packets to intermediate nodes that can
-forward them.<!rewrite>
+Without going into details about the contents of the XML configuration
+string and other configurator parameters, we tell the configurator to
+assign IP addresses in the 10.0.0.x range, and to create routes based on
+the estimated packet error rate of links between the nodes. (The
+configurator looks at the wireless network as a full graph. Links with high
+error rates will have high costs, and links with low error rates will have
+low costs. Routes are formed such as to minimize their costs. In the case
+of the `IdealRadio` model, the error rate is 1 for nodes that are out of
+range, and a very small value for ones in range. The result will be that
+nodes that are out of range of each other will send packets to intermediate
+nodes that can forward them.)
 
 <b>Visualization</b>
 
-Packet paths can be visualized as colored arrows by the `routeVisualizer`
-submodule. This module displays paths where a packet has been recently sent
-between network layers of the two end hosts. The path continually fades and then
-it disappears a certain ammount of time unless it is reinforced by another
-packet. By specifying "*" in the `packetNameFilter` parameter, all types of
-packets are visualized.
+The `IntegratedCanvasVisualizer` we use as the `visualizer` submodule in
+this network contains a `routeVisualizer` module which is able to render
+packet paths. This module displays paths where a packet has been recently
+sent between the network layers of the two end hosts. The path is displayed as
+a colored arrow that goes through the hosts visited. The path continually
+fades and then it disappears after a certain amount of time unless it is
+reinforced by another packet.
+
+The route visualizer is activated by specifying in its `packetNameFilter`
+parameter which packets it should take into account. By default it is set
+to the empty string, meaning *none*. Setting `*` would mean all packets.
+Our UDP application generates packets with the name `UDPBasicAppData-0`,
+`UDPBasicAppData-1`, etc, so we set the name filter to `UDPBasicAppData-*`
+in order to filter out other types of packets that will appear in later
+steps.
+
+
+Configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless04]

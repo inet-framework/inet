@@ -1,5 +1,7 @@
-[General]
-# Some global configuration to make the model simpler
+######################################################################################################
+[Config Wireless01]
+description = Two nodes communicating via UDP
+network = WirelessA
 
 # At this point you should take a look at the NED files corresponding to this Ini file. 
 # They are rather simple. The only interesting thing is that they are using parametrized types
@@ -9,6 +11,8 @@
 # Limit the simulation to 25s
 sim-time-limit = 25s
 
+# Now we are ready to jump into the tutorial
+
 # Let's configure ARP
 # ARP in the real world is used to figure out the MAC address of a node from its IPv4 address.
 # We do not want to use it in this wireless tutorial as it just adds some uninteresting 
@@ -16,14 +20,6 @@ sim-time-limit = 25s
 # the GlobalARP module instead that can automatically provide all the MAC-IP assocoations 
 # for the nodes out of band. 
 **.arpType = "GlobalARP"
-#end
-
-# Now we are ready to jump into the tutorial
-
-######################################################################################################
-[Config Wireless01]
-description = Two nodes communicating via UDP
-network = WirelessA
 
 # Configure an aplication for hostA that sends a constant
 # UDP traffic around 800Kbps (+ protocol overhead) 
@@ -56,7 +52,6 @@ network = WirelessA
 # transmission collisions. Any number of nodes in range can transmit at the same time
 # and the packets will be still successfully delivered.
 *.host*.wlan[*].radio.receiver.ignoreInterference = true
-#end
 
 # Result: HostA can send data to hostB using almost the whole 1Mbps bandwidth.
 
@@ -78,7 +73,6 @@ extends=Wireless01
 
 # Allow the medium to draw a fading trail of successful transmissions (will show the communication paths).
 *.visualizer.mediumVisualizer.displayCommunicationTrail = true
-#end
 
 # Result: We can see nice expanding bubbles representing the transmissions.
 
@@ -91,7 +85,6 @@ network = WirelessB
 # Decrease the communication range so hostA and hostB can no longer
 # communicate directly.	
 *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 250m
-#end
 
 # Result: With decreased communication range, hostA and hostB can no longer talk to each other directly.
 # Unfortunately the extra nodes we have added to relay the information are not properly configured for
@@ -101,10 +94,6 @@ network = WirelessB
 [Config Wireless04]
 description = Set up static routing
 extends = Wireless03
-
-# Enable route visualization
-*.visualizer.routeVisualizer.packetNameFilter = "*"
-
 
 # Enable static routing
 *.host*.forwarding = true
@@ -125,7 +114,9 @@ extends = Wireless03
 
 # Disable routing table entries generated from the netmask (will disable default routes too.)
 **.routingTable.netmaskRoutes = ""
-#end
+
+# Enable route visualization
+*.visualizer.routeVisualizer.packetNameFilter = "UDPBasicAppData-*"
 
 # Result: Data is now correctly routed by the R1 node. In reality we would expect that 
 # the throughput between the hosts drops becuase two nodes (hostA and hostR1) are using 
@@ -144,7 +135,6 @@ extends = Wireless04
 
 # Let's make the interference range the double of the communication range. 
 *.host*.wlan[*].radio.transmitter.maxInterferenceRange = 500m
-#end
 
 # Result: This change resulted in an almost constant collision at hostB becuase both hostA and hostR1 is 
 # transmitting at almost the capacity of the medium. The only packets that get through are 
@@ -171,7 +161,6 @@ extends = Wireless05
 
 # We need MAC acknowledgements to detect if a link is broken between two nodes
 *.host*.wlan[*].mac.useMACAcks = true
-#end
 
 # Result: After CSMA was configured, we should see an increased throughput (compared to the previous step
 # where the medium was not checked before transmission)
@@ -189,7 +178,6 @@ extends = Wireless06
 *.hostR*.mobilityType = "LinearMobility"
 *.hostR*.mobility.speed = 12mps
 *.hostR*.mobility.angle = 270deg
-#end
 
 # Result: we are seeig lower throughput than previously. This is because the
 # static routing tables were configured based on the topology (node distances) at
@@ -214,7 +202,6 @@ extends = Wireless07
 # While running the simulation we see that the communication is broken areound 13s
 # and AODV re-establishes the routes through A->R2->R3->B around 16s
 *.hostType = "AODVRouter"
-#end
 
 # Result: The MANET routing protocol now dynamically reconfigures the routes so data keeps flowing
 # even after some nodes get out of range.
@@ -230,7 +217,6 @@ extends = Wireless08
 # Configure an energy storage device (inifite energy). We are not interested
 # in the actual storage behavior.
 *.host*.energyStorageType = "IdealEnergyStorage"
-#end
 
 # Result: We can check the energy use of a module by looking at the energyBalance value in the module
 # (hostA.energyStorage.energyBalance) or it is possible to see the energy use
@@ -251,7 +237,6 @@ network = WirelessC
 *.physicalEnvironment.config = xmldoc("walls.xml")
 # Set up how the loss is calculated (using line of sight tracing)
 *.radioMedium.obstacleLossType = "TracingObstacleLoss"
-#end
 
 # Result: Unfortunately we don't see any difference. :( Our radio model is too simple to take into account 
 # the objects in the environment so we have to set up a more accurate model.
@@ -282,7 +267,6 @@ extends = Wireless10
 *.host*.wlan[*].radio.receiver.sensitivity = -85dBm
 *.host*.wlan[*].radio.receiver.energyDetection = -85dBm
 *.host*.wlan[*].radio.receiver.snirThreshold = 4dB
-#end
 
 # Result: The simulation is now able to calculate with the attenutation of the 
 # different physical objects in the environment. We see that the wall is actually blocking the
@@ -302,7 +286,6 @@ extends = Wireless11
 *.radioMedium.pathLossType = "TwoRayGroundReflection"
 *.radioMedium.pathLoss.transmitterAntennaHeight = 1.5m
 *.radioMedium.pathLoss.receiverAntennaHeight = 1.5m
-#end
 
 # Result: We see that with a better propagation model the communication pattern changes considerably
 # as the reception power is much smaller than with the free space model. (Experiment with different 
@@ -315,7 +298,6 @@ extends = Wireless12
 # Let's install a better antenna to extend the range of the nodes and increase the connectivity.
 *.host*.wlan[*].radio.antennaType = "ConstantGainAntenna"
 *.host*.wlan[*].radio.antenna.gain = 12dB
-#end
 
 # Results: We have much better connectivity this time because of the antenna gain. Some transmissions
 # even geth through the wall. The connectivity grap is almost a full graph at the end of the simulation.
