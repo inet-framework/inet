@@ -614,12 +614,20 @@ communication path.
 
 @section s7model The model
 
-Let's configure the intermediate nodes (R1-3) to move around. We set them to
-move upwards at a speed of 12 miles per hour:
+In the INET Framework, node mobility is handled by the `mobility` submodule
+of hosts. Several mobility module type exist that can be plugged into a
+host. The movement trail may be deterministic (such as line, rectangle or
+circle), probabilistic (e.g. random waypoint), scripted (e.g. a "turtle"
+script) or trace-driven. There are also invididual and group mobility
+models.
 
-@dontinclude omnetpp.ini
-@skip mobility
-@until mobility.angle
+Here we install `LinearMobility` into the intermediate nodes.
+`LinearMobility` implements movement along a line, where the heading and
+speed are parameters. We configure the nodes to move north at the speed of
+12 m/s.
+
+The visualization of radio signals as expanding bubbles is no longer needed,
+so we turn it off.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless07]
@@ -627,22 +635,17 @@ move upwards at a speed of 12 miles per hour:
 
 @section s7results Results
 
-<!more on linearmobility>
-<!do we need more on mobility? should be clear from the code above>
-
-You should run the simulation in fast mode to better see the nodes moving,
-because they move very slowly if run in normal mode.
-
-We see that data exchange works just like in the previous step until R1 moves
-out of range of A. Traffic could be routed through R2 and R3, but the routing
-tables are static, and configured according to the starting positions of the
-nodes. Throughput is about 260 kbps, which is less than in the previous step,
-because at around 18 seconds, R1 moves out of range of A thus severing the
-connection to B.
+We run the simulation in Fast mode, because the nodes move very slowly if
+viewed in Normal mode.
 
 <img src="step7_2_v3.gif">
 
-A dynamic routing mechanism is needed to reconfigure the routes as nodes move out of range.
+We can see data exchange taking place just like in the previous step until
+R1 moves out of range of host A at around 18 seconds, and then it stops.
+
+Traffic could be routed through R2 and R3, but that does not happen because
+the routing tables are static and have been configured according to the
+initial positions of the nodes.
 
 <b>Number of packets received by host B: 787</b>
 
