@@ -1,8 +1,8 @@
 /**
-@mainpage Wireless Tutorial for the INET framework
+@mainpage Wireless Tutorial for the INET Framework
 
 In this tutorial, we show you how to build wireless simulations in the INET
-framework. The tutorial contains a series of simulation models numbered from 1 through 19.
+Framework. The tutorial contains a series of simulation models numbered from 1 through 19.
 The models are of increasing complexity -- they start from the basics and
 in each step, they introduce new INET features and concepts related to wireless communication
 networks.
@@ -57,7 +57,7 @@ with one host sending a UDP data stream wirelessly to the other. Our goal
 is to keep the physical layer and lower layer protocol models as simple
 and possible.
 
-We'll make the model more realistic in later step.
+We'll make the model more realistic in later steps.
 
 @section s1model The model
 
@@ -107,7 +107,7 @@ due to the low computational cost.
 In hosts, network interface cards are represented by NIC modules. Radio is part of
 wireless NIC modules. There are various radio modules, and one must always
 use one that is compatible with the medium module. In this step, hosts contain
-<tt>IdealRadio</tt> as part of IdealWirelessNic.
+`IdealRadio` as part of `IdealWirelessNic`.
 
 Here is the complete NED file that describes the above WirelessA network:
 
@@ -132,8 +132,8 @@ actual NED type is given in the `omnetpp.ini` file to be `StandardHost`.
 @dontinclude omnetpp.ini
 @skipline .host*.wlan[*].typename = "IdealWirelessNic"
 
-The most important parameter of <tt>IdealRadio</tt> is <i>communication range</i>.
-<tt>IdealRadio</tt> receives a transmission correctly within communication
+The most important parameter of `IdealRadio` is *communication range*.
+`IdealRadio` receives a transmission correctly within communication
 range, unless there is an interfering transmission.
 
 @note This might seem overly simplified because such radios and signal propagation do not work
@@ -146,7 +146,7 @@ In this model, the communication range is set to 500m.
 @skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
 
 Interference (in this case, loss of packets due to collision) is also
-modeled by <tt>IdealRadio</tt>. In this step, interference is turned off,
+modeled by `IdealRadio`. In this step, interference is turned off,
 resulting in pairwise independent duplex communication channels.
 
 @dontinclude omnetpp.ini
@@ -158,7 +158,7 @@ The radio data rates are set to 1 Mbps.
 @skipline **.bitrate = 1Mbps
 
 Hosts in the network need IP addresses. IP address assignment in this model
-is handled by an instance of <tt>IPv4NetworkConfigurator</tt>. This module
+is handled by an instance of `IPv4NetworkConfigurator`. This module
 also sets up static routing between the hosts.
 
 @dontinclude WirelessA.ned
@@ -167,7 +167,7 @@ also sets up static routing between the hosts.
 @skipline }
 
 The hosts have to know each other's MAC addresses to communicate, which is
-taken care of by using <i>GlobalARP</i>:
+taken care of by using `GlobalARP`:
 
 @dontinclude omnetpp.ini
 @skipline **.arpType = "GlobalARP"
@@ -181,7 +181,7 @@ Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic (not c
 @skip *.hostA.numUdpApps = 1
 @until *.hostA.udpApp[0].sendInterval = exponential(10ms)
 
-Host B contains a <tt>UDPSink</tt> application that just discards received packets.
+Host B contains a `UDPSink` application that just discards received packets.
 
 @dontinclude omnetpp.ini
 @skip *.hostB.numUdpApps = 1
@@ -224,7 +224,7 @@ and signal propagation.
 @section s2model The model
 
 Steps in this tutorial build on each other. In omnetpp.ini, the configuration
-<i>Wireless02</i> extends <i>Wireless01</i>.
+`Wireless02` extends `Wireless01`.
 This way, subsequent steps can be based on the previous ones by adding a
 few lines to the .ini file.
 
@@ -248,7 +248,7 @@ Visualization of transmissions are enabled by editing the ini file:
 
 This displays transmissions as colored rings emanating from hosts. Since this
 is sufficient to represent transmissions visually, it is advisable to turn off
-<i>animate messages</i> in qtenv.
+message send animations in Qtenv.
 
 In order to get a smooth animation, canvas updates have to be enabled and an
 update interval has to be set:
@@ -374,7 +374,7 @@ to read.
 
 <!rewrite>We tell the configurator to assign IP addresses in the 10.0.0.x range, and to
 create routes based on the estimated error rate of links between the nodes. In
-the case of the <tt>IdealRadio</tt> model, the error rate is 1 for nodes that
+the case of the `IdealRadio` model, the error rate is 1 for nodes that
 are out of range, and 1e-3 for ones in range. The result will be that nodes that
 are out of range of each other will send packets to intermediate nodes that can
 forward them.<!rewrite>
@@ -544,13 +544,13 @@ TODO What about ACKs? Turn them on in a SEPARATE step!
 
 @section s6model The model
 
-We need to switch the <tt>IdealWirelessNic</tt> to <tt>WirelessNic</tt>, which can use CSMA:
+We need to switch the `IdealWirelessNic` to `WirelessNic`, which can use CSMA:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].typename = "WirelessNic"
 
-<tt>WirelessNic</tt> has <tt>Ieee80211</tt> radio by default, but we still
-want to use <tt>IdealRadio</tt>:
+`WirelessNic` has `Ieee80211` radio by default, but we still
+want to use `IdealRadio`:
 
 @dontinclude omnetpp.ini
 @skipline *.host*.wlan[*].radioType = "IdealRadio"
@@ -659,20 +659,20 @@ try to).
 
 Let's configure ad-hoc routing with AODV.
 
-We need the <tt>IPv4NetworkConfigurator</tt> to only assign the IP addresses. We
+We need the `IPv4NetworkConfigurator` to only assign the IP addresses. We
 turn all other functions off:
 
 @dontinclude omnetpp.ini
 @skip *.configurator.addStaticRoutes = false
 @until Subnet
 
-Replace <tt>INetworkNode</tt>s with <tt>AODVRouter</tt>s:
+Replace `INetworkNode`s with `AODVRouter`s:
 
 @dontinclude omnetpp.ini
 @skipline *.hostType = "AODVRouter"
 
-<tt>AODVRouter</tt> is basically an <tt>INetworkNode</tt> extended with the
-<tt>AODVRouting</tt> submodule. Each node works like a router -- they manage
+`AODVRouter` is basically an `INetworkNode` extended with the
+`AODVRouting` submodule. Each node works like a router -- they manage
 their own routing tables and adapt to changes in the network topology.
 
 @dontinclude omnetpp.ini
@@ -720,7 +720,7 @@ First set up energy consumption in the node radios:
 @dontinclude omnetpp.ini
 @skipline **.energyConsumerType = "StateBasedEnergyConsumer"
 
-The <tt>StateBasedEnergyConsumer</tt> module models radio power consumption
+The `StateBasedEnergyConsumer` module models radio power consumption
 based on states like radio mode, transmitter and receiver state. Each state has
 a constant power consumption that can be set by a parameter. Energy use depends
 on how much time the radio spends in a particular state.
@@ -730,7 +730,7 @@ Set up energy storage in the nodes -- basically modelling the batteries:
 @dontinclude omnetpp.ini
 @skipline *.host*.energyStorageType = "IdealEnergyStorage"
 
-<tt>IdealEnergyStorage</tt> provides an infinite ammount of energy, can't be
+`IdealEnergyStorage` provides an infinite ammount of energy, can't be
 fully charged or depleted. We use this because we want to concentrate on the
 power consumption, not the storage.
 
@@ -776,7 +776,7 @@ radio signals, making reception behind them impossible.
 
 @section s10model The model
 
-We have to extend WirelessB.ned to include an <tt>environment</tt> module:
+We have to extend WirelessB.ned to include an `environment` module:
 
 @dontinclude WirelessC.ned
 @skip network WirelessC extends WirelessB
@@ -845,9 +845,9 @@ and obstacle loss.
 
 @section s11model The model
 
-We will have to replace <tt>IdealRadio</tt> with APSKScalarRadio.
+We will have to replace `IdealRadio` with APSKScalarRadio.
 
-So let's switch <tt>IdealRadioMedium</tt> with <tt>APSKScalarRadioMedium</tt>:
+So let's switch `IdealRadioMedium` with `APSKScalarRadioMedium`:
 
 @dontinclude omnetpp.ini
 @skipline *.mediumType = "APSKScalarRadioMedium"
@@ -857,21 +857,21 @@ Set up some background noise:
 @dontinclude omnetpp.ini
 @skipline *.radioMedium.backgroundNoise.power = -110dBm
 
-<tt>APSKRadioMedium</tt> uses <tt>IsotropicScalarBackgroundNoise</tt> by
+`APSKRadioMedium` uses `IsotropicScalarBackgroundNoise` by
 default. This is basically white noise that is constant in space, time and
 frequency.<!white noise already means every frequency>
 
 <!frequency 2 ghz>
 
-Set up <tt>APSKScalarRadio</tt>'s in the nodes and configure each radio:
+Set up `APSKScalarRadio`'s in the nodes and configure each radio:
 
 @dontinclude omnetpp.ini
 @skip *.host*.wlan[*].radioType = "APSKScalarRadio"
 @until *.host*.wlan[*].radio.receiver.snirThreshold = 4dB
 
-@note Each <tt>radioMedium</tt> model has to be used with the corresponding
-radio model -- this case <tt>APSKScalarRadioMedium</tt> with
-<tt>APSKScalarRadio</tt>. The same was true with <tt>IdealRadio</tt>.
+@note Each `radioMedium` model has to be used with the corresponding
+radio model -- this case `APSKScalarRadioMedium` with
+`APSKScalarRadio`. The same was true with `IdealRadio`.
 <!do we need this - is it correct - do we need this here and not at idealradio -
 last 3 lines - preambleduration?>
 
