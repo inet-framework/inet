@@ -674,23 +674,14 @@ try to).
 
 @section s8model The model
 
-Let's configure ad-hoc routing with AODV.
+Let's configure ad-hoc routing with AODV. As AODV will manage the routing
+tables, we don't need the statically added routes any more. We only need
+`IPv4NetworkConfigurator` to assign the IP addresses, and turn all other
+functions off.
 
-We need the `IPv4NetworkConfigurator` to only assign the IP addresses. We
-turn all other functions off:
-
-@dontinclude omnetpp.ini
-@skip *.configurator.addStaticRoutes = false
-@until Subnet
-
-Replace `INetworkNode`s with `AODVRouter`s:
-
-@dontinclude omnetpp.ini
-@skipline *.hostType = "AODVRouter"
-
-`AODVRouter` is basically an `INetworkNode` extended with the
-`AODVRouting` submodule. Each node works like a router -- they manage
-their own routing tables and adapt to changes in the network topology.
+More important, we change the hosts to be instances of `AODVRouter`.
+`AODVRouter` is like  `WirelessHost`, but with an added `AODVRouting`
+submodule. This change turns each node into an AODV router.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless08]
