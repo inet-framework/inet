@@ -893,11 +893,11 @@ the medium to `APSKScalarRadioMedium`. In general, one always needs to use
 a medium that is compatible with the given radio. (With `IdealRadio`, we
 also used `IdealRadioMedium`.)
 
-`APSKScalarRadioMedium` has "slots" to plug in various propagation models,
-path loss models, analog models and background noise models. Here we make
-use of the fact that the default background noise model is homogeous
-isotropic white noise, and set up the noise level to a nonzero value
-(-110dBm).
+`APSKScalarRadioMedium` has "slots" to plug in various propagation
+models, path loss models, obstacle loss models, analog models and
+background noise models. Here we make use of the fact that the default
+background noise model is homogeous isotropic white noise, and set up the
+noise level to a nonzero value (-110dBm).
 
 Configuration:
 
@@ -930,15 +930,26 @@ Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
 @section s12goals Goals
 
-By default, the medium uses the free space model. To make our model even
-more accurate, let's configure a more realistic pathloss model, the two-ray
-ground reflection model here (assuming the we are walking on the ground).
+By default, the medium uses the free-space path loss model, which assumes
+line-of-sight path, with no obstacles nearby to cause reflection or
+diffraction. Since our wireless hosts move on the ground, a more accurate
+path loss model would be the two-ray ground reflection model that
+calculates with one reflection from the ground.
 
 @section s12model The model
 
-At this point we could also configure the computation model for the medium (scalar,
-multidimensional) the propagation mode (constant speed, constant time) etc.
-(see the radioMedium's parameters for further detail.)
+It has been mentioned that `APSKScalarRadioMedium` relies on various
+subcomponents for computing path loss, obstable loss, and background noise,
+among others. Installing the two-ray ground reflection model is just a matter
+of changing its `pathLossType` parameter from the default
+`FreeSpacePathLoss` to `TwoRayGroundReflection`. (Further options are
+`RayleighFading`, `RicianFading`, `LogNormalShadowing` and some others.)
+
+`TwoRayGroundReflection` needs two parameters, which are the elevations
+of the transmitter and the receiver antenna.
+
+TODO why are they parameters of the medium??? shouldn't they be parameters of the antennas?
+
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless12]
