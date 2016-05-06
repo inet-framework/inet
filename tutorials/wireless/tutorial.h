@@ -604,6 +604,10 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @page step7 Step 7 - CSMA with acks
 
+@nav{step6,step8}
+
+@nav{step6,step8}
+
 <!------------------------------------------------------------------------>
 
 @page step8 Step 8 - Configuring node movements
