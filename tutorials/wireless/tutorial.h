@@ -40,6 +40,7 @@ and consecutive steps mostly share the same networks, defined in NED.
 - @ref step11
 - @ref step12
 - @ref step13
+- @ref step14
 
 @nav{index,step1}
 @fixupini
@@ -527,7 +528,7 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 <!------------------------------------------------------------------------>
 
-@page step6 Step 6 - Using CSMA to better utilize the medium
+@page step6 Step 6 - Using CSMA to better utilize the medium (without acks)
 
 @nav{step5,step7}
 
@@ -601,18 +602,22 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 <!------------------------------------------------------------------------>
 
-@page step7 Step 7 - Configuring node movements
+@page step7 Step 7 - CSMA with acks
 
-@nav{step6,step8}
+<!------------------------------------------------------------------------>
 
-@section s7goals Goals
+@page step8 Step 8 - Configuring node movements
+
+@nav{step7,step9}
+
+@section s8goals Goals
 
 In this step, we make the model more interesting by adding node mobility.
 Namely, we make the intermediate nodes travel north during simulation.
 After a while, they will move out of the range of host A (and B), breaking the
 communication path.
 
-@section s7model The model
+@section s8model The model
 
 In the INET Framework, node mobility is handled by the `mobility` submodule
 of hosts. Several mobility module type exist that can be plugged into a
@@ -633,12 +638,12 @@ so we turn it off.
 @skipline [Config Wireless07]
 @until ####
 
-@section s7results Results
+@section s8results Results
 
 We run the simulation in Fast mode, because the nodes move very slowly if
 viewed in Normal mode.
 
-<img src="step7_2_v3.gif">
+<img src="step8_2_v3.gif">
 
 We can see data exchange taking place just like in the previous step until
 R1 moves out of range of host A at around 18 seconds, and then it stops.
@@ -651,16 +656,16 @@ initial positions of the nodes.
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-@nav{step6,step8}
+@nav{step7,step9}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
-@page step8 Step 8 - Configuring ad-hoc routing (AODV)
+@page step9 Step 9 - Configuring ad-hoc routing (AODV)
 
-@nav{step7,step9}
+@nav{step8,step10}
 
-@section s8goals Goals
+@section s9goals Goals
 
 In this step, we configure a routing protocol that adapts to the changing
 network topology, and will arrange packets to be routed through `R2` and `R3`
@@ -672,7 +677,7 @@ tables is driven by demand. This is in contrast to proactive routing
 protocols which keep routing tables up to date all the time (or at least
 try to).
 
-@section s8model The model
+@section s9model The model
 
 Let's configure ad-hoc routing with AODV. As AODV will manage the routing
 tables, we don't need the statically added routes any more. We only need
@@ -687,31 +692,31 @@ submodule. This change turns each node into an AODV router.
 @skipline [Config Wireless08]
 @until ####
 
-@section s8results Results
+@section s9results Results
 
 This time when R1 gets out of range, the routes are reconfigured and packets
 keep flowing to B. Throughput is about the same as in step 6 -- even though the
 connection is not broken here, the AODV protocol adds some overhead to the
 communication.
 
-<img src="step8_aodv_udp.gif">
+<img src="step9_aodv_udp.gif">
 
-<img src="step8.gif">
+<img src="step9.gif">
 
 <b>Number of packets received by host B: 890</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-@nav{step7,step9}
+@nav{step8,step10}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
-@page step9 Step 9 - Modeling energy consumption
+@page step10 Step 10 - Modeling energy consumption
 
-@nav{step8,step10}
+@nav{step9,step11}
 
-@section s9goals Goals
+@section s10goals Goals
 
 Wireless ad-hoc networks often operate in an energy-constrained
 environment, and thus it is often useful to model the energy consumption of
@@ -723,7 +728,7 @@ In this step, we augment the nodes with components so that we can model
 (and measure) their energy consumption. For simplicity, we ignore energy
 constraints, and just install infinite energy sources into the nodes.
 
-@section s9model The model
+@section s10model The model
 
 First set up energy consumption in the node radios:
 
@@ -752,24 +757,24 @@ to display energy consumption over time.
 @skipline [Config Wireless09]
 @until ####
 
-@section s9results Results
+@section s10results Results
 
-<img src="wireless-step9-energy.png">
+<img src="wireless-step10-energy.png">
 
 <b>Number of packets received by host B: 980</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
-@nav{step8,step10}
+@nav{step9,step11}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
-@page step10 Step 10 - Adding obstacles to the environment
+@page step11 Step 11 - Adding obstacles to the environment
 
-@nav{step9,step11}
+@nav{step10,step12}
 
-@section s10goals Goals
+@section s11goals Goals
 
 In an attempt to make our simulation both more realistic and more
 interesting, we add some obstacles to the playground.
@@ -784,7 +789,7 @@ and ideal wireless medium models that do not model physical phenomena,
 obstable modeling will be very simple: all obstacles completely absorb
 radio signals, making reception behind them impossible.
 
-@section s10model The model
+@section s11model The model
 
 We have to extend WirelessB.ned to include an `environment` module:
 
@@ -819,7 +824,7 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 @until ####
 
 
-@section s10results Results
+@section s11results Results
 
 `TracingObstacleLoss` models signal loss along a line connecting the
 transmitter and the receiver, calculating the loss where it intersects
@@ -830,22 +835,22 @@ received packets is exactly the same as in the previous step -- because our
 simple radio model doesn't interact with obstacles. We need a more realistic
 radio model.
 
-<img src="wireless-step10-v2.png">
+<img src="wireless-step11-v2.png">
 
 <b>Number of packets received by host B: 603</b>
 
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
-@nav{step9,step11}
+@nav{step10,step12}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
-@page step11 Step 11 - Changing to a more realistic radio model
+@page step12 Step 12 - Changing to a more realistic radio model
 
-@nav{step10,step12}
+@nav{step11,step13}
 
-@section s11goals Goals
+@section s12goals Goals
 
 After so many steps, we let go of the ideal radio model, and introduce a
 more realistic one. Our new radio will use an APSK modulation scheme, but
@@ -853,7 +858,7 @@ still without other techniques like forward error correction, interleaving
 or spreading. We also want our model of the radio channel to simulate
 attenuation and obstacle loss.
 
-@section s11model The model
+@section s12model The model
 
 <b>Switching to APSK radio</b>
 
@@ -908,7 +913,7 @@ Configuration:
 @until ####
 
 
-@section s11results Results
+@section s12results Results
 
 <!results>
 <!throughput>
@@ -921,16 +926,16 @@ behind it.<!rewrite>
 
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
-@nav{step10,step12}
+@nav{step11,step13}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
-@page step12 Step 12 - Configuring a more accurate pathloss model
+@page step13 Step 13 - Configuring a more accurate pathloss model
 
-@nav{step11,step13}
+@nav{step12,step14}
 
-@section s12goals Goals
+@section s13goals Goals
 
 By default, the medium uses the free-space path loss model, which assumes
 line-of-sight path, with no obstacles nearby to cause reflection or
@@ -938,7 +943,7 @@ diffraction. Since our wireless hosts move on the ground, a more accurate
 path loss model would be the two-ray ground reflection model that
 calculates with one reflection from the ground.
 
-@section s12model The model
+@section s13model The model
 
 It has been mentioned that `APSKScalarRadioMedium` relies on various
 subcomponents for computing path loss, obstable loss, and background noise,
@@ -957,26 +962,26 @@ TODO why are they parameters of the medium??? shouldn't they be parameters of th
 @skipline [Config Wireless12]
 @until ####
 
-@section s12results Results
+@section s13results Results
 
 TODO
 
 <b>Number of packets received by host B: 243</b>
 
-@nav{step11,step13}
+@nav{step12,step14}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
-@page step13 Step 13 - Enhancing the antenna with some constant gain
+@page step14 Step 14 - Enhancing the antenna with some constant gain
 
-@nav{step12,index}
+@nav{step13,index}
 
-@section s13goals Goals
+@section s14goals Goals
 
 TODO eddig nem volt gain?
 
-@section s13model The model
+@section s14model The model
 
 TODO
 
@@ -984,13 +989,13 @@ TODO
 @skipline [Config Wireless13]
 @until ####
 
-@section s13results Results
+@section s14results Results
 
 TODO
 
 <b>Number of packets received by host B: 942</b>
 
-@nav{step12,index}
+@nav{step13,index}
 @fixupini
 
 */
