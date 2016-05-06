@@ -34,6 +34,6 @@ module Router6 extends TransportLayerNodeBase
         hasIpv6 = true;
         xml routes = default(xml("<routingTable/>"));
         ipv6.routingTable.routes = routes;
-        *.routingTableModule = default("^.ipv6.routingTable");
+        *.routingTableModule = "^.ipv6.routingTable";
 }
 

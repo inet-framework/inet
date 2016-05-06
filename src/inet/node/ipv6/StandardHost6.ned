@@ -33,6 +33,6 @@ module StandardHost6 extends StandardHost
         hasIpv4 = false;
         hasIpv6 = true;
         ipv6.routingTable.routes = routes;
-        *.routingTableModule = default("^.ipv6.routingTable");
+        *.routingTableModule = "^.ipv6.routingTable";
 }
 
