@@ -696,6 +696,8 @@ communication.
 
 <img src="step8_aodv_udp.gif">
 
+<img src="step8.gif">
+
 <b>Number of packets received by host B: 890</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
