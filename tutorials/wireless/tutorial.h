@@ -694,7 +694,7 @@ keep flowing to B. Throughput is about the same as in step 6 -- even though the
 connection is not broken here, the AODV protocol adds some overhead to the
 communication.
 
-<img src="wireless-step8-v2.png">
+<img src="step8_aodv_udp.gif">
 
 <b>Number of packets received by host B: 890</b>
 
