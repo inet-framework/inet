@@ -759,7 +759,7 @@ to display energy consumption over time.
 
 @section s10results Results
 
-<img src="wireless-step10-energy.png">
+<img src="wireless-step10-energy_2.png">
 
 <b>Number of packets received by host B: 980</b>
 
