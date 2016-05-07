@@ -62,25 +62,62 @@ We'll make the model more realistic in later steps.
 
 @section s1model The model
 
-In this step we use the model depicted below.
+In this step we'll use the model depicted below.
 
 <img src="wireless-step1-v2.png">
 
+Here is the NED source of the network:
+
+@dontinclude WirelessA.ned
+@skip network WirelessA
+@until ####
+
+We'll explain the above NED file below.
+
+<b>The playground</b>
+
 The model contains a playground of the size 500x500 meters, with two hosts
 spaced 400 meters apart. (The distance will be relevant in later steps.)
+These numbers are set via display strings.
+
+The modules that are present in the network in addition to the hosts are
+responsible for tasks like visualization, configuring the IP layer, and
+modeling the physical radio channel. We'll return to them later.
+
+<b>The hosts</b>
 
 In INET, hosts are usually represented with the `StandardHost` NED type,
 which is a generic template for TCP/IP hosts. It contains protocol
 components like TCP, UDP and IP, slots for plugging in application models,
-and various network interfaces (NICs). In this model, we configure the
-hosts to use `UDPBasicApp` for UDP traffic generation, and
-`IdealWirelessNic` for network interface.
+and various network interfaces (NICs). `StandardHost` has some variations
+in INET, for example `WirelessHost`, which is basically a `StandardHost`
+preconfigured for wireless scenarios.
 
-As one can see, there are additional modules in the network. They are
-responsible for tasks like visualization and configuring the IP layer.
-We'll return to them in later steps, but for now we concentrate on the
-module called `radioMedium`.
+As you can see, the hosts' type is parametric in this NED file (defined via
+a `hostType` parameter and the `INetworkNode` module interface). This done
+so that in later steps we can replace hosts with a different NED type. The
+actual NED type here is `WirelessHost` (given near the top of the NED
+file), and later steps will override this setting using `omnetpp.ini`.
 
+The hosts have to know each other's MAC addresses to communicate, which is
+taken care of by using `GlobalARP`:
+
+<b>Traffic model</b>
+
+In the model, host A generates UDP packets which are received by host B. To
+this end, host A is configured to contain a `UDPBasicApp` module, which generates 1000-byte
+UDP messages at random intervals with exponential distribution, the mean of
+which is 10ms. Therefore the app is going to generate 100 kbyte/s (800
+kbps) UDP traffic, not counting protocol overhead. Host B contains a
+`UDPSink` application that just discards received packets.
+
+The model also contains a gauge to display the number of packets received by
+host B. The gauge is added by the `@figure[thruputInstrument](type=gauge...)`
+line.
+
+<b>Physical layer modeling</b>
+
+Let us concentrate on the module called `radioMedium`.
 All wireless simulations in INET need a radio medium module. This module
 represents the shared physical medium where communication takes place. It
 is responsible for taking signal propagation, attenuation, interference,
@@ -110,89 +147,20 @@ wireless NIC modules. There are various radio modules, and one must always
 use one that is compatible with the medium module. In this step, hosts contain
 `IdealRadio` as part of `IdealWirelessNic`.
 
-Here is the complete NED file that describes the above WirelessA network:
+In this model, we configure the chosen physical layer model (`IdealRadioMedium`
+and `IdealRadio`) as follows. The communication range is set to 500m.
+Interference (in this case, loss of packets due to collision) is turned
+off, resulting in pairwise independent duplex communication channels. The
+radio data rates are set to 1 Mbps. These values are set in `omnetpp.ini`
+with the `maxCommunicationRange`, `ignoreInterference`, and `bitrate`
+parameters of the appropriate modules.
 
-@dontinclude WirelessA.ned
-@skip network WirelessA
-@until hostB:
-@skipline display
-@skipline }
-
-One can notice that in the source, hosts use the `INetworkNode` NED type
-and not the promised `StandardHost`. This is because later steps will use
-other NED types for hosts, so we leave host type is parameterizable
-(`INetworkNode<` is the interface which all host types implement.). The
-actual NED type is given in the `omnetpp.ini` file to be `StandardHost`.
+The configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless01]
 @until ####
 
--------------------
-
-@dontinclude omnetpp.ini
-@skipline .host*.wlan[*].typename = "IdealWirelessNic"
-
-The most important parameter of `IdealRadio` is *communication range*.
-`IdealRadio` receives a transmission correctly within communication
-range, unless there is an interfering transmission.
-
-@note This might seem overly simplified because such radios and signal propagation do not work
-like that in real life. However, it can be very useful in modeling scenarios where
-details of radio propagation is not of interest.
-
-In this model, the communication range is set to 500m.
-
-@dontinclude omnetpp.ini
-@skipline *.host*.wlan[*].radio.transmitter.maxCommunicationRange = 500m
-
-Interference (in this case, loss of packets due to collision) is also
-modeled by `IdealRadio`. In this step, interference is turned off,
-resulting in pairwise independent duplex communication channels.
-
-@dontinclude omnetpp.ini
-@skipline *.host*.wlan[*].radio.receiver.ignoreInterference = true
-
-The radio data rates are set to 1 Mbps.
-
-@dontinclude omnetpp.ini
-@skipline **.bitrate = 1Mbps
-
-Hosts in the network need IP addresses. IP address assignment in this model
-is handled by an instance of `IPv4NetworkConfigurator`. This module
-also sets up static routing between the hosts.
-
-@dontinclude WirelessA.ned
-@skip configurator:
-@until @display
-@skipline }
-
-The hosts have to know each other's MAC addresses to communicate, which is
-taken care of by using `GlobalARP`:
-
-@dontinclude omnetpp.ini
-@skipline **.arpType = "GlobalARP"
-
-In the model, host A generates UDP packets which are received by host B.
-To this end, host A contains a UDPBasicApp module, which generates 1000-byte UDP
-messages at random intervals with exponential distribution, the mean of which is 10ms.
-Therefore the app is going to generate 100 kbyte/s (800 kbps) UDP traffic (not counting protocol overhead).
-
-@dontinclude omnetpp.ini
-@skip *.hostA.numUdpApps = 1
-@until *.hostA.udpApp[0].sendInterval = exponential(10ms)
-
-Host B contains a `UDPSink` application that just discards received packets.
-
-@dontinclude omnetpp.ini
-@skip *.hostB.numUdpApps = 1
-@until *.hostB.udpApp[0].localPort = 5000
-
-The model also contains a gauge to display the number of packets received by Host B:
-
-@dontinclude WirelessA.ned
-@skipline @figure
-@skipline moduleName
 
 @section s1results Results
 
@@ -305,10 +273,8 @@ network used in the previous steps, but instead we extend WirelessA into
 WirelessB using the inheritance feature of NED:
 
 @dontinclude WirelessB.ned
-@skip network
-@until hostR3
-@skipline }
-@skipline }
+@skip network WirelessB
+@until ####
 
 We decrease the communication range of the radios of all hosts to 250
 meters. This will make direct communication between hosts A and B
@@ -798,10 +764,8 @@ radio signals, making reception behind them impossible.
 We have to extend WirelessB.ned to include an `environment` module:
 
 @dontinclude WirelessC.ned
-@skip network WirelessC extends WirelessB
-@until @display
-@skipline }
-@skipline }
+@skip network WirelessC
+@until ####
 
 The physical environment module implements the objects that interact with
 transmissions -- various shapes can be created. <!rewrite>

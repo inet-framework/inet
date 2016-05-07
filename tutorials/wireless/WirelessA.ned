@@ -21,11 +21,6 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 
-// - create a network and specify the size to 500x500
-// - drop an IPv4NetworkConfigurator and rename it to "configurator"
-// - drop an IdealRadioMedium module and rename to "radioMedium"
-// - drop two standardhosts at the 100,100 and 400,400 position and
-//   rename them to hostA and hostB
 network WirelessA
 {
     @display("bgb=500,500");
@@ -49,3 +44,5 @@ network WirelessA
             @display("p=450,250");
         }
 }
+
+//##### (marker for doxygen)
