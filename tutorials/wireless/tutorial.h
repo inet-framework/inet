@@ -99,8 +99,9 @@ so that in later steps we can replace hosts with a different NED type. The
 actual NED type here is `WirelessHost` (given near the top of the NED
 file), and later steps will override this setting using `omnetpp.ini`.
 
-The hosts have to know each other's MAC addresses to communicate, which is
-taken care of by using `GlobalARP`:
+The hosts have to know each other's MAC addresses to communicate, which, in
+this model, is taken care of by using `GlobalARP` instead of a real ARP
+protocol.
 
 <b>Traffic model</b>
 
@@ -134,26 +135,27 @@ failure) and interference range (a range where the signal cannot be
 received correctly, but still collides with other signals causing their
 reception to fail) are optional.
 
-In this model, we turn off collisions and interference. Naturally, this model
-of the physical layer has little correspondence to reality. However, it has its
-uses in the simulation. Its simplicity and its consequent predictability are
-an advantage in scenarios where realistic modeling of the physical layer is not
-a primary concern, for example in the modeling of ad-hoc routing protocols.
-Simulations using `IdealRadioMedium` also run faster than more realistic ones,
-due to the low computational cost.
+@note Naturally, this model of the physical layer has little correspondence
+to reality. However, it has its uses in the simulation. Its simplicity and
+its consequent predictability are an advantage in scenarios where realistic
+modeling of the physical layer is not a primary concern, for example in the
+modeling of ad-hoc routing protocols. Simulations using `IdealRadioMedium`
+also run faster than more realistic ones, due to the low computational
+cost.
 
 In hosts, network interface cards are represented by NIC modules. Radio is part of
 wireless NIC modules. There are various radio modules, and one must always
 use one that is compatible with the medium module. In this step, hosts contain
 `IdealRadio` as part of `IdealWirelessNic`.
 
-In this model, we configure the chosen physical layer model (`IdealRadioMedium`
-and `IdealRadio`) as follows. The communication range is set to 500m.
-Interference (in this case, loss of packets due to collision) is turned
-off, resulting in pairwise independent duplex communication channels. The
-radio data rates are set to 1 Mbps. These values are set in `omnetpp.ini`
-with the `maxCommunicationRange`, `ignoreInterference`, and `bitrate`
-parameters of the appropriate modules.
+In this model, we configure the chosen physical layer model
+(`IdealRadioMedium` and `IdealRadio`) as follows. The communication range
+is set to 500m. Modeling packet losses due to collision (termed
+"interference" in this model) is turned off, resulting in pairwise
+independent duplex communication channels. The radio data rates are set to
+1 Mbps. These values are set in `omnetpp.ini` with the
+`maxCommunicationRange`, `ignoreInterference`, and `bitrate` parameters of
+the appropriate modules.
 
 The configuration:
 
