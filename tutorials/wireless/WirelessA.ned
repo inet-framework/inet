@@ -23,25 +23,25 @@ import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network WirelessA
 {
-    @display("bgb=500,500");
-    @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red; label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
+    @display("bgb=650,500");
+    @figure[thruputInstrument](type=gauge; pos=520,10; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red; label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
     string hostType = default("WirelessHost");
     string mediumType = default("IdealRadioMedium");
     submodules:
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=50,50");
+            @display("p=580,200");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=200,50");
+            @display("p=580,275");
         }
         radioMedium: <mediumType> like IRadioMedium {
-            @display("p=350,50");
+            @display("p=580,350");
         }
         hostA: <hostType> like INetworkNode {
-            @display("p=50,250");
+            @display("p=50,325");
         }
         hostB: <hostType> like INetworkNode {
-            @display("p=450,250");
+            @display("p=450,325");
         }
 }
 

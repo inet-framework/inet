@@ -22,7 +22,7 @@ network WirelessC extends WirelessB
 {
     submodules:
         physicalEnvironment: PhysicalEnvironment {
-            @display("p=429,29");
+            @display("p=580,425");
         }
 }
 
