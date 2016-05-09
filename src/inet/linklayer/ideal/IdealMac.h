@@ -49,6 +49,7 @@ class INET_API IdealMac : public MACProtocolBase
     bool promiscuous = false;    // promiscuous mode
     MACAddress address;    // MAC address
     bool fullDuplex = false;
+    bool useAck = true;
 
     IRadio *radio = nullptr;
     IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
