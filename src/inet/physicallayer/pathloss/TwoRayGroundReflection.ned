@@ -21,7 +21,6 @@ module TwoRayGroundReflection extends FreeSpacePathLoss
 {
     parameters:
         @class(TwoRayGroundReflection);
-        double transmitterAntennaHeight @unit(m);
-        double receiverAntennaHeight @unit(m);
+        string physicalEnvironmentModule = default("physicalEnvironment"); // the path of the environment model relative to the network
 }
 
