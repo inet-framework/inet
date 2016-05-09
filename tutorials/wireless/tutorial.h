@@ -222,26 +222,24 @@ discovered network connectivity, discovered network routes, ongoing
 transmissions, ongoing receptions, propagating radio signals, and
 statistics.
 
-Visualization of transmissions are enabled by editing the ini file:
+We enable two kinds of visualizations: that of signal propagation and of
+recent successful physical layer transmissions.
+
+The visualization of signal propagation is enabled with the
+`displaySignals` parameter of `MediumCanvasVisualizer`. It displays
+transmissions as colored rings emanating from hosts. Since this is
+sufficient to represent transmissions visually, it is advisable to turn off
+message animations in Tkenv/Qtenv.
+
+The visualization of recent successful physical layer transmissions is
+enabled with the `displayCommunicationTrail` parameter. Successful
+transmissions are displayed with blue lines that fade with time. When a
+packet is successfully received by the physical layer, the arrow between
+the transmitter and receiver hosts is created or reinforced. The arrows
+visible at any given time indicate recent communication patterns.
 
 @dontinclude omnetpp.ini
-@skipline visualizer
-
-This displays transmissions as colored rings emanating from hosts. Since this
-is sufficient to represent transmissions visually, it is advisable to turn off
-message send animations in Qtenv.
-
-In order to get a smooth animation, canvas updates have to be enabled and an
-update interval has to be set:
-
-@dontinclude omnetpp.ini
-@skipline Propagation
-
-Communication trails are enabled, which are fading blue lines on
-successful physical layer communication paths:
-
-@dontinclude omnetpp.ini
-@skipline displayCommunicationTrail
+@skipline
 
 Configuration:
 
