@@ -200,7 +200,7 @@ extends = Wireless07
 
 ######################################################################################################
 [Config Wireless09]
-description = Configure adhoc routing (AODV)
+description = Configure ad hoc routing (AODV)
 extends = Wireless08
 
 # Turn off the static configuration added by the IPv4NetworkConfigurator so it will not interfere
