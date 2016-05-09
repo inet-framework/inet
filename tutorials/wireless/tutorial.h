@@ -157,6 +157,16 @@ independent duplex communication channels. The radio data rates are set to
 `maxCommunicationRange`, `ignoreInterference`, and `bitrate` parameters of
 the appropriate modules.
 
+<b>MAC layer</b>
+
+NICs modules also contain an L2 (i.e. data link layer) protocol. The MAC
+protocol in `IdealWirelessNic` is configurable, the default choice being
+`IdealMac`. `IdealMac` implements a trivial MAC layer which only provides
+encapsulation/decapsulation but no real medium access protocol. There is
+virtually no medium access control: packets are transmitted as soon as the
+previous packet has completed transmission. `IdealMac` also contains
+an optional out-of-band acknowledgement mechanism which we turn off here.
+
 The configuration:
 
 @dontinclude omnetpp.ini
