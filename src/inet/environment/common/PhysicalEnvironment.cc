@@ -52,6 +52,7 @@ void PhysicalEnvironment::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         objectCache = dynamic_cast<IObjectCache *>(getSubmodule("objectCache"));
+        ground = dynamic_cast<IGround *>(getSubmodule("ground"));
         temperature = K(par("temperature"));
         spaceMin.x = par("spaceMinX");
         spaceMin.y = par("spaceMinY");

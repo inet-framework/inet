@@ -27,6 +27,9 @@ namespace physicalenvironment {
 class INET_API IGround
 {
   public:
+    /**
+     * Returns the elevation above a fixed reference point.
+     */
     virtual double getElevation(const Coord &position) const = 0;
 };
 
