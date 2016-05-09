@@ -18,7 +18,7 @@
 #ifndef __INET_FREESPACEPATHLOSS_H
 #define __INET_FREESPACEPATHLOSS_H
 
-#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
+#include "inet/physicallayer/base/packetlevel/PathLossBase.h"
 
 namespace inet {
 
@@ -29,7 +29,7 @@ namespace physicallayer {
  *
  * @author Oliver Graute
  */
-class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
+class INET_API FreeSpacePathLoss : public PathLossBase
 {
   protected:
     double alpha;
