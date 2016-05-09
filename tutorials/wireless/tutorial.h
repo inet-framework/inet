@@ -974,17 +974,27 @@ TODO
 
 <!------------------------------------------------------------------------>
 
-@page step14 Step 14 - Enhancing the antenna with some constant gain
+@page step14 Step 14 - Introducing antenna gain
 
 @nav{step13,index}
 
 @section s14goals Goals
 
-TODO eddig nem volt gain?
+In the previous steps, we have assumed an isotropic antenna for the radio,
+with a gain of 1 (0dB). Here we want to enhance the simulation by taking
+antenna gain into account.
 
 @section s14model The model
 
-TODO
+For simplicity, we configure the hosts to use `ConstantGainAntenna`.
+`ConstantGainAntenna` is an abstraction: it models an antenna that has a
+constant gain in the directions relevant for the simulation, regardless of
+how such antenna could be implemented in real life. For example, if all
+nodes of a simulated wireless network are on the same plane,
+`ConstantGainAntenna` could correspond to an omnidirectional antenna such
+as a vertical dipole. (INET contains support for directional antennas as
+well.)
+
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless14]

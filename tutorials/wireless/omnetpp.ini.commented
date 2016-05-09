@@ -304,7 +304,7 @@ extends = Wireless12
  
 ######################################################################################################
 [Config Wireless14]
-description = Enhance the antenna with some constant gain
+description = Introducing antenna gain
 extends = Wireless13
 
 # Let's install a better antenna to extend the range of the nodes and increase the connectivity.
