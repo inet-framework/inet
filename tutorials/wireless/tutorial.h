@@ -496,7 +496,7 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 <!------------------------------------------------------------------------>
 
-@page step6 Step 6 - Using CSMA to better utilize the medium (without acks)
+@page step6 Step 6 - Using CSMA to better utilize the medium
 
 @nav{step5,step7}
 
@@ -522,8 +522,6 @@ over, possibly with an updated range for the backoff period.
 
 We expect that the use of CSMA will improve throughput, as there will be
 less collisions, and the medium will be utilized better.
-
-TODO What about ACKs? Turn them on in a SEPARATE step!
 
 @section s6model The model
 
@@ -570,11 +568,36 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 <!------------------------------------------------------------------------>
 
-@page step7 Step 7 - CSMA with acks
+@page step7 Step 7 - Turning on ACKs in CSMA
 
 @nav{step6,step8}
 
+@section s7goals Goals
+
+In this step, we try to make link layer communication more reliable by
+adding acknowledgement to the MAC protocol.
+
+TODO We not expect that the use of CSMA will improve throughput, but
+packets will not be lost etc.
+
+@section s7model The model
+
+We turn on ACKs by setting the useMACAcks parameter of CSMA.
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless07]
+@until ####
+
+@section s7results Results
+
+<img src="wireless-step7.png">
+
+<b>Number of packets received by host B: TODO</b>
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
 @nav{step6,step8}
+@fixupini
 
 <!------------------------------------------------------------------------>
 
@@ -607,7 +630,7 @@ The visualization of radio signals as expanding bubbles is no longer needed,
 so we turn it off.
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless07]
+@skipline [Config Wireless08]
 @until ####
 
 @section s8results Results
@@ -661,7 +684,7 @@ More important, we change the hosts to be instances of `AODVRouter`.
 submodule. This change turns each node into an AODV router.
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless08]
+@skipline [Config Wireless09]
 @until ####
 
 @section s9results Results
@@ -726,7 +749,7 @@ The energyBalance variable indicates the energy consumption
 to display energy consumption over time.
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless09]
+@skipline [Config Wireless10]
 @until ####
 
 @section s10results Results
@@ -790,7 +813,7 @@ To calculate interactions with obstacles, we need an obstacle loss model:
 @skipline obstacleLoss
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless10]
+@skipline [Config Wireless11]
 @until ####
 
 
@@ -879,7 +902,7 @@ noise level to a nonzero value (-110dBm).
 Configuration:
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless11]
+@skipline [Config Wireless12]
 @until ####
 
 
@@ -929,7 +952,7 @@ TODO why are they parameters of the medium??? shouldn't they be parameters of th
 
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless12]
+@skipline [Config Wireless13]
 @until ####
 
 @section s13results Results
@@ -956,7 +979,7 @@ TODO eddig nem volt gain?
 TODO
 
 @dontinclude omnetpp.ini
-@skipline [Config Wireless13]
+@skipline [Config Wireless14]
 @until ####
 
 @section s14results Results

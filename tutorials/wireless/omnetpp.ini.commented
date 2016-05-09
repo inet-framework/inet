@@ -58,7 +58,7 @@ sim-time-limit = 25s
 ######################################################################################################
 [Config Wireless02]
 description = Set up some animations
-extends=Wireless01
+extends = Wireless01
 
 # Allow the medium to animate the transmissions using the OMNeT++ Canvas API
 # (We no longer need the default message animation so let's turn it off manually
@@ -159,16 +159,27 @@ extends = Wireless05
 # The MAC protocol is now CSMA
 *.host*.wlan[*].macType = "CSMA"
 
-# We need MAC acknowledgements to detect if a link is broken between two nodes
-*.host*.wlan[*].mac.useMACAcks = true
+# No ACKs for now
+*.host*.wlan[*].mac.useMACAcks = false
 
 # Result: After CSMA was configured, we should see an increased throughput (compared to the previous step
 # where the medium was not checked before transmission)
 
 ######################################################################################################
 [Config Wireless07]
-description = Configure node movements
+description = Turning on ACKs in CSMA
 extends = Wireless06
+
+# We need MAC acknowledgements to detect if a link is broken between two nodes
+*.host*.wlan[*].mac.useMACAcks = true
+
+# Result: About the same number of packets go through, but the the link lsyer is now reliable
+# (packets arriving at hostB are of consecutive sequence numbers)
+
+######################################################################################################
+[Config Wireless08]
+description = Configure node movements
+extends = Wireless07
 
 # Turn bubble off, we don't need them anymore
 *.visualizer.mediumVisualizer.displaySignals = false
@@ -188,9 +199,9 @@ extends = Wireless06
 # lost connectivity.     
 
 ######################################################################################################
-[Config Wireless08]
+[Config Wireless09]
 description = Configure adhoc routing (AODV)
-extends = Wireless07
+extends = Wireless08
 
 # Turn off the static configuration added by the IPv4NetworkConfigurator so it will not interfere
 # with the dynamic routing protocol. We are only assigning IP addresses now
@@ -207,9 +218,9 @@ extends = Wireless07
 # even after some nodes get out of range.
 
 ######################################################################################################
-[Config Wireless09]
+[Config Wireless10]
 description = Install energy management into the nodes
-extends = Wireless08
+extends = Wireless09
 
 # Set up a model for the energy consumption of the nodes
 **.energyConsumerType = "StateBasedEnergyConsumer"
@@ -223,9 +234,9 @@ extends = Wireless08
 # over time by displaying the residualCapacity signal.
 
 ######################################################################################################
-[Config Wireless10]
+[Config Wireless11]
 description = Add obstacles to the environment
-extends = Wireless09
+extends = Wireless10
 network = WirelessC
 
 ### XXX because of an incorrect default we should configure an empty object cache for an infinite space environment
@@ -242,9 +253,9 @@ network = WirelessC
 # the objects in the environment so we have to set up a more accurate model.
 
 ######################################################################################################
-[Config Wireless11]
+[Config Wireless12]
 description = Enhance the accuracy of the radio model
-extends = Wireless10
+extends = Wireless11
 
 # We switch to a more detailed radio model so we have to replace the global radioMedium module, too
 *.mediumType = "APSKScalarRadioMedium"
@@ -273,9 +284,9 @@ extends = Wireless10
 # transmission sometimes.
 
 ######################################################################################################
-[Config Wireless12]
+[Config Wireless13]
 description = Configure a more accurate pathloss model
-extends = Wireless11
+extends = Wireless12
 
 # To make our model even more accurate, let's configure the pathloss model, too.
 # By default the medium uses the free space model. We will use the TwoRayGroundReflection 
@@ -292,9 +303,10 @@ extends = Wireless11
 # height values between 1m and 2m. and see the differences!)
  
 ######################################################################################################
-[Config Wireless13]
+[Config Wireless14]
 description = Enhance the antenna with some constant gain
-extends = Wireless12
+extends = Wireless13
+
 # Let's install a better antenna to extend the range of the nodes and increase the connectivity.
 *.host*.wlan[*].radio.antennaType = "ConstantGainAntenna"
 *.host*.wlan[*].radio.antenna.gain = 12dB
