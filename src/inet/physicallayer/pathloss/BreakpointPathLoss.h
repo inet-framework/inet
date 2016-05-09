@@ -1,7 +1,7 @@
 #ifndef __INET_BREAKPOINTPATHLOSS_H
 #define __INET_BREAKPOINTPATHLOSS_H
 
-#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
+#include "inet/physicallayer/base/packetlevel/PathLossBase.h"
 
 namespace inet {
 
@@ -10,7 +10,7 @@ namespace physicallayer {
 /**
  * Implementation of a breakpoint path loss model.
  */
-class INET_API BreakpointPathLoss : public cModule, public IPathLoss
+class INET_API BreakpointPathLoss : public PathLossBase
 {
   protected:
     /** @brief initial path loss */
