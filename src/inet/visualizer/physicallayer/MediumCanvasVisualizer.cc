@@ -49,7 +49,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         }
         if (displayCommunicationTrail) {
             communicationTrail = new TrailFigure(100, true, "communication trail");
-            canvas->addFigureBelow(communicationTrail, canvas->getSubmodulesLayer());
+            canvas->addFigureAbove(communicationTrail, canvas->getSubmodulesLayer());
         }
         displayCommunicationHeat = par("displayCommunicationHeat");
         if (displayCommunicationHeat) {
