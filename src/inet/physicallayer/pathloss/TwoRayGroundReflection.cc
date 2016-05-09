@@ -51,7 +51,7 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
     Hz carrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
     m distance = m(recepiverPosition.distance(transmitterPosition));
     m transmitterAltitude = m(transmitterPosition.z - physicalEnvironment->getGround()->getElevation(transmitterPosition));
-    m recepiverAltitude = m(recepiverPosition.z - physicalEnvironment->getGround()->getElevation(recepiverPosition));
+    m receiverAltitude = m(recepiverPosition.z - physicalEnvironment->getGround()->getElevation(recepiverPosition));
     m waveLength = propagationSpeed / carrierFrequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power
@@ -60,7 +60,7 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
      *   crossOverDistance = ------------------
      *                           waveLength
      */
-    m crossOverDistance = (4 * M_PI * transmitterAltitude * recepiverAltitude) / waveLength;
+    m crossOverDistance = (4 * M_PI * transmitterAltitude * receiverAltitude) / waveLength;
     if (distance < crossOverDistance)
         return computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     else
@@ -74,7 +74,7 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
          * To be consistent with the free space equation, L is added here.
          * The original equation in Rappaport's book assumes L = 1.
          */
-        return unit((transmitterAltitude * transmitterAltitude * recepiverAltitude * recepiverAltitude) / (distance * distance * distance * distance * systemLoss)).get();
+        return unit((transmitterAltitude * transmitterAltitude * receiverAltitude * receiverAltitude) / (distance * distance * distance * distance * systemLoss)).get();
 }
 
 } // namespace physicallayer
