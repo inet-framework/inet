@@ -15,6 +15,7 @@
 *              in the top level directory
 ***************************************************************************/
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/pathloss/TwoRayGroundReflection.h"
 
@@ -27,7 +28,7 @@ Define_Module(TwoRayGroundReflection);
 void TwoRayGroundReflection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        physicalEnvironment = check_and_cast<IPhysicalEnvironment *>(getModuleByPath(par("physicalEnvironmentModule")));
+        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, true);
     }
 }
 
@@ -49,8 +50,8 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     Hz carrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
     m distance = m(recepiverPosition.distance(transmitterPosition));
-    m transmitterElevation = m(physicalEnvironment->getGround()->getElevation(transmitterPosition));
-    m recepiverElevation = m(physicalEnvironment->getGround()->getElevation(recepiverPosition));
+    m transmitterAltitude = m(transmitterPosition.z - physicalEnvironment->getGround()->getElevation(transmitterPosition));
+    m recepiverAltitude = m(recepiverPosition.z - physicalEnvironment->getGround()->getElevation(recepiverPosition));
     m waveLength = propagationSpeed / carrierFrequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power
@@ -59,7 +60,7 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
      *   crossOverDistance = ------------------
      *                           waveLength
      */
-    m crossOverDistance = (4 * M_PI * transmitterElevation * recepiverElevation) / waveLength;
+    m crossOverDistance = (4 * M_PI * transmitterAltitude * recepiverAltitude) / waveLength;
     if (distance < crossOverDistance)
         return computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     else
@@ -73,7 +74,7 @@ double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission
          * To be consistent with the free space equation, L is added here.
          * The original equation in Rappaport's book assumes L = 1.
          */
-        return unit((transmitterElevation * transmitterElevation * recepiverElevation * recepiverElevation) / (distance * distance * distance * distance * systemLoss)).get();
+        return unit((transmitterAltitude * transmitterAltitude * recepiverAltitude * recepiverAltitude) / (distance * distance * distance * distance * systemLoss)).get();
 }
 
 } // namespace physicallayer
