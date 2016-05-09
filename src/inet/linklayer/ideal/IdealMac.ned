@@ -45,7 +45,7 @@ simple IdealMac extends MACProtocolBase like ILinkLayer
         int headerLength @unit("B") = default(0B);       // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
         bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
-        double ackTimeout @unit("s") = default(100ms);
+        double ackTimeout @unit("s") = default(100ms); // -1 means, no ack
 
         @class(IdealMac);
         @signal[dropPkNotForUs](type=IdealMacFrame);
