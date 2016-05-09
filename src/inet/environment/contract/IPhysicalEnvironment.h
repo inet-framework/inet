@@ -18,12 +18,14 @@
 #ifndef __INET_IPHYSICALENVIRONMENT_H
 #define __INET_IPHYSICALENVIRONMENT_H
 
-#include "inet/common/IVisitor.h"
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/geometry/common/EulerAngles.h"
-#include "inet/environment/contract/IPhysicalObject.h"
+#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/IVisitor.h"
+#include "inet/environment/contract/IGround.h"
 #include "inet/environment/contract/IMaterialRegistry.h"
+#include "inet/environment/contract/IObjectCache.h"
+#include "inet/environment/contract/IPhysicalObject.h"
 
 namespace inet {
 
@@ -32,6 +34,9 @@ namespace physicalenvironment {
 class INET_API IPhysicalEnvironment
 {
   public:
+    virtual IObjectCache *getObjectCache() const = 0;
+    virtual IGround *getGround() const = 0;
+
     virtual const Coord& getSpaceMin() const = 0;
     virtual const Coord& getSpaceMax() const = 0;
     virtual const IMaterialRegistry *getMaterialRegistry() const = 0;

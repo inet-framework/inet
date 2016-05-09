@@ -51,6 +51,12 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
     Coord spaceMax;
     //@}
 
+    /** @name Submodules */
+    //@{
+    IObjectCache *objectCache = nullptr;
+    IGround *ground = nullptr;
+    //@}
+
     /** @name Internal state */
     //@{
     std::vector<const ShapeBase *> shapes;
@@ -60,7 +66,6 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 
     /** @name Cache */
     //@{
-    IObjectCache *objectCache;
     std::map<int, const ShapeBase *> idToShapeMap;  // shared shapes
     std::map<int, const Material *> idToMaterialMap;
     std::map<int, const PhysicalObject *> idToObjectMap;
@@ -79,6 +84,9 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
   public:
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
+
+    virtual IObjectCache *getObjectCache() const override { return objectCache; }
+    virtual IGround *getGround() const override { return ground; }
 
     virtual K getTemperature() const { return temperature; }
     virtual const Coord& getSpaceMin() const override { return spaceMin; }

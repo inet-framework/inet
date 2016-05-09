@@ -17,6 +17,7 @@
 
 package inet.environment.common;
 
+import inet.environment.contract.IGround;
 import inet.environment.contract.IObjectCache;
 import inet.environment.contract.IPhysicalEnvironment;
 
@@ -161,6 +162,7 @@ module PhysicalEnvironment like IPhysicalEnvironment
     parameters:
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
         string objectCacheType = default("GridObjectCache");  // TODO should be empty by default as GridObjectCache require finite space* parameters which is not always present
+        string groundType = default("");
         double temperature @unit(K) = default(293K);
         double spaceMinX @unit(m) = default(-1m/0); // min x position of space, unconstrained by default (negative infinity)
         double spaceMinY @unit(m) = default(-1m/0); // min y position of space, unconstrained by default (negative infinity)
@@ -171,9 +173,14 @@ module PhysicalEnvironment like IPhysicalEnvironment
         xml config = default(xml("<config/>"));
         @display("i=misc/town_s");
         @class(PhysicalEnvironment);
+
     submodules:
         objectCache: <objectCacheType> like IObjectCache if objectCacheType != "" {
-            @display("p=100,50");
+            parameters:
+                @display("p=100,50");
+        }
+        ground: <groundType> like IGround if groundType != "" {
+            parameters:
+                @display("p=100,150");
         }
 }
-
