@@ -1,6 +1,6 @@
 ######################################################################################################
 [Config Wireless01]
-description = Two nodes communicating via UDP
+description = Two hosts communicating wirelessly
 network = WirelessA
 
 # At this point you should take a look at the NED files corresponding to this Ini file. 
@@ -57,7 +57,7 @@ sim-time-limit = 25s
 
 ######################################################################################################
 [Config Wireless02]
-description = Set up some animations
+description = Setting up some animations
 extends = Wireless01
 
 # Allow the medium to animate the transmissions using the OMNeT++ Canvas API
@@ -78,7 +78,7 @@ extends = Wireless01
 
 ######################################################################################################
 [Config Wireless03]
-description = Add more nodes and decrease the communication range to 250m
+description = Adding more nodes and decreasing the communication range
 extends = Wireless02
 network = WirelessB
 
@@ -92,7 +92,7 @@ network = WirelessB
 
 ######################################################################################################
 [Config Wireless04]
-description = Set up static routing
+description = Setting up static routing
 extends = Wireless03
 
 # Enable static routing
@@ -126,7 +126,7 @@ extends = Wireless03
 
 ######################################################################################################
 [Config Wireless05]
-description = Take into account the interference between different hosts
+description = Taking interference into account
 extends = Wireless04
 
 # In this step we will try to more accurately model the communication by taking into account
@@ -144,7 +144,7 @@ extends = Wireless04
 
 ######################################################################################################
 [Config Wireless06]
-description = Use CSMA for better utilize the medium
+description = Using CSMA to better utilize the medium
 extends = Wireless05
 
 # We will use CSMA for the MAC so transmitters will sniff into the medium and will not
@@ -178,7 +178,7 @@ extends = Wireless06
 
 ######################################################################################################
 [Config Wireless08]
-description = Configure node movements
+description = Configuring node movements
 extends = Wireless07
 
 # Turn bubble off, we don't need them anymore
@@ -200,7 +200,7 @@ extends = Wireless07
 
 ######################################################################################################
 [Config Wireless09]
-description = Configure ad hoc routing (AODV)
+description = Configuring ad-hoc routing (AODV)
 extends = Wireless08
 
 # Turn off the static configuration added by the IPv4NetworkConfigurator so it will not interfere
@@ -219,7 +219,7 @@ extends = Wireless08
 
 ######################################################################################################
 [Config Wireless10]
-description = Install energy management into the nodes
+description = Modeling energy consumption
 extends = Wireless09
 
 # Set up a model for the energy consumption of the nodes
@@ -235,7 +235,7 @@ extends = Wireless09
 
 ######################################################################################################
 [Config Wireless11]
-description = Add obstacles to the environment
+description = Adding obstacles to the environment
 extends = Wireless10
 network = WirelessC
 
@@ -254,7 +254,7 @@ network = WirelessC
 
 ######################################################################################################
 [Config Wireless12]
-description = Enhance the accuracy of the radio model
+description = Changing to a more realistic radio model
 extends = Wireless11
 
 # We switch to a more detailed radio model so we have to replace the global radioMedium module, too
@@ -285,7 +285,7 @@ extends = Wireless11
 
 ######################################################################################################
 [Config Wireless13]
-description = Configure a more accurate pathloss model
+description = Configuring a more accurate pathloss model
 extends = Wireless12
 
 # To make our model even more accurate, let's configure the pathloss model, too.
