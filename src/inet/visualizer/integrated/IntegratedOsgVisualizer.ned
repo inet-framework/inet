@@ -18,17 +18,19 @@
 
 package inet.visualizer.integrated;
 
+import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
-import inet.visualizer.contract.ILinkVisualizer;
 import inet.visualizer.contract.IMediumVisualizer;
 import inet.visualizer.contract.IMobilityVisualizer;
 import inet.visualizer.contract.INetworkConnectionVisualizer;
 import inet.visualizer.contract.INetworkNodeVisualizer;
+import inet.visualizer.contract.INetworkRouteVisualizer;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
-import inet.visualizer.contract.IRouteVisualizer;
+import inet.visualizer.contract.IPhysicalLinkVisualizer;
 import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.contract.IStatisticVisualizer;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
+import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
 // This module integrates all osg visualizers into a single module. It supports
@@ -48,8 +50,10 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
         string mobilityVisualizerType = default("MobilityOsgVisualizer");
         string mediumVisualizerType = default("MediumOsgVisualizer");
         string obsacleLossVisualizerType = default("TracingObstacleLossOsgVisualizer");
-        string linkVisualizerType = default("LinkOsgVisualizer");
-        string routeVisualizerType = default("RouteOsgVisualizer");
+        string physicalLinkVisualizerType = default("PhysicalLinkOsgVisualizer");
+        string dataLinkVisualizerType = default("DataLinkOsgVisualizer");
+        string networkRouteVisualizerType = default("NetworkRouteOsgVisualizer");
+        string transportRouteVisualizerType = default("TransportRouteOsgVisualizer");
         string statisticVisualizerType = default("StatisticOsgVisualizer");
     submodules:
         sceneVisualizer: <sceneVisualizerType> like ISceneVisualizer if sceneVisualizerType != "" {
@@ -72,24 +76,32 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,450");
         }
-        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
+        statisticVisualizer: <statisticVisualizerType> like IStatisticVisualizer if statisticVisualizerType != "" {
             parameters:
                 @display("p=150,550");
         }
+        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
+            parameters:
+                @display("p=450,50");
+        }
         obsacleLossVisualizer: <obsacleLossVisualizerType> like ITracingObstacleLossVisualizer if obsacleLossVisualizerType != "" {
             parameters:
-                @display("p=150,650");
+                @display("p=450,150");
         }
-        linkVisualizer: <linkVisualizerType> like ILinkVisualizer if linkVisualizerType != "" {
+        physicalLinkVisualizer: <physicalLinkVisualizerType> like IPhysicalLinkVisualizer if physicalLinkVisualizerType != "" {
             parameters:
-                @display("p=150,750");
+                @display("p=450,250");
         }
-        routeVisualizer: <routeVisualizerType> like IRouteVisualizer if routeVisualizerType != "" {
+        dataLinkVisualizer: <dataLinkVisualizerType> like IDataLinkVisualizer if dataLinkVisualizerType != "" {
             parameters:
-                @display("p=150,850");
+                @display("p=450,350");
         }
-        statisticVisualizer: <statisticVisualizerType> like IStatisticVisualizer if statisticVisualizerType != "" {
+        networkRouteVisualizer: <networkRouteVisualizerType> like INetworkRouteVisualizer if networkRouteVisualizerType != "" {
             parameters:
-                @display("p=150,950");
+                @display("p=450,450");
+        }
+        transportRouteVisualizer: <transportRouteVisualizerType> like ITransportRouteVisualizer if transportRouteVisualizerType != "" {
+            parameters:
+                @display("p=450,550");
         }
 }

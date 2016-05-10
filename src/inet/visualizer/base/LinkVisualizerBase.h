@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -62,6 +62,8 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
+
+    virtual bool isLinkEnd(cModule *module) const = 0;
 
     virtual const Link *createLink(cModule *source, cModule *destination) const = 0;
     virtual void setAlpha(const Link *link, double alpha) const = 0;

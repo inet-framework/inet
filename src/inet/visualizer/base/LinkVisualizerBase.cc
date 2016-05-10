@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,8 +17,6 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/base/MACBase.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
@@ -123,7 +121,7 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         setPosition(node, position);
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
-        if (dynamic_cast<MACProtocolBase *>(source) != nullptr || dynamic_cast<MACBase *>(source) != nullptr) {
+        if (isLinkEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {
                 auto treeId = packet->getTreeId();
@@ -133,7 +131,7 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         }
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
-        if (dynamic_cast<MACProtocolBase *>(source) != nullptr || dynamic_cast<MACBase *>(source) != nullptr) {
+        if (isLinkEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {
                 auto treeId = packet->getTreeId();

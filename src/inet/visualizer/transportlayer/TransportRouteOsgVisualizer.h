@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,25 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.contract;
+#ifndef __INET_TRANSPORTROUTEOSGVISUALIZER_H
+#define __INET_TRANSPORTROUTEOSGVISUALIZER_H
 
-//
-// This module interface allows configuring different ILinkVisualizer
-// submodules from INI files. Such a visualizer displays the active links in a
-// network.
-//
-// @see ~LinkCanvasVisualizer, ~LinkOsgVisualizer, and
-// ~LinkVisualizerBase
-//
-moduleinterface ILinkVisualizer
+#include "inet/visualizer/base/PathOsgVisualizerBase.h"
+
+namespace inet {
+
+namespace visualizer {
+
+class INET_API TransportRouteOsgVisualizer : public PathOsgVisualizerBase
 {
-    parameters:
-        @display("i=block/app_s");
-}
+  protected:
+    virtual bool isPathEnd(cModule *module) const override;
+    virtual bool isPathElement(cModule *module) const override;
+};
+
+} // namespace visualizer
+
+} // namespace inet
+
+#endif // ifndef __INET_TRANSPORTROUTEOSGVISUALIZER_H
+

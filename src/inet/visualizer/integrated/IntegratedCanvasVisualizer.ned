@@ -18,17 +18,19 @@
 
 package inet.visualizer.integrated;
 
+import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
-import inet.visualizer.contract.ILinkVisualizer;
 import inet.visualizer.contract.IMediumVisualizer;
 import inet.visualizer.contract.IMobilityVisualizer;
 import inet.visualizer.contract.INetworkConnectionVisualizer;
 import inet.visualizer.contract.INetworkNodeVisualizer;
+import inet.visualizer.contract.INetworkRouteVisualizer;
 import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
-import inet.visualizer.contract.IRouteVisualizer;
+import inet.visualizer.contract.IPhysicalLinkVisualizer;
 import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.contract.IStatisticVisualizer;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
+import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
 // This module integrates all canvas visualizers into a single module. It
@@ -49,8 +51,10 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         string mobilityVisualizerType = default("MobilityCanvasVisualizer");
         string mediumVisualizerType = default("MediumCanvasVisualizer");
         string obstacleLossVisualizerType = default("TracingObstacleLossCanvasVisualizer");
-        string linkVisualizerType = default("LinkCanvasVisualizer");
-        string routeVisualizerType = default("RouteCanvasVisualizer");
+        string physicalLinkVisualizerType = default("PhysicalLinkCanvasVisualizer");
+        string dataLinkVisualizerType = default("DataLinkCanvasVisualizer");
+        string networkRouteVisualizerType = default("NetworkRouteCanvasVisualizer");
+        string transportRouteVisualizerType = default("TransportRouteCanvasVisualizer");
         string statisticVisualizerType = default("StatisticCanvasVisualizer");
     submodules:
         sceneVisualizer: <sceneVisualizerType> like ISceneVisualizer if sceneVisualizerType != "" {
@@ -73,24 +77,32 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=150,450");
         }
-        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
+        statisticVisualizer: <statisticVisualizerType> like IStatisticVisualizer if statisticVisualizerType != "" {
             parameters:
                 @display("p=150,550");
         }
+        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
+            parameters:
+                @display("p=450,50");
+        }
         obstacleLossVisualizer: <obstacleLossVisualizerType> like ITracingObstacleLossVisualizer if obstacleLossVisualizerType != "" {
             parameters:
-                @display("p=150,650");
+                @display("p=450,150");
         }
-        linkVisualizer: <linkVisualizerType> like ILinkVisualizer if linkVisualizerType != "" {
+        physicalLinkVisualizer: <physicalLinkVisualizerType> like IPhysicalLinkVisualizer if physicalLinkVisualizerType != "" {
             parameters:
-                @display("p=150,750");
+                @display("p=450,250");
         }
-        routeVisualizer: <routeVisualizerType> like IRouteVisualizer if routeVisualizerType != "" {
+        dataLinkVisualizer: <dataLinkVisualizerType> like IDataLinkVisualizer if dataLinkVisualizerType != "" {
             parameters:
-                @display("p=150,850");
+                @display("p=450,350");
         }
-        statisticVisualizer: <statisticVisualizerType> like IStatisticVisualizer if statisticVisualizerType != "" {
+        networkRouteVisualizer: <networkRouteVisualizerType> like INetworkRouteVisualizer if networkRouteVisualizerType != "" {
             parameters:
-                @display("p=150,950");
+                @display("p=450,450");
+        }
+        transportRouteVisualizer: <transportRouteVisualizerType> like ITransportRouteVisualizer if transportRouteVisualizerType != "" {
+            parameters:
+                @display("p=450,550");
         }
 }

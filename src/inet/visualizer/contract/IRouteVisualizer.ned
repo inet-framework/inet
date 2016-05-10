@@ -18,13 +18,14 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different IRouteVisualizer
-// submodules from INI files. Such a visualizer displays active routes in a
-// network.
+// This module interface allows configuring different INetworkRouteVisualizer
+// submodules from INI files. Such a visualizer displays active network routes
+// in a network.
 //
-// @see ~RouteCanvasVisualizer, ~RouteOsgVisualizer, and ~RouteVisualizerBase
+// @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteOsgVisualizer, and
+// ~RouteVisualizerBase
 //
-moduleinterface IRouteVisualizer
+moduleinterface INetworkRouteVisualizer
 {
     parameters:
         @display("i=block/app_s");

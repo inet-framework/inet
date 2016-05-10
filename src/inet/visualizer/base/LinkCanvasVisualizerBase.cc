@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,26 +17,24 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/visualizer/linklayer/LinkCanvasVisualizer.h"
+#include "inet/visualizer/base/LinkCanvasVisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
 
-Define_Module(LinkCanvasVisualizer);
-
-LinkCanvasVisualizer::CanvasLink::CanvasLink(cLineFigure *figure, int sourceModuleId, int destinationModuleId) :
+LinkCanvasVisualizerBase::CanvasLink::CanvasLink(cLineFigure *figure, int sourceModuleId, int destinationModuleId) :
     Link(sourceModuleId, destinationModuleId),
     figure(figure)
 {
 }
 
-LinkCanvasVisualizer::CanvasLink::~CanvasLink()
+LinkCanvasVisualizerBase::CanvasLink::~CanvasLink()
 {
     delete figure;
 }
 
-void LinkCanvasVisualizer::initialize(int stage)
+void LinkCanvasVisualizerBase::initialize(int stage)
 {
     LinkVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
@@ -44,21 +42,21 @@ void LinkCanvasVisualizer::initialize(int stage)
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
 }
 
-void LinkCanvasVisualizer::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
+void LinkCanvasVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
 {
     LinkVisualizerBase::addLink(sourceAndDestination, link);
     auto canvasLink = static_cast<const CanvasLink *>(link);
     visualizerTargetModule->getCanvas()->addFigure(canvasLink->figure);
 }
 
-void LinkCanvasVisualizer::removeLink(const Link *link)
+void LinkCanvasVisualizerBase::removeLink(const Link *link)
 {
     LinkVisualizerBase::removeLink(link);
     auto canvasLink = static_cast<const CanvasLink *>(link);
     visualizerTargetModule->getCanvas()->removeFigure(canvasLink->figure);
 }
 
-const LinkVisualizerBase::Link *LinkCanvasVisualizer::createLink(cModule *source, cModule *destination) const
+const LinkVisualizerBase::Link *LinkCanvasVisualizerBase::createLink(cModule *source, cModule *destination) const
 {
     auto figure = new cLineFigure();
     figure->setStart(canvasProjection->computeCanvasPoint(getPosition(source)));
@@ -69,14 +67,14 @@ const LinkVisualizerBase::Link *LinkCanvasVisualizer::createLink(cModule *source
     return new CanvasLink(figure, source->getId(), destination->getId());
 }
 
-void LinkCanvasVisualizer::setAlpha(const Link *link, double alpha) const
+void LinkCanvasVisualizerBase::setAlpha(const Link *link, double alpha) const
 {
     auto canvasLink = static_cast<const CanvasLink *>(link);
     auto figure = canvasLink->figure;
     figure->setLineOpacity(alpha);
 }
 
-void LinkCanvasVisualizer::setPosition(cModule *node, const Coord& position) const
+void LinkCanvasVisualizerBase::setPosition(cModule *node, const Coord& position) const
 {
     for (auto it : links) {
         auto link = static_cast<const CanvasLink *>(it.second);

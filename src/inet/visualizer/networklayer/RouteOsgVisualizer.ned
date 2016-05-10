@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,7 +18,8 @@
 package inet.visualizer.networklayer;
 
 import inet.visualizer.base.RouteVisualizerBase;
-import inet.visualizer.contract.IRouteVisualizer;
+import inet.visualizer.contract.INetworkRouteVisualizer;
+
 
 //
 // This module visualizes network routes on a 3D osg scene. It displays an
@@ -27,11 +28,11 @@ import inet.visualizer.contract.IRouteVisualizer;
 // over time until the route becomes inactive unless it is reinforced by another
 // packet. The polyline automatically follows the movement of mobile nodes.
 //
-// @see ~RouteCanvasVisualizer, ~RouteVisualizer, ~RouteVisualizerBase, and
-// ~IRouteVisualizer
+// @see ~NetworkRouteCanvasVisualizer, ~NetworkRouteVisualizer, ~RouteVisualizerBase,
+// and ~INetworkRouteVisualizer
 //
-simple RouteOsgVisualizer extends RouteVisualizerBase like IRouteVisualizer
+simple NetworkRouteOsgVisualizer extends RouteVisualizerBase like INetworkRouteVisualizer
 {
     parameters:
-        @class(RouteOsgVisualizer);
+        @class(NetworkRouteOsgVisualizer);
 }

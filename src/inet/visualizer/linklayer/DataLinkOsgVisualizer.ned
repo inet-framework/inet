@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,7 +18,7 @@
 package inet.visualizer.linklayer;
 
 import inet.visualizer.base.LinkVisualizerBase;
-import inet.visualizer.contract.ILinkVisualizer;
+import inet.visualizer.contract.IDataLinkVisualizer;
 
 //
 // This module visualizes network links on a 3D osg scene. It displays a
@@ -27,11 +27,11 @@ import inet.visualizer.contract.ILinkVisualizer;
 // until the link becomes inactive unless it is reinforced by another packet.
 // The line automatically follows the movement of mobile nodes.
 //
-// @see ~LinkCanvasVisualizer, ~LinkVisualizer,
-// ~LinkVisualizerBase, and ~ILinkVisualizer
+// @see ~DataLinkCanvasVisualizer, ~DataLinkVisualizer,
+// ~DataLinkVisualizerBase, and ~IDataLinkVisualizer
 //
-simple LinkOsgVisualizer extends LinkVisualizerBase like ILinkVisualizer
+simple DataLinkOsgVisualizer extends LinkVisualizerBase like IDataLinkVisualizer
 {
     parameters:
-        @class(LinkOsgVisualizer);
+        @class(DataLinkOsgVisualizer);
 }

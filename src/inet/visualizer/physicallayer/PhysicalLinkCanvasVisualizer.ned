@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.linklayer;
+package inet.visualizer.physicallayer;
 
 import inet.visualizer.base.LinkVisualizerBase;
-import inet.visualizer.contract.ILinkVisualizer;
+import inet.visualizer.contract.IPhysicalLinkVisualizer;
 
 //
 // This module visualizes network links on a 2D canvas. It displays an
@@ -32,8 +32,8 @@ import inet.visualizer.contract.ILinkVisualizer;
 // @see ~LinkOsgVisualizer, ~LinkVisualizer,
 // ~LinkVisualizerBase, and ~ILinkVisualizer
 //
-simple LinkCanvasVisualizer extends LinkVisualizerBase like ILinkVisualizer
+simple PhysicalLinkCanvasVisualizer extends LinkVisualizerBase like IPhysicalLinkVisualizer
 {
     parameters:
-        @class(LinkCanvasVisualizer);
+        @class(PhysicalLinkCanvasVisualizer);
 }

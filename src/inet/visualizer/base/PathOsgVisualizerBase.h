@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,42 +15,42 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ROUTEOSGVISUALIZER_H
-#define __INET_ROUTEOSGVISUALIZER_H
+#ifndef __INET_PATHOSGVISUALIZERBASE_H
+#define __INET_PATHOSGVISUALIZERBASE_H
 
-#include "inet/visualizer/base/RouteVisualizerBase.h"
+#include "inet/visualizer/base/PathVisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
 
-class INET_API RouteOsgVisualizer : public RouteVisualizerBase
+class INET_API PathOsgVisualizerBase : public PathVisualizerBase
 {
 #ifdef WITH_OSG
 
   protected:
-    class INET_API OsgRoute : public Route {
+    class INET_API OsgPath : public Path {
       public:
         osg::Node *node = nullptr;
 
       public:
-        OsgRoute(const std::vector<int>& path, osg::Node *node);
-        virtual ~OsgRoute();
+        OsgPath(const std::vector<int>& path, osg::Node *node);
+        virtual ~OsgPath();
     };
 
   protected:
-    virtual void addRoute(std::pair<int, int> sourceAndDestination, const Route *route) override;
-    virtual void removeRoute(std::pair<int, int> sourceAndDestination, const Route *route) override;
+    virtual void addPath(std::pair<int, int> sourceAndDestination, const Path *path) override;
+    virtual void removePath(std::pair<int, int> sourceAndDestination, const Path *path) override;
 
-    virtual const Route *createRoute(const std::vector<int>& path) const override;
-    virtual void setAlpha(const Route *route, double alpha) const override;
+    virtual const Path *createPath(const std::vector<int>& path) const override;
+    virtual void setAlpha(const Path *path, double alpha) const override;
     virtual void setPosition(cModule *node, const Coord& position) const override;
 
 #else // ifdef WITH_OSG
 
   protected:
-    virtual const Route *createRoute(const std::vector<int>& path) const override { return RouteVisualizerBase::createRoute(path); }
-    virtual void setAlpha(const Route *route, double alpha) const override {}
+    virtual const Path *createPath(const std::vector<int>& path) const override { return PathVisualizerBase::createPath(path); }
+    virtual void setAlpha(const Path *path, double alpha) const override {}
     virtual void setPosition(cModule *node, const Coord& position) const override {}
 
 #endif // ifdef WITH_OSG
@@ -60,5 +60,5 @@ class INET_API RouteOsgVisualizer : public RouteVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTEOSGVISUALIZER_H
+#endif // ifndef __INET_PATHOSGVISUALIZERBASE_H
 

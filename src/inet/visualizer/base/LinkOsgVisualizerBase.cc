@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,10 +18,8 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OSGUtils.h"
-#include "inet/linklayer/base/MACBase.h"
-#include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/visualizer/linklayer/LinkOsgVisualizer.h"
+#include "inet/visualizer/base/LinkOsgVisualizerBase.h"
 
 #ifdef WITH_OSG
 #include <osg/Geode>
@@ -32,22 +30,20 @@ namespace inet {
 
 namespace visualizer {
 
-Define_Module(LinkOsgVisualizer);
-
 #ifdef WITH_OSG
 
-LinkOsgVisualizer::OsgLink::OsgLink(osg::Node *node, int sourceModuleId, int destinationModuleId) :
+LinkOsgVisualizerBase::OsgLink::OsgLink(osg::Node *node, int sourceModuleId, int destinationModuleId) :
     Link(sourceModuleId, destinationModuleId),
     node(node)
 {
 }
 
-LinkOsgVisualizer::OsgLink::~OsgLink()
+LinkOsgVisualizerBase::OsgLink::~OsgLink()
 {
     // TODO: delete node;
 }
 
-void LinkOsgVisualizer::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
+void LinkOsgVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
 {
     LinkVisualizerBase::addLink(sourceAndDestination, link);
     auto osgLink = static_cast<const OsgLink *>(link);
@@ -55,7 +51,7 @@ void LinkOsgVisualizer::addLink(std::pair<int, int> sourceAndDestination, const 
     scene->addChild(osgLink->node);
 }
 
-void LinkOsgVisualizer::removeLink(const Link *link)
+void LinkOsgVisualizerBase::removeLink(const Link *link)
 {
     LinkVisualizerBase::removeLink(link);
     auto osgLink = static_cast<const OsgLink *>(link);
@@ -63,7 +59,7 @@ void LinkOsgVisualizer::removeLink(const Link *link)
     node->getParent(0)->removeChild(node);
 }
 
-const LinkVisualizerBase::Link *LinkOsgVisualizer::createLink(cModule *source, cModule *destination) const
+const LinkVisualizerBase::Link *LinkOsgVisualizerBase::createLink(cModule *source, cModule *destination) const
 {
     auto sourcePosition = getPosition(source);
     auto destinationPosition = getPosition(destination);
@@ -77,7 +73,7 @@ const LinkVisualizerBase::Link *LinkOsgVisualizer::createLink(cModule *source, c
     return new OsgLink(node, source->getId(), destination->getId());
 }
 
-void LinkOsgVisualizer::setAlpha(const Link *link, double alpha) const
+void LinkOsgVisualizerBase::setAlpha(const Link *link, double alpha) const
 {
     auto osgLink = static_cast<const OsgLink *>(link);
     auto node = osgLink->node;
@@ -85,7 +81,7 @@ void LinkOsgVisualizer::setAlpha(const Link *link, double alpha) const
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
 }
 
-void LinkOsgVisualizer::setPosition(cModule *node, const Coord& position) const
+void LinkOsgVisualizerBase::setPosition(cModule *node, const Coord& position) const
 {
     for (auto it : links) {
         auto link = static_cast<const OsgLink *>(it.second);

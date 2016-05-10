@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,22 +17,19 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
-#include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/networklayer/ipv4/IPv4.h"
-#include "inet/visualizer/base/RouteVisualizerBase.h"
+#include "inet/visualizer/base/PathVisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
 
-RouteVisualizerBase::Route::Route(const std::vector<int>& path) :
-    path(path)
+PathVisualizerBase::Path::Path(const std::vector<int>& path) :
+    moduleIds(path)
 {
 }
 
-void RouteVisualizerBase::initialize(int stage)
+void PathVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
@@ -50,80 +47,80 @@ void RouteVisualizerBase::initialize(int stage)
     }
 }
 
-void RouteVisualizerBase::refreshDisplay() const
+void PathVisualizerBase::refreshDisplay() const
 {
     auto now = simTime();
-    std::vector<const Route *> removedRoutes;
-    for (auto it : routes) {
-        auto route = it.second;
-        auto alpha = std::min(1.0, std::pow(2.0, -(now - route->lastUsage).dbl() / opacityHalfLife));
+    std::vector<const Path *> removedPaths;
+    for (auto it : paths) {
+        auto path = it.second;
+        auto alpha = std::min(1.0, std::pow(2.0, -(now - path->lastUsage).dbl() / opacityHalfLife));
         if (alpha < 0.01)
-            removedRoutes.push_back(route);
+            removedPaths.push_back(path);
         else
-            setAlpha(route, alpha);
+            setAlpha(path, alpha);
     }
-    for (auto route : removedRoutes) {
-        auto sourceAndDestination = std::pair<int, int>(route->path.front(), route->path.back());
-        const_cast<RouteVisualizerBase *>(this)->removeRoute(sourceAndDestination, route);
-        delete route;
+    for (auto path : removedPaths) {
+        auto sourceAndDestination = std::pair<int, int>(path->moduleIds.front(), path->moduleIds.back());
+        const_cast<PathVisualizerBase *>(this)->removePath(sourceAndDestination, path);
+        delete path;
     }
 }
 
-const RouteVisualizerBase::Route *RouteVisualizerBase::createRoute(const std::vector<int>& path) const
+const PathVisualizerBase::Path *PathVisualizerBase::createPath(const std::vector<int>& path) const
 {
-    return new Route(path);
+    return new Path(path);
 }
 
-const RouteVisualizerBase::Route *RouteVisualizerBase::getRoute(std::pair<int, int> route, const std::vector<int>& path)
+const PathVisualizerBase::Path *PathVisualizerBase::getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path)
 {
-    auto range = routes.equal_range(route);
+    auto range = paths.equal_range(sourceAndDestination);
     for (auto it = range.first; it != range.second; it++)
-        if (it->second->path == path)
+        if (it->second->moduleIds == path)
             return it->second;
     return nullptr;
 }
 
-void RouteVisualizerBase::addRoute(std::pair<int, int> sourceAndDestination, const Route *route)
+void PathVisualizerBase::addPath(std::pair<int, int> sourceAndDestination, const Path *path)
 {
-    routes.insert(std::pair<std::pair<int, int>, const Route *>(sourceAndDestination, route));
+    paths.insert(std::pair<std::pair<int, int>, const Path *>(sourceAndDestination, path));
     updateOffsets();
     updatePositions();
 }
 
-void RouteVisualizerBase::removeRoute(std::pair<int, int> sourceAndDestination, const Route *route)
+void PathVisualizerBase::removePath(std::pair<int, int> sourceAndDestination, const Path *path)
 {
-    routes.erase(routes.find(sourceAndDestination));
+    paths.erase(paths.find(sourceAndDestination));
     updateOffsets();
     updatePositions();
 }
 
-const std::vector<int> *RouteVisualizerBase::getIncompleteRoute(int treeId)
+const std::vector<int> *PathVisualizerBase::getIncompletePath(int treeId)
 {
-    auto it = incompleteRoutes.find(treeId);
-    if (it == incompleteRoutes.end())
+    auto it = incompletePaths.find(treeId);
+    if (it == incompletePaths.end())
         return nullptr;
     else
         return &it->second;
 }
 
-void RouteVisualizerBase::addToIncompleteRoute(int treeId, cModule *module)
+void PathVisualizerBase::addToIncompletePath(int treeId, cModule *module)
 {
-    incompleteRoutes[treeId].push_back(module->getId());
+    incompletePaths[treeId].push_back(module->getId());
 }
 
-void RouteVisualizerBase::removeIncompleteRoute(int treeId)
+void PathVisualizerBase::removeIncompletePath(int treeId)
 {
-    incompleteRoutes.erase(incompleteRoutes.find(treeId));
+    incompletePaths.erase(incompletePaths.find(treeId));
 }
 
-void RouteVisualizerBase::updateOffsets()
+void PathVisualizerBase::updateOffsets()
 {
     numPaths.clear();
-    for (auto it : routes) {
-        auto route = it.second;
+    for (auto it : paths) {
+        auto path = it.second;
         int count = 0;
         int maxNumPath = 0;
-        for (auto id : route->path) {
+        for (auto id : path->moduleIds) {
             int numPath = numPaths[id];
             if (numPath == maxNumPath)
                 count++;
@@ -133,11 +130,11 @@ void RouteVisualizerBase::updateOffsets()
             }
             numPaths[id] = numPath + 1;
         }
-        route->offset = 3 * (maxNumPath + (count > 1 ? 1 : 0));
+        path->offset = 3 * (maxNumPath + (count > 1 ? 1 : 0));
     }
 }
 
-void RouteVisualizerBase::updatePositions()
+void PathVisualizerBase::updatePositions()
 {
     for (auto it : numPaths) {
         auto id = it.first;
@@ -146,19 +143,19 @@ void RouteVisualizerBase::updatePositions()
     }
 }
 
-void RouteVisualizerBase::updateRoute(const std::vector<int>& path)
+void PathVisualizerBase::updatePath(const std::vector<int>& moduleIds)
 {
-    auto key = std::pair<int, int>(path.front(), path.back());
-    const Route *route = getRoute(key, path);
-    if (route == nullptr) {
-        route = createRoute(path);
-        addRoute(key, route);
+    auto key = std::pair<int, int>(moduleIds.front(), moduleIds.back());
+    const Path *path = getPath(key, moduleIds);
+    if (path == nullptr) {
+        path = createPath(moduleIds);
+        addPath(key, path);
     }
     else
-        route->lastUsage = simTime();
+        path->lastUsage = simTime();
 }
 
-void RouteVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
 {
     if (signal == IMobility::mobilityStateChangedSignal) {
         auto mobility = dynamic_cast<IMobility *>(object);
@@ -168,46 +165,44 @@ void RouteVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, 
         setPosition(node, position);
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
-        if (dynamic_cast<IPv4 *>(source) != nullptr) {
+        if (isPathEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {
                 auto treeId = packet->getTreeId();
                 auto module = check_and_cast<cModule *>(source);
-                addToIncompleteRoute(treeId, getContainingNode(module));
+                addToIncompletePath(treeId, getContainingNode(module));
             }
         }
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromLowerSignal) {
-        if (dynamic_cast<IPv4 *>(source) != nullptr)
-        {
+        if (isPathEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {
                 auto treeId = packet->getEncapsulatedPacket()->getTreeId();
                 auto module = check_and_cast<cModule *>(source);
-                addToIncompleteRoute(treeId, getContainingNode(module));
+                addToIncompletePath(treeId, getContainingNode(module));
             }
         }
-        else if (dynamic_cast<MACRelayUnit *>(source) != nullptr || dynamic_cast<Ieee8021dRelay *>(source) != nullptr)
-        {
+        else if (isPathElement(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {
                 auto encapsulatedPacket = packet->getEncapsulatedPacket()->getEncapsulatedPacket();
                 if (encapsulatedPacket != nullptr) {
                     auto treeId = encapsulatedPacket->getTreeId();
                     auto module = check_and_cast<cModule *>(source);
-                    addToIncompleteRoute(treeId, getContainingNode(module));
+                    addToIncompletePath(treeId, getContainingNode(module));
                 }
             }
         }
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
-        if (dynamic_cast<IPv4 *>(source) != nullptr) {
+        if (isPathEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {
                 auto treeId = packet->getTreeId();
-                auto path = getIncompleteRoute(treeId);
-                updateRoute(*path);
-                removeIncompleteRoute(treeId);
+                auto path = getIncompletePath(treeId);
+                updatePath(*path);
+                removeIncompletePath(treeId);
             }
         }
     }

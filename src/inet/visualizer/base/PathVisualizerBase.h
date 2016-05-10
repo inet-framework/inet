@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ROUTEVISUALIZERBASE_H
-#define __INET_ROUTEVISUALIZERBASE_H
+#ifndef __INET_PATHVISUALIZERBASE_H
+#define __INET_PATHVISUALIZERBASE_H
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/PatternMatcher.h"
@@ -26,18 +26,18 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API RouteVisualizerBase : public VisualizerBase, public cListener
+class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API Route {
+    class INET_API Path {
       public:
         mutable double offset = NaN;
         mutable simtime_t lastUsage = simTime();
-        const std::vector<int> path;
+        const std::vector<int> moduleIds;
 
       public:
-        Route(const std::vector<int>& path);
-        virtual ~Route() {}
+        Path(const std::vector<int>& path);
+        virtual ~Path() {}
     };
 
   protected:
@@ -53,11 +53,11 @@ class INET_API RouteVisualizerBase : public VisualizerBase, public cListener
     /**
      * Maps packet to module vector.
      */
-    std::map<int, std::vector<int>> incompleteRoutes;
+    std::map<int, std::vector<int>> incompletePaths;
     /**
-     * Maps source/destination modules to multiple routes between them.
+     * Maps source/destination modules to multiple paths between them.
      */
-    std::multimap<std::pair<int, int>, const Route *> routes;
+    std::multimap<std::pair<int, int>, const Path *> paths;
     /**
      * Maps nodes to the number of paths that go through it.
      */
@@ -67,21 +67,24 @@ class INET_API RouteVisualizerBase : public VisualizerBase, public cListener
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const Route *createRoute(const std::vector<int>& path) const = 0;
-    virtual void setAlpha(const Route *route, double alpha) const = 0;
+    virtual bool isPathEnd(cModule *module) const = 0;
+    virtual bool isPathElement(cModule *module) const = 0;
+
+    virtual const Path *createPath(const std::vector<int>& path) const = 0;
+    virtual void setAlpha(const Path *path, double alpha) const = 0;
     virtual void setPosition(cModule *node, const Coord& position) const = 0;
 
-    virtual const Route *getRoute(std::pair<int, int> sourceAndDestination, const std::vector<int>& path);
-    virtual void addRoute(std::pair<int, int> sourceAndDestination, const Route *route);
-    virtual void removeRoute(std::pair<int, int> sourceAndDestination, const Route *route);
+    virtual const Path *getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path);
+    virtual void addPath(std::pair<int, int> sourceAndDestination, const Path *path);
+    virtual void removePath(std::pair<int, int> sourceAndDestination, const Path *path);
 
-    virtual const std::vector<int> *getIncompleteRoute(int treeId);
-    virtual void addToIncompleteRoute(int treeId, cModule *module);
-    virtual void removeIncompleteRoute(int treeId);
+    virtual const std::vector<int> *getIncompletePath(int treeId);
+    virtual void addToIncompletePath(int treeId, cModule *module);
+    virtual void removeIncompletePath(int treeId);
 
     virtual void updateOffsets();
     virtual void updatePositions();
-    virtual void updateRoute(const std::vector<int>& path);
+    virtual void updatePath(const std::vector<int>& path);
 
   public:
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
@@ -91,5 +94,5 @@ class INET_API RouteVisualizerBase : public VisualizerBase, public cListener
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTEVISUALIZERBASE_H
+#endif // ifndef __INET_PATHVISUALIZERBASE_H
 

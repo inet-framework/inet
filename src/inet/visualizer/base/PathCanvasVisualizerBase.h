@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,26 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ROUTECANVASVISUALIZER_H
-#define __INET_ROUTECANVASVISUALIZER_H
+#ifndef __INET_PATHCANVASVISUALIZERBASE_H
+#define __INET_PATHCANVASVISUALIZERBASE_H
 
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/visualizer/base/RouteVisualizerBase.h"
+#include "inet/visualizer/base/PathVisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
 
-class INET_API RouteCanvasVisualizer : public RouteVisualizerBase
+class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
 {
   protected:
-    class INET_API CanvasRoute : public Route {
+    class INET_API CanvasPath : public Path {
       public:
         cPolylineFigure *figure = nullptr;
 
       public:
-        CanvasRoute(const std::vector<int>& path, cPolylineFigure *figure);
-        virtual ~CanvasRoute();
+        CanvasPath(const std::vector<int>& path, cPolylineFigure *figure);
+        virtual ~CanvasPath();
     };
 
   protected:
@@ -43,11 +43,11 @@ class INET_API RouteCanvasVisualizer : public RouteVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void addRoute(std::pair<int, int> sourceAndDestination, const Route *route) override;
-    virtual void removeRoute(std::pair<int, int> sourceAndDestination, const Route *route) override;
+    virtual void addPath(std::pair<int, int> sourceAndDestination, const Path *path) override;
+    virtual void removePath(std::pair<int, int> sourceAndDestination, const Path *path) override;
 
-    virtual const Route *createRoute(const std::vector<int>& path) const override;
-    virtual void setAlpha(const Route *route, double alpha) const override;
+    virtual const Path *createPath(const std::vector<int>& path) const override;
+    virtual void setAlpha(const Path *path, double alpha) const override;
     virtual void setPosition(cModule *node, const Coord& position) const override;
 };
 
@@ -55,5 +55,5 @@ class INET_API RouteCanvasVisualizer : public RouteVisualizerBase
 
 } // namespace inet
 
-#endif // ifndef __INET_ROUTECANVASVISUALIZER_H
+#endif // ifndef __INET_PATHCANVASVISUALIZERBASE_H
 

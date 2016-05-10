@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,45 +15,50 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_LINKCANVASVISUALIZER_H
-#define __INET_LINKCANVASVISUALIZER_H
+#ifndef __INET_LINKOSGVISUALIZERBASE_H
+#define __INET_LINKOSGVISUALIZERBASE_H
 
-#include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
 
-class INET_API LinkCanvasVisualizer : public LinkVisualizerBase
+class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
 {
+#ifdef WITH_OSG
+
   protected:
-    class INET_API CanvasLink : public Link {
+    class INET_API OsgLink : public Link {
       public:
-        cLineFigure *figure = nullptr;
+        osg::Node *node = nullptr;
 
       public:
-        CanvasLink(cLineFigure *figure, int sourceModuleId, int destinationModuleId);
-        virtual ~CanvasLink();
+        OsgLink(osg::Node *node, int sourceModuleId, int destinationModuleId);
+        virtual ~OsgLink();
     };
 
   protected:
-    const CanvasProjection *canvasProjection = nullptr;
-
-  protected:
-    virtual void initialize(int stage) override;
-
     virtual void addLink(std::pair<int, int> sourceAndDestination, const Link *link) override;
     virtual void removeLink(const Link *link) override;
 
     virtual const Link *createLink(cModule *source, cModule *destination) const override;
     virtual void setAlpha(const Link *link, double alpha) const override;
     virtual void setPosition(cModule *node, const Coord& position) const override;
+
+#else // ifdef WITH_OSG
+
+  protected:
+    virtual const Link *createLink(cModule *source, cModule *destination) const override { return nullptr; }
+    virtual void setAlpha(const Link *link, double alpha) const override {}
+    virtual void setPosition(cModule *node, const Coord& position) const override {}
+
+#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer
 
 } // namespace inet
 
-#endif // ifndef __INET_LINKCANVASVISUALIZER_H
+#endif // ifndef __INET_LINKOSGVISUALIZERBASE_H
 
