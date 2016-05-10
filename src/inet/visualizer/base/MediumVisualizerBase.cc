@@ -33,9 +33,9 @@ void MediumVisualizerBase::initialize(int stage)
         displaySignals = par("displaySignals");
         displayTransmissions = par("displayTransmissions");
         displayReceptions = par("displayReceptions");
+        displayRadioFrames = par("displayRadioFrames");
         displayInterferenceRanges = par("displayInterferenceRanges");
         displayCommunicationRanges = par("displayCommunicationRanges");
-        displayCommunicationTrail = par("displayCommunicationTrail");
         signalPropagationUpdateInterval = par("signalPropagationUpdateInterval");
     }
 }

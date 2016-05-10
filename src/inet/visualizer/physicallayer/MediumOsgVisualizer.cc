@@ -381,6 +381,25 @@ void MediumOsgVisualizer::receptionStarted(const IReception *reception)
         auto node = static_cast<osg::Node *>(group->getChild(1));
         node->setNodeMask(1);
     }
+    auto scene = inet::osg::getScene(visualizerTargetModule);
+    const ITransmission *transmission = reception->getTransmission();
+    if (displayRadioFrames) {
+        Coord transmissionPosition = transmission->getStartPosition();
+        Coord receptionPosition = reception->getStartPosition();
+        Coord centerPosition = (transmissionPosition + receptionPosition) / 2;
+        osg::Geometry *linesGeom = new osg::Geometry();
+        osg::Vec3Array *vertexData = new osg::Vec3Array();
+        vertexData->push_back(osg::Vec3(transmissionPosition.x, transmissionPosition.y, transmissionPosition.z));
+        vertexData->push_back(osg::Vec3(receptionPosition.x, receptionPosition.y, receptionPosition.z));
+        osg::DrawArrays *drawArrayLines = new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP);
+        drawArrayLines->setFirst(0);
+        drawArrayLines->setCount(vertexData->size());
+        linesGeom->setVertexArray(vertexData);
+        linesGeom->addPrimitiveSet(drawArrayLines);
+        osg::Geode *geode = new osg::Geode();
+        geode->addDrawable(linesGeom);
+        scene->addChild(geode);
+    }
 }
 
 void MediumOsgVisualizer::receptionEnded(const IReception *reception)
@@ -390,35 +409,6 @@ void MediumOsgVisualizer::receptionEnded(const IReception *reception)
         auto group = static_cast<osg::Group *>(getCachedOsgNode(reception->getReceiver()));
         auto node = static_cast<osg::Node *>(group->getChild(1));
         node->setNodeMask(0);
-    }
-}
-
-void MediumOsgVisualizer::packetReceived(const IReceptionResult *result)
-{
-    Enter_Method_Silent();
-    auto decisions = result->getDecisions();
-    auto decision = decisions->at(decisions->size() - 1);
-    if (decision->isReceptionSuccessful()) {
-        auto scene = inet::osg::getScene(visualizerTargetModule);
-        const ITransmission *transmission = decision->getReception()->getTransmission();
-        const IReception *reception = decision->getReception();
-        if (displayCommunicationTrail) {
-            Coord transmissionPosition = transmission->getStartPosition();
-            Coord receptionPosition = reception->getStartPosition();
-            Coord centerPosition = (transmissionPosition + receptionPosition) / 2;
-            osg::Geometry *linesGeom = new osg::Geometry();
-            osg::Vec3Array *vertexData = new osg::Vec3Array();
-            vertexData->push_back(osg::Vec3(transmissionPosition.x, transmissionPosition.y, transmissionPosition.z));
-            vertexData->push_back(osg::Vec3(receptionPosition.x, receptionPosition.y, receptionPosition.z));
-            osg::DrawArrays *drawArrayLines = new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP);
-            drawArrayLines->setFirst(0);
-            drawArrayLines->setCount(vertexData->size());
-            linesGeom->setVertexArray(vertexData);
-            linesGeom->addPrimitiveSet(drawArrayLines);
-            osg::Geode *geode = new osg::Geode();
-            geode->addDrawable(linesGeom);
-            scene->addChild(geode);
-        }
     }
 }
 

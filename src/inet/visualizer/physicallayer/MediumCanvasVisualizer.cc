@@ -47,7 +47,7 @@ void MediumCanvasVisualizer::initialize(int stage)
             communicationLayer = new cGroupFigure("communication");
             canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
         }
-        if (displayCommunicationTrail) {
+        if (displayRadioFrames) {
             communicationTrail = new TrailFigure(100, true, "communication trail");
             canvas->addFigureAbove(communicationTrail, canvas->getSubmodulesLayer());
         }
@@ -181,46 +181,36 @@ void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission
 void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
 {
     Enter_Method_Silent();
+    const ITransmission *transmission = reception->getTransmission();
+    if (displayRadioFrames) {
+        cLineFigure *communicationFigure = new cLineFigure();
+        communicationFigure->setTags("successful_reception recent_history");
+        cFigure::Point start = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
+        cFigure::Point end = canvasProjection->computeCanvasPoint(reception->getStartPosition());
+        communicationFigure->setStart(start);
+        communicationFigure->setEnd(end);
+        communicationFigure->setLineColor(cFigure::BLUE);
+        communicationFigure->setEndArrowhead(cFigure::ARROW_BARBED);
+        communicationFigure->setLineWidth(1);
+        communicationFigure->setZoomLineWidth(false);
+        communicationTrail->addFigure(communicationFigure);
+    }
+    if (displayCommunicationHeat) {
+        const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
+        Coord min = mediumLimitCache->getMinConstraintArea();
+        Coord max = mediumLimitCache->getMaxConstraintArea();
+        Coord delta = max - min;
+        int x1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().x - min.x) / delta.x));
+        int y1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().y - min.x) / delta.y));
+        int x2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().x - min.x) / delta.x));
+        int y2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().y - min.y) / delta.y));
+        communicationHeat->heatLine(x1, y1, x2, y2);
+    }
 }
 
 void MediumCanvasVisualizer::receptionEnded(const IReception *reception)
 {
     Enter_Method_Silent();
-}
-
-void MediumCanvasVisualizer::packetReceived(const IReceptionResult *result)
-{
-    Enter_Method_Silent();
-    auto decisions = result->getDecisions();
-    auto decision = decisions->at(decisions->size() - 1);
-    if (decision->isReceptionSuccessful()) {
-        const ITransmission *transmission = decision->getReception()->getTransmission();
-        const IReception *reception = decision->getReception();
-        if (displayCommunicationTrail) {
-            cLineFigure *communicationFigure = new cLineFigure();
-            communicationFigure->setTags("successful_reception recent_history");
-            cFigure::Point start = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
-            cFigure::Point end = canvasProjection->computeCanvasPoint(reception->getStartPosition());
-            communicationFigure->setStart(start);
-            communicationFigure->setEnd(end);
-            communicationFigure->setLineColor(cFigure::BLUE);
-            communicationFigure->setEndArrowhead(cFigure::ARROW_BARBED);
-            communicationFigure->setLineWidth(1);
-            communicationFigure->setZoomLineWidth(false);
-            communicationTrail->addFigure(communicationFigure);
-        }
-        if (displayCommunicationHeat) {
-            const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
-            Coord min = mediumLimitCache->getMinConstraintArea();
-            Coord max = mediumLimitCache->getMaxConstraintArea();
-            Coord delta = max - min;
-            int x1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().x - min.x) / delta.x));
-            int y1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().y - min.x) / delta.y));
-            int x2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().x - min.x) / delta.x));
-            int y2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().y - min.y) / delta.y));
-            communicationHeat->heatLine(x1, y1, x2, y2);
-        }
-    }
 }
 
 void MediumCanvasVisualizer::refreshDisplay() const

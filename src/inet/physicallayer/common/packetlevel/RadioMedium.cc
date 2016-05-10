@@ -592,7 +592,6 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     communicationCache->removeCachedReceptionResult(radio, transmission);
     cPacket *macFrame = const_cast<cPacket *>(result->getMacFrame()->dup());
     macFrame->setControlInfo(const_cast<ReceptionIndication *>(result->getIndication()));
-    firePacketReceived(result);
     delete result;
     return macFrame;
 }
@@ -750,12 +749,6 @@ void RadioMedium::fireReceptionEnded(const IReception *reception) const
 {
     for (auto listener : listeners)
         listener->receptionEnded(reception);
-}
-
-void RadioMedium::firePacketReceived(const IReceptionResult *result) const
-{
-    for (auto listener : listeners)
-        listener->packetReceived(result);
 }
 
 } // namespace physicallayer

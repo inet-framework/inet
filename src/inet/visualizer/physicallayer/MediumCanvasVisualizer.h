@@ -104,8 +104,6 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void receptionStarted(const IReception *reception) override;
     virtual void receptionEnded(const IReception *reception) override;
 
-    virtual void packetReceived(const IReceptionResult *result) override;
-
     static void setInterferenceRange(const IRadio *radio);
     static void setCommunicationRange(const IRadio *radio);
 };

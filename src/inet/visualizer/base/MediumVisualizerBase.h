@@ -44,9 +44,9 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public RadioMedium:
     bool displaySignals = false;
     bool displayTransmissions = false;
     bool displayReceptions = false;
+    bool displayRadioFrames = false;
     bool displayInterferenceRanges = false;
     bool displayCommunicationRanges = false;
-    bool displayCommunicationTrail = false;
     simtime_t signalPropagationUpdateInterval = NaN;
     //@}
 

@@ -102,8 +102,6 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListen
     virtual void receptionStarted(const IReception *reception) override;
     virtual void receptionEnded(const IReception *reception) override;
 
-    virtual void packetReceived(const IReceptionResult *result) override;
-
 #else // ifdef WITH_OSG
 
   public:
@@ -117,8 +115,6 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListen
     virtual void transmissionEnded(const ITransmission *transmission) override {}
     virtual void receptionStarted(const IReception *reception) override {}
     virtual void receptionEnded(const IReception *reception) override {}
-
-    virtual void packetReceived(const IReceptionResult *result) override {}
 
 #endif // ifdef WITH_OSG
 };
