@@ -794,51 +794,56 @@ radio signals, making reception behind them impossible.
 
 @section s11model The model
 
-We have to extend WirelessB.ned to include an `environment` module:
+First, we need to represent obstacles. In INET, obstacles are managed as
+part of the `PhysicalEnvironment` module, so we need to add an instance to
+the `WirelessB` network:
 
 @dontinclude WirelessC.ned
 @skip network WirelessC
 @until ####
 
-The physical environment module implements the objects that interact with
-transmissions -- various shapes can be created. <!rewrite>
+Obstacles are described in an XML file. An obstacle is defined by its
+shape, location, orientation, and material. It may also have a name, and
+one can define how it should be rendered (color, line width, opacity, etc.)
+The XML format allows one to use predefined shapes like cuboid, prism,
+polyhedron or sphere, and also to define new shapes that may be reused for
+any number of obstacles. It is similar for materials: there are predefined
+materials like concrete, brick, wood, glass, forest, and one can also
+define new materials. A material is defined with its physical properties
+like resistivity, relative permittivity and relative permeability. These
+properties are used in the computations of dielectric loss tangent,
+refractive index and signal propagation speed, and ultimately in the
+computation of signal loss.
 
-Objects can be defined in .xml files (see details in the
-<a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET manual</a>).
-Our wall is defined in walls.xml.
+Our wall is defined in walls.xml, and the file name is given to
+`PhysicalEnvironment` in its `config` parameter.
 
-@dontinclude walls.xml
-@skip environment
-@until /environment
+Having obstacles is not enough in itself, we also need to teach the model
+of the wireless medium to take them into account. This is done by
+specifying an <i>obstacle loss model</i>. Since our model contains
+`IdealMedium`, we specify `IdealObstacleLoss`. With `IdealObstacleLoss`,
+obstacles completely block radio signals, making reception behind them
+impossible.
 
-We need to configure the environment in omnetpp.ini:
-
-@dontinclude omnetpp.ini
-@skipline *.physicalEnvironment.config = xmldoc("walls.xml")
-
-To calculate interactions with obstacles, we need an obstacle loss model:
-@dontinclude omnetpp.ini
-@skipline obstacleLoss
+The configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless11]
 @until ####
 
+The walls.xml file:
+
+@dontinclude walls.xml
+@skip environment
+@until /environment
 
 @section s11results Results
 
-`TracingObstacleLoss` models signal loss along a line connecting the
-transmitter and the receiver, calculating the loss where it intersects
-obstacles. <!rewrite>
-
-Unfortunately, the wall has no effect on the transmissions -- the number of
-received packets is exactly the same as in the previous step -- because our
-simple radio model doesn't interact with obstacles. We need a more realistic
-radio model.
+TODO
 
 <img src="wireless-step11-v2.png">
 
-<b>Number of packets received by host B: 603</b>
+<b>Number of packets received by host B: TODO</b>
 
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
