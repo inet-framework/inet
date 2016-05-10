@@ -771,15 +771,21 @@ specified in watts in parameters like `sleep&shy;PowerConsumption`,
 
 <b>Measuring energy consumption</b>
 
-Set up energy storage in the nodes -- basically modelling the batteries
-`IdealEnergyStorage`.
-`IdealEnergyStorage` provides an infinite amount of energy, can't be fully
-charged or depleted. We use this because we want to concentrate on the
-power consumption, not the storage.
+Hosts contain an energy storage component that basically models an energy
+source like a battery or the mains. INET contains several <i>energy storage
+models</i>, and the desired one can be selected in the `energyStorageType`
+parameter of the host. Also, the radio's energy consumption model is
+preconfigured to draw energy from the host's energy storage. (Hosts with
+more than one energy storage component are also possible.)
 
-The `energyBalance` variable in the energy storage module indicates the
-energy consumption. The `residualCapacity` signal can be used to display
-energy consumption over time.  (TODO how?)
+In this model, we use `IdealEnergyStorage` in hosts. `IdealEnergyStorage`
+provides an infinite amount of energy, can't be fully charged or depleted.
+We use this because we want to concentrate on the power consumption, not
+the storage.
+
+The energy storage module contains an `energyBalance` watched variable that
+can be used to track energy consumption. Also, the `residualCapacity`
+signal can be used to display energy consumption over time.  (TODO how? why mentioned?)
 
 Configuration:
 
