@@ -733,12 +733,43 @@ constraints, and just install infinite energy sources into the nodes.
 
 @section s10model The model
 
-First, we set up energy consumption in the node radios to use
-`StateBasedEnergyConsumer`. The `StateBasedEnergyConsumer` module models
-radio power consumption based on states like radio mode, transmitter and
-receiver state. Each state has a constant power consumption that can be set
-by a parameter. Energy use depends on how much time the radio spends in a
+<b>Energy consumption model</b>
+
+In a real system, there are energy consumers like the radio, and energy
+sources like a battery or the mains. In the INET model of the radio, energy
+consumption is represented by a separate component. This <i>energy
+consumption model</i> maps the activity of the core parts of the radio (the
+transmitter and the receiver) to power (energy) consumption. The core parts
+of the radio themselves do not contain anything about power consumption,
+they only expose their state variables. This allows one to switch to
+arbitrarily complex (or simple) power consumption models, without affecting
+the operation of the radio. The energy consumption model can be specified
+in the `energyConsumerType` parameter of the `Radio` module.
+
+Here, we set the energy consumption model in the node radios to
+`StateBasedEnergyConsumer`. `StateBasedEnergyConsumer` models radio power
+consumption based on states like radio mode, transmitter and receiver
+state. Each state has a constant power consumption that can be set by a
+parameter. Energy use depends on how much time the radio spends in a
 particular state.
+
+To go into a little bit more detail: the radio maintains two state
+variables, _receive state_ and _transmit state_. At any given time, the
+radio mode (one of _off_, _sleep_, _switching_, _receiver_, _transmitter_
+and _transciever_) decides which of the two state variables are valid. The
+receive state may be _idle_, _busy_, or _receiving_, the former two
+referring to the channel state. When it is _receiving_, a sub-state stores
+which part of the signal it is receiving: the _preamble_, the (physical
+layer) _header_, the _data_, or _any_ (we don't know/care). Similarly, the
+transmit state may be _idle_ or _transmitting_, and a sub-state stores
+which part of the signal is being transmitted (if any).
+
+`StateBasedEnergyConsumer` expects the consumption in various states to be
+specified in watts in parameters like `sleep&shy;PowerConsumption`,
+`receiverBusy&shy;PowerConsumption`,
+`transmitterTransmitting&shy;PreamblePowerConsumption` and so on.
+
+<b>Measuring energy consumption</b>
 
 Set up energy storage in the nodes -- basically modelling the batteries
 `IdealEnergyStorage`.
@@ -749,6 +780,8 @@ power consumption, not the storage.
 The `energyBalance` variable in the energy storage module indicates the
 energy consumption. The `residualCapacity` signal can be used to display
 energy consumption over time.  (TODO how?)
+
+Configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless10]
