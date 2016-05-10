@@ -950,14 +950,23 @@ It has been mentioned that `APSKScalarRadioMedium` relies on various
 subcomponents for computing path loss, obstable loss, and background noise,
 among others. Installing the two-ray ground reflection model is just a matter
 of changing its `pathLossType` parameter from the default
-`FreeSpacePathLoss` to `TwoRayGroundReflection`. (Further options are
+`FreeSpacePathLoss` to `TwoRayGroundReflection`. (Further options include
 `RayleighFading`, `RicianFading`, `LogNormalShadowing` and some others.)
 
-`TwoRayGroundReflection` needs two parameters, which are the elevations
-of the transmitter and the receiver antenna.
+The two-ray ground reflection model uses the altitudes of the transmitter
+and the receiver antennas above the ground as inputs. To compute the
+altitude, we need the hosts' (x,y,z) positions, and the ground's elevation
+at those points. In INET, the ground's elevation is defined by the
+<i>ground model</i>. which is part of the physical environment model.
 
-TODO why are they parameters of the medium??? shouldn't they be parameters of the antennas?
-
+In this model, we'll use `FlatGround` for ground model, and specify it to
+the `physicalEnvironment` module. (Note that we added `physicalEnvironment`
+to the network when we introduced obstacles.) The ground's elevation is the
+`elevation` parameter of `FlatGround`. We set this parameter to -1m to have
+antennas that are one meter above the ground. -1m may seem like an odd
+choice, but it is actually very convenient, because the hosts' _z_
+coordinates are zero. (That is the default when the hosts' positions are
+initialized from display strings.)
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless13]
