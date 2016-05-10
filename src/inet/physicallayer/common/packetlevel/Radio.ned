@@ -72,6 +72,8 @@ module Radio like IRadio
         @class(Radio);
         @display("i=block/wrxtx");
 
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
         @signal[radioModeChanged](type=long);
         @signal[listeningChanged];
         @signal[receptionStateChanged](type=long);
