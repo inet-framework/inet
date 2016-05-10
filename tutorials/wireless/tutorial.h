@@ -733,28 +733,22 @@ constraints, and just install infinite energy sources into the nodes.
 
 @section s10model The model
 
-First set up energy consumption in the node radios:
+First, we set up energy consumption in the node radios to use
+`StateBasedEnergyConsumer`. The `StateBasedEnergyConsumer` module models
+radio power consumption based on states like radio mode, transmitter and
+receiver state. Each state has a constant power consumption that can be set
+by a parameter. Energy use depends on how much time the radio spends in a
+particular state.
 
-@dontinclude omnetpp.ini
-@skipline **.energyConsumerType = "StateBasedEnergyConsumer"
-
-The `StateBasedEnergyConsumer` module models radio power consumption
-based on states like radio mode, transmitter and receiver state. Each state has
-a constant power consumption that can be set by a parameter. Energy use depends
-on how much time the radio spends in a particular state.
-
-Set up energy storage in the nodes -- basically modelling the batteries:
-
-@dontinclude omnetpp.ini
-@skipline *.host*.energyStorageType = "IdealEnergyStorage"
-
-`IdealEnergyStorage` provides an infinite ammount of energy, can't be
-fully charged or depleted. We use this because we want to concentrate on the
+Set up energy storage in the nodes -- basically modelling the batteries
+`IdealEnergyStorage`.
+`IdealEnergyStorage` provides an infinite amount of energy, can't be fully
+charged or depleted. We use this because we want to concentrate on the
 power consumption, not the storage.
 
-The energyBalance variable indicates the energy consumption
-(host*.energyStorage.energyBalance). You can use the residualCapacity signal
-to display energy consumption over time.
+The `energyBalance` variable in the energy storage module indicates the
+energy consumption. The `residualCapacity` signal can be used to display
+energy consumption over time.  (TODO how?)
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless10]
@@ -824,6 +818,8 @@ specifying an <i>obstacle loss model</i>. Since our model contains
 `IdealMedium`, we specify `IdealObstacleLoss`. With `IdealObstacleLoss`,
 obstacles completely block radio signals, making reception behind them
 impossible.
+
+TODO Visualization
 
 The configuration:
 
