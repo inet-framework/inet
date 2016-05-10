@@ -45,6 +45,9 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       This optional attribute specifies the name of the object. The name need
 //       not be unique, and it might be still useful on the graphical user interface.
 //
+//    - @shape
+//       TODO
+//
 //    - @position
 //       This mandatory attribute specifies the position of the object. The value
 //       constists of a type followed by 3 coordinates (X, Y, and Z) separated
