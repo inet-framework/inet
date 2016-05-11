@@ -404,10 +404,10 @@ Configuration:
 @section s4results Results
 
 Now the two hosts can communicate as Host R1 relays data to
-Host B. The arrows indicate paths in the network layer, there is a path
+Host B. The arrows indicate a path in the network layer, there is a path
 going from Host A through R1 to B, tracing the UDP stream.
 
-Note that there are blue lines leading to Host R2 and R3 even though they don't
+Note that there are black arrows leading to Host R2 and R3 even though they don't
 transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
