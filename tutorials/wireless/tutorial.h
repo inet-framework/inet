@@ -76,7 +76,7 @@ We'll explain the above NED file below.
 
 <b>The playground</b>
 
-The model contains a playground of the size 500x500 meters, with two hosts
+The model contains a playground of the size 500x650 meters, with two hosts
 spaced 400 meters apart. (The distance will be relevant in later steps.)
 These numbers are set via display strings.
 
