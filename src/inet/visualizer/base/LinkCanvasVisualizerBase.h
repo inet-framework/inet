@@ -39,6 +39,7 @@ class INET_API LinkCanvasVisualizerBase : public LinkVisualizerBase
 
   protected:
     const CanvasProjection *canvasProjection = nullptr;
+    cGroupFigure *linkGroup = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

@@ -48,7 +48,7 @@ simple MediumVisualizerBase extends VisualizerBase
         string interferenceRangeColor = default("gray"); // interference range circle color, gray by default
 
         bool displayRadioFrames = default(false); // display radio frames, disabled by default
-        string radioFrameLineColor = default("blue"); // radio frame line color, blue by default
+        string radioFrameLineColor = default("black"); // radio frame line color, black by default
 
         @class(MediumVisualizerBase);
 }

@@ -35,5 +35,6 @@ import inet.visualizer.contract.IPhysicalLinkVisualizer;
 simple PhysicalLinkCanvasVisualizer extends LinkVisualizerBase like IPhysicalLinkVisualizer
 {
     parameters:
+        lineColor = default("black"); // link line color, black by default
         @class(PhysicalLinkCanvasVisualizer);
 }

@@ -38,22 +38,26 @@ void LinkCanvasVisualizerBase::initialize(int stage)
 {
     LinkVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL)
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+    if (stage == INITSTAGE_LOCAL) {
+        auto canvas = visualizerTargetModule->getCanvas();
+        canvasProjection = CanvasProjection::getCanvasProjection(canvas);
+        linkGroup = new cGroupFigure();
+        canvas->addFigure(linkGroup);
+    }
 }
 
 void LinkCanvasVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
 {
     LinkVisualizerBase::addLink(sourceAndDestination, link);
     auto canvasLink = static_cast<const CanvasLink *>(link);
-    visualizerTargetModule->getCanvas()->addFigure(canvasLink->figure);
+    linkGroup->addFigure(canvasLink->figure);
 }
 
 void LinkCanvasVisualizerBase::removeLink(const Link *link)
 {
     LinkVisualizerBase::removeLink(link);
     auto canvasLink = static_cast<const CanvasLink *>(link);
-    visualizerTargetModule->getCanvas()->removeFigure(canvasLink->figure);
+    linkGroup->removeFigure(canvasLink->figure);
 }
 
 const LinkVisualizerBase::Link *LinkCanvasVisualizerBase::createLink(cModule *source, cModule *destination) const

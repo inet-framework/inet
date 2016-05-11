@@ -35,5 +35,6 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 simple DataLinkCanvasVisualizer extends LinkVisualizerBase like IDataLinkVisualizer
 {
     parameters:
+        lineColor = default("darkGreen"); // link line color, dark green by default
         @class(DataLinkCanvasVisualizer);
 }
