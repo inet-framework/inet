@@ -176,6 +176,13 @@ The configuration:
 
 @section s1results Results
 
+When we run the simulation, here's what happens. 
+Host A's UDPApp creates UDP packets at random intervals. These packets are sent
+down to the network interface for transmission. The network interface queues
+packets, and transmits them as soon as it can. As long as there are packets in
+the network interface's transmission queue, packets are transmitted back-to-back, with no
+gap between the transmission of each packet.
+
 Here is an animation showing the hosts communicating:
 
 <img src="step1_3_v5.gif">
@@ -252,12 +259,8 @@ Configuration:
 This results in bubble animations representing radio
 transmissions, and black arrows indicating communication paths.
 
-Host A's UDPApp creates UDP packets at random intervals. These packets are sent
-down to the network interface for transmission. The network interface queues
-packets, and transmits them as soon as it can. As long as there are packets in
-the network interface's transmission queue, packets are transmitted back-to-back, with no
-gap between the transmission of each packet. This can be seen in the animation,
-with no gap between the colored transmission rings. Sometimes, the transmission
+The UDP application generates packets at a rate so that there are back-to-back transmissions.
+This can be seen in the animation, with no gap between the colored transmission rings. Sometimes, the transmission
 stops for a while, indicating that the transmission queue is empty.
 
 In the animation below, Host A sends the following:
