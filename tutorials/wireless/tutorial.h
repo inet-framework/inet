@@ -232,8 +232,8 @@ sufficient to represent transmissions visually, it is advisable to turn off
 message animations in Tkenv/Qtenv.
 
 The visualization of recent successful physical layer transmissions is
-enabled with the `displayCommunicationTrail` parameter. Successful
-transmissions are displayed with blue lines that fade with time. When a
+enabled with the `physicalLinkVisualizer` parameter. Successful
+transmissions are displayed with black arrows that fade with time. When a
 packet is successfully received by the physical layer, the arrow between
 the transmitter and receiver hosts is created or reinforced. The arrows
 visible at any given time indicate recent communication patterns.
@@ -250,9 +250,20 @@ Configuration:
 @section s2results Results
 
 This results in bubble animations representing radio
-transmissions, and blue lines indicating communication paths:
+transmissions, and black arrows indicating communication paths.
 
-<img src="step2_2_v3.gif">
+Host A's UDPApp creates UDP packets at random intervals. These packets are sent
+down to the network interface for transmission. The network interface queues
+packets, and transmits them as soon as it can. As long as there are packets in
+the network interface's transmission queue, packets are transmitted back-to-back, with no
+gap between the transmission of each packet. This can be seen in the animation,
+with no gap between the colored transmission rings. Sometimes, the transmission
+stops for a while, indicating that the transmission queue is empty.
+
+In the animation below, Host A sends the following:
+4 packets - gap - 1 packet - gap - 2 packets
+
+<img src="step2_4_1.gif">
 
 <b>Number of packets received by host B: 2422</b>
 
@@ -306,6 +317,12 @@ hosts in communication range of Host A, so they are the only ones that
 receive Host A's transmissions. This is indicated by the blue lines
 connecting Host A to R1 and R2, respectively, indicating successful
 receptions in the physical layer.
+
+Host R1 is in transmission range of Host B, and could potentially relay A's packets,
+but R1 drops them, because routing is not configured yet (it will be configured
+in a later step).
+
+Therefore no packets are received by Host B.
 
 <img src="wireless-step3-v2.png">
 
