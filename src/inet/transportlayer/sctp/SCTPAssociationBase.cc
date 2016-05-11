@@ -778,7 +778,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 {
     SCTPPathVariables *path = nullptr;
 
-    std::cout << msg->getName() << " timer expired at " << simTime() << "\n";
+    EV_INFO << msg->getName() << " timer expired at " << simTime() << "\n";
 
     SCTPPathInfo *pinfo = check_and_cast<SCTPPathInfo *>(msg->getControlInfo());
     L3Address addr = pinfo->getRemoteAddress();

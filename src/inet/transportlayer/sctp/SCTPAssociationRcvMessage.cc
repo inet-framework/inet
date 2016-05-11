@@ -2867,7 +2867,6 @@ void SCTPAssociation::process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event)
         EV_INFO << "Retransmission count during connection setup exceeds " << (int32)sctpMain->getMaxInitRetrans() << ", giving up\n";
         sendIndicationToApp(SCTP_I_CLOSED);
         sendAbort();
-        printf("go and remove association %d\n", assocId);
         return;
     }
     EV_INFO << "Performing retransmission #" << state->initRetransCounter << "\n";

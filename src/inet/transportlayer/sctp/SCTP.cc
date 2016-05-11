@@ -784,12 +784,10 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
     bool ok = false;
     bool find = false;
     const int32 id = assoc->assocId;
-printf("sizeAssocMap=%d\n", sizeAssocMap);
-    std::cout << "Deleting SCTP connection " << assoc << " id= " << id << endl;
 
- //   printInfoAssocMap();
- printf("vor sizeAssocMap\n");
+    EV_INFO << "Deleting SCTP connection " << assoc << " id= " << id << endl;
 
+    printInfoAssocMap();
     if (sizeAssocMap > 0) {
         auto assocStatMapIterator = assocStatMap.find(assoc->assocId);
         if (assocStatMapIterator != assocStatMap.end()) {
