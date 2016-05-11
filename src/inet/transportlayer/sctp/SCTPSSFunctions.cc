@@ -64,11 +64,11 @@ void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 
 void SCTPAssociation::deleteStreams()
 {
-    for (auto it = sendStreams.begin(); it != sendStreams.end(); it++) {
-        delete it->second;
+    for (auto & elem : sendStreams) {
+        delete elem.second;
     }
-    for (auto it = receiveStreams.begin(); it != receiveStreams.end(); it++) {
-        delete it->second;
+    for (auto & elem : receiveStreams) {
+        delete elem.second;
     }
 }
 
