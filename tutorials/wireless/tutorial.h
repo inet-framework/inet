@@ -314,7 +314,7 @@ The configuration:
 
 As we run the simulation, we can see that hosts R1 and R2 are the only
 hosts in communication range of Host A, so they are the only ones that
-receive Host A's transmissions. This is indicated by the blue lines
+receive Host A's transmissions. This is indicated by the black arrows
 connecting Host A to R1 and R2, respectively, indicating successful
 receptions in the physical layer.
 
@@ -404,7 +404,7 @@ Configuration:
 @section s4results Results
 
 Now the two hosts can communicate as Host R1 relays data to
-Host B. The arrows indicate a path in the network layer, there is a path
+Host B. The arrows indicate a route in the network layer, there is a route
 going from Host A through R1 to B, tracing the UDP stream.
 
 Note that there are black arrows leading to Host R2 and R3 even though they don't
