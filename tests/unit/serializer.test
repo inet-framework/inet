@@ -137,13 +137,16 @@ static void testRecord(const char* filename, bool fcs = true)
     uint32_t serializedLength = 0;
 
     uint32_t incl_len = recordHeader.incl_len;
-    if (fileHeader.network == LINKTYPE_ETHERNET && recordHeader.incl_len == recordHeader.orig_len) {
+
+    if (! fcs && fileHeader.network == LINKTYPE_ETHERNET && recordHeader.incl_len == recordHeader.orig_len) {
+        // add FCS
         Buffer b(readBuf, incl_len + 4);
         b.seek(incl_len);
         uint32_t fcs = ethernetCRC(b._getBuf(), b.getPos());
         b.writeUint32(fcs);
         incl_len = b.getPos();
     }
+
     Buffer rb(readBuf, incl_len);
     Buffer wb(writeBuf, sizeof(writeBuf));
     Context c;
@@ -169,6 +172,7 @@ static void testRecord(const char* filename, bool fcs = true)
 testRecord("../../pcap/rarp_request.pcap", false);
 testRecord("../../pcap/rarp_req_reply.pcap", false);
 testRecord("../../pcap/Ethernet_Pause_Frame.pcap", false);
+testRecord("../../pcap/eth_fcs_good.pcap", true);
 //testRecord("../../pcap/v6.pcap", false);
 //testRecord("../../pcap/tcp_ok_capture.pcap", false);
 //testRecord("../../pcap/80211ack.pcap", false);
@@ -178,6 +182,12 @@ testRecord("../../pcap/Ethernet_Pause_Frame.pcap", false);
 .*
 Frames are the same
 === Testing file ../../pcap/rarp_req_reply.pcap
+.*
+Frames are the same
+=== Testing file ../../pcap/Ethernet_Pause_Frame.pcap
+.*
+Frames are the same
+=== Testing file ../../pcap/eth_fcs_good.pcap
 .*
 Frames are the same
 
