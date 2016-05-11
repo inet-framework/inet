@@ -34,6 +34,8 @@ class INET_API IPathLoss : public IPrintableObject
   public:
     /**
      * Returns the loss factor for the provided transmission and arrival.
+     * The value is in the range [0, 1] where 1 means no loss at all and 0
+     * means all power is lost.
      */
     virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const = 0;
 
