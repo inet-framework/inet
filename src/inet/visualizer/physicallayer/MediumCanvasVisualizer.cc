@@ -48,8 +48,8 @@ void MediumCanvasVisualizer::initialize(int stage)
             canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
         }
         if (displayRadioFrames) {
-            communicationTrail = new TrailFigure(100, true, "communication trail");
-            canvas->addFigureAbove(communicationTrail, canvas->getSubmodulesLayer());
+            radioFrameLayer = new cGroupFigure("radio frame");
+            canvas->addFigureAbove(radioFrameLayer, canvas->getSubmodulesLayer());
         }
         displayCommunicationHeat = par("displayCommunicationHeat");
         if (displayCommunicationHeat) {
@@ -113,10 +113,28 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
 {
     Enter_Method_Silent();
     auto module = check_and_cast<const cModule *>(radio);
-    if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange")))
-        setInterferenceRange(radio);
-    if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange")))
-        setCommunicationRange(radio);
+    if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
+        auto module = check_and_cast<const cModule *>(radio);
+        auto node = findContainingNode(const_cast<cModule *>(module));
+        cDisplayString& displayString = node->getDisplayString();
+        m maxInterferenceRage = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
+        const char *tag = "r1";
+        displayString.removeTag(tag);
+        displayString.insertTag(tag);
+        displayString.setTagArg(tag, 0, maxInterferenceRage.get());
+        displayString.setTagArg(tag, 2, interferenceRangeColor.str().c_str());
+    }
+    if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
+        auto module = check_and_cast<const cModule *>(radio);
+        auto node = findContainingNode(const_cast<cModule *>(module));
+        cDisplayString& displayString = node->getDisplayString();
+        m maxCommunicationRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
+        const char *tag = "r2";
+        displayString.removeTag(tag);
+        displayString.insertTag(tag);
+        displayString.setTagArg(tag, 0, maxCommunicationRange.get());
+        displayString.setTagArg(tag, 2, communicationRangeColor.str().c_str());
+    }
 }
 
 void MediumCanvasVisualizer::radioRemoved(const IRadio *radio)
@@ -184,16 +202,16 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
     const ITransmission *transmission = reception->getTransmission();
     if (displayRadioFrames) {
         cLineFigure *communicationFigure = new cLineFigure();
-        communicationFigure->setTags("successful_reception recent_history");
+        communicationFigure->setTags("radio_frame recent_history");
         cFigure::Point start = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
         cFigure::Point end = canvasProjection->computeCanvasPoint(reception->getStartPosition());
         communicationFigure->setStart(start);
         communicationFigure->setEnd(end);
-        communicationFigure->setLineColor(cFigure::BLUE);
+        communicationFigure->setLineColor(radioFrameLineColor);
         communicationFigure->setEndArrowhead(cFigure::ARROW_BARBED);
         communicationFigure->setLineWidth(1);
         communicationFigure->setZoomLineWidth(false);
-        communicationTrail->addFigure(communicationFigure);
+        radioFrameLayer->addFigure(communicationFigure);
     }
     if (displayCommunicationHeat) {
         const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
@@ -281,32 +299,6 @@ void MediumCanvasVisualizer::scheduleSignalPropagationUpdateTimer()
     if (earliestUpdateTime != SimTime::getMaxTime()) {
         scheduleAt(earliestUpdateTime, signalPropagationUpdateTimer);
     }
-}
-
-void MediumCanvasVisualizer::setInterferenceRange(const IRadio *radio)
-{
-    auto module = check_and_cast<const cModule *>(radio);
-    auto node = findContainingNode(const_cast<cModule *>(module));
-    cDisplayString& displayString = node->getDisplayString();
-    m maxInterferenceRage = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
-    const char *tag = "r1";
-    displayString.removeTag(tag);
-    displayString.insertTag(tag);
-    displayString.setTagArg(tag, 0, maxInterferenceRage.get());
-    displayString.setTagArg(tag, 2, "gray");
-}
-
-void MediumCanvasVisualizer::setCommunicationRange(const IRadio *radio)
-{
-    auto module = check_and_cast<const cModule *>(radio);
-    auto node = findContainingNode(const_cast<cModule *>(module));
-    cDisplayString& displayString = node->getDisplayString();
-    m maxCommunicationRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
-    const char *tag = "r2";
-    displayString.removeTag(tag);
-    displayString.insertTag(tag);
-    displayString.setTagArg(tag, 0, maxCommunicationRange.get());
-    displayString.setTagArg(tag, 2, "blue");
 }
 
 } // namespace visualizer

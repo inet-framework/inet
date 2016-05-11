@@ -70,9 +70,9 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
      */
     cGroupFigure *communicationLayer = nullptr;
     /**
-     * The trail figure that contains figures representing the recent successful communications.
+     * The layer figure that contains figures representing the recent radio frame sends.
      */
-    TrailFigure *communicationTrail = nullptr;
+    cGroupFigure *radioFrameLayer = nullptr;
     /**
      * The heat map figure that shows the recent successful communications.
      */
@@ -103,9 +103,6 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void transmissionEnded(const ITransmission *transmission) override;
     virtual void receptionStarted(const IReception *reception) override;
     virtual void receptionEnded(const IReception *reception) override;
-
-    static void setInterferenceRange(const IRadio *radio);
-    static void setCommunicationRange(const IRadio *radio);
 };
 
 } // namespace visualizer

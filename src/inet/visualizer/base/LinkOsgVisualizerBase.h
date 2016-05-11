@@ -49,6 +49,8 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
 #else // ifdef WITH_OSG
 
   protected:
+    virtual void initialize(int stage) override {}
+
     virtual const Link *createLink(cModule *source, cModule *destination) const override { return nullptr; }
     virtual void setAlpha(const Link *link, double alpha) const override {}
     virtual void setPosition(cModule *node, const Coord& position) const override {}

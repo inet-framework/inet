@@ -31,12 +31,15 @@ void MediumVisualizerBase::initialize(int stage)
         if (radioMedium != nullptr)
             radioMedium->addListener(this);
         displaySignals = par("displaySignals");
+        signalPropagationUpdateInterval = par("signalPropagationUpdateInterval");
         displayTransmissions = par("displayTransmissions");
         displayReceptions = par("displayReceptions");
         displayRadioFrames = par("displayRadioFrames");
+        radioFrameLineColor = cFigure::Color(par("radioFrameLineColor"));
         displayInterferenceRanges = par("displayInterferenceRanges");
+        interferenceRangeColor = cFigure::Color(par("interferenceRangeColor"));
         displayCommunicationRanges = par("displayCommunicationRanges");
-        signalPropagationUpdateInterval = par("signalPropagationUpdateInterval");
+        communicationRangeColor = cFigure::Color(par("communicationRangeColor"));
     }
 }
 

@@ -49,6 +49,8 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
 #else // ifdef WITH_OSG
 
   protected:
+    virtual void initialize(int stage) override {}
+
     virtual const Path *createPath(const std::vector<int>& path) const override { return PathVisualizerBase::createPath(path); }
     virtual void setAlpha(const Path *path, double alpha) const override {}
     virtual void setPosition(cModule *node, const Coord& position) const override {}

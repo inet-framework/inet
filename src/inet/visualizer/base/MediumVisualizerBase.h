@@ -42,12 +42,19 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public RadioMedium:
     //@{
     RadioMedium *radioMedium = nullptr;
     bool displaySignals = false;
+    simtime_t signalPropagationUpdateInterval = NaN;
+
     bool displayTransmissions = false;
     bool displayReceptions = false;
+
     bool displayRadioFrames = false;
-    bool displayInterferenceRanges = false;
+    cFigure::Color radioFrameLineColor;
+
     bool displayCommunicationRanges = false;
-    simtime_t signalPropagationUpdateInterval = NaN;
+    cFigure::Color communicationRangeColor;
+
+    bool displayInterferenceRanges = false;
+    cFigure::Color interferenceRangeColor;
     //@}
 
   protected:
