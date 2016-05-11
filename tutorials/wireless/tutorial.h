@@ -318,11 +318,9 @@ receive Host A's transmissions. This is indicated by the blue lines
 connecting Host A to R1 and R2, respectively, indicating successful
 receptions in the physical layer.
 
-Host R1 is in transmission range of Host B, and could potentially relay A's packets,
-but R1 drops them, because routing is not configured yet (it will be configured
-in a later step).
-
-Therefore no packets are received by Host B.
+Host B is in transmission range of Host R1, and R1 could potentially relay A's packets,
+but it drops them, because routing is not configured yet (it will be configured
+in a later step). Therefore no packets are received by Host B.
 
 <img src="wireless-step3-v2.png">
 
