@@ -70,7 +70,10 @@ uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize)
     uint32_t crc = ~0U;
     while (bufsize--)
         crc = crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
-    return crc ^ ~0U;
+    crc = crc ^ ~0U;
+
+    // swap byte order:
+    return (crc >> 24) | ((crc >>  8) & 0x0000FF00) | ((crc <<  8) & 0x00FF0000) | (crc << 24);
 }
 
 } // namespace serializer
