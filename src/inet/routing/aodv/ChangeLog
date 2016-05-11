@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-07-27  Zoltan Bojthe
+
+	aodv: bugfix: accept and drop icmp error packages
+
 2016-04-06  ------ inet-3.2.4 released ------
 
 2016-03-16  ------ inet-3.2.3 released ------

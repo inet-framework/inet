@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2016-03-30  Irene Ruengeler
+
+	Added packetdrill SCTP support and socket options
+
 2016-04-06  ------ inet-3.2.4 released ------
 
 2016-03-16  ------ inet-3.2.3 released ------
@@ -25,4 +29,3 @@
 2015-04-23  Irene Rungeler
 
 	Initial implementation for packet drill UDP testing.
-

@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2015-07-07  Zoltan Bojthe
+
+	icmpv6: a bit more verbose runtime error messages
+
 2016-04-06  ------ inet-3.2.4 released ------
 
 2016-03-16  ------ inet-3.2.3 released ------

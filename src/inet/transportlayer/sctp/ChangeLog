@@ -1,5 +1,14 @@
 ====== inet-3.x ======
 
+2016-05-11  Rudolf Hornig
+
+  sctp: refactor: use c++11 style for loop
+	sctp: Reverted some logging changes
+
+2016-03-30  Irene Ruengeler
+
+	Packetdrill SCTP support and socket options added
+
 2016-04-06  ------ inet-3.2.4 released ------
 
 2016-03-16  ------ inet-3.2.3 released ------

@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2016-04-28  Zoltan Bojthe
+
+	InterfaceEntry: also shows id in the info() method
+
+2016-04-11  Zoltan Bojthe
+
+	L3AddressResolver: show more info when errors are thrown
+
 2016-04-06  ------ inet-3.2.4 released ------
 
 2016-03-16  ------ inet-3.2.3 released ------

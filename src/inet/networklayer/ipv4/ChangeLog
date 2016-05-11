@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2015-07-20  Zoltan Bojthe
+
+	IPv4RoutingTable: bugfix: broadcast addresses should be supported by BROADCAST
+	interfaces only
+
+2016-03-17  Zoltan Bojthe
+
+	IPv4 Fragment: bugfix: fragment didn't deserialize subpacket from
+	ByteArray
+
 2016-04-06  ------ inet-3.2.4 released ------
 
 2016-03-16  ------ inet-3.2.3 released ------
