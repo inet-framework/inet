@@ -674,117 +674,11 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 <!------------------------------------------------------------------------>
 
-@page step8 Step 8 - Configuring node movements
+@page step8 Step 8 - Modeling energy consumption
 
 @nav{step7,step9}
 
 @section s8goals Goals
-
-In this step, we make the model more interesting by adding node mobility.
-Namely, we make the intermediate nodes travel north during simulation.
-After a while, they will move out of the range of host A (and B), breaking the
-communication path.
-
-@section s8model The model
-
-In the INET Framework, node mobility is handled by the `mobility` submodule
-of hosts. Several mobility module type exist that can be plugged into a
-host. The movement trail may be deterministic (such as line, rectangle or
-circle), probabilistic (e.g. random waypoint), scripted (e.g. a "turtle"
-script) or trace-driven. There are also invididual and group mobility
-models.
-
-Here we install `LinearMobility` into the intermediate nodes.
-`LinearMobility` implements movement along a line, where the heading and
-speed are parameters. We configure the nodes to move north at the speed of
-12 m/s.
-
-The visualization of radio signals as expanding bubbles is no longer needed,
-so we turn it off.
-
-@dontinclude omnetpp.ini
-@skipline [Config Wireless08]
-@until ####
-
-@section s8results Results
-
-We run the simulation in Fast mode, because the nodes move very slowly if
-viewed in Normal mode.
-
-<img src="step8_2_v3.gif">
-
-We can see data exchange taking place just like in the previous step until
-R1 moves out of range of host A at around 18 seconds, and then it stops.
-
-Traffic could be routed through R2 and R3, but that does not happen because
-the routing tables are static and have been configured according to the
-initial positions of the nodes.
-
-<b>Number of packets received by host B: 787</b>
-
-Sources: @ref omnetpp.ini, @ref WirelessB.ned
-
-@nav{step7,step9}
-@fixupini
-
-<!------------------------------------------------------------------------>
-
-@page step9 Step 9 - Configuring ad-hoc routing (AODV)
-
-@nav{step8,step10}
-
-@section s9goals Goals
-
-In this step, we configure a routing protocol that adapts to the changing
-network topology, and will arrange packets to be routed through `R2` and `R3`
-as `R1` departs.
-
-We'll use AODV (ad hoc on-demand distance vector routing). It is a
-reactive routing protocol, which means its maintenance of the routing
-tables is driven by demand. This is in contrast to proactive routing
-protocols which keep routing tables up to date all the time (or at least
-try to).
-
-@section s9model The model
-
-Let's configure ad-hoc routing with AODV. As AODV will manage the routing
-tables, we don't need the statically added routes any more. We only need
-`IPv4NetworkConfigurator` to assign the IP addresses, and turn all other
-functions off.
-
-More important, we change the hosts to be instances of `AODVRouter`.
-`AODVRouter` is like  `WirelessHost`, but with an added `AODVRouting`
-submodule. This change turns each node into an AODV router.
-
-@dontinclude omnetpp.ini
-@skipline [Config Wireless09]
-@until ####
-
-@section s9results Results
-
-This time when R1 gets out of range, the routes are reconfigured and packets
-keep flowing to B. Throughput is about the same as in step 6 -- even though the
-connection is not broken here, the AODV protocol adds some overhead to the
-communication.
-
-<img src="step9_aodv_udp.gif">
-
-<img src="step9.gif">
-
-<b>Number of packets received by host B: 890</b>
-
-Sources: @ref omnetpp.ini, @ref WirelessB.ned
-
-@nav{step8,step10}
-@fixupini
-
-<!------------------------------------------------------------------------>
-
-@page step10 Step 10 - Modeling energy consumption
-
-@nav{step9,step11}
-
-@section s10goals Goals
 
 Wireless ad-hoc networks often operate in an energy-constrained
 environment, and thus it is often useful to model the energy consumption of
@@ -796,7 +690,7 @@ In this step, we augment the nodes with components so that we can model
 (and measure) their energy consumption. For simplicity, we ignore energy
 constraints, and just install infinite energy sources into the nodes.
 
-@section s10model The model
+@section s8model The model
 
 <b>Energy consumption model</b>
 
@@ -855,14 +749,120 @@ signal can be used to display energy consumption over time.  (TODO how? why ment
 Configuration:
 
 @dontinclude omnetpp.ini
+@skipline [Config Wireless08]
+@until ####
+
+@section s8results Results
+
+<img src="wireless-step8-energy_2.png">
+
+<b>Number of packets received by host B: 980</b>
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
+@nav{step7,step9}
+@fixupini
+
+<!------------------------------------------------------------------------>
+
+@page step9 Step 9 - Configuring node movements
+
+@nav{step8,step10}
+
+@section s9goals Goals
+
+In this step, we make the model more interesting by adding node mobility.
+Namely, we make the intermediate nodes travel north during simulation.
+After a while, they will move out of the range of host A (and B), breaking the
+communication path.
+
+@section s9model The model
+
+In the INET Framework, node mobility is handled by the `mobility` submodule
+of hosts. Several mobility module type exist that can be plugged into a
+host. The movement trail may be deterministic (such as line, rectangle or
+circle), probabilistic (e.g. random waypoint), scripted (e.g. a "turtle"
+script) or trace-driven. There are also invididual and group mobility
+models.
+
+Here we install `LinearMobility` into the intermediate nodes.
+`LinearMobility` implements movement along a line, where the heading and
+speed are parameters. We configure the nodes to move north at the speed of
+12 m/s.
+
+The visualization of radio signals as expanding bubbles is no longer needed,
+so we turn it off.
+
+@dontinclude omnetpp.ini
+@skipline [Config Wireless09]
+@until ####
+
+@section s9results Results
+
+We run the simulation in Fast mode, because the nodes move very slowly if
+viewed in Normal mode.
+
+<img src="step9_2_v3.gif">
+
+We can see data exchange taking place just like in the previous step until
+R1 moves out of range of host A at around 18 seconds, and then it stops.
+
+Traffic could be routed through R2 and R3, but that does not happen because
+the routing tables are static and have been configured according to the
+initial positions of the nodes.
+
+<b>Number of packets received by host B: 787</b>
+
+Sources: @ref omnetpp.ini, @ref WirelessB.ned
+
+@nav{step8,step10}
+@fixupini
+
+<!------------------------------------------------------------------------>
+
+@page step10 Step 10 - Configuring ad-hoc routing (AODV)
+
+@nav{step9,step11}
+
+@section s10goals Goals
+
+In this step, we configure a routing protocol that adapts to the changing
+network topology, and will arrange packets to be routed through `R2` and `R3`
+as `R1` departs.
+
+We'll use AODV (ad hoc on-demand distance vector routing). It is a
+reactive routing protocol, which means its maintenance of the routing
+tables is driven by demand. This is in contrast to proactive routing
+protocols which keep routing tables up to date all the time (or at least
+try to).
+
+@section s10model The model
+
+Let's configure ad-hoc routing with AODV. As AODV will manage the routing
+tables, we don't need the statically added routes any more. We only need
+`IPv4NetworkConfigurator` to assign the IP addresses, and turn all other
+functions off.
+
+More important, we change the hosts to be instances of `AODVRouter`.
+`AODVRouter` is like  `WirelessHost`, but with an added `AODVRouting`
+submodule. This change turns each node into an AODV router.
+
+@dontinclude omnetpp.ini
 @skipline [Config Wireless10]
 @until ####
 
 @section s10results Results
 
-<img src="wireless-step10-energy_2.png">
+This time when R1 gets out of range, the routes are reconfigured and packets
+keep flowing to B. Throughput is about the same as in step 6 -- even though the
+connection is not broken here, the AODV protocol adds some overhead to the
+communication.
 
-<b>Number of packets received by host B: 980</b>
+<img src="step10_aodv_udp.gif">
+
+<img src="step10.gif">
+
+<b>Number of packets received by host B: 890</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
