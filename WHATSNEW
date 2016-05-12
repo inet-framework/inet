@@ -1,6 +1,36 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.3.0 (May, 2016) - stable
+-------------------------------
+
+This release requires either OMNeT++ 4.6, or 5.0.
+
+Changes:
+
+  - Packetdrill: Added SCTP support and socket options (by Irene Rungeler)
+  - Physical layer: added IdealObstacleLoss. This obstacle loss model determines
+    power loss by checking if there is any obstructing physical object along the
+    straight propagation path. The result is either total power loss if there was
+    such an object or no loss at all if there wasn't.
+  - The Manet rounting feature was removed from the source tree. The external
+    MANET routing algorithms are available in the INETMANET fork
+    (https://github.com/aarizaq/inetmanet-2.0)
+  - AODV: ICMP packets are now accepted (and silently dropped) by the AODV Routing component
+  - examples: 'run' script can now take parameters containing spaces (as long as
+    they are quoted properly)
+  - build: removed unnecessary -pINET from the makemake options. This caused linking issues
+    on Windows when 'clang' was used as a compiler. (the INET_API macros are needed only for Viusal C++)
+  - bug fix in IPv4 packet deserialization
+  - bug fix in 802.11 management code
+  - bug fix in TelnetApp (cancels pending timers correctly)
+  - bug fix in Configurator: Links were not properly detected by the configurator if
+    a switch was precedeing all the nodes it was connected to.
+    (i.e. all nodes were defined after the switch in the NED file)
+  - IPv6: double delete fixed in IPv6
+  - IPv4: broadcast addresses can be used only with interfaces that support broadcasting
+
+
 INET-3.2.4 (April, 2016) - stable
 ---------------------------------
 
@@ -16,10 +46,10 @@ Changes:
 INET-3.2.3 (March, 2016) - Stable
 ---------------------------------
 
-This is a minor maintenance release that requires either OMNeT++ 4.6, 
+This is a minor maintenance release that requires either OMNeT++ 4.6,
 or 5.0rc or later. (Earlier test versions of OMNeT++ will not work.)
 
-Changes: 
+Changes:
 
   - build: updated inet_featuretool (the same like the opp_featuretool in OMNeT++ 5.0 rc)
   - several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
@@ -30,7 +60,7 @@ Changes:
 INET-3.2.1 (Jan, 2016) - Stable
 -------------------------------
 
-Changes: 
+Changes:
 
   - 802.11 MAC model: EDCA, rate control crashes fixed
   - Radio: Fixed handling of abort reception/transmission.
