@@ -286,7 +286,14 @@ In the following animation, Host A sends the following:
 
 <img src="step2_4_1.gif">
 
-This exchange, and the back-to-back radio frames, are visualized in a sequence chart below:
+This exchange, and the back-to-back radio frames, are visualized in a sequence chart below.
+It indicates that transmission of the packet UDPData-0 starts at around 15ms,
+and is completed at around 23ms. The transmission takes a finite ammount of time,
+but it is such a small value compared to the transmission time that it is not
+visible in this image. The arrow signifying the beginning of the transmission
+appears to be vertical, one needs to zoom in a lot to see that in fact, it is not).
+The chart also indicates that UDPData-1 and UDPData-2 are transmitted back-to-back,
+as there is no gap between them.
 
 <img src="wireless-step2-seq.png" width=900px>
 
