@@ -441,6 +441,22 @@ Configuration:
 
 @section s4results Results
 
+When the first packet sent by Host A arrives at Host R1, a black arrow appears
+between the two hosts indicating a successful physical layer exchange, as it was
+noted earlier. A few events later but still at the same simulation time, a green
+arrow appears on top of the black one. The green arrow represents a successful
+exchange between the two data link layers of the same hosts. As opposed to the
+previous step, this happens because according to the routing table of Host A, a
+packet destined to Host B, has to be sent to Host R1 (the gateway). As the packet
+reaches the network layer of Host R1, it immediately gets routed according to the
+routing table of this host directly towards Host B. So when the first packet arrives
+at Host B, first a black arrow appears, then a green arrow appears on top of that,
+similarly to the Host R1 case. Still at the same simulation time the packet leaves
+the network layer of Host B towards the UDP protocol. At this moment a new polyline
+arrow appears between Host A and Host B going through Host R1. This blue arrow
+represents the route the packet has taken from first entering the network layer
+at Host A until it left the network layer at Host B.
+
 The routing table of Host A (10.0.0.1) can be examined in the following image.
 It tells that Host B (10.0.0.2) can be reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
 
