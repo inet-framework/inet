@@ -22,8 +22,9 @@ INET documentation:
 - <a href="https://omnetpp.org/doc/inet/api-current/inet-manual-draft.pdf" target="_blank">INET Manual draft</a>
 - <a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
 
-In the tutorial, each step is a separate configuration in the same omnetpp.ini file,
-and consecutive steps mostly share the same networks, defined in NED.
+In the tutorial, each step is a separate configuration in the same omnetpp.ini file.
+Steps build on each other, they extend the configuration of the previous step by adding
+a few new lines. Consecutive steps mostly share the same network, defined in NED.
 
 @section contents Contents
 
@@ -210,11 +211,6 @@ To facilitate understanding, we would like to visualize radio transmissions
 and signal propagation.
 
 @section s2model The model
-
-Steps in this tutorial build on each other. In omnetpp.ini, the configuration
-`Wireless02` extends `Wireless01`.
-This way, subsequent steps can be based on the previous ones by adding a
-few lines to the .ini file.
 
 Visualization support in INET is implemented as separate modules that
 are optional parts of a network model. There are several kinds of visualizers
