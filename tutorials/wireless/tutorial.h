@@ -263,7 +263,12 @@ The UDP application generates packets at a rate so that there are back-to-back t
 This can be seen in the animation, with no gap between the colored transmission rings. Sometimes, the transmission
 stops for a while, indicating that the transmission queue is empty.
 
-In the animation below, Host A sends the following:
+The black arrow that indicates successfully received packets in the physical
+layer is created after a packet transmission is completed, and it is succesfuly
+received by the physical layer. This can be seen in the animation below, as the arrow is displayed
+for the first time after the first packet transmission is over.
+
+In the following animation, Host A sends the following:
 4 packets - gap - 1 packet - gap - 2 packets
 
 <img src="step2_4_1.gif">
