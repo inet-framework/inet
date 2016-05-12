@@ -10,6 +10,7 @@ src/Makefile.vc
 /doc/neddoc/
 /doc/src/manual/figures/*.pdf
 /doc/src/manual/inet-manual.pdf
+/doc/inet-manual-draft.pdf
 /examples/*/results/
 /examples/*/*/results/
 /examples/*/*/*/results/
@@ -57,6 +58,7 @@ gcc-debug
 # ignore backup and temp files
 *.UPDATED
 *.FAILED
+*.ERROR
 *.bak
 backups
 *~
