@@ -440,6 +440,11 @@ Configuration:
 
 @section s4results Results
 
+The routing table of Host A (10.0.0.1) can be examined in the following image.
+It tells that Host B (10.0.0.2) can be reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
+
+<img src="wireless-step4-rt.png">
+
 Now the two hosts can communicate as Host R1 relays data to
 Host B. The arrows indicate a route in the network layer, there is a route
 going from Host A through R1 to B, tracing the UDP stream.
