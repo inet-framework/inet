@@ -95,7 +95,7 @@ ned-path = .;../../../../src;../../lib
 
 # nic settings
 **.wlan[*].typename = "IdealWirelessNic"
-**.wlan[*].radio.transmitter.maxCommunicationRange = 240m
+**.wlan[*].radio.transmitter.communicationRange = 240m
 **.wlan[*].bitrate = 2Mbps
 **.wlan[*].mac.address = "auto"
 **.wlan[*].mac.headerLength = 20B
