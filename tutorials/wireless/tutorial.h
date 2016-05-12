@@ -356,6 +356,11 @@ in a later step). Therefore no packets are received by Host B.
 
 <img src="wireless-step3-v2.png">
 
+Host R1's MAC submodule logs indicate that it is discarding the received packets, as they are
+not addressed to it:
+
+<img src="wireless-step3-log.png">
+
 <b>Number of packets received by host B: 0</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
