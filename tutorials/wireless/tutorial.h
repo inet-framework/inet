@@ -427,8 +427,8 @@ reinforced by another packet.
 The route visualizer is activated by specifying in its `packetNameFilter`
 parameter which packets it should take into account. By default it is set
 to the empty string, meaning *none*. Setting `*` would mean all packets.
-Our UDP application generates packets with the name `UDPBasicAppData-0`,
-`UDPBasicAppData-1`, etc, so we set the name filter to `UDPBasicAppData-*`
+Our UDP application generates packets with the name `UDPData-0`,
+`UDPData-1`, etc, so we set the name filter to `UDPData*`
 in order to filter out other types of packets that will appear in later
 steps.
 
