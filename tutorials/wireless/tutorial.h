@@ -555,7 +555,7 @@ two successive transmissions is large enough, R1 can transmit a packet without c
 The animation below is from the beginning of the simulation. Host A transmits UDPData-0 and UDPData-1
 back-to-back, 
 
-<img src="step5_5_3.gif">
+<img src="step5_5_4.gif">
 
 
 As we expected, the number of packets received by Host B is low. The following
