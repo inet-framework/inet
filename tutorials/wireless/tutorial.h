@@ -192,6 +192,8 @@ When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
 the transmission rate was around 800 kbps.
 
+<img src="wireless-step1-host.png">
+
 <b>Number of packets received by host B: 2422</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
