@@ -207,8 +207,10 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 @section s2goals Goals
 
-To facilitate understanding, we would like to visualize radio transmissions
-and signal propagation.
+To facilitate understanding - because a picture worth a thousand words - we will
+visualize certain aspects of the simulation throughout this tutorial. In this step,
+we will focus on the physical layer, most notably radio transmissions and signal
+propagation.
 
 @section s2model The model
 
@@ -222,24 +224,28 @@ The `visualizer` submodule in this network is an `IntegratedCanvasVisualizer`,
 which is a compound module that contains all typically useful visualizers as submodules.
 It can display physical objects in the physical environment, movement trail,
 discovered network connectivity, discovered network routes, ongoing
-transmissions, ongoing receptions, propagating radio signals, and
-statistics.
+transmissions, ongoing receptions, propagating radio signals, statistics, and more.
 
-We enable two kinds of visualizations: that of signal propagation and of
-recent successful physical layer transmissions.
+We enable several kinds of visualizations: communication range, signal propagation
+and recent successful physical layer transmissions.
+
+The visualization of communication range is enabled using the `displayCommunicationRange`
+parameter of the radio module in Host A. It displays a circle around the host
+representing the maximum distance where successful transmission is still possible
+with some hosts in the network.
 
 The visualization of signal propagation is enabled with the
 `displaySignals` parameter of `MediumCanvasVisualizer`. It displays
 transmissions as colored rings emanating from hosts. Since this is
 sufficient to represent transmissions visually, it is advisable to turn off
-message animations in Tkenv/Qtenv.
+message animations in the Tkenv/Qtenv preferences dialog.
 
 The visualization of recent successful physical layer transmissions is
-enabled with the `physicalLinkVisualizer` parameter. Successful
-transmissions are displayed with black arrows that fade with time. When a
-packet is successfully received by the physical layer, the arrow between
+enabled with the `packetNameFilter` parameter of the `physicalLinkVisualizer` submodule.
+Matching successful transmissions are displayed with black arrows that fade with time.
+When a packet is successfully received by the physical layer, the arrow between
 the transmitter and receiver hosts is created or reinforced. The arrows
-visible at any given time indicate recent communication patterns.
+visible at any given time indicate recent successful communication patterns.
 
 @dontinclude omnetpp.ini
 @skipline
