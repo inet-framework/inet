@@ -286,7 +286,7 @@ In the following animation, Host A sends the following:
 
 This exchange, and the back-to-back radio frames, are visualized in a sequence chart below:
 
-<img src="wireless-step2-elog.png" width=900px>
+<img src="wireless-step2-seq.png" width=900px>
 
 <b>Number of packets received by host B: 2422</b>
 
