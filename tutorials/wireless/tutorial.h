@@ -258,17 +258,26 @@ Configuration:
 
 @section s2results Results
 
-This results in bubble animations representing radio
-transmissions, and black arrows indicating communication paths.
+The most notable change is the bubble animations representing radio signals. Each
+transmission starts with displaying a growing filled circle centered at the transmitter.
+The outer edge of the circle indicates the propagation of the radio signal's first
+bit. When the transmission ends, the circle becomes a ring and the inner edge appears
+at the transmitter. The growing inner edge of the ring indicates the propagation of the radio
+signal's last bit. The reception is completed when the inner edge arrives at the receiver.
 
 The UDP application generates packets at a rate so that there are back-to-back transmissions.
-This can be seen in the animation, with no gap between the colored transmission rings. Sometimes, the transmission
-stops for a while, indicating that the transmission queue is empty.
+Back-to-back means the first bit of a transmission is just right after the last bit of the
+previous transmission. This can be seen in the animation, with no gap between the colored
+transmission rings. Sometimes, the transmission stops for a while, indicating that the
+transmission queue became empty.
 
-The black arrow that indicates successfully received packets in the physical
-layer is created after a packet transmission is completed, and it is succesfuly
-received by the physical layer. This can be seen in the animation below, as the arrow is displayed
-for the first time after the first packet transmission is over.
+The blue circle around Host A depicts the communication range, and it clearly shows that
+Host B is within, therefore successful communication is possible.
+
+The black arrow between the hosts indicates successful communication at the physical layer.
+The arrow is created after a packet reception is successfully completed, just when the packet
+is passed up to the link layer. This can be seen in the animation below, as the arrow is
+displayed for the first time after the first packet reception at Host B is over.
 
 In the following animation, Host A sends the following:
 4 packets - gap - 1 packet - gap - 2 packets
