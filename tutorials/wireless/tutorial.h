@@ -155,7 +155,7 @@ is set to 500m. Modeling packet losses due to collision (termed
 "interference" in this model) is turned off, resulting in pairwise
 independent duplex communication channels. The radio data rates are set to
 1 Mbps. These values are set in `omnetpp.ini` with the
-`maxCommunicationRange`, `ignoreInterference`, and `bitrate` parameters of
+`communicationRange`, `ignoreInterference`, and `bitrate` parameters of
 the appropriate modules.
 
 <b>MAC layer</b>
@@ -499,7 +499,7 @@ channel, so we expect the number of packets that go through to drop.
 To turn on interference modeling, we set the `ignoreInterference` parameter
 in the receiver part of `IdealRadio` to `false`.
 
-Interference range is the `maxInterferenceRange` parameter of
+Interference range is the `interferenceRange` parameter of
 `IdealRadio`'s transmitter part, so we set that to 500m.
 
 We expect that although host B will not be able to receive host A's
