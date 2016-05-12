@@ -28,9 +28,9 @@ Define_Module(IdealTransmitter);
 IdealTransmitter::IdealTransmitter() :
     headerBitLength(-1),
     bitrate(NaN),
-    maxCommunicationRange(NaN),
-    maxInterferenceRange(NaN),
-    maxDetectionRange(NaN)
+    communicationRange(NaN),
+    interferenceRange(NaN),
+    detectionRange(NaN)
 {
 }
 
@@ -40,9 +40,9 @@ void IdealTransmitter::initialize(int stage)
         preambleDuration = par("preambleDuration");
         headerBitLength = par("headerBitLength");
         bitrate = bps(par("bitrate"));
-        maxCommunicationRange = m(par("maxCommunicationRange"));
-        maxInterferenceRange = m(par("maxInterferenceRange"));
-        maxDetectionRange = m(par("maxDetectionRange"));
+        communicationRange = m(par("communicationRange"));
+        interferenceRange = m(par("interferenceRange"));
+        detectionRange = m(par("detectionRange"));
     }
 }
 
@@ -54,10 +54,10 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
                << ", headerBitLength = " << headerBitLength
                << ", bitrate = " << bitrate;
     if (level <= PRINT_LEVEL_INFO)
-        stream << ", maxCommunicationRange = " << maxCommunicationRange;
+        stream << ", communicationRange = " << communicationRange;
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", maxInterferenceRange = " << maxInterferenceRange
-               << ", maxDetectionRange = " << maxDetectionRange;
+        stream << ", interferenceRange = " << interferenceRange
+               << ", detectionRange = " << detectionRange;
     return stream;
 }
 
@@ -74,7 +74,7 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
+    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
 }
 
 } // namespace physicallayer

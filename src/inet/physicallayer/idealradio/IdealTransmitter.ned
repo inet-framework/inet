@@ -31,12 +31,12 @@ import inet.physicallayer.contract.packetlevel.ITransmitter;
 module IdealTransmitter like ITransmitter
 {
     parameters:
-        double preambleDuration @unit(s) = default(0s);                        // preamble added before the header
-        double headerBitLength @unit(b) = default(0b);                         // number of header bits added to the length of the MAC frame
-        double bitrate @unit(bps);                                             // the bitrate of the transmitter is used to compute the duration of the transmission
-        double maxCommunicationRange @unit(m);                                 // the maximum range where the reception of transmissions produced by this transmitter is possible
-        double maxInterferenceRange @unit(m) = default(maxCommunicationRange); // the maximum range where transmissions produced by this transmitter interferes with other transmissions
-        double maxDetectionRange @unit(m) = default(maxInterferenceRange);     // the maximum range where transmissions produced by this transmitter can be detected at all
+        double preambleDuration @unit(s) = default(0s);                  // preamble added before the header
+        double headerBitLength @unit(b) = default(0b);                   // number of header bits added to the length of the MAC frame
+        double bitrate @unit(bps);                                       // the bitrate of the transmitter is used to compute the duration of the transmission
+        double communicationRange @unit(m);                              // the range where the reception of transmissions produced by this transmitter is possible
+        double interferenceRange @unit(m) = default(communicationRange); // the range where transmissions produced by this transmitter interferes with other transmissions
+        double detectionRange @unit(m) = default(interferenceRange);     // the range where transmissions produced by this transmitter can be detected at all
         @class(IdealTransmitter);
         @display("i=block/wtx");
 }

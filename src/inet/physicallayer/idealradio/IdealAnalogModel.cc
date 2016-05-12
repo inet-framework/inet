@@ -50,11 +50,11 @@ const IReception *IdealAnalogModel::computeReception(const IRadio *receiverRadio
     IdealReception::Power power;
     if (obstacleLoss == 0)
         power = IdealReception::POWER_UNDETECTABLE;
-    else if (distance <= idealTransmission->getMaxCommunicationRange())
+    else if (distance <= idealTransmission->getCommunicationRange())
         power = IdealReception::POWER_RECEIVABLE;
-    else if (distance <= idealTransmission->getMaxInterferenceRange())
+    else if (distance <= idealTransmission->getInterferenceRange())
         power = IdealReception::POWER_INTERFERING;
-    else if (distance <= idealTransmission->getMaxDetectionRange())
+    else if (distance <= idealTransmission->getDetectionRange())
         power = IdealReception::POWER_DETECTABLE;
     else
         power = IdealReception::POWER_UNDETECTABLE;

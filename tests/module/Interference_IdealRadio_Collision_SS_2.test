@@ -57,15 +57,15 @@ ned-path = .;../../../../src
 *.host*.wlan[*].radio.transmitter.preambleDuration = 0s
 *.host*.wlan[*].radio.transmitter.headerBitLength = 100b
 *.host*.wlan[*].radio.receiver.ignoreInterference = false
-*.hostSender1.wlan[*].radio.transmitter.maxCommunicationRange = 300m
-*.hostSender1.wlan[*].radio.transmitter.maxInterferenceRange = 600m
-*.hostSender1.wlan[*].radio.transmitter.maxDetectionRange = 1.2km
-*.hostSender2.wlan[*].radio.transmitter.maxCommunicationRange = 1km
-*.hostSender2.wlan[*].radio.transmitter.maxInterferenceRange = 2km
-*.hostSender2.wlan[*].radio.transmitter.maxDetectionRange = 4km
-*.hostReceiver.wlan[*].radio.transmitter.maxCommunicationRange = 0m
-*.hostReceiver.wlan[*].radio.transmitter.maxInterferenceRange = 0m
-*.hostReceiver.wlan[*].radio.transmitter.maxDetectionRange = 0m
+*.hostSender1.wlan[*].radio.transmitter.communicationRange = 300m
+*.hostSender1.wlan[*].radio.transmitter.interferenceRange = 600m
+*.hostSender1.wlan[*].radio.transmitter.detectionRange = 1.2km
+*.hostSender2.wlan[*].radio.transmitter.communicationRange = 1km
+*.hostSender2.wlan[*].radio.transmitter.interferenceRange = 2km
+*.hostSender2.wlan[*].radio.transmitter.detectionRange = 4km
+*.hostReceiver.wlan[*].radio.transmitter.communicationRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.interferenceRange = 0m
+*.hostReceiver.wlan[*].radio.transmitter.detectionRange = 0m
 
 # ping app
 *.hostSender*.numPingApps = 1
