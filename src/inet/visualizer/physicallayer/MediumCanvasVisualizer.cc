@@ -58,6 +58,7 @@ void MediumCanvasVisualizer::initialize(int stage)
             canvas->addFigure(communicationHeat, 0);
         }
         signalPropagationUpdateTimer = new cMessage("signalPropagation");
+        networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
     }
     else if (stage == INITSTAGE_LAST) {
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
@@ -115,25 +116,23 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
     auto module = check_and_cast<const cModule *>(radio);
     if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
         auto module = check_and_cast<const cModule *>(radio);
-        auto node = findContainingNode(const_cast<cModule *>(module));
-        cDisplayString& displayString = node->getDisplayString();
+        auto node = getContainingNode(const_cast<cModule *>(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
+        auto communicationRangeFigure = new cOvalFigure();
         m maxInterferenceRage = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
-        const char *tag = "r1";
-        displayString.removeTag(tag);
-        displayString.insertTag(tag);
-        displayString.setTagArg(tag, 0, maxInterferenceRage.get());
-        displayString.setTagArg(tag, 2, interferenceRangeColor.str().c_str());
+        communicationRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRage.get(), -maxInterferenceRage.get(), 2 * maxInterferenceRage.get(), 2 * maxInterferenceRage.get()));
+        communicationRangeFigure->setLineColor(interferenceRangeColor);
+        networkNodeVisualization->addFigure(communicationRangeFigure);
     }
     if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
         auto module = check_and_cast<const cModule *>(radio);
-        auto node = findContainingNode(const_cast<cModule *>(module));
-        cDisplayString& displayString = node->getDisplayString();
+        auto node = getContainingNode(const_cast<cModule *>(module));
+        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
+        auto communicationRangeFigure = new cOvalFigure();
         m maxCommunicationRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
-        const char *tag = "r2";
-        displayString.removeTag(tag);
-        displayString.insertTag(tag);
-        displayString.setTagArg(tag, 0, maxCommunicationRange.get());
-        displayString.setTagArg(tag, 2, communicationRangeColor.str().c_str());
+        communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
+        communicationRangeFigure->setLineColor(communicationRangeColor);
+        networkNodeVisualization->addFigure(communicationRangeFigure);
     }
 }
 

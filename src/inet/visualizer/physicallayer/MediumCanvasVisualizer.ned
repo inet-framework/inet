@@ -35,6 +35,8 @@ simple MediumCanvasVisualizer extends MediumVisualizerBase like IMediumVisualize
 {
     parameters:
         @class(MediumCanvasVisualizer);
+        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path of the network node visualizer module
+
         string signalShape @enum("ring", "sphere") = default("ring"); // shape for displaying signals
 
         bool displayCommunicationHeat = default(false); // when enabled the radio medium displays recent successful receptions as a heat map overlay

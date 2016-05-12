@@ -25,6 +25,7 @@
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
+#include "inet/visualizer/networknode/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 
@@ -45,6 +46,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 
     /** @name Internal state */
     //@{
+    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
     /**
      * The list of ongoing transmissions.
      */
