@@ -346,12 +346,12 @@ The configuration:
 @section s3results Results
 
 As we run the simulation, we can see that hosts R1 and R2 are the only
-hosts in communication range of Host A, so they are the only ones that
+hosts in the communication range of Host A. Therefore they are the only ones that
 receive Host A's transmissions. This is indicated by the black arrows
-connecting Host A to R1 and R2, respectively, indicating successful
+connecting Host A to R1 and R2, respectively, representing recent successful
 receptions in the physical layer.
 
-Host B is in transmission range of Host R1, and R1 could potentially relay A's packets,
+Host B is in the transmission range of Host R1, and R1 could potentially relay A's packets,
 but it drops them, because routing is not configured yet (it will be configured
 in a later step). Therefore no packets are received by Host B.
 
