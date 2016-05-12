@@ -275,6 +275,10 @@ In the following animation, Host A sends the following:
 
 <img src="step2_4_1.gif">
 
+This exchange, and the back-to-back radio frames, are visualized in a sequence chart below:
+
+<img src="wireless-step2-elog.png" width=900px>
+
 <b>Number of packets received by host B: 2422</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
