@@ -49,7 +49,7 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
         string networkConnectionVisualizerType = default("NetworkConnectionOsgVisualizer");
         string mobilityVisualizerType = default("MobilityOsgVisualizer");
         string mediumVisualizerType = default("MediumOsgVisualizer");
-        string obsacleLossVisualizerType = default("TracingObstacleLossOsgVisualizer");
+        string obstacleLossVisualizerType = default("TracingObstacleLossOsgVisualizer");
         string physicalLinkVisualizerType = default("PhysicalLinkOsgVisualizer");
         string dataLinkVisualizerType = default("DataLinkOsgVisualizer");
         string networkRouteVisualizerType = default("NetworkRouteOsgVisualizer");
@@ -84,7 +84,7 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,50");
         }
-        obsacleLossVisualizer: <obsacleLossVisualizerType> like ITracingObstacleLossVisualizer if obsacleLossVisualizerType != "" {
+        obstacleLossVisualizer: <obstacleLossVisualizerType> like ITracingObstacleLossVisualizer if obstacleLossVisualizerType != "" {
             parameters:
                 @display("p=450,150");
         }
