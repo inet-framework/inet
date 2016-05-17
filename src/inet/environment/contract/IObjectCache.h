@@ -34,11 +34,6 @@ class INET_API IObjectCache
 {
   public:
     /**
-     * Inserts a new physical object into the cache data structure.
-     */
-    virtual bool insertObject(const IPhysicalObject *object) = 0;
-
-    /**
      * Calls the visitor with at least all physical objects that intersect
      * with the provided line segment.
      */

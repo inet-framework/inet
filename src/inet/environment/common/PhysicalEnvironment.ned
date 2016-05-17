@@ -164,15 +164,15 @@ module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
-        string objectCacheType = default("GridObjectCache");  // TODO should be empty by default as GridObjectCache require finite space* parameters which is not always present
+        string objectCacheType = default("GridObjectCache");  // NED type of object cache
         string groundType = default("");
         double temperature @unit(K) = default(293K);
-        double spaceMinX @unit(m) = default(-1m/0); // min x position of space, unconstrained by default (negative infinity)
-        double spaceMinY @unit(m) = default(-1m/0); // min y position of space, unconstrained by default (negative infinity)
-        double spaceMinZ @unit(m) = default(-1m/0); // min z position of space, unconstrained by default (negative infinity)
-        double spaceMaxX @unit(m) = default(1m/0); // max x position of space, unconstrained by default (positive infinity)
-        double spaceMaxY @unit(m) = default(1m/0); // max y position of space, unconstrained by default (positive infinity)
-        double spaceMaxZ @unit(m) = default(1m/0); // max z position of space, unconstrained by default (positive infinity)
+        double spaceMinX @unit(m) = default(0m/0); // lower bound of x coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinY @unit(m) = default(0m/0); // lower bound of y coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinZ @unit(m) = default(0m/0); // lower bound of z coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxX @unit(m) = default(0m/0); // upper bound of x coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxY @unit(m) = default(0m/0); // upper bound of y coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxZ @unit(m) = default(0m/0); // upper bound of z coordinates in space, NaN means determined by physical objects, NaN by default
         xml config = default(xml("<config/>"));
         @display("i=misc/town_s");
         @class(PhysicalEnvironment);

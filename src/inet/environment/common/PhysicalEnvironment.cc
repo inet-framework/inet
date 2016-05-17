@@ -458,8 +458,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         objects.push_back(object);
         if (id != -1)
             idToObjectMap.insert(std::pair<int, const PhysicalObject *>(id, object));
-        if (objectCache)
-            objectCache->insertObject(object);
         const Coord min = position - size / 2;
         const Coord max = position + size / 2;
         if ((!std::isnan(spaceMin.x) && min.x < spaceMin.x) || (!std::isnan(spaceMax.x) && max.x > spaceMax.x) ||
