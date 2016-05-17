@@ -106,8 +106,8 @@ protocol.
 
 <b>Traffic model</b>
 
-In the model, host A generates UDP packets which are received by Host B. To
-this end, host A is configured to contain a `UDPBasicApp` module, which generates 1000-byte
+In the model, Host A generates UDP packets which are received by Host B. To
+this end, Host A is configured to contain a `UDPBasicApp` module, which generates 1000-byte
 UDP messages at random intervals with exponential distribution, the mean of
 which is 10ms. Therefore the app is going to generate 100 kbyte/s (800
 kbps) UDP traffic, not counting protocol overhead. Host B contains a
@@ -383,13 +383,13 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 @section s4goals Goals
 
-In this step, we set up routing so that packets can flow from host A to B.
+In this step, we set up routing so that packets can flow from Host A to B.
 For this to happen, the intermediate nodes will need to act as a routers.
 As we still want to keep things simple, we'll use statically added routes
 that remain unchanged throughout the simulation.
 
 We also configure visualization so that we can see the paths packets take
-when traveling from host A to B.
+when traveling from Host A to B.
 
 @section s4model The model
 
@@ -522,7 +522,7 @@ To turn on interference modeling, we set the `ignoreInterference` parameter
 in the receiver part of `IdealRadio` to `false`. Interference range is the
 `interferenceRange` parameter of `IdealRadio`'s transmitter part, so we set that to 500m.
 
-We expect that although Host B will not be able to receive host A's
+We expect that although Host B will not be able to receive Host A's
 transmissions, those transmission will still cause interference with other
 (e.g. R1's) transmissions at Host B.
 
@@ -833,7 +833,7 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
 In this step, we make the model more interesting by adding node mobility.
 Namely, we make the intermediate nodes travel north during simulation.
-After a while, they will move out of the range of host A (and B), breaking the
+After a while, they will move out of the range of Host A (and B), breaking the
 communication path.
 
 @section s9model The model
@@ -865,7 +865,7 @@ viewed in Normal mode.
 <img src="step9_2_v3.gif">
 
 We can see data exchange taking place just like in the previous step until
-R1 moves out of range of host A at around 18 seconds, and then it stops.
+R1 moves out of range of Host A at around 18 seconds, and then it stops.
 
 Traffic could be routed through R2 and R3, but that does not happen because
 the routing tables are static and have been configured according to the
@@ -944,7 +944,7 @@ In the real world, objects like walls, trees, buildings and hills act as
 obstacles to radio signal propagation. They absorb and reflect radio waves,
 reducing signal quality and decreasing the chance of successful reception.
 
-In this step, we add a concrete wall to the model that sits between host A
+In this step, we add a concrete wall to the model that sits between Host A
 and `R1`, and see what happens. Since our model still uses the ideal radio
 and ideal wireless medium models that do not model physical phenomena,
 obstable modeling will be very simple: all obstacles completely absorb
