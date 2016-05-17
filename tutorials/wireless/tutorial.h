@@ -233,14 +233,16 @@ and recent successful physical layer transmissions.
 
 The visualization of communication range is enabled using the `displayCommunicationRange`
 parameter of the radio module in Host A. It displays a circle around the host
-representing the maximum distance where successful transmission is still possible
+which represents the maximum distance where successful transmission is still possible
 with some hosts in the network.
 
 The visualization of signal propagation is enabled with the
 `displaySignals` parameter of `MediumCanvasVisualizer`. It displays
 transmissions as colored rings emanating from hosts. Since this is
-sufficient to represent transmissions visually, it is advisable to turn off
-message animations in the Tkenv/Qtenv preferences dialog.
+sufficient to represent radio signals visually, it is advisable to turn off
+message animations in the Tkenv/Qtenv preferences dialog. The `signalPropagationUpdateInterval`
+parameter tells the visualizer to periodically update the display when
+there's at least one propagating radio signal on the medium.
 
 The visualization of recent successful physical layer transmissions is
 enabled with the `packetNameFilter` parameter of the `physicalLinkVisualizer` submodule.
@@ -264,8 +266,11 @@ The most notable change is the bubble animations representing radio signals. Eac
 transmission starts with displaying a growing filled circle centered at the transmitter.
 The outer edge of the circle indicates the propagation of the radio signal's first
 bit. When the transmission ends, the circle becomes a ring and the inner edge appears
-at the transmitter. The growing inner edge of the ring indicates the propagation of the radio
-signal's last bit. The reception is completed when the inner edge arrives at the receiver.
+at the transmitter. By the time this happens, the outer edge is very far away from the
+transmitter. The reason is that the transmission duration is much longer than the
+propagation time needed to reach the receiver. The growing inner edge of the ring
+indicates the propagation of the radio signal's last bit. The reception starts when
+the outer edge reaches the receiver, and it finishes when the inner edge arrives.
 
 The UDP application generates packets at a rate so that there are back-to-back transmissions.
 Back-to-back means the first bit of a transmission is just right after the last bit of the
@@ -274,12 +279,12 @@ transmission rings. Sometimes, the transmission stops for a while, indicating th
 transmission queue became empty.
 
 The blue circle around Host A depicts the communication range, and it clearly shows that
-Host B is within, therefore successful communication is possible.
+Host B is within the range, therefore successful communication is possible.
 
 The black arrow between the hosts indicates successful communication at the physical layer.
 The arrow is created after a packet reception is successfully completed, just when the packet
-is passed up to the link layer. This can be seen in the animation below, as the arrow is
-displayed for the first time after the first packet reception at Host B is over.
+is passed up to the link layer. The arrow is displayed after the first packet reception
+at Host B is over.
 
 In the following animation, Host A sends the following:
 4 packets - gap - 1 packet - gap - 2 packets
@@ -292,7 +297,7 @@ and is completed at around 23ms. The sigal propagation takes a non-zero amount o
 but it's such a small value compared to the transmission duration that it's not
 visible in this image. The arrow signifying the beginning of the transmission
 appears to be vertical, one needs to zoom in a lot to see that in fact, it is not.
-In a later, we will see that it is possible to configure the sequence chart to represent
+In a later step, we will see that it is possible to configure the sequence chart to represent
 time in a non-linear way. The chart also indicates that UDPData-1 and UDPData-2 are
 transmitted back-to-back, because there's no gap between them.
 
