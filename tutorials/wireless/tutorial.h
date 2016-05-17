@@ -106,7 +106,7 @@ protocol.
 
 <b>Traffic model</b>
 
-In the model, host A generates UDP packets which are received by host B. To
+In the model, host A generates UDP packets which are received by Host B. To
 this end, host A is configured to contain a `UDPBasicApp` module, which generates 1000-byte
 UDP messages at random intervals with exponential distribution, the mean of
 which is 10ms. Therefore the app is going to generate 100 kbyte/s (800
@@ -114,7 +114,7 @@ kbps) UDP traffic, not counting protocol overhead. Host B contains a
 `UDPSink` application that just discards received packets.
 
 The model also contains a gauge to display the number of packets received by
-host B. The gauge is added by the `@figure[thruputInstrument](type=gauge...)`
+Host B. The gauge is added by the `@figure[thruputInstrument](type=gauge...)`
 line.
 
 <b>Physical layer modeling</b>
@@ -194,7 +194,7 @@ the transmission rate was around 800 kbps.
 
 <img src="wireless-step1-host.png">
 
-<b>Number of packets received by host B: 2422</b>
+<b>Number of packets received by Host B: 2422</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
@@ -303,7 +303,7 @@ transmitted back-to-back, because there's no gap between them.
 
 <img src="wireless-step2-seq.png" width=900px>
 
-<b>Number of packets received by host B: 2422</b>
+<b>Number of packets received by Host B: 2422</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
@@ -367,7 +367,7 @@ not addressed to it:
 
 <img src="wireless-step3-log.png">
 
-<b>Number of packets received by host B: 0</b>
+<b>Number of packets received by Host B: 0</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -481,7 +481,7 @@ transmitting at the same time, because interference is still ignored.
 
 <img src="wireless-step4-v2.png">
 
-<b>Number of packets received by host B: 2453</b>
+<b>Number of packets received by Host B: 2453</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -522,9 +522,9 @@ To turn on interference modeling, we set the `ignoreInterference` parameter
 in the receiver part of `IdealRadio` to `false`. Interference range is the
 `interferenceRange` parameter of `IdealRadio`'s transmitter part, so we set that to 500m.
 
-We expect that although host B will not be able to receive host A's
+We expect that although Host B will not be able to receive host A's
 transmissions, those transmission will still cause interference with other
-(e.g. R1's) transmissions at host B.
+(e.g. R1's) transmissions at Host B.
 
 To make the animation simpler, we disable displaying successful exchanges at
 the physical layer and the data link layer, but displaying the network routes
@@ -572,7 +572,7 @@ most packets sent by R1 do not make it Host B's IP submodule.
 To minimize interference, some kind of media access protocol is needed to govern
 which host can transmit and when.
 
-<b>Number of packets received by host B: 197</b>
+<b>Number of packets received by Host B: 197</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -692,7 +692,7 @@ We can see that throughput is about 380 kbps, so it is increased over the
 previous step thanks to CSMA -- altough less than in step 4 because of the
 interference.
 
-<b>Number of packets received by host B: 1172</b>
+<b>Number of packets received by Host B: 1172</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -725,7 +725,7 @@ We turn on ACKs by setting the `useMACAcks` parameter of `CSMA`.
 
 <img src="wireless-step7.png">
 
-<b>Number of packets received by host B: TODO</b>
+<b>Number of packets received by Host B: TODO</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -816,7 +816,7 @@ Configuration:
 
 <img src="wireless-step8-energy_2.png">
 
-<b>Number of packets received by host B: 980</b>
+<b>Number of packets received by Host B: 980</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -871,7 +871,7 @@ Traffic could be routed through R2 and R3, but that does not happen because
 the routing tables are static and have been configured according to the
 initial positions of the nodes.
 
-<b>Number of packets received by host B: 787</b>
+<b>Number of packets received by Host B: 787</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -922,7 +922,7 @@ communication.
 
 <img src="step10.gif">
 
-<b>Number of packets received by host B: 890</b>
+<b>Number of packets received by Host B: 890</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -1003,7 +1003,7 @@ TODO
 
 <img src="wireless-step11-v2.png">
 
-<b>Number of packets received by host B: TODO</b>
+<b>Number of packets received by Host B: TODO</b>
 
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
@@ -1088,7 +1088,7 @@ Now our model takes the objects into account when calculating attenuation.
 The wall is blocking the transmission between Host A and R1 when R1 gets
 behind it.<!rewrite>
 
-<b>Number of packets received by host B: 477</b>
+<b>Number of packets received by Host B: 477</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
@@ -1141,7 +1141,7 @@ initialized from display strings.)
 
 TODO
 
-<b>Number of packets received by host B: 243</b>
+<b>Number of packets received by Host B: 243</b>
 
 @nav{step12,step14}
 @fixupini
@@ -1178,7 +1178,7 @@ well.)
 
 TODO
 
-<b>Number of packets received by host B: 942</b>
+<b>Number of packets received by Host B: 942</b>
 
 @nav{step13,index}
 @fixupini
