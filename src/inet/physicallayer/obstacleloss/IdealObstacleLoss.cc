@@ -53,7 +53,12 @@ bool IdealObstacleLoss::isObstacle(const IPhysicalObject *object, const Coord& t
     const LineSegment lineSegment(rotation.rotateVectorCounterClockwise(transmissionPosition - position), rotation.rotateVectorCounterClockwise(receptionPosition - position));
     Coord intersection1, intersection2, normal1, normal2;
     bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
-    return hasIntersections && intersection1 != intersection2;
+    bool isObstacle = hasIntersections && intersection1 != intersection2;
+    if (isObstacle) {
+        ObstaclePenetratedEvent event(object, intersection1, intersection2, normal1, normal2);
+        const_cast<IdealObstacleLoss *>(this)->emit(obstaclePenetratedSignal, &event);
+    }
+    return isObstacle;
 }
 
 double IdealObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const

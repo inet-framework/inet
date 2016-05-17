@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/physicallayer/obstacleloss/TracingObstacleLossOsgVisualizer.h"
@@ -45,7 +46,6 @@ void TracingObstacleLossOsgVisualizer::initialize(int stage)
 
 void TracingObstacleLossOsgVisualizer::obstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2)
 {
-    Enter_Method_Silent();
     if (displayIntersectionTrail || displayFaceNormalVectorTrail) {
         const Rotation rotation(object->getOrientation());
         const Coord& position = object->getPosition();

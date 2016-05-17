@@ -18,7 +18,7 @@
 #ifndef __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
 #define __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
 
-#include "inet/physicallayer/obstacleloss/TracingObstacleLoss.h"
+#include "inet/physicallayer/base/packetlevel/TracingObstacleLossBase.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
@@ -27,18 +27,23 @@ namespace visualizer {
 
 using namespace inet::physicallayer;
 
-class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public TracingObstacleLoss::ITracingObstacleLossListener
+class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
     /** @name Parameters */
     //@{
-    TracingObstacleLoss *obstacleLoss = nullptr;
+    cModule *subscriptionModule = nullptr;
     bool displayIntersectionTrail = false;
     bool displayFaceNormalVectorTrail = false;
     //@}
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual void obstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) = 0;
+
+  public:
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
 };
 
 } // namespace visualizer

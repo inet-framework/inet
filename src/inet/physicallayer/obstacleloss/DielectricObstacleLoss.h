@@ -15,14 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TRACINGOBSTACLELOSS_H
-#define __INET_TRACINGOBSTACLELOSS_H
+#ifndef __INET_DIELECTRICOBSTACLELOSS_H
+#define __INET_DIELECTRICOBSTACLELOSS_H
 
 #include <algorithm>
+
 #include "inet/common/IVisitor.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
+#include "inet/physicallayer/base/packetlevel/TracingObstacleLossBase.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
 
 namespace inet {
 
@@ -34,26 +35,20 @@ namespace physicallayer {
  * the combination of the dielectric losses in the intersected obstacles and the
  * reflection losses of the penetrated faces along this path.
  */
-class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
+class INET_API DielectricObstacleLoss : public TracingObstacleLossBase
 {
-  public:
-    class INET_API ITracingObstacleLossListener {
-      public:
-        virtual void obstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) = 0;
-    };
-
   protected:
     class TotalObstacleLossComputation : public IVisitor
     {
       protected:
         mutable double totalLoss;
-        const TracingObstacleLoss *obstacleLoss;
+        const DielectricObstacleLoss *obstacleLoss;
         const Hz frequency;
         const Coord transmissionPosition;
         const Coord receptionPosition;
 
       public:
-        TotalObstacleLossComputation(const TracingObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition);
+        TotalObstacleLossComputation(const DielectricObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition);
         void visit(const cObject *object) const override;
         double getTotalLoss() const { return totalLoss; }
     };
@@ -69,11 +64,6 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
      * The physical environment that provides to obstacles.
      */
     IPhysicalEnvironment *physicalEnvironment;
-    //@}
-
-    /** @name Statistics */
-    //@{
-    std::vector<ITracingObstacleLossListener *> listeners;
     //@}
 
     /** @name Statistics */
@@ -97,15 +87,10 @@ class INET_API TracingObstacleLoss : public cModule, public IObstacleLoss
     virtual double computeReflectionLoss(const IMaterial *incidentMaterial, const IMaterial *refractiveMaterial, double angle) const;
     virtual double computeObjectLoss(const IPhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const;
 
-    virtual void fireObstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const;
-
   public:
-    TracingObstacleLoss();
+    DielectricObstacleLoss();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-
-    virtual void addListener(ITracingObstacleLossListener *listener) { listeners.push_back(listener); }
-    virtual void removeListener(ITracingObstacleLossListener *listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
 
     virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const override;
 };

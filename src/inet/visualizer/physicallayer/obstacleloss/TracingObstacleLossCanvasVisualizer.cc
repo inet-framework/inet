@@ -39,7 +39,6 @@ void TracingObstacleLossCanvasVisualizer::initialize(int stage)
 
 void TracingObstacleLossCanvasVisualizer::obstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2)
 {
-    Enter_Method_Silent();
     if (displayIntersectionTrail || displayFaceNormalVectorTrail) {
         const Rotation rotation(object->getOrientation());
         const Coord& position = object->getPosition();

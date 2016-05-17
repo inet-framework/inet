@@ -27,12 +27,18 @@ void TracingObstacleLossVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        obstacleLoss = getModuleFromPar<TracingObstacleLoss>(par("obstacleLossModule"), this, false);
-        if (obstacleLoss != nullptr)
-            obstacleLoss->addListener(this);
         displayIntersectionTrail = par("displayIntersectionTrail");
         displayFaceNormalVectorTrail = par("displayFaceNormalVectorTrail");
+        subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
+        subscriptionModule->subscribe(TracingObstacleLossBase::obstaclePenetratedSignal, this);
     }
+}
+
+void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+{
+    Enter_Method_Silent();
+    auto event = static_cast<TracingObstacleLossBase::ObstaclePenetratedEvent *>(object);
+    obstaclePenetrated(event->object, event->intersection1, event->intersection2, event->normal1, event->normal2);
 }
 
 } // namespace visualizer

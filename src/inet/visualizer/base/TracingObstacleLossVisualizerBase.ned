@@ -19,9 +19,8 @@ package inet.visualizer.base;
 
 //
 // This is a base module for tracing obstacle loss visualizer simple modules. It
-// subscribes on the obstacle loss module for physical object penetrated
-// notifications. The actual visualization of obstacle loss is done in derived
-// modules.
+// subscribes on the obstacle loss module for physical object penetrated signals.
+// The actual visualization of obstacle loss is done in derived modules.
 //
 // @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer,
 // ~ITracingObstacleLossVisualizer, and ~TracingObstacleLossVisualizerBase
@@ -29,7 +28,7 @@ package inet.visualizer.base;
 simple TracingObstacleLossVisualizerBase extends VisualizerBase
 {
     parameters:
-        string obstacleLossModule = default("radioMedium.obstacleLoss"); // module path of the tracing obstacle loss module that is displayed, refers to the obstacle loss of a top level submodule by default
+        string subscriptionModule = default("radioMedium.obstacleLoss"); // module path where the visualizer subscribes for obstacle loss signals, root module by default
         bool displayIntersectionTrail = default(false); // display instersections of transmissions and physical objects, disabled by default
         bool displayFaceNormalVectorTrail = default(false); // display face normal vectors of instersections, disabled by default
         @class(TracingObstacleLossVisualizerBase);
