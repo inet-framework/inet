@@ -25,7 +25,7 @@ network WirelessA
 {
     @display("bgb=650,500;bgg=100,1,grey95");
     @figure[thruputInstrument](type=gauge; pos=520,10; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red; label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
-    string hostType = default("WirelessHost");
+    string hostType = default("WirelessHost"); // TODO: eliminate parameter when MessageDispatcher is merged in
     string mediumType = default("IdealRadioMedium");
     submodules:
         visualizer: IntegratedCanvasVisualizer {
