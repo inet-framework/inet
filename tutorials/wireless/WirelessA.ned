@@ -15,6 +15,7 @@
 
 package inet.tutorials.wireless;
 
+import inet.common.figures.DelegateSignalConfigurator;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
@@ -23,10 +24,25 @@ import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network WirelessA
 {
-    @display("bgb=650,500;bgg=100,1,grey95");
-    @figure[thruputInstrument](type=gauge; pos=520,10; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red; label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
-    string hostType = default("WirelessHost"); // TODO: eliminate parameter when MessageDispatcher is merged in
-    string mediumType = default("IdealRadioMedium");
+    parameters:
+        string hostType = default("WirelessHost");
+        string mediumType = default("IdealRadioMedium");
+
+        @display("bgb=650,500;bgg=100,1,grey95");
+
+        @figure[sentPk](type=progressMeter; pos=80,50; size=100,15; anchor=c; min=0; max=2500; cornerRadius=3; text="%g (%g%%)"; label=# packets sent);
+        @statistic[sentPk](source=hostA_sentPk; record=figure(count); meterFigure=sentPk);
+        @signal[hostA_sentPk];
+        @delegatesignal[sentPk](source=hostA.udpApp[0].sentPk; target=hostA_sentPk);
+
+        @figure[rcvdPk](type=progressMeter; pos=430,50; size=100,15; anchor=c; min=0; max=2500; cornerRadius=3; text="%g (%g%%)"; label=# packets received);
+        @statistic[rcvdPk](source=hostB_rcvdPk; record=figure(count); meterFigure=rcvdPk);
+        @signal[hostB_rcvdPk];
+        @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostB_rcvdPk);
+
+        @figure[ratio](type=textMeter; pos=200,57; anchor=nw; textFormat=arrival ratio: %.2f%%);
+        @statistic[ratio](source=100*count(hostB_rcvdPk)/count(hostA_sentPk); record=figure(last); meterFigure=ratio);
+
     submodules:
         visualizer: IntegratedCanvasVisualizer {
             @display("p=580,200");
@@ -37,6 +53,9 @@ network WirelessA
         radioMedium: <mediumType> like IRadioMedium {
             @display("p=580,350");
         }
+        figureHelper: DelegateSignalConfigurator {
+            @display("p=580,425");
+        }
         hostA: <hostType> like INetworkNode {
             @display("p=50,325");
         }
@@ -45,4 +64,3 @@ network WirelessA
         }
 }
 
-//##### (marker for doxygen)
