@@ -31,8 +31,6 @@ Register_Class(GaugeFigure);
 
 static const double START_ANGLE = -M_PI/2;
 static const double END_ANGLE = M_PI;
-static const char *MODULE_NAME_PROPERTY = "moduleName";
-static const char *SIGNAL_NAME_PROPERTY = "signalName";
 static const char *LABEL_PROPERTY = "label";
 static const char *VALUE_PROPERTY = "value";
 static const char *MIN_VALUE_PROPERTY = "minValue";
@@ -40,19 +38,18 @@ static const char *MAX_VALUE_PROPERTY = "maxValue";
 static const char *TICK_SIZE_PROPERTY = "tickSize";
 static const char *COLOR_STRIP_PROPERTY = "colorStrip";
 
-const char *use_default(const char *value, const char *defValue)
+static const char *use_default(const char *value, const char *defValue)
 {
     return value != nullptr ? value : defValue;
 }
 
-GaugeFigure::GaugeFigure(const char *name) : cOvalFigure(name) {
-    getEnvir()->addLifecycleListener(this);
+GaugeFigure::GaugeFigure(const char *name) : cOvalFigure(name)
+{
 }
 
-void GaugeFigure::parse(cProperty *property) {
+void GaugeFigure::parse(cProperty *property)
+{
     cOvalFigure::parse(property);
-    signalName = property->getValue(SIGNAL_NAME_PROPERTY, 0);
-    moduleName = property->getValue(MODULE_NAME_PROPERTY, 0);
     label = use_default(property->getValue(LABEL_PROPERTY, 0), "");
     value = atof(use_default(property->getValue(VALUE_PROPERTY, 0), "0"));
     minValue = atof(use_default(property->getValue(MIN_VALUE_PROPERTY, 0), "0"));
@@ -62,10 +59,9 @@ void GaugeFigure::parse(cProperty *property) {
     addChildren();
 }
 
-bool GaugeFigure::isAllowedPropertyKey(const char *key) const {
-    if (strcmp(key, SIGNAL_NAME_PROPERTY) == 0 ||
-        strcmp(key, MODULE_NAME_PROPERTY) == 0 ||
-        strcmp(key, LABEL_PROPERTY) == 0 ||
+bool GaugeFigure::isAllowedPropertyKey(const char *key) const
+{
+    if (strcmp(key, LABEL_PROPERTY) == 0 ||
         strcmp(key, MIN_VALUE_PROPERTY) == 0 ||
         strcmp(key, MAX_VALUE_PROPERTY) == 0 ||
         strcmp(key, VALUE_PROPERTY) == 0 ||
@@ -76,14 +72,15 @@ bool GaugeFigure::isAllowedPropertyKey(const char *key) const {
     return cOvalFigure::isAllowedPropertyKey(key);
 }
 
-void GaugeFigure::addChildren() {
+void GaugeFigure::addChildren()
+{
     cFigure::Rectangle bounds = getBounds();
     cFigure::Color color("#b8afa6");
     setFilled(true);
     setFillColor(color);
     setLineWidth(bounds.width/80);
 
-    //create color sings
+    // create color strips
     cStringTokenizer signalTokenizer(colorStrip, " ,");
 
     double lastStop = 0.0;
@@ -102,44 +99,43 @@ void GaugeFigure::addChildren() {
         addColorCurve(color, M_PI - (M_PI * 1.5), M_PI - (M_PI * 1.5 * lastStop));
 
 
-    int numLines = maxValue/tickSize + 1;
-    cFigure::Point endPos;
+    int numTicks = maxValue / tickSize + 1;
 
-    for(int i = 0; i < numLines; ++i)
-    {
-        //create line
+    // create ticks
+    for(int i = 0; i < numTicks; ++i) {
+        // create line
         cLineFigure *line = new cLineFigure();
         line->setStart(cFigure::Point(bounds.x, bounds.getCenter().y));
-        endPos = bounds.getCenter();
+        cFigure::Point endPos = bounds.getCenter();
 
-        if(!(i % 3))
+        if (!(i % 3))
             endPos.x -= bounds.width / 2.3;
         else
             endPos.x -= bounds.width / 2.15;
         line->setEnd(endPos);
         line->setLineWidth(bounds.width/120);
 
-        line->rotate(i*(M_PI + M_PI/2)/(numLines-1), bounds.getCenter());
+        line->rotate(i*(M_PI + M_PI/2)/(numTicks-1), bounds.getCenter());
 
         addFigure(line);
 
-        //create numbers
+        // create numbers
         cTextFigure *number = new cTextFigure();
-        char num_str[32];
-        sprintf(num_str, "%g", minValue + i*tickSize);
-        number->setText(num_str);
+        char buf[32];
+        sprintf(buf, "%g", minValue + i*tickSize);
+        number->setText(buf);
         number->setAnchor(cFigure::ANCHOR_CENTER);
         number->setFont(cFigure::Font("", bounds.width / 15, 0));
 
         cFigure::Point textPos = cFigure::Point(bounds.x + bounds.width/9, bounds.getCenter().y);
         number->setPosition(textPos);
-        number->rotate(-i*(M_PI + M_PI/2)/(numLines-1), textPos);
+        number->rotate(-i*(M_PI + M_PI/2)/(numTicks-1), textPos);
         number->rotate(M_PI/4, textPos);
-        number->rotate(i*(M_PI + M_PI/2)/(numLines-1), bounds.getCenter());
+        number->rotate(i*(M_PI + M_PI/2)/(numTicks-1), bounds.getCenter());
         addFigure(number);
     }
 
-    //create needle
+    // create needle
     needle = new cPathFigure();
     needle->setFilled(true);
     needle->setFillColor(cFigure::Color("#dba672"));
@@ -162,7 +158,6 @@ void GaugeFigure::addChildren() {
     valueFigure->setPosition(valuePos);
     valueFigure->rotate(M_PI/4, bounds.getCenter());
     addFigure(valueFigure);
-    setValue(value);
 
     // show label
     labelFigure = new cTextFigure();
@@ -172,10 +167,12 @@ void GaugeFigure::addChildren() {
     labelFigure->setPosition(labelPos);
     labelFigure->rotate(M_PI/4, bounds.getCenter());
     addFigure(labelFigure);
+
     setLabel(label);
+    setValue(0, simTime(), value);
 }
 
-void GaugeFigure::addColorCurve(const cFigure::Color &curveColor, double startAngle, double endAngle)
+void GaugeFigure::addColorCurve(const cFigure::Color& curveColor, double startAngle, double endAngle)
 {
     cArcFigure *arc = new cArcFigure();
     double lineWidth = getBounds().width / 40;
@@ -194,58 +191,35 @@ void GaugeFigure::addColorCurve(const cFigure::Color &curveColor, double startAn
     addFigure(arc);
 }
 
-void GaugeFigure::setLabel(const char *newValue) {
-    label = newValue;
+void GaugeFigure::setLabel(const char *newLabel)
+{
+    label = newLabel;
     labelFigure->setText(label);
 }
 
-void GaugeFigure::setValue(double newValue) {
-    if (newValue < minValue) newValue = minValue;
-    if (newValue > maxValue) newValue = maxValue;
-    value = newValue;
-    double angle = (newValue - minValue)/(maxValue - minValue)*(END_ANGLE - START_ANGLE);
+void GaugeFigure::setValue(int series, simtime_t timestamp, double newValue)
+{
+    ASSERT(series == 0);
+    // Note: we currently ignore timestamp
+    if (value != newValue) {
+        value = newValue;
+        refresh();
+    }
+}
+
+void GaugeFigure::refresh()
+{
+    // adjust needle
+    double needleValue = std::max(minValue, std::min(maxValue, value));
+    double angle = (needleValue - minValue)/(maxValue - minValue)*(END_ANGLE - START_ANGLE);
     cFigure::Transform t;
     t.rotate(angle, getBounds().getCenter());
     needle->setTransform(t);
 
-    // show the value digitally, too
-    char num_str[32];
-    sprintf(num_str, "%g", value);
-    valueFigure->setText(num_str);
-}
-
-const char *GaugeFigure::getClassNameForRenderer() const {
-    return "cOvalFigure";
-} // denotes renderer of which figure class to use; override if you want to subclass a figure while reusing renderer of the base class
-
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, long l DETAILS_ARG) {
-    setValue(l);
-}
-
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l DETAILS_ARG) {
-    setValue(l);
-}
-
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, double d DETAILS_ARG) {
-    setValue(d);
-}
-
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) {
-    value++;
-    setValue(value);
-}
-
-void GaugeFigure::lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) {
-    if (eventType == LF_POST_NETWORK_SETUP || eventType == LF_PRE_NETWORK_DELETE)
-        getEnvir()->removeLifecycleListener(this);
-
-    if (eventType == LF_POST_NETWORK_SETUP) {
-        cModule *module = getSimulation()->getModuleByPath(moduleName);
-        if (!module)
-            throw cRuntimeError("GaugeFigure cannot find module '%s'", moduleName);
-
-        module->subscribe(signalName, this);
-    }
+    // update displayed number
+    char buf[32];
+    sprintf(buf, "%g", value);
+    valueFigure->setText(buf);
 }
 
 #endif // omnetpp 5
