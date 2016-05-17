@@ -164,7 +164,7 @@ module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
-        string objectCacheType = default("GridObjectCache");  // NED type of object cache
+        string objectCacheType = default("");  // NED type of object cache
         string groundType = default("");
         double temperature @unit(K) = default(293K);
         double spaceMinX @unit(m) = default(0m/0); // lower bound of x coordinates in space, NaN means determined by physical objects, NaN by default
