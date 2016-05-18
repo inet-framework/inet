@@ -106,7 +106,7 @@ void MobilityBase::setInitialPosition()
         filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
                  parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
         if (filled)
-            lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0;
+            lastPosition.z = hasPar("initialZ") ? par("initialZ").doubleValue() : 0.0;
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
     else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
