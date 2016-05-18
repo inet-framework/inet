@@ -474,8 +474,7 @@ them.
 
 <img src="wireless-step4-v2.png">
 
-The data rate is the same as before (800 kbps), even though multiple hosts are
-transmitting at the same time, because interference is still ignored.
+<! number of packets>
 
 <b>Number of packets received by Host B: 2453</b>
 
