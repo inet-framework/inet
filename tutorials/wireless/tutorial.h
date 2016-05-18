@@ -446,6 +446,11 @@ Configuration:
 
 @section s4results Results
 
+Routing tables are submodules of hosts. The routing table of Host A (10.0.0.1) can be seen in the following image.
+It tells that Host B (10.0.0.2) can be reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
+
+<img src="wireless-step4-rt.png">
+
 When the first packet sent by Host A arrives at Host R1, a black arrow appears
 between the two hosts indicating a successful physical layer exchange, as it was
 noted earlier. A few events later but still at the same simulation time, a green
@@ -462,24 +467,15 @@ arrow appears between Host A and Host B going through Host R1. This blue arrow
 represents the route the packet has taken from first entering the network layer
 at Host A until it left the network layer at Host B.
 
-Routing tables are submodules of hosts. The routing table of Host A (10.0.0.1) can be seen in the following image.
-It tells that Host B (10.0.0.2) can be reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
-
-<img src="wireless-step4-rt.png">
-
-Now the two hosts can communicate as Host R1 relays data to
-Host B. The arrows indicate a route in the network layer. There is a route
-going from Host A through R1 to B, tracing the UDP stream.
-
 Note that there are black arrows leading to Host R2 and R3 even though they don't
 transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
 
+<img src="wireless-step4-v2.png">
+
 The data rate is the same as before (800 kbps), even though multiple hosts are
 transmitting at the same time, because interference is still ignored.
-
-<img src="wireless-step4-v2.png">
 
 <b>Number of packets received by Host B: 2453</b>
 
