@@ -30,31 +30,23 @@ network WirelessA
 
         @display("bgb=650,500;bgg=100,1,grey95");
 
-        @figure[sentPk](type=progressMeter; pos=80,50; size=100,15; anchor=c; min=0; max=2500; cornerRadius=3; text="%g (%g%%)"; label=# packets sent);
-        @statistic[sentPk](source=hostA_sentPk; record=figure(count); meterFigure=sentPk);
-        @signal[hostA_sentPk];
-        @delegatesignal[sentPk](source=hostA.udpApp[0].sentPk; target=hostA_sentPk);
-
-        @figure[rcvdPk](type=progressMeter; pos=430,50; size=100,15; anchor=c; min=0; max=2500; cornerRadius=3; text="%g (%g%%)"; label=# packets received);
+        @figure[rcvdPk](type=textMeter; pos=420,20; anchor=w; font=,20; textFormat=packets received: %g);
         @statistic[rcvdPk](source=hostB_rcvdPk; record=figure(count); meterFigure=rcvdPk);
         @signal[hostB_rcvdPk];
         @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostB_rcvdPk);
 
-        @figure[ratio](type=textMeter; pos=200,57; anchor=nw; textFormat=arrival ratio: %.2f%%);
-        @statistic[ratio](source=100*count(hostB_rcvdPk)/count(hostA_sentPk); record=figure(last); meterFigure=ratio);
-
     submodules:
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=580,200");
+            @display("p=580,125");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=580,275");
+            @display("p=580,200");
         }
         radioMedium: <mediumType> like IRadioMedium {
-            @display("p=580,350");
+            @display("p=580,275");
         }
         figureHelper: DelegateSignalConfigurator {
-            @display("p=580,425");
+            @display("p=580,350");
         }
         hostA: <hostType> like INetworkNode {
             @display("p=50,325");
