@@ -55,7 +55,9 @@ class INET_API Context
     const void *l3AddressesPtr = nullptr;
     unsigned int l3AddressesLength = 0;
     bool throwOnSerializerNotFound = true;
+    bool throwOnSerializedSizeMissmatch = true;
     bool errorOccured = false;
+    bool serializeControlData = false;
 };
 
 /**

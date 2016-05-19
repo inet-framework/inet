@@ -38,6 +38,9 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     const EtherFrame *ethPkt = check_and_cast<const EtherFrame *>(pkt);
+    if(c.serializeControlData && ethPkt->getByteLength() > ethPkt->getFrameByteLength()){
+        b.writeUint64(0x55555555555555D5);
+    }
     b.writeMACAddress(ethPkt->getDest());
     b.writeMACAddress(ethPkt->getSrc());
     if (dynamic_cast<const EthernetIIFrame *>(pkt)) {
@@ -49,7 +52,7 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     }
     else if (dynamic_cast<const EtherFrameWithLLC *>(pkt)) {
         const EtherFrameWithLLC *frame = static_cast<const EtherFrameWithLLC *>(pkt);
-        b.writeUint16(frame->getFrameByteLength());
+        b.writeUint16(frame->getFrameByteLength()-ETHER_HDR_LEN-ETHER_CRC_LEN);
         b.writeByte(frame->getSsap());
         b.writeByte(frame->getDsap());
         b.writeByte(frame->getControl());
@@ -61,17 +64,17 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
             b.writeUint16(frame->getLocalcode());
             if (frame->getOrgCode() == 0) {
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), b.getRemainingSize(4));
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, ETHERTYPE, frame->getLocalcode(), b.getRemainingSize(ETHER_CRC_LEN));
             }
             else {
                 //TODO
                 cPacket *encapPkt = frame->getEncapsulatedPacket();
-                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), b.getRemainingSize(4));
+                SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, frame->getLocalcode(), b.getRemainingSize(ETHER_CRC_LEN));
             }
         }
         else if (typeid(*frame) == typeid(EtherFrameWithLLC)) {
             cPacket *encapPkt = frame->getEncapsulatedPacket();
-            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, b.getRemainingSize(4));
+            SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0, b.getRemainingSize(ETHER_CRC_LEN));
         }
         else {
             throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
@@ -86,10 +89,10 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     else {
         throw cRuntimeError("Serializer not found for '%s'", pkt->getClassName());
     }
-    if (b.getPos() + 4 < pkt->getByteLength())
-        b.fillNBytes((pkt->getByteLength() - 4) - b.getPos(), 0);
+    if (b.getPos() + ETHER_CRC_LEN < ethPkt->getFrameByteLength())
+        b.fillNBytes((ethPkt->getFrameByteLength() - ETHER_CRC_LEN) - b.getPos(), 0);
     uint32_t fcs = ethernetCRC(b._getBuf(), b.getPos());
-    b.writeUint32(fcs);
+    b.writeUint32(htonl(fcs));
 }
 
 cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
@@ -148,7 +151,7 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
     }
     etherPacket->setFrameByteLength(frameLength);
     uint32_t calculatedFcs = ethernetCRC(b._getBuf(), b.getPos());
-    uint32_t receivedFcs = b.readUint32();
+    uint32_t receivedFcs = ntohl(b.readUint32());
     EV_DEBUG << "Calculated FCS: " << calculatedFcs << ", received FCS: " << receivedFcs << endl;
     if (receivedFcs != calculatedFcs)
         etherPacket->setBitError(true);
