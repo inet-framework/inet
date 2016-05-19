@@ -883,19 +883,23 @@ so we turn it off.
 
 @section s9results Results
 
-We run the simulation in Fast mode, because the nodes move very slowly if
+It is advisable to run the simulation in Fast mode, because the nodes move very slowly if
 viewed in Normal mode.
 
-<img src="step9_2_v3.gif">
-
-We can see data exchange taking place just like in the previous step until
-R1 moves out of range of Host A at around 18 seconds, and then it stops.
-
-Traffic could be routed through R2 and R3, but that does not happen because
+It can be seen in the animation below as Host R1 leaves Host A's communication range at around 11 seconds.
+After that, the communication path is broken. Traffic could be routed through R2 and R3, but that does not happen because
 the routing tables are static and have been configured according to the
-initial positions of the nodes.
+initial positions of the nodes. The intermediate hosts are leaving behind a communication trail as they are moving.
+When the communication path breaks, the blue arrow that represents successful network layer communication paths fades away,
+because there are no more packets to reinforce it.
 
-<b>Number of packets received by Host B: 787</b>
+<img src="step9_1.gif">
+
+As mentioned before, a communication path could be established between Host A and B by routing traffic
+through Hosts R2 and R3. To reconfigure routes according to the changing topology of the network, an
+ad-hoc routing protocol is required.
+
+<b>Number of packets received by Host B: 264</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
