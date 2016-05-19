@@ -960,6 +960,10 @@ quickly fade, and the UDP traffic continues.
 
 <img src="step10_1.gif">
 
+The AODV Route-discovery messages can be seen in the following packet log:
+
+<img src="wireless-step10-packetlog.png">
+
 The number of successfully received packets at Host B is about two times
 compared to the previous step. This is because the flow of packets doesn't stop
 when Host R1 gets out of communication range of Host A. Altough the AODV
