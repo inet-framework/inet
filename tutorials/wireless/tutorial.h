@@ -1181,6 +1181,20 @@ initialized from display strings.)
 
 TODO
 
+The image below shows the bit error rate of Host R1's radio, as a function of
+time. The bit error rate is shown when free space space propagation is used, and
+when using two ray ground reflection. The interval shown here corresponds to the
+time in the simulation when Host R1 is not cut off from Host A by the wall
+anymore, and also still in communication range of Host A and B. In the interval
+that is shown, from around 5 seconds to 11 seconds, the distance between Host R1
+and Hosts A and B is increasing, which results in increase in the bit error rate
+as well. There are is no significant difference between the free space
+propagation path loss and the two ray ground reflection path loss at first. The
+two curves separate towards the end of the displayed interval. As expected, in
+the case of the two ray ground recflection model, the bit error rate is greater.
+
+<img src="wireless-step13.png">
+
 <b>Number of packets received by Host B: 243</b>
 
 @nav{step12,step14}
