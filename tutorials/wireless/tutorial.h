@@ -192,7 +192,7 @@ When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
 the transmission rate was around 800 kbps.
 
-<img src="wireless-step1-host.png">
+<img src="step1_1.gif">
 
 <b>Number of packets received by Host B: 2422</b>
 
