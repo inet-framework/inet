@@ -563,6 +563,10 @@ The image indicates that Host B only ocasionally receives packets successfully,
 most packets sent by R1 do not make it Host B's IP submodule.
 <img src="wireless-step5-seq.png" width=900px>
 
+The image below shows Host R1's and Host A's signals overlapping at Host B.
+
+<img src="wireless-step5-seq-2.png">
+
 To minimize interference, some kind of media access protocol is needed to govern
 which host can transmit and when.
 
