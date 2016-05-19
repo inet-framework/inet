@@ -827,7 +827,18 @@ Configuration:
 
 @section s8results Results
 
-<img src="wireless-step8-energy_2.png">
+The image below shows Host A's 'energyBalance' variable at the end of the simulation.
+The negative energy value signifies the consumption of energy.
+
+<img src="wireless-step8-energy-2.png">
+
+The 'residualCapacity' signal of Hosts A, R1 and B is plotted in following diagram.
+The diagram shows that Host A has the consumed the most power because it transmitted more than
+the other nodes.
+
+<! R1 should have transmitted the most because of ACKs>
+
+<img src="wireless-step8.png">
 
 <b>Number of packets received by Host B: 980</b>
 
