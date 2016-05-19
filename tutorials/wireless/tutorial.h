@@ -941,16 +941,32 @@ submodule. This change turns each node into an AODV router.
 
 @section s10results Results
 
-This time when R1 gets out of range, the routes are reconfigured and packets
-keep flowing to B. Throughput is about the same as in step 6 -- even though the
-connection is not broken here, the AODV protocol adds some overhead to the
-communication.
+Host R1 moves out of communication range or Hosts A and B. The route that was
+established through R1 is broken. Hosts R2 and R3 are at the right position to
+relay Host A's packets to Host B, and the AODV protocol reconfigures the route
+to go through R2 and R3. The UDP stream is re-established using these
+intermediate hosts to relay Host A's packets to Host B. This can be seen in the
+animation below.
 
-<img src="step10_aodv_udp.gif">
+<img src="step10_4.gif">
 
-<img src="step10.gif">
+AODV detects when a route is no longer able to pass packets. When the link is
+broken, there are no ACKs arriving at Host A, so its AODV submodule triggers the
+reconfiguration of the route. To detect possible new routes and establish one,
+there is a burst of AODV transmissions between the hosts, and a new route is
+established through Hosts R2 and R3. This detection and reconfiguration takes
+very little time. After the short AODV packet burst, the arrows displaying it
+quickly fade, and the UDP traffic continues.
 
-<b>Number of packets received by Host B: 890</b>
+<img src="step10_1.gif">
+
+The number of successfully received packets at Host B is about two times
+compared to the previous step. This is because the flow of packets doesn't stop
+when Host R1 gets out of communication range of Host A. Altough the AODV
+protocol adds come overhead, in this simulation it is not significant, the
+number received packets still increase substantially.
+
+<b>Number of packets received by Host B: 446</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
