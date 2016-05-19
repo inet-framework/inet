@@ -721,7 +721,22 @@ We turn on ACKs by setting the `useMACAcks` parameter of `CSMA`.
 
 @section s7results Results
 
+With ACKs enabled, each successfully received packet is acknowledged. The animation
+below depicts the first packet transmission from Host A, and the corresponding ACK
+from Host R1.
+
 <img src="step7_4.gif">
+
+The UDPData + ACK sequences can can be seen in the sequence chart below:
+
+<img src="wireless-step7-seq.png">
+
+When the channel utilization is low, and collisions are infrequent, using ACKs
+doesnt have a positive impact on the number of correctly received packets, as
+they increase the overhead of transmissions. However, when the channel is operating
+close to its capacity, and more collisions happen, ACKs can increase the number of
+successfuly received packets by forcing hosts to retransmit lost ones. This implements
+a kind of reliable packet transport, where lost packets are always retransmitted.
 
 <b>Number of packets received by Host B: TODO</b>
 
