@@ -1047,7 +1047,16 @@ The walls.xml file:
 
 @section s11results Results
 
-TODO
+At the beginning of the simulation, the initial route the was established in
+previous steps (A-R1-B) cannot be established, because the wall is between Host
+A and R1. The wall is completely blocking transmissions, therefore AODV
+establishes the A-R2-R1-B route. Host R2's transmission is cut when R2 moves
+behind the wall. This time, however, Host R1 is available to relay Host A's
+transmissions to Host B. A new route is formed, and traffic continues to use
+this route until Host R1 moves out of communication range. After that, the
+A-R2-R3-B route is used, as seen in the previous steps.
+
+TODO gif
 
 <img src="wireless-step11-v2.png">
 
