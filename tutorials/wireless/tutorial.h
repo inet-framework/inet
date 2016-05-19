@@ -684,10 +684,10 @@ We turn on ACKs by setting the `useMACAcks` parameter of `CSMA`.
 @section s7results Results
 
 With ACKs enabled, each successfully received packet is acknowledged. The animation
-below depicts the first packet transmission from Host A, and the corresponding ACK
-from Host R1.
+below depicts a packet transmission from Host R1, and the corresponding ACK
+from Host B.
 
-<img src="step7_4.gif">
+<img src="step7_7.gif">
 
 The UDPData + ACK sequences can can be seen in the sequence chart below:
 
