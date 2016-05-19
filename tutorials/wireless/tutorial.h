@@ -177,7 +177,7 @@ The configuration:
 
 @section s1results Results
 
-When we run the simulation, here's what happens. 
+When we run the simulation, here's what happens.
 Host A's UDPApp creates UDP packets at random intervals. These packets are sent
 down to the network interface for transmission. The network interface queues
 packets, and transmits them as soon as it can. As long as there are packets in
@@ -614,7 +614,7 @@ protocol in it. This is done by specifying `IdealRadio` for `radioType`,
 and `CSMA` for `macType`.
 
 The `CSMA` module implements Carrier Sense Multiple Access with optional
-acknowledgements and a retry mechanism. It has a number of parameters for 
+acknowledgements and a retry mechanism. It has a number of parameters for
 tweaking its operation. With the appropriate parameters, it can even
 approximate basic 802.11b ad-hoc mode operation. Parameters include:
 
@@ -622,7 +622,7 @@ approximate basic 802.11b ad-hoc mode operation. Parameters include:
 - protocol overhead: MAC header and ACK frame lengths
 - acknowledgements on/off
 - ACK timeout, maximum retry count
-- backoff parameters: strategy (exponential, linear, constant), 
+- backoff parameters: strategy (exponential, linear, constant),
   minimum/maximum contention window, backoff slot time
 - interval before transmitting ACK frame
 - hardware timing parameters such as CCA (Clear Channel Assessment) time
@@ -896,6 +896,27 @@ functions off.
 More important, we change the hosts to be instances of `AODVRouter`.
 `AODVRouter` is like  `WirelessHost`, but with an added `AODVRouting`
 submodule. This change turns each node into an AODV router.
+
+AODV stands for Ad hoc On-Demand Distance Vector. In AODV, routes are
+established as they are needed. Once established, a route is maintained
+as long as it is needed.
+
+In AODV, the network is silent until a connection is needed. At that point
+the network node that needs a connection broadcasts a request for connection.
+Other AODV nodes forward this message, and record the node that they heard
+it from, creating an explosion of temporary routes back to the needy node.
+When a node receives such a message and already has a route to the desired
+node, it sends a message backwards through a temporary route to the requesting
+node. The needy node then begins using the route that has the least number
+of hops through other nodes. Unused entries in the routing tables are recycled
+after a time.
+
+The message types defined by AODV are Route Request (RREQ), Route Reply (RREP),
+and Route Error (RERRs). We expect to see these messages at the start of the
+simulation (when an initial route needs to be established), and later when
+the topology of the network changes due to the movement of nodes.
+
+The configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless10]
