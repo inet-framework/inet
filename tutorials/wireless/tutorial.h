@@ -65,7 +65,7 @@ We'll make the model more realistic in later steps.
 
 In this step we'll use the model depicted below.
 
-<img src="wireless-step1-v2.png">
+<img src="wireless-step1.png">
 
 Here is the NED source of the network:
 
@@ -186,7 +186,7 @@ gap between the transmission of each packet.
 
 Here is an animation showing the hosts communicating:
 
-<img src="step1_3_v5.gif">
+<img src="step1_8.gif">
 
 When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
