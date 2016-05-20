@@ -88,7 +88,7 @@ void NewCsmaMac::initialize(int stage)
             address.setAddress(addressString);
 
         // subscribe for the information of the carrier sense
-//        nb->subscribe(this, NF_RADIOSTATE_CHANGED);
+// TODO:       nb->subscribe(this, NF_RADIOSTATE_CHANGED);
 
         // initalize self messages
         endSIFS = new cMessage("SIFS");
@@ -102,7 +102,7 @@ void NewCsmaMac::initialize(int stage)
 
         // state variables
         fsm.setName("NewCsmaMac State Machine");
-//        radioState = RadioState::IDLE;
+// TODO:       radioState = RadioState::IDLE;
         retryCounter = 0;
         backoffPeriod = -1;
         backoff = false;
@@ -119,7 +119,7 @@ void NewCsmaMac::initialize(int stage)
 
         // initialize watches
         WATCH(fsm);
-//        WATCH(radioState);
+// TODO:       WATCH(radioState);
         WATCH(retryCounter);
         WATCH(backoff);
 
@@ -203,6 +203,7 @@ void NewCsmaMac::handleUpperPacket(cPacket *msg)
 
 void NewCsmaMac::handleCommand(cMessage *msg)
 {
+// TODO:
 //    if (msg->getKind()==PHY_C_CONFIGURERADIO)
 //    {
 //        EV << "Passing on command " << msg->getName() << " to physical layer\n";
@@ -256,7 +257,7 @@ void NewCsmaMac::handleLowerPacket(cPacket *msg)
         delete msg;
 }
 
-//void NewCsmaMac::receiveChangeNotification(int category, const cPolymorphic *details)
+// TODO: void NewCsmaMac::receiveChangeNotification(int category, const cPolymorphic *details)
 //{
 //    Enter_Method_Silent();
 //    printNotificationBanner(category, details);
@@ -289,7 +290,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
     int frameType = frame ? frame->getType() : -1;
     int msgKind = msg->getKind();
 
-    // TODO: fix bug according to the message: [omnetpp] A possible bug in the NewCsma's FSM.
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -410,7 +410,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
                 retryCurrentTransmission();
             );
         }
-        // wait until broadcast is sent
         FSMA_State(WAITBROADCAST)
         {
             FSMA_Enter(scheduleBroadcastTimeoutPeriod(getCurrentTransmission()));
@@ -431,7 +430,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
                 resetStateVariables();
             );
         }
-        // this is not a real state
         FSMA_State(RECEIVE)
         {
             FSMA_No_Event_Transition(Immediate-Receive-Error,
@@ -566,7 +564,6 @@ void NewCsmaMac::generateBackoffPeriod()
 
 void NewCsmaMac::decreaseBackoffPeriod()
 {
-    // see spec 9.2.5.2
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
     backoffPeriod -= ((int)(elapsedBackoffTime / getSlotTime())) * getSlotTime();
     ASSERT(backoffPeriod >= 0);
@@ -692,12 +689,12 @@ void NewCsmaMac::resetStateVariables()
 
 bool NewCsmaMac::isMediumStateChange(cMessage *msg)
 {
-//    return msg == mediumStateChange || (radioState == RadioState::IDLE);
+//    TODO: return msg == mediumStateChange || (radioState == RadioState::IDLE);
 }
 
 bool NewCsmaMac::isMediumFree()
 {
-//    return radioState == RadioState::IDLE;
+//    TODO: return radioState == RadioState::IDLE;
 }
 
 bool NewCsmaMac::isBroadcast(NewCsmaFrame *frame)

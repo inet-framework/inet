@@ -31,7 +31,6 @@ namespace inet {
 namespace newcsma {
 
 // frame lengths in bits
-// XXX this is duplicate, it's already in NewCsmaFrame.msg
 const unsigned int LENGTH_ACK = 112;
 
 // time slot ST, short interframe space SIFS, distributed interframe
@@ -52,26 +51,6 @@ const int PHY_HEADER_LENGTH = 192;
 const double BITRATE_HEADER = 1E+6;
 const double BANDWIDTH = 2E+6;
 
-/**
- * IEEE 802.11b Media Access Control Layer.
- *
- * Various comments in the code refer to the Wireless LAN Medium Access
- * Control (MAC) and Physical Layer(PHY) Specifications
- * ANSI/IEEE Std 802.11, 1999 Edition (R2003)
- *
- * For more info, see the NED file.
- *
- * TODO: support fragmentation
- * TODO: CF period
- * TODO: pass radio power to upper layer
- * TODO: transmission complete notification to upper layer
- * TODO: STA TCF timer syncronization, see Chapter 11 pp 123
- *
- * Parts of the implementation have been taken over from the
- * Mobility Framework's Mac80211 module.
- *
- * @ingroup macLayer
- */
 class INET_API NewCsmaMac : public MACProtocolBase
 {
   typedef std::list<NewCsmaDataFrame*> NewCsmaDataFrameList;
@@ -79,7 +58,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
   protected:
     /**
      * @name Configuration parameters
-     * These are filled in during the initialization phase and not supposed to change afterwards.
      */
     //@{
     /** MAC address */
@@ -95,11 +73,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * Maximum number of transmissions for a message.
      * This includes the initial transmission and all subsequent retransmissions.
      * Thus a value 0 is invalid and a value 1 means no retransmissions.
-     * See: dot11ShortRetryLimit on page 484.
-     *   'This attribute shall indicate the maximum number of
-     *    transmission attempts of a frame, that shall be made before a
-     *    failure condition is indicated. The default value of this
-     *    attribute shall be 7'
      */
     int transmissionLimit;
 
@@ -116,8 +89,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * Various state information checked and modified according to the state machine.
      */
     //@{
-    // don't forget to keep synchronized the C++ enum and the runtime enum definition
-    /** the 80211 MAC state machine */
     enum State {
         IDLE,
         DEFER,
@@ -139,8 +110,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
     simtime_t backoffPeriod;
 
     /**
-     * Number of frame retransmission attempts, this is a simpification of
-     * SLRC and SSRC, see 9.2.4 in the spec
+     * Number of frame retransmission attempts.
      */
     int retryCounter;
 
@@ -219,7 +189,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
      */
     //@{
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    //virtual void receiveChangeNotification(int category, const cPolymorphic * details);
+    // TODO: virtual void receiveChangeNotification(int category, const cPolymorphic * details);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
     virtual void handleCommand(cMessage *msg);
