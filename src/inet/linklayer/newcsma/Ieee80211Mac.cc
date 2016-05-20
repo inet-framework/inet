@@ -26,27 +26,6 @@ namespace newcsma {
 
 Define_Module(Ieee80211Mac);
 
-// don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(Ieee80211Mac,
-   (Ieee80211Mac::IDLE,
-    Ieee80211Mac::DEFER,
-    Ieee80211Mac::WAITDIFS,
-    Ieee80211Mac::BACKOFF,
-    Ieee80211Mac::WAITACK,
-    Ieee80211Mac::WAITBROADCAST,
-    Ieee80211Mac::WAITSIFS,
-    Ieee80211Mac::RECEIVE));
-
-//// don't forget to keep synchronized the C++ enum and the runtime enum definition
-//Register_Enum(RadioState,
-//   (RadioState::IDLE,
-//    RadioState::RECV,
-//    RadioState::TRANSMIT,
-//    RadioState::SLEEP));
-
-/****************************************************************
- * Construction functions.
- */
 Ieee80211Mac::Ieee80211Mac()
 {
     endSIFS = NULL;
