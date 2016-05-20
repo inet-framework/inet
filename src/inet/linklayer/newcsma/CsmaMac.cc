@@ -397,6 +397,7 @@ void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value
 CsmaDataFrame *CsmaMac::encapsulate(cPacket *msg)
 {
     CsmaDataFrame *frame = new CsmaDataFrame(msg->getName());
+    frame->setByteLength(32);
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
@@ -574,6 +575,7 @@ CsmaAckFrame *CsmaMac::buildACKFrame(CsmaDataFrame *frameToACK)
 {
     CsmaAckFrame *frame = new CsmaAckFrame("ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
+    frame->setByteLength(16);
     return frame;
 }
 
