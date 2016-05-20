@@ -337,9 +337,6 @@ class INET_API NewCsmaMac : public WirelessMacBase
      */
     virtual double computeFrameDuration(NewCsmaFrame *msg);
     virtual double computeFrameDuration(int bits, double bitrate);
-
-    /** @brief Logs all state information */
-    virtual void logState();
     //@}
 };
 

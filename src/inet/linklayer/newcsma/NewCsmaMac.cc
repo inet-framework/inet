@@ -306,7 +306,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
     NewCsmaFrame *frame = dynamic_cast<NewCsmaFrame*>(msg);
     int frameType = frame ? frame->getType() : -1;
     int msgKind = msg->getKind();
-    logState();
 
     // TODO: fix bug according to the message: [omnetpp] A possible bug in the NewCsma's FSM.
     FSMA_Switch(fsm)
@@ -479,8 +478,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
             );
         }
     }
-
-    logState();
 }
 
 /****************************************************************
@@ -754,13 +751,6 @@ double NewCsmaMac::computeFrameDuration(NewCsmaFrame *msg)
 double NewCsmaMac::computeFrameDuration(int bits, double bitrate)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
-}
-
-void NewCsmaMac::logState()
-{
-    EV  << "state information: state = " << fsm.getStateName()
-        << ", backoff = " << backoff << ", backoffPeriod = " << backoffPeriod;
-//        << ", retryCounter = " << retryCounter << ", radioState = " << radioState
 }
 
 }
