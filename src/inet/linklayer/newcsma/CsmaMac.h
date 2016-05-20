@@ -46,7 +46,7 @@ class INET_API CsmaMac : public MACProtocolBase
     /** MAC address */
     MACAddress address;
 
-    /** The bitrate is used to send data frames; be sure to use a valid 802.11 bitrate */
+    /** The bitrate is used to send data frames */
     double bitrate = NaN;
 
     /** Maximum number of frames in the queue; should be set in the omnetpp.ini */

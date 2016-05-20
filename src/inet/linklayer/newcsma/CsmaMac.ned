@@ -23,17 +23,17 @@ import inet.linklayer.contract.IMACProtocol;
 simple CsmaMac extends MACProtocolBase like IMACProtocol
 {
     parameters:
-        string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
+        string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string queueModule = default("");    // name of optional external queue module
-        int maxQueueSize = default(10); // max queue length in frames; only used if queueModule==""
+        string queueModule = default(""); // name of optional external queue module
+        int maxQueueSize = default(10); // maximum queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
         int mtu = default(1500);
-        int cwMin = default(31); // contention window for normal data frames
-        int cwMax = default(1023); // contention window for normal data frames
-        int retryLimit = default(7); // maximum number of retries per message, -1 means default
+        int cwMin = default(31); // minimum contention window
+        int cwMax = default(1023); // maximum contention window
+        int retryLimit = default(7); // maximum number of retries per message
         @class(CsmaMac);
         @signal[NF_LINK_BREAK](type=CsmaFrame);
 }
