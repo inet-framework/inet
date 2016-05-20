@@ -23,26 +23,26 @@ class noncobject MACAddress;
 
 namespace inet::newcsma;
 
-enum Ieee80211FrameType
+enum NewCsmaFrameType
 {
     ST_ACK = 0x1d;
     ST_DATA = 0x20;
 }
 
-packet Ieee80211Frame
+packet NewCsmaFrame
 {
     byteLength = 14;
-    short type enum(Ieee80211FrameType);
+    short type enum(NewCsmaFrameType);
     bool retry;
     MACAddress receiverAddress;
 }
 
-packet Ieee80211ACKFrame extends Ieee80211Frame
+packet NewCsmaACKFrame extends NewCsmaFrame
 {
     type = ST_ACK;
 }
 
-packet Ieee80211DataFrame extends Ieee80211Frame
+packet NewCsmaDataFrame extends NewCsmaFrame
 {
     type = ST_DATA;
     byteLength = 34;

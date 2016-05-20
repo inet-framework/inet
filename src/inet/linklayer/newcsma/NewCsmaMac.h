@@ -24,7 +24,7 @@
 #include <list>
 #include "WirelessMacBase.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "Ieee80211Frame_m.h"
+#include "NewCsmaFrame_m.h"
 #include "inet/common/FSMA.h"
 
 namespace inet {
@@ -32,7 +32,7 @@ namespace inet {
 namespace newcsma {
 
 // frame lengths in bits
-// XXX this is duplicate, it's already in Ieee80211Frame.msg
+// XXX this is duplicate, it's already in NewCsmaFrame.msg
 const unsigned int LENGTH_ACK = 112;
 
 // time slot ST, short interframe space SIFS, distributed interframe
@@ -73,9 +73,9 @@ const double BANDWIDTH = 2E+6;
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211Mac : public WirelessMacBase
+class INET_API NewCsmaMac : public WirelessMacBase
 {
-  typedef std::list<Ieee80211DataFrame*> Ieee80211DataFrameList;
+  typedef std::list<NewCsmaDataFrame*> NewCsmaDataFrameList;
 
   protected:
     /**
@@ -113,7 +113,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
   public:
     /**
-     * @name Ieee80211Mac state variables
+     * @name NewCsmaMac state variables
      * Various state information checked and modified according to the state machine.
      */
     //@{
@@ -149,7 +149,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 //    RadioState::State radioState;
 
     /** Messages received from upper layer and to be transmitted later */
-    Ieee80211DataFrameList transmissionQueue;
+    NewCsmaDataFrameList transmissionQueue;
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule;
@@ -198,8 +198,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      * @name Construction functions
      */
     //@{
-    Ieee80211Mac();
-    virtual ~Ieee80211Mac();
+    NewCsmaMac();
+    virtual ~NewCsmaMac();
     //@}
 
   protected:
@@ -248,7 +248,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual simtime_t getSIFS();
     virtual simtime_t getSlotTime();
     virtual simtime_t getDIFS();
-    virtual simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
+    virtual simtime_t computeBackoffPeriod(NewCsmaFrame *msg, int r);
     //@}
 
   protected:
@@ -257,13 +257,13 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
-    virtual void scheduleSIFSPeriod(Ieee80211Frame *frame);
+    virtual void scheduleSIFSPeriod(NewCsmaFrame *frame);
 
     virtual void scheduleDIFSPeriod();
     virtual void cancelDIFSPeriod();
 
-    virtual void scheduleDataTimeoutPeriod(Ieee80211DataFrame *frame);
-    virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataFrame *frame);
+    virtual void scheduleDataTimeoutPeriod(NewCsmaDataFrame *frame);
+    virtual void scheduleBroadcastTimeoutPeriod(NewCsmaDataFrame *frame);
     virtual void cancelTimeoutPeriod();
 
     /** @brief Generates a new backoff period based on the contention window. */
@@ -281,9 +281,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      */
     //@{
     virtual void sendACKFrameOnEndSIFS();
-    virtual void sendACKFrame(Ieee80211DataFrame *frame);
-    virtual void sendDataFrame(Ieee80211DataFrame *frameToSend);
-    virtual void sendBroadcastFrame(Ieee80211DataFrame *frameToSend);
+    virtual void sendACKFrame(NewCsmaDataFrame *frame);
+    virtual void sendDataFrame(NewCsmaDataFrame *frameToSend);
+    virtual void sendBroadcastFrame(NewCsmaDataFrame *frameToSend);
     //@}
 
   protected:
@@ -291,9 +291,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      * @name Frame builder functions
      */
     //@{
-    virtual Ieee80211DataFrame *buildDataFrame(Ieee80211DataFrame *frameToSend);
-    virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataFrame *frameToACK);
-    virtual Ieee80211DataFrame *buildBroadcastFrame(Ieee80211DataFrame *frameToSend);
+    virtual NewCsmaDataFrame *buildDataFrame(NewCsmaDataFrame *frameToSend);
+    virtual NewCsmaACKFrame *buildACKFrame(NewCsmaDataFrame *frameToACK);
+    virtual NewCsmaDataFrame *buildBroadcastFrame(NewCsmaDataFrame *frameToSend);
     //@}
 
   protected:
@@ -309,7 +309,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void sendDownPendingRadioConfigMsg();
 
     /** @brief Returns the current frame being transmitted */
-    virtual Ieee80211DataFrame *getCurrentTransmission();
+    virtual NewCsmaDataFrame *getCurrentTransmission();
 
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     virtual void resetStateVariables();
@@ -322,10 +322,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual bool isMediumFree();
 
     /** @brief Returns true if message is a broadcast message */
-    virtual bool isBroadcast(Ieee80211Frame *msg);
+    virtual bool isBroadcast(NewCsmaFrame *msg);
 
     /** @brief Returns true if message destination address is ours */
-    virtual bool isForUs(Ieee80211Frame *msg);
+    virtual bool isForUs(NewCsmaFrame *msg);
 
     /** @brief Deletes frame at the front of queue. */
     virtual void popTransmissionQueue();
@@ -335,7 +335,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      * over the physical channel. 'bits' should be the total length of the MAC frame
      * in bits, but excluding the physical layer framing (preamble etc.)
      */
-    virtual double computeFrameDuration(Ieee80211Frame *msg);
+    virtual double computeFrameDuration(NewCsmaFrame *msg);
     virtual double computeFrameDuration(int bits, double bitrate);
 
     /** @brief Logs all state information */

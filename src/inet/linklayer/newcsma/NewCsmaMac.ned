@@ -17,7 +17,7 @@
 
 package inet.linklayer.newcsma;
 
-simple Ieee80211Mac
+simple NewCsmaMac
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -26,7 +26,6 @@ simple Ieee80211Mac
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize; // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
-        int rtsThresholdBytes @unit("B") = default(2346B); // longer messages will be sent using RTS/CTS
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
