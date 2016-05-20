@@ -21,7 +21,7 @@ cplusplus {{
 
 class noncobject MACAddress;
 
-namespace inet::newcsma;
+namespace inet;
 
 enum NewCsmaFrameType
 {

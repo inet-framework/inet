@@ -26,8 +26,6 @@
 
 namespace inet {
 
-namespace newcsma {
-
 using namespace inet::physicallayer;
 
 // frame lengths in bits
@@ -188,6 +186,9 @@ class INET_API NewCsmaMac : public MACProtocolBase
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFSM(cMessage *msg);
+
+    virtual NewCsmaDataFrame *encapsulate(cPacket *msg);
+    virtual cPacket *decapsulate(NewCsmaDataFrame *frame);
     //@}
 
   protected:
@@ -290,8 +291,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
     virtual double computeFrameDuration(int bits, double bitrate);
     //@}
 };
-
-} // namespace newcsma
 
 } // namespace inet
 

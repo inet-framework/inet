@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/newcsma/NewCsmaMac.h"
 
 namespace inet {
-
-namespace newcsma {
 
 Define_Module(NewCsmaMac);
 
@@ -70,9 +70,12 @@ void NewCsmaMac::initialize(int stage)
         }
         else
             address.setAddress(addressString);
+        registerInterface();
 
         // subscribe for the information of the carrier sense
-        dynamic_cast<cModule *>(radio)->subscribe(IRadio::receptionStateChangedSignal, this);
+        cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
+        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
 
         // initalize self messages
         endSIFS = new cMessage("SIFS");
@@ -170,16 +173,13 @@ void NewCsmaMac::handleUpperPacket(cPacket *msg)
         delete msg;
         return;
     }
-    NewCsmaDataFrame *frame = check_and_cast<NewCsmaDataFrame *>(msg);
+    NewCsmaDataFrame *frame = encapsulate(msg);
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
-
     ASSERT(!frame->getReceiverAddress().isUnspecified());
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(address);
-
     transmissionQueue.push_back(frame);
-
     handleWithFSM(frame);
 }
 
@@ -201,14 +201,6 @@ void NewCsmaMac::handleLowerPacket(cPacket *msg)
     // if we are the owner then we did not send this message up
     if (msg->getOwner() == this)
         delete msg;
-}
-
-void NewCsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
-{
-    Enter_Method_Silent();
-    if (signalID == IRadio::receptionStateChangedSignal) {
-        handleWithFSM(mediumStateChange);
-    }
 }
 
 /**
@@ -394,6 +386,40 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
             );
         }
     }
+}
+
+void NewCsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+{
+    Enter_Method_Silent();
+    if (signalID == IRadio::receptionStateChangedSignal) {
+        handleWithFSM(mediumStateChange);
+    }
+}
+
+NewCsmaDataFrame *NewCsmaMac::encapsulate(cPacket *msg)
+{
+    NewCsmaDataFrame *frame = new NewCsmaDataFrame(msg->getName());
+
+    // copy receiver address from the control info (sender address will be set in MAC)
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    frame->setReceiverAddress(ctrl->getDest());
+    delete ctrl;
+
+    frame->encapsulate(msg);
+    return frame;
+}
+
+cPacket *NewCsmaMac::decapsulate(NewCsmaDataFrame *frame)
+{
+    cPacket *payload = frame->decapsulate();
+
+    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+    ctrl->setSrc(frame->getTransmitterAddress());
+    ctrl->setDest(frame->getReceiverAddress());
+    payload->setControlInfo(ctrl);
+
+    delete frame;
+    return payload;
 }
 
 /****************************************************************
@@ -660,7 +686,5 @@ double NewCsmaMac::computeFrameDuration(int bits, double bitrate)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }
-
-} // namespace newcsma
 
 } // namespace inet
