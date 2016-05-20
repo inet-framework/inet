@@ -23,27 +23,18 @@ class noncobject MACAddress;
 
 namespace inet;
 
-enum CsmaFrameType
-{
-    ST_ACK = 0x1d;
-    ST_DATA = 0x20;
-}
-
 packet CsmaFrame
 {
     byteLength = 14;
-    short type enum(CsmaFrameType);
     MACAddress receiverAddress;
 }
 
 packet CsmaAckFrame extends CsmaFrame
 {
-    type = ST_ACK;
 }
 
 packet CsmaDataFrame extends CsmaFrame
 {
-    type = ST_DATA;
     byteLength = 34;
     MACAddress transmitterAddress;
 }

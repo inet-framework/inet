@@ -212,7 +212,6 @@ void CsmaMac::handleWithFSM(cMessage *msg)
     }
 
     CsmaFrame *frame = dynamic_cast<CsmaFrame*>(msg);
-    int frameType = frame ? frame->getType() : -1;
 
     FSMA_Switch(fsm)
     {
@@ -314,7 +313,7 @@ void CsmaMac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleDataTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-ACK,
-                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK,
+                                  isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaAckFrame *>(frame),
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
