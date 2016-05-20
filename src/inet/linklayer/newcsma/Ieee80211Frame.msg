@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
-// Copyright (C) 2001 Eric Wu and Steve Woon, Monash University, Melbourne, Australia
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,6 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
 
 cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
