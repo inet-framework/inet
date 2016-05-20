@@ -57,18 +57,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 {
   typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
 
-  /**
-   * This is used to populate fragments and identify duplicated messages. See spec 9.2.9.
-   */
-  struct Ieee80211ASFTuple
-  {
-      MACAddress address;
-      int sequenceNumber;
-      int fragmentNumber;
-  };
-
-  typedef std::list<Ieee80211ASFTuple*> Ieee80211ASFTupleList;
-
   protected:
     /**
      * @name Configuration parameters
@@ -177,13 +165,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** Messages received from upper layer and to be transmitted later */
     Ieee80211DataOrMgmtFrameList transmissionQueue;
-
-    /**
-     * A list of last sender, sequence and fragment number tuples to identify
-     * duplicates, see spec 9.2.9.
-     * TODO: this is not yet used
-     */
-    Ieee80211ASFTupleList asfTuplesList;
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule;
