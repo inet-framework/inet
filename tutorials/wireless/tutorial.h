@@ -1124,10 +1124,11 @@ The connection is re-established when Host R1 moves out from behind the wall.
 Then it gets out of communication range, and the new route goes through Hosts R2
 and R3.
 
-In this model, there are multiple physical effects simulated. There is a more
-realistic radio, radio signal attenuation, and background noise. The blue
-circles representing communication range is an approximation. There is no
-distinct distance where receptions fail, as in the case of 'IdealRadio'.
+In this model, there are more physical effects simulated than in previous steps.
+There is radio signal attenuation, background noise and a more realistic radio
+model. The blue circles representing communication range is an approximation.
+There is no distinct distance where receptions fail, as in the case of
+'IdealRadio'.
 
 <b>Number of packets received by Host B: 285</b>
 
