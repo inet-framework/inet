@@ -290,7 +290,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
      */
     //@{
     virtual NewCsmaDataFrame *buildDataFrame(NewCsmaDataFrame *frameToSend);
-    virtual NewCsmaACKFrame *buildACKFrame(NewCsmaDataFrame *frameToACK);
+    virtual NewCsmaAckFrame *buildACKFrame(NewCsmaDataFrame *frameToACK);
     virtual NewCsmaDataFrame *buildBroadcastFrame(NewCsmaDataFrame *frameToSend);
     //@}
 

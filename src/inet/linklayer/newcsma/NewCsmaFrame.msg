@@ -37,7 +37,7 @@ packet NewCsmaFrame
     MACAddress receiverAddress;
 }
 
-packet NewCsmaACKFrame extends NewCsmaFrame
+packet NewCsmaAckFrame extends NewCsmaFrame
 {
     type = ST_ACK;
 }

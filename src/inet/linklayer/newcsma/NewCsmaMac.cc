@@ -623,9 +623,9 @@ NewCsmaDataFrame *NewCsmaMac::buildDataFrame(NewCsmaDataFrame *frameToSend)
     return frame;
 }
 
-NewCsmaACKFrame *NewCsmaMac::buildACKFrame(NewCsmaDataFrame *frameToACK)
+NewCsmaAckFrame *NewCsmaMac::buildACKFrame(NewCsmaDataFrame *frameToACK)
 {
-    NewCsmaACKFrame *frame = new NewCsmaACKFrame("wlan-ack");
+    NewCsmaAckFrame *frame = new NewCsmaAckFrame("wlan-ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
     return frame;
 }
