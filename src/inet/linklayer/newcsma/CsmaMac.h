@@ -47,6 +47,10 @@ class INET_API CsmaMac : public MACProtocolBase
     /** The header size of frames */
     int headerLength = -1;
 
+    simtime_t slotTime;
+    simtime_t sifsTime;
+    simtime_t difsTime;
+
     /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize = -1;
 
@@ -183,9 +187,9 @@ class INET_API CsmaMac : public MACProtocolBase
      * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
      */
     //@{
-    virtual simtime_t getSifs();
     virtual simtime_t getSlotTime();
-    virtual simtime_t getDifs();
+    virtual simtime_t getSifsTime();
+    virtual simtime_t getDifsTime();
     virtual simtime_t computeBackoffPeriod(int r);
     //@}
 

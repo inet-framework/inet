@@ -45,6 +45,9 @@ void CsmaMac::initialize(int stage)
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
         headerLength = par("headerLength");
+        slotTime = par("slotTime");
+        sifsTime = par("sifsTime");
+        difsTime = par("difsTime");
         cwMin = par("cwMin");
         cwMax = par("cwMax");
         retryLimit = par("retryLimit");
@@ -411,19 +414,19 @@ cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
 /****************************************************************
  * Timing functions.
  */
-simtime_t CsmaMac::getSifs()
-{
-    return 10E-6;
-}
-
 simtime_t CsmaMac::getSlotTime()
 {
-    return 20E-6;
+    return slotTime;
 }
 
-simtime_t CsmaMac::getDifs()
+simtime_t CsmaMac::getSifsTime()
 {
-    return getSifs() + 2 * getSlotTime();
+    return sifsTime;
+}
+
+simtime_t CsmaMac::getDifsTime()
+{
+    return difsTime;
 }
 
 simtime_t CsmaMac::computeBackoffPeriod(int r)
@@ -445,13 +448,13 @@ void CsmaMac::scheduleSifsPeriod(CsmaFrame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSifs->setContextPointer(frame->dup());
-    scheduleAt(simTime() + getSifs(), endSifs);
+    scheduleAt(simTime() + getSifsTime(), endSifs);
 }
 
 void CsmaMac::scheduleDifsPeriod()
 {
     EV << "scheduling DIFS period\n";
-    scheduleAt(simTime() + getDifs(), endDifs);
+    scheduleAt(simTime() + getDifsTime(), endDifs);
 }
 
 void CsmaMac::cancelDifsPeriod()
@@ -464,7 +467,7 @@ void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifs() + computeFrameDuration(headerLength * 8, bitrate) + maxPropagationDelay * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifsTime() + computeFrameDuration(headerLength * 8, bitrate) + maxPropagationDelay * 2, endTimeout);
 }
 
 void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
