@@ -29,13 +29,7 @@ namespace inet {
 using namespace inet::physicallayer;
 
 // frame lengths in bits
-const unsigned int LENGTH_ACK = 112;
-
-const_simtime_t MAX_PROPAGATION_DELAY = 2E-6;  // 300 meters at the speed of light
-
-const int PHY_HEADER_LENGTH = 192;
-const double BITRATE_HEADER = 1E+6;
-const double BANDWIDTH = 2E+6;
+#define LENGTH_ACK (16 * 8)
 
 class INET_API CsmaMac : public MACProtocolBase
 {
@@ -195,7 +189,7 @@ class INET_API CsmaMac : public MACProtocolBase
     virtual simtime_t getSifs();
     virtual simtime_t getSlotTime();
     virtual simtime_t getDifs();
-    virtual simtime_t computeBackoffPeriod(CsmaFrame *msg, int r);
+    virtual simtime_t computeBackoffPeriod(int r);
     //@}
 
   protected:
@@ -287,4 +281,3 @@ class INET_API CsmaMac : public MACProtocolBase
 } // namespace inet
 
 #endif // ifndef __INET_CSMAMAC_H
-

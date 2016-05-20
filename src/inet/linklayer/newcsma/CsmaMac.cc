@@ -158,7 +158,6 @@ void CsmaMac::initializeQueueModule()
 void CsmaMac::handleSelfMessage(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
-
     handleWithFsm(msg);
 }
 
@@ -185,7 +184,6 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
     EV << "received message from lower layer: " << msg << endl;
 
     CsmaFrame *frame = check_and_cast<CsmaFrame *>(msg);
-
     EV << "Self address: " << address
        << ", receiver address: " << frame->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
@@ -207,9 +205,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
         return;
     }
-
     CsmaFrame *frame = dynamic_cast<CsmaFrame*>(msg);
-
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -438,12 +434,11 @@ simtime_t CsmaMac::getDifs()
     return getSifs() + 2 * getSlotTime();
 }
 
-simtime_t CsmaMac::computeBackoffPeriod(CsmaFrame *msg, int r)
+simtime_t CsmaMac::computeBackoffPeriod(int r)
 {
-    int cw;
-    EV << "generating backoff slot number for retry: " << r << endl;
     ASSERT(0 <= r && r < retryLimit);
-    cw = (cwMin + 1) * (1 << r) - 1;
+    EV << "generating backoff slot number for retry: " << r << endl;
+    int cw = (cwMin + 1) * (1 << r) - 1;
     if (cw > cwMax)
         cw = cwMax;
     int c = intrand(cw + 1);
@@ -476,7 +471,8 @@ void CsmaMac::cancelDifsPeriod()
 void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifs() + computeFrameDuration(LENGTH_ACK, bitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifs() + computeFrameDuration(LENGTH_ACK, bitrate) + maxPropagationDelay * 2, endTimeout);
 }
 
 void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
@@ -487,7 +483,7 @@ void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
 
 void CsmaMac::cancelTimeoutPeriod()
 {
-    EV << "cancelling timeout period\n";
+    EV << "canceling timeout period\n";
     cancelEvent(endTimeout);
 }
 
@@ -503,7 +499,7 @@ bool CsmaMac::isInvalidBackoffPeriod()
 
 void CsmaMac::generateBackoffPeriod()
 {
-    backoffPeriod = computeBackoffPeriod(getCurrentTransmission(), retryCounter);
+    backoffPeriod = computeBackoffPeriod(retryCounter);
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period set to " << backoffPeriod << endl;
 }
@@ -524,7 +520,7 @@ void CsmaMac::scheduleBackoffPeriod()
 
 void CsmaMac::cancelBackoffPeriod()
 {
-    EV << "cancelling Backoff period\n";
+    EV << "canceling backoff period\n";
     cancelEvent(endBackoff);
 }
 
@@ -572,7 +568,7 @@ CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
 {
     CsmaAckFrame *frame = new CsmaAckFrame("Ack");
     frame->setReceiverAddress(frameToAck->getTransmitterAddress());
-    frame->setByteLength(16);
+    frame->setByteLength(LENGTH_ACK / 8);
     return frame;
 }
 
@@ -600,9 +596,9 @@ void CsmaMac::giveUpCurrentTransmission()
 void CsmaMac::retryCurrentTransmission()
 {
     ASSERT(retryCounter < retryLimit - 1);
+    backoff = true;
     retryCounter++;
     numRetry++;
-    backoff = true;
     generateBackoffPeriod();
 }
 
@@ -615,11 +611,7 @@ void CsmaMac::resetStateVariables()
 {
     backoffPeriod = 0;
     retryCounter = 0;
-
-    if (!transmissionQueue.empty())
-        backoff = true;
-    else
-        backoff = false;
+    backoff = !transmissionQueue.empty();
 }
 
 bool CsmaMac::isMediumStateChange(cMessage *msg)
@@ -648,7 +640,6 @@ void CsmaMac::popTransmissionQueue()
     CsmaFrame *temp = transmissionQueue.front();
     transmissionQueue.pop_front();
     delete temp;
-
     if (queueModule) {
         // tell queue module that we've become idle
         EV << "requesting another frame from queue module\n";
@@ -663,7 +654,9 @@ double CsmaMac::computeFrameDuration(CsmaFrame *msg)
 
 double CsmaMac::computeFrameDuration(int bits, double bitrate)
 {
-    return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
+    int phyHeaderLength = 192;
+    double phyHeaderBitrate = 1E+6;
+    return bits / bitrate + phyHeaderLength / phyHeaderBitrate;
 }
 
 } // namespace inet
