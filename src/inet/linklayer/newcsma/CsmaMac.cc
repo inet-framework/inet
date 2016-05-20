@@ -381,7 +381,7 @@ void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value
 CsmaDataFrame *CsmaMac::encapsulate(cPacket *msg)
 {
     CsmaDataFrame *frame = new CsmaDataFrame(msg->getName());
-    frame->setByteLength(32);
+    frame->setByteLength(headerLength);
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
@@ -463,7 +463,7 @@ void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifs() + computeFrameDuration(LENGTH_ACK, bitrate) + maxPropagationDelay * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifs() + computeFrameDuration(headerLength * 8, bitrate) + maxPropagationDelay * 2, endTimeout);
 }
 
 void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
@@ -559,7 +559,7 @@ CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
 {
     CsmaAckFrame *frame = new CsmaAckFrame("CsmaAck");
     frame->setReceiverAddress(frameToAck->getTransmitterAddress());
-    frame->setByteLength(LENGTH_ACK / 8);
+    frame->setByteLength(headerLength);
     return frame;
 }
 

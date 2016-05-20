@@ -28,9 +28,6 @@ namespace inet {
 
 using namespace inet::physicallayer;
 
-// frame lengths in bits
-#define LENGTH_ACK (16 * 8)
-
 class INET_API CsmaMac : public MACProtocolBase
 {
   typedef std::list<CsmaDataFrame*> CsmaDataFrameList;
@@ -48,6 +45,9 @@ class INET_API CsmaMac : public MACProtocolBase
 
     /** The bitrate is used to send data frames */
     double bitrate = NaN;
+
+    /** The header size of frames */
+    int headerLength = -1;
 
     /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize = -1;
