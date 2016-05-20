@@ -33,7 +33,6 @@ packet CsmaFrame
 {
     byteLength = 14;
     short type enum(CsmaFrameType);
-    bool retry;
     MACAddress receiverAddress;
 }
 

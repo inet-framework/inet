@@ -617,7 +617,6 @@ void CsmaMac::giveUpCurrentTransmission()
 void CsmaMac::retryCurrentTransmission()
 {
     ASSERT(retryCounter < retryLimit - 1);
-    getCurrentTransmission()->setRetry(true);
     retryCounter++;
     numRetry++;
     backoff = true;
@@ -636,7 +635,6 @@ void CsmaMac::resetStateVariables()
 
     if (!transmissionQueue.empty()) {
         backoff = true;
-        getCurrentTransmission()->setRetry(false);
     }
     else {
         backoff = false;
