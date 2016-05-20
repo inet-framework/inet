@@ -457,7 +457,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(RECEIVE)
         {
             FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
+                                     isLowerMsg(msg) && frame->hasBitError(),
                                      IDLE,
                 numCollision++;
                 resetStateVariables();

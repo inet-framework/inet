@@ -31,12 +31,6 @@ namespace inet {
 
 namespace newcsma {
 
-// XXX these are taken over from Consts80211.h
-// the phy has recognized a bit error in the packet
-#define BITERROR -1
-// packet lost due to collision
-#define COLLISION 9
-
 // frame lengths in bits
 // XXX this is duplicate, it's already in Ieee80211Frame.msg
 const unsigned int LENGTH_ACK = 112;
