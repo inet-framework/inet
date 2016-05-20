@@ -284,7 +284,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     }
                     break;
                 }
-                case SCTP_I_CLOSED: {
+                case SCTP_I_CLOSED:
+                case SCTP_I_ABORT:
+                case SCTP_I_PEER_CLOSED: {
                     break;
                 }
                 default: printf("Msg kind %d not implemented\n", msg->getKind());
@@ -323,6 +325,7 @@ void PacketDrillApp::scheduleEvent()
     PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
     event->setEventNumber(eventCounter);
     adjustTimes(event);
+    cancelEvent(eventTimer);
     eventTimer->setContextPointer(event);
     scheduleAt(event->getEventTime(), eventTimer);
 }
@@ -352,45 +355,53 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
             if (protocol == IP_PROT_SCTP) {
                 SCTPMessage* sctp = check_and_cast<SCTPMessage*>(ip->decapsulate());
                 sctp->setTag(peerVTag);
-                if (((SCTPChunk*) sctp->peekFirstChunk())->getChunkType() == INIT) {
-                    SCTPInitChunk* init = check_and_cast<SCTPInitChunk*>(sctp->getChunks(0));
-                    peerInStreams = init->getNoInStreams();
-                    peerOutStreams = init->getNoOutStreams();
-                    initPeerTsn = init->getInitTSN();
-                    localVTag = init->getInitTag();
-                    peerCumTsn = initPeerTsn - 1;
-                }
-                if (((SCTPChunk*) sctp->peekFirstChunk())->getChunkType() == INIT_ACK) {
-                    SCTPInitAckChunk* initack = check_and_cast<SCTPInitAckChunk*>(sctp->getChunks(0));
-                    localVTag = initack->getInitTag();
-                    initPeerTsn = initack->getInitTSN();
-                    peerCumTsn = initPeerTsn - 1;
-                }
-                if (((SCTPChunk*) sctp->peekFirstChunk())->getChunkType() == COOKIE_ECHO) {
-                    SCTPCookieEchoChunk* cookieEcho = check_and_cast<SCTPCookieEchoChunk*>(sctp->getChunks(0));
-                    int tempLength = cookieEcho->getByteLength();
-                    cookieEcho->setStateCookie(peerCookie);
-                    cookieEcho->setByteLength(SCTP_COOKIE_ACK_LENGTH + peerCookieLength);
-                    sctp->setByteLength(sctp->getByteLength() - tempLength + cookieEcho->getByteLength());
-                }
-                if (((SCTPChunk*) sctp->peekFirstChunk())->getChunkType() == SACK)
-                {
-                    SCTPSackChunk* sack = check_and_cast<SCTPSackChunk*>(sctp->getChunks(0));
-                    sack->setCumTsnAck(sack->getCumTsnAck() + initLocalTsn);
-                    if (sack->getNumGaps() > 0) {
-                        for (int i = 0; i < sack->getNumGaps(); i++) {
-                            sack->setGapStart(i, sack->getGapStart(i) + initLocalTsn);
-                            sack->setGapStop(i, sack->getGapStop(i) + initLocalTsn);
+                int32 noChunks = sctp->getChunksArraySize();
+                for (int32 cc = 0; cc < noChunks; cc++) {
+                    SCTPChunk *chunk = const_cast<SCTPChunk *>(check_and_cast<const SCTPChunk *>(((SCTPMessage *)sctp)->getChunks(cc)));
+                    unsigned char chunkType = chunk->getChunkType();
+                    switch (chunkType) {
+                        case INIT: {
+                            SCTPInitChunk* init = check_and_cast<SCTPInitChunk*>(chunk);
+                            peerInStreams = init->getNoInStreams();
+                            peerOutStreams = init->getNoOutStreams();
+                            initPeerTsn = init->getInitTSN();
+                            localVTag = init->getInitTag();
+                            peerCumTsn = initPeerTsn - 1;
+                            break;
+                        }
+                        case INIT_ACK: {
+                            SCTPInitAckChunk* initack = check_and_cast<SCTPInitAckChunk*>(chunk);
+                            localVTag = initack->getInitTag();
+                            initPeerTsn = initack->getInitTSN();
+                            peerCumTsn = initPeerTsn - 1;
+                            break;
+                        }
+                        case COOKIE_ECHO: {
+                            SCTPCookieEchoChunk* cookieEcho = check_and_cast<SCTPCookieEchoChunk*>(chunk);
+                            int tempLength = cookieEcho->getByteLength();
+                            cookieEcho->setStateCookie(peerCookie);
+                            cookieEcho->setByteLength(SCTP_COOKIE_ACK_LENGTH + peerCookieLength);
+                            sctp->setByteLength(sctp->getByteLength() - tempLength + cookieEcho->getByteLength());
+                            break;
+                        }
+                        case SACK: {
+                            SCTPSackChunk* sack = check_and_cast<SCTPSackChunk*>(chunk);
+                            sack->setCumTsnAck(sack->getCumTsnAck() + localDiffTsn);
+                            if (sack->getNumGaps() > 0) {
+                                for (int i = 0; i < sack->getNumGaps(); i++) {
+                                    sack->setGapStart(i, sack->getGapStart(i) + localDiffTsn);
+                                    sack->setGapStop(i, sack->getGapStop(i) + localDiffTsn);
+                                }
+                            }
+                            if (sack->getNumDupTsns() > 0) {
+                                for (int i = 0; i < sack->getNumDupTsns(); i++) {
+                                    sack->setDupTsns(i, sack->getDupTsns(i) + localDiffTsn);
+                                }
+                            }
+                            sctp->replaceChunk(sack, 0);
+                            break;
                         }
                     }
-                    if (sack->getNumDupTsns() > 0)
-                    {
-                        for (int i = 0; i < sack->getNumDupTsns(); i++)
-                        {
-                            sack->setDupTsns(i, sack->getDupTsns(i) + initLocalTsn);
-                        }
-                    }
-                    sctp->replaceChunk(sack, 0);
                 }
                 sctp->setName("inboundSctp");
                 ip->encapsulate(sctp);
@@ -482,12 +493,47 @@ void PacketDrillApp::handleTimer(cMessage *msg)
                 eventCounter++;
                 scheduleEvent();
             }
+            if (eventCounter >= numEvents - 1 && outboundPackets->getLength() == 0) {
+                closeAllSockets();
+            }
             break;
         }
 
         default:
             throw cRuntimeError("Unknown message kind");
     }
+}
+
+void PacketDrillApp::closeAllSockets()
+{
+    SCTPAbortChunk *abortChunk = new SCTPAbortChunk("Abort");
+    abortChunk->setChunkType(ABORT);
+    abortChunk->setT_Bit(1);
+    abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
+    SCTPMessage *sctpmsg = new SCTPMessage();
+    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
+    sctpmsg->setSrcPort(remotePort);
+    sctpmsg->setDestPort(localPort);
+    sctpmsg->setTag(peerVTag);
+    sctpmsg->setName("SCTPCleanUp");
+    sctpmsg->setChecksumOk(true);
+    sctpmsg->addChunk(abortChunk);
+    IPv4Datagram *datagram = new IPv4Datagram("IPCleanup");
+    datagram->setSrcAddress(remoteAddress.toIPv4());
+    datagram->setDestAddress(localAddress.toIPv4());
+    datagram->setIdentification(0);
+    datagram->setVersion(4);
+    datagram->setHeaderLength(20);
+    datagram->setTransportProtocol(IPPROTO_SCTP);
+    datagram->setTimeToLive(31);
+    datagram->setMoreFragments(0);
+    datagram->setDontFragment(0);
+    datagram->setFragmentOffset(0);
+    datagram->setTypeOfService(0);
+    datagram->setByteLength(20);
+    datagram->encapsulate(sctpmsg);
+    EV_DETAIL << "Send Abort to cleanup association." << endl;
+    send(datagram, "tunOut");
 }
 
 void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_spec *syscall)
@@ -509,7 +555,7 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
         syscallBind(syscall, args, &error);
     } else if (!strcmp(name, "listen")) {
         syscallListen(syscall, args, &error);
-    } else if (!strcmp(name, "write")) {
+    } else if (!strcmp(name, "write") || !strcmp(name, "send")) {
         syscallWrite(syscall, args, &error);
     } else if (!strcmp(name, "read")) {
         syscallRead((PacketDrillEvent*) event, syscall, args, &error);
@@ -534,6 +580,7 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
 
     if (result == STATUS_ERR) {
         EV_ERROR << event->getLineNumber() << ": runtime error in " << syscall->name << " call: " << error << endl;
+        closeAllSockets();
         free(error);
     }
     return;
@@ -649,7 +696,7 @@ int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, ch
             tcpSocket.listenOnce();
             break;
         case IP_PROT_SCTP: {
-            sctpSocket.listen(0, true, 0, true);
+            sctpSocket.listen(0, true, 0, true, script_fd);
             listenSet = true;
             break;
         }
@@ -661,15 +708,20 @@ int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, ch
 
 int PacketDrillApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, char **error)
 {
+    int script_accepted_fd;
     if (!listenSet)
         return STATUS_ERR;
 
+    PacketDrillExpression* exp = (PacketDrillExpression *)syscall->result;
+    if (!exp || exp->getS32(&script_accepted_fd, error))
+        return STATUS_ERR;
     if (establishedPending) {
         if (protocol == IP_PROT_TCP)
             tcpSocket.setState(TCPSocket::CONNECTED);
         else if (protocol == IP_PROT_SCTP)
             sctpSocket.setState(SCTPSocket::CONNECTED);
         establishedPending = false;
+        sctpSocket.accept(sctpAssocId, script_accepted_fd);
     } else {
         acceptSet = true;
     }
@@ -682,7 +734,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
     int script_fd, count;
     PacketDrillExpression* exp;
 
-    if (args->getLength() != 3)
+    if (args->getLength() > 4)
         return STATUS_ERR;
     exp = (PacketDrillExpression *) args->get(0);
     if (!exp || exp->getS32(&script_fd, error))
@@ -718,6 +770,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
 
             SCTPSendInfo* sendCommand = new SCTPSendInfo;
             sendCommand->setLast(true);
+            sendCommand->setAssocId(sctpAssocId);
             cmsg->setControlInfo(sendCommand);
 
             sctpSocket.sendMsg(cmsg);
@@ -755,7 +808,7 @@ int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, c
             tcpSocket.connect(remoteAddress, remotePort);
             break;
         case IP_PROT_SCTP: {
-            sctpSocket.connect(remoteAddress, remotePort, 0, true);
+            sctpSocket.connect(script_fd, remoteAddress, remotePort, 0, true);
             break;
             }
         default:
@@ -842,7 +895,12 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
             //PDExpression *exp2 = (PDExpression*)(exp->getList()->get(0));
             PacketDrillExpression *exp2 = (PacketDrillExpression*) (exp->getList()->pop());
             exp2->getS32(&value, error);
-            sctpSocket.setNoDelay(value);
+            switch (optname)
+            {
+                case SCTP_NODELAY:
+                    sctpSocket.setNoDelay(value);
+                    break;
+            }
             delete exp2;
             break;
         }
@@ -1033,7 +1091,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
             break;
         }
         case IP_PROT_SCTP: {
-            sctpSocket.close();
+            sctpSocket.close(script_fd);
             break;
         }
         default:
@@ -1050,6 +1108,9 @@ void PacketDrillApp::finish()
 
 PacketDrillApp::~PacketDrillApp()
 {
+    if (eventTimer->isScheduled()) {
+        cancelEvent(eventTimer);
+    }
     delete eventTimer;
     delete script;
     delete pd;
@@ -1203,6 +1264,10 @@ bool PacketDrillApp::compareTcpPacket(TCPSegment *storedTcp, TCPSegment *liveTcp
             return true;
         }
         if (storedTcp->getHeaderOptionArraySize() != liveTcp->getHeaderOptionArraySize()) {
+            TCPOption *liveOption;
+            for (unsigned int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
+                liveOption = liveTcp->getHeaderOption(i);
+            }
             return false;
         } else {
             TCPOption *storedOption, *liveOption;
@@ -1280,7 +1345,7 @@ bool PacketDrillApp::compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liv
             return false;
         const uint8 type = storedHeader->getChunkType();
 
-        if ((type != INIT && type != INIT_ACK) && (liveSctp->getTag() != localVTag)) {
+        if ((type != INIT && type != INIT_ACK) && type != ABORT && (liveSctp->getTag() != localVTag)) {
             std::cout << " VTag " << liveSctp->getTag() << " incorrect. Should be " << localVTag << " peerVTag="
                     << peerVTag << endl;
             return false;
@@ -1402,7 +1467,7 @@ bool PacketDrillApp::compareDataPacket(SCTPDataChunk* storedDataChunk, SCTPDataC
             return false;
     }
     if (!(flags & FLAG_DATA_CHUNK_TSN_NOCHECK))
-        if (!(storedDataChunk->getTsn() + initLocalTsn == liveDataChunk->getTsn()))
+        if (!(storedDataChunk->getTsn() + localDiffTsn == liveDataChunk->getTsn()))
             return false;
     if (!(flags & FLAG_DATA_CHUNK_SID_NOCHECK))
         if (!(storedDataChunk->getSid() == liveDataChunk->getSid()))
@@ -1421,11 +1486,15 @@ bool PacketDrillApp::compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitC
 {
     uint32 flags = storedInitChunk->getFlags();
     peerVTag = liveInitChunk->getInitTag();
-    initLocalTsn = liveInitChunk->getInitTSN();
-    localCumTsn = initLocalTsn - 1;
+    localDiffTsn = liveInitChunk->getInitTSN() - initLocalTsn;
+    initPeerTsn = liveInitChunk->getInitTSN();
+    localCumTsn = initPeerTsn - 1;
+    peerCumTsn = initLocalTsn - 1;
 
     if (!(flags & FLAG_INIT_CHUNK_TSN_NOCHECK))
-        initPeerTsn -= storedInitChunk->getInitTSN();
+        if (!(storedInitChunk->getInitTSN() + localDiffTsn == liveInitChunk->getInitTSN())) {
+            return false;
+        }
     if (!(flags & FLAG_INIT_CHUNK_TAG_NOCHECK))
         if (!(storedInitChunk->getInitTag() == liveInitChunk->getInitTag())) {
             return false;
@@ -1450,6 +1519,7 @@ bool PacketDrillApp::compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, 
 {
     uint32 flags = storedInitAckChunk->getFlags();
     peerVTag = liveInitAckChunk->getInitTag();
+    localDiffTsn = liveInitAckChunk->getInitTSN() - initLocalTsn;
     initPeerTsn = liveInitAckChunk->getInitTSN();
     localCumTsn = initPeerTsn - 1;
     peerCumTsn = initLocalTsn - 1;
@@ -1465,7 +1535,10 @@ bool PacketDrillApp::compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, 
     if (!(flags & FLAG_INIT_ACK_CHUNK_IS_NOCHECK))
         if (!(min(storedInitAckChunk->getNoInStreams(), peerOutStreams) == liveInitAckChunk->getNoInStreams()))
             return false;
-
+    if (!(flags & FLAG_INIT_ACK_CHUNK_TSN_NOCHECK))
+        if (!(storedInitAckChunk->getInitTSN() + localDiffTsn == liveInitAckChunk->getInitTSN())) {
+            return false;
+        }
     peerCookie = check_and_cast<SCTPCookie*>(liveInitAckChunk->getStateCookie());
     peerCookieLength = peerCookie->getByteLength();
     return true;

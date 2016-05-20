@@ -253,6 +253,10 @@ void SCTP::handleMessage(cMessage *msg)
             else
                 appGateIndex = msg->getArrivalGate()->getIndex();
             int32 assocId = controlInfo->getAssocId();
+            if (assocId == -1) {
+                int32 fd = controlInfo->getFd();
+                assocId = findAssocForFd(fd);
+            }
             EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
             SCTPAssociation *assoc = findAssocForApp(appGateIndex, assocId);
 
@@ -569,6 +573,17 @@ SCTPAssociation *SCTP::findAssocForApp(int32 appGateIndex, int32 assocId)
     EV_INFO << "findAssoc for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
     auto i = sctpAppAssocMap.find(key);
     return (i == sctpAppAssocMap.end()) ? nullptr : i->second;
+}
+
+int32 SCTP::findAssocForFd(int32 fd)
+{
+    SCTPAssociation *assoc = NULL;
+    for (auto & elem : sctpAppAssocMap) {
+        assoc = elem.second;
+        if (assoc->fd == fd)
+            return assoc->assocId;
+    }
+    return -1;
 }
 
 uint16 SCTP::getEphemeralPort()

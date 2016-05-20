@@ -85,8 +85,7 @@ void SCTPAssociation::checkPseudoCumAck(const SCTPPathVariables *path)
             earliestOutstandingTSN, rtxEarliestOutstandingTSN);
 
     if (tsnGt(path->pseudoCumAck, earliestOutstandingTSN) ||
-        tsnGt(path->rtxPseudoCumAck, rtxEarliestOutstandingTSN))
-    {
+        tsnGt(path->rtxPseudoCumAck, rtxEarliestOutstandingTSN)) {
         std::cerr << "WRONG PSEUDO CUM-ACK!" << endl
                   << "pseudoCumAck=" << path->pseudoCumAck << ", earliestOutstandingTSN=" << earliestOutstandingTSN << endl
                   << "rtxPseudoCumAck=" << path->rtxPseudoCumAck << ", rtxEarliestOutstandingTSN=" << rtxEarliestOutstandingTSN << endl;
@@ -96,8 +95,7 @@ void SCTPAssociation::checkPseudoCumAck(const SCTPPathVariables *path)
 void SCTPAssociation::printSctpPathMap() const
 {
     EV_DEBUG << "SCTP PathMap:" << endl;
-    for (const auto & elem : sctpPathMap)
-    {
+    for (const auto & elem : sctpPathMap) {
         const SCTPPathVariables *path = elem.second;
         EV_DEBUG << " - " << path->remoteAddress << ":  osb=" << path->outstandingBytes
                  << " cwnd=" << path->cwnd << endl;
@@ -160,6 +158,7 @@ const char *SCTPAssociation::eventName(const int32 event)
         CASE(SCTP_E_STREAM_RESET);
         CASE(SCTP_E_SEND_ASCONF);
         CASE(SCTP_E_SET_STREAM_PRIO);
+        CASE(SCTP_E_ACCEPT);
     }
     return s;
 #undef CASE
@@ -306,9 +305,11 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
     assoc->localAddr = localAddr;
     assoc->localPort = localPort;
     assoc->localAddressList = localAddressList;
+    assoc->listening = true;
 
     assoc->outboundStreams = outboundStreams;
     assoc->inboundStreams = inboundStreams;
+    assoc->fd = fd;
 
     FSM_Goto((*assoc->fsm), SCTP_S_CLOSED);
     sctpMain->printInfoAssocMap();
@@ -1058,7 +1059,7 @@ void SCTPAssociation::sendShutdownComplete()
     sendToIP(sctpshutdowncomplete);
 }
 
-void SCTPAssociation::sendAbort()
+void SCTPAssociation::sendAbort(uint16 tBit)
 {
     SCTPAuthenticationChunk *authChunk;
     SCTPMessage *msg = new SCTPMessage();
@@ -1070,7 +1071,7 @@ void SCTPAssociation::sendAbort()
     msg->setDestPort(remotePort);
     SCTPAbortChunk *abortChunk = new SCTPAbortChunk("ABORT");
     abortChunk->setChunkType(ABORT);
-    abortChunk->setT_Bit(0);
+    abortChunk->setT_Bit(tBit);
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
     if (state->auth && state->peerAuth && typeInChunkList(ABORT)) {
         authChunk = createAuthChunk();
@@ -1680,8 +1681,7 @@ SCTPSackChunk *SCTPAssociation::createSack()
             sackChunk->setNumGaps(numRevokableGaps);
             sackChunk->setNumNrGaps(numNonRevokableGaps);
             sackLength = sackHeaderLength + revokableGapsSpace + nonRevokableGapsSpace + numDups * 4;
-        }
-        else {
+        } else {
             assert(false);    // NOTE: IMPLEMENT ME!
         }
     }
@@ -1690,8 +1690,7 @@ SCTPSackChunk *SCTPAssociation::createSack()
     if (numDups > 0) {
         sackChunk->setDupTsnsArraySize(numDups);
         uint32 key = 0;
-        for (auto & elem : state->dupList)
-        {
+        for (auto & elem : state->dupList) {
             sackChunk->setDupTsns(key, elem);
             key++;
             if (key == numDups)
@@ -1758,6 +1757,22 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
     cmsg->setControlInfo(cmd);
 
     sendToApp(cmsg);
+}
+
+void SCTPAssociation::sendInvalidStreamError(uint16 sid)
+{
+    SCTPMessage *sctpmsg = new SCTPMessage();
+    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
+    SCTPErrorChunk *errorChunk = new SCTPErrorChunk("ErrorChunk");
+    errorChunk->setChunkType(ERRORTYPE);
+    SCTPSimpleErrorCauseParameter *cause = new SCTPSimpleErrorCauseParameter("Cause");
+    cause->setParameterType(INVALID_STREAM_IDENTIFIER);
+    cause->setByteLength(8);
+    cause->setValue(sid);
+    errorChunk->setByteLength(4);
+    errorChunk->addParameters(cause);
+    sctpmsg->addChunk(errorChunk);
+    sendToIP(sctpmsg);
 }
 
 void SCTPAssociation::sendHMacError(const uint16 id)
@@ -2027,16 +2042,14 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
 
         const uint32 oldSum = sum;
         // ====== Iterate all streams to find chunk with TSN "tryTSN" =========
-        for (auto & elem : receiveStreams)
-        {
+        for (auto & elem : receiveStreams) {
             SCTPReceiveStream *receiveStream = elem.second;
 
             // ====== Get chunk to drop ========================================
             SCTPQueue *queue;
             if (uBit) {
                 queue = receiveStream->getUnorderedQ();    // Look in unordered queue
-            }
-            else {
+            } else {
                 queue = receiveStream->getOrderedQ();    // Look in ordered queue
             }
             SCTPDataVariables *chunk = queue->getChunk(tryTSN);
@@ -2065,8 +2078,7 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
                 state->gapList.removeFromGapList(tryTSN);
 
                 break;
-            }
-            else {
+            } else {
                 EV_INFO << "TSN " << tryTSN << " not found in stream "
                         << receiveStream->getStreamId() << endl;
             }
@@ -2230,8 +2242,7 @@ SCTPDataVariables *SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables *
     SCTPDataVariables *retChunk = nullptr;
 
     if (state->prMethod != 0 && !retransmissionQ->payloadQueue.empty()) {
-        for (auto & elem : retransmissionQ->payloadQueue)
-        {
+        for (auto & elem : retransmissionQ->payloadQueue) {
             SCTPDataVariables *chunk = elem.second;
 
             if (chunk->getLastDestinationPath() == path) {
@@ -2505,8 +2516,7 @@ SCTPPathVariables *SCTPAssociation::getNextPath(const SCTPPathVariables *oldPath
 {
     int32 hit = 0;
     if (sctpPathMap.size() > 1) {
-        for (const auto & elem : sctpPathMap)
-        {
+        for (const auto & elem : sctpPathMap) {
             SCTPPathVariables *newPath = elem.second;
             if (newPath == oldPath) {
                 if (++hit == 1) {
@@ -2518,8 +2528,7 @@ SCTPPathVariables *SCTPAssociation::getNextPath(const SCTPPathVariables *oldPath
             }
             if ((newPath->activePath) &&
                 ((state->allowCMT == false) || (newPath->blockingTimeout <= 0.0) ||
-                 (simTime() > newPath->blockingTimeout)))
-            {
+                 (simTime() > newPath->blockingTimeout))) {
                 return newPath;
             }
         }

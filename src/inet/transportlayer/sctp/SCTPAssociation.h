@@ -100,7 +100,8 @@ enum SCTPEventCode {
     SCTP_E_STOP_SENDING,
     SCTP_E_STREAM_RESET,
     SCTP_E_SEND_ASCONF,
-    SCTP_E_SET_STREAM_PRIO
+    SCTP_E_SET_STREAM_PRIO,
+    SCTP_E_ACCEPT
 };
 
 enum SCTPChunkTypes {
@@ -173,6 +174,8 @@ enum SCTPParameterTypes {
 };
 
 enum SCTPErrorCauses {
+    INVALID_STREAM_IDENTIFIER = 1,
+    NO_USER_DATA = 9,
     UNSUPPORTED_HMAC = 261,
     MISSING_NAT_ENTRY = 177
 };
@@ -462,6 +465,8 @@ class INET_API SCTPDataVariables : public cObject
     {
         return nextDestination;
     }
+
+    uint16 getSid() { return sid; };
 
     // ====== Chunk Data Management =======================================
     cPacket *userData;
@@ -846,6 +851,8 @@ class INET_API SCTPAssociation : public cObject
     // connection identification by apps: appgateIndex+assocId
     int32 appGateIndex;    // Application gate index
     int32 assocId;    // Identifies connection within the app
+    int32 fd;
+    bool listening;
     L3Address remoteAddr;    // Remote address from last message
     L3Address localAddr;    // Local address from last message
     uint16 localPort;    // Remote port from last message
@@ -1082,7 +1089,7 @@ class INET_API SCTPAssociation : public cObject
     void sendInitAck(SCTPInitChunk *initchunk);
     void sendCookieEcho(SCTPInitAckChunk *initackchunk);
     void sendCookieAck(const L3Address& dest);
-    void sendAbort();
+    void sendAbort(uint16 tBit = 0);
     void sendHeartbeat(const SCTPPathVariables *path);
     void sendHeartbeatAck(const SCTPHeartbeatChunk *heartbeatChunk,
             const L3Address& src,
@@ -1167,6 +1174,7 @@ class INET_API SCTPAssociation : public cObject
     void sendOutgoingResetRequest(SCTPIncomingSSNResetRequestParameter *requestParam);
     void sendPacketDrop(const bool flag);
     void sendHMacError(const uint16 id);
+    void sendInvalidStreamError(uint16 sid);
 
     SCTPForwardTsnChunk *createForwardTsnChunk(const L3Address& pid);
 
