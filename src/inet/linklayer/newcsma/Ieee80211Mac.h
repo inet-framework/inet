@@ -130,13 +130,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** Sequence number to be assigned to the next frame */
     int sequenceNumber;
 
-    /**
-     * Indicates that the last frame received had bit errors in it or there was a
-     * collision during receiving the frame. If this flag is set, then the MAC
-     * will wait EIFS instead of DIFS period of time in WAITDIFS state.
-     */
-    bool lastReceiveFailed;
-
     /** True if backoff is enabled */
     bool backoff;
 
@@ -260,8 +253,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual simtime_t getSIFS();
     virtual simtime_t getSlotTime();
     virtual simtime_t getDIFS();
-    virtual simtime_t getEIFS();
-    virtual simtime_t getPIFS();
     virtual simtime_t computeBackoffPeriod(Ieee80211Frame *msg, int r);
     //@}
 

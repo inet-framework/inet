@@ -135,7 +135,6 @@ void Ieee80211Mac::initialize(int stage)
         retryCounter = 0;
         backoffPeriod = -1;
         backoff = false;
-        lastReceiveFailed = false;
         nav = false;
 
         // statistics
@@ -357,7 +356,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
     if (frame && isLowerMsg(frame))
     {
-        lastReceiveFailed =(msgKind == COLLISION || msgKind == BITERROR);
         scheduleReservePeriod(frame);
     }
 
@@ -509,7 +507,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Error,
                                      isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
                                      IDLE,
-                EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
                 numCollision++;
                 resetStateVariables();
             );
@@ -553,20 +550,9 @@ simtime_t Ieee80211Mac::getSlotTime()
     return ST;
 }
 
-simtime_t Ieee80211Mac::getPIFS()
-{
-    return getSIFS() + getSlotTime();
-}
-
 simtime_t Ieee80211Mac::getDIFS()
 {
     return getSIFS() + 2 * getSlotTime();
-}
-
-simtime_t Ieee80211Mac::getEIFS()
-{
-// FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-    return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
 }
 
 simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
@@ -606,16 +592,8 @@ void Ieee80211Mac::scheduleSIFSPeriod(Ieee80211Frame *frame)
 
 void Ieee80211Mac::scheduleDIFSPeriod()
 {
-    if (lastReceiveFailed)
-    {
-        EV << "receiption of last frame failed, scheduling EIFS period\n";
-        scheduleAt(simTime() + getEIFS(), endDIFS);
-    }
-    else
-    {
-        EV << "scheduling DIFS period\n";
-        scheduleAt(simTime() + getDIFS(), endDIFS);
-    }
+    EV << "scheduling DIFS period\n";
+    scheduleAt(simTime() + getDIFS(), endDIFS);
 }
 
 void Ieee80211Mac::cancelDIFSPeriod()
