@@ -43,6 +43,7 @@ void CsmaMac::initialize(int stage)
         EV << "Initializing stage 0\n";
 
         maxQueueSize = par("maxQueueSize");
+        useAck = par("useAck");
         bitrate = par("bitrate");
         headerLength = par("headerLength");
         slotTime = par("slotTime");
@@ -299,6 +300,13 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(WAITACK)
         {
+            FSMA_No_Event_Transition(Immediate-No-Ack,
+                                     !useAck,
+                                     IDLE,
+                 if (retryCounter == 0) numSentWithoutRetry++;
+                 numSent++;
+                finishCurrentTransmission();
+            );
             FSMA_Enter(scheduleDataTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-ACK,
                                   isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaAckFrame *>(frame),
@@ -356,7 +364,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
                                      isLowerMessage(msg) && isForUs(frame),
-                                     WAITSIFS,
+                                     useAck ? WAITSIFS : IDLE,
                 sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame->dup())));
                 numReceived++;
             );
