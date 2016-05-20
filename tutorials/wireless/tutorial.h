@@ -188,11 +188,14 @@ Here is an animation showing the hosts communicating:
 
 <img src="step1_8.gif">
 
+This animation shows how a host looks on the inside, and an UDP packet being
+sent up to the UDP Application submodule.
+
+<img src="step1_1.gif">
+
 When the simulation concludes at t=25s, the throughput instrument indicates that
 around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
 the transmission rate was around 800 kbps.
-
-<img src="step1_1.gif">
 
 <b>Number of packets received by Host B: 2422</b>
 
