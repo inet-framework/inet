@@ -131,7 +131,6 @@ void Ieee80211Mac::initialize(int stage)
         // state variables
         fsm.setName("Ieee80211Mac State Machine");
         mode = DCF;
-        sequenceNumber = 0;
 //        radioState = RadioState::IDLE;
         retryCounter = 0;
         backoffPeriod = -1;
@@ -255,7 +254,6 @@ void Ieee80211Mac::handleUpperMsg(cPacket *msg)
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(address);
-    sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
 
     transmissionQueue.push_back(frame);
 
