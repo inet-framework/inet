@@ -159,7 +159,7 @@ void CsmaMac::handleSelfMessage(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
 
-    handleWithFSM(msg);
+    handleWithFsm(msg);
 }
 
 void CsmaMac::handleUpperPacket(cPacket *msg)
@@ -177,7 +177,7 @@ void CsmaMac::handleUpperPacket(cPacket *msg)
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(address);
     transmissionQueue.push_back(frame);
-    handleWithFSM(frame);
+    handleWithFsm(frame);
 }
 
 void CsmaMac::handleLowerPacket(cPacket *msg)
@@ -193,7 +193,7 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
        << ", receiver address: " << frame->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
 
-    handleWithFSM(msg);
+    handleWithFsm(msg);
 
     // if we are the owner then we did not send this message up
     if (msg->getOwner() == this)
@@ -203,7 +203,7 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
 /**
  * Msg can be upper, lower, self or nullptr (when radio state changes)
  */
-void CsmaMac::handleWithFSM(cMessage *msg)
+void CsmaMac::handleWithFsm(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
     if (isUpperMessage(msg) && fsm.getState() != IDLE) {
@@ -250,18 +250,18 @@ void CsmaMac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(WAITDIFS)
         {
-            FSMA_Enter(scheduleDIFSPeriod());
+            FSMA_Enter(scheduleDifsPeriod());
             FSMA_Event_Transition(Immediate-Transmit-Broadcast,
                                   msg == endDIFS && isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITBROADCAST,
                 sendBroadcastFrame(getCurrentTransmission());
-                cancelDIFSPeriod();
+                cancelDifsPeriod();
             );
             FSMA_Event_Transition(Immediate-Transmit-Data,
                                   msg == endDIFS && !isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITACK,
                 sendDataFrame(getCurrentTransmission());
-                cancelDIFSPeriod();
+                cancelDifsPeriod();
             );
             FSMA_Event_Transition(DIFS-Over,
                                   msg == endDIFS,
@@ -274,19 +274,19 @@ void CsmaMac::handleWithFSM(cMessage *msg)
                                   isMediumStateChange(msg) && !isMediumFree(),
                                   DEFER,
                 backoff = true;
-                cancelDIFSPeriod();
+                cancelDifsPeriod();
             );
             FSMA_No_Event_Transition(Immediate-Busy,
                                      !isMediumFree(),
                                      DEFER,
                 backoff = true;
-                cancelDIFSPeriod();
+                cancelDifsPeriod();
             );
             // radio state changes before we actually get the message, so this must be here
             FSMA_Event_Transition(Receive,
                                   isLowerMessage(msg),
                                   RECEIVE,
-                cancelDIFSPeriod();
+                cancelDifsPeriod();
             ;);
         }
         FSMA_State(BACKOFF)
@@ -343,11 +343,11 @@ void CsmaMac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(WAITSIFS)
         {
-            FSMA_Enter(scheduleSIFSPeriod(frame));
+            FSMA_Enter(scheduleSifsPeriod(frame));
             FSMA_Event_Transition(Transmit-ACK,
                                   msg == endSIFS,
                                   IDLE,
-                sendACKFrame();
+                sendAckFrame();
                 resetStateVariables();
             );
         }
@@ -385,7 +385,7 @@ void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal)
-        handleWithFSM(mediumStateChange);
+        handleWithFsm(mediumStateChange);
     else if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
@@ -426,7 +426,7 @@ cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
 /****************************************************************
  * Timing functions.
  */
-simtime_t CsmaMac::getSIFS()
+simtime_t CsmaMac::getSifs()
 {
     return 10E-6;
 }
@@ -436,9 +436,9 @@ simtime_t CsmaMac::getSlotTime()
     return 20E-6;
 }
 
-simtime_t CsmaMac::getDIFS()
+simtime_t CsmaMac::getDifs()
 {
-    return getSIFS() + 2 * getSlotTime();
+    return getSifs() + 2 * getSlotTime();
 }
 
 simtime_t CsmaMac::computeBackoffPeriod(CsmaFrame *msg, int r)
@@ -457,20 +457,20 @@ simtime_t CsmaMac::computeBackoffPeriod(CsmaFrame *msg, int r)
 /****************************************************************
  * Timer functions.
  */
-void CsmaMac::scheduleSIFSPeriod(CsmaFrame *frame)
+void CsmaMac::scheduleSifsPeriod(CsmaFrame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSIFS->setContextPointer(frame->dup());
-    scheduleAt(simTime() + getSIFS(), endSIFS);
+    scheduleAt(simTime() + getSifs(), endSIFS);
 }
 
-void CsmaMac::scheduleDIFSPeriod()
+void CsmaMac::scheduleDifsPeriod()
 {
     EV << "scheduling DIFS period\n";
-    scheduleAt(simTime() + getDIFS(), endDIFS);
+    scheduleAt(simTime() + getDifs(), endDIFS);
 }
 
-void CsmaMac::cancelDIFSPeriod()
+void CsmaMac::cancelDifsPeriod()
 {
     EV << "cancelling DIFS period\n";
     cancelEvent(endDIFS);
@@ -479,7 +479,7 @@ void CsmaMac::cancelDIFSPeriod()
 void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, bitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifs() + computeFrameDuration(LENGTH_ACK, bitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
@@ -534,19 +534,19 @@ void CsmaMac::cancelBackoffPeriod()
 /****************************************************************
  * Frame sender functions.
  */
-void CsmaMac::sendACKFrame()
+void CsmaMac::sendAckFrame()
 {
     CsmaFrame *frameToACK = (CsmaFrame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(nullptr);
-    sendACKFrame(check_and_cast<CsmaDataFrame*>(frameToACK));
+    sendAckFrame(check_and_cast<CsmaDataFrame*>(frameToACK));
     delete frameToACK;
 }
 
-void CsmaMac::sendACKFrame(CsmaDataFrame *frameToACK)
+void CsmaMac::sendAckFrame(CsmaDataFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(buildACKFrame(frameToACK));
+    sendDown(buildAckFrame(frameToACK));
 }
 
 void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
@@ -571,7 +571,7 @@ CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
     return (CsmaDataFrame *)frameToSend->dup();
 }
 
-CsmaAckFrame *CsmaMac::buildACKFrame(CsmaDataFrame *frameToACK)
+CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToACK)
 {
     CsmaAckFrame *frame = new CsmaAckFrame("ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());

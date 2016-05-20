@@ -178,7 +178,7 @@ class INET_API CsmaMac : public MACProtocolBase
     virtual void handleLowerPacket(cPacket *msg) override;
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
-    virtual void handleWithFSM(cMessage *msg);
+    virtual void handleWithFsm(cMessage *msg);
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
 
@@ -192,9 +192,9 @@ class INET_API CsmaMac : public MACProtocolBase
      * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
      */
     //@{
-    virtual simtime_t getSIFS();
+    virtual simtime_t getSifs();
     virtual simtime_t getSlotTime();
-    virtual simtime_t getDIFS();
+    virtual simtime_t getDifs();
     virtual simtime_t computeBackoffPeriod(CsmaFrame *msg, int r);
     //@}
 
@@ -204,10 +204,10 @@ class INET_API CsmaMac : public MACProtocolBase
      * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
-    virtual void scheduleSIFSPeriod(CsmaFrame *frame);
+    virtual void scheduleSifsPeriod(CsmaFrame *frame);
 
-    virtual void scheduleDIFSPeriod();
-    virtual void cancelDIFSPeriod();
+    virtual void scheduleDifsPeriod();
+    virtual void cancelDifsPeriod();
 
     virtual void scheduleDataTimeoutPeriod(CsmaDataFrame *frame);
     virtual void scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frame);
@@ -227,8 +227,8 @@ class INET_API CsmaMac : public MACProtocolBase
      * @name Frame transmission functions
      */
     //@{
-    virtual void sendACKFrame();
-    virtual void sendACKFrame(CsmaDataFrame *frame);
+    virtual void sendAckFrame();
+    virtual void sendAckFrame(CsmaDataFrame *frame);
     virtual void sendDataFrame(CsmaDataFrame *frameToSend);
     virtual void sendBroadcastFrame(CsmaDataFrame *frameToSend);
     //@}
@@ -239,7 +239,7 @@ class INET_API CsmaMac : public MACProtocolBase
      */
     //@{
     virtual CsmaDataFrame *buildDataFrame(CsmaDataFrame *frameToSend);
-    virtual CsmaAckFrame *buildACKFrame(CsmaDataFrame *frameToACK);
+    virtual CsmaAckFrame *buildAckFrame(CsmaDataFrame *frameToACK);
     virtual CsmaDataFrame *buildBroadcastFrame(CsmaDataFrame *frameToSend);
     //@}
 
