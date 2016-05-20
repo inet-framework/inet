@@ -68,9 +68,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** The bitrate is used to send data frames; be sure to use a valid 802.11 bitrate */
     double bitrate;
 
-    /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
-    double basicBitrate;
-
     /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize;
 
@@ -282,12 +279,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataFrame *frameToACK);
     virtual Ieee80211DataFrame *buildBroadcastFrame(Ieee80211DataFrame *frameToSend);
     //@}
-
-    /**
-     * @brief Attaches a PhyControlInfo to the frame which will cause it to be sent at
-     * basicBitrate not bitrate (e.g. 2Mbps instead of 11Mbps). Used with ACK.
-     */
-    virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
 
   protected:
     /**

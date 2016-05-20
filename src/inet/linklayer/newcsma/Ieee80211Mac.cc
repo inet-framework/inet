@@ -83,7 +83,6 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
-        basicBitrate = 2e6; //FIXME make it parameter
 
         // the variable is renamed due to a confusion in the standard
         // the name retry limit would be misleading, see the header file comment
@@ -591,7 +590,7 @@ void Ieee80211Mac::cancelDIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
+    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, bitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
 void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataFrame *frameToSend)
@@ -658,7 +657,7 @@ void Ieee80211Mac::sendACKFrameOnEndSIFS()
 void Ieee80211Mac::sendACKFrame(Ieee80211DataFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
-    sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
+    sendDown(buildACKFrame(frameToACK));
 }
 
 void Ieee80211Mac::sendDataFrame(Ieee80211DataFrame *frameToSend)
@@ -683,10 +682,10 @@ Ieee80211DataFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataFrame *frameToSend
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
-        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, bitrate));
     else
         // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate) + computeFrameDuration(frameToSend));
+        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, bitrate) + computeFrameDuration(frameToSend));
 
     return frame;
 }
@@ -699,7 +698,7 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataFrame *frameToACK)
     if (!frameToACK->getMoreFragments())
         frame->setDuration(0);
     else
-        frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, basicBitrate));
+        frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, bitrate));
 
     return frame;
 }
@@ -708,15 +707,6 @@ Ieee80211DataFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataFrame *frameT
 {
     Ieee80211DataFrame *frame = (Ieee80211DataFrame *)frameToSend->dup();
     frame->setDuration(0);
-    return frame;
-}
-
-Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
-{
-    ASSERT(frame->getControlInfo()==NULL);
-//    PhyControlInfo *ctrl = new PhyControlInfo();
-//    ctrl->setBitrate(basicBitrate);
-//    frame->setControlInfo(ctrl);
     return frame;
 }
 
