@@ -22,10 +22,13 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
 #include "inet/linklayer/newcsma/NewCsmaFrame_m.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
 namespace newcsma {
+
+using namespace inet::physicallayer;
 
 // frame lengths in bits
 const unsigned int LENGTH_ACK = 112;
@@ -41,6 +44,8 @@ class INET_API NewCsmaMac : public MACProtocolBase
   typedef std::list<NewCsmaDataFrame*> NewCsmaDataFrameList;
 
   protected:
+    IRadio *radio;
+
     /**
      * @name Configuration parameters
      */
@@ -98,9 +103,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * Number of frame retransmission attempts.
      */
     int retryCounter;
-
-    /** Physical radio (medium) state copied from physical layer */
-//    RadioState::State radioState;
 
     /** Messages received from upper layer and to be transmitted later */
     NewCsmaDataFrameList transmissionQueue;
@@ -173,8 +175,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * @brief Functions called from other classes to notify about state changes and to handle messages.
      */
     //@{
-    /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    // TODO: virtual void receiveChangeNotification(int category, const cPolymorphic * details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
 
     /** @brief Handle timer self messages */
     virtual void handleSelfMsg(cMessage *msg);

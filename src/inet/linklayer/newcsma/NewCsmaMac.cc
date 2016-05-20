@@ -72,7 +72,7 @@ void NewCsmaMac::initialize(int stage)
             address.setAddress(addressString);
 
         // subscribe for the information of the carrier sense
-// TODO:       nb->subscribe(this, NF_RADIOSTATE_CHANGED);
+        dynamic_cast<cModule *>(radio)->subscribe(IRadio::receptionStateChangedSignal, this);
 
         // initalize self messages
         endSIFS = new cMessage("SIFS");
@@ -86,7 +86,6 @@ void NewCsmaMac::initialize(int stage)
 
         // state variables
         fsm.setName("NewCsmaMac State Machine");
-// TODO:       radioState = RadioState::IDLE;
         retryCounter = 0;
         backoffPeriod = -1;
         backoff = false;
@@ -103,7 +102,6 @@ void NewCsmaMac::initialize(int stage)
 
         // initialize watches
         WATCH(fsm);
-// TODO:       WATCH(radioState);
         WATCH(retryCounter);
         WATCH(backoff);
 
@@ -205,22 +203,13 @@ void NewCsmaMac::handleLowerPacket(cPacket *msg)
         delete msg;
 }
 
-// TODO: void NewCsmaMac::receiveChangeNotification(int category, const cPolymorphic *details)
-//{
-//    Enter_Method_Silent();
-//    printNotificationBanner(category, details);
-//
-//    if (category == NF_RADIOSTATE_CHANGED)
-//    {
-//        RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
-//
-//        // FIXME: double recording, because there's no sample hold in the gui
-//
-//        radioState = newRadioState;
-//
-//        handleWithFSM(mediumStateChange);
-//    }
-//}
+void NewCsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+{
+    Enter_Method_Silent();
+    if (signalID == IRadio::receptionStateChangedSignal) {
+        handleWithFSM(mediumStateChange);
+    }
+}
 
 /**
  * Msg can be upper, lower, self or nullptr (when radio state changes)
@@ -629,12 +618,12 @@ void NewCsmaMac::resetStateVariables()
 
 bool NewCsmaMac::isMediumStateChange(cMessage *msg)
 {
-//    TODO: return msg == mediumStateChange || (radioState == RadioState::IDLE);
+    return msg == mediumStateChange;
 }
 
 bool NewCsmaMac::isMediumFree()
 {
-//    TODO: return radioState == RadioState::IDLE;
+    return radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 }
 
 bool NewCsmaMac::isBroadcast(NewCsmaFrame *frame)
