@@ -47,23 +47,23 @@ class INET_API CsmaMac : public MACProtocolBase
     MACAddress address;
 
     /** The bitrate is used to send data frames; be sure to use a valid 802.11 bitrate */
-    double bitrate;
+    double bitrate = NaN;
 
     /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
-    int maxQueueSize;
+    int maxQueueSize = -1;
 
     /**
      * Maximum number of transmissions for a message.
      * This includes the initial transmission and all subsequent retransmissions.
      * Thus a value 0 is invalid and a value 1 means no retransmissions.
      */
-    int retryLimit;
+    int retryLimit = -1;
 
     /** Minimum contention window. */
-    int cwMin;
+    int cwMin = -1;
 
     /** Maximum contention window. */
-    int cwMax;
+    int cwMax = -1;
     //@}
 
   public:
@@ -87,40 +87,40 @@ class INET_API CsmaMac : public MACProtocolBase
 
   protected:
     /** True if backoff is enabled */
-    bool backoff;
+    bool backoff = false;
 
     /** Remaining backoff period in seconds */
-    simtime_t backoffPeriod;
+    simtime_t backoffPeriod = -1;
 
     /**
      * Number of frame retransmission attempts.
      */
-    int retryCounter;
+    int retryCounter = -1;
 
     /** Messages received from upper layer and to be transmitted later */
     CsmaDataFrameList transmissionQueue;
 
     /** Passive queue module to request messages from */
-    IPassiveQueue *queueModule;
+    IPassiveQueue *queueModule = nullptr;
     //@}
 
   protected:
     /** @name Timer messages */
     //@{
     /** End of the Short Inter-Frame Time period */
-    cMessage *endSifs;
+    cMessage *endSifs = nullptr;
 
     /** End of the Data Inter-Frame Time period */
-    cMessage *endDifs;
+    cMessage *endDifs = nullptr;
 
     /** End of the backoff period */
-    cMessage *endBackoff;
+    cMessage *endBackoff = nullptr;
 
     /** Timeout after the transmission of a DATA frame */
-    cMessage *endTimeout;
+    cMessage *endTimeout = nullptr;
 
     /** Radio state change self message. Currently this is optimized away and sent directly */
-    cMessage *mediumStateChange;
+    cMessage *mediumStateChange = nullptr;
     //@}
 
   protected:
@@ -141,7 +141,6 @@ class INET_API CsmaMac : public MACProtocolBase
      * @name Construction functions
      */
     //@{
-    CsmaMac();
     virtual ~CsmaMac();
     //@}
 

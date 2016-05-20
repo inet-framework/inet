@@ -23,15 +23,6 @@ namespace inet {
 
 Define_Module(CsmaMac);
 
-CsmaMac::CsmaMac()
-{
-    endSifs = nullptr;
-    endDifs = nullptr;
-    endBackoff = nullptr;
-    endTimeout = nullptr;
-    mediumStateChange = nullptr;
-}
-
 CsmaMac::~CsmaMac()
 {
     cancelAndDelete(endSifs);
