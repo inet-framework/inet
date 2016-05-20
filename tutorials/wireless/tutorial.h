@@ -557,7 +557,7 @@ indicated by the appearance of the blue polyline arrow between Host A and Host B
 
 This is shown in the animation below:
 
-<img src="step5_5_5.gif">
+<img src="step5_2.gif">
 
 
 As we expected, the number of packets received by Host B is low. The following
