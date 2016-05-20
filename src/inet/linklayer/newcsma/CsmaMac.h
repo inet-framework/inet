@@ -30,8 +30,6 @@ using namespace inet::physicallayer;
 
 class INET_API CsmaMac : public MACProtocolBase
 {
-  typedef std::list<CsmaDataFrame*> CsmaDataFrameList;
-
   protected:
     IRadio *radio = nullptr;
     IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
@@ -98,7 +96,7 @@ class INET_API CsmaMac : public MACProtocolBase
     int retryCounter = -1;
 
     /** Messages received from upper layer and to be transmitted later */
-    CsmaDataFrameList transmissionQueue;
+    std::list<CsmaDataFrame*> transmissionQueue;
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule = nullptr;

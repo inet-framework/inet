@@ -520,7 +520,7 @@ void CsmaMac::cancelBackoffPeriod()
  */
 void CsmaMac::sendAckFrame()
 {
-    CsmaFrame *frameToAck = (CsmaFrame *)endSifs->getContextPointer();
+    CsmaFrame *frameToAck = static_cast<CsmaFrame *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
     sendAckFrame(check_and_cast<CsmaDataFrame*>(frameToAck));
     delete frameToAck;
@@ -552,7 +552,7 @@ void CsmaMac::sendBroadcastFrame(CsmaDataFrame *frameToSend)
  */
 CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
 {
-    return (CsmaDataFrame *)frameToSend->dup();
+    return frameToSend->dup();
 }
 
 CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
@@ -565,7 +565,7 @@ CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
 
 CsmaDataFrame *CsmaMac::buildBroadcastFrame(CsmaDataFrame *frameToSend)
 {
-    return (CsmaDataFrame *)frameToSend->dup();
+    return frameToSend->dup();
 }
 
 /****************************************************************
@@ -596,7 +596,7 @@ void CsmaMac::retryCurrentTransmission()
 
 CsmaDataFrame *CsmaMac::getCurrentTransmission()
 {
-    return (CsmaDataFrame *)transmissionQueue.front();
+    return transmissionQueue.front();
 }
 
 void CsmaMac::resetStateVariables()
@@ -646,6 +646,7 @@ double CsmaMac::computeFrameDuration(CsmaFrame *msg)
 
 double CsmaMac::computeFrameDuration(int bits, double bitrate)
 {
+    // TODO: how do we get this?
     int phyHeaderLength = 192;
     double phyHeaderBitrate = 1E+6;
     return bits / bitrate + phyHeaderLength / phyHeaderBitrate;
