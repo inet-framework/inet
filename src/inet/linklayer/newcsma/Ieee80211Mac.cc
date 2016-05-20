@@ -232,11 +232,6 @@ void Ieee80211Mac::handleUpperMsg(cPacket *msg)
         return;
     }
 
-    // must be a Ieee80211DataFrame, within the max size because we don't support fragmentation
-    Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(msg);
-    if (frame->getByteLength() > fragmentationThreshold)
-        error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
-              msg->getClassName(), msg->getName(), msg->getByteLength());
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
     ASSERT(!frame->getReceiverAddress().isUnspecified());

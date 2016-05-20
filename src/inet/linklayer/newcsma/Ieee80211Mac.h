@@ -88,9 +88,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** Contention window size for broadcast messages. */
     int cwMinBroadcast;
-
-    /** Messages longer than this threshold will be sent in multiple fragments. see spec 361 */
-    static const int fragmentationThreshold = 2346;
     //@}
 
   public:
