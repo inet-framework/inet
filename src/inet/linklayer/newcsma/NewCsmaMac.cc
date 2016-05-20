@@ -15,10 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
-
 #include "inet/linklayer/newcsma/NewCsmaMac.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -28,12 +25,12 @@ Define_Module(NewCsmaMac);
 
 NewCsmaMac::NewCsmaMac()
 {
-    endSIFS = NULL;
-    endDIFS = NULL;
-    endBackoff = NULL;
-    endTimeout = NULL;
-    mediumStateChange = NULL;
-    pendingRadioConfigMsg = NULL;
+    endSIFS = nullptr;
+    endDIFS = nullptr;
+    endBackoff = nullptr;
+    endTimeout = nullptr;
+    mediumStateChange = nullptr;
+    pendingRadioConfigMsg = nullptr;
 }
 
 NewCsmaMac::~NewCsmaMac()
@@ -55,8 +52,7 @@ void NewCsmaMac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
 
-    if (stage == 0)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
         // initialize parameters
@@ -207,7 +203,7 @@ void NewCsmaMac::handleCommand(cMessage *msg)
 //    if (msg->getKind()==PHY_C_CONFIGURERADIO)
 //    {
 //        EV << "Passing on command " << msg->getName() << " to physical layer\n";
-//        if (pendingRadioConfigMsg != NULL)
+//        if (pendingRadioConfigMsg != nullptr)
 //        {
 //            // merge contents of the old command into the new one, then delete it
 //            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
@@ -217,7 +213,7 @@ void NewCsmaMac::handleCommand(cMessage *msg)
 //            if (pNew->getBitrate()==-1 && pOld->getBitrate()!=-1)
 //                pNew->setBitrate(pOld->getBitrate());
 //            delete pendingRadioConfigMsg;
-//            pendingRadioConfigMsg = NULL;
+//            pendingRadioConfigMsg = nullptr;
 //        }
 //
 //        if (fsm.getState() == IDLE || fsm.getState() == DEFER || fsm.getState() == BACKOFF)
@@ -275,7 +271,7 @@ void NewCsmaMac::handleLowerPacket(cPacket *msg)
 //}
 
 /**
- * Msg can be upper, lower, self or NULL (when radio state changes)
+ * Msg can be upper, lower, self or nullptr (when radio state changes)
  */
 void NewCsmaMac::handleWithFSM(cMessage *msg)
 {
@@ -288,7 +284,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
 
     NewCsmaFrame *frame = dynamic_cast<NewCsmaFrame*>(msg);
     int frameType = frame ? frame->getType() : -1;
-    int msgKind = msg->getKind();
 
     FSMA_Switch(fsm)
     {
@@ -426,7 +421,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
             FSMA_Event_Transition(Transmit-ACK,
                                   msg == endSIFS,
                                   IDLE,
-                sendACKFrameOnEndSIFS();
+                sendACKFrame();
                 resetStateVariables();
             );
         }
@@ -465,14 +460,12 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
  */
 simtime_t NewCsmaMac::getSIFS()
 {
-// TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
-    return SIFS;
+    return 10E-6;
 }
 
 simtime_t NewCsmaMac::getSlotTime()
 {
-// TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
-    return ST;
+    return 20E-6;
 }
 
 simtime_t NewCsmaMac::getDIFS()
@@ -585,10 +578,10 @@ void NewCsmaMac::cancelBackoffPeriod()
 /****************************************************************
  * Frame sender functions.
  */
-void NewCsmaMac::sendACKFrameOnEndSIFS()
+void NewCsmaMac::sendACKFrame()
 {
     NewCsmaFrame *frameToACK = (NewCsmaFrame *)endSIFS->getContextPointer();
-    endSIFS->setContextPointer(NULL);
+    endSIFS->setContextPointer(nullptr);
     sendACKFrame(check_and_cast<NewCsmaDataFrame*>(frameToACK));
     delete frameToACK;
 }
@@ -666,10 +659,10 @@ NewCsmaDataFrame *NewCsmaMac::getCurrentTransmission()
 
 void NewCsmaMac::sendDownPendingRadioConfigMsg()
 {
-    if (pendingRadioConfigMsg != NULL)
+    if (pendingRadioConfigMsg != nullptr)
     {
         sendDown(pendingRadioConfigMsg);
-        pendingRadioConfigMsg = NULL;
+        pendingRadioConfigMsg = nullptr;
     }
 }
 
@@ -732,6 +725,6 @@ double NewCsmaMac::computeFrameDuration(int bits, double bitrate)
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }
 
-}
+} // namespace newcsma
 
-}
+} // namespace inet

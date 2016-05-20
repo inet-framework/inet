@@ -15,11 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IEEE_80211_MAC_H
-#define IEEE_80211_MAC_H
-
-// uncomment this if you do not want to log state machine transitions
-#define FSM_DEBUG
+#ifndef __INET_NEWCSMA_H
+#define __INET_NEWCSMA_H
 
 #include "inet/common/FSMA.h"
 #include "inet/common/queue/IPassiveQueue.h"
@@ -33,12 +30,6 @@ namespace newcsma {
 // frame lengths in bits
 const unsigned int LENGTH_ACK = 112;
 
-// time slot ST, short interframe space SIFS, distributed interframe
-// space DIFS, and extended interframe space EIFS
-
-const_simtime_t ST = 20E-6;
-const_simtime_t SIFS = 10E-6;
-const_simtime_t DIFS = 2 * ST + SIFS;
 const_simtime_t MAX_PROPAGATION_DELAY = 2E-6;  // 300 meters at the speed of light
 
 /** Minimum size (initial size) of contention window */
@@ -248,7 +239,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * @name Frame transmission functions
      */
     //@{
-    virtual void sendACKFrameOnEndSIFS();
+    virtual void sendACKFrame();
     virtual void sendACKFrame(NewCsmaDataFrame *frame);
     virtual void sendDataFrame(NewCsmaDataFrame *frameToSend);
     virtual void sendBroadcastFrame(NewCsmaDataFrame *frameToSend);
@@ -308,9 +299,9 @@ class INET_API NewCsmaMac : public MACProtocolBase
     //@}
 };
 
-}
+} // namespace newcsma
 
-}
+} // namespace inet
 
-#endif
+#endif // ifndef __INET_NEWCSMA_H
 
