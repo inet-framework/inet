@@ -25,8 +25,8 @@ Define_Module(CsmaMac);
 
 CsmaMac::CsmaMac()
 {
-    endSIFS = nullptr;
-    endDIFS = nullptr;
+    endSifs = nullptr;
+    endDifs = nullptr;
     endBackoff = nullptr;
     endTimeout = nullptr;
     mediumStateChange = nullptr;
@@ -34,8 +34,8 @@ CsmaMac::CsmaMac()
 
 CsmaMac::~CsmaMac()
 {
-    cancelAndDelete(endSIFS);
-    cancelAndDelete(endDIFS);
+    cancelAndDelete(endSifs);
+    cancelAndDelete(endDifs);
     cancelAndDelete(endBackoff);
     cancelAndDelete(endTimeout);
     cancelAndDelete(mediumStateChange);
@@ -75,8 +75,8 @@ void CsmaMac::initialize(int stage)
         radio = check_and_cast<IRadio *>(radioModule);
 
         // initalize self messages
-        endSIFS = new cMessage("SIFS");
-        endDIFS = new cMessage("DIFS");
+        endSifs = new cMessage("SIFS");
+        endDifs = new cMessage("DIFS");
         endBackoff = new cMessage("Backoff");
         endTimeout = new cMessage("Timeout");
         mediumStateChange = new cMessage("MediumStateChange");
@@ -184,10 +184,7 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 
-    CsmaFrame *frame = dynamic_cast<CsmaFrame *>(msg);
-    if (!frame)
-        error("message from physical layer (%s)%s is not a subclass of CsmaFrame",
-              msg->getClassName(), msg->getName());
+    CsmaFrame *frame = check_and_cast<CsmaFrame *>(msg);
 
     EV << "Self address: " << address
        << ", receiver address: " << frame->getReceiverAddress()
@@ -252,19 +249,19 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(scheduleDifsPeriod());
             FSMA_Event_Transition(Immediate-Transmit-Broadcast,
-                                  msg == endDIFS && isBroadcast(getCurrentTransmission()) && !backoff,
+                                  msg == endDifs && isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITBROADCAST,
                 sendBroadcastFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
             FSMA_Event_Transition(Immediate-Transmit-Data,
-                                  msg == endDIFS && !isBroadcast(getCurrentTransmission()) && !backoff,
+                                  msg == endDifs && !isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITACK,
                 sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
             FSMA_Event_Transition(DIFS-Over,
-                                  msg == endDIFS,
+                                  msg == endDifs,
                                   BACKOFF,
                 ASSERT(backoff);
                 if (isInvalidBackoffPeriod())
@@ -345,7 +342,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(scheduleSifsPeriod(frame));
             FSMA_Event_Transition(Transmit-ACK,
-                                  msg == endSIFS,
+                                  msg == endSifs,
                                   IDLE,
                 sendAckFrame();
                 resetStateVariables();
@@ -460,20 +457,20 @@ simtime_t CsmaMac::computeBackoffPeriod(CsmaFrame *msg, int r)
 void CsmaMac::scheduleSifsPeriod(CsmaFrame *frame)
 {
     EV << "scheduling SIFS period\n";
-    endSIFS->setContextPointer(frame->dup());
-    scheduleAt(simTime() + getSifs(), endSIFS);
+    endSifs->setContextPointer(frame->dup());
+    scheduleAt(simTime() + getSifs(), endSifs);
 }
 
 void CsmaMac::scheduleDifsPeriod()
 {
     EV << "scheduling DIFS period\n";
-    scheduleAt(simTime() + getDifs(), endDIFS);
+    scheduleAt(simTime() + getDifs(), endDifs);
 }
 
 void CsmaMac::cancelDifsPeriod()
 {
     EV << "cancelling DIFS period\n";
-    cancelEvent(endDIFS);
+    cancelEvent(endDifs);
 }
 
 void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
@@ -536,17 +533,17 @@ void CsmaMac::cancelBackoffPeriod()
  */
 void CsmaMac::sendAckFrame()
 {
-    CsmaFrame *frameToACK = (CsmaFrame *)endSIFS->getContextPointer();
-    endSIFS->setContextPointer(nullptr);
-    sendAckFrame(check_and_cast<CsmaDataFrame*>(frameToACK));
-    delete frameToACK;
+    CsmaFrame *frameToAck = (CsmaFrame *)endSifs->getContextPointer();
+    endSifs->setContextPointer(nullptr);
+    sendAckFrame(check_and_cast<CsmaDataFrame*>(frameToAck));
+    delete frameToAck;
 }
 
-void CsmaMac::sendAckFrame(CsmaDataFrame *frameToACK)
+void CsmaMac::sendAckFrame(CsmaDataFrame *frameToAck)
 {
     EV << "sending ACK frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(buildAckFrame(frameToACK));
+    sendDown(buildAckFrame(frameToAck));
 }
 
 void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
@@ -571,10 +568,10 @@ CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
     return (CsmaDataFrame *)frameToSend->dup();
 }
 
-CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToACK)
+CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
 {
-    CsmaAckFrame *frame = new CsmaAckFrame("ack");
-    frame->setReceiverAddress(frameToACK->getTransmitterAddress());
+    CsmaAckFrame *frame = new CsmaAckFrame("Ack");
+    frame->setReceiverAddress(frameToAck->getTransmitterAddress());
     frame->setByteLength(16);
     return frame;
 }

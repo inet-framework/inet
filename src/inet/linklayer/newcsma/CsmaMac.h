@@ -114,10 +114,10 @@ class INET_API CsmaMac : public MACProtocolBase
     /** @name Timer messages */
     //@{
     /** End of the Short Inter-Frame Time period */
-    cMessage *endSIFS;
+    cMessage *endSifs;
 
     /** End of the Data Inter-Frame Time period */
-    cMessage *endDIFS;
+    cMessage *endDifs;
 
     /** End of the backoff period */
     cMessage *endBackoff;
