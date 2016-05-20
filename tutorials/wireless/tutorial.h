@@ -641,7 +641,7 @@ backoff period before each transmission.
 
 The effect of CSMA can be seen in the animation below. The first packet is sent by Host A,
 and after waiting for a backup period, Host R1 retransmits the first packet. This time,
-Host B receives it correctly, because Host A is not transmitting while R1 trasmits.
+Host B receives it correctly, because only Host R1 is transmitting.
 
 <img src="step6_4.gif">
 
@@ -1038,9 +1038,7 @@ transmissions to Host B. A new route is formed, and traffic continues to use
 this route until Host R1 moves out of communication range. After that, the
 A-R2-R3-B route is used, as seen in the previous steps.
 
-TODO gif
-
-<img src="wireless-step11-v2.png">
+<img src="step11_1.gif">
 
 <b>Number of packets received by Host B: TODO</b>
 
