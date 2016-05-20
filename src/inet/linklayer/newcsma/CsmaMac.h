@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NEWCSMA_H
-#define __INET_NEWCSMA_H
+#ifndef __INET_CSMAMAC_H
+#define __INET_CSMAMAC_H
 
 #include "inet/common/FSMA.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
-#include "inet/linklayer/newcsma/NewCsmaFrame_m.h"
+#include "inet/linklayer/newcsma/CsmaFrame_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -37,9 +37,9 @@ const int PHY_HEADER_LENGTH = 192;
 const double BITRATE_HEADER = 1E+6;
 const double BANDWIDTH = 2E+6;
 
-class INET_API NewCsmaMac : public MACProtocolBase
+class INET_API CsmaMac : public MACProtocolBase
 {
-  typedef std::list<NewCsmaDataFrame*> NewCsmaDataFrameList;
+  typedef std::list<CsmaDataFrame*> CsmaDataFrameList;
 
   protected:
     IRadio *radio = nullptr;
@@ -74,7 +74,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
 
   public:
     /**
-     * @name NewCsmaMac state variables
+     * @name CsmaMac state variables
      * Various state information checked and modified according to the state machine.
      */
     //@{
@@ -104,7 +104,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
     int retryCounter;
 
     /** Messages received from upper layer and to be transmitted later */
-    NewCsmaDataFrameList transmissionQueue;
+    CsmaDataFrameList transmissionQueue;
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule;
@@ -147,8 +147,8 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * @name Construction functions
      */
     //@{
-    NewCsmaMac();
-    virtual ~NewCsmaMac();
+    CsmaMac();
+    virtual ~CsmaMac();
     //@}
 
   protected:
@@ -182,8 +182,8 @@ class INET_API NewCsmaMac : public MACProtocolBase
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
 
-    virtual NewCsmaDataFrame *encapsulate(cPacket *msg);
-    virtual cPacket *decapsulate(NewCsmaDataFrame *frame);
+    virtual CsmaDataFrame *encapsulate(cPacket *msg);
+    virtual cPacket *decapsulate(CsmaDataFrame *frame);
     //@}
 
   protected:
@@ -195,7 +195,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
     virtual simtime_t getSIFS();
     virtual simtime_t getSlotTime();
     virtual simtime_t getDIFS();
-    virtual simtime_t computeBackoffPeriod(NewCsmaFrame *msg, int r);
+    virtual simtime_t computeBackoffPeriod(CsmaFrame *msg, int r);
     //@}
 
   protected:
@@ -204,13 +204,13 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
-    virtual void scheduleSIFSPeriod(NewCsmaFrame *frame);
+    virtual void scheduleSIFSPeriod(CsmaFrame *frame);
 
     virtual void scheduleDIFSPeriod();
     virtual void cancelDIFSPeriod();
 
-    virtual void scheduleDataTimeoutPeriod(NewCsmaDataFrame *frame);
-    virtual void scheduleBroadcastTimeoutPeriod(NewCsmaDataFrame *frame);
+    virtual void scheduleDataTimeoutPeriod(CsmaDataFrame *frame);
+    virtual void scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frame);
     virtual void cancelTimeoutPeriod();
 
     /** @brief Generates a new backoff period based on the contention window. */
@@ -228,9 +228,9 @@ class INET_API NewCsmaMac : public MACProtocolBase
      */
     //@{
     virtual void sendACKFrame();
-    virtual void sendACKFrame(NewCsmaDataFrame *frame);
-    virtual void sendDataFrame(NewCsmaDataFrame *frameToSend);
-    virtual void sendBroadcastFrame(NewCsmaDataFrame *frameToSend);
+    virtual void sendACKFrame(CsmaDataFrame *frame);
+    virtual void sendDataFrame(CsmaDataFrame *frameToSend);
+    virtual void sendBroadcastFrame(CsmaDataFrame *frameToSend);
     //@}
 
   protected:
@@ -238,9 +238,9 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * @name Frame builder functions
      */
     //@{
-    virtual NewCsmaDataFrame *buildDataFrame(NewCsmaDataFrame *frameToSend);
-    virtual NewCsmaAckFrame *buildACKFrame(NewCsmaDataFrame *frameToACK);
-    virtual NewCsmaDataFrame *buildBroadcastFrame(NewCsmaDataFrame *frameToSend);
+    virtual CsmaDataFrame *buildDataFrame(CsmaDataFrame *frameToSend);
+    virtual CsmaAckFrame *buildACKFrame(CsmaDataFrame *frameToACK);
+    virtual CsmaDataFrame *buildBroadcastFrame(CsmaDataFrame *frameToSend);
     //@}
 
   protected:
@@ -253,7 +253,7 @@ class INET_API NewCsmaMac : public MACProtocolBase
     virtual void retryCurrentTransmission();
 
     /** @brief Returns the current frame being transmitted */
-    virtual NewCsmaDataFrame *getCurrentTransmission();
+    virtual CsmaDataFrame *getCurrentTransmission();
 
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     virtual void resetStateVariables();
@@ -266,10 +266,10 @@ class INET_API NewCsmaMac : public MACProtocolBase
     virtual bool isMediumFree();
 
     /** @brief Returns true if message is a broadcast message */
-    virtual bool isBroadcast(NewCsmaFrame *msg);
+    virtual bool isBroadcast(CsmaFrame *msg);
 
     /** @brief Returns true if message destination address is ours */
-    virtual bool isForUs(NewCsmaFrame *msg);
+    virtual bool isForUs(CsmaFrame *msg);
 
     /** @brief Deletes frame at the front of queue. */
     virtual void popTransmissionQueue();
@@ -279,12 +279,12 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * over the physical channel. 'bits' should be the total length of the MAC frame
      * in bits, but excluding the physical layer framing (preamble etc.)
      */
-    virtual double computeFrameDuration(NewCsmaFrame *msg);
+    virtual double computeFrameDuration(CsmaFrame *msg);
     virtual double computeFrameDuration(int bits, double bitrate);
     //@}
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_NEWCSMA_H
+#endif // ifndef __INET_CSMAMAC_H
 

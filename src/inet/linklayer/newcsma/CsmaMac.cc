@@ -17,13 +17,13 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/newcsma/NewCsmaMac.h"
+#include "inet/linklayer/newcsma/CsmaMac.h"
 
 namespace inet {
 
-Define_Module(NewCsmaMac);
+Define_Module(CsmaMac);
 
-NewCsmaMac::NewCsmaMac()
+CsmaMac::CsmaMac()
 {
     endSIFS = nullptr;
     endDIFS = nullptr;
@@ -32,7 +32,7 @@ NewCsmaMac::NewCsmaMac()
     mediumStateChange = nullptr;
 }
 
-NewCsmaMac::~NewCsmaMac()
+CsmaMac::~CsmaMac()
 {
     cancelAndDelete(endSIFS);
     cancelAndDelete(endDIFS);
@@ -44,7 +44,7 @@ NewCsmaMac::~NewCsmaMac()
 /****************************************************************
  * Initialization functions.
  */
-void NewCsmaMac::initialize(int stage)
+void CsmaMac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
 
@@ -85,7 +85,7 @@ void NewCsmaMac::initialize(int stage)
         initializeQueueModule();
 
         // state variables
-        fsm.setName("NewCsmaMac State Machine");
+        fsm.setName("CsmaMac State Machine");
         retryCounter = 0;
         backoffPeriod = -1;
         backoff = false;
@@ -119,7 +119,7 @@ void NewCsmaMac::initialize(int stage)
     }
 }
 
-InterfaceEntry *NewCsmaMac::createInterfaceEntry()
+InterfaceEntry *CsmaMac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
@@ -139,7 +139,7 @@ InterfaceEntry *NewCsmaMac::createInterfaceEntry()
     return e;
 }
 
-void NewCsmaMac::initializeQueueModule()
+void CsmaMac::initializeQueueModule()
 {
     // use of external queue module is optional -- find it if there's one specified
     if (par("queueModule").stringValue()[0])
@@ -157,14 +157,14 @@ void NewCsmaMac::initializeQueueModule()
 /****************************************************************
  * Message handling functions.
  */
-void NewCsmaMac::handleSelfMessage(cMessage *msg)
+void CsmaMac::handleSelfMessage(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
 
     handleWithFSM(msg);
 }
 
-void NewCsmaMac::handleUpperPacket(cPacket *msg)
+void CsmaMac::handleUpperPacket(cPacket *msg)
 {
     // check for queue overflow
     if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize)
@@ -173,7 +173,7 @@ void NewCsmaMac::handleUpperPacket(cPacket *msg)
         delete msg;
         return;
     }
-    NewCsmaDataFrame *frame = encapsulate(msg);
+    CsmaDataFrame *frame = encapsulate(msg);
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
 
@@ -183,13 +183,13 @@ void NewCsmaMac::handleUpperPacket(cPacket *msg)
     handleWithFSM(frame);
 }
 
-void NewCsmaMac::handleLowerPacket(cPacket *msg)
+void CsmaMac::handleLowerPacket(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 
-    NewCsmaFrame *frame = dynamic_cast<NewCsmaFrame *>(msg);
+    CsmaFrame *frame = dynamic_cast<CsmaFrame *>(msg);
     if (!frame)
-        error("message from physical layer (%s)%s is not a subclass of NewCsmaFrame",
+        error("message from physical layer (%s)%s is not a subclass of CsmaFrame",
               msg->getClassName(), msg->getName());
 
     EV << "Self address: " << address
@@ -206,7 +206,7 @@ void NewCsmaMac::handleLowerPacket(cPacket *msg)
 /**
  * Msg can be upper, lower, self or nullptr (when radio state changes)
  */
-void NewCsmaMac::handleWithFSM(cMessage *msg)
+void CsmaMac::handleWithFSM(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
     if (isUpperMessage(msg) && fsm.getState() != IDLE)
@@ -215,7 +215,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
         return;
     }
 
-    NewCsmaFrame *frame = dynamic_cast<NewCsmaFrame*>(msg);
+    CsmaFrame *frame = dynamic_cast<CsmaFrame*>(msg);
     int frameType = frame ? frame->getType() : -1;
 
     FSMA_Switch(fsm)
@@ -367,14 +367,14 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMessage(msg) && isBroadcast(frame),
                                      IDLE,
-                sendUp(decapsulate(check_and_cast<NewCsmaDataFrame *>(frame)));
+                sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame)));
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
                                      isLowerMessage(msg) && isForUs(frame),
                                      WAITSIFS,
-                sendUp(decapsulate(check_and_cast<NewCsmaDataFrame *>(frame->dup())));
+                sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame->dup())));
                 numReceived++;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
@@ -386,7 +386,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
     }
 }
 
-void NewCsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal) {
@@ -401,9 +401,9 @@ void NewCsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long va
     }
 }
 
-NewCsmaDataFrame *NewCsmaMac::encapsulate(cPacket *msg)
+CsmaDataFrame *CsmaMac::encapsulate(cPacket *msg)
 {
-    NewCsmaDataFrame *frame = new NewCsmaDataFrame(msg->getName());
+    CsmaDataFrame *frame = new CsmaDataFrame(msg->getName());
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
@@ -416,7 +416,7 @@ NewCsmaDataFrame *NewCsmaMac::encapsulate(cPacket *msg)
     return frame;
 }
 
-cPacket *NewCsmaMac::decapsulate(NewCsmaDataFrame *frame)
+cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
@@ -432,22 +432,22 @@ cPacket *NewCsmaMac::decapsulate(NewCsmaDataFrame *frame)
 /****************************************************************
  * Timing functions.
  */
-simtime_t NewCsmaMac::getSIFS()
+simtime_t CsmaMac::getSIFS()
 {
     return 10E-6;
 }
 
-simtime_t NewCsmaMac::getSlotTime()
+simtime_t CsmaMac::getSlotTime()
 {
     return 20E-6;
 }
 
-simtime_t NewCsmaMac::getDIFS()
+simtime_t CsmaMac::getDIFS()
 {
     return getSIFS() + 2 * getSlotTime();
 }
 
-simtime_t NewCsmaMac::computeBackoffPeriod(NewCsmaFrame *msg, int r)
+simtime_t CsmaMac::computeBackoffPeriod(CsmaFrame *msg, int r)
 {
     int cw;
 
@@ -470,61 +470,61 @@ simtime_t NewCsmaMac::computeBackoffPeriod(NewCsmaFrame *msg, int r)
 /****************************************************************
  * Timer functions.
  */
-void NewCsmaMac::scheduleSIFSPeriod(NewCsmaFrame *frame)
+void CsmaMac::scheduleSIFSPeriod(CsmaFrame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSIFS->setContextPointer(frame->dup());
     scheduleAt(simTime() + getSIFS(), endSIFS);
 }
 
-void NewCsmaMac::scheduleDIFSPeriod()
+void CsmaMac::scheduleDIFSPeriod()
 {
     EV << "scheduling DIFS period\n";
     scheduleAt(simTime() + getDIFS(), endDIFS);
 }
 
-void NewCsmaMac::cancelDIFSPeriod()
+void CsmaMac::cancelDIFSPeriod()
 {
     EV << "cancelling DIFS period\n";
     cancelEvent(endDIFS);
 }
 
-void NewCsmaMac::scheduleDataTimeoutPeriod(NewCsmaDataFrame *frameToSend)
+void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
     scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, bitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
-void NewCsmaMac::scheduleBroadcastTimeoutPeriod(NewCsmaDataFrame *frameToSend)
+void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling broadcast timeout period\n";
     scheduleAt(simTime() + computeFrameDuration(frameToSend), endTimeout);
 }
 
-void NewCsmaMac::cancelTimeoutPeriod()
+void CsmaMac::cancelTimeoutPeriod()
 {
     EV << "cancelling timeout period\n";
     cancelEvent(endTimeout);
 }
 
-void NewCsmaMac::invalidateBackoffPeriod()
+void CsmaMac::invalidateBackoffPeriod()
 {
     backoffPeriod = -1;
 }
 
-bool NewCsmaMac::isInvalidBackoffPeriod()
+bool CsmaMac::isInvalidBackoffPeriod()
 {
     return backoffPeriod == -1;
 }
 
-void NewCsmaMac::generateBackoffPeriod()
+void CsmaMac::generateBackoffPeriod()
 {
     backoffPeriod = computeBackoffPeriod(getCurrentTransmission(), retryCounter);
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period set to " << backoffPeriod << endl;
 }
 
-void NewCsmaMac::decreaseBackoffPeriod()
+void CsmaMac::decreaseBackoffPeriod()
 {
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
     backoffPeriod -= ((int)(elapsedBackoffTime / getSlotTime())) * getSlotTime();
@@ -532,13 +532,13 @@ void NewCsmaMac::decreaseBackoffPeriod()
     EV << "backoff period decreased to " << backoffPeriod << endl;
 }
 
-void NewCsmaMac::scheduleBackoffPeriod()
+void CsmaMac::scheduleBackoffPeriod()
 {
     EV << "scheduling backoff period\n";
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
-void NewCsmaMac::cancelBackoffPeriod()
+void CsmaMac::cancelBackoffPeriod()
 {
     EV << "cancelling Backoff period\n";
     cancelEvent(endBackoff);
@@ -547,29 +547,29 @@ void NewCsmaMac::cancelBackoffPeriod()
 /****************************************************************
  * Frame sender functions.
  */
-void NewCsmaMac::sendACKFrame()
+void CsmaMac::sendACKFrame()
 {
-    NewCsmaFrame *frameToACK = (NewCsmaFrame *)endSIFS->getContextPointer();
+    CsmaFrame *frameToACK = (CsmaFrame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(nullptr);
-    sendACKFrame(check_and_cast<NewCsmaDataFrame*>(frameToACK));
+    sendACKFrame(check_and_cast<CsmaDataFrame*>(frameToACK));
     delete frameToACK;
 }
 
-void NewCsmaMac::sendACKFrame(NewCsmaDataFrame *frameToACK)
+void CsmaMac::sendACKFrame(CsmaDataFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildACKFrame(frameToACK));
 }
 
-void NewCsmaMac::sendDataFrame(NewCsmaDataFrame *frameToSend)
+void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
 {
     EV << "sending Data frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(frameToSend));
 }
 
-void NewCsmaMac::sendBroadcastFrame(NewCsmaDataFrame *frameToSend)
+void CsmaMac::sendBroadcastFrame(CsmaDataFrame *frameToSend)
 {
     EV << "sending Broadcast frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
@@ -579,42 +579,42 @@ void NewCsmaMac::sendBroadcastFrame(NewCsmaDataFrame *frameToSend)
 /****************************************************************
  * Frame builder functions.
  */
-NewCsmaDataFrame *NewCsmaMac::buildDataFrame(NewCsmaDataFrame *frameToSend)
+CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
 {
-    NewCsmaDataFrame *frame = (NewCsmaDataFrame *)frameToSend->dup();
+    CsmaDataFrame *frame = (CsmaDataFrame *)frameToSend->dup();
     return frame;
 }
 
-NewCsmaAckFrame *NewCsmaMac::buildACKFrame(NewCsmaDataFrame *frameToACK)
+CsmaAckFrame *CsmaMac::buildACKFrame(CsmaDataFrame *frameToACK)
 {
-    NewCsmaAckFrame *frame = new NewCsmaAckFrame("ack");
+    CsmaAckFrame *frame = new CsmaAckFrame("ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
     return frame;
 }
 
-NewCsmaDataFrame *NewCsmaMac::buildBroadcastFrame(NewCsmaDataFrame *frameToSend)
+CsmaDataFrame *CsmaMac::buildBroadcastFrame(CsmaDataFrame *frameToSend)
 {
-    NewCsmaDataFrame *frame = (NewCsmaDataFrame *)frameToSend->dup();
+    CsmaDataFrame *frame = (CsmaDataFrame *)frameToSend->dup();
     return frame;
 }
 
 /****************************************************************
  * Helper functions.
  */
-void NewCsmaMac::finishCurrentTransmission()
+void CsmaMac::finishCurrentTransmission()
 {
     popTransmissionQueue();
     resetStateVariables();
 }
 
-void NewCsmaMac::giveUpCurrentTransmission()
+void CsmaMac::giveUpCurrentTransmission()
 {
     popTransmissionQueue();
     resetStateVariables();
     numGivenUp++;
 }
 
-void NewCsmaMac::retryCurrentTransmission()
+void CsmaMac::retryCurrentTransmission()
 {
     ASSERT(retryCounter < retryLimit - 1);
     getCurrentTransmission()->setRetry(true);
@@ -624,12 +624,12 @@ void NewCsmaMac::retryCurrentTransmission()
     generateBackoffPeriod();
 }
 
-NewCsmaDataFrame *NewCsmaMac::getCurrentTransmission()
+CsmaDataFrame *CsmaMac::getCurrentTransmission()
 {
-    return (NewCsmaDataFrame *)transmissionQueue.front();
+    return (CsmaDataFrame *)transmissionQueue.front();
 }
 
-void NewCsmaMac::resetStateVariables()
+void CsmaMac::resetStateVariables()
 {
     backoffPeriod = 0;
     retryCounter = 0;
@@ -643,30 +643,30 @@ void NewCsmaMac::resetStateVariables()
     }
 }
 
-bool NewCsmaMac::isMediumStateChange(cMessage *msg)
+bool CsmaMac::isMediumStateChange(cMessage *msg)
 {
     return msg == mediumStateChange;
 }
 
-bool NewCsmaMac::isMediumFree()
+bool CsmaMac::isMediumFree()
 {
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 }
 
-bool NewCsmaMac::isBroadcast(NewCsmaFrame *frame)
+bool CsmaMac::isBroadcast(CsmaFrame *frame)
 {
     return frame && frame->getReceiverAddress().isBroadcast();
 }
 
-bool NewCsmaMac::isForUs(NewCsmaFrame *frame)
+bool CsmaMac::isForUs(CsmaFrame *frame)
 {
     return frame && frame->getReceiverAddress() == address;
 }
 
-void NewCsmaMac::popTransmissionQueue()
+void CsmaMac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
-    NewCsmaFrame *temp = transmissionQueue.front();
+    CsmaFrame *temp = transmissionQueue.front();
     transmissionQueue.pop_front();
     delete temp;
 
@@ -678,12 +678,12 @@ void NewCsmaMac::popTransmissionQueue()
     }
 }
 
-double NewCsmaMac::computeFrameDuration(NewCsmaFrame *msg)
+double CsmaMac::computeFrameDuration(CsmaFrame *msg)
 {
     return computeFrameDuration(msg->getBitLength(), bitrate);
 }
 
-double NewCsmaMac::computeFrameDuration(int bits, double bitrate)
+double CsmaMac::computeFrameDuration(int bits, double bitrate)
 {
     return bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
 }

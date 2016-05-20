@@ -20,7 +20,7 @@ package inet.linklayer.newcsma;
 import inet.linklayer.base.MACProtocolBase;
 import inet.linklayer.contract.IMACProtocol;
 
-simple NewCsmaMac extends MACProtocolBase like IMACProtocol
+simple CsmaMac extends MACProtocolBase like IMACProtocol
 {
     parameters:
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
