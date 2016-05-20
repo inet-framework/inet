@@ -140,10 +140,6 @@ void Ieee80211Mac::initialize(int stage)
         numReceived = 0;
         numSentBroadcast = 0;
         numReceivedBroadcast = 0;
-        stateVector.setName("State");
-        stateVector.setEnum("Ieee80211Mac");
-        radioStateVector.setName("RadioState");
-        radioStateVector.setEnum("RadioState");
 
         // initialize watches
         WATCH(fsm);
@@ -312,8 +308,6 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
 //        RadioState::State newRadioState = check_and_cast<RadioState *>(details)->getState();
 //
 //        // FIXME: double recording, because there's no sample hold in the gui
-//        radioStateVector.record(radioState);
-//        radioStateVector.record(newRadioState);
 //
 //        radioState = newRadioState;
 //
@@ -337,7 +331,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     int frameType = frame ? frame->getType() : -1;
     int msgKind = msg->getKind();
     logState();
-    stateVector.record(fsm.getState());
 
     // TODO: fix bug according to the message: [omnetpp] A possible bug in the Ieee80211's FSM.
     FSMA_Switch(fsm)
@@ -512,7 +505,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     }
 
     logState();
-    stateVector.record(fsm.getState());
 }
 
 /****************************************************************
