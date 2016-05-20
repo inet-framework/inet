@@ -853,7 +853,7 @@ viewed in Normal mode.
 It can be seen in the animation below as Host R1 leaves Host A's communication range at around 11 seconds.
 After that, the communication path is broken. Traffic could be routed through R2 and R3, but that does not happen because
 the routing tables are static and have been configured according to the
-initial positions of the nodes. The intermediate hosts are leaving behind a communication trail as they are moving.
+initial positions of the nodes. The intermediate hosts are leaving behind a movement trail as they are travelling.
 When the communication path breaks, the blue arrow that represents successful network layer communication paths fades away,
 because there are no more packets to reinforce it.
 
