@@ -76,19 +76,12 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     int maxQueueSize;
 
     /**
-     * The minimum length of MPDU to use RTS/CTS mechanism. 0 means always, extremely
-     * large value means never. See spec 9.2.6 and 361.
-     */
-    int rtsThreshold;
-
-    /**
      * Maximum number of transmissions for a message.
      * This includes the initial transmission and all subsequent retransmissions.
      * Thus a value 0 is invalid and a value 1 means no retransmissions.
      * See: dot11ShortRetryLimit on page 484.
      *   'This attribute shall indicate the maximum number of
-     *    transmission attempts of a frame, the length of which is less
-     *    than or equal to dot11RTSThreshold, that shall be made before a
+     *    transmission attempts of a frame, that shall be made before a
      *    failure condition is indicated. The default value of this
      *    attribute shall be 7'
      */
@@ -119,7 +112,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
         BACKOFF,
         WAITACK,
         WAITBROADCAST,
-        WAITCTS,
         WAITSIFS,
         RECEIVE,
     };
@@ -188,7 +180,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** End of the backoff period */
     cMessage *endBackoff;
 
-    /** Timeout after the transmission of an RTS, a CTS, or a DATA frame */
+    /** Timeout after the transmission of a DATA frame */
     cMessage *endTimeout;
 
     /** End of medium reserve period (NAV) when two other nodes were communicating on the channel */
@@ -288,8 +280,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
     virtual void cancelTimeoutPeriod();
 
-    virtual void scheduleCTSTimeoutPeriod();
-
     /** @brief Schedule network allocation period according to 9.2.5.4. */
     virtual void scheduleReservePeriod(Ieee80211Frame *frame);
 
@@ -309,10 +299,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     //@{
     virtual void sendACKFrameOnEndSIFS();
     virtual void sendACKFrame(Ieee80211DataOrMgmtFrame *frame);
-    virtual void sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    virtual void sendCTSFrameOnEndSIFS();
-    virtual void sendCTSFrame(Ieee80211RTSFrame *rtsFrame);
-    virtual void sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend);
     virtual void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     virtual void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
@@ -324,14 +310,12 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     //@{
     virtual Ieee80211DataOrMgmtFrame *buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
-    virtual Ieee80211RTSFrame *buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    virtual Ieee80211CTSFrame *buildCTSFrame(Ieee80211RTSFrame *rtsFrame);
     virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
     //@}
 
     /**
      * @brief Attaches a PhyControlInfo to the frame which will cause it to be sent at
-     * basicBitrate not bitrate (e.g. 2Mbps instead of 11Mbps). Used with ACK, CTS, RTS.
+     * basicBitrate not bitrate (e.g. 2Mbps instead of 11Mbps). Used with ACK.
      */
     virtual Ieee80211Frame *setBasicBitrate(Ieee80211Frame *frame);
 

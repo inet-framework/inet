@@ -49,8 +49,6 @@ enum Ieee80211FrameType
 
     // control (CFEND/CFEND_CFACK omitted):
     ST_PSPOLL = 0x1a;
-    ST_RTS = 0x1b;
-    ST_CTS = 0x1c;
     ST_ACK = 0x1d;
 
     // data (CFPOLL/CFACK subtypes omitted):
@@ -79,7 +77,7 @@ packet Ieee80211Frame
 }
 
 //
-// Format of a 802.11 frame with address1 present, like ACK and CTS
+// Format of a 802.11 frame with address1 present, like ACK
 //
 packet Ieee80211OneAddressFrame extends Ieee80211Frame
 {
@@ -100,22 +98,6 @@ packet Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 {
     byteLength = 20;
     MACAddress transmitterAddress; // aka address2
-}
-
-//
-// Format of the 802.11 RTS frame
-//
-packet Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
-{
-    type = ST_RTS;
-}
-
-//
-// Format of the 802.11 CTS frame
-//
-packet Ieee80211CTSFrame extends Ieee80211OneAddressFrame
-{
-    type = ST_CTS;
 }
 
 //

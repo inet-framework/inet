@@ -34,7 +34,6 @@ Register_Enum(Ieee80211Mac,
     Ieee80211Mac::BACKOFF,
     Ieee80211Mac::WAITACK,
     Ieee80211Mac::WAITBROADCAST,
-    Ieee80211Mac::WAITCTS,
     Ieee80211Mac::WAITSIFS,
     Ieee80211Mac::RECEIVE));
 
@@ -87,7 +86,6 @@ void Ieee80211Mac::initialize(int stage)
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
         basicBitrate = 2e6; //FIXME make it parameter
-        rtsThreshold = par("rtsThresholdBytes");
 
         // the variable is renamed due to a confusion in the standard
         // the name retry limit would be misleading, see the header file comment
@@ -407,13 +405,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(WAITDIFS)
         {
             FSMA_Enter(scheduleDIFSPeriod());
-            FSMA_Event_Transition(Immediate-Transmit-RTS,
-                                  msg == endDIFS && !isBroadcast(getCurrentTransmission())
-                                  && getCurrentTransmission()->getByteLength() >= rtsThreshold && !backoff,
-                                  WAITCTS,
-                sendRTSFrame(getCurrentTransmission());
-                cancelDIFSPeriod();
-            );
             FSMA_Event_Transition(Immediate-Transmit-Broadcast,
                                   msg == endDIFS && isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITBROADCAST,
@@ -455,12 +446,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(BACKOFF)
         {
             FSMA_Enter(scheduleBackoffPeriod());
-            FSMA_Event_Transition(Transmit-RTS,
-                                  msg == endBackoff && !isBroadcast(getCurrentTransmission())
-                                  && getCurrentTransmission()->getByteLength() >= rtsThreshold,
-                                  WAITCTS,
-                sendRTSFrame(getCurrentTransmission());
-            );
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endBackoff && isBroadcast(getCurrentTransmission()),
                                   WAITBROADCAST,
@@ -511,40 +496,9 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 numSentBroadcast++;
             );
         }
-        // accoriding to 9.2.5.7 CTS procedure
-        FSMA_State(WAITCTS)
-        {
-            FSMA_Enter(scheduleCTSTimeoutPeriod());
-            FSMA_Event_Transition(Receive-CTS,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_CTS,
-                                  WAITSIFS,
-                cancelTimeoutPeriod();
-            );
-            FSMA_Event_Transition(Transmit-RTS-Failed,
-                                  msg == endTimeout && retryCounter == transmissionLimit - 1,
-                                  IDLE,
-                giveUpCurrentTransmission();
-            );
-            FSMA_Event_Transition(Receive-CTS-Timeout,
-                                  msg == endTimeout,
-                                  DEFER,
-                retryCurrentTransmission();
-            );
-        }
         FSMA_State(WAITSIFS)
         {
             FSMA_Enter(scheduleSIFSPeriod(frame));
-            FSMA_Event_Transition(Transmit-CTS,
-                                  msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_RTS,
-                                  IDLE,
-                sendCTSFrameOnEndSIFS();
-                resetStateVariables();
-            );
-            FSMA_Event_Transition(Transmit-DATA,
-                                  msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_CTS,
-                                  WAITACK,
-                sendDataFrameOnEndSIFS(getCurrentTransmission());
-            );
             FSMA_Event_Transition(Transmit-ACK,
                                   msg == endSIFS && isDataOrMgmtFrame(getFrameReceivedBeforeSIFS()),
                                   IDLE,
@@ -574,10 +528,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      WAITSIFS,
                 sendUp(frame);
                 numReceived++;
-            );
-            FSMA_No_Event_Transition(Immediate-Receive-RTS,
-                                     isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS,
-                                     WAITSIFS,
             );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
                                      isLowerMsg(msg),
@@ -695,11 +645,6 @@ void Ieee80211Mac::cancelTimeoutPeriod()
     cancelEvent(endTimeout);
 }
 
-void Ieee80211Mac::scheduleCTSTimeoutPeriod()
-{
-    scheduleAt(simTime() + computeFrameDuration(LENGTH_RTS, basicBitrate) + getSIFS() + computeFrameDuration(LENGTH_CTS, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
-}
-
 void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
 {
     simtime_t reserve = frame->getDuration();
@@ -786,14 +731,6 @@ void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
     sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
 }
 
-void Ieee80211Mac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend)
-{
-    Ieee80211Frame *ctsFrame = (Ieee80211Frame *)endSIFS->getContextPointer();
-    endSIFS->setContextPointer(NULL);
-    sendDataFrame(frameToSend);
-    delete ctsFrame;
-}
-
 void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending Data frame\n";
@@ -804,26 +741,6 @@ void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending Broadcast frame\n";
     sendDown(buildBroadcastFrame(frameToSend));
-}
-
-void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
-{
-    EV << "sending RTS frame\n";
-    sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
-}
-
-void Ieee80211Mac::sendCTSFrameOnEndSIFS()
-{
-    Ieee80211Frame *rtsFrame = (Ieee80211Frame *)endSIFS->getContextPointer();
-    endSIFS->setContextPointer(NULL);
-    sendCTSFrame(check_and_cast<Ieee80211RTSFrame*>(rtsFrame));
-    delete rtsFrame;
-}
-
-void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
-{
-    EV << "sending CTS frame\n";
-    sendDown(setBasicBitrate(buildCTSFrame(rtsFrame)));
 }
 
 /****************************************************************
@@ -853,27 +770,6 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
         frame->setDuration(0);
     else
         frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, basicBitrate));
-
-    return frame;
-}
-
-Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
-{
-    Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
-    frame->setTransmitterAddress(address);
-    frame->setReceiverAddress(frameToSend->getReceiverAddress());
-    frame->setDuration(3 * getSIFS() + computeFrameDuration(LENGTH_CTS, basicBitrate) +
-                       computeFrameDuration(frameToSend) +
-                       computeFrameDuration(LENGTH_ACK, basicBitrate));
-
-    return frame;
-}
-
-Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
-{
-    Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
-    frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
-    frame->setDuration(rtsFrame->getDuration() - getSIFS() - computeFrameDuration(LENGTH_CTS, basicBitrate));
 
     return frame;
 }
