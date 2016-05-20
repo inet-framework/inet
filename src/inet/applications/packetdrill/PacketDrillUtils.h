@@ -26,6 +26,7 @@
  #include <sys/socket.h>
 #endif
 #include "inet/transportlayer/sctp/SCTPMessage.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 using namespace inet;
 using namespace sctp;
@@ -126,6 +127,13 @@ enum direction_t {
     DIRECTION_OUTBOUND, /* packet leaving the kernel under test */
 };
 
+/* A --name=value option in a script */
+struct option_list {
+    char *name;
+    char *value;
+    struct option_list *next;
+};
+
 
 #define NO_TIME_RANGE -1    /* time_usecs_end if no range */
 
@@ -186,7 +194,6 @@ enum expression_t {
     EXPR_SCTP_INITMSG, /* struct sctp_initmsg for SCTP_INITMSG */
     EXPR_SCTP_ASSOCVAL, /* struct sctp_assoc_value */
     EXPR_SCTP_SACKINFO, /* struct sctp_sack_info for SCTP_DELAYED_SACK */
-    EXPR_SCTP_NODELAY,
     NUM_EXPR_TYPES,
 };
 
@@ -220,6 +227,7 @@ class PacketDrillConfig;
 class PacketDrillScript;
 class PacketDrillExpression;
 class PacketDrillStruct;
+class PacketDrillOption;
 
 /* A system call and its expected result. */
 struct syscall_spec {
@@ -247,6 +255,9 @@ struct syscall_spec {
 int parse_script(PacketDrillConfig *config,
     PacketDrillScript *script,
     struct invocation *callback_invocation);
+
+void parse_and_finalize_config(struct invocation *invocation);
+
 
 /* Top-level info about the invocation of a test script */
 struct invocation {
@@ -312,6 +323,7 @@ class INET_API PacketDrillConfig
         int getWireProtocol() { return wireProtocol; };
         int getSocketDomain() { return socketDomain; };
         int getToleranceUsecs() { return tolerance_usecs; };
+        void parseScriptOptions(cQueue *options);
 };
 
 
@@ -394,6 +406,7 @@ class INET_API PacketDrillExpression : public cObject
             struct sctp_sack_info_expr *sctp_sack_info;
             cQueue *list;
         } value;
+        std::list<int32> optionList;
         const char *format; /* the printf format for printing the value */
 
     public:
@@ -409,7 +422,7 @@ class INET_API PacketDrillExpression : public cObject
         void setList(cQueue* queue) { value.list = queue; };
         struct binary_expression* getBinary() { return value.binary; };
         void setBinary(struct binary_expression* bin) { value.binary = bin; };
-
+        void insertValue(int64 value_) { optionList.push_back(value_); };
         void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; };
         struct sctp_rtoinfo_expr *getRtoinfo() { return value.sctp_rtoinfo; };
         void setInitmsg(struct sctp_initmsg_expr *exp) { value.sctp_initmsg = exp; };
@@ -418,6 +431,7 @@ class INET_API PacketDrillExpression : public cObject
         struct sctp_assoc_value_expr *getAssocval() { return value.sctp_assoc_value; };
         void setSackinfo(struct sctp_sack_info_expr *exp) { value.sctp_sack_info = exp; };
         struct sctp_sack_info_expr *getSackinfo() { return value.sctp_sack_info; };
+        std::list<int32> getOptionList() { return optionList; };
 
         int unescapeCstringExpression(const char *input_string, char **error);
         int getS32(int32 *value, char **error);
@@ -433,6 +447,7 @@ class INET_API PacketDrillScript
         ~PacketDrillScript();
 
     private:
+        cQueue *optionList;
         cQueue *eventList;
         char *buffer;
         int length;
@@ -446,7 +461,9 @@ class INET_API PacketDrillScript
         int getLength() { return length; };
         const char *getScriptPath() { return scriptPath; };
         cQueue *getEventList() { return eventList; };
+        cQueue *getOptionList() { return optionList; };
         void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); };
+        void addOption(PacketDrillOption *opt) { optionList->insert((cObject *)opt); };
 };
 
 class INET_API PacketDrillStruct: public cObject
@@ -466,6 +483,21 @@ class INET_API PacketDrillStruct: public cObject
         uint32 value2;
 };
 
+class INET_API PacketDrillOption: public cObject
+{
+    public:
+        PacketDrillOption(char *name, char *value);
+
+        char *getName() { return name; };
+        void setName(char *name_) { strcpy(name, name_); };
+        char *getValue() { return value; };
+        void setValue(char *value_) { strcpy(value, value_); };
+
+    private:
+        char *name;
+        char *value;
+};
+
 class INET_API PacketDrillBytes: public cObject
 {
     public:
@@ -474,6 +506,7 @@ class INET_API PacketDrillBytes: public cObject
 
         void appendByte(uint8 byte);
         uint32 getListLength() { return listLength; };
+        ByteArray* getByteList() { return &byteList; };
 
     private:
         ByteArray byteList;
@@ -533,13 +566,15 @@ class INET_API PacketDrillSctpChunk : public cObject
 class INET_API PacketDrillSctpParameter : public cObject
 {
     public:
-        PacketDrillSctpParameter(int16 len_, void* content_);
+        PacketDrillSctpParameter(uint16 type_, int16 len_, void* content_);
 
     private:
         int32 parameterValue;
         cQueue* parameterList;
         int16 parameterLength;
+        ByteArray *bytearray;
         uint32 flags;
+        uint16 type;
 
     public:
         int32 getValue() { return parameterValue; };
@@ -547,6 +582,9 @@ class INET_API PacketDrillSctpParameter : public cObject
         uint32 getFlags() { return flags; };
         void setFlags(uint32 flgs_) { flags = flgs_; };
         int16 getLength() { return parameterLength; };
+        uint16 getType() { return type; };
+        ByteArray* getByteList() { return bytearray; };
+        void setByteArrayPointer(ByteArray *ptr) { bytearray = ptr; };
 };
 
 #endif

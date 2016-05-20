@@ -72,6 +72,11 @@ PacketDrillConfig::~PacketDrillConfig()
 {
 }
 
+void PacketDrillConfig::parseScriptOptions(cQueue *options)
+{
+    printf("parseScriptOptions\n");
+}
+
 PacketDrillPacket::PacketDrillPacket()
 {
    // inetPacket = nullptr;
@@ -205,6 +210,7 @@ PacketDrillEvent::~PacketDrillEvent()
 PacketDrillScript::PacketDrillScript(const char *scriptFile)
 {
     eventList = new cQueue("eventList");
+    optionList = new cQueue("optionList");
     buffer = NULL;
     assert(scriptFile != NULL);
     scriptPath = scriptFile;
@@ -290,6 +296,12 @@ PacketDrillStruct::PacketDrillStruct(uint32 v1, uint32 v2)
     value2 = v2;
 }
 
+PacketDrillOption::PacketDrillOption(char *v1, char *v2)
+{
+    name = strdup(v1);
+    value = strdup(v2);
+}
+
 PacketDrillTcpOption::PacketDrillTcpOption(uint16 kind_, uint16 length_)
 {
     kind = kind_;
@@ -311,6 +323,8 @@ PacketDrillBytes::PacketDrillBytes()
 
 PacketDrillBytes::PacketDrillBytes(uint8 byte)
 {
+    listLength = 0;
+    byteList.setDataArraySize(listLength + 1);
     byteList.setData(listLength, byte);
     listLength++;
 }
@@ -322,9 +336,10 @@ void PacketDrillBytes::appendByte(uint8 byte)
 }
 
 
-PacketDrillSctpParameter::PacketDrillSctpParameter(int16 len, void* content_)
+PacketDrillSctpParameter::PacketDrillSctpParameter(uint16 type_, int16 len, void* content_)
 {
     uint32 flgs = 0;
+    type = type_;
     if (len == -1)
         flgs |= FLAG_CHUNK_LENGTH_NOCHECK;
     parameterLength = len;
@@ -332,6 +347,13 @@ PacketDrillSctpParameter::PacketDrillSctpParameter(int16 len, void* content_)
     if (!content_) {
         flgs |= FLAG_CHUNK_VALUE_NOCHECK;
         parameterList = nullptr;
+    } else {
+        if (type == SUPPORTED_EXTENSIONS) {
+            PacketDrillBytes *pdb = (PacketDrillBytes *)content_;
+            this->setByteArrayPointer(pdb->getByteList());
+        } else {
+           // parameterList = content_->getList();
+        }
     }
 
 

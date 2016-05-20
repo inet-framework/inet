@@ -193,6 +193,7 @@ class INET_API SCTP : public cSimpleModule
 
     SCTPAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
     SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
+    int32 findAssocForFd(int32 fd);
     void sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
     void updateDisplayString();

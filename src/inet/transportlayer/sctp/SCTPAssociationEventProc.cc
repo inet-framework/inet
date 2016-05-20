@@ -55,6 +55,8 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
                 rAddr = openCmd->getRemoteAddr();
             localPort = openCmd->getLocalPort();
             remotePort = openCmd->getRemotePort();
+            EV_DETAIL << "open active with fd=" << fd << " and assocId=" << assocId << endl;
+            fd = openCmd->getFd();
             state->streamReset = openCmd->getStreamReset();
             state->prMethod = openCmd->getPrMethod();
             state->numRequests = openCmd->getNumRequests();
@@ -98,6 +100,9 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
             localPort = openCmd->getLocalPort();
             inboundStreams = openCmd->getInboundStreams();
             outboundStreams = openCmd->getOutboundStreams();
+            listening = true;
+            fd = openCmd->getFd();
+            EV_DETAIL << "open listening socket with fd=" << fd << " and assocId=" << assocId << endl;
             state->localRwnd = (long)sctpMain->par("arwnd");
             state->localMsgRwnd = sctpMain->par("messageAcceptLimit");
             state->streamReset = openCmd->getStreamReset();

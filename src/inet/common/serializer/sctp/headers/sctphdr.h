@@ -436,6 +436,14 @@ struct error_cause
     uint8_t info[0];
 } __PACKED__;
 
+struct error_cause_with_int
+{
+    uint16_t cause_code;
+    uint16_t length;
+    uint16_t info;
+    uint16_t reserved;
+} __PACKED__;
+
 // SACK GAP:
 struct sack_gap
 {
