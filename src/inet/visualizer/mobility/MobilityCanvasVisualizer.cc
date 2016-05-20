@@ -102,7 +102,7 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
     double dy = startPosition.y - endPosition.y;
     // TODO: 1?
     if (trailFigure->getNumFigures() == 0 || dx * dx + dy * dy > 1) {
-        cLineFigure *movementLine = new cLineFigure();
+        cLineFigure *movementLine = new cLineFigure("movementTrail");
         movementLine->setTags("movement_trail recent_history");
         movementLine->setStart(startPosition);
         movementLine->setEnd(endPosition);

@@ -38,9 +38,9 @@ StatisticVisualizerBase::CacheEntry *StatisticCanvasVisualizer::createCacheEntry
     double width = 100;
     double height = 24;
     double spacing = 4;
-    auto labelFigure = new cLabelFigure();
+    auto labelFigure = new cLabelFigure("text");
     labelFigure->setPosition(cFigure::Point(spacing, spacing));
-    auto rectangleFigure = new cRectangleFigure();
+    auto rectangleFigure = new cRectangleFigure("border");
     rectangleFigure->setCornerRx(spacing);
     rectangleFigure->setCornerRy(spacing);
     rectangleFigure->setFilled(true);
@@ -48,7 +48,7 @@ StatisticVisualizerBase::CacheEntry *StatisticCanvasVisualizer::createCacheEntry
     rectangleFigure->setFillColor(color);
     rectangleFigure->setLineColor(cFigure::BLACK);
     rectangleFigure->setBounds(cFigure::Rectangle(0, 0, width, height));
-    auto groupFigure = new cGroupFigure();
+    auto groupFigure = new cGroupFigure("statistic");
     groupFigure->addFigure(rectangleFigure);
     groupFigure->addFigure(labelFigure);
     auto networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);

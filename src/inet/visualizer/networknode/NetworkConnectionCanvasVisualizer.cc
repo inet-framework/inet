@@ -34,7 +34,7 @@ void NetworkConnectionCanvasVisualizer::initialize(int stage)
 
 void NetworkConnectionCanvasVisualizer::createConnection(cModule *startNetworkNode, cModule *endNetworkNode)
 {
-    auto lineFigure = new cLineFigure();
+    auto lineFigure = new cLineFigure("connection");
     lineFigure->setLineColor(lineColor);
     lineFigure->setLineWidth(lineWidth);
     lineFigure->setStart(canvasProjection->computeCanvasPoint(getPosition(startNetworkNode)));

@@ -33,7 +33,7 @@ void SceneCanvasVisualizer::initialize(int stage)
         canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
         canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
-        axisLayer = new cGroupFigure();
+        axisLayer = new cGroupFigure("axisLayer");
         canvas->addFigureBelow(axisLayer, canvas->getSubmodulesLayer());
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
@@ -43,9 +43,9 @@ void SceneCanvasVisualizer::initialize(int stage)
 
 void SceneCanvasVisualizer::initializeAxis(double axisLength)
 {
-    cLineFigure *xAxis = new cLineFigure();
-    cLineFigure *yAxis = new cLineFigure();
-    cLineFigure *zAxis = new cLineFigure();
+    cLineFigure *xAxis = new cLineFigure("xAxis");
+    cLineFigure *yAxis = new cLineFigure("yAxis");
+    cLineFigure *zAxis = new cLineFigure("zAxis");
     xAxis->setTags("axis");
     yAxis->setTags("axis");
     zAxis->setTags("axis");
@@ -67,9 +67,9 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     axisLayer->addFigure(xAxis);
     axisLayer->addFigure(yAxis);
     axisLayer->addFigure(zAxis);
-    cLabelFigure *xLabel = new cLabelFigure();
-    cLabelFigure *yLabel = new cLabelFigure();
-    cLabelFigure *zLabel = new cLabelFigure();
+    cLabelFigure *xLabel = new cLabelFigure("xAxisLabel");
+    cLabelFigure *yLabel = new cLabelFigure("yAxisLabel");
+    cLabelFigure *zLabel = new cLabelFigure("zAxisLabel");
     xLabel->setTags("axis label");
     yLabel->setTags("axis label");
     zLabel->setTags("axis label");

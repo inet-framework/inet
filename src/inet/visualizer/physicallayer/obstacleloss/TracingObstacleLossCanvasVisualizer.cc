@@ -46,7 +46,7 @@ void TracingObstacleLossCanvasVisualizer::obstaclePenetrated(const IPhysicalObje
         const Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
         double intersectionDistance = intersection2.distance(intersection1);
         if (displayIntersectionTrail) {
-            cLineFigure *intersectionLine = new cLineFigure();
+            cLineFigure *intersectionLine = new cLineFigure("intersection");
             intersectionLine->setTags("obstacle_intersection recent_history");
             intersectionLine->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position));
             intersectionLine->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position));
@@ -58,14 +58,14 @@ void TracingObstacleLossCanvasVisualizer::obstaclePenetrated(const IPhysicalObje
         if (displayFaceNormalVectorTrail) {
             Coord normalVisualization1 = normal1 / normal1.length() * intersectionDistance / 10;
             Coord normalVisualization2 = normal2 / normal2.length() * intersectionDistance / 10;
-            cLineFigure *normal1Line = new cLineFigure();
+            cLineFigure *normal1Line = new cLineFigure("normal1");
             normal1Line->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position));
             normal1Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position + rotation.rotateVectorClockwise(normalVisualization1)));
             normal1Line->setLineColor(cFigure::GREY);
             normal1Line->setTags("obstacle_intersection face_normal_vector recent_history");
             normal1Line->setLineWidth(1);
             intersectionTrail->addFigure(normal1Line);
-            cLineFigure *normal2Line = new cLineFigure();
+            cLineFigure *normal2Line = new cLineFigure("normal2");
             normal2Line->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position));
             normal2Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position + rotation.rotateVectorClockwise(normalVisualization2)));
             normal2Line->setLineColor(cFigure::GREY);

@@ -48,7 +48,7 @@ void MediumCanvasVisualizer::initialize(int stage)
             canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
         }
         if (displayRadioFrames) {
-            radioFrameLayer = new cGroupFigure("radio frame");
+            radioFrameLayer = new cGroupFigure("radioFrameLayer");
             canvas->addFigureAbove(radioFrameLayer, canvas->getSubmodulesLayer());
         }
         displayCommunicationHeat = par("displayCommunicationHeat");
@@ -118,7 +118,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto module = check_and_cast<const cModule *>(radio);
         auto node = getContainingNode(const_cast<cModule *>(module));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
-        auto communicationRangeFigure = new cOvalFigure();
+        auto communicationRangeFigure = new cOvalFigure("communicationRange");
         m maxInterferenceRage = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
         communicationRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRage.get(), -maxInterferenceRage.get(), 2 * maxInterferenceRage.get(), 2 * maxInterferenceRage.get()));
         communicationRangeFigure->setLineColor(interferenceRangeColor);
@@ -128,7 +128,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto module = check_and_cast<const cModule *>(radio);
         auto node = getContainingNode(const_cast<cModule *>(module));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
-        auto communicationRangeFigure = new cOvalFigure();
+        auto communicationRangeFigure = new cOvalFigure("communicationRange");
         m maxCommunicationRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
         communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
         communicationRangeFigure->setLineColor(communicationRangeColor);
@@ -147,9 +147,9 @@ void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission
     if (displaySignals) {
         transmissions.push_back(transmission);
         cFigure::Point position = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
-        cGroupFigure *groupFigure = new cGroupFigure();
+        cGroupFigure *groupFigure = new cGroupFigure("signal");
         cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-        cRingFigure *communicationFigure = new cRingFigure();
+        cRingFigure *communicationFigure = new cRingFigure("bubble");
         communicationFigure->setTags("ongoing_transmission");
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFillColor(color);
@@ -160,7 +160,7 @@ void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission
         communicationFigure->setFillOpacity(0.5);
         communicationFigure->setLineOpacity(0.5);
         communicationFigure->setZoomLineWidth(false);
-        cLabelFigure *nameFigure = new cLabelFigure();
+        cLabelFigure *nameFigure = new cLabelFigure("name");
         nameFigure->setPosition(position);
         nameFigure->setTags("ongoing_transmission packet_name label");
         nameFigure->setText(transmission->getMacFrame()->getName());
@@ -200,7 +200,7 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
     Enter_Method_Silent();
     const ITransmission *transmission = reception->getTransmission();
     if (displayRadioFrames) {
-        cLineFigure *communicationFigure = new cLineFigure();
+        cLineFigure *communicationFigure = new cLineFigure("signal");
         communicationFigure->setTags("radio_frame recent_history");
         cFigure::Point start = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
         cFigure::Point end = canvasProjection->computeCanvasPoint(reception->getStartPosition());

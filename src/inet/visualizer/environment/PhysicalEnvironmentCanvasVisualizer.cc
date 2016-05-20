@@ -34,7 +34,7 @@ void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)
     PhysicalEnvironmentVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        objectsLayer = new cGroupFigure();
+        objectsLayer = new cGroupFigure("objectsLayer");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         canvas->addFigureBelow(objectsLayer, canvas->getSubmodulesLayer());
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
@@ -68,7 +68,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
             if (sphere) {
                 double radius = sphere->getRadius();
-                cOvalFigure *figure = new cOvalFigure();
+                cOvalFigure *figure = new cOvalFigure("sphere");
                 figure->setFilled(true);
                 cFigure::Point center = canvasProjection->computeCanvasPoint(position);
                 figure->setBounds(cFigure::Rectangle(center.x - radius, center.y - radius, radius * 2, radius * 2));
@@ -101,7 +101,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             // add name to the end
             const char *name = object->getName();
             if (name) {
-                cLabelFigure *nameFigure = new cLabelFigure();
+                cLabelFigure *nameFigure = new cLabelFigure("objectName");
                 nameFigure->setPosition(canvasProjection->computeCanvasPoint(position));
                 nameFigure->setTags("physical_object object_name label");
                 nameFigure->setText(name);
@@ -123,7 +123,7 @@ void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const PhysicalObject
             cFigure::Point canvPoint = canvasProjection->computeCanvasPoint(rotation.rotateVectorClockwise(facePoint) + position);
             canvasPoints.push_back(canvPoint);
         }
-        cPolygonFigure *figure = new cPolygonFigure();
+        cPolygonFigure *figure = new cPolygonFigure("objectFace");
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
         figure->setLineWidth(object->getLineWidth());
