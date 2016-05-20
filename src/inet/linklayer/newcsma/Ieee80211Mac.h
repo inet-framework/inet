@@ -127,9 +127,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
   protected:
     Mode mode;
 
-    /** Sequence number to be assigned to the next frame */
-    int sequenceNumber;
-
     /** True if backoff is enabled */
     bool backoff;
 
