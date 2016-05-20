@@ -176,9 +176,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
     /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
     // TODO: virtual void receiveChangeNotification(int category, const cPolymorphic * details);
 
-    /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleCommand(cMessage *msg);
-
     /** @brief Handle timer self messages */
     virtual void handleSelfMsg(cMessage *msg);
 

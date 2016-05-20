@@ -185,42 +185,6 @@ void NewCsmaMac::handleUpperPacket(cPacket *msg)
     handleWithFSM(frame);
 }
 
-void NewCsmaMac::handleCommand(cMessage *msg)
-{
-// TODO:
-//    if (msg->getKind()==PHY_C_CONFIGURERADIO)
-//    {
-//        EV << "Passing on command " << msg->getName() << " to physical layer\n";
-//        if (pendingRadioConfigMsg != nullptr)
-//        {
-//            // merge contents of the old command into the new one, then delete it
-//            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
-//            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-//            if (pNew->getChannelNumber()==-1 && pOld->getChannelNumber()!=-1)
-//                pNew->setChannelNumber(pOld->getChannelNumber());
-//            if (pNew->getBitrate()==-1 && pOld->getBitrate()!=-1)
-//                pNew->setBitrate(pOld->getBitrate());
-//            delete pendingRadioConfigMsg;
-//            pendingRadioConfigMsg = nullptr;
-//        }
-//
-//        if (fsm.getState() == IDLE || fsm.getState() == DEFER || fsm.getState() == BACKOFF)
-//        {
-//            EV << "Sending it down immediately\n";
-//            sendDown(msg);
-//        }
-//        else
-//        {
-//            EV << "Delaying " << msg->getName() << " until next IDLE or DEFER state\n";
-//            pendingRadioConfigMsg = msg;
-//        }
-//    }
-//    else
-//    {
-//        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
-//    }
-}
-
 void NewCsmaMac::handleLowerPacket(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
