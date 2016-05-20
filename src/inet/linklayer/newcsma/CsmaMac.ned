@@ -34,5 +34,5 @@ simple CsmaMac extends MACProtocolBase like IMACProtocol
         int cwMin = default(31); // contention window for normal data frames
         int cwMax = default(1023); // contention window for normal data frames
         int retryLimit = default(7); // maximum number of retries per message, -1 means default
-        @class(NewCsmaMac);
+        @class(CsmaMac);
 }
