@@ -42,7 +42,6 @@ namespace newcsma {
  * For more info, see the NED file.
  *
  * TODO: support fragmentation
- * TODO: PCF mode
  * TODO: CF period
  * TODO: pass radio power to upper layer
  * TODO: transmission complete notification to upper layer
@@ -118,15 +117,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
   protected:
     cFSM fsm;
 
-  public:
-    /** 80211 MAC operation modes */
-    enum Mode {
-        DCF,  ///< Distributed Coordination Function
-        PCF,  ///< Point Coordination Function
-    };
   protected:
-    Mode mode;
-
     /** True if backoff is enabled */
     bool backoff;
 
@@ -310,9 +301,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
    /** @brief Send down the change channel message to the physical layer if there is any. */
     virtual void sendDownPendingRadioConfigMsg();
 
-    /** @brief Change the current MAC operation mode. */
-    virtual void setMode(Mode mode);
-
     /** @brief Returns the current frame being transmitted */
     virtual Ieee80211DataFrame *getCurrentTransmission();
 
@@ -345,9 +333,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** @brief Logs all state information */
     virtual void logState();
-
-    /** @brief Produce a readable name of the given MAC operation mode */
-    const char *modeName(int mode);
     //@}
 };
 

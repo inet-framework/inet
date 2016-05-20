@@ -127,7 +127,6 @@ void Ieee80211Mac::initialize(int stage)
 
         // state variables
         fsm.setName("Ieee80211Mac State Machine");
-        mode = DCF;
 //        radioState = RadioState::IDLE;
         retryCounter = 0;
         backoffPeriod = -1;
@@ -761,14 +760,6 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
     }
 }
 
-void Ieee80211Mac::setMode(Mode mode)
-{
-    if (mode == PCF)
-        error("PCF mode not yet supported");
-
-    this->mode = mode;
-}
-
 void Ieee80211Mac::resetStateVariables()
 {
     backoffPeriod = 0;
@@ -830,22 +821,9 @@ double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 
 void Ieee80211Mac::logState()
 {
-    EV  << "state information: mode = " << modeName(mode) << ", state = " << fsm.getStateName()
+    EV  << "state information: state = " << fsm.getStateName()
         << ", backoff = " << backoff << ", backoffPeriod = " << backoffPeriod;
 //        << ", retryCounter = " << retryCounter << ", radioState = " << radioState
-}
-
-const char *Ieee80211Mac::modeName(int mode)
-{
-#define CASE(x) case x: s=#x; break
-    const char *s = "???";
-    switch (mode)
-    {
-        CASE(DCF);
-        CASE(PCF);
-    }
-    return s;
-#undef CASE
 }
 
 }
