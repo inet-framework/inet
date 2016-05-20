@@ -1118,14 +1118,18 @@ Configuration:
 
 @section s12results Results
 
-<!results>
-<!throughput>
+What happens is about the same as in the previous step. At first, Host A's
+packets are relayed by Host R2 until it moves so that the wall separates them.
+The connection is re-established when Host R1 moves out from behind the wall.
+Then it gets out of communication range, and the new route goes through Hosts R2
+and R3.
 
-Now our model takes the objects into account when calculating attenuation.
-The wall is blocking the transmission between Host A and R1 when R1 gets
-behind it.<!rewrite>
+In this model, there are multiple physical effects simulated. There is a more
+realistic radio, radio signal attenuation, and background noise. The blue
+circles representing communication range is an approximation. There is no
+distinct distance where receptions fail, as in the case of 'IdealRadio'.
 
-<b>Number of packets received by Host B: 477</b>
+<b>Number of packets received by Host B: 285</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
