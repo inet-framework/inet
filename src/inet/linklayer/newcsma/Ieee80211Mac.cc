@@ -869,11 +869,6 @@ bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
     return frame && frame->getReceiverAddress() == address;
 }
 
-Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS()
-{
-    return (Ieee80211Frame *)endSIFS->getContextPointer();
-}
-
 void Ieee80211Mac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";

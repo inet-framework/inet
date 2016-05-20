@@ -353,9 +353,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** @brief Returns true if message destination address is ours */
     virtual bool isForUs(Ieee80211Frame *msg);
 
-    /** @brief Returns the last frame received before the SIFS period. */
-    virtual Ieee80211Frame *getFrameReceivedBeforeSIFS();
-
     /** @brief Deletes frame at the front of queue. */
     virtual void popTransmissionQueue();
 
