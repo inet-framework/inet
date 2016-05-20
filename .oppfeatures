@@ -82,7 +82,7 @@
     <feature
         id="INET_examples"
         name="INET examples"
-        description = "Examples for Basic Internet Protocols (IPv4, TCP, UDP)"
+        description = "Examples for basic internet protocols (IPv4, TCP, UDP)"
         initiallyEnabled = "true"
         requires = "IPv4 TCP_INET UDP Ethernet PPP"
         labels = "protocols examples"
@@ -1002,7 +1002,7 @@
     <feature
         id="TUN"
         name="TUN"
-        description = "Provides TUN/TAP virtual network interfaces"
+        description = "TUN/TAP virtual network interface"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1017,7 +1017,7 @@
     <feature
         id="packetdrill"
         name="PacketDrill testing"
-        description = "Provides PacketDrill testing application"
+        description = "PacketDrill testing application"
         initiallyEnabled = "true"
         requires = "TUN"
         labels = ""
@@ -1032,7 +1032,7 @@
     <feature
         id="BMAC"
         name="BMAC"
-        description = "Provides the B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
+        description = "B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1046,7 +1046,7 @@
     <feature
         id="LMAC"
         name="LMAC"
-        description = "Provides the L-MAC, a Lightweight Medium Access Protocol for Wireless Sensor Networks"
+        description = "L-MAC, a lightweight MAC protocol for wireless sensor networks"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1060,7 +1060,7 @@
     <feature
         id="CSMA"
         name="CSMA"
-        description = "Provides link layer support for Carrier Sense Multiple Access protocols"
+        description = "A CSMA (Carrier Sense Multiple Access) MAC protocol, similar to 802.15.4"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1069,6 +1069,20 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_CSMA"
+        linkerFlags = ""
+        />
+    <feature
+        id="CsmaCaMac"
+        name="CSMA/CA"
+        description = "A CSMA/CA (Carrier Sense Multiple Access / Collision Avoidance) MAC protocol, similar to 802.11b"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.csmaca
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CSMACA"
         linkerFlags = ""
         />
 </features>
