@@ -114,9 +114,8 @@ void CsmaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER)
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-    }
 }
 
 InterfaceEntry *CsmaMac::createInterfaceEntry()
@@ -142,8 +141,7 @@ InterfaceEntry *CsmaMac::createInterfaceEntry()
 void CsmaMac::initializeQueueModule()
 {
     // use of external queue module is optional -- find it if there's one specified
-    if (par("queueModule").stringValue()[0])
-    {
+    if (par("queueModule").stringValue()[0]) {
         cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
         queueModule = check_and_cast<IPassiveQueue *>(module);
 
@@ -167,8 +165,7 @@ void CsmaMac::handleSelfMessage(cMessage *msg)
 void CsmaMac::handleUpperPacket(cPacket *msg)
 {
     // check for queue overflow
-    if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize)
-    {
+    if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize) {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         delete msg;
         return;
@@ -209,8 +206,7 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
 void CsmaMac::handleWithFSM(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
-    if (isUpperMessage(msg) && fsm.getState() != IDLE)
-    {
+    if (isUpperMessage(msg) && fsm.getState() != IDLE) {
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
         return;
     }
@@ -389,14 +385,12 @@ void CsmaMac::handleWithFSM(cMessage *msg)
 void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::receptionStateChangedSignal) {
+    if (signalID == IRadio::receptionStateChangedSignal)
         handleWithFSM(mediumStateChange);
-    }
     else if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
-        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-        }
         transmissionState = newRadioTransmissionState;
     }
 }
@@ -450,20 +444,13 @@ simtime_t CsmaMac::getDIFS()
 simtime_t CsmaMac::computeBackoffPeriod(CsmaFrame *msg, int r)
 {
     int cw;
-
     EV << "generating backoff slot number for retry: " << r << endl;
-
     ASSERT(0 <= r && r < retryLimit);
-
     cw = (cwMin + 1) * (1 << r) - 1;
-
     if (cw > cwMax)
         cw = cwMax;
-
     int c = intrand(cw + 1);
-
     EV << "generated backoff slot number: " << c << " , cw: " << cw << endl;
-
     return ((double)c) * getSlotTime();
 }
 
@@ -581,8 +568,7 @@ void CsmaMac::sendBroadcastFrame(CsmaDataFrame *frameToSend)
  */
 CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
 {
-    CsmaDataFrame *frame = (CsmaDataFrame *)frameToSend->dup();
-    return frame;
+    return (CsmaDataFrame *)frameToSend->dup();
 }
 
 CsmaAckFrame *CsmaMac::buildACKFrame(CsmaDataFrame *frameToACK)
@@ -594,8 +580,7 @@ CsmaAckFrame *CsmaMac::buildACKFrame(CsmaDataFrame *frameToACK)
 
 CsmaDataFrame *CsmaMac::buildBroadcastFrame(CsmaDataFrame *frameToSend)
 {
-    CsmaDataFrame *frame = (CsmaDataFrame *)frameToSend->dup();
-    return frame;
+    return (CsmaDataFrame *)frameToSend->dup();
 }
 
 /****************************************************************
@@ -633,12 +618,10 @@ void CsmaMac::resetStateVariables()
     backoffPeriod = 0;
     retryCounter = 0;
 
-    if (!transmissionQueue.empty()) {
+    if (!transmissionQueue.empty())
         backoff = true;
-    }
-    else {
+    else
         backoff = false;
-    }
 }
 
 bool CsmaMac::isMediumStateChange(cMessage *msg)
@@ -668,8 +651,7 @@ void CsmaMac::popTransmissionQueue()
     transmissionQueue.pop_front();
     delete temp;
 
-    if (queueModule)
-    {
+    if (queueModule) {
         // tell queue module that we've become idle
         EV << "requesting another frame from queue module\n";
         queueModule->requestPacket();
