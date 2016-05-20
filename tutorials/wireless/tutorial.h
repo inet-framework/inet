@@ -639,15 +639,14 @@ backoff period before each transmission.
 
 @section s6results Results
 
-Effect of CSMA can be seen in the animation below. The first packet is sent by Host A,
+The effect of CSMA can be seen in the animation below. The first packet is sent by Host A,
 and after waiting for a backup period, Host R1 retransmits the first packet. This time,
 Host B receives it correctly, because Host A is not transmitting while R1 trasmits.
 
 <img src="step6_4.gif">
 
-We can see that throughput is about 380 kbps, so it is increased over the
-previous step thanks to CSMA -- altough less than in step 4 because of the
-interference.
+The following sequence chart displays that after receiving the UDPData-0 packet,
+Host R1 transmits it after the backoff period timer has expired.
 
 <!--TODO: backoff time sequence chart, FIX CSMA first -->
 <img src="wireless-step6-seq-2.png">
