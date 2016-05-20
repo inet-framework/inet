@@ -363,7 +363,7 @@ Host B is in the transmission range of Host R1, and R1 could potentially relay A
 but it drops them, because routing is not configured yet (it will be configured
 in a later step). Therefore no packets are received by Host B.
 
-<img src="wireless-step3-v2.png">
+<img src="wireless-step3.png">
 
 Host R1's MAC submodule logs indicate that it is discarding the received packets, as they are
 not addressed to it:
