@@ -71,6 +71,7 @@ void NewCsmaMac::initialize(int stage)
         // subscribe for the information of the carrier sense
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
         // initalize self messages
@@ -113,6 +114,9 @@ void NewCsmaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+    }
 }
 
 InterfaceEntry *NewCsmaMac::createInterfaceEntry()
@@ -153,7 +157,7 @@ void NewCsmaMac::initializeQueueModule()
 /****************************************************************
  * Message handling functions.
  */
-void NewCsmaMac::handleSelfMsg(cMessage *msg)
+void NewCsmaMac::handleSelfMessage(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
 
@@ -363,14 +367,14 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMessage(msg) && isBroadcast(frame),
                                      IDLE,
-                sendUp(frame);
+                sendUp(decapsulate(check_and_cast<NewCsmaDataFrame *>(frame)));
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
                                      isLowerMessage(msg) && isForUs(frame),
                                      WAITSIFS,
-                sendUp(frame);
+                sendUp(decapsulate(check_and_cast<NewCsmaDataFrame *>(frame->dup())));
                 numReceived++;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
@@ -388,11 +392,20 @@ void NewCsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long va
     if (signalID == IRadio::receptionStateChangedSignal) {
         handleWithFSM(mediumStateChange);
     }
+    else if (signalID == IRadio::transmissionStateChangedSignal) {
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        }
+        transmissionState = newRadioTransmissionState;
+    }
 }
 
 NewCsmaDataFrame *NewCsmaMac::encapsulate(cPacket *msg)
 {
     NewCsmaDataFrame *frame = new NewCsmaDataFrame(msg->getName());
+    // TODO: kludge to make isUpperMessage work
+    frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
     // copy receiver address from the control info (sender address will be set in MAC)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
@@ -545,18 +558,21 @@ void NewCsmaMac::sendACKFrame()
 void NewCsmaMac::sendACKFrame(NewCsmaDataFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildACKFrame(frameToACK));
 }
 
 void NewCsmaMac::sendDataFrame(NewCsmaDataFrame *frameToSend)
 {
     EV << "sending Data frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(frameToSend));
 }
 
 void NewCsmaMac::sendBroadcastFrame(NewCsmaDataFrame *frameToSend)
 {
     EV << "sending Broadcast frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildBroadcastFrame(frameToSend));
 }
 
@@ -571,7 +587,7 @@ NewCsmaDataFrame *NewCsmaMac::buildDataFrame(NewCsmaDataFrame *frameToSend)
 
 NewCsmaAckFrame *NewCsmaMac::buildACKFrame(NewCsmaDataFrame *frameToACK)
 {
-    NewCsmaAckFrame *frame = new NewCsmaAckFrame("wlan-ack");
+    NewCsmaAckFrame *frame = new NewCsmaAckFrame("ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
     return frame;
 }

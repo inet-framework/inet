@@ -42,7 +42,8 @@ class INET_API NewCsmaMac : public MACProtocolBase
   typedef std::list<NewCsmaDataFrame*> NewCsmaDataFrameList;
 
   protected:
-    IRadio *radio;
+    IRadio *radio = nullptr;
+    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     /**
      * @name Configuration parameters
@@ -167,10 +168,8 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * @brief Functions called from other classes to notify about state changes and to handle messages.
      */
     //@{
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
-
     /** @brief Handle timer self messages */
-    virtual void handleSelfMsg(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
 
     /** @brief Handle messages from upper layer */
     virtual void handleUpperPacket(cPacket *msg) override;
@@ -180,6 +179,8 @@ class INET_API NewCsmaMac : public MACProtocolBase
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFSM(cMessage *msg);
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
 
     virtual NewCsmaDataFrame *encapsulate(cPacket *msg);
     virtual cPacket *decapsulate(NewCsmaDataFrame *frame);
