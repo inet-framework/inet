@@ -33,12 +33,7 @@ namespace inet::newcsma;
 //
 enum Ieee80211FrameType
 {
-
-    // control (CFEND/CFEND_CFACK omitted):
-    ST_PSPOLL = 0x1a;
     ST_ACK = 0x1d;
-
-    // data (CFPOLL/CFACK subtypes omitted):
     ST_DATA = 0x20;
 }
 
@@ -54,12 +49,7 @@ packet Ieee80211Frame
 {
     byteLength = 14;
     short type enum(Ieee80211FrameType); // type and subtype
-    bool toDS;
-    bool fromDS;
     bool retry;
-    bool moreFragments;
-    simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
-    short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
     MACAddress receiverAddress; // aka address1
 }
 

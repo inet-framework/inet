@@ -644,15 +644,6 @@ void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataFrame *frameToSend)
 Ieee80211DataFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataFrame *frameToSend)
 {
     Ieee80211DataFrame *frame = (Ieee80211DataFrame *)frameToSend->dup();
-
-    if (isBroadcast(frameToSend))
-        frame->setDuration(0);
-    else if (!frameToSend->getMoreFragments())
-        frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, bitrate));
-    else
-        // FIXME: shouldn't we use the next frame to be sent?
-        frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, bitrate) + computeFrameDuration(frameToSend));
-
     return frame;
 }
 
@@ -660,19 +651,12 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataFrame *frameToACK)
 {
     Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("wlan-ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
-
-    if (!frameToACK->getMoreFragments())
-        frame->setDuration(0);
-    else
-        frame->setDuration(frameToACK->getDuration() - getSIFS() - computeFrameDuration(LENGTH_ACK, bitrate));
-
     return frame;
 }
 
 Ieee80211DataFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataFrame *frameToSend)
 {
     Ieee80211DataFrame *frame = (Ieee80211DataFrame *)frameToSend->dup();
-    frame->setDuration(0);
     return frame;
 }
 
