@@ -25,7 +25,7 @@ namespace inet;
 
 packet CsmaFrame
 {
-    byteLength = 14;
+    byteLength = 10;
     MACAddress receiverAddress;
 }
 
@@ -35,6 +35,6 @@ packet CsmaAckFrame extends CsmaFrame
 
 packet CsmaDataFrame extends CsmaFrame
 {
-    byteLength = 34;
+    byteLength = 16;
     MACAddress transmitterAddress;
 }
