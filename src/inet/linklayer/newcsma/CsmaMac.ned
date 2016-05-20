@@ -30,7 +30,7 @@ simple CsmaMac extends MACProtocolBase like IMACProtocol
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(10); // maximum queue length in frames; only used if queueModule==""
         double bitrate @unit(bps);
-        int headerLength @unit("B") = default(0B);
+        int headerLength @unit(B) = default(8B);
         int mtu = default(1500);
         int cwMin = default(31); // minimum contention window
         int cwMax = default(1023); // maximum contention window

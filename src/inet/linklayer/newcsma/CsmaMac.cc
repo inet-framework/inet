@@ -44,6 +44,7 @@ void CsmaMac::initialize(int stage)
 
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
+        headerLength = par("headerLength");
         cwMin = par("cwMin");
         cwMax = par("cwMax");
         retryLimit = par("retryLimit");
