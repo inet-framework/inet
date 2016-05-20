@@ -244,8 +244,8 @@ void Ieee80211Mac::handleUpperMsg(cPacket *msg)
         return;
     }
 
-    // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
-    Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
+    // must be a Ieee80211DataFrame, within the max size because we don't support fragmentation
+    Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(msg);
     if (frame->getByteLength() > fragmentationThreshold)
         error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
               msg->getClassName(), msg->getName(), msg->getByteLength());
@@ -255,7 +255,6 @@ void Ieee80211Mac::handleUpperMsg(cPacket *msg)
 
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(address);
-    frame->setSequenceNumber(sequenceNumber);
     sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
 
     transmissionQueue.push_back(frame);
@@ -500,7 +499,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleSIFSPeriod(frame));
             FSMA_Event_Transition(Transmit-ACK,
-                                  msg == endSIFS && isDataOrMgmtFrame(getFrameReceivedBeforeSIFS()),
+                                  msg == endSIFS,
                                   IDLE,
                 sendACKFrameOnEndSIFS();
                 resetStateVariables();
@@ -517,14 +516,14 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
-                                     isLowerMsg(msg) && isBroadcast(frame) && isDataOrMgmtFrame(frame),
+                                     isLowerMsg(msg) && isBroadcast(frame),
                                      IDLE,
                 sendUp(frame);
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
-                                     isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame(frame),
+                                     isLowerMsg(msg) && isForUs(frame),
                                      WAITSIFS,
                 sendUp(frame);
                 numReceived++;
@@ -627,13 +626,13 @@ void Ieee80211Mac::cancelDIFSPeriod()
     cancelEvent(endDIFS);
 }
 
-void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataFrame *frameToSend)
 {
     EV << "scheduling data timeout period\n";
     scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2, endTimeout);
 }
 
-void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::scheduleBroadcastTimeoutPeriod(Ieee80211DataFrame *frameToSend)
 {
     EV << "scheduling broadcast timeout period\n";
     scheduleAt(simTime() + computeFrameDuration(frameToSend), endTimeout);
@@ -721,23 +720,23 @@ void Ieee80211Mac::sendACKFrameOnEndSIFS()
 {
     Ieee80211Frame *frameToACK = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
-    sendACKFrame(check_and_cast<Ieee80211DataOrMgmtFrame*>(frameToACK));
+    sendACKFrame(check_and_cast<Ieee80211DataFrame*>(frameToACK));
     delete frameToACK;
 }
 
-void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
+void Ieee80211Mac::sendACKFrame(Ieee80211DataFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
 }
 
-void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::sendDataFrame(Ieee80211DataFrame *frameToSend)
 {
     EV << "sending Data frame\n";
     sendDown(buildDataFrame(frameToSend));
 }
 
-void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataFrame *frameToSend)
 {
     EV << "sending Broadcast frame\n";
     sendDown(buildBroadcastFrame(frameToSend));
@@ -746,9 +745,9 @@ void Ieee80211Mac::sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 /****************************************************************
  * Frame builder functions.
  */
-Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211DataFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataFrame *frameToSend)
 {
-    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
+    Ieee80211DataFrame *frame = (Ieee80211DataFrame *)frameToSend->dup();
 
     if (isBroadcast(frameToSend))
         frame->setDuration(0);
@@ -761,7 +760,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     return frame;
 }
 
-Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
+Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataFrame *frameToACK)
 {
     Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("wlan-ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
@@ -774,9 +773,9 @@ Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameTo
     return frame;
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211DataFrame *Ieee80211Mac::buildBroadcastFrame(Ieee80211DataFrame *frameToSend)
 {
-    Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
+    Ieee80211DataFrame *frame = (Ieee80211DataFrame *)frameToSend->dup();
     frame->setDuration(0);
     return frame;
 }
@@ -816,9 +815,9 @@ void Ieee80211Mac::retryCurrentTransmission()
     generateBackoffPeriod();
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211Mac::getCurrentTransmission()
+Ieee80211DataFrame *Ieee80211Mac::getCurrentTransmission()
 {
-    return (Ieee80211DataOrMgmtFrame *)transmissionQueue.front();
+    return (Ieee80211DataFrame *)transmissionQueue.front();
 }
 
 void Ieee80211Mac::sendDownPendingRadioConfigMsg()
@@ -870,11 +869,6 @@ bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame)
 bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
 {
     return frame && frame->getReceiverAddress() == address;
-}
-
-bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
-{
-    return dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
 }
 
 Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS()

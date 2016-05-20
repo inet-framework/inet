@@ -34,19 +34,6 @@ namespace inet::newcsma;
 enum Ieee80211FrameType
 {
 
-    // management:
-    ST_ASSOCIATIONREQUEST = 0x00;
-    ST_ASSOCIATIONRESPONSE = 0x01;
-    ST_REASSOCIATIONREQUEST = 0x02;
-    ST_REASSOCIATIONRESPONSE = 0x03;
-    ST_PROBEREQUEST = 0x04;
-    ST_PROBERESPONSE = 0x05;
-    ST_BEACON = 0x08;
-    ST_ATIM = 0x09;
-    ST_DISASSOCIATION = 0x0a;
-    ST_AUTHENTICATION = 0x0b;
-    ST_DEAUTHENTICATION = 0x0c;
-
     // control (CFEND/CFEND_CFACK omitted):
     ST_PSPOLL = 0x1a;
     ST_ACK = 0x1d;
@@ -101,30 +88,11 @@ packet Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 }
 
 //
-// Common base class for 802.11 data and management frames
-//
-packet Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
-{
-    byteLength = 28;
-    MACAddress address3;
-    short fragmentNumber;
-    short sequenceNumber;
-}
-
-//
 // Format of the 802.11 data frame
 //
-packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
+packet Ieee80211DataFrame extends Ieee80211TwoAddressFrame
 {
     type = ST_DATA;
     byteLength = 34;
     MACAddress address4;
 }
-
-//
-// Base class for 802.11 management frames (subclasses will add frame body contents)
-//
-packet Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
-{
-}
-

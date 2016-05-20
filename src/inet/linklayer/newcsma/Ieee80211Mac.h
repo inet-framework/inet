@@ -55,7 +55,7 @@ namespace newcsma {
  */
 class INET_API Ieee80211Mac : public WirelessMacBase
 {
-  typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
+  typedef std::list<Ieee80211DataFrame*> Ieee80211DataFrameList;
 
   protected:
     /**
@@ -66,7 +66,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** MAC address */
     MACAddress address;
 
-    /** The bitrate is used to send data and mgmt frames; be sure to use a valid 802.11 bitrate */
+    /** The bitrate is used to send data frames; be sure to use a valid 802.11 bitrate */
     double bitrate;
 
     /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames */
@@ -156,7 +156,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 //    RadioState::State radioState;
 
     /** Messages received from upper layer and to be transmitted later */
-    Ieee80211DataOrMgmtFrameList transmissionQueue;
+    Ieee80211DataFrameList transmissionQueue;
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule;
@@ -276,8 +276,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void scheduleDIFSPeriod();
     virtual void cancelDIFSPeriod();
 
-    virtual void scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
-    virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frame);
+    virtual void scheduleDataTimeoutPeriod(Ieee80211DataFrame *frame);
+    virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataFrame *frame);
     virtual void cancelTimeoutPeriod();
 
     /** @brief Schedule network allocation period according to 9.2.5.4. */
@@ -298,9 +298,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      */
     //@{
     virtual void sendACKFrameOnEndSIFS();
-    virtual void sendACKFrame(Ieee80211DataOrMgmtFrame *frame);
-    virtual void sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    virtual void sendBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual void sendACKFrame(Ieee80211DataFrame *frame);
+    virtual void sendDataFrame(Ieee80211DataFrame *frameToSend);
+    virtual void sendBroadcastFrame(Ieee80211DataFrame *frameToSend);
     //@}
 
   protected:
@@ -308,9 +308,9 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      * @name Frame builder functions
      */
     //@{
-    virtual Ieee80211DataOrMgmtFrame *buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend);
-    virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK);
-    virtual Ieee80211DataOrMgmtFrame *buildBroadcastFrame(Ieee80211DataOrMgmtFrame *frameToSend);
+    virtual Ieee80211DataFrame *buildDataFrame(Ieee80211DataFrame *frameToSend);
+    virtual Ieee80211ACKFrame *buildACKFrame(Ieee80211DataFrame *frameToACK);
+    virtual Ieee80211DataFrame *buildBroadcastFrame(Ieee80211DataFrame *frameToSend);
     //@}
 
     /**
@@ -335,7 +335,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void setMode(Mode mode);
 
     /** @brief Returns the current frame being transmitted */
-    virtual Ieee80211DataOrMgmtFrame *getCurrentTransmission();
+    virtual Ieee80211DataFrame *getCurrentTransmission();
 
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     virtual void resetStateVariables();
@@ -352,9 +352,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** @brief Returns true if message destination address is ours */
     virtual bool isForUs(Ieee80211Frame *msg);
-
-    /** @brief Checks if the frame is a data or management frame */
-    virtual bool isDataOrMgmtFrame(Ieee80211Frame *frame);
 
     /** @brief Returns the last frame received before the SIFS period. */
     virtual Ieee80211Frame *getFrameReceivedBeforeSIFS();
