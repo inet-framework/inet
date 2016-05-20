@@ -15,11 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-//
-// Required for MACAddress declarations
-//
 cplusplus {{
-//FIXME use consts for frame lengths!!! account for LLC(3)+SNAP(5) headers in data frames!!! +add SNAP orgcode, localcode into the msg?
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
@@ -27,62 +23,28 @@ class noncobject MACAddress;
 
 namespace inet::newcsma;
 
-//
-// 802.11 frame type constants (type+subtype), for the "type" field of
-// Ieee80211FrameControl
-//
 enum Ieee80211FrameType
 {
     ST_ACK = 0x1d;
     ST_DATA = 0x20;
 }
 
-//
-// The common part of 802.11 frames.
-//
-// NOTE:
-// FCS value is not explicitly modeled, but it is included in the length.
-// Frame control format fields not supported by this model are omitted:
-// MoreFlag, PowerMgmt, MoreData, WEP, Order.
-//
 packet Ieee80211Frame
 {
     byteLength = 14;
-    short type enum(Ieee80211FrameType); // type and subtype
+    short type enum(Ieee80211FrameType);
     bool retry;
-    MACAddress receiverAddress; // aka address1
+    MACAddress receiverAddress;
 }
 
-//
-// Format of a 802.11 frame with address1 present, like ACK
-//
-packet Ieee80211OneAddressFrame extends Ieee80211Frame
-{
-}
-
-//
-// Format of the 802.11 ACK frame
-//
-packet Ieee80211ACKFrame extends Ieee80211OneAddressFrame
+packet Ieee80211ACKFrame extends Ieee80211Frame
 {
     type = ST_ACK;
 }
 
-//
-// Format of a 802.11 frame with address1 and address2 present
-//
-packet Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
-{
-    byteLength = 20;
-    MACAddress transmitterAddress; // aka address2
-}
-
-//
-// Format of the 802.11 data frame
-//
-packet Ieee80211DataFrame extends Ieee80211TwoAddressFrame
+packet Ieee80211DataFrame extends Ieee80211Frame
 {
     type = ST_DATA;
     byteLength = 34;
-    MACAddress address4;
+    MACAddress transmitterAddress;
 }

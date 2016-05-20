@@ -267,9 +267,6 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
        << ", receiver address: " << frame->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
 
-    Ieee80211TwoAddressFrame *twoAddressFrame = dynamic_cast<Ieee80211TwoAddressFrame *>(msg);
-    ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != address);
-
     handleWithFSM(msg);
 
     // if we are the owner then we did not send this message up
