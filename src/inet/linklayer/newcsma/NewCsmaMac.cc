@@ -55,23 +55,11 @@ void NewCsmaMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
 
-        // initialize parameters
         maxQueueSize = par("maxQueueSize");
         bitrate = par("bitrate");
-
-        // the variable is renamed due to a confusion in the standard
-        // the name retry limit would be misleading, see the header file comment
-        transmissionLimit = par("retryLimit");
-        if (transmissionLimit == -1) transmissionLimit = 7;
-        ASSERT(transmissionLimit > 0);
-
-        cwMinData = par("cwMinData");
-        if (cwMinData == -1) cwMinData = CW_MIN;
-        ASSERT(cwMinData >= 0);
-
-        cwMinBroadcast = par("cwMinBroadcast");
-        if (cwMinBroadcast == -1) cwMinBroadcast = 31;
-        ASSERT(cwMinBroadcast >= 0);
+        cwMin = par("cwMin");
+        cwMax = par("cwMax");
+        retryLimit = par("retryLimit");
 
         const char *addressString = par("address");
         if (!strcmp(addressString, "auto")) {
@@ -395,7 +383,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
                 finishCurrentTransmission();
             );
             FSMA_Event_Transition(Transmit-Data-Failed,
-                                  msg == endTimeout && retryCounter == transmissionLimit - 1,
+                                  msg == endTimeout && retryCounter == retryLimit - 1,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
@@ -479,17 +467,12 @@ simtime_t NewCsmaMac::computeBackoffPeriod(NewCsmaFrame *msg, int r)
 
     EV << "generating backoff slot number for retry: " << r << endl;
 
-    if (isBroadcast(msg))
-        cw = cwMinBroadcast;
-    else
-    {
-        ASSERT(0 <= r && r < transmissionLimit);
+    ASSERT(0 <= r && r < retryLimit);
 
-        cw = (cwMinData + 1) * (1 << r) - 1;
+    cw = (cwMin + 1) * (1 << r) - 1;
 
-        if (cw > CW_MAX)
-            cw = CW_MAX;
-    }
+    if (cw > cwMax)
+        cw = cwMax;
 
     int c = intrand(cw + 1);
 
@@ -644,7 +627,7 @@ void NewCsmaMac::giveUpCurrentTransmission()
 
 void NewCsmaMac::retryCurrentTransmission()
 {
-    ASSERT(retryCounter < transmissionLimit - 1);
+    ASSERT(retryCounter < retryLimit - 1);
     getCurrentTransmission()->setRetry(true);
     retryCounter++;
     numRetry++;

@@ -17,7 +17,9 @@
 
 package inet.linklayer.newcsma;
 
-simple NewCsmaMac
+import inet.linklayer.base.MACProtocolBase;
+
+simple NewCsmaMac extends MACProtocolBase
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -26,14 +28,8 @@ simple NewCsmaMac
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize; // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
-        int retryLimit = default(-1); // maximum number of retries per message, -1 means default
-        int cwMinData = default(-1); // contention window for normal data frames, -1 means default
-        int cwMinBroadcast = default(-1); // contention window for broadcast messages, -1 means default
         int mtu = default(1500);
-        @display("i=block/layer");
-    gates:
-        input uppergateIn;
-        output uppergateOut;
-        input lowergateIn;
-        output lowergateOut;
+        int cwMin = default(31); // contention window for normal data frames
+        int cwMax = default(1023); // contention window for normal data frames
+        int retryLimit = default(7); // maximum number of retries per message, -1 means default
 }

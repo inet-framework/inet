@@ -32,12 +32,6 @@ const unsigned int LENGTH_ACK = 112;
 
 const_simtime_t MAX_PROPAGATION_DELAY = 2E-6;  // 300 meters at the speed of light
 
-/** Minimum size (initial size) of contention window */
-const int CW_MIN = 31;
-
-/** Maximum size of contention window */
-const int CW_MAX = 1023;
-
 const int PHY_HEADER_LENGTH = 192;
 const double BITRATE_HEADER = 1E+6;
 const double BANDWIDTH = 2E+6;
@@ -65,13 +59,13 @@ class INET_API NewCsmaMac : public MACProtocolBase
      * This includes the initial transmission and all subsequent retransmissions.
      * Thus a value 0 is invalid and a value 1 means no retransmissions.
      */
-    int transmissionLimit;
+    int retryLimit;
 
     /** Minimum contention window. */
-    int cwMinData;
+    int cwMin;
 
-    /** Contention window size for broadcast messages. */
-    int cwMinBroadcast;
+    /** Maximum contention window. */
+    int cwMax;
     //@}
 
   public:
