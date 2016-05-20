@@ -557,7 +557,7 @@ CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
 
 CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
 {
-    CsmaAckFrame *frame = new CsmaAckFrame("Ack");
+    CsmaAckFrame *frame = new CsmaAckFrame("CsmaAck");
     frame->setReceiverAddress(frameToAck->getTransmitterAddress());
     frame->setByteLength(LENGTH_ACK / 8);
     return frame;
@@ -579,6 +579,7 @@ void CsmaMac::finishCurrentTransmission()
 
 void CsmaMac::giveUpCurrentTransmission()
 {
+    emit(NF_LINK_BREAK, getCurrentTransmission());
     popTransmissionQueue();
     resetStateVariables();
     numGivenUp++;
