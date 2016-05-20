@@ -227,7 +227,7 @@ void Ieee80211Mac::handleUpperMsg(cPacket *msg)
         delete msg;
         return;
     }
-
+    Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(msg);
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
     ASSERT(!frame->getReceiverAddress().isUnspecified());
