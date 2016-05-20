@@ -189,7 +189,7 @@ Here is an animation showing the hosts communicating:
 <img src="step1_8.gif">
 
 This animation shows how a host looks on the inside, and an UDP packet being
-sent down from the UDP Application submodule.
+sent down from the UDP Application submodule, and transmitted by the wlan interface.
 
 <img src="step1_1.gif">
 
