@@ -53,7 +53,6 @@ Ieee80211Mac::Ieee80211Mac()
     endDIFS = NULL;
     endBackoff = NULL;
     endTimeout = NULL;
-    endReserve = NULL;
     mediumStateChange = NULL;
     pendingRadioConfigMsg = NULL;
 }
@@ -64,7 +63,6 @@ Ieee80211Mac::~Ieee80211Mac()
     cancelAndDelete(endDIFS);
     cancelAndDelete(endBackoff);
     cancelAndDelete(endTimeout);
-    cancelAndDelete(endReserve);
     cancelAndDelete(mediumStateChange);
 
     if (pendingRadioConfigMsg)
@@ -119,7 +117,6 @@ void Ieee80211Mac::initialize(int stage)
         endDIFS = new cMessage("DIFS");
         endBackoff = new cMessage("Backoff");
         endTimeout = new cMessage("Timeout");
-        endReserve = new cMessage("Reserve");
         mediumStateChange = new cMessage("MediumStateChange");
 
         // interface
@@ -135,7 +132,6 @@ void Ieee80211Mac::initialize(int stage)
         retryCounter = 0;
         backoffPeriod = -1;
         backoff = false;
-        nav = false;
 
         // statistics
         numRetry = 0;
@@ -156,7 +152,6 @@ void Ieee80211Mac::initialize(int stage)
 //        WATCH(radioState);
         WATCH(retryCounter);
         WATCH(backoff);
-        WATCH(nav);
 
         WATCH(numRetry);
         WATCH(numSentWithoutRetry);
@@ -225,9 +220,6 @@ void Ieee80211Mac::initializeQueueModule()
 void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 {
     EV << "received self message: " << msg << endl;
-
-    if (msg == endReserve)
-        nav = false;
 
     handleWithFSM(msg);
 }
@@ -353,11 +345,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     int msgKind = msg->getKind();
     logState();
     stateVector.record(fsm.getState());
-
-    if (frame && isLowerMsg(frame))
-    {
-        scheduleReservePeriod(frame);
-    }
 
     // TODO: fix bug according to the message: [omnetpp] A possible bug in the Ieee80211's FSM.
     FSMA_Switch(fsm)
@@ -620,37 +607,6 @@ void Ieee80211Mac::cancelTimeoutPeriod()
     cancelEvent(endTimeout);
 }
 
-void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
-{
-    simtime_t reserve = frame->getDuration();
-
-    // see spec. 7.1.3.2
-    if (!isForUs(frame) && reserve != 0 && reserve < 32768)
-    {
-        if (endReserve->isScheduled()) {
-            simtime_t oldReserve = endReserve->getArrivalTime() - simTime();
-
-            if (oldReserve > reserve)
-                return;
-
-            reserve = std::max(reserve, oldReserve);
-            cancelEvent(endReserve);
-        }
-//        else if (radioState == RadioState::IDLE)
-//        {
-//            // NAV: the channel just became virtually busy according to the spec
-//            scheduleAt(simTime(), mediumStateChange);
-//        }
-
-        EV << "scheduling reserve period for: " << reserve << endl;
-
-        ASSERT(reserve > 0);
-
-        nav = true;
-        scheduleAt(simTime() + reserve, endReserve);
-    }
-}
-
 void Ieee80211Mac::invalidateBackoffPeriod()
 {
     backoffPeriod = -1;
@@ -829,12 +785,12 @@ void Ieee80211Mac::resetStateVariables()
 
 bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
 {
-//    return msg == mediumStateChange || (msg == endReserve && radioState == RadioState::IDLE);
+//    return msg == mediumStateChange || (radioState == RadioState::IDLE);
 }
 
 bool Ieee80211Mac::isMediumFree()
 {
-//    return radioState == RadioState::IDLE && !endReserve->isScheduled();
+//    return radioState == RadioState::IDLE;
 }
 
 bool Ieee80211Mac::isBroadcast(Ieee80211Frame *frame)
@@ -875,9 +831,8 @@ double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 void Ieee80211Mac::logState()
 {
     EV  << "state information: mode = " << modeName(mode) << ", state = " << fsm.getStateName()
-        << ", backoff = " << backoff << ", backoffPeriod = " << backoffPeriod
+        << ", backoff = " << backoff << ", backoffPeriod = " << backoffPeriod;
 //        << ", retryCounter = " << retryCounter << ", radioState = " << radioState
-        << ", nav = " << nav << endl;
 }
 
 const char *Ieee80211Mac::modeName(int mode)

@@ -133,9 +133,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** True if backoff is enabled */
     bool backoff;
 
-    /** True during network allocation period. This flag is present to be able to watch this state. */
-    bool nav;
-
     /** Remaining backoff period in seconds */
     simtime_t backoffPeriod;
 
@@ -175,9 +172,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** Timeout after the transmission of a DATA frame */
     cMessage *endTimeout;
-
-    /** End of medium reserve period (NAV) when two other nodes were communicating on the channel */
-    cMessage *endReserve;
 
     /** Radio state change self message. Currently this is optimized away and sent directly */
     cMessage *mediumStateChange;
@@ -270,9 +264,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void scheduleDataTimeoutPeriod(Ieee80211DataFrame *frame);
     virtual void scheduleBroadcastTimeoutPeriod(Ieee80211DataFrame *frame);
     virtual void cancelTimeoutPeriod();
-
-    /** @brief Schedule network allocation period according to 9.2.5.4. */
-    virtual void scheduleReservePeriod(Ieee80211Frame *frame);
 
     /** @brief Generates a new backoff period based on the contention window. */
     virtual void invalidateBackoffPeriod();
