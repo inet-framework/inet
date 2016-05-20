@@ -53,7 +53,7 @@ NewCsmaMac::~NewCsmaMac()
  */
 void NewCsmaMac::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MACProtocolBase::initialize(stage);
 
     if (stage == 0)
     {
@@ -97,9 +97,6 @@ void NewCsmaMac::initialize(int stage)
         endTimeout = new cMessage("Timeout");
         mediumStateChange = new cMessage("MediumStateChange");
 
-        // interface
-        registerInterface();
-
         // obtain pointer to external queue
         initializeQueueModule();
 
@@ -137,39 +134,24 @@ void NewCsmaMac::initialize(int stage)
     }
 }
 
-void NewCsmaMac::registerInterface()
+InterfaceEntry *NewCsmaMac::createInterfaceEntry()
 {
-//    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
-//    if (!ift)
-//        return;
-//
-//    InterfaceEntry *e = new InterfaceEntry();
-//
-//    // interface name: NetworkInterface module's name without special characters ([])
-//    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-//    char *d = interfaceName;
-//    for (const char *s = getParentModule()->getFullName(); *s; s++)
-//        if (isalnum(*s))
-//            *d++ = *s;
-//    *d = '\0';
-//
-//    e->setName(interfaceName);
-//    delete [] interfaceName;
-//
-//    // address
-//    e->setMACAddress(address);
-//    e->setInterfaceToken(address.formInterfaceIdentifier());
-//
-//    // FIXME: MTU on 802.11 = ?
-//    e->setMtu(par("mtu"));
-//
-//    // capabilities
-//    e->setBroadcast(true);
-//    e->setMulticast(true);
-//    e->setPointToPoint(false);
-//
-//    // add
-//    ift->addInterface(e, this);
+    InterfaceEntry *e = new InterfaceEntry(this);
+
+    // data rate
+    e->setDatarate(bitrate);
+
+    // generate a link-layer address to be used as interface token for IPv6
+    e->setMACAddress(address);
+    e->setInterfaceToken(address.formInterfaceIdentifier());
+
+    // capabilities
+    e->setMtu(par("mtu"));
+    e->setMulticast(true);
+    e->setBroadcast(true);
+    e->setPointToPoint(false);
+
+    return e;
 }
 
 void NewCsmaMac::initializeQueueModule()
@@ -197,7 +179,7 @@ void NewCsmaMac::handleSelfMsg(cMessage *msg)
     handleWithFSM(msg);
 }
 
-void NewCsmaMac::handleUpperMsg(cPacket *msg)
+void NewCsmaMac::handleUpperPacket(cPacket *msg)
 {
     // check for queue overflow
     if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize)
@@ -254,7 +236,7 @@ void NewCsmaMac::handleCommand(cMessage *msg)
 //    }
 }
 
-void NewCsmaMac::handleLowerMsg(cPacket *msg)
+void NewCsmaMac::handleLowerPacket(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 
@@ -297,7 +279,7 @@ void NewCsmaMac::handleLowerMsg(cPacket *msg)
 void NewCsmaMac::handleWithFSM(cMessage *msg)
 {
     // skip those cases where there's nothing to do, so the switch looks simpler
-    if (isUpperMsg(msg) && fsm.getState() != IDLE)
+    if (isUpperMessage(msg) && fsm.getState() != IDLE)
     {
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
         return;
@@ -314,7 +296,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Data-Ready,
-                                  isUpperMsg(msg),
+                                  isUpperMessage(msg),
                                   DEFER,
                 ASSERT(isInvalidBackoffPeriod() || backoffPeriod == 0);
                 invalidateBackoffPeriod();
@@ -325,7 +307,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
                 invalidateBackoffPeriod();
             );
             FSMA_Event_Transition(Receive,
-                                  isLowerMsg(msg),
+                                  isLowerMessage(msg),
                                   RECEIVE,
             );
         }
@@ -341,7 +323,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
                                      WAITDIFS,
             ;);
             FSMA_Event_Transition(Receive,
-                                  isLowerMsg(msg),
+                                  isLowerMessage(msg),
                                   RECEIVE,
             ;);
         }
@@ -381,7 +363,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
             );
             // radio state changes before we actually get the message, so this must be here
             FSMA_Event_Transition(Receive,
-                                  isLowerMsg(msg),
+                                  isLowerMessage(msg),
                                   RECEIVE,
                 cancelDIFSPeriod();
             ;);
@@ -410,7 +392,7 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
         {
             FSMA_Enter(scheduleDataTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-ACK,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK,
+                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK,
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
@@ -453,26 +435,26 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
         FSMA_State(RECEIVE)
         {
             FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMsg(msg) && frame->hasBitError(),
+                                     isLowerMessage(msg) && frame->hasBitError(),
                                      IDLE,
                 numCollision++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
-                                     isLowerMsg(msg) && isBroadcast(frame),
+                                     isLowerMessage(msg) && isBroadcast(frame),
                                      IDLE,
                 sendUp(frame);
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
-                                     isLowerMsg(msg) && isForUs(frame),
+                                     isLowerMessage(msg) && isForUs(frame),
                                      WAITSIFS,
                 sendUp(frame);
                 numReceived++;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
-                                     isLowerMsg(msg),
+                                     isLowerMessage(msg),
                                      IDLE,
                 resetStateVariables();
             );

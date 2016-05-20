@@ -21,11 +21,10 @@
 // uncomment this if you do not want to log state machine transitions
 #define FSM_DEBUG
 
-#include <list>
-#include "WirelessMacBase.h"
-#include "inet/common/queue/IPassiveQueue.h"
-#include "NewCsmaFrame_m.h"
 #include "inet/common/FSMA.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/linklayer/base/MACProtocolBase.h"
+#include "inet/linklayer/newcsma/NewCsmaFrame_m.h"
 
 namespace inet {
 
@@ -73,7 +72,7 @@ const double BANDWIDTH = 2E+6;
  *
  * @ingroup macLayer
  */
-class INET_API NewCsmaMac : public WirelessMacBase
+class INET_API NewCsmaMac : public MACProtocolBase
 {
   typedef std::list<NewCsmaDataFrame*> NewCsmaDataFrameList;
 
@@ -208,10 +207,9 @@ class INET_API NewCsmaMac : public WirelessMacBase
      */
     //@{
     /** @brief Initialization of the module and its variables */
-    virtual int numInitStages() const {return 2;}
-    virtual void initialize(int);
-    virtual void registerInterface();
+    virtual void initialize(int stage) override;
     virtual void initializeQueueModule();
+    virtual InterfaceEntry *createInterfaceEntry() override;
     //@}
 
   protected:
@@ -230,10 +228,10 @@ class INET_API NewCsmaMac : public WirelessMacBase
     virtual void handleSelfMsg(cMessage *msg);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg) override;
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerMsg(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg) override;
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFSM(cMessage *msg);
