@@ -292,7 +292,7 @@ at Host B is over.
 In the following animation, Host A sends the following:
 4 packets - gap - 1 packet - gap - 2 packets
 
-<img src="step2_4_1.gif">
+<img src="step2_3.gif">
 
 This exchange, and the back-to-back radio frames, are visualized in a sequence chart below.
 It indicates that transmission of the packet UDPData-0 starts at around 15ms,
