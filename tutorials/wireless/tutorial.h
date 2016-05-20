@@ -646,7 +646,7 @@ The effect of CSMA can be seen in the animation below. The first packet is sent 
 and after waiting for a backup period, Host R1 retransmits the first packet. This time,
 Host B receives it correctly, because only Host R1 is transmitting.
 
-<img src="step6_4.gif">
+<img src="step6_2_1.gif">
 
 The following sequence chart displays that after receiving the UDPData-0 packet,
 Host R1 transmits it after the backoff period timer has expired.
