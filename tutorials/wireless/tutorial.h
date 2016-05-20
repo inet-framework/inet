@@ -475,7 +475,7 @@ transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
 
-<img src="wireless-step4-v2.png">
+<img src="wireless-step4.png">
 
 <! number of packets>
 
