@@ -107,12 +107,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule;
-
-    /**
-     * The last change channel message received and not yet sent to the physical layer, or NULL.
-     * The message will be sent down when the state goes to IDLE or DEFER next time.
-     */
-    cMessage *pendingRadioConfigMsg;
     //@}
 
   protected:
@@ -256,9 +250,6 @@ class INET_API NewCsmaMac : public MACProtocolBase
     virtual void finishCurrentTransmission();
     virtual void giveUpCurrentTransmission();
     virtual void retryCurrentTransmission();
-
-   /** @brief Send down the change channel message to the physical layer if there is any. */
-    virtual void sendDownPendingRadioConfigMsg();
 
     /** @brief Returns the current frame being transmitted */
     virtual NewCsmaDataFrame *getCurrentTransmission();

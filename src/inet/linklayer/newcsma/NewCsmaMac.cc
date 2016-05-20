@@ -30,7 +30,6 @@ NewCsmaMac::NewCsmaMac()
     endBackoff = nullptr;
     endTimeout = nullptr;
     mediumStateChange = nullptr;
-    pendingRadioConfigMsg = nullptr;
 }
 
 NewCsmaMac::~NewCsmaMac()
@@ -40,9 +39,6 @@ NewCsmaMac::~NewCsmaMac()
     cancelAndDelete(endBackoff);
     cancelAndDelete(endTimeout);
     cancelAndDelete(mediumStateChange);
-
-    if (pendingRadioConfigMsg)
-        delete pendingRadioConfigMsg;
 }
 
 /****************************************************************
@@ -222,7 +218,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
     {
         FSMA_State(IDLE)
         {
-            FSMA_Enter(sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMessage(msg),
                                   DEFER,
@@ -241,7 +236,6 @@ void NewCsmaMac::handleWithFSM(cMessage *msg)
         }
         FSMA_State(DEFER)
         {
-            FSMA_Enter(sendDownPendingRadioConfigMsg());
             FSMA_Event_Transition(Wait-DIFS,
                                   isMediumStateChange(msg) && isMediumFree(),
                                   WAITDIFS,
@@ -617,15 +611,6 @@ void NewCsmaMac::retryCurrentTransmission()
 NewCsmaDataFrame *NewCsmaMac::getCurrentTransmission()
 {
     return (NewCsmaDataFrame *)transmissionQueue.front();
-}
-
-void NewCsmaMac::sendDownPendingRadioConfigMsg()
-{
-    if (pendingRadioConfigMsg != nullptr)
-    {
-        sendDown(pendingRadioConfigMsg);
-        pendingRadioConfigMsg = nullptr;
-    }
 }
 
 void NewCsmaMac::resetStateVariables()
