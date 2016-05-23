@@ -28,7 +28,8 @@ CsmaMac::~CsmaMac()
     cancelAndDelete(endSifs);
     cancelAndDelete(endDifs);
     cancelAndDelete(endBackoff);
-    cancelAndDelete(endTimeout);
+    cancelAndDelete(endAck);
+    cancelAndDelete(endData);
     cancelAndDelete(mediumStateChange);
 }
 
@@ -74,7 +75,8 @@ void CsmaMac::initialize(int stage)
         endSifs = new cMessage("SIFS");
         endDifs = new cMessage("DIFS");
         endBackoff = new cMessage("Backoff");
-        endTimeout = new cMessage("Timeout");
+        endData = new cMessage("Data");
+        endAck = new cMessage("Ack");
         mediumStateChange = new cMessage("MediumStateChange");
 
         // obtain pointer to external queue
@@ -241,13 +243,13 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_Enter(scheduleDifsPeriod());
             FSMA_Event_Transition(Immediate-Transmit-Broadcast,
                                   msg == endDifs && isBroadcast(getCurrentTransmission()) && !backoff,
-                                  TRANSMIT,
+                                  WAITTRANSMIT,
                 sendBroadcastFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
             FSMA_Event_Transition(Immediate-Transmit-Data,
                                   msg == endDifs && !isBroadcast(getCurrentTransmission()) && !backoff,
-                                  WAITACK,
+                                  WAITTRANSMIT,
                 sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
@@ -282,12 +284,12 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_Enter(scheduleBackoffPeriod());
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endBackoff && isBroadcast(getCurrentTransmission()),
-                                  TRANSMIT,
+                                  WAITTRANSMIT,
                 sendBroadcastFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Transmit-Data,
                                   msg == endBackoff && !isBroadcast(getCurrentTransmission()),
-                                  WAITACK,
+                                  WAITTRANSMIT,
                 sendDataFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Backoff-Busy,
@@ -297,53 +299,45 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 decreaseBackoffPeriod();
             );
         }
-        FSMA_State(WAITACK)
+        FSMA_State(WAITTRANSMIT)
         {
-            FSMA_No_Event_Transition(Immediate-No-Ack,
-                                     !useAck,
-                                     IDLE,
-                 if (retryCounter == 0) numSentWithoutRetry++;
-                 numSent++;
-                finishCurrentTransmission();
-            );
-            FSMA_Enter(scheduleDataTimeoutPeriod(getCurrentTransmission()));
-            FSMA_Event_Transition(Receive-ACK,
-                                  isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaAckFrame *>(frame),
-                                  IDLE,
-                if (retryCounter == 0) numSentWithoutRetry++;
-                numSent++;
-                cancelTimeoutPeriod();
-                finishCurrentTransmission();
-            );
-            FSMA_Event_Transition(Transmit-Data-Failed,
-                                  msg == endTimeout && retryCounter == retryLimit - 1,
-                                  IDLE,
-                giveUpCurrentTransmission();
-            );
-            FSMA_Event_Transition(Receive-ACK-Timeout,
-                                  msg == endTimeout,
-                                  DEFER,
-                retryCurrentTransmission();
-            );
-        }
-        FSMA_State(TRANSMIT)
-        {
-            FSMA_Enter(scheduleBroadcastTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Transmit-Broadcast,
-                                  msg == endTimeout,
+                                  msg == endData && isBroadcast(getCurrentTransmission()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSentBroadcast++;
             );
-        }
-        FSMA_State(WAITSIFS)
-        {
-            FSMA_Enter(scheduleSifsPeriod(frame));
-            FSMA_Event_Transition(Transmit-ACK,
-                                  msg == endSifs,
+            FSMA_Event_Transition(Transmit-Unicast-No-Ack,
+                                  msg == endData && !useAck && !isBroadcast(getCurrentTransmission()),
                                   IDLE,
-                sendAckFrame();
-                resetStateVariables();
+                finishCurrentTransmission();
+                numSent++;
+            );
+            FSMA_Event_Transition(Transmit-Unicast-Ack,
+                                  msg == endData && useAck && !isBroadcast(getCurrentTransmission()),
+                                  WAITACK,
+            );
+        }
+        FSMA_State(WAITACK)
+        {
+            FSMA_Enter(scheduleAckTimeoutPeriod(getCurrentTransmission()));
+            FSMA_Event_Transition(Receive-Ack,
+                                  isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaAckFrame *>(frame),
+                                  IDLE,
+                if (retryCounter == 0) numSentWithoutRetry++;
+                numSent++;
+                cancelAckTimeoutPeriod();
+                finishCurrentTransmission();
+            );
+            FSMA_Event_Transition(Transmit-Data-Failed,
+                                  msg == endAck && retryCounter == retryLimit - 1,
+                                  IDLE,
+                giveUpCurrentTransmission();
+            );
+            FSMA_Event_Transition(Receive-Ack-Timeout,
+                                  msg == endAck,
+                                  DEFER,
+                retryCurrentTransmission();
             );
         }
         FSMA_State(RECEIVE)
@@ -361,15 +355,32 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Data,
-                                     isLowerMessage(msg) && isForUs(frame),
-                                     useAck ? WAITSIFS : IDLE,
+            FSMA_No_Event_Transition(Immediate-Receive-Data-No-Ack,
+                                     isLowerMessage(msg) && isForUs(frame) && !useAck,
+                                     IDLE,
+                sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame->dup())));
+                numReceived++;
+                resetStateVariables();
+            );
+            FSMA_No_Event_Transition(Immediate-Receive-Data-Ack,
+                                     isLowerMessage(msg) && isForUs(frame) && useAck,
+                                     WAITSIFS,
                 sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame->dup())));
                 numReceived++;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
                                      isLowerMessage(msg),
                                      IDLE,
+                resetStateVariables();
+            );
+        }
+        FSMA_State(WAITSIFS)
+        {
+            FSMA_Enter(scheduleSifsPeriod(frame));
+            FSMA_Event_Transition(Transmit-Ack,
+                                  msg == endSifs,
+                                  IDLE,
+                sendAckFrame();
                 resetStateVariables();
             );
         }
@@ -383,8 +394,10 @@ void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value
         handleWithFsm(mediumStateChange);
     else if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
-        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
+            handleWithFsm(endData);
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        }
         transmissionState = newRadioTransmissionState;
     }
 }
@@ -470,23 +483,17 @@ void CsmaMac::cancelDifsPeriod()
     cancelEvent(endDifs);
 }
 
-void CsmaMac::scheduleDataTimeoutPeriod(CsmaDataFrame *frameToSend)
+void CsmaMac::scheduleAckTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
-    EV << "scheduling data timeout period\n";
+    EV << "scheduling ack timeout period\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
-    scheduleAt(simTime() + computeFrameDuration(frameToSend) + getSifsTime() + computeFrameDuration(headerLength * 8, bitrate) + maxPropagationDelay * 2, endTimeout);
+    scheduleAt(simTime() + getSifsTime() + computeFrameDuration(headerLength * 8, bitrate) + maxPropagationDelay * 2, endAck);
 }
 
-void CsmaMac::scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frameToSend)
+void CsmaMac::cancelAckTimeoutPeriod()
 {
-    EV << "scheduling broadcast timeout period\n";
-    scheduleAt(simTime() + computeFrameDuration(frameToSend), endTimeout);
-}
-
-void CsmaMac::cancelTimeoutPeriod()
-{
-    EV << "canceling timeout period\n";
-    cancelEvent(endTimeout);
+    EV << "canceling ack timeout period\n";
+    cancelEvent(endAck);
 }
 
 void CsmaMac::invalidateBackoffPeriod()

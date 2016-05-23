@@ -82,7 +82,7 @@ class INET_API CsmaMac : public MACProtocolBase
         WAITDIFS,
         BACKOFF,
         WAITACK,
-        TRANSMIT,
+        WAITTRANSMIT,
         WAITSIFS,
         RECEIVE,
     };
@@ -120,8 +120,11 @@ class INET_API CsmaMac : public MACProtocolBase
     /** End of the backoff period */
     cMessage *endBackoff = nullptr;
 
-    /** Timeout after the transmission of a DATA frame */
-    cMessage *endTimeout = nullptr;
+    /** End of the ack period */
+    cMessage *endAck = nullptr;
+
+    /** Timeout after the transmission of a Data frame */
+    cMessage *endData = nullptr;
 
     /** Radio state change self message. Currently this is optimized away and sent directly */
     cMessage *mediumStateChange = nullptr;
@@ -206,9 +209,8 @@ class INET_API CsmaMac : public MACProtocolBase
     virtual void scheduleDifsPeriod();
     virtual void cancelDifsPeriod();
 
-    virtual void scheduleDataTimeoutPeriod(CsmaDataFrame *frame);
-    virtual void scheduleBroadcastTimeoutPeriod(CsmaDataFrame *frame);
-    virtual void cancelTimeoutPeriod();
+    virtual void scheduleAckTimeoutPeriod(CsmaDataFrame *frame);
+    virtual void cancelAckTimeoutPeriod();
 
     /** @brief Generates a new backoff period based on the contention window. */
     virtual void invalidateBackoffPeriod();
