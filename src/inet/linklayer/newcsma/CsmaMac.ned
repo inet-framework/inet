@@ -40,5 +40,5 @@ simple CsmaMac extends MACProtocolBase like IMACProtocol
         int cwMax = default(1023); // maximum contention window
         int retryLimit = default(7); // maximum number of retries per message
         @class(CsmaMac);
-        @signal[NF_LINK_BREAK](type=CsmaFrame);
+        @signal[NF_LINK_BREAK](type=CsmaMacFrame);
 }

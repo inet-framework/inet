@@ -167,7 +167,7 @@ void CsmaMac::handleUpperPacket(cPacket *msg)
         delete msg;
         return;
     }
-    CsmaDataFrame *frame = encapsulate(msg);
+    CsmaMacDataFrame *frame = encapsulate(msg);
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
     transmissionQueue.push_back(frame);
@@ -182,7 +182,7 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 
-    CsmaFrame *frame = check_and_cast<CsmaFrame *>(msg);
+    CsmaMacFrame *frame = check_and_cast<CsmaMacFrame *>(msg);
     EV << "Self address: " << address
        << ", receiver address: " << frame->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
@@ -199,7 +199,7 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
  */
 void CsmaMac::handleWithFsm(cMessage *msg)
 {
-    CsmaFrame *frame = dynamic_cast<CsmaFrame*>(msg);
+    CsmaMacFrame *frame = dynamic_cast<CsmaMacFrame*>(msg);
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -319,7 +319,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(scheduleAckTimeoutPeriod(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-Ack,
-                                  isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaAckFrame *>(frame),
+                                  isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaMacAckFrame *>(frame),
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
@@ -348,21 +348,21 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMessage(msg) && isBroadcast(frame),
                                      IDLE,
-                sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame)));
+                sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame)));
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data-No-Ack,
                                      isLowerMessage(msg) && isForUs(frame) && !useAck,
                                      IDLE,
-                sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame->dup())));
+                sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame->dup())));
                 numReceived++;
                 resetStateVariables();
             );
             FSMA_No_Event_Transition(Immediate-Receive-Data-Ack,
                                      isLowerMessage(msg) && isForUs(frame) && useAck,
                                      WAITSIFS,
-                sendUp(decapsulate(check_and_cast<CsmaDataFrame *>(frame->dup())));
+                sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame->dup())));
                 numReceived++;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
@@ -399,9 +399,9 @@ void CsmaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value
     }
 }
 
-CsmaDataFrame *CsmaMac::encapsulate(cPacket *msg)
+CsmaMacDataFrame *CsmaMac::encapsulate(cPacket *msg)
 {
-    CsmaDataFrame *frame = new CsmaDataFrame(msg->getName());
+    CsmaMacDataFrame *frame = new CsmaMacDataFrame(msg->getName());
     frame->setByteLength(headerLength);
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
@@ -415,7 +415,7 @@ CsmaDataFrame *CsmaMac::encapsulate(cPacket *msg)
     return frame;
 }
 
-cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
+cPacket *CsmaMac::decapsulate(CsmaMacDataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
@@ -431,7 +431,7 @@ cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
 /****************************************************************
  * Timer functions.
  */
-void CsmaMac::scheduleSifsPeriod(CsmaFrame *frame)
+void CsmaMac::scheduleSifsPeriod(CsmaMacFrame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSifs->setContextPointer(frame->dup());
@@ -450,7 +450,7 @@ void CsmaMac::cancelDifsPeriod()
     cancelEvent(endDifs);
 }
 
-void CsmaMac::scheduleAckTimeoutPeriod(CsmaDataFrame *frameToSend)
+void CsmaMac::scheduleAckTimeoutPeriod(CsmaMacDataFrame *frameToSend)
 {
     EV << "scheduling ack timeout period\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
@@ -519,7 +519,7 @@ void CsmaMac::cancelBackoffPeriod()
 /****************************************************************
  * Frame sender functions.
  */
-void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
+void CsmaMac::sendDataFrame(CsmaMacDataFrame *frameToSend)
 {
     EV << "sending Data frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
@@ -528,9 +528,9 @@ void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
 void CsmaMac::sendAckFrame()
 {
     EV << "sending Ack frame\n";
-    auto frameToAck = static_cast<CsmaDataFrame *>(endSifs->getContextPointer());
+    auto frameToAck = static_cast<CsmaMacDataFrame *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
-    auto ackFrame = new CsmaAckFrame("CsmaAck");
+    auto ackFrame = new CsmaMacAckFrame("CsmaMacAck");
     ackFrame->setReceiverAddress(frameToAck->getTransmitterAddress());
     ackFrame->setByteLength(headerLength);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
@@ -564,7 +564,7 @@ void CsmaMac::retryCurrentTransmission()
     generateBackoffPeriod();
 }
 
-CsmaDataFrame *CsmaMac::getCurrentTransmission()
+CsmaMacDataFrame *CsmaMac::getCurrentTransmission()
 {
     return transmissionQueue.front();
 }
@@ -572,7 +572,7 @@ CsmaDataFrame *CsmaMac::getCurrentTransmission()
 void CsmaMac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
-    CsmaFrame *temp = transmissionQueue.front();
+    CsmaMacFrame *temp = transmissionQueue.front();
     transmissionQueue.pop_front();
     delete temp;
     if (queueModule) {
@@ -594,12 +594,12 @@ bool CsmaMac::isMediumFree()
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 }
 
-bool CsmaMac::isBroadcast(CsmaFrame *frame)
+bool CsmaMac::isBroadcast(CsmaMacFrame *frame)
 {
     return frame->getReceiverAddress().isBroadcast();
 }
 
-bool CsmaMac::isForUs(CsmaFrame *frame)
+bool CsmaMac::isForUs(CsmaMacFrame *frame)
 {
     return frame->getReceiverAddress() == address;
 }
