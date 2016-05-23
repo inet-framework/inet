@@ -209,8 +209,8 @@ class INET_API CsmaMac : public MACProtocolBase
      * @name Frame transmission functions
      */
     //@{
-    virtual void sendAckFrame();
     virtual void sendDataFrame(CsmaDataFrame *frameToSend);
+    virtual void sendAckFrame();
     //@}
 
   protected:

@@ -525,9 +525,15 @@ void CsmaMac::cancelBackoffPeriod()
 /****************************************************************
  * Frame sender functions.
  */
+void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
+{
+    EV << "sending Data frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    sendDown(frameToSend->dup());
+}
 void CsmaMac::sendAckFrame()
 {
-    EV << "sending ACK frame\n";
+    EV << "sending Ack frame\n";
     auto frameToAck = static_cast<CsmaDataFrame *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
     auto ackFrame = new CsmaAckFrame("CsmaAck");
@@ -536,13 +542,6 @@ void CsmaMac::sendAckFrame()
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(ackFrame);
     delete frameToAck;
-}
-
-void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
-{
-    EV << "sending Data frame\n";
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(frameToSend->dup());
 }
 
 /****************************************************************
