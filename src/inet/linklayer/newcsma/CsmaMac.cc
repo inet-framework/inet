@@ -170,9 +170,6 @@ void CsmaMac::handleUpperPacket(cPacket *msg)
     CsmaDataFrame *frame = encapsulate(msg);
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
-
-    // fill in missing fields (receiver address, seq number), and insert into the queue
-    frame->setTransmitterAddress(address);
     transmissionQueue.push_back(frame);
     // skip those cases where there's nothing to do, so the switch looks simpler
     if (fsm.getState() != IDLE)
@@ -409,8 +406,8 @@ CsmaDataFrame *CsmaMac::encapsulate(cPacket *msg)
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
-    // copy receiver address from the control info (sender address will be set in MAC)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    frame->setTransmitterAddress(address);
     frame->setReceiverAddress(ctrl->getDest());
     delete ctrl;
 
@@ -429,21 +426,6 @@ cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
 
     delete frame;
     return payload;
-}
-
-/****************************************************************
- * Timing functions.
- */
-simtime_t CsmaMac::computeBackoffPeriod(int r)
-{
-    ASSERT(0 <= r && r < retryLimit);
-    EV << "generating backoff slot number for retry: " << r << endl;
-    int cw = (cwMin + 1) * (1 << r) - 1;
-    if (cw > cwMax)
-        cw = cwMax;
-    int c = intrand(cw + 1);
-    EV << "generated backoff slot number: " << c << " , cw: " << cw << endl;
-    return ((double)c) * slotTime;
 }
 
 /****************************************************************
@@ -483,6 +465,18 @@ void CsmaMac::cancelAckTimeoutPeriod()
 {
     EV << "canceling ack timeout period\n";
     cancelEvent(endAck);
+}
+
+simtime_t CsmaMac::computeBackoffPeriod(int r)
+{
+    ASSERT(0 <= r && r < retryLimit);
+    EV << "generating backoff slot number for retry: " << r << endl;
+    int cw = (cwMin + 1) * (1 << r) - 1;
+    if (cw > cwMax)
+        cw = cwMax;
+    int c = intrand(cw + 1);
+    EV << "generated backoff slot number: " << c << " , cw: " << cw << endl;
+    return ((double)c) * slotTime;
 }
 
 void CsmaMac::invalidateBackoffPeriod()
