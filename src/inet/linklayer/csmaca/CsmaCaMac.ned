@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.newcsma;
+package inet.linklayer.csmaca;
 
 import inet.linklayer.base.MACProtocolBase;
 import inet.linklayer.contract.IMACProtocol;
 
-simple CsmaMac extends MACProtocolBase like IMACProtocol
+simple CsmaCaMac extends MACProtocolBase like IMACProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
@@ -39,6 +39,6 @@ simple CsmaMac extends MACProtocolBase like IMACProtocol
         int cwMin = default(31); // minimum contention window
         int cwMax = default(1023); // maximum contention window
         int retryLimit = default(7); // maximum number of retries per message
-        @class(CsmaMac);
-        @signal[NF_LINK_BREAK](type=CsmaMacFrame);
+        @class(CsmaCaMac);
+        @signal[NF_LINK_BREAK](type=CsmaCaMacFrame);
 }

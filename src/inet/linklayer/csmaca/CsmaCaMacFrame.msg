@@ -23,16 +23,16 @@ class noncobject MACAddress;
 
 namespace inet;
 
-packet CsmaMacFrame
+packet CsmaCaMacFrame
 {
     MACAddress transmitterAddress;
     MACAddress receiverAddress;
 }
 
-packet CsmaMacAckFrame extends CsmaMacFrame
+packet CsmaCaMacAckFrame extends CsmaCaMacFrame
 {
 }
 
-packet CsmaMacDataFrame extends CsmaMacFrame
+packet CsmaCaMacDataFrame extends CsmaCaMacFrame
 {
 }
