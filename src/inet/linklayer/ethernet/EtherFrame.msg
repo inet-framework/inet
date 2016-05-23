@@ -33,8 +33,8 @@ enum EtherType;
 enum SAPCode;
 
 //
-// This class should never be instantiated by the models, only specific
-// subclasses: EtherJam, EtherFilledIFG and EtherPhyFrame.
+// Abstract base class for various Ethernet traffic types:
+// EtherJam, EtherFilledIFG and EtherPhyFrame.
 //
 packet EtherTraffic
 {

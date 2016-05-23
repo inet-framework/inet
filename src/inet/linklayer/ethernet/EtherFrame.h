@@ -5,6 +5,9 @@
 
 namespace inet {
 
+/**
+ * Represents an Ethernet PHY frame. See EtherFrame.msg for details.
+ */
 class EtherPhyFrame : public EtherPhyFrame_Base
 {
   private:
