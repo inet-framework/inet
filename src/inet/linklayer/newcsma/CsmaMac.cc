@@ -244,7 +244,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Immediate-Transmit-Broadcast,
                                   msg == endDifs && isBroadcast(getCurrentTransmission()) && !backoff,
                                   WAITTRANSMIT,
-                sendBroadcastFrame(getCurrentTransmission());
+                sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
             FSMA_Event_Transition(Immediate-Transmit-Data,
@@ -285,7 +285,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endBackoff && isBroadcast(getCurrentTransmission()),
                                   WAITTRANSMIT,
-                sendBroadcastFrame(getCurrentTransmission());
+                sendDataFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Transmit-Data,
                                   msg == endBackoff && !isBroadcast(getCurrentTransmission()),
@@ -541,13 +541,6 @@ void CsmaMac::sendAckFrame()
 void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
 {
     EV << "sending Data frame\n";
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(frameToSend->dup());
-}
-
-void CsmaMac::sendBroadcastFrame(CsmaDataFrame *frameToSend)
-{
-    EV << "sending Broadcast frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frameToSend->dup());
 }

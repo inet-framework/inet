@@ -211,7 +211,6 @@ class INET_API CsmaMac : public MACProtocolBase
     //@{
     virtual void sendAckFrame();
     virtual void sendDataFrame(CsmaDataFrame *frameToSend);
-    virtual void sendBroadcastFrame(CsmaDataFrame *frameToSend);
     //@}
 
   protected:
