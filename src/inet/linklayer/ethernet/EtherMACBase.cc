@@ -394,11 +394,15 @@ EtherPhyFrame *EtherMACBase::encapsulate(EtherFrame* frame)
 {
     EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
     phyFrame->encapsulate(frame);
+    phyFrame->setSrcMacFullDuplex(duplexMode);
     return phyFrame;
 }
 
 EtherFrame *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
 {
+    if (phyFrame->getSrcMacFullDuplex() != duplexMode)
+        throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
+
     cPacket *frame = phyFrame->decapsulate();
     delete phyFrame;
 

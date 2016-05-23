@@ -69,6 +69,7 @@ packet EtherPhyFrame extends EtherTraffic
 {
     @customize(true);
     byteLength = PREAMBLE_BYTES + SFD_BYTES;
+    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration 
 }
 
 //
