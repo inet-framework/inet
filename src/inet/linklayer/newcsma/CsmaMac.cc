@@ -248,8 +248,8 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         FSMA_State(WAITDIFS)
         {
             FSMA_Enter(scheduleDifsPeriod());
-            FSMA_Event_Transition(Immediate-Transmit-Broadcast,
                                   msg == endDifs && isBroadcast(getCurrentTransmission()) && !backoff,
+            FSMA_Event_Transition(Difs-Over-Transmit,
                                   WAITTRANSMIT,
                 sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
@@ -260,8 +260,8 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
-            FSMA_Event_Transition(Difs-Over,
                                   msg == endDifs,
+            FSMA_Event_Transition(Difs-Over-Backoff,
                                   BACKOFF,
                 ASSERT(backoff);
                 if (isInvalidBackoffPeriod())
@@ -309,13 +309,13 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 finishCurrentTransmission();
                 numSentBroadcast++;
             );
-            FSMA_Event_Transition(Transmit-Data-No-Ack,
+            FSMA_Event_Transition(Transmit-Unicast-Without-Ack,
                                   msg == endData && !useAck && !isBroadcast(getCurrentTransmission()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSent++;
             );
-            FSMA_Event_Transition(Transmit-Data-Receive-Ack,
+            FSMA_Event_Transition(Transmit-Unicast-With-Ack,
                                   msg == endData && useAck && !isBroadcast(getCurrentTransmission()),
                                   WAITACK,
             );
@@ -332,7 +332,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 finishCurrentTransmission();
                 delete frame;
             );
-            FSMA_Event_Transition(Transmit-Data-Failed,
+            FSMA_Event_Transition(Transmit-Failed,
                                   msg == endAck && retryCounter == retryLimit - 1,
                                   IDLE,
                 giveUpCurrentTransmission();
@@ -359,14 +359,14 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Data-No-Ack,
+            FSMA_No_Event_Transition(Immediate-Receive-Without-Ack,
                                      isLowerMessage(msg) && isForUs(frame) && !useAck,
                                      IDLE,
                 sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame)));
                 numReceived++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Data-Transmit-Ack,
+            FSMA_No_Event_Transition(Immediate-Receive-With-Ack,
                                      isLowerMessage(msg) && isForUs(frame) && useAck,
                                      WAITSIFS,
                 sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame->dup())));
