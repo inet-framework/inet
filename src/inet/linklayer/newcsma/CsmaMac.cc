@@ -248,22 +248,14 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         FSMA_State(WAITDIFS)
         {
             FSMA_Enter(scheduleDifsPeriod());
-                                  msg == endDifs && isBroadcast(getCurrentTransmission()) && !backoff,
             FSMA_Event_Transition(Difs-Over-Transmit,
+                                  msg == endDifs && !backoff,
                                   WAITTRANSMIT,
-                sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
-            FSMA_Event_Transition(Immediate-Transmit-Data,
-                                  msg == endDifs && !isBroadcast(getCurrentTransmission()) && !backoff,
-                                  WAITTRANSMIT,
-                sendDataFrame(getCurrentTransmission());
-                cancelDifsPeriod();
-            );
-                                  msg == endDifs,
             FSMA_Event_Transition(Difs-Over-Backoff,
+                                  msg == endDifs && backoff,
                                   BACKOFF,
-                ASSERT(backoff);
                 if (isInvalidBackoffPeriod())
                     generateBackoffPeriod();
             );
@@ -292,7 +284,6 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Backoff-Done,
                                   msg == endBackoff,
                                   WAITTRANSMIT,
-                sendDataFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Backoff-Busy,
                                   msg == mediumStateChange && !isMediumFree(),
@@ -303,6 +294,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(WAITTRANSMIT)
         {
+            FSMA_Enter(sendDataFrame(getCurrentTransmission()));
             FSMA_Event_Transition(Transmit-Broadcast,
                                   msg == endData && isBroadcast(getCurrentTransmission()),
                                   IDLE,
