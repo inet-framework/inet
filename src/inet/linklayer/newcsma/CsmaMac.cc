@@ -648,12 +648,12 @@ bool CsmaMac::isMediumFree()
 
 bool CsmaMac::isBroadcast(CsmaFrame *frame)
 {
-    return frame && frame->getReceiverAddress().isBroadcast();
+    return frame->getReceiverAddress().isBroadcast();
 }
 
 bool CsmaMac::isForUs(CsmaFrame *frame)
 {
-    return frame && frame->getReceiverAddress() == address;
+    return frame->getReceiverAddress() == address;
 }
 
 } // namespace inet

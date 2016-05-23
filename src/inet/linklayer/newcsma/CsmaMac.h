@@ -31,9 +31,6 @@ using namespace inet::physicallayer;
 class INET_API CsmaMac : public MACProtocolBase
 {
   protected:
-    IRadio *radio = nullptr;
-    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
-
     /**
      * @name Configuration parameters
      */
@@ -70,7 +67,6 @@ class INET_API CsmaMac : public MACProtocolBase
     int cwMax = -1;
     //@}
 
-  public:
     /**
      * @name CsmaMac state variables
      * Various state information checked and modified according to the state machine.
@@ -86,19 +82,19 @@ class INET_API CsmaMac : public MACProtocolBase
         WAITSIFS,
         RECEIVE,
     };
-  protected:
+
+    IRadio *radio = nullptr;
+    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+
     cFSM fsm;
 
-  protected:
     /** True if backoff is enabled */
     bool backoff = false;
 
     /** Remaining backoff period in seconds */
     simtime_t backoffPeriod = -1;
 
-    /**
-     * Number of frame retransmission attempts.
-     */
+    /** Number of frame retransmission attempts. */
     int retryCounter = -1;
 
     /** Messages received from upper layer and to be transmitted later */
@@ -108,7 +104,6 @@ class INET_API CsmaMac : public MACProtocolBase
     IPassiveQueue *queueModule = nullptr;
     //@}
 
-  protected:
     /** @name Timer messages */
     //@{
     /** End of the Short Inter-Frame Time period */
@@ -130,7 +125,6 @@ class INET_API CsmaMac : public MACProtocolBase
     cMessage *mediumStateChange = nullptr;
     //@}
 
-  protected:
     /** @name Statistics */
     //@{
     long numRetry;
