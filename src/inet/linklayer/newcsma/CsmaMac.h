@@ -216,16 +216,6 @@ class INET_API CsmaMac : public MACProtocolBase
 
   protected:
     /**
-     * @name Frame builder functions
-     */
-    //@{
-    virtual CsmaDataFrame *buildDataFrame(CsmaDataFrame *frameToSend);
-    virtual CsmaAckFrame *buildAckFrame(CsmaDataFrame *frameToACK);
-    virtual CsmaDataFrame *buildBroadcastFrame(CsmaDataFrame *frameToSend);
-    //@}
-
-  protected:
-    /**
      * @name Utility functions
      */
     //@{

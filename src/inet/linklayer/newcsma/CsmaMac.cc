@@ -528,10 +528,13 @@ void CsmaMac::cancelBackoffPeriod()
 void CsmaMac::sendAckFrame()
 {
     EV << "sending ACK frame\n";
-    CsmaDataFrame *frameToAck = static_cast<CsmaDataFrame *>(endSifs->getContextPointer());
+    auto frameToAck = static_cast<CsmaDataFrame *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
+    auto ackFrame = new CsmaAckFrame("CsmaAck");
+    ackFrame->setReceiverAddress(frameToAck->getTransmitterAddress());
+    ackFrame->setByteLength(headerLength);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(buildAckFrame(frameToAck));
+    sendDown(ackFrame);
     delete frameToAck;
 }
 
@@ -539,35 +542,14 @@ void CsmaMac::sendDataFrame(CsmaDataFrame *frameToSend)
 {
     EV << "sending Data frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(buildDataFrame(frameToSend));
+    sendDown(frameToSend->dup());
 }
 
 void CsmaMac::sendBroadcastFrame(CsmaDataFrame *frameToSend)
 {
     EV << "sending Broadcast frame\n";
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(buildBroadcastFrame(frameToSend));
-}
-
-/****************************************************************
- * Frame builder functions.
- */
-CsmaDataFrame *CsmaMac::buildDataFrame(CsmaDataFrame *frameToSend)
-{
-    return frameToSend->dup();
-}
-
-CsmaAckFrame *CsmaMac::buildAckFrame(CsmaDataFrame *frameToAck)
-{
-    CsmaAckFrame *frame = new CsmaAckFrame("CsmaAck");
-    frame->setReceiverAddress(frameToAck->getTransmitterAddress());
-    frame->setByteLength(headerLength);
-    return frame;
-}
-
-CsmaDataFrame *CsmaMac::buildBroadcastFrame(CsmaDataFrame *frameToSend)
-{
-    return frameToSend->dup();
+    sendDown(frameToSend->dup());
 }
 
 /****************************************************************
