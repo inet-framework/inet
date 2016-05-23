@@ -273,6 +273,10 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
         case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
+            // TODO: kludge to instruct the dispatcher to forward this packet to the transport protocol
+            IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(packet->getEncapsulatedPacket());
+            check_and_cast<IPv4ControlInfo *>(packet->getControlInfo())->setTransportProtocol(bogusPacket->getTransportProtocol());
+
             // ICMP errors are delivered to the appropriate higher layer protocol
             send(packet, "transportOut");
             break;
