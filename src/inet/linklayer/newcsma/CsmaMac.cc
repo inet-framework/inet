@@ -434,21 +434,6 @@ cPacket *CsmaMac::decapsulate(CsmaDataFrame *frame)
 /****************************************************************
  * Timing functions.
  */
-simtime_t CsmaMac::getSlotTime()
-{
-    return slotTime;
-}
-
-simtime_t CsmaMac::getSifsTime()
-{
-    return sifsTime;
-}
-
-simtime_t CsmaMac::getDifsTime()
-{
-    return difsTime;
-}
-
 simtime_t CsmaMac::computeBackoffPeriod(int r)
 {
     ASSERT(0 <= r && r < retryLimit);
@@ -458,7 +443,7 @@ simtime_t CsmaMac::computeBackoffPeriod(int r)
         cw = cwMax;
     int c = intrand(cw + 1);
     EV << "generated backoff slot number: " << c << " , cw: " << cw << endl;
-    return ((double)c) * getSlotTime();
+    return ((double)c) * slotTime;
 }
 
 /****************************************************************
@@ -468,13 +453,13 @@ void CsmaMac::scheduleSifsPeriod(CsmaFrame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSifs->setContextPointer(frame->dup());
-    scheduleAt(simTime() + getSifsTime(), endSifs);
+    scheduleAt(simTime() + sifsTime, endSifs);
 }
 
 void CsmaMac::scheduleDifsPeriod()
 {
     EV << "scheduling DIFS period\n";
-    scheduleAt(simTime() + getDifsTime(), endDifs);
+    scheduleAt(simTime() + difsTime, endDifs);
 }
 
 void CsmaMac::cancelDifsPeriod()
@@ -491,7 +476,7 @@ void CsmaMac::scheduleAckTimeoutPeriod(CsmaDataFrame *frameToSend)
     int phyHeaderLength = 192;
     double phyHeaderBitrate = 1E+6;
     simtime_t ackDuration = headerLength * 8 / bitrate + phyHeaderLength / phyHeaderBitrate;
-    scheduleAt(simTime() + getSifsTime() + ackDuration + maxPropagationDelay * 2, endAck);
+    scheduleAt(simTime() + sifsTime + ackDuration + maxPropagationDelay * 2, endAck);
 }
 
 void CsmaMac::cancelAckTimeoutPeriod()
@@ -520,7 +505,7 @@ void CsmaMac::generateBackoffPeriod()
 void CsmaMac::decreaseBackoffPeriod()
 {
     simtime_t elapsedBackoffTime = simTime() - endBackoff->getSendingTime();
-    backoffPeriod -= ((int)(elapsedBackoffTime / getSlotTime())) * getSlotTime();
+    backoffPeriod -= ((int)(elapsedBackoffTime / slotTime)) * slotTime;
     ASSERT(backoffPeriod >= 0);
     EV << "backoff period decreased to " << backoffPeriod << endl;
 }

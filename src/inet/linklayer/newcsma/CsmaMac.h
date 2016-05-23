@@ -182,18 +182,6 @@ class INET_API CsmaMac : public MACProtocolBase
 
   protected:
     /**
-     * @name Timing functions
-     * @brief Calculate various timings based on transmission rate and physical layer charactersitics.
-     */
-    //@{
-    virtual simtime_t getSlotTime();
-    virtual simtime_t getSifsTime();
-    virtual simtime_t getDifsTime();
-    virtual simtime_t computeBackoffPeriod(int r);
-    //@}
-
-  protected:
-    /**
      * @name Timer functions
      * @brief These functions have the side effect of starting the corresponding timers.
      */
@@ -207,6 +195,7 @@ class INET_API CsmaMac : public MACProtocolBase
     virtual void cancelAckTimeoutPeriod();
 
     /** @brief Generates a new backoff period based on the contention window. */
+    virtual simtime_t computeBackoffPeriod(int r);
     virtual void invalidateBackoffPeriod();
     virtual bool isInvalidBackoffPeriod();
     virtual void generateBackoffPeriod();
