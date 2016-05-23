@@ -289,13 +289,8 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         FSMA_State(BACKOFF)
         {
             FSMA_Enter(scheduleBackoffPeriod());
-            FSMA_Event_Transition(Transmit-Broadcast,
-                                  msg == endBackoff && isBroadcast(getCurrentTransmission()),
-                                  WAITTRANSMIT,
-                sendDataFrame(getCurrentTransmission());
-            );
-            FSMA_Event_Transition(Transmit-Data,
-                                  msg == endBackoff && !isBroadcast(getCurrentTransmission()),
+            FSMA_Event_Transition(Backoff-Done,
+                                  msg == endBackoff,
                                   WAITTRANSMIT,
                 sendDataFrame(getCurrentTransmission());
             );
@@ -353,9 +348,9 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Error,
                                      isLowerMessage(msg) && frame->hasBitError(),
                                      IDLE,
+                delete frame;
                 numCollision++;
                 resetStateVariables();
-                delete msg;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMessage(msg) && isBroadcast(frame),
