@@ -226,7 +226,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         FSMA_State(DEFER)
         {
             FSMA_Event_Transition(Wait-DIFS,
-                                  isMediumStateChange(msg) && isMediumFree(),
+                                  msg == mediumStateChange && isMediumFree(),
                                   WAITDIFS,
             ;);
             FSMA_No_Event_Transition(Immediate-Wait-DIFS,
@@ -261,7 +261,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                     generateBackoffPeriod();
             );
             FSMA_Event_Transition(Busy,
-                                  isMediumStateChange(msg) && !isMediumFree(),
+                                  msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
                 backoff = true;
                 cancelDifsPeriod();
@@ -293,7 +293,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 sendDataFrame(getCurrentTransmission());
             );
             FSMA_Event_Transition(Backoff-Busy,
-                                  isMediumStateChange(msg) && !isMediumFree(),
+                                  msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
                 cancelBackoffPeriod();
                 decreaseBackoffPeriod();
@@ -626,11 +626,6 @@ void CsmaMac::resetStateVariables()
     backoffPeriod = 0;
     retryCounter = 0;
     backoff = !transmissionQueue.empty();
-}
-
-bool CsmaMac::isMediumStateChange(cMessage *msg)
-{
-    return msg == mediumStateChange;
 }
 
 bool CsmaMac::isMediumFree()

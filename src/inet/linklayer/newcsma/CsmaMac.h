@@ -257,10 +257,6 @@ class INET_API CsmaMac : public MACProtocolBase
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     virtual void resetStateVariables();
 
-    /** @brief Used by the state machine to identify medium state change events.
-        This message is currently optimized away and not sent through the kernel. */
-    virtual bool isMediumStateChange(cMessage *msg);
-
     /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
     virtual bool isMediumFree();
 
