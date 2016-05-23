@@ -621,6 +621,19 @@ CsmaDataFrame *CsmaMac::getCurrentTransmission()
     return transmissionQueue.front();
 }
 
+void CsmaMac::popTransmissionQueue()
+{
+    EV << "dropping frame from transmission queue\n";
+    CsmaFrame *temp = transmissionQueue.front();
+    transmissionQueue.pop_front();
+    delete temp;
+    if (queueModule) {
+        // tell queue module that we've become idle
+        EV << "requesting another frame from queue module\n";
+        queueModule->requestPacket();
+    }
+}
+
 void CsmaMac::resetStateVariables()
 {
     backoffPeriod = 0;
@@ -641,19 +654,6 @@ bool CsmaMac::isBroadcast(CsmaFrame *frame)
 bool CsmaMac::isForUs(CsmaFrame *frame)
 {
     return frame && frame->getReceiverAddress() == address;
-}
-
-void CsmaMac::popTransmissionQueue()
-{
-    EV << "dropping frame from transmission queue\n";
-    CsmaFrame *temp = transmissionQueue.front();
-    transmissionQueue.pop_front();
-    delete temp;
-    if (queueModule) {
-        // tell queue module that we've become idle
-        EV << "requesting another frame from queue module\n";
-        queueModule->requestPacket();
-    }
 }
 
 } // namespace inet

@@ -254,6 +254,9 @@ class INET_API CsmaMac : public MACProtocolBase
     /** @brief Returns the current frame being transmitted */
     virtual CsmaDataFrame *getCurrentTransmission();
 
+    /** @brief Deletes frame at the front of queue. */
+    virtual void popTransmissionQueue();
+
     /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     virtual void resetStateVariables();
 
@@ -265,9 +268,6 @@ class INET_API CsmaMac : public MACProtocolBase
 
     /** @brief Returns true if message destination address is ours */
     virtual bool isForUs(CsmaFrame *msg);
-
-    /** @brief Deletes frame at the front of queue. */
-    virtual void popTransmissionQueue();
     //@}
 };
 
