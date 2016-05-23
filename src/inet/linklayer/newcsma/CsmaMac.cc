@@ -116,6 +116,32 @@ void CsmaMac::initialize(int stage)
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 }
 
+void CsmaMac::initializeQueueModule()
+{
+    // use of external queue module is optional -- find it if there's one specified
+    if (par("queueModule").stringValue()[0]) {
+        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
+        queueModule = check_and_cast<IPassiveQueue *>(module);
+
+        EV << "Requesting first two frames from queue module\n";
+        queueModule->requestPacket();
+        // needed for backoff: mandatory if next message is already present
+        queueModule->requestPacket();
+    }
+}
+
+void CsmaMac::finish()
+{
+    recordScalar("numRetry", numRetry);
+    recordScalar("numSentWithoutRetry", numSentWithoutRetry);
+    recordScalar("numGivenUp", numGivenUp);
+    recordScalar("numCollision", numCollision);
+    recordScalar("numSent", numSent);
+    recordScalar("numReceived", numReceived);
+    recordScalar("numSentBroadcast", numSentBroadcast);
+    recordScalar("numReceivedBroadcast", numReceivedBroadcast);
+}
+
 InterfaceEntry *CsmaMac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
@@ -134,20 +160,6 @@ InterfaceEntry *CsmaMac::createInterfaceEntry()
     e->setPointToPoint(false);
 
     return e;
-}
-
-void CsmaMac::initializeQueueModule()
-{
-    // use of external queue module is optional -- find it if there's one specified
-    if (par("queueModule").stringValue()[0]) {
-        cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
-        queueModule = check_and_cast<IPassiveQueue *>(module);
-
-        EV << "Requesting first two frames from queue module\n";
-        queueModule->requestPacket();
-        // needed for backoff: mandatory if next message is already present
-        queueModule->requestPacket();
-    }
 }
 
 /****************************************************************
