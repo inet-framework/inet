@@ -487,7 +487,11 @@ void CsmaMac::scheduleAckTimeoutPeriod(CsmaDataFrame *frameToSend)
 {
     EV << "scheduling ack timeout period\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
-    scheduleAt(simTime() + getSifsTime() + computeFrameDuration(headerLength * 8, bitrate) + maxPropagationDelay * 2, endAck);
+    // TODO: how do we get this?
+    int phyHeaderLength = 192;
+    double phyHeaderBitrate = 1E+6;
+    simtime_t ackDuration = headerLength * 8 / bitrate + phyHeaderLength / phyHeaderBitrate;
+    scheduleAt(simTime() + getSifsTime() + ackDuration + maxPropagationDelay * 2, endAck);
 }
 
 void CsmaMac::cancelAckTimeoutPeriod()
@@ -655,19 +659,6 @@ void CsmaMac::popTransmissionQueue()
         EV << "requesting another frame from queue module\n";
         queueModule->requestPacket();
     }
-}
-
-double CsmaMac::computeFrameDuration(CsmaFrame *msg)
-{
-    return computeFrameDuration(msg->getBitLength(), bitrate);
-}
-
-double CsmaMac::computeFrameDuration(int bits, double bitrate)
-{
-    // TODO: how do we get this?
-    int phyHeaderLength = 192;
-    double phyHeaderBitrate = 1E+6;
-    return bits / bitrate + phyHeaderLength / phyHeaderBitrate;
 }
 
 } // namespace inet

@@ -272,14 +272,6 @@ class INET_API CsmaMac : public MACProtocolBase
 
     /** @brief Deletes frame at the front of queue. */
     virtual void popTransmissionQueue();
-
-    /**
-     * @brief Computes the duration (in seconds) of the transmission of a frame
-     * over the physical channel. 'bits' should be the total length of the MAC frame
-     * in bits, but excluding the physical layer framing (preamble etc.)
-     */
-    virtual double computeFrameDuration(CsmaFrame *msg);
-    virtual double computeFrameDuration(int bits, double bitrate);
     //@}
 };
 
