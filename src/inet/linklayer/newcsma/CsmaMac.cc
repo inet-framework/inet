@@ -172,7 +172,11 @@ void CsmaMac::handleUpperPacket(cPacket *msg)
     // fill in missing fields (receiver address, seq number), and insert into the queue
     frame->setTransmitterAddress(address);
     transmissionQueue.push_back(frame);
-    handleWithFsm(frame);
+    // skip those cases where there's nothing to do, so the switch looks simpler
+    if (fsm.getState() != IDLE)
+        EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
+    else
+        handleWithFsm(frame);
 }
 
 void CsmaMac::handleLowerPacket(cPacket *msg)
@@ -196,11 +200,6 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
  */
 void CsmaMac::handleWithFsm(cMessage *msg)
 {
-    // skip those cases where there's nothing to do, so the switch looks simpler
-    if (isUpperMessage(msg) && fsm.getState() != IDLE) {
-        EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-        return;
-    }
     CsmaFrame *frame = dynamic_cast<CsmaFrame*>(msg);
     FSMA_Switch(fsm)
     {
