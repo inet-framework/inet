@@ -30,6 +30,7 @@
 
 #ifdef WITH_CSMA
 #include "inet/linklayer/csma/CSMAFrame_m.h"
+#include "inet/linklayer/newcsma/CsmaMacFrame_m.h"
 #endif // ifdef WITH_CSMA
 
 #ifdef WITH_LMAC
@@ -1016,6 +1017,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 #endif // ifdef WITH_IDEALWIRELESS
 #ifdef WITH_CSMA
             || dynamic_cast<CSMAFrame *>(frame)
+            || dynamic_cast<CsmaMacFrame *>(frame)
 #endif // ifdef WITH_CSMA
 #ifdef WITH_LMAC
             || dynamic_cast<LMacFrame *>(frame)

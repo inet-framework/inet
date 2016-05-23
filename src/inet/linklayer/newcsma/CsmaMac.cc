@@ -31,6 +31,8 @@ CsmaMac::~CsmaMac()
     cancelAndDelete(endAck);
     cancelAndDelete(endData);
     cancelAndDelete(mediumStateChange);
+    for (auto frame : transmissionQueue)
+        delete frame;;
 }
 
 /****************************************************************
@@ -75,8 +77,8 @@ void CsmaMac::initialize(int stage)
         endSifs = new cMessage("SIFS");
         endDifs = new cMessage("DIFS");
         endBackoff = new cMessage("Backoff");
-        endData = new cMessage("Data");
         endAck = new cMessage("Ack");
+        endData = new cMessage("Data");
         mediumStateChange = new cMessage("MediumStateChange");
 
         // obtain pointer to external queue
@@ -200,10 +202,6 @@ void CsmaMac::handleLowerPacket(cPacket *msg)
        << ", received frame is for us: " << isForUs(frame) << endl;
 
     handleWithFsm(msg);
-
-    // if we are the owner then we did not send this message up
-    if (msg->getOwner() == this)
-        delete msg;
 }
 
 /**
@@ -234,11 +232,11 @@ void CsmaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(DEFER)
         {
-            FSMA_Event_Transition(Wait-DIFS,
+            FSMA_Event_Transition(Wait-Difs,
                                   msg == mediumStateChange && isMediumFree(),
                                   WAITDIFS,
             ;);
-            FSMA_No_Event_Transition(Immediate-Wait-DIFS,
+            FSMA_No_Event_Transition(Immediate-Wait-Difs,
                                      isMediumFree() || !backoff,
                                      WAITDIFS,
             ;);
@@ -262,7 +260,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 sendDataFrame(getCurrentTransmission());
                 cancelDifsPeriod();
             );
-            FSMA_Event_Transition(DIFS-Over,
+            FSMA_Event_Transition(Difs-Over,
                                   msg == endDifs,
                                   BACKOFF,
                 ASSERT(backoff);
@@ -316,13 +314,13 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 finishCurrentTransmission();
                 numSentBroadcast++;
             );
-            FSMA_Event_Transition(Transmit-Unicast-No-Ack,
+            FSMA_Event_Transition(Transmit-Data-No-Ack,
                                   msg == endData && !useAck && !isBroadcast(getCurrentTransmission()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSent++;
             );
-            FSMA_Event_Transition(Transmit-Unicast-Ack,
+            FSMA_Event_Transition(Transmit-Data-Receive-Ack,
                                   msg == endData && useAck && !isBroadcast(getCurrentTransmission()),
                                   WAITACK,
             );
@@ -337,6 +335,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                 numSent++;
                 cancelAckTimeoutPeriod();
                 finishCurrentTransmission();
+                delete frame;
             );
             FSMA_Event_Transition(Transmit-Data-Failed,
                                   msg == endAck && retryCounter == retryLimit - 1,
@@ -356,6 +355,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
                                      IDLE,
                 numCollision++;
                 resetStateVariables();
+                delete msg;
             );
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMessage(msg) && isBroadcast(frame),
@@ -367,11 +367,11 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Data-No-Ack,
                                      isLowerMessage(msg) && isForUs(frame) && !useAck,
                                      IDLE,
-                sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame->dup())));
+                sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame)));
                 numReceived++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Data-Ack,
+            FSMA_No_Event_Transition(Immediate-Receive-Data-Transmit-Ack,
                                      isLowerMessage(msg) && isForUs(frame) && useAck,
                                      WAITSIFS,
                 sendUp(decapsulate(check_and_cast<CsmaMacDataFrame *>(frame->dup())));
@@ -380,6 +380,7 @@ void CsmaMac::handleWithFsm(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Other,
                                      isLowerMessage(msg),
                                      IDLE,
+                delete frame;
                 resetStateVariables();
             );
         }
@@ -446,7 +447,7 @@ cPacket *CsmaMac::decapsulate(CsmaMacDataFrame *frame)
 void CsmaMac::scheduleSifsPeriod(CsmaMacFrame *frame)
 {
     EV << "scheduling SIFS period\n";
-    endSifs->setContextPointer(frame->dup());
+    endSifs->setContextPointer(frame);
     scheduleAt(simTime() + sifsTime, endSifs);
 }
 
@@ -458,7 +459,7 @@ void CsmaMac::scheduleDifsPeriod()
 
 void CsmaMac::cancelDifsPeriod()
 {
-    EV << "cancelling DIFS period\n";
+    EV << "canceling DIFS period\n";
     cancelEvent(endDifs);
 }
 
