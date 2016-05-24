@@ -305,14 +305,14 @@ OMNeT++ IDE. The following image was obtained by recording an event log
 (`.elog`) file from the simulation, opening it in the IDE, and tweaking the
 settings in the Sequence Chart tool.
 
-The transmission of the packet `UDPData-0` starts at around 15ms, and
+The transmission of the packet UDPData-0 starts at around 15ms, and
 completes at around 23ms. The signal propagation takes a nonzero amount of
 time, but it's such a small value compared to the transmission duration
 that it's not visible in this image. (The arrow signifying the beginning of
 the transmission appears to be vertical, one needs to zoom in along the
 time axis to see that in fact it is not. In a later step, we will see that
 it is possible to configure the Sequence Chart tool to represent time in a
-non-linear way.) The chart also indicates that `UDPData-1` and `UDPData-2`
+non-linear way.) The chart also indicates that UDPData-1 and UDPData-2
 are transmitted back-to-back, because there's no gap between them.
 
 <img src="wireless-step2-seq.png" width=900px>
@@ -605,19 +605,20 @@ suited for wireless communication.
 
 In the previous step, nodes transmitted on the channel immediately when
 they had something to send, without first listening for ongoing
-transmissions, and this resulted in a lot of collisions and lost packets.
+transmissions. This resulted in a lot of collisions and lost packets.
 We improve the communication by using the CSMA protocol, which is based
 on the "sense before transmit" (or "listen before talk") principle.
 
 CSMA (carrier sense multiple access) is a probabilistic MAC protocol in
 which a node verifies the absence of other traffic before transmitting on
-the shared transmission medium. In this protocol, a node that has data to
-send first waits for the channel to become idle, and then it also waits for
-random backoff period. If the channel was still idle during the backoff,
-the node can actually start transmitting. Otherwise the procedure starts
-over, possibly with an updated range for the backoff period.
-We expect that the use of CSMA will improve throughput, as there will be
-less collisions, and the medium will be utilized better.
+the shared transmission medium. CSMA has several variants, we'll use
+CSMA/CA (where CA stands for collision avoidance). In this protocol, a node
+that has data to send first waits for the channel to become idle, and then
+it also waits for random backoff period. If the channel was still idle
+during the backoff, the node can actually start transmitting. Otherwise the
+procedure starts over, possibly with an updated range for the backoff
+period. We expect that the use of CSMA will improve throughput, as there
+will be less collisions, and the medium will be utilized better.
 
 @section s6model The model
 
@@ -625,26 +626,26 @@ To use CSMA, we need to replace `IdealWirelessNic` in the hosts with
 `WirelessNic`. However, `WirelessNic` is configured for
 IEEE 802.11 by default, so we need to replace both the radio and the MAC
 protocol in it. This is done by specifying `IdealRadio` for `radioType`,
-and `CSMA` for `macType`.
+and `CsmaCaMacfor `macType`.
 
-The `CSMA` module implements Carrier Sense Multiple Access with optional
-acknowledgements and a retry mechanism. It has a number of parameters for
-tweaking its operation. With the appropriate parameters, it can even
-approximate basic 802.11b ad-hoc mode operation. Parameters include:
+The `CsmaCaMac` module implements CSMA/CA with optional acknowledgements
+and a retry mechanism. It has a number of parameters for tweaking its
+operation. With the appropriate parameters, it can approximate basic
+802.11b ad-hoc mode operation. Parameters include:
 
-- bit rate (this is used for both data and ACK frames)
-- protocol overhead: MAC header and ACK frame lengths
 - acknowledgements on/off
-- ACK timeout, maximum retry count
-- backoff parameters: strategy (exponential, linear, constant),
-  minimum/maximum contention window, backoff slot time
-- interval before transmitting ACK frame
-- hardware timing parameters such as CCA (Clear Channel Assessment) time
-  and radio turnaround time (the time to swich from Rx to Tx state)
+- bit rate (this is used for both data and ACK frames)
+- protocol overhead: MAC header length, ACK frame length
+- backoff parameters: minimum/maximum contention window (in slots),
+  slot time, maximum retry count
+- timing: interval to wait before transmitting ACK frame (SIFS) and before data
+  frames in addition to the backoff slots (DIFS)
 
-For now, we turn off acknowledgement (sending of ACK packets) in CSMA so we
-can see purely the effect of "listen before talk" and waiting a random
-backoff period before each transmission.
+For now, we turn off acknowledgement (sending of ACK packets) so we can see
+purely the effect of "listen before talk" and waiting a random backoff
+period before each transmission. In the absence of ACKs, the MAC has to
+assume that all its transmissions are successful, so no frame is ever
+retransmitted.
 
 
 @dontinclude omnetpp.ini
@@ -662,10 +663,10 @@ Host B receives it correctly, because only Host R1 is transmitting.
 The following sequence chart displays that after receiving the UDPData-0 packet,
 Host R1 transmits it after the backoff period timer has expired.
 
-<!--TODO: backoff time sequence chart, FIX CSMA first -->
+<!--TODO: backoff time sequence chart, using CsmaCaMac -->
 <img src="wireless-step6-seq-2.png">
 
-<b>Number of packets received by Host B: 1172</b>
+<b>Number of packets received by Host B: 1421</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
