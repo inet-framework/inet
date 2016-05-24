@@ -1,8 +1,8 @@
 /**
-@mainpage Wireless Tutorial for the INET Framework
+@mainpage Wireless Tutorial for the INET Framework -- Part 1
 
 In this tutorial, we show you how to build wireless simulations in the INET
-Framework. The tutorial contains a series of simulation models numbered from 1 through 19.
+Framework. The tutorial contains a series of simulation models numbered from 1 through 14.
 The models are of increasing complexity -- they start from the basics and
 in each step, they introduce new INET features and concepts related to wireless communication
 networks.
@@ -113,9 +113,9 @@ which is 10ms. Therefore the app is going to generate 100 kbyte/s (800
 kbps) UDP traffic, not counting protocol overhead. Host B contains a
 `UDPSink` application that just discards received packets.
 
-The model also contains a gauge to display the number of packets received by
-Host B. The gauge is added by the `@figure[thruputInstrument](type=gauge...)`
-line.
+The model also displays the number of packets received by Host B. The text
+is added is added by the `@figure[rcvdPk]` line, and the subsequent few
+lines arrange the figure to be updated during the simulation.
 
 <b>Physical layer modeling</b>
 
@@ -177,27 +177,31 @@ The configuration:
 
 @section s1results Results
 
-When we run the simulation, here's what happens.
-Host A's UDPApp creates UDP packets at random intervals. These packets are sent
-down to the network interface for transmission. The network interface queues
-packets, and transmits them as soon as it can. As long as there are packets in
-the network interface's transmission queue, packets are transmitted back-to-back, with no
-gap between the transmission of each packet.
+When we run the simulation, here's what happens. Host A's `UDPBasicApp`
+generates UDP packets at random intervals. These packets are sent down via
+UDP and IPv4 to the network interface for transmission. The network
+interface queues packets, and transmits them as soon as it can. As long as
+there are packets in the network interface's transmission queue, packets
+are transmitted back-to-back, with no gaps between subsequent packets.
 
-Here is an animation showing the hosts communicating:
+These events can be followed on OMNeT++'s Qtenv runtime GUI. The following
+image has been captured from Qtenv, and shows the inside of Host A during
+the simulation. One can see a UDP packet being sent down from the
+`udpApp` submodule, traversing the intermediate protocol layers, and being
+transmitted by the wlan interface.
 
-<img src="step1_8.gif">
+<img src="step1_1.gif"> <!-- TODO the animation is completely wrong in Qtenv, must be re-recorded with Tkenv! -->
 
-This animation shows how a host looks on the inside, and an UDP packet being
-sent down from the UDP Application submodule, and transmitted by the wlan interface.
+The next animation shows the communication between the hosts, using
+OMNeT++'s default "message sending" animation.
 
-<img src="step1_1.gif">
+<img src="step1_8.gif">  <!-- TODO re-record so that it has no NAN in it! -->
 
-When the simulation concludes at t=25s, the throughput instrument indicates that
-around 2400 packets were sent. A packet with overhead is 1028 bytes, which means
-the transmission rate was around 800 kbps.
+When the simulation concludes at t=25s, the packet count meter indicates that
+around 2000 packets were sent. A packet with overhead is 1028 bytes, which means
+the transmission rate was around 660 kbps.
 
-<b>Number of packets received by Host B: 2422</b>
+<b>Number of packets received by Host B: 2018</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
@@ -249,7 +253,7 @@ there's at least one propagating radio signal on the medium.
 
 The visualization of recent successful physical layer transmissions is
 enabled with the `packetNameFilter` parameter of the `physicalLinkVisualizer` submodule.
-Matching successful transmissions are displayed with black arrows that fade with time.
+Matching successful transmissions are displayed with grey arrows that fade with time.
 When a packet is successfully received by the physical layer, the arrow between
 the transmitter and receiver hosts is created or reinforced. The arrows
 visible at any given time indicate recent successful communication patterns.
@@ -265,48 +269,55 @@ Configuration:
 
 @section s2results Results
 
-The most notable change is the bubble animations representing radio signals. Each
-transmission starts with displaying a growing filled circle centered at the transmitter.
-The outer edge of the circle indicates the propagation of the radio signal's first
-bit. When the transmission ends, the circle becomes a ring and the inner edge appears
-at the transmitter. By the time this happens, the outer edge is very far away from the
-transmitter. The reason is that the transmission duration is much longer than the
-propagation time needed to reach the receiver. The growing inner edge of the ring
-indicates the propagation of the radio signal's last bit. The reception starts when
-the outer edge reaches the receiver, and it finishes when the inner edge arrives.
+The most notable change is the bubble animations representing radio
+signals. Each transmission starts with displaying a growing filled circle
+centered at the transmitter. The outer edge of the circle indicates the
+propagation of the radio signal's first bit. When the transmission ends,
+the circle becomes a ring and the inner edge appears at the transmitter.
+The growing inner edge of the ring indicates the propagation of the radio
+signal's last bit. The reception starts when the outer edge reaches the
+receiver, and it finishes when the inner edge arrives.
 
-The UDP application generates packets at a rate so that there are back-to-back transmissions.
-Back-to-back means the first bit of a transmission is just right after the last bit of the
-previous transmission. This can be seen in the animation, with no gap between the colored
-transmission rings. Sometimes, the transmission stops for a while, indicating that the
-transmission queue became empty.
+Note that when the inner edge appears, the outer edge is already far away
+from the transmitter. The explanation for that is that in this network,
+transmission durations are much longer than propagation times.
+
+The UDP application generates packets at a rate so that there are
+back-to-back transmissions. Back-to-back means the first bit of a
+transmission immediately follows the last bit of the previous transmission.
+This can be seen in the animation, as there are no gaps between the colored
+transmission rings. Sometimes the transmission stops for a while,
+indicating that the transmission queue became empty.
 
 The blue circle around Host A depicts the communication range, and it clearly shows that
 Host B is within the range, therefore successful communication is possible.
 
-The black arrow between the hosts indicates successful communication at the physical layer.
-The arrow is created after a packet reception is successfully completed, just when the packet
-is passed up to the link layer. The arrow is displayed after the first packet reception
+The arrow that goes from Host A to Host B indicates successful
+communication at the physical layer. The arrow is created after a packet
+reception is successfully completed, when the packet is passed up to the
+link layer. The arrow is displayed when the reception of the first packet
 at Host B is over.
-
-In the following animation, Host A sends the following:
-4 packets - gap - 1 packet - gap - 2 packets
 
 <img src="step2_3.gif">
 
-This exchange, and the back-to-back radio frames, are visualized in a sequence chart below.
-It indicates that transmission of the packet UDPData-0 starts at around 15ms,
-and is completed at around 23ms. The signal propagation takes a non-zero amount of time,
-but it's such a small value compared to the transmission duration that it's not
-visible in this image. The arrow signifying the beginning of the transmission
-appears to be vertical, one needs to zoom in a lot to see that in fact, it is not.
-In a later step, we will see that it is possible to configure the sequence chart to represent
-time in a non-linear way. The chart also indicates that UDPData-1 and UDPData-2 are
-transmitted back-to-back, because there's no gap between them.
+Frame exchanges may also be visualized using the Sequence Chart tool in the
+OMNeT++ IDE. The following image was obtained by recording an event log
+(`.elog`) file from the simulation, opening it in the IDE, and tweaking the
+settings in the Sequence Chart tool.
+
+The transmission of the packet `UDPData-0` starts at around 15ms, and
+completes at around 23ms. The signal propagation takes a nonzero amount of
+time, but it's such a small value compared to the transmission duration
+that it's not visible in this image. (The arrow signifying the beginning of
+the transmission appears to be vertical, one needs to zoom in along the
+time axis to see that in fact it is not. In a later step, we will see that
+it is possible to configure the Sequence Chart tool to represent time in a
+non-linear way.) The chart also indicates that `UDPData-1` and `UDPData-2`
+are transmitted back-to-back, because there's no gap between them.
 
 <img src="wireless-step2-seq.png" width=900px>
 
-<b>Number of packets received by Host B: 2422</b>
+<b>Number of packets received by Host B: 2018</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
@@ -355,7 +366,7 @@ The configuration:
 
 As we run the simulation, we can see that hosts R1 and R2 are the only
 hosts in the communication range of Host A. Therefore they are the only ones that
-receive Host A's transmissions. This is indicated by the black arrows
+receive Host A's transmissions. This is indicated by the grey arrows
 connecting Host A to R1 and R2, respectively, representing recent successful
 receptions in the physical layer.
 
@@ -454,23 +465,23 @@ It tells that Host B (10.0.0.2) can be reached via Host R1 (10.0.0.3), as specif
 
 <img src="wireless-step4-rt.png">
 
-When the first packet sent by Host A arrives at Host R1, a black arrow appears
+When the first packet sent by Host A arrives at Host R1, a grey arrow appears
 between the two hosts indicating a successful physical layer exchange, as it was
 noted earlier. A few events later but still at the same simulation time, a green
-arrow appears on top of the black one. The green arrow represents a successful
+arrow appears on top of the grey one. The green arrow represents a successful
 exchange between the two data link layers of the same hosts. As opposed to the
 previous step, this happens because according to the routing table of Host A, a
 packet destined to Host B, has to be sent to Host R1 (the gateway). As the packet
 reaches the network layer of Host R1, it immediately gets routed according to the
 routing table of this host directly towards Host B. So when the first packet arrives
-at Host B, first a black arrow appears, then a green arrow appears on top of that,
+at Host B, first a grey arrow appears, then a green arrow appears on top of that,
 similarly to the Host R1 case. Still at the same simulation time the packet leaves
 the network layer of Host B towards the UDP protocol. At this moment a new polyline
 arrow appears between Host A and Host B going through Host R1. This blue arrow
 represents the route the packet has taken from first entering the network layer
 at Host A until it left the network layer at Host B.
 
-Note that there are black arrows leading to Host R2 and R3 even though they don't
+Note that there are grey arrows leading to Host R2 and R3 even though they don't
 transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
