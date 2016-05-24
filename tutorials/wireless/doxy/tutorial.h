@@ -334,16 +334,16 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 @section s3goals Goals
 
 Later in this tutorial, we'll want to turn our model into an ad-hoc network
-and experiment with routing. To this end, in this step we add three more
-wireless nodes, and reduce the communication range so that our two original
+and experiment with routing. To this end, we add three more wireless nodes,
+and reduce the communication range so that our two original
 hosts cannot reach one another directly. In later steps, we'll set up
 routing and use the extra nodes as relays.
 
 @section s3model The model
 
 We need to add 3 more hosts. This could be done by copying end editing the
-network used in the previous steps, but instead we extend WirelessA into
-WirelessB using the inheritance feature of NED:
+network used in the previous steps, but instead we extend `WirelessA` into
+`WirelessB` using the inheritance feature of NED:
 
 @dontinclude WirelessB.ned
 @skip network WirelessB
@@ -364,7 +364,7 @@ The configuration:
 
 @section s3results Results
 
-As we run the simulation, we can see that hosts R1 and R2 are the only
+When we run the simulation, blue circles confirm that hosts R1 and R2 are the only
 hosts in the communication range of Host A. Therefore they are the only ones that
 receive Host A's transmissions. This is indicated by the grey arrows
 connecting Host A to R1 and R2, respectively, representing recent successful
@@ -374,7 +374,7 @@ Host B is in the transmission range of Host R1, and R1 could potentially relay A
 but it drops them, because routing is not configured yet (it will be configured
 in a later step). Therefore no packets are received by Host B.
 
-<img src="wireless-step3.png">
+<img src="wireless-step3.png"> <!--TODO eliminate NAN from the screenshot -->
 
 Host R1's MAC submodule logs indicate that it is discarding the received packets, as they are
 not addressed to it:
