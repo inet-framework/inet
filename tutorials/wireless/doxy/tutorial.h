@@ -682,14 +682,36 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 @section s7goals Goals
 
 In this step, we try to make link layer communication more reliable by
-adding acknowledgement to the MAC protocol.
+adding acknowledgements to the MAC protocol.
 
-TODO We not expect that the use of CSMA will improve throughput, but
-packets will not be lost etc.
 
 @section s7model The model
 
-We turn on ACKs by setting the `useMACAcks` parameter of `CSMA`.
+We turn on acknowledgements by setting the `useAcks` parameter of `CsmaCaMac`
+to `true`. This change will make the operation of the MAC module both more
+interesting and more complicated, both on the transmitter and the receiver side.
+
+On the receiver side, the change is quite simple: when the MAC correctly
+receives a data frame addressed to it, it responds with an ACK frame after
+a fixed-length gap (SIFS). If the originator of the data frame does not
+receive the ACK correctly within the appropriate timeout interval, it will
+initiate a retransmission. The contention window (aka backoff period) will
+be doubled for each retransmission until it reaches the maximum (and then
+it will stay constant for further retransmissions). After a given number of
+unsuccessful retries, the MAC will give up and discard the data frame, and
+will take the next data frame from the queue. The next frame will start
+with a clean slate (i.e. the contention window and the retry count will be
+reset).
+
+This operation roughly corresponds to the basic IEEE 802.11b MAC ad-hoc mode
+operation.
+
+Note that when ACKs are lost, the receiver MAC will send each correctly
+received copy of the data frame up to the higher layers, introducing
+duplicates in the packet stream. This could be eliminated by adding
+sequence numbers to frames and maintaining per-sender sequence numbers in
+each receiver, but the `CsmaCaMac` module does not contain duplicate
+detection to keep its code simple and accessible.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless07]
@@ -705,7 +727,11 @@ from Host R1.
 
 The UDPData + ACK sequences can can be seen in the sequence chart below:
 
-<img src="wireless-step7-seq.png">
+<img src="wireless-step7-seq.png">  <!--TODO re-record with CsmaCaMac -->
+
+TODO We do not expect that the
+use of ACKs will improve throughput, but
+packets will not be lost etc.
 
 When the channel utilization is low, and collisions are infrequent, using ACKs
 doesnt have a positive impact on the number of correctly received packets, as
