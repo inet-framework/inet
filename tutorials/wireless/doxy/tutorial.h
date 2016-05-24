@@ -460,8 +460,10 @@ Configuration:
 
 @section s4results Results
 
-Routing tables are submodules of hosts. The routing table of Host A (10.0.0.1) can be seen in the following image.
-It tells that Host B (10.0.0.2) can be reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
+Routing tables are stored in the `routingTable` submodules of hosts, and
+can be inspected in the runtime GUI. The routing table of Host A (10.0.0.1)
+can be seen in the following image. It tells that Host B (10.0.0.2) can be
+reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
 
 <img src="wireless-step4-rt.png">
 
@@ -472,14 +474,14 @@ arrow appears on top of the grey one. The green arrow represents a successful
 exchange between the two data link layers of the same hosts. As opposed to the
 previous step, this happens because according to the routing table of Host A, a
 packet destined to Host B, has to be sent to Host R1 (the gateway). As the packet
-reaches the network layer of Host R1, it immediately gets routed according to the
+reaches the network layer of Host R1, it is immediately routed according to the
 routing table of this host directly towards Host B. So when the first packet arrives
 at Host B, first a grey arrow appears, then a green arrow appears on top of that,
-similarly to the Host R1 case. Still at the same simulation time the packet leaves
-the network layer of Host B towards the UDP protocol. At this moment a new polyline
-arrow appears between Host A and Host B going through Host R1. This blue arrow
-represents the route the packet has taken from first entering the network layer
-at Host A until it left the network layer at Host B.
+similarly to the Host R1 case. Still at the same simulation time, the packet leaves
+the network layer of Host B towards the UDP protocol component. At this moment
+a new polyline arrow appears between Host A and Host B going through Host R1.
+This blue arrow represents the route the packet has taken from first entering
+the network layer at Host A until it left the network layer at Host B.
 
 Note that there are grey arrows leading to Host R2 and R3 even though they don't
 transmit. This is because they receive the transmissions at the physical layer,
@@ -487,8 +489,6 @@ but they discard the packets at the link layer because it is not addressed to
 them.
 
 <img src="wireless-step4.png">
-
-<! number of packets>
 
 <b>Number of packets received by Host B: 2453</b>
 
