@@ -687,21 +687,20 @@ adding acknowledgements to the MAC protocol.
 
 @section s7model The model
 
-We turn on acknowledgements by setting the `useAcks` parameter of `CsmaCaMac`
-to `true`. This change will make the operation of the MAC module both more
-interesting and more complicated, both on the transmitter and the receiver side.
+We turn on acknowledgements by setting the `useAcks` parameter of
+`CsmaCaMac` to `true`. This change will make the operation of the MAC
+module both more interesting and more complicated.
 
 On the receiver side, the change is quite simple: when the MAC correctly
 receives a data frame addressed to it, it responds with an ACK frame after
 a fixed-length gap (SIFS). If the originator of the data frame does not
-receive the ACK correctly within the appropriate timeout interval, it will
-initiate a retransmission. The contention window (aka backoff period) will
-be doubled for each retransmission until it reaches the maximum (and then
-it will stay constant for further retransmissions). After a given number of
-unsuccessful retries, the MAC will give up and discard the data frame, and
-will take the next data frame from the queue. The next frame will start
-with a clean slate (i.e. the contention window and the retry count will be
-reset).
+receive the ACK correctly within due time, it will initiate a
+retransmission. The contention window (aka backoff period) will be doubled
+for each retransmission until it reaches the maximum (and then it will stay
+constant for further retransmissions). After a given number of unsuccessful
+retries, the MAC will give up and discard the data frame, and will take the
+next data frame from the queue. The next frame will start with a clean
+slate (i.e. the contention window and the retry count will be reset).
 
 This operation roughly corresponds to the basic IEEE 802.11b MAC ad-hoc mode
 operation.
@@ -821,6 +820,11 @@ The energy storage module contains an `energyBalance` watched variable that
 can be used to track energy consumption. Also, the `residualCapacity`
 signal can be used to display energy consumption over time.  (TODO how? why mentioned?)
 
+<b>Visualization</b>
+
+The visualization of radio signals as expanding bubbles is no longer needed,
+so we turn it off.
+
 Configuration:
 
 @dontinclude omnetpp.ini
@@ -835,10 +839,10 @@ The negative energy value signifies the consumption of energy.
 <img src="wireless-step8-energy-2.png">
 
 The 'residualCapacity' signal of Hosts A, R1 and B is plotted in following diagram.
-The diagram shows that Host A has the consumed the most power because it transmitted more than
+The diagram shows that Host A has consumed the most power because it transmitted more than
 the other nodes.
 
-<! R1 should have transmitted the most because of ACKs>
+<!-- TODO R1 should have transmitted the most because of ACKs -->
 
 <img src="wireless-step8.png">
 
@@ -876,8 +880,10 @@ Here we install `LinearMobility` into the intermediate nodes.
 speed are parameters. We configure the nodes to move north at the speed of
 12 m/s.
 
-The visualization of radio signals as expanding bubbles is no longer needed,
-so we turn it off.
+We also update the visualization settings, and turn on an option that will
+cause mobile nodes to leave a trail as they move.
+
+The configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless09]
@@ -885,21 +891,24 @@ so we turn it off.
 
 @section s9results Results
 
-It is advisable to run the simulation in Fast mode, because the nodes move very slowly if
-viewed in Normal mode.
+It is advisable to run the simulation in Fast mode, because the nodes move
+very slowly if viewed in Normal mode.
 
-It can be seen in the animation below as Host R1 leaves Host A's communication range at around 11 seconds.
-After that, the communication path is broken. Traffic could be routed through R2 and R3, but that does not happen because
-the routing tables are static and have been configured according to the
-initial positions of the nodes. The intermediate hosts are leaving behind a movement trail as they are traveling.
-When the communication path breaks, the blue arrow that represents successful network layer communication paths fades away,
-because there are no more packets to reinforce it.
+It can be seen in the animation below as Host R1 leaves Host A's
+communication range at around 11 seconds. After that, the communication
+path is broken. Traffic could be routed through R2 and R3, but that does
+not happen because the routing tables are static and have been configured
+according to the initial positions of the nodes. When the communication
+path breaks, the blue arrow that represents successful network layer
+communication paths fades away, because there are no more packets to
+reinforce it.
 
 <img src="step9_1.gif">
 
-As mentioned before, a communication path could be established between Host A and B by routing traffic
-through Hosts R2 and R3. To reconfigure routes according to the changing topology of the network, an
-ad-hoc routing protocol is required.
+As mentioned before, a communication path could be established between Host
+A and B by routing traffic through Hosts R2 and R3. To reconfigure routes
+according to the changing topology of the network, an ad-hoc routing
+protocol is required.
 
 <b>Number of packets received by Host B: 264</b>
 
