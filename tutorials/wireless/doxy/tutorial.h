@@ -195,7 +195,7 @@ transmitted by the wlan interface.
 The next animation shows the communication between the hosts, using
 OMNeT++'s default "message sending" animation.
 
-<img src="step1_8.gif">  <!-- TODO re-record so that it has no NAN in it! -->
+<img src="step1_11.gif">  <!-- TODO re-record so that it has no NAN in it! -->
 
 When the simulation concludes at t=25s, the packet count meter indicates that
 around 2000 packets were sent. A packet with overhead is 1028 bytes, which means
