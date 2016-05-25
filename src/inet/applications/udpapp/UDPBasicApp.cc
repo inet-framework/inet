@@ -18,6 +18,7 @@
 
 #include "inet/applications/udpapp/UDPBasicApp.h"
 
+#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -113,8 +114,9 @@ void UDPBasicApp::sendPacket()
 {
     std::ostringstream str;
     str << packetName << "-" << numSent;
-    cPacket *payload = new cPacket(str.str().c_str());
+    ApplicationPacket *payload = new ApplicationPacket(str.str().c_str());
     payload->setByteLength(par("messageLength").longValue());
+    payload->setSequenceNumber(numSent);
 
     L3Address destAddr = chooseDestAddr();
 

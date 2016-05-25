@@ -22,6 +22,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/applications/base/ApplicationPacket_m.h"
 
 namespace inet {
 
@@ -33,21 +34,26 @@ Register_ResultFilter("messageAge", MessageAgeFilter);
 
 void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
-    if (dynamic_cast<cMessage *>(object)) {
-        cMessage *msg = (cMessage *)object;
+    if (auto msg = dynamic_cast<cMessage *>(object))
         fire(this, t, t - msg->getCreationTime() DETAILS_ARG_NAME);
-    }
 }
 
 Register_ResultFilter("messageTSAge", MessageTSAgeFilter);
 
 void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
-    if (dynamic_cast<cMessage *>(object)) {
-        cMessage *msg = (cMessage *)object;
+    if (auto msg = dynamic_cast<cMessage *>(object))
         fire(this, t, t - msg->getTimestamp() DETAILS_ARG_NAME);
-    }
 }
+
+Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
+
+void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+{
+    if (auto msg = dynamic_cast<ApplicationPacket*>(object))
+        fire(this, t, msg->getSequenceNumber() DETAILS_ARG_NAME);
+}
+
 
 Register_ResultFilter("mobilityPos", MobilityPosFilter);
 

@@ -47,6 +47,15 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects an ApplicationPacket, and outputs its sequence number.
+ */
+class INET_API ApplicationPacketSequenceNumberFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+};
+
+/**
  * Filter that expects an IMobility and outputs its current coordinate
  */
 class INET_API MobilityPosFilter : public cObjectResultFilter

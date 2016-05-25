@@ -20,6 +20,7 @@
 
 #include "inet/applications/udpapp/UDPBasicBurst.h"
 
+#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
@@ -107,8 +108,9 @@ cPacket *UDPBasicBurst::createPacket()
     char msgName[32];
     sprintf(msgName, "UDPBasicAppData-%d", counter++);
     long msgByteLength = messageLengthPar->longValue();
-    cPacket *payload = new cPacket(msgName);
+    ApplicationPacket *payload = new ApplicationPacket(msgName);
     payload->setByteLength(msgByteLength);
+    payload->setSequenceNumber(numSent);
     payload->addPar("sourceId") = getId();
     payload->addPar("msgId") = numSent;
 

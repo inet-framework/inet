@@ -41,6 +41,8 @@ simple UDPSink like IUDPApp
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[throughput](title="throughput"; unit=bps; source="throughput(rcvdPk)"; record=last);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[rcvdPkSeqNo](title="received packet sequence number"; source="appPkSeqNo(rcvdPk)"; record=vector; interpolationmode=none);
+
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
