@@ -28,7 +28,7 @@ CsmaCaMac::~CsmaCaMac()
     cancelAndDelete(endSifs);
     cancelAndDelete(endDifs);
     cancelAndDelete(endBackoff);
-    cancelAndDelete(endAck);
+    cancelAndDelete(endAckTimeout);
     cancelAndDelete(endData);
     cancelAndDelete(mediumStateChange);
     for (auto frame : transmissionQueue)
@@ -79,7 +79,7 @@ void CsmaCaMac::initialize(int stage)
         endSifs = new cMessage("SIFS");
         endDifs = new cMessage("DIFS");
         endBackoff = new cMessage("Backoff");
-        endAck = new cMessage("Ack");
+        endAckTimeout = new cMessage("AckTimeout");
         endData = new cMessage("Data");
         mediumStateChange = new cMessage("MediumStateChange");
 
@@ -317,12 +317,12 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 delete frame;
             );
             FSMA_Event_Transition(Transmit-Failed,
-                                  msg == endAck && retryCounter == retryLimit - 1,
+                                  msg == endAckTimeout && retryCounter == retryLimit - 1,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
             FSMA_Event_Transition(Receive-Ack-Timeout,
-                                  msg == endAck,
+                                  msg == endAckTimeout,
                                   DEFER,
                 retryCurrentTransmission();
             );
@@ -445,13 +445,13 @@ void CsmaCaMac::cancelDifsTimer()
 void CsmaCaMac::scheduleAckTimer(CsmaCaMacDataFrame *frameToSend)
 {
     EV << "scheduling ACK timer\n";
-    scheduleAt(simTime() + ackTimeout, endAck);
+    scheduleAt(simTime() + ackTimeout, endAckTimeout);
 }
 
 void CsmaCaMac::cancelAckTimer()
 {
     EV << "canceling ACK timer\n";
-    cancelEvent(endAck);
+    cancelEvent(endAckTimeout);
 }
 
 void CsmaCaMac::invalidateBackoffPeriod()

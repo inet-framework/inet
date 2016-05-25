@@ -103,7 +103,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     cMessage *endBackoff = nullptr;
 
     /** End of the ack timeout */
-    cMessage *endAck = nullptr;
+    cMessage *endAckTimeout = nullptr;
 
     /** Timeout after the transmission of a Data frame */
     cMessage *endData = nullptr;
