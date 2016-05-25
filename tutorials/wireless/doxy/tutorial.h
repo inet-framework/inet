@@ -253,7 +253,7 @@ there's at least one propagating radio signal on the medium.
 
 The visualization of recent successful physical layer transmissions is
 enabled with the `packetNameFilter` parameter of the `physicalLinkVisualizer` submodule.
-Matching successful transmissions are displayed with grey arrows that fade with time.
+Matching successful transmissions are displayed with dotted dark yellow arrows that fade with time.
 When a packet is successfully received by the physical layer, the arrow between
 the transmitter and receiver hosts is created or reinforced. The arrows
 visible at any given time indicate recent successful communication patterns.
@@ -366,7 +366,7 @@ The configuration:
 
 When we run the simulation, blue circles confirm that hosts R1 and R2 are the only
 hosts in the communication range of Host A. Therefore they are the only ones that
-receive Host A's transmissions. This is indicated by the grey arrows
+receive Host A's transmissions. This is indicated by the dotted arrows
 connecting Host A to R1 and R2, respectively, representing recent successful
 receptions in the physical layer.
 
@@ -467,23 +467,23 @@ reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
 
 <img src="wireless-step4-rt.png">
 
-When the first packet sent by Host A arrives at Host R1, a grey arrow appears
+When the first packet sent by Host A arrives at Host R1, a dotted dark yellow arrow appears
 between the two hosts indicating a successful physical layer exchange, as it was
 noted earlier. A few events later but still at the same simulation time, a green
-arrow appears on top of the grey one. The green arrow represents a successful
+arrow appears on top of the dotted one. The green arrow represents a successful
 exchange between the two data link layers of the same hosts. As opposed to the
 previous step, this happens because according to the routing table of Host A, a
 packet destined to Host B, has to be sent to Host R1 (the gateway). As the packet
 reaches the network layer of Host R1, it is immediately routed according to the
 routing table of this host directly towards Host B. So when the first packet arrives
-at Host B, first a grey arrow appears, then a green arrow appears on top of that,
+at Host B, first a dotted arrow appears, then a cyan arrow appears on top of that,
 similarly to the Host R1 case. Still at the same simulation time, the packet leaves
 the network layer of Host B towards the UDP protocol component. At this moment
 a new polyline arrow appears between Host A and Host B going through Host R1.
 This blue arrow represents the route the packet has taken from first entering
 the network layer at Host A until it left the network layer at Host B.
 
-Note that there are grey arrows leading to Host R2 and R3 even though they don't
+Note that there are dotted arrows leading to Host R2 and R3 even though they don't
 transmit. This is because they receive the transmissions at the physical layer,
 but they discard the packets at the link layer because it is not addressed to
 them.
@@ -535,8 +535,8 @@ We expect that although Host B will not be able to receive Host A's
 transmissions, those transmission will still cause interference with other
 (e.g. R1's) transmissions at Host B.
 
-To make the animation simpler, we disable displaying successful exchanges at
-the physical layer and the data link layer, but displaying the network routes
+To make the animation simpler, we disable displaying some of the physical layer
+and the data link layer communication arrows, but displaying the network routes
 is still enabled.
 
 @dontinclude omnetpp.ini
@@ -623,10 +623,9 @@ will be less collisions, and the medium will be utilized better.
 @section s6model The model
 
 To use CSMA, we need to replace `IdealWirelessNic` in the hosts with
-`WirelessNic`. However, `WirelessNic` is configured for
-IEEE 802.11 by default, so we need to replace both the radio and the MAC
-protocol in it. This is done by specifying `IdealRadio` for `radioType`,
-and `CsmaCaMacfor `macType`.
+`WirelessNic`. `WirelessNic` is a generic NIC with both the radio and
+the MAC module left open, so we specify `IdealRadio` for its `radioType`
+parameter, and `CsmaCaMacMac` for `macType`.
 
 The `CsmaCaMac` module implements CSMA/CA with optional acknowledgements
 and a retry mechanism. It has a number of parameters for tweaking its
@@ -695,12 +694,13 @@ On the receiver side, the change is quite simple: when the MAC correctly
 receives a data frame addressed to it, it responds with an ACK frame after
 a fixed-length gap (SIFS). If the originator of the data frame does not
 receive the ACK correctly within due time, it will initiate a
-retransmission. The contention window (aka backoff period) will be doubled
-for each retransmission until it reaches the maximum (and then it will stay
-constant for further retransmissions). After a given number of unsuccessful
-retries, the MAC will give up and discard the data frame, and will take the
-next data frame from the queue. The next frame will start with a clean
-slate (i.e. the contention window and the retry count will be reset).
+retransmission. The contention window (from which the backoff period is
+drawn) will be doubled for each retransmission until it reaches the maximum
+(and then it will stay constant for further retransmissions). After a given
+number of unsuccessful retries, the MAC will give up and discard the data
+frame, and will take the next data frame from the queue. The next frame
+will start with a clean slate (i.e. the contention window and the retry
+count will be reset).
 
 This operation roughly corresponds to the basic IEEE 802.11b MAC ad-hoc mode
 operation.
@@ -724,7 +724,7 @@ from Host R1.
 
 <img src="step7_2_2.gif">
 
-The UDPData + ACK sequences can can be seen in the sequence chart below:
+The UDPData + ACK sequences can be seen in the sequence chart below:
 
 <img src="wireless-step7-seq.png">  <!--TODO re-record with CsmaCaMac -->
 
