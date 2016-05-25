@@ -89,8 +89,8 @@ void CsmaCaMac::initialize(int stage)
 
         // state variables
         fsm.setName("CsmaCaMac State Machine");
-        retryCounter = 0;
         backoffPeriod = -1;
+        retryCounter = 0;
 
         // statistics
         numRetry = 0;
@@ -104,6 +104,7 @@ void CsmaCaMac::initialize(int stage)
 
         // initialize watches
         WATCH(fsm);
+        WATCH(backoffPeriod);
         WATCH(retryCounter);
         WATCH(numRetry);
         WATCH(numSentWithoutRetry);
@@ -215,13 +216,12 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMessage(msg),
                                   DEFER,
-                ASSERT(isInvalidBackoffPeriod() || backoffPeriod == 0);
-                invalidateBackoffPeriod();
+                ASSERT(isInvalidBackoffPeriod());
             );
             FSMA_No_Event_Transition(Immediate-Data-Ready,
                                      !transmissionQueue.empty(),
                                      DEFER,
-                invalidateBackoffPeriod();
+                ASSERT(isInvalidBackoffPeriod());
             );
             FSMA_Event_Transition(Receive,
                                   isLowerMessage(msg),
@@ -579,7 +579,7 @@ void CsmaCaMac::popTransmissionQueue()
 
 void CsmaCaMac::resetStateVariables()
 {
-    backoffPeriod = 0;
+    backoffPeriod = -1;
     retryCounter = 0;
 }
 
