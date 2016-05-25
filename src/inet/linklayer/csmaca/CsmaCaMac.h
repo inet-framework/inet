@@ -193,7 +193,6 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void cancelAckTimer();
 
     /** @brief Generates a new backoff period based on the contention window. */
-    virtual simtime_t computeBackoffPeriod(int r);
     virtual void invalidateBackoffPeriod();
     virtual bool isInvalidBackoffPeriod();
     virtual void generateBackoffPeriod();
