@@ -47,6 +47,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     PatternMatcher packetNameMatcher;
     cFigure::Color lineColor;
     double lineWidth = NaN;
+    cFigure::LineStyle lineStyle;
     double opacityHalfLife = NaN;
     //@}
 

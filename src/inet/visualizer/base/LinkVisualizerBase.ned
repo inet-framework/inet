@@ -46,6 +46,7 @@ simple LinkVisualizerBase extends VisualizerBase
         string packetNameFilter = default(""); // which packets are considered to determine active links, matches no packets by default
         string lineColor = default("black"); // link line color, black by default
         double lineWidth = default(3); // link line width
+        string lineStyle = default("solid"); // link line style (solid, dashed, dotted)
         double opacityHalfLife @unit(s) = default(1s); // how quickly inactive links fade away, opacity halves every second by default
         @class(LinkVisualizerBase);
 }

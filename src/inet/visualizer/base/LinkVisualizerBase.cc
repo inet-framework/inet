@@ -42,6 +42,7 @@ void LinkVisualizerBase::initialize(int stage)
         packetNameMatcher.setPattern(par("packetNameFilter"), false, true, true);
         lineColor = cFigure::Color(par("lineColor"));
         lineWidth = par("lineWidth");
+        lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         opacityHalfLife = par("opacityHalfLife");
     }
 }
