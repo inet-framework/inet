@@ -1,7 +1,10 @@
 #
 # TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
 #
-ifneq (,$(findstring -DWITH_TCP_NSC,$(COPTS)))
+
+WITH_TCP_NSC := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_NSC && echo enabled) )
+CFLAGS += -Dxxx$(WITH_TCP_NSC)xxx
+ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
     CFLAGS += -I../3rdparty/nsc-$(NSC_VERSION)/sim -DHAVE_NSC
@@ -23,7 +26,8 @@ endif
 #
 # VoipStream feature:
 #
-ifneq (,$(findstring -DWITH_VOIPSTREAM,$(COPTS)))
+WITH_VOIPSTREAM := $(shell (cd .. && ./inet_featuretool -q isenabled VoIPStream && echo enabled) )
+ifeq ($(WITH_VOIPSTREAM), enabled)
   ifeq ($(HAVE_PKGCFG), yes)
     HAVE_FFMPEG := $(shell $(PKGCFG) --exists libavcodec libavformat libavutil && echo yes || echo no)
     ifeq ($(HAVE_FFMPEG), yes)
