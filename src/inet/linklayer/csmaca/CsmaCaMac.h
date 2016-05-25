@@ -88,9 +88,6 @@ class INET_API CsmaCaMac : public MACProtocolBase
 
     cFSM fsm;
 
-    /** True if backoff is enabled */
-    bool backoff = false;
-
     /** Remaining backoff period in seconds */
     simtime_t backoffPeriod = -1;
 

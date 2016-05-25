@@ -88,7 +88,6 @@ void CsmaCaMac::initialize(int stage)
         fsm.setName("CsmaCaMac State Machine");
         retryCounter = 0;
         backoffPeriod = -1;
-        backoff = false;
 
         // statistics
         numRetry = 0;
@@ -103,8 +102,6 @@ void CsmaCaMac::initialize(int stage)
         // initialize watches
         WATCH(fsm);
         WATCH(retryCounter);
-        WATCH(backoff);
-
         WATCH(numRetry);
         WATCH(numSentWithoutRetry);
         WATCH(numGivenUp);
@@ -237,7 +234,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   WAITDIFS,
             ;);
             FSMA_No_Event_Transition(Immediate-Wait-Difs,
-                                     isMediumFree() || !backoff,
+                                     isMediumFree(),
                                      WAITDIFS,
             ;);
             FSMA_Event_Transition(Receive,
@@ -248,13 +245,8 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         FSMA_State(WAITDIFS)
         {
             FSMA_Enter(scheduleDifsPeriod());
-            FSMA_Event_Transition(Difs-Over-Transmit,
-                                  msg == endDifs && !backoff,
-                                  WAITTRANSMIT,
-                cancelDifsPeriod();
-            );
             FSMA_Event_Transition(Difs-Over-Backoff,
-                                  msg == endDifs && backoff,
+                                  msg == endDifs,
                                   BACKOFF,
                 if (isInvalidBackoffPeriod())
                     generateBackoffPeriod();
@@ -262,13 +254,11 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Busy,
                                   msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
-                backoff = true;
                 cancelDifsPeriod();
             );
             FSMA_No_Event_Transition(Immediate-Busy,
                                      !isMediumFree(),
                                      DEFER,
-                backoff = true;
                 cancelDifsPeriod();
             );
             // radio state changes before we actually get the message, so this must be here
@@ -558,7 +548,6 @@ void CsmaCaMac::giveUpCurrentTransmission()
 void CsmaCaMac::retryCurrentTransmission()
 {
     ASSERT(retryCounter < retryLimit - 1);
-    backoff = true;
     retryCounter++;
     numRetry++;
     generateBackoffPeriod();
@@ -586,7 +575,6 @@ void CsmaCaMac::resetStateVariables()
 {
     backoffPeriod = 0;
     retryCounter = 0;
-    backoff = !transmissionQueue.empty();
 }
 
 bool CsmaCaMac::isMediumFree()
