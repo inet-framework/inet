@@ -173,7 +173,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void scheduleDifsTimer();
     virtual void cancelDifsTimer();
 
-    virtual void scheduleAckTimer(CsmaCaMacDataFrame *frame);
+    virtual void scheduleAckTimeout(CsmaCaMacDataFrame *frame);
     virtual void cancelAckTimer();
 
     /** @brief Generates a new backoff period based on the contention window. */

@@ -313,9 +313,9 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(WAITACK)
         {
-            FSMA_Enter(scheduleAckTimer(getCurrentTransmission()));
+            FSMA_Enter(scheduleAckTimeout(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-Ack,
-                                  isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaCaMacAckFrame *>(frame),
+                                  isLowerMessage(msg) && isForUs(frame) && isAck(frame),
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
@@ -454,9 +454,9 @@ void CsmaCaMac::cancelDifsTimer()
     cancelEvent(endDifs);
 }
 
-void CsmaCaMac::scheduleAckTimer(CsmaCaMacDataFrame *frameToSend)
+void CsmaCaMac::scheduleAckTimeout(CsmaCaMacDataFrame *frameToSend)
 {
-    EV << "scheduling ACK timer\n";
+    EV << "scheduling ACK timeout\n";
     scheduleAt(simTime() + ackTimeout, endAckTimeout);
 }
 
@@ -588,6 +588,11 @@ void CsmaCaMac::resetStateVariables()
 bool CsmaCaMac::isMediumFree()
 {
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
+}
+
+bool CsmaCaMac::isAck(CsmaCaMacFrame *frame)
+{
+    return dynamic_cast<CsmaCaMacAckFrame *>(frame);
 }
 
 bool CsmaCaMac::isBroadcast(CsmaCaMacFrame *frame)
