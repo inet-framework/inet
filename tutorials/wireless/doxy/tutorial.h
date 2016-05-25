@@ -903,7 +903,7 @@ path breaks, the blue arrow that represents successful network layer
 communication paths fades away, because there are no more packets to
 reinforce it.
 
-<img src="step9_1.gif">
+<img src="step9_2.gif">
 
 As mentioned before, a communication path could be established between Host
 A and B by routing traffic through Hosts R2 and R3. To reconfigure routes
