@@ -35,25 +35,15 @@ class INET_API CsmaCaMac : public MACProtocolBase
      * @name Configuration parameters
      */
     //@{
-    /** MAC address */
     MACAddress address;
-
     bool useAck = true;
-
-    /** The bitrate is used to send data frames */
     double bitrate = NaN;
-
-    /** The header size of frames */
     int headerLength = -1;
-
-    /** Size of Ack frames */
     int ackLength = -1;
-
+    simtime_t ackTimeout = -1;
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;
     simtime_t difsTime = -1;
-
-    /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize = -1;
 
     /**
@@ -63,10 +53,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
      */
     int retryLimit = -1;
 
-    /** Minimum contention window. */
     int cwMin = -1;
-
-    /** Maximum contention window. */
     int cwMax = -1;
     //@}
 

@@ -50,6 +50,7 @@ void CsmaCaMac::initialize(int stage)
         bitrate = par("bitrate");
         headerLength = par("headerLength");
         ackLength = par("ackLength");
+        ackTimeout = par("ackTimeout");
         slotTime = par("slotTime");
         sifsTime = par("sifsTime");
         difsTime = par("difsTime");
@@ -444,12 +445,7 @@ void CsmaCaMac::cancelDifsTimer()
 void CsmaCaMac::scheduleAckTimer(CsmaCaMacDataFrame *frameToSend)
 {
     EV << "scheduling ACK timer\n";
-    simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
-    // TODO: how do we get this?
-    int phyHeaderLength = 192;
-    double phyHeaderBitrate = 1E+6;
-    simtime_t ackDuration = headerLength * 8 / bitrate + phyHeaderLength / phyHeaderBitrate;
-    scheduleAt(simTime() + sifsTime + ackDuration + maxPropagationDelay * 2, endAck);
+    scheduleAt(simTime() + ackTimeout, endAck);
 }
 
 void CsmaCaMac::cancelAckTimer()
