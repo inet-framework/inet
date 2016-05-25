@@ -298,7 +298,7 @@ reception is successfully completed, when the packet is passed up to the
 link layer. The arrow is displayed when the reception of the first packet
 at Host B is over.
 
-<img src="step2_3.gif">
+<img src="step2_5.gif">
 
 Frame exchanges may also be visualized using the Sequence Chart tool in the
 OMNeT++ IDE. The following image was obtained by recording an event log
@@ -568,7 +568,7 @@ indicated by the appearance of the blue polyline arrow between Host A and Host B
 
 This is shown in the animation below:
 
-<img src="step5_2.gif">
+<img src="step5_6_4.gif">
 
 
 As we expected, the number of packets received by Host B is low. The following
@@ -1088,7 +1088,7 @@ transmissions to Host B. A new route is formed, and traffic continues to use
 this route until Host R1 moves out of communication range. After that, the
 A-R2-R3-B route is used, as seen in the previous steps.
 
-<img src="step11_1.gif">
+<img src="step11_2.gif">
 
 <b>Number of packets received by Host B: TODO</b>
 
