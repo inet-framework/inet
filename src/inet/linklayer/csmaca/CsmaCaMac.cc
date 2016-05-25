@@ -530,7 +530,7 @@ void CsmaCaMac::sendAckFrame()
     EV << "sending Ack frame\n";
     auto frameToAck = static_cast<CsmaCaMacDataFrame *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
-    auto ackFrame = new CsmaCaMacAckFrame("CsmaCaMacAck");
+    auto ackFrame = new CsmaCaMacAckFrame("CsmaAck");
     ackFrame->setReceiverAddress(frameToAck->getTransmitterAddress());
     ackFrame->setByteLength(headerLength);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
