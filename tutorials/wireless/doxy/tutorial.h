@@ -374,7 +374,7 @@ Host B is in the transmission range of Host R1, and R1 could potentially relay A
 but it drops them, because routing is not configured yet (it will be configured
 in a later step). Therefore no packets are received by Host B.
 
-<img src="wireless-step3.png"> <!--TODO eliminate NAN from the screenshot -->
+<img src="wireless-step3.png">
 
 Host R1's MAC submodule logs indicate that it is discarding the received packets, as they are
 not addressed to it:
@@ -726,7 +726,7 @@ from Host R1.
 
 The UDPData + ACK sequences can be seen in the sequence chart below:
 
-<img src="wireless-step7-seq.png">  <!--TODO re-record with CsmaCaMac -->
+<img src="wireless-step7-seq-2.png" width=900px>  <!--TODO re-record with CsmaCaMac -->
 
 TODO We do not expect that the
 use of ACKs will improve throughput, but
