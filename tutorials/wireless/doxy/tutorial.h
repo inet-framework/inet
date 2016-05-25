@@ -190,12 +190,12 @@ the simulation. One can see a UDP packet being sent down from the
 `udpApp` submodule, traversing the intermediate protocol layers, and being
 transmitted by the wlan interface.
 
-<img src="step1_10.gif"> <!-- TODO the animation is completely wrong in Qtenv, must be re-recorded with Tkenv! -->
+<img src="step1_10.gif">í
 
 The next animation shows the communication between the hosts, using
 OMNeT++'s default "message sending" animation.
 
-<img src="step1_11.gif">  <!-- TODO re-record so that it has no NAN in it! -->
+<img src="step1_11.gif">
 
 When the simulation concludes at t=25s, the packet count meter indicates that
 around 2000 packets were sent. A packet with overhead is 1028 bytes, which means
