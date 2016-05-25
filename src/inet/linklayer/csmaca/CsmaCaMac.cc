@@ -175,8 +175,7 @@ void CsmaCaMac::handleSelfMessage(cMessage *msg)
 
 void CsmaCaMac::handleUpperPacket(cPacket *msg)
 {
-    // check for queue overflow
-    if (maxQueueSize && (int)transmissionQueue.size() == maxQueueSize) {
+    if (maxQueueSize != -1 && (int)transmissionQueue.size() == maxQueueSize) {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         delete msg;
         return;
@@ -185,7 +184,6 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
     transmissionQueue.push_back(frame);
-    // skip those cases where there's nothing to do, so the switch looks simpler
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else

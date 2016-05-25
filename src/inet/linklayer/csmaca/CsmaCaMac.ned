@@ -28,7 +28,7 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
         string queueModule = default(""); // name of optional external queue module
-        int maxQueueSize = default(10); // maximum queue length in frames; only used if queueModule==""
+        int maxQueueSize = default(-1); // maximum queue length in frames; only used if queueModule==""
         bool useAck = default(true);
         double bitrate @unit(bps);
         int headerLength @unit(B) = default(8B);
