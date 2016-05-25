@@ -472,11 +472,8 @@ void CsmaCaMac::generateBackoffPeriod()
     int cw;
     if (getCurrentTransmission()->getReceiverAddress().isMulticast())
         cw = cwMulticast;
-    else {
-        cw = (cwMin + 1) * (1 << retryCounter) - 1;
-        if (cw > cwMax)
-            cw = cwMax;
-    }
+    else
+        cw = std::min(cwMax, (cwMin + 1) * (1 << retryCounter) - 1);
     int slots = intrand(cw + 1);
     EV << "generated backoff slot number: " << slots << " , cw: " << cw << endl;
     backoffPeriod = slots * slotTime;
