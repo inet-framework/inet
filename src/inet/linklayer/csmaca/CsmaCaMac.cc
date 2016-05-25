@@ -423,26 +423,26 @@ cPacket *CsmaCaMac::decapsulate(CsmaCaMacDataFrame *frame)
  */
 void CsmaCaMac::scheduleSifsTimer(CsmaCaMacFrame *frame)
 {
-    EV << "scheduling SIFS period\n";
+    EV << "scheduling SIFS timer\n";
     endSifs->setContextPointer(frame);
     scheduleAt(simTime() + sifsTime, endSifs);
 }
 
 void CsmaCaMac::scheduleDifsTimer()
 {
-    EV << "scheduling DIFS period\n";
+    EV << "scheduling DIFS timer\n";
     scheduleAt(simTime() + difsTime, endDifs);
 }
 
 void CsmaCaMac::cancelDifsTimer()
 {
-    EV << "canceling DIFS period\n";
+    EV << "canceling DIFS timer\n";
     cancelEvent(endDifs);
 }
 
 void CsmaCaMac::scheduleAckTimer(CsmaCaMacDataFrame *frameToSend)
 {
-    EV << "scheduling ack timeout period\n";
+    EV << "scheduling ACK timer\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
     // TODO: how do we get this?
     int phyHeaderLength = 192;
@@ -453,7 +453,7 @@ void CsmaCaMac::scheduleAckTimer(CsmaCaMacDataFrame *frameToSend)
 
 void CsmaCaMac::cancelAckTimer()
 {
-    EV << "canceling ack timeout period\n";
+    EV << "canceling ACK timer\n";
     cancelEvent(endAck);
 }
 
@@ -496,13 +496,13 @@ void CsmaCaMac::decreaseBackoffPeriod()
 
 void CsmaCaMac::scheduleBackoffTimer()
 {
-    EV << "scheduling backoff period\n";
+    EV << "scheduling backoff timer\n";
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
 void CsmaCaMac::cancelBackoffTimer()
 {
-    EV << "canceling backoff period\n";
+    EV << "canceling backoff timer\n";
     cancelEvent(endBackoff);
 }
 
