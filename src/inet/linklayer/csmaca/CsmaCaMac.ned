@@ -40,7 +40,8 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
         int mtu = default(1500);
         int cwMin = default(31); // minimum contention window
         int cwMax = default(1023); // maximum contention window
-        int retryLimit = default(7); // maximum number of retries per message
+        int cwMulticast = default(cwMin); // multicast contention window
+        int retryLimit = default(7); // maximum number of retries
         @class(CsmaCaMac);
         @signal[NF_LINK_BREAK](type=CsmaCaMacFrame);
 }

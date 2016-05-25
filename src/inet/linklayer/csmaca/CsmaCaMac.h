@@ -55,6 +55,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
 
     int cwMin = -1;
     int cwMax = -1;
+    int cwMulticast = -1;
     //@}
 
     /**

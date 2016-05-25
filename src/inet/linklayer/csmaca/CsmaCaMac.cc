@@ -56,6 +56,7 @@ void CsmaCaMac::initialize(int stage)
         difsTime = par("difsTime");
         cwMin = par("cwMin");
         cwMax = par("cwMax");
+        cwMulticast = par("cwMulticast");
         retryLimit = par("retryLimit");
 
         const char *addressString = par("address");
@@ -468,9 +469,14 @@ void CsmaCaMac::generateBackoffPeriod()
 {
     ASSERT(0 <= retryCounter && retryCounter < retryLimit);
     EV << "generating backoff slot number for retry: " << retryCounter << endl;
-    int cw = (cwMin + 1) * (1 << retryCounter) - 1;
-    if (cw > cwMax)
-        cw = cwMax;
+    int cw;
+    if (getCurrentTransmission()->getReceiverAddress().isMulticast())
+        cw = cwMulticast;
+    else {
+        cw = (cwMin + 1) * (1 << retryCounter) - 1;
+        if (cw > cwMax)
+            cw = cwMax;
+    }
     int slots = intrand(cw + 1);
     EV << "generated backoff slot number: " << slots << " , cw: " << cw << endl;
     backoffPeriod = slots * slotTime;
