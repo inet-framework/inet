@@ -284,7 +284,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Enter(scheduleBackoffTimer());
             FSMA_Event_Transition(Backoff-Done,
                                   msg == endBackoff,
-                                  WAITTRANSMIT,
+                                  TRANSMIT,
             );
             FSMA_Event_Transition(Backoff-Busy,
                                   msg == mediumStateChange && !isMediumFree(),
@@ -293,7 +293,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 decreaseBackoffPeriod();
             );
         }
-        FSMA_State(WAITTRANSMIT)
+        FSMA_State(TRANSMIT)
         {
             FSMA_Enter(sendDataFrame(getCurrentTransmission()));
             FSMA_Event_Transition(Transmit-Broadcast,

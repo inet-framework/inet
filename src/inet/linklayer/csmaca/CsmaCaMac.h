@@ -62,7 +62,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
         WAITDIFS,
         BACKOFF,
         WAITACK,
-        WAITTRANSMIT,
+        TRANSMIT,
         WAITSIFS,
         RECEIVE,
     };
