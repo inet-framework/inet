@@ -235,23 +235,23 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Wait-Difs,
                                   msg == mediumStateChange && isMediumFree() && !useAck,
                                   BACKOFF,
-            ;);
+            );
             FSMA_No_Event_Transition(Immediate-Wait-Difs,
                                      isMediumFree() && !useAck,
                                      BACKOFF,
-            ;);
+            );
             FSMA_Event_Transition(Wait-Difs,
                                   msg == mediumStateChange && isMediumFree() && useAck,
                                   WAITDIFS,
-            ;);
+            );
             FSMA_No_Event_Transition(Immediate-Wait-Difs,
                                      isMediumFree() && useAck,
                                      WAITDIFS,
-            ;);
+            );
             FSMA_Event_Transition(Receive,
                                   isLowerMessage(msg),
                                   RECEIVE,
-            ;);
+            );
         }
         FSMA_State(WAITDIFS)
         {
@@ -275,7 +275,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                                   isLowerMessage(msg),
                                   RECEIVE,
                 cancelDifsTimer();
-            ;);
+            );
         }
         FSMA_State(BACKOFF)
         {
