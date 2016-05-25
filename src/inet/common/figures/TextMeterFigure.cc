@@ -16,10 +16,12 @@
 //
 
 #include "TextMeterFigure.h"
+#include "inet/common/INETUtils.h"
 
 // namespace inet {
 
 static const char *TEXT_FORMAT_PROPERTY = "textFormat";
+static const char *INITIAL_VALUE_PROPERTY = "initialValue";
 
 Register_Class(TextMeterFigure);
 
@@ -27,7 +29,7 @@ const char **TextMeterFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = { TEXT_FORMAT_PROPERTY, nullptr};
+        const char *localKeys[] = { TEXT_FORMAT_PROPERTY, INITIAL_VALUE_PROPERTY, nullptr};
         concatArrays(keys, cTextFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -40,6 +42,8 @@ void TextMeterFigure::parse(cProperty *property)
     const char *s;
     if ((s = property->getValue(TEXT_FORMAT_PROPERTY)) != nullptr)
         setTextFormat(s);
+    if ((s = property->getValue(INITIAL_VALUE_PROPERTY)) != nullptr)
+        setValue(0, simTime(), utils::atod(s));
 }
 
 void TextMeterFigure::setValue(int series, simtime_t timestamp, double value)
