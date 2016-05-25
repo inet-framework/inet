@@ -112,7 +112,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     /** End of the backoff period */
     cMessage *endBackoff = nullptr;
 
-    /** End of the ack period */
+    /** End of the ack timeout */
     cMessage *endAck = nullptr;
 
     /** Timeout after the transmission of a Data frame */
@@ -184,13 +184,13 @@ class INET_API CsmaCaMac : public MACProtocolBase
      * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
-    virtual void scheduleSifsPeriod(CsmaCaMacFrame *frame);
+    virtual void scheduleSifsTimer(CsmaCaMacFrame *frame);
 
-    virtual void scheduleDifsPeriod();
-    virtual void cancelDifsPeriod();
+    virtual void scheduleDifsTimer();
+    virtual void cancelDifsTimer();
 
-    virtual void scheduleAckTimeoutPeriod(CsmaCaMacDataFrame *frame);
-    virtual void cancelAckTimeoutPeriod();
+    virtual void scheduleAckTimer(CsmaCaMacDataFrame *frame);
+    virtual void cancelAckTimer();
 
     /** @brief Generates a new backoff period based on the contention window. */
     virtual simtime_t computeBackoffPeriod(int r);
@@ -198,8 +198,8 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual bool isInvalidBackoffPeriod();
     virtual void generateBackoffPeriod();
     virtual void decreaseBackoffPeriod();
-    virtual void scheduleBackoffPeriod();
-    virtual void cancelBackoffPeriod();
+    virtual void scheduleBackoffTimer();
+    virtual void cancelBackoffTimer();
     //@}
 
   protected:

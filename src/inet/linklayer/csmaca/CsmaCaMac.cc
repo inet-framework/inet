@@ -244,7 +244,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(WAITDIFS)
         {
-            FSMA_Enter(scheduleDifsPeriod());
+            FSMA_Enter(scheduleDifsTimer());
             FSMA_Event_Transition(Difs-Over-Backoff,
                                   msg == endDifs,
                                   BACKOFF,
@@ -254,23 +254,23 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Busy,
                                   msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
-                cancelDifsPeriod();
+                cancelDifsTimer();
             );
             FSMA_No_Event_Transition(Immediate-Busy,
                                      !isMediumFree(),
                                      DEFER,
-                cancelDifsPeriod();
+                cancelDifsTimer();
             );
             // radio state changes before we actually get the message, so this must be here
             FSMA_Event_Transition(Receive,
                                   isLowerMessage(msg),
                                   RECEIVE,
-                cancelDifsPeriod();
+                cancelDifsTimer();
             ;);
         }
         FSMA_State(BACKOFF)
         {
-            FSMA_Enter(scheduleBackoffPeriod());
+            FSMA_Enter(scheduleBackoffTimer());
             FSMA_Event_Transition(Backoff-Done,
                                   msg == endBackoff,
                                   WAITTRANSMIT,
@@ -278,7 +278,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Backoff-Busy,
                                   msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
-                cancelBackoffPeriod();
+                cancelBackoffTimer();
                 decreaseBackoffPeriod();
             );
         }
@@ -304,13 +304,13 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(WAITACK)
         {
-            FSMA_Enter(scheduleAckTimeoutPeriod(getCurrentTransmission()));
+            FSMA_Enter(scheduleAckTimer(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-Ack,
                                   isLowerMessage(msg) && isForUs(frame) && dynamic_cast<CsmaCaMacAckFrame *>(frame),
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
-                cancelAckTimeoutPeriod();
+                cancelAckTimer();
                 finishCurrentTransmission();
                 delete frame;
             );
@@ -363,7 +363,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         }
         FSMA_State(WAITSIFS)
         {
-            FSMA_Enter(scheduleSifsPeriod(frame));
+            FSMA_Enter(scheduleSifsTimer(frame));
             FSMA_Event_Transition(Transmit-Ack,
                                   msg == endSifs,
                                   IDLE,
@@ -421,26 +421,26 @@ cPacket *CsmaCaMac::decapsulate(CsmaCaMacDataFrame *frame)
 /****************************************************************
  * Timer functions.
  */
-void CsmaCaMac::scheduleSifsPeriod(CsmaCaMacFrame *frame)
+void CsmaCaMac::scheduleSifsTimer(CsmaCaMacFrame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSifs->setContextPointer(frame);
     scheduleAt(simTime() + sifsTime, endSifs);
 }
 
-void CsmaCaMac::scheduleDifsPeriod()
+void CsmaCaMac::scheduleDifsTimer()
 {
     EV << "scheduling DIFS period\n";
     scheduleAt(simTime() + difsTime, endDifs);
 }
 
-void CsmaCaMac::cancelDifsPeriod()
+void CsmaCaMac::cancelDifsTimer()
 {
     EV << "canceling DIFS period\n";
     cancelEvent(endDifs);
 }
 
-void CsmaCaMac::scheduleAckTimeoutPeriod(CsmaCaMacDataFrame *frameToSend)
+void CsmaCaMac::scheduleAckTimer(CsmaCaMacDataFrame *frameToSend)
 {
     EV << "scheduling ack timeout period\n";
     simtime_t maxPropagationDelay = 2E-6;  // 300 meters at the speed of light
@@ -451,7 +451,7 @@ void CsmaCaMac::scheduleAckTimeoutPeriod(CsmaCaMacDataFrame *frameToSend)
     scheduleAt(simTime() + sifsTime + ackDuration + maxPropagationDelay * 2, endAck);
 }
 
-void CsmaCaMac::cancelAckTimeoutPeriod()
+void CsmaCaMac::cancelAckTimer()
 {
     EV << "canceling ack timeout period\n";
     cancelEvent(endAck);
@@ -494,13 +494,13 @@ void CsmaCaMac::decreaseBackoffPeriod()
     EV << "backoff period decreased to " << backoffPeriod << endl;
 }
 
-void CsmaCaMac::scheduleBackoffPeriod()
+void CsmaCaMac::scheduleBackoffTimer()
 {
     EV << "scheduling backoff period\n";
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
-void CsmaCaMac::cancelBackoffPeriod()
+void CsmaCaMac::cancelBackoffTimer()
 {
     EV << "canceling backoff period\n";
     cancelEvent(endBackoff);
