@@ -318,7 +318,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 delete frame;
             );
             FSMA_Event_Transition(Transmit-Failed,
-                                  msg == endAckTimeout && retryCounter == retryLimit - 1,
+                                  msg == endAckTimeout && retryCounter == retryLimit,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
@@ -467,7 +467,7 @@ bool CsmaCaMac::isInvalidBackoffPeriod()
 
 void CsmaCaMac::generateBackoffPeriod()
 {
-    ASSERT(0 <= retryCounter && retryCounter < retryLimit);
+    ASSERT(0 <= retryCounter && retryCounter <= retryLimit);
     EV << "generating backoff slot number for retry: " << retryCounter << endl;
     int cw;
     if (getCurrentTransmission()->getReceiverAddress().isMulticast())
@@ -545,7 +545,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
 
 void CsmaCaMac::retryCurrentTransmission()
 {
-    ASSERT(retryCounter < retryLimit - 1);
+    ASSERT(retryCounter < retryLimit);
     retryCounter++;
     numRetry++;
     generateBackoffPeriod();

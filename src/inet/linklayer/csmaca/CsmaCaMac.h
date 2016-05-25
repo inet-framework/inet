@@ -45,14 +45,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     simtime_t sifsTime = -1;
     simtime_t difsTime = -1;
     int maxQueueSize = -1;
-
-    /**
-     * Maximum number of transmissions for a message.
-     * This includes the initial transmission and all subsequent retransmissions.
-     * Thus a value 0 is invalid and a value 1 means no retransmissions.
-     */
     int retryLimit = -1;
-
     int cwMin = -1;
     int cwMax = -1;
     int cwMulticast = -1;
