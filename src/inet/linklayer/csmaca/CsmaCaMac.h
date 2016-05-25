@@ -46,6 +46,9 @@ class INET_API CsmaCaMac : public MACProtocolBase
     /** The header size of frames */
     int headerLength = -1;
 
+    /** Size of Ack frames */
+    int ackLength = -1;
+
     simtime_t slotTime = -1;
     simtime_t sifsTime = -1;
     simtime_t difsTime = -1;

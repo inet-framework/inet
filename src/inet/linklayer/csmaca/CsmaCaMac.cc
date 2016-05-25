@@ -49,6 +49,7 @@ void CsmaCaMac::initialize(int stage)
         useAck = par("useAck");
         bitrate = par("bitrate");
         headerLength = par("headerLength");
+        ackLength = par("ackLength");
         slotTime = par("slotTime");
         sifsTime = par("sifsTime");
         difsTime = par("difsTime");
@@ -517,7 +518,7 @@ void CsmaCaMac::sendAckFrame()
     endSifs->setContextPointer(nullptr);
     auto ackFrame = new CsmaCaMacAckFrame("CsmaAck");
     ackFrame->setReceiverAddress(frameToAck->getTransmitterAddress());
-    ackFrame->setByteLength(headerLength);
+    ackFrame->setByteLength(ackLength);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(ackFrame);
     delete frameToAck;

@@ -32,6 +32,7 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
         bool useAck = default(true);
         double bitrate @unit(bps);
         int headerLength @unit(B) = default(8B);
+        int ackLength @unit(B) = default(headerLength);
         double sifsTime @unit(s) = default(10us);
         double slotTime @unit(s) = default(20us);
         double difsTime @unit(s) = default(sifsTime + 2 * slotTime);
