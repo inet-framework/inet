@@ -343,6 +343,11 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numCollision++;
                 resetStateVariables();
             );
+            FSMA_No_Event_Transition(Immediate-Receive-Unknown-Ack,
+                                     isLowerMessage(msg) && isAck(frame),
+                                     IDLE,
+                resetStateVariables();
+            );
             FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
                                      isLowerMessage(msg) && isBroadcast(frame),
                                      IDLE,

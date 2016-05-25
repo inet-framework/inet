@@ -215,6 +215,9 @@ class INET_API CsmaCaMac : public MACProtocolBase
     /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
     virtual bool isMediumFree();
 
+    /** @brief Returns true if message is an Ack message */
+    virtual bool isAck(CsmaCaMacFrame *frame);
+
     /** @brief Returns true if message is a broadcast message */
     virtual bool isBroadcast(CsmaCaMacFrame *msg);
 
