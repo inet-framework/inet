@@ -61,10 +61,10 @@ class INET_API CsmaCaMac : public MACProtocolBase
         DEFER,
         WAITDIFS,
         BACKOFF,
-        WAITACK,
         TRANSMIT,
-        WAITSIFS,
+        WAITACK,
         RECEIVE,
+        WAITSIFS,
     };
 
     IRadio *radio = nullptr;
