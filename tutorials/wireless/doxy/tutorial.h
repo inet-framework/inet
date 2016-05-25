@@ -722,7 +722,7 @@ With ACKs enabled, each successfully received packet is acknowledged. The animat
 below depicts a packet transmission from Host A, and the corresponding ACK
 from Host R1.
 
-<img src="step7_2_2.gif">
+<img src="step7_12.gif">
 
 The UDPData + ACK sequences can be seen in the sequence chart below:
 
