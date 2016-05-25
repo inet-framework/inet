@@ -233,11 +233,19 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         FSMA_State(DEFER)
         {
             FSMA_Event_Transition(Wait-Difs,
-                                  msg == mediumStateChange && isMediumFree(),
+                                  msg == mediumStateChange && isMediumFree() && !useAck,
+                                  BACKOFF,
+            ;);
+            FSMA_No_Event_Transition(Immediate-Wait-Difs,
+                                     isMediumFree() && !useAck,
+                                     BACKOFF,
+            ;);
+            FSMA_Event_Transition(Wait-Difs,
+                                  msg == mediumStateChange && isMediumFree() && useAck,
                                   WAITDIFS,
             ;);
             FSMA_No_Event_Transition(Immediate-Wait-Difs,
-                                     isMediumFree(),
+                                     isMediumFree() && useAck,
                                      WAITDIFS,
             ;);
             FSMA_Event_Transition(Receive,
