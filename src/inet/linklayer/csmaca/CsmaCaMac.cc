@@ -259,8 +259,6 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Difs-Over-Backoff,
                                   msg == endDifs,
                                   BACKOFF,
-                if (isInvalidBackoffPeriod())
-                    generateBackoffPeriod();
             );
             FSMA_Event_Transition(Busy,
                                   msg == mediumStateChange && !isMediumFree(),
@@ -500,6 +498,8 @@ void CsmaCaMac::decreaseBackoffPeriod()
 void CsmaCaMac::scheduleBackoffTimer()
 {
     EV << "scheduling backoff timer\n";
+    if (isInvalidBackoffPeriod())
+        generateBackoffPeriod();
     scheduleAt(simTime() + backoffPeriod, endBackoff);
 }
 
