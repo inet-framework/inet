@@ -732,6 +732,30 @@ The UDPData + ACK sequences can be seen in the sequence chart below:
 
 <img src="wireless-step7-seq-2.png" width=900px>
 
+In the following chart, the UDPData packet sequence numbers that are received by
+Host B's UDPApp, are plotted against time. This chart contains the statistics of
+the previous step (ACK off, blue) and of the current step (ACK on, red).
+
+<img src="wireless-step7-seqno.png">
+
+When ACKs are turned on, each successfuly received UDPData packet have to be
+ackowledged before the next one can be sent. Lost packets are retransmitted
+until an ACK arrives, impementing a kind of reliable transport. Because of this,
+the sequence numbers are sequential. In the case of ACKs turned off, lost
+packets are not retransmitted, which results in gaps in the sequence numbers.
+The blue curve is steeper, because the sequence numbers grow more rapidly. This
+is in contrast to the red curve, where the sequence numbers grow only by one.
+
+The next two charts display the difference between the subsequently received
+UDPData packet sequence numbers. The first one (blue) is for the previous step.
+The difference is mostly 1, which means the packets are received sequentially.
+However, often there are gaps in the sequence numbers, signifying lost packets.
+The second one (red) is for the current step,  where the difference is always 1,
+as there are no lost packets.
+
+<img src="wireless-step7-seqdiff6.png" width=900px>
+<img src="wireless-step7-seqdiff7.png" width=900px>
+
 <b>Number of packets received by Host B: 1393</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
