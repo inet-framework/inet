@@ -1285,8 +1285,8 @@ well.)
 TODO
 
 With the added antenna gain, the transmissions are powerful enough to require
-only one hop to get to Host B, as opposed to the previous step, where it
-required two. Therefore, at the beginning of the simulation, Host R1 can reach
+only two hops to get to Host B, as opposed to the previous step, where it
+required three. Therefore, at the beginning of the simulation, Host R1 can reach
 Host B directly.  Also, Host R1 goes out of Host A's communication range only at
 the very end of the simulation. When this happens, Host A's transmission is
 routed through Host R3, which is again just two hops.
