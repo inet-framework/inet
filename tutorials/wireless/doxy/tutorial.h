@@ -1074,7 +1074,7 @@ The walls.xml file:
 
 @section s11results Results
 
-At the beginning of the simulation, the initial route the was established in
+At the beginning of the simulation, the initial route that was established in
 previous steps (A-R1-B) cannot be established, because the wall is between Host
 A and R1. The wall is completely blocking transmissions, therefore AODV
 establishes the A-R2-R1-B route. Host R2's transmission is cut when R2 moves
