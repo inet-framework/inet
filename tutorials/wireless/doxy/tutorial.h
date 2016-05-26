@@ -57,7 +57,7 @@ a few new lines. Consecutive steps mostly share the same network, defined in NED
 In the first step, we want to create a network that contains two hosts,
 with one host sending a UDP data stream wirelessly to the other. Our goal
 is to keep the physical layer and lower layer protocol models as simple
-and possible.
+as possible.
 
 We'll make the model more realistic in later steps.
 
@@ -109,7 +109,7 @@ protocol.
 In the model, Host A generates UDP packets which are received by Host B. To
 this end, Host A is configured to contain a `UDPBasicApp` module, which generates 1000-byte
 UDP messages at random intervals with exponential distribution, the mean of
-which is 10ms. Therefore the app is going to generate 100 kbyte/s (800
+which is 12ms. Therefore the app is going to generate 100 kbyte/s (800
 kbps) UDP traffic, not counting protocol overhead. Host B contains a
 `UDPSink` application that just discards received packets.
 
@@ -138,7 +138,7 @@ reception to fail) are optional.
 
 @note Naturally, this model of the physical layer has little correspondence
 to reality. However, it has its uses in the simulation. Its simplicity and
-its consequent predictability are an advantage in scenarios where realistic
+consequent predictability are an advantage in scenarios where realistic
 modeling of the physical layer is not a primary concern, for example in the
 modeling of ad-hoc routing protocols. Simulations using `IdealRadioMedium`
 also run faster than more realistic ones, due to the low computational
@@ -190,7 +190,7 @@ the simulation. One can see a UDP packet being sent down from the
 `udpApp` submodule, traversing the intermediate protocol layers, and being
 transmitted by the wlan interface.
 
-<img src="step1_10.gif">í
+<img src="step1_10.gif">
 
 The next animation shows the communication between the hosts, using
 OMNeT++'s default "message sending" animation.
@@ -216,10 +216,9 @@ Sources: @ref omnetpp.ini, @ref WirelessA.ned
 
 @section s2goals Goals
 
-To facilitate understanding - because a picture worth a thousand words - we will
-visualize certain aspects of the simulation throughout this tutorial. In this step,
-we will focus on the physical layer, most notably radio transmissions and signal
-propagation.
+To facilitate understanding, we will visualize certain aspects of the simulation
+throughout this tutorial. In this step, we will focus on the physical layer,
+most notably radio transmissions and signal propagation.
 
 @section s2model The model
 
@@ -292,7 +291,7 @@ indicating that the transmission queue became empty.
 The blue circle around Host A depicts the communication range, and it clearly shows that
 Host B is within the range, therefore successful communication is possible.
 
-The arrow that goes from Host A to Host B indicates successful
+The dotted arrow that appears between Host A and Host B indicates successful
 communication at the physical layer. The arrow is created after a packet
 reception is successfully completed, when the packet is passed up to the
 link layer. The arrow is displayed when the reception of the first packet
@@ -305,7 +304,7 @@ OMNeT++ IDE. The following image was obtained by recording an event log
 (`.elog`) file from the simulation, opening it in the IDE, and tweaking the
 settings in the Sequence Chart tool.
 
-The transmission of the packet UDPData-0 starts at around 15ms, and
+The transmission of packet UDPData-0 starts at around 15ms, and
 completes at around 23ms. The signal propagation takes a nonzero amount of
 time, but it's such a small value compared to the transmission duration
 that it's not visible in this image. (The arrow signifying the beginning of
@@ -341,7 +340,7 @@ routing and use the extra nodes as relays.
 
 @section s3model The model
 
-We need to add 3 more hosts. This could be done by copying end editing the
+We need to add three more hosts. This could be done by copying end editing the
 network used in the previous steps, but instead we extend `WirelessA` into
 `WirelessB` using the inheritance feature of NED:
 
@@ -469,8 +468,8 @@ reached via Host R1 (10.0.0.3), as specified by the gateway (gw) value.
 
 When the first packet sent by Host A arrives at Host R1, a dotted dark yellow arrow appears
 between the two hosts indicating a successful physical layer exchange, as it was
-noted earlier. A few events later but still at the same simulation time, a green
-arrow appears on top of the dotted one. The green arrow represents a successful
+noted earlier. A few events later but still at the same simulation time, a cyan-colored
+arrow appears on top of the dotted one. The cyan arrow represents a successful
 exchange between the two data link layers of the same hosts. As opposed to the
 previous step, this happens because according to the routing table of Host A, a
 packet destined to Host B, has to be sent to Host R1 (the gateway). As the packet
@@ -489,6 +488,11 @@ but they discard the packets at the link layer because it is not addressed to
 them.
 
 <img src="wireless-step4.png">
+
+Note that the number of packets received by Host B has dropped to about half
+of what we saw in step 2. This is so because R1's NIC operates in half-duplex
+mode (it can only transmit or receive at any time, but not both), so it can
+only relay packets at half the rate that Host A emits.
 
 <b>Number of packets received by Host B: 1107</b>
 
@@ -574,7 +578,8 @@ This is shown in the animation below:
 As we expected, the number of packets received by Host B is low. The following
 sequence chart illustrates packet traffic between Hosts A's, R1's and B's network layer.
 The image indicates that Host B only occasionally receives packets successfully,
-most packets sent by R1 do not make it Host B's IP submodule.
+most packets sent by R1 do not make it to Host B's IP layer.
+
 <img src="wireless-step5-seq.png" width=900px>
 
 The image below shows Host R1's and Host A's signals overlapping at Host B.
@@ -654,7 +659,7 @@ retransmitted.
 @section s6results Results
 
 The effect of CSMA can be seen in the animation below. The first packet is sent by Host A,
-and after waiting for a backup period, Host R1 retransmits the first packet. This time,
+and after waiting for a backoff period, Host R1 retransmits the first packet. This time,
 Host B receives it correctly, because only Host R1 is transmitting.
 
 <img src="step6_7.gif">
@@ -743,9 +748,9 @@ Sources: @ref omnetpp.ini, @ref WirelessB.ned
 @section s8goals Goals
 
 Wireless ad-hoc networks often operate in an energy-constrained
-environment, and thus it is often useful to model the energy consumption of
-the devices. Consider, for example, wireless motes that operate on battery.
-The mote's activity has be planned so that the battery lasts until it can
+environment, and thus it is useful to be able to model the energy consumption
+of the devices. Consider, for example, wireless motes that operate on battery.
+The mote's activity has to be planned so that the battery lasts until it can
 be recharged or replaced.
 
 In this step, we augment the nodes with components so that we can model
@@ -806,7 +811,7 @@ the storage.
 
 The energy storage module contains an `energyBalance` watched variable that
 can be used to track energy consumption. Also, energy consumption over time
-can be displayed by plotting the `residualCapacity` statistic.
+can be obtained by plotting the `residualCapacity` statistic.
 
 <b>Visualization</b>
 
@@ -821,12 +826,12 @@ Configuration:
 
 @section s8results Results
 
-The image below shows Host A's 'energyBalance' variable at the end of the simulation.
+The image below shows Host A's `energyBalance` variable at the end of the simulation.
 The negative energy value signifies the consumption of energy.
 
 <img src="wireless-step8-energy-2.png">
 
-The 'residualCapacity' signal of Hosts A, R1 and B is plotted in following diagram.
+The `residualCapacity` statistic of Hosts A, R1 and B is plotted in following diagram.
 The diagram shows that Host A has consumed the most power because it transmitted more than
 the other nodes.
 
@@ -982,7 +987,7 @@ The AODV Route-discovery messages can be seen in the following packet log:
 
 <img src="wireless-step10-packetlog.png">
 
-The number of successfully received packets at Host B is about two times
+The number of successfully received packets at Host B has roughly doubled
 compared to the previous step. This is because the flow of packets doesn't stop
 when Host R1 gets out of communication range of Host A. Although the AODV
 protocol adds come overhead, in this simulation it is not significant, the
@@ -1168,7 +1173,7 @@ In this model, there are more physical effects simulated than in previous steps.
 There is radio signal attenuation, background noise and a more realistic radio
 model. The blue circles representing communication range is an approximation.
 There is no distinct distance where receptions fail, as in the case of
-'IdealRadio'.
+`IdealRadio`.
 
 <b>Number of packets received by Host B: 655</b>
 
