@@ -145,8 +145,8 @@
 /examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           6190-261e 1523-72fa/tplx
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             6327-5d2c dbcf-43c2/tplx
 
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,         33ab-9caa 33ff-4447/tplx
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,         7902-b01a 2bce-15f4/tplx
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,         33ab-9caa 458d-5335/tplx
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,         7902-b01a 0958-258f/tplx
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           66a3-a647 f042-928b/tplx
 
@@ -251,7 +251,7 @@
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             7b85-4bc6 db5f-b8ff/tplx
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           758c-a571 cd51-cd0a/tplx
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           0b51-a44a 26de-bc68/tplx
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            fcce-1180 f0fa-2a36/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            fcce-1180 4c11-bb60/tplx
 
 ### /examples/manetrouting/* : see manet.csv
 
@@ -351,9 +351,9 @@
 # /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           0000-0000    # unstable fingerprint
 # /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
 
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            8b35-54b4 0663-44b4/tplx
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            db21-a060 37c7-1833/tplx
-/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            b1c5-f6db a075-5291/tplx
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            8b35-54b4 93e9-5083/tplx
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            db21-a060 7fd4-8fbe/tplx
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            b1c5-f6db 96c9-198d/tplx
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            68a1-bafe a19f-1323/tplx
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2f37-be67 219a-0a01/tplx
