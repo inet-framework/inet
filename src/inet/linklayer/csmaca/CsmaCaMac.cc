@@ -213,76 +213,71 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     {
         FSMA_State(IDLE)
         {
-            FSMA_Event_Transition(Data-Ready,
-                                  isUpperMessage(msg),
+            FSMA_Event_Transition(Defer-Transmit,
+                                  isUpperMessage(msg) && !isMediumFree(),
                                   DEFER,
-                ASSERT(isInvalidBackoffPeriod());
             );
-            FSMA_No_Event_Transition(Immediate-Data-Ready,
-                                     !transmissionQueue.empty(),
-                                     DEFER,
-                ASSERT(isInvalidBackoffPeriod());
+            FSMA_Event_Transition(Start-Backoff,
+                                  isUpperMessage(msg) && isMediumFree() && !useAck,
+                                  BACKOFF,
             );
-            FSMA_Event_Transition(Receive,
-                                  isLowerMessage(msg),
+            FSMA_Event_Transition(Start-Difs,
+                                  isUpperMessage(msg) && isMediumFree() && useAck,
+                                  WAITDIFS,
+            );
+            FSMA_Event_Transition(Start-Receive,
+                                  msg == mediumStateChange && isReceiving(),
                                   RECEIVE,
             );
         }
         FSMA_State(DEFER)
         {
-            FSMA_Event_Transition(Wait-Difs,
+            FSMA_Event_Transition(Start-Backoff,
                                   msg == mediumStateChange && isMediumFree() && !useAck,
                                   BACKOFF,
             );
-            FSMA_No_Event_Transition(Immediate-Wait-Difs,
-                                     isMediumFree() && !useAck,
-                                     BACKOFF,
-            );
-            FSMA_Event_Transition(Wait-Difs,
+            FSMA_Event_Transition(Start-Difs,
                                   msg == mediumStateChange && isMediumFree() && useAck,
                                   WAITDIFS,
             );
-            FSMA_No_Event_Transition(Immediate-Wait-Difs,
-                                     isMediumFree() && useAck,
-                                     WAITDIFS,
-            );
-            FSMA_Event_Transition(Receive,
-                                  isLowerMessage(msg),
+            FSMA_Event_Transition(Start-Receive,
+                                  msg == mediumStateChange && isReceiving(),
                                   RECEIVE,
             );
         }
         FSMA_State(WAITDIFS)
         {
             FSMA_Enter(scheduleDifsTimer());
-            FSMA_Event_Transition(Difs-Over-Backoff,
+            FSMA_Event_Transition(Start-Backoff,
                                   msg == endDifs,
                                   BACKOFF,
             );
-            FSMA_Event_Transition(Busy,
+            FSMA_Event_Transition(Start-Receive,
+                                  msg == mediumStateChange && isReceiving(),
+                                  RECEIVE,
+                cancelDifsTimer();
+            );
+            FSMA_Event_Transition(Defer-Difs,
                                   msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
-                cancelDifsTimer();
-            );
-            FSMA_No_Event_Transition(Immediate-Busy,
-                                     !isMediumFree(),
-                                     DEFER,
-                cancelDifsTimer();
-            );
-            // radio state changes before we actually get the message, so this must be here
-            FSMA_Event_Transition(Receive,
-                                  isLowerMessage(msg),
-                                  RECEIVE,
                 cancelDifsTimer();
             );
         }
         FSMA_State(BACKOFF)
         {
             FSMA_Enter(scheduleBackoffTimer());
-            FSMA_Event_Transition(Backoff-Done,
+            FSMA_Event_Transition(Start-Transmit,
                                   msg == endBackoff,
                                   TRANSMIT,
+                invalidateBackoffPeriod();
             );
-            FSMA_Event_Transition(Backoff-Busy,
+            FSMA_Event_Transition(Start-Receive,
+                                  msg == mediumStateChange && isReceiving(),
+                                  RECEIVE,
+                cancelBackoffTimer();
+                decreaseBackoffPeriod();
+            );
+            FSMA_Event_Transition(Defer-Backoff,
                                   msg == mediumStateChange && !isMediumFree(),
                                   DEFER,
                 cancelBackoffTimer();
@@ -298,13 +293,13 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 finishCurrentTransmission();
                 numSentBroadcast++;
             );
-            FSMA_Event_Transition(Transmit-Unicast-Without-Ack,
+            FSMA_Event_Transition(Transmit-Unicast-No-Ack,
                                   msg == endData && !useAck && !isBroadcast(getCurrentTransmission()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSent++;
             );
-            FSMA_Event_Transition(Transmit-Unicast-With-Ack,
+            FSMA_Event_Transition(Transmit-Unicast-Use-Ack,
                                   msg == endData && useAck && !isBroadcast(getCurrentTransmission()),
                                   WAITACK,
             );
@@ -321,54 +316,55 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 finishCurrentTransmission();
                 delete frame;
             );
-            FSMA_Event_Transition(Transmit-Failed,
+            FSMA_Event_Transition(Give-Up-Transmission,
                                   msg == endAckTimeout && retryCounter == retryLimit,
                                   IDLE,
                 giveUpCurrentTransmission();
             );
-            FSMA_Event_Transition(Receive-Ack-Timeout,
+            FSMA_Event_Transition(Retry-Transmission,
                                   msg == endAckTimeout,
-                                  DEFER,
+                                  IDLE,
                 retryCurrentTransmission();
             );
         }
         FSMA_State(RECEIVE)
         {
-            FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMessage(msg) && frame->hasBitError(),
-                                     IDLE,
+            FSMA_Event_Transition(Receive-Bit-Error,
+                                  isLowerMessage(msg) && frame->hasBitError(),
+                                  IDLE,
                 delete frame;
                 numCollision++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Unknown-Ack,
-                                     isLowerMessage(msg) && isAck(frame),
-                                     IDLE,
+            FSMA_Event_Transition(Receive-Unknown-Ack,
+                                  isLowerMessage(msg) && isAck(frame),
+                                  IDLE,
+                delete frame;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Broadcast,
-                                     isLowerMessage(msg) && isBroadcast(frame),
-                                     IDLE,
+            FSMA_Event_Transition(Receive-Broadcast,
+                                  isLowerMessage(msg) && isBroadcast(frame),
+                                  IDLE,
                 sendUp(decapsulate(check_and_cast<CsmaCaMacDataFrame *>(frame)));
                 numReceivedBroadcast++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Without-Ack,
-                                     isLowerMessage(msg) && isForUs(frame) && !useAck,
-                                     IDLE,
+            FSMA_Event_Transition(Receive-Unicast-No-Ack,
+                                  isLowerMessage(msg) && isForUs(frame) && !useAck,
+                                  IDLE,
                 sendUp(decapsulate(check_and_cast<CsmaCaMacDataFrame *>(frame)));
                 numReceived++;
                 resetStateVariables();
             );
-            FSMA_No_Event_Transition(Immediate-Receive-With-Ack,
-                                     isLowerMessage(msg) && isForUs(frame) && useAck,
-                                     WAITSIFS,
+            FSMA_Event_Transition(Receive-Unicast-Use-Ack,
+                                  isLowerMessage(msg) && isForUs(frame) && useAck,
+                                  WAITSIFS,
                 sendUp(decapsulate(check_and_cast<CsmaCaMacDataFrame *>(frame->dup())));
                 numReceived++;
             );
-            FSMA_No_Event_Transition(Immediate-Receive-Other,
-                                     isLowerMessage(msg),
-                                     IDLE,
+            FSMA_Event_Transition(Receive-Unicast-Not-For-Us,
+                                  isLowerMessage(msg) && !isForUs(frame),
+                                  IDLE,
                 delete frame;
                 resetStateVariables();
             );
@@ -383,6 +379,12 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 resetStateVariables();
             );
         }
+    }
+    if (fsm.getState() == IDLE) {
+        if (isReceiving())
+            handleWithFsm(mediumStateChange);
+        else if (!transmissionQueue.empty())
+            handleWithFsm(transmissionQueue.front());
     }
 }
 
@@ -586,6 +588,11 @@ void CsmaCaMac::resetStateVariables()
 bool CsmaCaMac::isMediumFree()
 {
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
+}
+
+bool CsmaCaMac::isReceiving()
+{
+    return radio->getReceptionState() == IRadio::RECEPTION_STATE_RECEIVING;
 }
 
 bool CsmaCaMac::isAck(CsmaCaMacFrame *frame)

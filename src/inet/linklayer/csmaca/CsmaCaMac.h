@@ -216,6 +216,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual bool isMediumFree();
 
     /** @brief Returns true if message is an Ack message */
+    virtual bool isReceiving();
     virtual bool isAck(CsmaCaMacFrame *frame);
 
     /** @brief Returns true if message is a broadcast message */
