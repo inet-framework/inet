@@ -118,11 +118,11 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto module = check_and_cast<const cModule *>(radio);
         auto node = getContainingNode(const_cast<cModule *>(module));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
-        auto communicationRangeFigure = new cOvalFigure("communicationRange");
+        auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
         m maxInterferenceRage = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
-        communicationRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRage.get(), -maxInterferenceRage.get(), 2 * maxInterferenceRage.get(), 2 * maxInterferenceRage.get()));
-        communicationRangeFigure->setLineColor(interferenceRangeColor);
-        networkNodeVisualization->addFigure(communicationRangeFigure);
+        interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRage.get(), -maxInterferenceRage.get(), 2 * maxInterferenceRage.get(), 2 * maxInterferenceRage.get()));
+        interferenceRangeFigure->setLineColor(interferenceRangeColor);
+        networkNodeVisualization->addFigure(interferenceRangeFigure);
     }
     if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
         auto module = check_and_cast<const cModule *>(radio);
