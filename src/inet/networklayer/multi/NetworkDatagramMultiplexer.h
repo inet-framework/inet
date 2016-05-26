@@ -34,7 +34,7 @@ class INET_API NetworkDatagramMultiplexer : public cSimpleModule
     virtual ~NetworkDatagramMultiplexer() {}
 
   protected:
-    virtual void handleMessage(cMessage *message) override;
+    virtual void arrived(cMessage *message, cGate *arrivalGate, simtime_t t) override;
     int getProtocolIndex(cMessage *message);
 };
 

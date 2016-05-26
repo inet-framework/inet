@@ -31,7 +31,7 @@ class INET_API MultiNetworkLayerUpperMultiplexer : public cSimpleModule
 
   protected:
     virtual void initialize() override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void arrived(cMessage *message, cGate *inGate, simtime_t t) override;
     int getProtocolCount();
     int getProtocolIndex(cMessage *message);
 };

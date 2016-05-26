@@ -35,16 +35,17 @@ namespace inet {
 
 Define_Module(MultiNetworkLayerLowerMultiplexer);
 
-void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage *message)
+void MultiNetworkLayerLowerMultiplexer::arrived(cMessage *message, cGate *arrivalGate, simtime_t t)
 {
-    cGate *arrivalGate = message->getArrivalGate();
+    cGate *outGate = nullptr;
     const char *arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "ifUpperIn"))
-        send(message, "ifLowerOut", arrivalGate->getIndex() / getProtocolCount());
+        outGate = gate("ifLowerOut", arrivalGate->getIndex() / getProtocolCount());
     else if (!strcmp(arrivalGateName, "ifLowerIn"))
-        send(message, "ifUpperOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
+        outGate = gate("ifUpperOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
     else
-        throw cRuntimeError("Unknown arrival gate");
+        throw cRuntimeError("Message %s(%s) arrived on unknown '%s' gate", message->getName(), message->getClassName(), arrivalGate->getFullName());
+    outGate->deliver(message, t);
 }
 
 int MultiNetworkLayerLowerMultiplexer::getProtocolCount()

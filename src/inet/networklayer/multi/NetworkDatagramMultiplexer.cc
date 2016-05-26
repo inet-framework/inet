@@ -37,16 +37,17 @@ namespace inet {
 
 Define_Module(NetworkDatagramMultiplexer);
 
-void NetworkDatagramMultiplexer::handleMessage(cMessage *message)
+void NetworkDatagramMultiplexer::arrived(cMessage *message, cGate *arrivalGate, simtime_t t)
 {
-    cGate *arrivalGate = message->getArrivalGate();
+    cGate *outGate = nullptr;
     const char *arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "upperIn"))
-        send(message, "lowerOut", getProtocolIndex(message));
+        outGate = gate("lowerOut", getProtocolIndex(message));
     else if (!strcmp(arrivalGateName, "lowerIn"))
-        send(message, "upperOut");
+        outGate = gate("upperOut");
     else
         throw cRuntimeError("Unknown arrival gate");
+    outGate->deliver(message, t);
 }
 
 int NetworkDatagramMultiplexer::getProtocolIndex(cMessage *message)

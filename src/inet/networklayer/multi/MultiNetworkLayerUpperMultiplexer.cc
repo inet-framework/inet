@@ -17,8 +17,11 @@
 //
 
 #include "inet/networklayer/multi/MultiNetworkLayerUpperMultiplexer.h"
+
+#include "inet/common/INETUtils.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
@@ -49,33 +52,33 @@ void MultiNetworkLayerUpperMultiplexer::initialize()
         throw cRuntimeError("Connection error: pingUpperIn[] / pingLowerOut[] gate size ratio not correct");
 }
 
-void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage *message)
+void MultiNetworkLayerUpperMultiplexer::arrived(cMessage *message, cGate *arrivalGate, simtime_t t)
 {
-    cGate *arrivalGate = message->getArrivalGate();
+    cGate *outGate = nullptr;
     const char *arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "transportUpperIn")) {
-        if (dynamic_cast<cPacket *>(message))
-            send(message, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
-        else {
+        if (dynamic_cast<RegisterTransportProtocolCommand*>(message)) {
             // sending down commands
-            for (int i = 0; i < getProtocolCount(); i++) {
-                cMessage *duplicate = message->dup();
-                cObject *controlInfo = message->getControlInfo();
-                if (controlInfo)
-                    duplicate->setControlInfo(controlInfo->dup());
-                send(duplicate, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + i);
+            int protocolCount = getProtocolCount();
+            for (int i = 0; i < protocolCount; i++) {
+                cMessage *duplicate = (i < protocolCount-1) ? utils::dupPacketAndControlInfo(message) : message;
+                gate("transportLowerOut", protocolCount * arrivalGate->getIndex() + i)->deliver(duplicate, t);
             }
-            delete message;
+            return;
+        }
+        else {
+            outGate = gate("transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
         }
     }
     else if (!strcmp(arrivalGateName, "transportLowerIn"))
-        send(message, "transportUpperOut", arrivalGate->getIndex() / getProtocolCount());
+        outGate = gate("transportUpperOut", arrivalGate->getIndex() / getProtocolCount());
     else if (!strcmp(arrivalGateName, "pingUpperIn"))
-        send(message, "pingLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
+        outGate = gate("pingLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
     else if (!strcmp(arrivalGateName, "pingLowerIn"))
-        send(message, "pingUpperOut", arrivalGate->getIndex() / getProtocolCount());
+        outGate = gate("pingUpperOut", arrivalGate->getIndex() / getProtocolCount());
     else
-        throw cRuntimeError("Unknown arrival gate");
+        throw cRuntimeError("Message %s(%s) arrived on unknown '%s' gate", message->getName(), message->getClassName(), arrivalGate->getFullName());
+    outGate->deliver(message, t);
 }
 
 int MultiNetworkLayerUpperMultiplexer::getProtocolCount()
