@@ -490,7 +490,7 @@ them.
 
 <img src="wireless-step4.png">
 
-<b>Number of packets received by Host B: 2453</b>
+<b>Number of packets received by Host B: 1107</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -662,10 +662,9 @@ Host B receives it correctly, because only Host R1 is transmitting.
 The following sequence chart displays that after receiving the UDPData-2 packet,
 Host R1 transmits it after the backoff period timer has expired.
 
-<!--TODO: backoff time sequence chart, using CsmaCaMac -->
 <img src="wireless-step6-seq-3.png" width=900px>
 
-<b>Number of packets received by Host B: 1421</b>
+<b>Number of packets received by Host B: 1051</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -726,20 +725,9 @@ from Host R1.
 
 The UDPData + ACK sequences can be seen in the sequence chart below:
 
-<img src="wireless-step7-seq-2.png" width=900px>  <!--TODO re-record with CsmaCaMac -->
+<img src="wireless-step7-seq-2.png" width=900px>
 
-TODO We do not expect that the
-use of ACKs will improve throughput, but
-packets will not be lost etc.
-
-When the channel utilization is low, and collisions are infrequent, using ACKs
-doesnt have a positive impact on the number of correctly received packets, as
-they increase the overhead of transmissions. However, when the channel is operating
-close to its capacity, and more collisions happen, ACKs can increase the number of
-successfuly received packets by forcing hosts to retransmit lost ones. This implements
-a kind of reliable packet transport, where lost packets are always retransmitted.
-
-<b>Number of packets received by Host B: TODO</b>
+<b>Number of packets received by Host B: 1393</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -817,8 +805,8 @@ We use this because we want to concentrate on the power consumption, not
 the storage.
 
 The energy storage module contains an `energyBalance` watched variable that
-can be used to track energy consumption. Also, the `residualCapacity`
-signal can be used to display energy consumption over time.  (TODO how? why mentioned?)
+can be used to track energy consumption. Also, energy consumption over time
+can be displayed by plotting the `residualCapacity` statistic.
 
 <b>Visualization</b>
 
@@ -842,11 +830,9 @@ The 'residualCapacity' signal of Hosts A, R1 and B is plotted in following diagr
 The diagram shows that Host A has consumed the most power because it transmitted more than
 the other nodes.
 
-<!-- TODO R1 should have transmitted the most because of ACKs -->
-
 <img src="wireless-step8.png">
 
-<b>Number of packets received by Host B: 980</b>
+<b>Number of packets received by Host B: 1393</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -910,7 +896,7 @@ A and B by routing traffic through Hosts R2 and R3. To reconfigure routes
 according to the changing topology of the network, an ad-hoc routing
 protocol is required.
 
-<b>Number of packets received by Host B: 264</b>
+<b>Number of packets received by Host B: 560</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -1002,7 +988,7 @@ when Host R1 gets out of communication range of Host A. Although the AODV
 protocol adds come overhead, in this simulation it is not significant, the
 number received packets still increase substantially.
 
-<b>Number of packets received by Host B: 446</b>
+<b>Number of packets received by Host B: 1015</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessB.ned
 
@@ -1063,7 +1049,11 @@ specifying an <i>obstacle loss model</i>. Since our model contains
 obstacles completely block radio signals, making reception behind them
 impossible.
 
-TODO Visualization
+The `IntegratedCanvasVisualizer` we use as the `visualizer` submodule in
+the network contains two submodules related to obstacles:
+`physicalEnvironmentVisualizer` displays the obstacles themselves, and
+`obstacleLossVisualizer` is responsible for visualizing the obstacle loss of
+individual signals.
 
 The configuration:
 
@@ -1090,7 +1080,7 @@ A-R2-R3-B route is used, as seen in the previous steps.
 
 <img src="step11_2.gif">
 
-<b>Number of packets received by Host B: TODO</b>
+<b>Number of packets received by Host B: 798</b>
 
 Sources: omnetpp.ini, WirelessC.ned, walls.xml
 
@@ -1180,7 +1170,7 @@ model. The blue circles representing communication range is an approximation.
 There is no distinct distance where receptions fail, as in the case of
 'IdealRadio'.
 
-<b>Number of packets received by Host B: 285</b>
+<b>Number of packets received by Host B: 655</b>
 
 Sources: @ref omnetpp.ini, @ref WirelessC.ned
 
@@ -1231,8 +1221,6 @@ initialized from display strings.)
 
 @section s13results Results
 
-TODO
-
 The image below shows the bit error rate of Host R1's radio, as a function of
 time. The bit error rate is shown when free space space propagation is used, and
 when using two ray ground reflection. The interval shown here corresponds to the
@@ -1247,7 +1235,7 @@ the case of the two ray ground reflection model, the bit error rate is greater.
 
 <img src="wireless-step13.png">
 
-<b>Number of packets received by Host B: 243</b>
+<b>Number of packets received by Host B: 657</b>
 
 @nav{step12,step14}
 @fixupini
@@ -1282,8 +1270,6 @@ well.)
 
 @section s14results Results
 
-TODO
-
 With the added antenna gain, the transmissions are powerful enough to require
 only two hops to get to Host B, as opposed to the previous step, where it
 required three. Therefore, at the beginning of the simulation, Host R1 can reach
@@ -1293,7 +1279,7 @@ routed through Host R3, which is again just two hops.
 
 <img src="step14.gif">
 
-<b>Number of packets received by Host B: 942</b>
+<b>Number of packets received by Host B: 1042</b>
 
 @nav{step13,index}
 @fixupini
