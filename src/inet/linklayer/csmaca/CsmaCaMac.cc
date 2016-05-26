@@ -203,9 +203,6 @@ void CsmaCaMac::handleLowerPacket(cPacket *msg)
     handleWithFsm(msg);
 }
 
-/**
- * Msg can be upper, lower, self or nullptr (when radio state changes)
- */
 void CsmaCaMac::handleWithFsm(cMessage *msg)
 {
     CsmaCaMacFrame *frame = dynamic_cast<CsmaCaMacFrame*>(msg);

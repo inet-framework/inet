@@ -138,22 +138,14 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual InterfaceEntry *createInterfaceEntry() override;
     //@}
 
-  protected:
     /**
      * @name Message handing functions
      * @brief Functions called from other classes to notify about state changes and to handle messages.
      */
     //@{
-    /** @brief Handle timer self messages */
     virtual void handleSelfMessage(cMessage *msg) override;
-
-    /** @brief Handle messages from upper layer */
     virtual void handleUpperPacket(cPacket *msg) override;
-
-    /** @brief Handle messages from lower (physical) layer */
     virtual void handleLowerPacket(cPacket *msg) override;
-
-    /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFsm(cMessage *msg);
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
@@ -162,7 +154,6 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual cPacket *decapsulate(CsmaCaMacDataFrame *frame);
     //@}
 
-  protected:
     /**
      * @name Timer functions
      * @brief These functions have the side effect of starting the corresponding timers.
@@ -176,7 +167,6 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void scheduleAckTimeout(CsmaCaMacDataFrame *frame);
     virtual void cancelAckTimer();
 
-    /** @brief Generates a new backoff period based on the contention window. */
     virtual void invalidateBackoffPeriod();
     virtual bool isInvalidBackoffPeriod();
     virtual void generateBackoffPeriod();
@@ -185,7 +175,6 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void cancelBackoffTimer();
     //@}
 
-  protected:
     /**
      * @name Frame transmission functions
      */
@@ -194,7 +183,6 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void sendAckFrame();
     //@}
 
-  protected:
     /**
      * @name Utility functions
      */
@@ -202,27 +190,14 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void finishCurrentTransmission();
     virtual void giveUpCurrentTransmission();
     virtual void retryCurrentTransmission();
-
-    /** @brief Returns the current frame being transmitted */
     virtual CsmaCaMacDataFrame *getCurrentTransmission();
-
-    /** @brief Deletes frame at the front of queue. */
     virtual void popTransmissionQueue();
-
-    /** @brief Reset backoff, backoffPeriod and retryCounter for IDLE state */
     virtual void resetStateVariables();
 
-    /** @brief Tells if the medium is free according to the physical and virtual carrier sense algorithm. */
     virtual bool isMediumFree();
-
-    /** @brief Returns true if message is an Ack message */
     virtual bool isReceiving();
     virtual bool isAck(CsmaCaMacFrame *frame);
-
-    /** @brief Returns true if message is a broadcast message */
     virtual bool isBroadcast(CsmaCaMacFrame *msg);
-
-    /** @brief Returns true if message destination address is ours */
     virtual bool isForUs(CsmaCaMacFrame *msg);
     //@}
 };
