@@ -659,11 +659,11 @@ Host B receives it correctly, because only Host R1 is transmitting.
 
 <img src="step6_7.gif">
 
-The following sequence chart displays that after receiving the UDPData-0 packet,
+The following sequence chart displays that after receiving the UDPData-2 packet,
 Host R1 transmits it after the backoff period timer has expired.
 
 <!--TODO: backoff time sequence chart, using CsmaCaMac -->
-<img src="wireless-step6-seq-2.png">
+<img src="wireless-step6-seq-3.png" width=900px>
 
 <b>Number of packets received by Host B: 1421</b>
 
