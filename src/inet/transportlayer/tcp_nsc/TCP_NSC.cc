@@ -267,9 +267,6 @@ TCP_NSC::~TCP_NSC()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
 {
-    if (connP.sentEstablishedM)
-        return;
-
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);
     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
@@ -281,6 +278,26 @@ void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
     msg->setControlInfo(tcpConnectInfo);
     send(msg, "appOut", connP.appGateIndexM);
     connP.sentEstablishedM = true;
+}
+
+void TCP_NSC::sendAvailableIndicationMsg(TCP_NSC_Connection& c)
+{
+    cMessage *msg = new cMessage("TCP_I_AVAILABLE");
+    msg->setKind(TCP_I_AVAILABLE);
+
+    TCPAvailableInfo *tcpConnectInfo = new TCPAvailableInfo();
+
+    ASSERT(c.forkedConnId != -1);
+    tcpConnectInfo->setSocketId(c.forkedConnId);
+    tcpConnectInfo->setNewSocketId(c.connIdM);
+    tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
+    tcpConnectInfo->setRemoteAddr(c.inetSockPairM.remoteM.ipAddrM);
+    tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
+    tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
+
+    msg->setControlInfo(tcpConnectInfo);
+    send(msg, "appOut", c.appGateIndexM);
+    c.sentEstablishedM = true;
 }
 
 void TCP_NSC::changeAddresses(TCP_NSC_Connection& connP,
@@ -443,6 +460,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
                 conn->tcpNscM = this;
                 conn->connIdM = newConnId;
                 conn->appGateIndexM = c.appGateIndexM;
+                conn->forkedConnId = c.connIdM;
                 conn->pNscSocketM = sock;
 
                 // set sockPairs:
@@ -458,7 +476,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
                 conn->receiveQueueM->setConnection(conn);
                 EV_DETAIL << this << ": NSC: got accept!\n";
 
-                sendEstablishedMsg(*conn);
+                sendAvailableIndicationMsg(*conn);
             }
         }
         else if (c.pNscSocketM && !c.disconnectCalledM && c.pNscSocketM->is_connected()) {    // not listener
@@ -473,7 +491,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
                 sendEstablishedMsg(c);
             }
 
-            while (true) {
+            while (c.forkedConnId == -1) {      // not a forked listener socket, or ACCEPT arrived after fork) {
                 static char buf[4096];
 
                 int buflen = sizeof(buf);
@@ -572,7 +590,7 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
         cMessage *msg = new cMessage(name);
         msg->setKind(code);
         TCPCommand *ind = new TCPCommand();
-                    ind->setSocketId(c.connIdM);
+        ind->setSocketId(c.connIdM);
         msg->setControlInfo(ind);
                     send(msg, "appOut", c.appGateIndexM);
     }
@@ -939,6 +957,10 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
             process_OPEN_PASSIVE(connP, tcpCommand, msgP);
             break;
 
+        case TCP_C_ACCEPT:
+            process_ACCEPT(connP, check_and_cast<TCPAcceptCommand *>(tcpCommand), msgP);
+            break;
+
         case TCP_C_SEND:
             process_SEND(connP, tcpCommand, check_and_cast<cPacket *>(msgP));
             break;
@@ -1053,6 +1075,34 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
 
     delete openCmd;
     delete msgP;
+}
+
+void TCP_NSC::process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCommandP, cMessage *msgP)
+{
+    EV_DEBUG << "process_ACCEPT: conn=" << connP.connIdM << ", forkedConn=" << connP.forkedConnId << endl;
+    connP.forkedConnId = -1;
+    sendEstablishedMsg(connP);
+
+    int err = NSC_EAGAIN;
+    while (true) {
+        static char buf[4096];
+
+        int buflen = sizeof(buf);
+
+        err = connP.pNscSocketM->read_data(buf, &buflen);
+
+        EV_DEBUG << this << ": NSC: read: err " << err << " , buflen " << buflen << "\n";
+
+        if (err == 0 && buflen > 0) {
+            connP.receiveQueueM->enqueueNscData(buf, buflen);
+            err = NSC_EAGAIN;
+        }
+        else
+            break;
+    }
+
+    sendDataToApp(connP);
+    sendErrorNotificationToApp(connP, err);
 }
 
 void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cPacket *msgP)
