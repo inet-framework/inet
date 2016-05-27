@@ -87,6 +87,21 @@ Ethernet:
   - Serializer: fix: length field contained incorrect value (size of frame
     instead of size of payload)
 
+Visualizers:
+
+ - Added a new 'visualizer' folder under 'src' that contains visualizer modules.
+   The visualizer modules are intentionally kept separate from network protocol
+   models. They are responsible for displaying various aspects of the simulation
+   in a graphical user interface. The most common mechanism they use is looking
+   up other modules and/or subscribing to the signals they emit. The visualizer
+   modules are compatible with both Tkenv and Qtenv. In Qtenv they are able to
+   display on both a 2D canvas and a 3D osg scene. See OMNeT++ 5.0 for osg support.
+
+   The current visualizer modules can display the scene (optionally with osg
+   Earth), the network nodes (optionally with 3D models), physical objects in
+   the physical environment, node mobility along with movement trail, discovered
+   network connectivity, discovered network routes, ongoing transmissions,
+   ongoing receptions, propagating radio signals, and statistics.
 
 INET-3.2.4 (April, 2016) - stable
 ---------------------------------
@@ -112,7 +127,6 @@ Changes:
   - several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
   - smoke and fingerprint tests are running on both OMNeT++ 4.6 and 5.0
   - some varaiable renames and fixes in ieee802.11
-
 
 INET-3.2.1 (Jan, 2016) - Stable
 -------------------------------
