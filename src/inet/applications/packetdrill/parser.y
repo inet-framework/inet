@@ -177,6 +177,11 @@ int parse_script(PacketDrillConfig *config, PacketDrillScript *script, struct in
     return result ? -1 : 0;
 }
 
+void parse_and_finalize_config(struct invocation *invocation)
+{
+    invocation->config->parseScriptOptions(invocation->script->getOptionList());
+}
+
 /* Bison emits code to call this method when there's a parse-time error.
  * We print the line number and the error message.
  */
@@ -225,7 +230,6 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
         uint32 start_sequence;
         uint16 payload_bytes;
     } tcp_sequence_info;
-    struct option_list *option;
     PacketDrillEvent *event;
     PacketDrillPacket *packet;
     struct syscall_spec *syscall;
@@ -234,6 +238,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
     cQueue *expression_list;
     PacketDrillTcpOption *tcp_option;
     PacketDrillSctpParameter *sctp_parameter;
+    PacketDrillOption *option;
     cQueue *tcp_options;
     struct errno_spec *errno_info;
     cQueue *sctp_chunk_list;
@@ -256,7 +261,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %token <reserved> MYSHUTDOWN MYSHUTDOWN_ACK MYERROR MYCOOKIE_ECHO MYCOOKIE_ACK
 %token <reserved> MYSHUTDOWN_COMPLETE
 %token <reserved> HEARTBEAT_INFORMATION CAUSE_INFO MYSACK STATE_COOKIE PARAMETER MYSCTP
-%token <reserved> TYPE FLAGS LEN
+%token <reserved> TYPE FLAGS LEN MYSUPPORTED_EXTENSIONS TYPES
 %token <reserved> TAG A_RWND OS IS TSN MYSID SSN PPID CUM_TSN GAPS DUPS
 %token <reserved> SRTO_ASSOC_ID SRTO_INITIAL SRTO_MAX SRTO_MIN
 %token <reserved> SINIT_NUM_OSTREAMS SINIT_MAX_INSTREAMS SINIT_MAX_ATTEMPTS
@@ -267,11 +272,12 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %token <string> MYWORD MYSTRING
 %type <direction> direction
 %type <event> event events event_time action
+%type <option> option options opt_options
 %type <time_usecs> time opt_end_time
 %type <packet> packet_spec tcp_packet_spec udp_packet_spec sctp_packet_spec
 %type <packet> packet_prefix
 %type <syscall> syscall_spec
-%type <string> flags
+%type <string> option_flag option_value flags
 %type <tcp_sequence_info> seq
 %type <tcp_options> opt_tcp_options tcp_option_list
 %type <tcp_option> tcp_option
@@ -290,7 +296,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %type <expression> sctp_initmsg sinit_num_ostreams sinit_max_instreams sinit_max_attempts
 %type <expression> sinit_max_init_timeo sctp_assoc_value sctp_sackinfo sack_delay sack_freq
 %type <errno_info> opt_errno
-%type <integer> opt_flags opt_len opt_data_flags opt_abort_flags
+%type <integer> opt_flags opt_len opt_data_flags opt_abort_flags chunk_type
 %type <integer> opt_shutdown_complete_flags opt_tag opt_a_rwnd opt_os opt_is
 %type <integer> opt_tsn opt_sid opt_ssn opt_ppid opt_cum_tsn
 %type <sctp_chunk_list> sctp_chunk_list
@@ -302,16 +308,51 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %type <sctp_chunk> sctp_cookie_echo_chunk_spec sctp_cookie_ack_chunk_spec
 %type <sctp_chunk> sctp_shutdown_complete_chunk_spec
 %type <sctp_parameter> sctp_parameter sctp_heartbeat_information_parameter
-%type <sctp_parameter> sctp_state_cookie_parameter
-%type <byte_list> opt_val byte_list
+%type <sctp_parameter> sctp_state_cookie_parameter sctp_supported_extensions_parameter
+%type <byte_list> opt_val byte_list chunk_types_list
 %type <byte> byte;
 
 %%  /* The grammar follows. */
 
 script
-: events {
+: opt_options events {
     $$ = NULL;    /* The parser output is in out_script */
 }
+;
+
+opt_options
+: { $$ = NULL;
+    parse_and_finalize_config(invocation);}
+| options {
+    $$ = $1;
+    parse_and_finalize_config(invocation);
+}
+;
+
+options
+: option {
+    out_script->addOption($1);
+    $$ = $1;    /* return the tail so we can append to it */
+}
+| options option {
+    out_script->addOption($2);
+    $$ = $2;    /* return the tail so we can append to it */
+}
+;
+
+option
+: option_flag '=' option_value {
+    $$ = new PacketDrillOption($1, $3);
+}
+
+option_flag
+: OPTION { $$ = $1; }
+;
+
+option_value
+: INTEGER   { $$ = strdup(yytext); }
+| MYWORD    { $$ = $1; }
+| MYSTRING  { $$ = $1; }
 ;
 
 
@@ -474,7 +515,7 @@ udp_packet_spec
 
 sctp_packet_spec
 : packet_prefix MYSCTP ':' sctp_chunk_list {
-    PacketDrillPacket *inner = NULL;;
+    PacketDrillPacket *inner = NULL;
     enum direction_t direction = $1->getDirection();
     cPacket* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, $4);
     if (direction == DIRECTION_INBOUND)
@@ -491,7 +532,7 @@ sctp_packet_spec
 sctp_chunk_list
 : sctp_chunk                     { $$ = new cQueue("sctpChunkList");
                                    $$->insert((cObject*)$1); }
-| sctp_chunk_list ',' sctp_chunk { $$ = $1;
+| sctp_chunk_list ';' sctp_chunk { $$ = $1;
                                    $1->insert($3); }
 ;
 
@@ -550,6 +591,12 @@ byte_list
                        $1->appendByte($3); }
 ;
 
+chunk_types_list
+: chunk_type         { $$ = new PacketDrillBytes($1); printf("new PacketDrillBytes created\n");}
+| chunk_types_list ',' chunk_type { $$ = $1;
+                       $1->appendByte($3); }
+;
+
 byte
 : HEX_INTEGER {
     if (!is_valid_u8($1)) {
@@ -562,6 +609,57 @@ byte
         printf("Semantic error: byte value out of range\n");
     }
     $$ = $1;
+}
+;
+
+chunk_type
+: HEX_INTEGER {
+    if (!is_valid_u8($1)) {
+        printf("Semantic error: type value out of range\n");
+    }
+    $$ = $1;
+}
+| INTEGER {
+    if (!is_valid_u8($1)) {
+        printf("Semantic error: type value out of range\n");
+    }
+    $$ = $1;
+}
+| MYDATA {
+    $$ = SCTP_DATA_CHUNK_TYPE;
+}
+| MYINIT {
+    $$ = SCTP_INIT_CHUNK_TYPE;
+}
+| MYINIT_ACK {
+    $$ = SCTP_INIT_ACK_CHUNK_TYPE;
+}
+| MYSACK {
+    $$ = SCTP_SACK_CHUNK_TYPE;
+}
+| MYHEARTBEAT {
+    $$ = SCTP_HEARTBEAT_CHUNK_TYPE;
+}
+| MYHEARTBEAT_ACK {
+    $$ = SCTP_HEARTBEAT_ACK_CHUNK_TYPE;
+}
+| MYABORT {
+    $$ = SCTP_ABORT_CHUNK_TYPE;
+}
+| MYSHUTDOWN {
+    $$ = SCTP_SHUTDOWN_CHUNK_TYPE;
+}
+| MYSHUTDOWN_ACK {
+    $$ = SCTP_SHUTDOWN_ACK_CHUNK_TYPE;
+}
+| MYCOOKIE_ECHO {
+    $$ = SCTP_COOKIE_ECHO_CHUNK_TYPE;
+}
+| MYCOOKIE_ACK {
+    $$ = SCTP_COOKIE_ACK_CHUNK_TYPE;
+}
+| MYSHUTDOWN_COMPLETE{
+    $$ = SCTP_SHUTDOWN_COMPLETE_CHUNK_TYPE;
 }
 ;
 
@@ -906,12 +1004,13 @@ sctp_parameter_list
 sctp_parameter
 : sctp_heartbeat_information_parameter   { $$ = $1; }
 | sctp_state_cookie_parameter            { $$ = $1; }
+| sctp_supported_extensions_parameter    { $$ = $1; }
 ;
 
 
 sctp_heartbeat_information_parameter
 : HEARTBEAT_INFORMATION '[' ELLIPSIS ']' {
-    $$ = new PacketDrillSctpParameter(-1, NULL);
+    $$ = new PacketDrillSctpParameter(HEARTBEAT_INFORMATION, -1, NULL);
 }
 | HEARTBEAT_INFORMATION '[' opt_len ',' opt_val ']' {
     if (($3 != -1) &&
@@ -925,22 +1024,29 @@ sctp_heartbeat_information_parameter
     if (($3 == -1) && ($5 != NULL)) {
         printf("Semantic error: length needs to be specified\n");
     }
-    $$ = new PacketDrillSctpParameter($3, $5);
+    $$ = new PacketDrillSctpParameter(HEARTBEAT_INFORMATION, $3, $5);
 }
 
+sctp_supported_extensions_parameter
+: MYSUPPORTED_EXTENSIONS '[' TYPES '=' ELLIPSIS ']' {
+    $$ = new PacketDrillSctpParameter(SUPPORTED_EXTENSIONS, -1, NULL);
+}
+| MYSUPPORTED_EXTENSIONS '[' TYPES '=' '[' chunk_types_list ']' ']' {
+    $$ = new PacketDrillSctpParameter(SUPPORTED_EXTENSIONS, $6->getListLength(), $6);
+}
 
 sctp_state_cookie_parameter
 : STATE_COOKIE '[' ELLIPSIS ']' {
-    $$ = new PacketDrillSctpParameter(-1, NULL);
+    $$ = new PacketDrillSctpParameter(STATE_COOKIE, -1, NULL);
 }
 | STATE_COOKIE '[' LEN '=' ELLIPSIS ',' VAL '=' ELLIPSIS ']' {
-    $$ = new PacketDrillSctpParameter(-1, NULL);
+    $$ = new PacketDrillSctpParameter(STATE_COOKIE, -1, NULL);
 }
 | STATE_COOKIE '[' LEN '=' INTEGER ',' VAL '=' ELLIPSIS ']' {
     if (($5 < 4) || !is_valid_u32($5)) {
         printf("Semantic error: len value out of range\n");
     }
-    $$ = new PacketDrillSctpParameter($5, NULL);
+    $$ = new PacketDrillSctpParameter(STATE_COOKIE, $5, NULL);
 }
 ;
 

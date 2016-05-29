@@ -108,6 +108,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         uint16 peerCookieLength;
         uint32 initPeerTsn;
         uint32 initLocalTsn;
+        uint32 localDiffTsn;
         uint32 peerCumTsn;
         uint32 localCumTsn;
         uint32 eventCounter;
@@ -124,6 +125,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         void runEvent(PacketDrillEvent *event);
         void runSystemCallEvent(PacketDrillEvent *event, struct syscall_spec *syscall);
+        void closeAllSockets();
 
         int syscallSocket(struct syscall_spec *syscall, cQueue *args, char **error);
 

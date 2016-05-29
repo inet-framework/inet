@@ -222,7 +222,6 @@ cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direct
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {
             PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(iter());
-
             option = setOptionValues(opt);
             tcpOptionsLength += opt->getLength();
             // write option to tcp header
@@ -317,7 +316,7 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 t
         datachunk->setSsn((uint16) ssn);
     }
 
-    if (tsn == -1) {
+    if (ppid == -1) {
         datachunk->setPpid(0);
         flags |= FLAG_DATA_CHUNK_PPID_NOCHECK;
     } else {
@@ -348,6 +347,7 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 t
 PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a_rwnd, int64 os, int64 is, int64 tsn, cQueue *parameters)
 {
     uint32 flags = 0;
+    uint16 length = 0;
     SCTPInitChunk *initchunk = new SCTPInitChunk();
     initchunk->setChunkType(INIT);
     initchunk->setName("INIT");
@@ -387,10 +387,34 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
         initchunk->setInitTSN((uint32) tsn);
     }
 
+    if (parameters != nullptr) {
+        PacketDrillSctpParameter *parameter;
+        uint16 parLen = 0;
+        for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
+            parameter = (PacketDrillSctpParameter*) (*iter);
+            printf("parameter type=%d\n", parameter->getType());
+            switch (parameter->getType()) {
+                case SUPPORTED_EXTENSIONS: {
+                    printf("SUPPORTED_EXTENSIONS\n");
+                    ByteArray *ba = (ByteArray *)(parameter->getByteList());
+                    parLen = ba->getDataArraySize();
+                    initchunk->setSepChunksArraySize(parLen);
+                    for (int i = 0; i < parLen; i++) {
+                        initchunk->setSepChunks(i, ba->getData(i));
+                    }
+                    if (parLen > 0) {
+                        length += ADD_PADDING(SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH + parLen);
+                    }
+                    break;
+                }
+                default: printf("Parameter type not implemented\n");
+            }
+        }
+    }
     initchunk->setAddressesArraySize(0);
     initchunk->setUnrecognizedParametersArraySize(0);
     initchunk->setFlags(flags);
-    initchunk->setByteLength(SCTP_INIT_CHUNK_LENGTH);
+    initchunk->setByteLength(SCTP_INIT_CHUNK_LENGTH + length);
     PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(INIT, (SCTPChunk *)initchunk);
     delete parameters;
     return sctpchunk;
@@ -518,6 +542,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         delete dups;
     }
     sackchunk->setByteLength(SCTP_SACK_CHUNK_LENGTH + (sackchunk->getNumGaps() + sackchunk->getNumDupTsns()) * 4);
+    sackchunk->setFlags(flags);
     PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SACK, (SCTPChunk *)sackchunk);
     return sctpchunk;
 

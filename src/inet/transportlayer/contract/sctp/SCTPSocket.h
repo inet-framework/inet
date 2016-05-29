@@ -230,14 +230,14 @@ class INET_API SCTPSocket
      */
     void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
-    void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false);
+    void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false, int32 fd = -1);
 
     /**
      * Active OPEN to the given remote socket.
      */
     void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
-    void connect(L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options = false);
+    void connect(int32 fd, L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options = false);
 
     /**
      * Active OPEN to the given remote socket.
@@ -246,6 +246,7 @@ class INET_API SCTPSocket
      */
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
+    void accept(int32 assocId, int32 fd);
     /**
      * Send data message.
      */
@@ -272,7 +273,7 @@ class INET_API SCTPSocket
      * connection until the remote SCTP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close();
+    void close(int id = -1);
 
     /**
      * Aborts the association.
