@@ -304,7 +304,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
     // helpers
     bool IamRP(IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
     bool IamDR(InterfaceEntry *ie);
-    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
+    PIMInterface *getIncomingInterface(InterfaceEntry *fromIE);
     bool deleteMulticastRoute(Route *route);
     void clearRoutes();
     void cancelAndDeleteTimer(cMessage *& timer);

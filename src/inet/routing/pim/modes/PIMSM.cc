@@ -292,15 +292,15 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == NF_IPv4_NEW_MULTICAST) {
         EV << "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
-        datagram = check_and_cast<IPv4Datagram *>(obj);
+        datagram = check_and_cast<IPv4Datagram *>(datagram);
         IPv4Address srcAddr = datagram->getSrcAddress();
         IPv4Address destAddr = datagram->getDestAddress();
         unroutableMulticastPacketArrived(srcAddr, destAddr);
     }
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
         EV << "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
-        datagram = check_and_cast<IPv4Datagram *>(obj);
-        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode) {
             route = findRouteG(datagram->getDestAddress());
             if (route)
@@ -311,8 +311,8 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         }
     }
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        datagram = check_and_cast<IPv4Datagram *>(obj);
-        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode) {
             IPv4Address srcAddr = datagram->getSrcAddress();
             IPv4Address destAddr = datagram->getDestAddress();
@@ -324,8 +324,8 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == NF_IPv4_MDATA_REGISTER) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
-        datagram = check_and_cast<IPv4Datagram *>(obj);
-        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
             multicastPacketForwarded(datagram);
@@ -1283,7 +1283,6 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
 
     // send Register message to RP
 
-    InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(routeSG->rpAddr);
 
     if (routeSG->registerState == Route::RS_JOIN) {
         // refresh KAT timer
@@ -1292,6 +1291,8 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
             restartTimer(routeSG->keepAliveTimer, KAT);
         }
 
+        InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(routeSG->rpAddr);
+        ASSERT(interfaceTowardRP != nullptr);
         sendPIMRegister(datagram, routeSG->rpAddr, interfaceTowardRP->getInterfaceId());
     }
 }
@@ -1697,14 +1698,10 @@ bool PIMSM::IamDR(InterfaceEntry *ie)
     return drAddress.isUnspecified() || drAddress == ie->ipv4Data()->getIPAddress();
 }
 
-PIMInterface *PIMSM::getIncomingInterface(IPv4Datagram *datagram)
+PIMInterface *PIMSM::getIncomingInterface(InterfaceEntry *fromIE)
 {
-    cGate *g = datagram->getArrivalGate();
-    if (g) {
-        InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(g->getIndex());
-        if (ie)
-            return pimIft->getInterfaceById(ie->getInterfaceId());
-    }
+    if (fromIE)
+        return pimIft->getInterfaceById(fromIE->getInterfaceId());
     return nullptr;
 }
 

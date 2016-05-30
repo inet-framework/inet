@@ -232,7 +232,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
     // helpers
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
-    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
+    PIMInterface *getIncomingInterface(InterfaceEntry *fromIE);
     IPv4MulticastRoute *findIPv4MulticastRoute(IPv4Address group, IPv4Address source);
     Route *findRoute(IPv4Address source, IPv4Address group);
     void deleteRoute(IPv4Address source, IPv4Address group);

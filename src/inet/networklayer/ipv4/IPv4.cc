@@ -512,7 +512,8 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
     if (!route) {
         EV_WARN << "Multicast route does not exist, try to add.\n";
-        emit(NF_IPv4_NEW_MULTICAST, datagram);
+        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        emit(NF_IPv4_NEW_MULTICAST, datagram, const_cast<InterfaceEntry *>(fromIE));
 
         // read new record
         route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
@@ -527,7 +528,8 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
 
     if (route->getInInterface() && fromIE != route->getInInterface()->getInterface()) {
         EV_ERROR << "Did not arrive on input interface, packet dropped.\n";
-        emit(NF_IPv4_DATA_ON_NONRPF, datagram);
+        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        emit(NF_IPv4_DATA_ON_NONRPF, datagram, const_cast<InterfaceEntry *>(fromIE));
         numDropped++;
         delete datagram;
     }
@@ -538,7 +540,8 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
         delete datagram;
     }
     else {
-        emit(NF_IPv4_DATA_ON_RPF, datagram);    // forwarding hook
+        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        emit(NF_IPv4_DATA_ON_RPF, datagram, const_cast<InterfaceEntry *>(fromIE));    // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
@@ -558,7 +561,8 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
             }
         }
 
-        emit(NF_IPv4_MDATA_REGISTER, datagram);    // postRouting hook
+        // TODO: no need to emit fromIE when tags will be used in place of control infos
+        emit(NF_IPv4_MDATA_REGISTER, datagram, const_cast<InterfaceEntry *>(fromIE));    // postRouting hook
 
         // only copies sent, delete original datagram
         delete datagram;
