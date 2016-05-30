@@ -26,6 +26,7 @@ import inet.transportlayer.contract.ISCTP;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
 import inet.applications.contract.ITunApp;
+import inet.node.base.TransportLayerNodeBase;
 
 //
 // IPv4 host with SCTP, TCP, UDP layers and applications.
@@ -44,7 +45,7 @@ import inet.applications.contract.ITunApp;
 // - If wireless card is present, node mobility can be set using **.mobilityType
 //   see: inet.mobility and ~IMobility
 //
-module StandardHost extends NodeBase
+module StandardHost extends TransportLayerNodeBase
 {
     parameters:
         @display("i=device/pc2");

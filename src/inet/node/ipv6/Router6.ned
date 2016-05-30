@@ -17,15 +17,15 @@
 
 package inet.node.ipv6;
 
-import inet.node.inet.NodeBase;
 
+import inet.node.base.TransportLayerNodeBase;
 
 //
 // IPv6 router.
 //
 // see ~Router for configuration options
 //
-module Router6 extends NodeBase
+module Router6 extends TransportLayerNodeBase
 {
     parameters:
         @display("i=abstract/router");

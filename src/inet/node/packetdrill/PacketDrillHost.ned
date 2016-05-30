@@ -19,11 +19,11 @@
 
 package inet.node.packetdrill;
 
+import inet.node.base.TransportLayerNodeBase;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
 import inet.transportlayer.contract.ISCTP;
 import inet.linklayer.tun.TunInterface;
-import inet.node.inet.NodeBase;
 import inet.applications.packetdrill.PacketDrillApp;
 
 
@@ -31,7 +31,7 @@ import inet.applications.packetdrill.PacketDrillApp;
 // IPv4 host with SCTP, TCP, UDP layers and a packetdrill application.
 // The application has a direct connection to the TunInterface.
 //
-module PacketDrillHost extends NodeBase
+module PacketDrillHost extends TransportLayerNodeBase
 {
     parameters:
         @display("i=device/pc2;bgl=4;bgb=588,447");

@@ -18,6 +18,7 @@
 package inet.node.inet;
 
 import inet.applications.contract.IUDPApp;
+import inet.node.base.TransportLayerNodeBase;
 import inet.routing.contract.IBGPRouting;
 import inet.routing.contract.IIPRouting;
 import inet.routing.contract.IPIMRouting;
@@ -47,7 +48,7 @@ import inet.transportlayer.contract.IUDP;
 // By default, dynamic routing is not supported. Specific routing protocols can
 // be added by setting the hasOSPF/hasRIP/hasBGP parameters.
 //
-module Router extends NodeBase
+module Router extends TransportLayerNodeBase
 {
     parameters:
         @display("i=abstract/router");
