@@ -38,9 +38,8 @@ module IPv6NetworkLayer like INetworkLayer
         bool xMIPv6Support = default(false);
         *.xmipv6Module = xMIPv6Support ? absPath(".mipv6support.xMobileIPv6") : "";
         string interfaceTableModule;
-        string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.routingTableModule = default(absPath(routingTableModule));
+        *.routingTableModule = default(absPath(".routingTable"));
         *.ipv6NeighbourDiscoveryModule = default(absPath(".neighbourDiscovery"));
         *.icmpv6Module = default(absPath(".icmpv6"));
         *.ipv6TunnelingModule = default(absPath(".iptunneling"));
@@ -53,6 +52,10 @@ module IPv6NetworkLayer like INetworkLayer
         input pingIn[] @labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
     submodules:
+        routingTable: IPv6RoutingTable {
+            parameters:
+                @display("p=100,750;is=s");
+        }
         // TODO: rename to ip
         ipv6: IPv6 {
             parameters:

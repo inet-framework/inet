@@ -35,9 +35,8 @@ module IPv4NetworkLayer like INetworkLayer
         string igmpType = default("IGMPv2");
         string arpType = default("ARP");
         string interfaceTableModule;
-        string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.routingTableModule = default(absPath(routingTableModule));
+        *.routingTableModule = default(absPath(".routingTable"));
         *.arpModule = default(absPath(".arp"));
         *.icmpModule = default(absPath(".icmp"));
         arp.respondToProxyARP = proxyARP;
@@ -55,6 +54,10 @@ module IPv4NetworkLayer like INetworkLayer
     submodules:
         configurator: IPv4NodeConfigurator {
             @display("p=39,158");
+        }
+        routingTable: IPv4RoutingTable {
+            parameters:
+                @display("p=50,100;is=s");
         }
         ip: IPv4 {
             parameters:

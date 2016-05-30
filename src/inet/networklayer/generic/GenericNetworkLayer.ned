@@ -29,9 +29,8 @@ module GenericNetworkLayer like INetworkLayer
 {
     parameters:
         string interfaceTableModule;
-        string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.routingTableModule = default(absPath(routingTableModule));
+        *.routingTableModule = default(absPath(".routingTable"));
         *.arpModule = default(absPath(".arp"));
         @display("i=block/fork");
     gates:
@@ -43,6 +42,10 @@ module GenericNetworkLayer like INetworkLayer
         output pingOut[] @labels(PingPayload/up);
 
     submodules:
+        routingTable: GenericRoutingTable {
+            parameters:
+                @display("p=100,50;is=s");
+        }
         gnp: GenericNetworkProtocol {
             parameters:
                 @display("p=85,95;q=queue");
