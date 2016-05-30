@@ -93,8 +93,7 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIn
         statsM = new Stats();
 }
 
-TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP,
-        LwipTcpLayer::tcp_pcb *pcbP)
+TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)
     :
     connIdM(connIdP),
     appGateIndexM(connP.appGateIndexM),
@@ -128,6 +127,27 @@ TcpLwipConnection::~TcpLwipConnection()
     delete statsM;
 }
 
+void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
+{
+    EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
+    cMessage *msg = new cMessage(indicationName(TCP_I_AVAILABLE));
+    msg->setKind(TCP_I_AVAILABLE);
+
+    L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
+
+    TCPAvailableInfo *ind = new TCPAvailableInfo();
+    ind->setSocketId(listenConnId);
+    ind->setNewSocketId(connIdM);
+    ind->setLocalAddr(localAddr);
+    ind->setRemoteAddr(remoteAddr);
+    ind->setLocalPort(pcbM->local_port);
+    ind->setRemotePort(pcbM->remote_port);
+
+    msg->setControlInfo(ind);
+    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    //TODO shouldn't read from lwip until accept arrived
+}
+
 void TcpLwipConnection::sendEstablishedMsg()
 {
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
@@ -146,6 +166,10 @@ void TcpLwipConnection::sendEstablishedMsg()
     msg->setControlInfo(tcpConnectInfo);
 
     tcpLwipM.send(msg, "appOut", appGateIndexM);
+    sendUpEnabled = true;
+    do_SEND();
+    //TODO now can read from lwip
+    sendUpData();
 }
 
 const char *TcpLwipConnection::indicationName(int code)
@@ -157,6 +181,7 @@ const char *TcpLwipConnection::indicationName(int code)
     switch (code) {
         CASE(TCP_I_DATA);
         CASE(TCP_I_URGENT_DATA);
+        CASE(TCP_I_AVAILABLE);
         CASE(TCP_I_ESTABLISHED);
         CASE(TCP_I_PEER_CLOSED);
         CASE(TCP_I_CLOSED);
@@ -250,6 +275,14 @@ void TcpLwipConnection::abort()
     onCloseM = false;
 }
 
+void TcpLwipConnection::accept()
+{
+    if (sendUpEnabled)
+        throw cRuntimeError("socket already accepted/not a fork of a listening socket");
+    sendEstablishedMsg();
+    do_SEND();
+}
+
 void TcpLwipConnection::send(cPacket *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
@@ -310,6 +343,8 @@ int TcpLwipConnection::send_data(void *data, int datalen)
 
 void TcpLwipConnection::do_SEND()
 {
+    if (!sendUpEnabled)
+        return;
     char buffer[8 * 536];
     int bytes;
     int allsent = 0;
@@ -339,6 +374,29 @@ void TcpLwipConnection::do_SEND()
     if (onCloseM && (0 == sendQueueM->getBytesAvailable())) {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
+    }
+}
+
+void TcpLwipConnection::sendUpData()
+{
+    if (sendUpEnabled) {
+        while (cPacket *dataMsg = receiveQueueM->extractBytesUpTo()) {
+            TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
+            tcpConnectInfo->setSocketId(connIdM);
+            tcpConnectInfo->setLocalAddr(pcbM->local_ip.addr);
+            tcpConnectInfo->setRemoteAddr(pcbM->remote_ip.addr);
+            tcpConnectInfo->setLocalPort(pcbM->local_port);
+            tcpConnectInfo->setRemotePort(pcbM->remote_port);
+            dataMsg->setControlInfo(tcpConnectInfo);
+            int64_t len = dataMsg->getByteLength();
+            // send Msg to Application layer:
+            tcpLwipM.send(dataMsg, "appOut", appGateIndexM);
+//            while (len > 0) {
+//                unsigned int slen = len > 0xffff ? 0xffff : len;
+//                tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, slen);
+//                len -= slen;
+//            }
+        }
     }
 }
 

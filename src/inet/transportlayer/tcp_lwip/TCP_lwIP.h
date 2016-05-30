@@ -117,13 +117,14 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
 
     void process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP, cMessage *msgP);
     void process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP, cMessage *msgP);
+    void process_ACCEPT(TcpLwipConnection& connP, TCPAcceptCommand *tcpCommand, cMessage *msg);
     void process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommandP, cPacket *msgP);
     void process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
 
     // send a connection established msg to application layer
-    void sendEstablishedMsg(TcpLwipConnection& connP);
+    //void sendEstablishedMsg(TcpLwipConnection& connP);
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
