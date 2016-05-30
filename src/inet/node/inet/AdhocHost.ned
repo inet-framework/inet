@@ -23,7 +23,7 @@ package inet.node.inet;
 // and may have TCP/UDP applications installed. Supports ICMP (ping) too.
 //
 // - By default contains a single wireless cards, however it can be configured
-//   by the numRadios parameter. Wireless card type is configured by the
+//   by the numWlanInterfaces parameter. Wirless card type is configured by the
 //   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessNic
 // - Node mobility can be set using **.mobility.typename

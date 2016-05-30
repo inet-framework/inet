@@ -27,5 +27,5 @@ package inet.node.inet;
 module WirelessHost extends StandardHost
 {
     @display("i=device/wifilaptop");
-    numRadios = default(1);
+    numWlanInterfaces = default(1);
 }

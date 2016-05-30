@@ -27,7 +27,7 @@ moduleinterface INetworkNode
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
     gates:
-        input radioIn[numRadios] @directIn;
+        input radioIn[numWlanInterfaces] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
 }

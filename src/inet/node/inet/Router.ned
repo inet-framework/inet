@@ -35,7 +35,7 @@ import inet.transportlayer.contract.IUDP;
 //   only (twisted pair). Set **.eth.typename="EthernetInterface" for
 //   a full/half-duplex CSMA/CD implementation (coaxial cable)
 // - By default contains no wireless cards, however it can be configured
-//   by the numRadios parameter. Wirless card type is configured by the
+//   by the numWlanInterfaces parameter. Wirless card type is configured by the
 //   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessNic
 // - Also external interfaces can be configured for HW in the loop simulation
