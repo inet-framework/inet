@@ -22,6 +22,7 @@ import inet.applications.ethernet.EtherAppCli;
 import inet.common.queue.Sink;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
+import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -30,11 +31,12 @@ module Node
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn @directIn;
 
     submodules:
+        interfaceTable: InterfaceTable;
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
@@ -60,11 +62,12 @@ module SinkNode
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn @directIn;
 
     submodules:
+        interfaceTable: InterfaceTable;
         sink: Sink {
             parameters:
                 @display("p=210,68,col");

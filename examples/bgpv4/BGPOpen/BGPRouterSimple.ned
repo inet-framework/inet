@@ -17,6 +17,7 @@
 
 package inet.examples.bgpv4.BGPOpen;
 
+import inet.common.MessageDispatcher;
 import inet.common.misc.MessageChecker;
 import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
@@ -68,18 +69,24 @@ module BGPRouterSimple
             parameters:
                 @display("p=160,202;i=block/transport");
         }
-        networkLayer: IPv4NetworkLayer {
+        tn: MessageDispatcher {
+            parameters:
+                @display("b=580,5,,,,1;p=461,274");
+        }
+        ipv4: IPv4NetworkLayer {
             parameters:
                 proxyARP = true;
-                @display("p=120,284;i=block/layer;q=queue");
-            gates:
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                @display("p=401,320;i=block/layer;q=queue");
+        }
+        nl: MessageDispatcher {
+            parameters:
+                @display("b=580,5,,,,1;p=461,368");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
+                @display("p=401,429,row,110;q=l2queue;i=block/ifcard");
         }
+
     connections allowunconnected:
         bgp.tcpOut --> { @display("m=s"); } --> snifferOut.in;
         bgp.tcpIn <-- { @display("m=s"); } <-- snifferIn.out;
@@ -87,14 +94,20 @@ module BGPRouterSimple
         snifferOut.out --> { @display("m=s"); } --> tcp.appIn++;
         snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut++;
 
-        tcp.ipOut --> { @display("m=s"); } --> networkLayer.transportIn++;
-        tcp.ipIn <-- { @display("m=s"); } <-- networkLayer.transportOut++;
+        tcp.ipOut --> { @display("m=s"); } --> tn.upperLayerIn++;
+        tcp.ipIn <-- { @display("m=s"); } <-- tn.upperLayerOut++;
+
+        tn.lowerLayerOut++ --> { @display("m=s"); } --> ipv4.transportIn;
+        tn.lowerLayerIn++ <-- { @display("m=s"); } <-- ipv4.transportOut;
+
+        ipv4.ifOut --> { @display("m=s"); } --> nl.upperLayerIn++;
+        ipv4.ifIn <-- { @display("m=s"); } <-- nl.upperLayerOut++;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
-            ppp[i].upperLayerOut --> networkLayer.ifIn[i];
-            ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
+            ppp[i].upperLayerOut --> nl.lowerLayerIn++;
+            ppp[i].upperLayerIn <-- nl.lowerLayerOut++;
         }
 }
 

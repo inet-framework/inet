@@ -28,7 +28,7 @@ import inet.node.mpls.RSVP_LSR;
 network RSVPTE4
 {
     parameters:
-        **.networkLayer.configurator.networkConfiguratorModule = "";
+        **.ipv4.configurator.networkConfiguratorModule = "";
 
     submodules:
         LSR1: RSVP_LSR {

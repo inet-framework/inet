@@ -27,7 +27,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 module DynamicHost extends AdhocHost
 {
     parameters:
-        networkLayer.configurator.networkConfiguratorModule = "";
+        ipv4.configurator.networkConfiguratorModule = "";
     submodules:
         autoConfigurator: HostAutoConfigurator {
             @display("p=171,335");

@@ -23,6 +23,7 @@ import inet.common.queue.Sink;
 import inet.environment.common.PhysicalEnvironment;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.RectangleMobility;
+import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -32,10 +33,11 @@ module SinkClient
         @networkNode();
         @labels(node);
         @display("i=device/cellphone");
-        *.interfaceTableModule = default("");
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn @directIn;
     submodules:
+        interfaceTable: InterfaceTable;
         sink: Sink {
             parameters:
                 @display("p=169,124");
@@ -59,11 +61,12 @@ module Client
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn @directIn;
 
     submodules:
+        interfaceTable: InterfaceTable;
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;

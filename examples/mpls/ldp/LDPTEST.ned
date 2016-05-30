@@ -24,7 +24,7 @@ import ned.DatarateChannel;
 network LDPTEST
 {
     parameters:
-        **.networkLayer.configurator.networkConfiguratorModule = "";
+        **.ipv4.configurator.networkConfiguratorModule = "";
 
     types:
         channel C5 extends DatarateChannel
