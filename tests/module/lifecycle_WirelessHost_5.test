@@ -15,7 +15,7 @@ sim-time-limit = 100s
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
-*.host*.numRadios=1
+*.host*.numWlanInterfaces=1
 
 *.host*.networkLayer.configurator.networkConfiguratorModule = ""
 

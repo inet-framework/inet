@@ -9,7 +9,7 @@ network multinat
     parameters:
         volatile double testTimeout;
         bool testing;
-        **.networkLayer.configurator.networkConfiguratorModule = "";
+        **.ipv4.configurator.networkConfiguratorModule = "";
     submodules:
         Peer_1: StandardHost {
             parameters:

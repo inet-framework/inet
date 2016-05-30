@@ -14,7 +14,7 @@ record-eventlog = true
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
-*.host.numRadios=2
+*.host.numWlanInterfaces=2
 
 *.host.networkLayer.configurator.networkConfiguratorModule = ""
 

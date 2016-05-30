@@ -14,7 +14,7 @@ sim-time-limit = 3s
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
-*.host.numRadios=2
+*.host.numWlanInterfaces=2
 
 *.host.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m

@@ -44,14 +44,14 @@ network failover
         sctp_client: StandardHost {
             parameters:
                 routingTable.routingFile = "../../lib/multi_client.mrt";
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[2];
         }
         sctp_server: StandardHost {
             parameters:
                 routingTable.routingFile = "../../lib/multi_server.mrt";
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[2];
 
@@ -59,14 +59,14 @@ network failover
         router1: Router {
             parameters:
                 routingTable.routingFile = "../../lib/multi_router1.mrt";
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[4];
         }
         router2: Router {
             parameters:
                 routingTable.routingFile = "../../lib/multi_router2.mrt";
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[4];
         }
