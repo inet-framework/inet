@@ -144,7 +144,6 @@ void Flood::handleUpperPacket(cPacket *m)
 void Flood::handleLowerPacket(cPacket *m)
 {
     FloodDatagram *msg = check_and_cast<FloodDatagram *>(m);
-    int protocol = msg->getTransportProtocol();
 
     //msg not broadcasted yet
     if (notBroadcasted(msg)) {
@@ -152,7 +151,7 @@ void Flood::handleLowerPacket(cPacket *m)
         if (interfaceTable->isLocalAddress(msg->getDestinationAddress())) {
             EV << " data msg for me! send to Upper" << endl;
             nbHops = nbHops + (defaultTtl + 1 - msg->getTtl());
-            sendUp(decapsMsg(msg), protocol);
+            sendUp(decapsMsg(msg));
             nbDataPacketsReceived++;
         }
         //broadcast message
@@ -173,7 +172,7 @@ void Flood::handleLowerPacket(cPacket *m)
 
             // message has to be forwarded to upper layer
             nbHops = nbHops + (defaultTtl + 1 - msg->getTtl());
-            sendUp(decapsMsg(msg), protocol);
+            sendUp(decapsMsg(msg));
             nbDataPacketsReceived++;
         }
         //not for me -> rebroadcast

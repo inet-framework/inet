@@ -169,8 +169,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
             else
                 msgCopy = netwMsg;
             if (msgCopy->getKind() == DATA) {
-                int protocol = msgCopy->getTransportProtocol();
-                sendUp(decapsMsg(msgCopy), protocol);
+                sendUp(decapsMsg(msgCopy));
                 nbDataPacketsReceived++;
             }
             else {

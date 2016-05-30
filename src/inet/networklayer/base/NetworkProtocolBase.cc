@@ -14,8 +14,10 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
+
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/IInterfaceControlInfo.h"
 
 namespace inet {
 
@@ -40,11 +42,11 @@ void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate
     protocolMapping.addProtocolMapping(protocol.getId(), gate->getIndex());
 }
 
-void NetworkProtocolBase::sendUp(cMessage *message, int transportProtocol)
+void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (message->isPacket())
         emit(packetSentToUpperSignal, message);
-    send(message, "upperLayerOut", protocolMapping.getOutputGateForProtocol(transportProtocol));
+    send(message, "upperLayerOut");
 }
 
 void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
@@ -52,16 +54,19 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById(interfaceId);
-        send(message, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
+        cObject *ctrl = message->getControlInfo();
+        check_and_cast<IInterfaceControlInfo *>(ctrl)->setInterfaceId(interfaceId);
+        send(message, "lowerLayerOut");
     }
     else {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage *duplicate = message->dup();
-                duplicate->setControlInfo(message->getControlInfo()->dup());
-                send(duplicate, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
+                cObject *ctrl = message->getControlInfo()->dup();
+                check_and_cast<IInterfaceControlInfo *>(ctrl)->setInterfaceId(interfaceEntry->getInterfaceId());
+                duplicate->setControlInfo(ctrl);
+                send(duplicate, "lowerLayerOut");
             }
         }
         delete message;

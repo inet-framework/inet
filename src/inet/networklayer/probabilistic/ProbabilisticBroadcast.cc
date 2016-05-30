@@ -98,9 +98,8 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
         // to the application layer who will be able to compute statistics.
         // TODO: implement an application subscription mechanism.
         if (true) {
-            int protocol = m->getTransportProtocol();
             ProbabilisticBroadcastDatagram *mCopy = check_and_cast<ProbabilisticBroadcastDatagram *>(m->dup());
-            sendUp(decapsMsg(mCopy), protocol);
+            sendUp(decapsMsg(mCopy));
         }
     }
 }
