@@ -38,8 +38,8 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
     SimpleNetworkProtocolControlInfo& operator=(const SimpleNetworkProtocolControlInfo& other) { if (this == &other) return *this; SimpleNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
     virtual SimpleNetworkProtocolControlInfo *dup() const override { return new SimpleNetworkProtocolControlInfo(*this); }
 
-    virtual int getControlInfoProtocolId() const override { return -1; }
-    virtual int getPacketProtocolId() const override { return -1; }
+    virtual int getControlInfoProtocolId() const override { return Protocol::gnp.getId(); }
+    virtual int getPacketProtocolId() const override { return ProtocolGroup::ipprotocol.getProtocol(getTransportProtocol())->getId(); }
 
     virtual int getSocketId() const override { return SimpleNetworkProtocolControlInfo_Base::getSocketId(); }
     virtual void setSocketId(int socketId) override { SimpleNetworkProtocolControlInfo_Base::setSocketId(socketId); }
