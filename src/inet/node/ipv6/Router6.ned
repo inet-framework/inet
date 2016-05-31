@@ -30,10 +30,10 @@ module Router6 extends TransportLayerNodeBase
     parameters:
         @display("i=abstract/router");
         forwarding = true;
+        hasIpv4 = false;
+        hasIpv6 = true;
         xml routes = default(xml("<routingTable/>"));
-        networkLayerType = "IPv6NetworkLayer";
-        routingTableType = "IPv6RoutingTable";
-        routingTable.routes = routes;
+        ipv6.routingTable.routes = routes;
         *.routingTableModule = default("^.ipv6.routingTable");
 }
 
