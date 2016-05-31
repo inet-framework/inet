@@ -33,6 +33,7 @@ class SimpleNetworkProtocolControlInfo
     L3Address destinationAddress @getter(_getDestinationAddress);
     L3Address sourceAddress @getter(_getSourceAddress);
     int interfaceId = -1;
-    short protocol;
-    short hopLimit;
+    int socketId = -1;
+    short protocol = -1;
+    short hopLimit = -1;
 }

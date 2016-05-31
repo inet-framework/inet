@@ -28,13 +28,15 @@ class INET_API INetworkProtocolControlInfo
   public:
     virtual ~INetworkProtocolControlInfo() {}
     virtual short getTransportProtocol() const = 0;
-    virtual void setTransportProtocol(short Transportprotocol) = 0;
+    virtual void setTransportProtocol(short protocol) = 0;
     virtual L3Address getSourceAddress() const = 0;
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const L3Address& address) = 0;
     virtual int getInterfaceId() const = 0;
     virtual void setInterfaceId(int interfaceId) = 0;
+    virtual int getSocketId() const = 0;
+    virtual void setSocketId(int socketId) = 0;
     virtual short getHopLimit() const = 0;
     virtual void setHopLimit(short hopLimit) = 0;
 };

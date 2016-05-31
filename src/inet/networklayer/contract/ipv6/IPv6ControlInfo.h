@@ -18,8 +18,11 @@
 #ifndef __INET_IPV6CONTROLINFO_H
 #define __INET_IPV6CONTROLINFO_H
 
+#include "inet/common/IProtocolControlInfo.h"
+#include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 
 namespace inet {
 
@@ -31,7 +34,7 @@ class IPv6ExtensionHeader;
  *
  * See the IPv6ControlInfo.msg file for more info.
  */
-class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo
+class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo
 {
   protected:
     IPv6Datagram *dgram;
@@ -48,6 +51,9 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other);
     virtual IPv6ControlInfo *dup() const override { return new IPv6ControlInfo(*this); }
+
+    virtual int getControlInfoProtocolId() const override { return Protocol::ipv6.getId(); }
+    virtual int getPacketProtocolId() const override { return ProtocolGroup::ipprotocol.getProtocol(getTransportProtocol())->getId(); }
 
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const { return dgram; }
@@ -108,6 +114,8 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     virtual void setDestinationAddress(const L3Address& address) override { destAddr_var = address.toIPv6(); }
     virtual int getInterfaceId() const override { return IPv6ControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) override { IPv6ControlInfo_Base::setInterfaceId(interfaceId); }
+    virtual int getSocketId() const override { return IPv6ControlInfo_Base::getSocketId(); }
+    virtual void setSocketId(int socketId) override { IPv6ControlInfo_Base::setSocketId(socketId); }
     virtual short getHopLimit() const override { return IPv6ControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) override { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };

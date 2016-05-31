@@ -77,6 +77,7 @@ class IPv6ControlInfo
     short hopLimit;       // hop limit
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
+    int socketId = -1;
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }
