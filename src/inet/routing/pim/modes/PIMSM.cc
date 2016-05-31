@@ -292,14 +292,14 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == NF_IPv4_NEW_MULTICAST) {
         EV << "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         IPv4Address srcAddr = datagram->getSrcAddress();
         IPv4Address destAddr = datagram->getDestAddress();
         unroutableMulticastPacketArrived(srcAddr, destAddr);
     }
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
         EV << "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode) {
             route = findRouteG(datagram->getDestAddress());
@@ -311,7 +311,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         }
     }
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode) {
             IPv4Address srcAddr = datagram->getSrcAddress();
@@ -324,7 +324,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == NF_IPv4_MDATA_REGISTER) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)

@@ -1043,7 +1043,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST) {
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             unroutableMulticastPacketArrived(datagram->getSrcAddress(), datagram->getDestAddress(), datagram->getTimeToLive());
@@ -1064,14 +1064,14 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     // data come to non-RPF interface
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
-        datagram = check_and_cast<IPv4Datagram *>(datagram);
+        datagram = check_and_cast<IPv4Datagram *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(),
