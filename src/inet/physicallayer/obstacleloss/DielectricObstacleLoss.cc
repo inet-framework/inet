@@ -19,15 +19,15 @@
 #include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/obstacleloss/TracingObstacleLoss.h"
+#include "inet/physicallayer/obstacleloss/DielectricObstacleLoss.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(TracingObstacleLoss);
+Define_Module(DielectricObstacleLoss);
 
-TracingObstacleLoss::TracingObstacleLoss() :
+DielectricObstacleLoss::DielectricObstacleLoss() :
     medium(nullptr),
     physicalEnvironment(nullptr),
     intersectionComputationCount(0),
@@ -35,7 +35,7 @@ TracingObstacleLoss::TracingObstacleLoss() :
 {
 }
 
-void TracingObstacleLoss::initialize(int stage)
+void DielectricObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         medium = check_and_cast<IRadioMedium *>(getParentModule());
@@ -43,7 +43,7 @@ void TracingObstacleLoss::initialize(int stage)
     }
 }
 
-void TracingObstacleLoss::finish()
+void DielectricObstacleLoss::finish()
 {
     EV_INFO << "Obstacle loss intersection computation count: " << intersectionComputationCount << endl;
     EV_INFO << "Obstacle loss intersection count: " << intersectionCount << endl;
@@ -51,12 +51,12 @@ void TracingObstacleLoss::finish()
     recordScalar("Obstacle loss intersection count", intersectionCount);
 }
 
-std::ostream& TracingObstacleLoss::printToStream(std::ostream& stream, int level) const
+std::ostream& DielectricObstacleLoss::printToStream(std::ostream& stream, int level) const
 {
-    return stream << "TracingObstacleLoss";
+    return stream << "DielectricObstacleLoss";
 }
 
-double TracingObstacleLoss::computeDielectricLoss(const IMaterial *material, Hz frequency, m distance) const
+double DielectricObstacleLoss::computeDielectricLoss(const IMaterial *material, Hz frequency, m distance) const
 {
     // NOTE: based on http://en.wikipedia.org/wiki/Dielectric_loss
     double lossTangent = material->getDielectricLossTangent(frequency);
@@ -66,7 +66,7 @@ double TracingObstacleLoss::computeDielectricLoss(const IMaterial *material, Hz 
     return factor;
 }
 
-double TracingObstacleLoss::computeReflectionLoss(const IMaterial *incidentMaterial, const IMaterial *refractiveMaterial, double angle) const
+double DielectricObstacleLoss::computeReflectionLoss(const IMaterial *incidentMaterial, const IMaterial *refractiveMaterial, double angle) const
 {
     // NOTE: based on http://en.wikipedia.org/wiki/Fresnel_equations
     double n1 = incidentMaterial->getRefractiveIndex();
@@ -86,7 +86,7 @@ double TracingObstacleLoss::computeReflectionLoss(const IMaterial *incidentMater
     return transmittance;
 }
 
-double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
+double DielectricObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
 {
     double totalLoss = 1;
     const ShapeBase *shape = object->getShape();
@@ -114,12 +114,13 @@ double TracingObstacleLoss::computeObjectLoss(const IPhysicalObject *object, Hz 
 //            if (!std::isnan(angle2))
 //                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
 //        }
-        fireObstaclePenetrated(object, intersection1, intersection2, normal1, normal2);
+        ObstaclePenetratedEvent event(object, intersection1, intersection2, normal1, normal2);
+        const_cast<DielectricObstacleLoss *>(this)->emit(obstaclePenetratedSignal, &event);
     }
     return totalLoss;
 }
 
-double TracingObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
+double DielectricObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
 {
     double totalLoss = 1;
     TotalObstacleLossComputation obstacleLossVisitor(this, frequency, transmissionPosition, receptionPosition);
@@ -128,7 +129,7 @@ double TracingObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
     return totalLoss;
 }
 
-TracingObstacleLoss::TotalObstacleLossComputation::TotalObstacleLossComputation(const TracingObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) :
+DielectricObstacleLoss::TotalObstacleLossComputation::TotalObstacleLossComputation(const DielectricObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) :
     totalLoss(1),
     obstacleLoss(obstacleLoss),
     frequency(frequency),
@@ -137,15 +138,9 @@ TracingObstacleLoss::TotalObstacleLossComputation::TotalObstacleLossComputation(
 {
 }
 
-void TracingObstacleLoss::TotalObstacleLossComputation::visit(const cObject *object) const
+void DielectricObstacleLoss::TotalObstacleLossComputation::visit(const cObject *object) const
 {
     totalLoss *= obstacleLoss->computeObjectLoss(check_and_cast<const IPhysicalObject *>(object), frequency, transmissionPosition, receptionPosition);
-}
-
-void TracingObstacleLoss::fireObstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const
-{
-    for (auto listener : listeners)
-        listener->obstaclePenetrated(object, intersection1, intersection2, normal1, normal2);
 }
 
 } // namespace physicallayer

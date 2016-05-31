@@ -15,18 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.obstacleloss;
+package inet.physicallayer.base.packetlevel;
 
-import inet.physicallayer.base.packetlevel.TracingObstacleLossBase;
+import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 
 //
-// This obstacle loss model determines power loss by checking if there is any
-// obstructing physical object along the straight propagation path. The result
-// is either total power loss if there was such an object or no loss at all if
-// there wasn't.
+// This module servces as a base module for tracing obstacle loss models.
 //
-module IdealObstacleLoss extends TracingObstacleLossBase
+module TracingObstacleLossBase like IObstacleLoss
 {
     parameters:
-        @class(IdealObstacleLoss);
+        string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
+        @display("i=block/control");
+        @signal[obstaclePenetrated];
 }

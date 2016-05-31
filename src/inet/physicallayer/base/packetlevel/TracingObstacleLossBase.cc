@@ -15,18 +15,24 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.obstacleloss;
+#include "inet/physicallayer/base/packetlevel/TracingObstacleLossBase.h"
 
-import inet.physicallayer.base.packetlevel.TracingObstacleLossBase;
+namespace inet {
 
-//
-// This obstacle loss model determines power loss by checking if there is any
-// obstructing physical object along the straight propagation path. The result
-// is either total power loss if there was such an object or no loss at all if
-// there wasn't.
-//
-module IdealObstacleLoss extends TracingObstacleLossBase
+namespace physicallayer {
+
+simsignal_t TracingObstacleLossBase::obstaclePenetratedSignal = registerSignal("obstaclePenetrated");
+
+TracingObstacleLossBase::ObstaclePenetratedEvent::ObstaclePenetratedEvent(const IPhysicalObject *object, Coord intersection1, Coord intersection2, Coord normal1, Coord normal2) :
+    object(object),
+    intersection1(intersection1),
+    intersection2(intersection2),
+    normal1(normal1),
+    normal2(normal2)
 {
-    parameters:
-        @class(IdealObstacleLoss);
 }
+
+} // namespace physicallayer
+
+} // namespace inet
+

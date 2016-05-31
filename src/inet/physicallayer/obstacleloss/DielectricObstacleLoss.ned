@@ -17,7 +17,7 @@
 
 package inet.physicallayer.obstacleloss;
 
-import inet.physicallayer.contract.packetlevel.IObstacleLoss;
+import inet.physicallayer.base.packetlevel.TracingObstacleLossBase;
 
 //
 // This obstacle loss model determines the power loss by computing the accurate
@@ -25,10 +25,8 @@ import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 // the position, the orientation, and the material of obstructing physical
 // objects.
 //
-module TracingObstacleLoss like IObstacleLoss
+module DielectricObstacleLoss extends TracingObstacleLossBase
 {
     parameters:
-        string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
-        @display("i=block/control");
-        @class(TracingObstacleLoss);
+        @class(DielectricObstacleLoss);
 }
