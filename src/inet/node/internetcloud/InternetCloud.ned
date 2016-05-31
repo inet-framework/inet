@@ -20,6 +20,7 @@
 package inet.node.internetcloud;
 
 
+import inet.common.MessageDispatcher;
 import inet.common.packet.PcapRecorder;
 import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.arp.ipv4.ARP;
@@ -54,7 +55,6 @@ module InternetCloud
         @display("i=misc/cloud");
         int numPcapRecorders = default(0); // no of PcapRecorders.
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.routingTableModule = default(absPath(".routingTable"));
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     types:
@@ -64,14 +64,13 @@ module InternetCloud
                 @display("i=block/fork");
                 bool proxyARP = default(true);
                 string interfaceTableModule;
-                string routingTableModule;
                 *.interfaceTableModule = default(absPath(interfaceTableModule));
-                *.routingTableModule = default(absPath(routingTableModule));
+                *.routingTableModule = default(absPath(".routingTable"));
                 *.arpModule = default(absPath(".arp"));
                 *.icmpModule = default(absPath(".icmp"));
             gates:
-                input ifIn[] @labels(IPDatagram);
-                output ifOut[];
+                input ifIn @labels(IPDatagram);
+                output ifOut;
             submodules:
                 configurator: IPv4NodeConfigurator;
                 ip: IPv4 {
@@ -80,22 +79,21 @@ module InternetCloud
                         multicastTimeToLive = 32;
                         fragmentTimeout = 60s;
                         useProxyARP = true;
-                        routingTableModule = "^.^.routingTable";
                         @display("p=85,95;q=queue");
-                    gates:
-                        transportIn[1];
-                        transportOut[1];
-                        queueIn[sizeof(ifIn)];
-                        queueOut[sizeof(ifOut)];
                 }
 
+                routingTable: IPv4RoutingTable {
+                    parameters:
+                        forwarding = true;
+                        routerId = "auto";
+                        @display("p=60,196");
+                }
                 delayer: <default("MatrixCloudDelayer")> like ICloudDelayer {
                     @display("p=160,123");
                 }
                 arp: ARP {
                     parameters:
                         respondToProxyARP = proxyARP;
-                        routingTableModule = "^.^.routingTable";
                         @display("p=163,206;q=pendingQueue");
                 }
                 icmp: ICMP {
@@ -108,52 +106,46 @@ module InternetCloud
                 }
             connections allowunconnected:
                 // transport Layer
-                ip.transportOut[0] --> icmp.localIn;
-                ip.transportIn[0] <-- icmp.sendOut;
+                ip.transportOut --> icmp.localIn;
+                ip.transportIn <-- icmp.sendOut;
 
                 icmp.errorOut --> errorHandling.in;
 
                 ip.arpOut --> arp.netwIn;
                 ip.arpIn <-- arp.netwOut;
 
-                for i=0..sizeof(ifIn)-1 {
-                    ip.queueIn[i] <-- { @display("m=s"); } <-- ifIn[i];
-                }
-                for i=0..sizeof(ifOut)-1 {
-                    ip.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
-                }
+                ip.queueIn <-- { @display("m=s"); } <-- ifIn;
+                ip.queueOut --> { @display("m=s"); } --> ifOut;
         }
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=60,131");
         }
-        routingTable: IPv4RoutingTable {
-            parameters:
-                forwarding = true;
-                routerId = "auto";
-                @display("p=60,196");
-        }
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             @display("p=291,60");
         }
-        networkLayer: InternetCloudNetworkLayer {
+        ipv4: InternetCloudNetworkLayer {
             parameters:
                 @display("p=267,157;q=queue");
-            gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
                 @display("p=125,257,row,110;q=l2queue");
         }
+        nl: MessageDispatcher {
+            parameters:
+                @display("b=580,5,,,,1;p=426,207");
+        }
+
     connections allowunconnected:
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
-            ppp[i].upperLayerOut --> networkLayer.ifIn[i];
-            ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
+            ppp[i].upperLayerOut --> nl.lowerLayerIn++;
+            nl.lowerLayerOut++ --> ppp[i].upperLayerIn;
         }
+        ipv4.ifOut --> nl.upperLayerIn++;
+        nl.upperLayerOut++ --> ipv4.ifIn;
 }
 
