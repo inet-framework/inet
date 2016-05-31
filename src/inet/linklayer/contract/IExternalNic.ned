@@ -20,6 +20,7 @@ package inet.linklayer.contract;
 moduleinterface IExternalNic extends INic
 {
     parameters:
+        @nic;
         @display("i=block/ifcard");
 }
 
