@@ -54,6 +54,8 @@ module StandardHost extends TransportLayerNodeBase
         int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].typename="UDPVideoStreamCli" syntax
         int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
         int numPingApps = default(0);  // no of PING apps. Specify the app types in INI file with pingApp[0..1].typename="PingApp" syntax
+        int numIpv4PingApps = default(hasIpv4 ? numPingApps : 0);   //TODO HACK, remove later
+        int numIpv6PingApps = default(!hasIpv4 && hasIpv6 ? numPingApps : 0);   //TODO HACK, remove later
         bool hasTun = default(numTunInterfaces > 0);
         hasUdp = default(numUdpApps > 0);
         hasTcp = default(numTcpApps > 0);
@@ -98,8 +100,18 @@ module StandardHost extends TransportLayerNodeBase
             sctp.to_appl++ --> sctpApp[i].sctpIn;
         }
         for i=0..numPingApps-1 {
-            networkLayer.pingOut++ --> pingApp[i].pingIn;
-            networkLayer.pingIn++ <-- pingApp[i].pingOut;
+            ipv4.pingOut++ --> pingApp[i].pingIn if i < numIpv4PingApps;
+            ipv4.pingIn++ <-- pingApp[i].pingOut if i < numIpv4PingApps;
+        }
+
+        for i=0..numPingApps-1 {
+            ipv6.pingOut++ --> pingApp[i].pingIn if i >= numIpv4PingApps && i < numIpv4PingApps+numIpv6PingApps;
+            ipv6.pingIn++ <-- pingApp[i].pingOut if i >= numIpv4PingApps && i < numIpv4PingApps+numIpv6PingApps;
+        }
+
+        for i=0..numPingApps-1 {
+            generic.pingOut++ --> pingApp[i].pingIn if i >= numIpv4PingApps+numIpv6PingApps;
+            generic.pingIn++ <-- pingApp[i].pingOut if i >= numIpv4PingApps+numIpv6PingApps;
         }
 
         for i=0..numTunInterfaces-1 {
