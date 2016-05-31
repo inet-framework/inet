@@ -38,8 +38,8 @@ GridObjectCache::~GridObjectCache()
 void GridObjectCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-    {
         physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
         double cellSizeX = par("cellSizeX");
         double cellSizeY = par("cellSizeY");
         double cellSizeZ = par("cellSizeZ");
@@ -53,7 +53,9 @@ void GridObjectCache::initialize(int stage)
         if (std::isnan(cellSizeZ))
             cellSizeZ = spaceSize.z / par("cellCountZ").doubleValue();
         Coord voxelSizes(cellSizeX, cellSizeY, cellSizeZ);
-        grid = new SpatialGrid(voxelSizes, physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax());
+        grid = new SpatialGrid(voxelSizes, spaceMin, spaceMax);
+        for (int i = 0; i < physicalEnvironment->getNumObjects(); i++)
+            insertObject(physicalEnvironment->getObject(i));
     }
 }
 
