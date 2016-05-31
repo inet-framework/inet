@@ -48,11 +48,11 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         }
         generic: <networkLayerType> like INetworkLayer if networkLayerType != "" {
             parameters:
-                @display("p=700,500;q=queue");
+                @display("p=600,500;q=queue");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=550,600");
+                @display("p=550,600;b=580,5,,,,1");
         }
 
     connections allowunconnected:

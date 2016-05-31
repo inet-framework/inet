@@ -28,7 +28,7 @@ package inet.networklayer.ipv6;
 simple IPv6ErrorHandling
 {
     parameters:
-        @display("i=block/sink_s");
+        @display("i=block/sink");
     gates:
         input in;
 }

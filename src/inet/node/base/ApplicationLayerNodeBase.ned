@@ -34,7 +34,7 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
         }
         at: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=550,200");
+                @display("p=550,200;b=580,5,,,,1");
         }
 
     connections allowunconnected:

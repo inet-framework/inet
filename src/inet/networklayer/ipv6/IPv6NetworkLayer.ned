@@ -58,36 +58,36 @@ module IPv6NetworkLayer like INetworkLayer
     submodules:
         routingTable: IPv6RoutingTable {
             parameters:
-                @display("p=100,750;is=s");
+                @display("p=100,100;is=s");
         }
         // TODO: rename to ip
         ipv6: IPv6 {
             parameters:
-                @display("p=84,129");
+                @display("p=450,300");
         }
         icmpv6: ICMPv6 {
             parameters:
-                @display("p=189,79");
+                @display("p=550,100");
         }
         ipv6ErrorHandling: IPv6ErrorHandling {
             parameters:
-                @display("p=280,79");
+                @display("p=700,100");
         }
         neighbourDiscovery: IPv6NeighbourDiscovery {
             parameters:
-                @display("p=257,149");
+                @display("p=300,300");
         }
         iptunneling: <default(firstAvailable("IPv6Tunneling"))> like IIPv6Tunneling {
             parameters:
-                @display("p=44,168");
+                @display("p=550,300");
         }
         mipv6support: <default("xMIPv6Support")> like IxMIPv6Support if xMIPv6Support {
             parameters:
-                @display("p=44,79");
+                @display("p=550,388");
         }
         dp: MessageDispatcher {
             parameters:
-                @display("b=300,5");
+                @display("p=450,200;b=480,5");
         }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!

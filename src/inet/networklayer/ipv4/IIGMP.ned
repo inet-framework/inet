@@ -34,7 +34,7 @@ package inet.networklayer.ipv4;
 //
 moduleinterface IIGMP
 {
-    @display("i=block/cogwheel_s");
+    @display("i=block/cogwheel");
 
     gates:
         input ipIn @labels(IPv4ControlInfo/up);

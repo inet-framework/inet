@@ -65,19 +65,20 @@ module Router extends TransportLayerNodeBase
     submodules:
         ospf: <"OSPFRouting"> like IIPRouting if hasOSPF {
             parameters:
-                @display("p=465,287,row");
+                @display("p=800,300,row");
         }
         bgp: <"BGPRouting"> like IBGPRouting if hasBGP {
             parameters:
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
-                @display("p=214,80;i=block/network");
+                @display("p=500,100;i=block/network");
         }
         rip: <"RIPRouting"> like IUDPApp if hasRIP {
             parameters:
-                @display("p=404,80");
+                @display("p=400,100");
         }
         pim: <"PIMRouting"> like IPIMRouting if hasPIM {
-            @display("p=175,287");
+            parameters:
+	            @display("p=700,300");
         }
 
     connections allowunconnected:

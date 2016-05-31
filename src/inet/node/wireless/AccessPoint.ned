@@ -58,31 +58,34 @@ module AccessPoint
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=51,43");
+            parameters:
+                @display("p=100,100;is=s");
         }
 
         interfaceTable: InterfaceTable {
-            @display("p=51,121;is=s");
+            parameters:
+                @display("p=100,200;is=s");
         }
         mobility: <mobilityType> like IMobility {
             parameters:
-                @display("p=208,43");
+                @display("p=100,300;is=s");
         }
         macTable: <macTableType> like IMACAddressTable {
-            @display("p=73,19;is=s");
+            parameters:
+                @display("p=100,400;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numWlanInterfaces>1 && relayUnitType != "" {
             parameters:
-                @display("p=151,121");
+                @display("p=400,200");
         }
         wlan[numWlanInterfaces]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
-                @display("p=89,225,row;q=queue");
+                @display("p=300,400,row;q=queue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 mac.promiscuous = true;
-                @display("p=208,225,row;q=txQueue");
+                @display("p=500,400,row;q=txQueue");
         }
     connections allowunconnected:
         // connections to network outside

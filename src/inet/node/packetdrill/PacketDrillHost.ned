@@ -34,7 +34,7 @@ import inet.applications.packetdrill.PacketDrillApp;
 module PacketDrillHost extends TransportLayerNodeBase
 {
     parameters:
-        @display("i=device/pc2;bgl=4;bgb=588,447");
+        @display("i=device/pc2;bgl=4");
         int numTcpTunApps = default(0);    // no of TCP packetdrill apps.
         int numUdpTunApps = default(0);    // no of UDP packetdrill apps.
         int numSctpTunApps = default(0);   // no of SCTP packetdrill apps.
@@ -46,21 +46,21 @@ module PacketDrillHost extends TransportLayerNodeBase
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
         *.routingTableModule = default("^.ipv4.routingTable");
     submodules:
-        tunApp[numTunInterfaces] : PacketDrillApp {
+        tunApp[numTunInterfaces]: PacketDrillApp {
             parameters:
-                @display("p=280,40");
+                @display("p=800,100");
         }
         tcp: <tcpType> like ITCP if hasTcpTun {
             parameters:
-                @display("p=230,140");
+                @display("p=500,250");
         }
         udp: <udpType> like IUDP if hasUdpTun {
             parameters:
-                @display("p=330,140");
+                @display("p=400,250");
         }
         sctp: <sctpType> like ISCTP if hasSctpTun {
             parameters:
-                @display("p=430,140");
+                @display("p=600,250");
         }
 
     connections allowunconnected:

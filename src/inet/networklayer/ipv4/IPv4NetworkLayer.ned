@@ -58,36 +58,37 @@ module IPv4NetworkLayer like INetworkLayer
 
     submodules:
         configurator: IPv4NodeConfigurator {
-            @display("p=39,158");
+            parameters:
+                @display("p=100,100;is=s");
         }
         routingTable: IPv4RoutingTable {
             parameters:
-                @display("p=50,100;is=s");
+                @display("p=100,200;is=s");
         }
         ip: IPv4 {
             parameters:
                 useProxyARP = true; // as routes with unspecified next-hop addr are quite common
-                @display("p=85,95;q=queue");
+                @display("p=450,300;q=queue");
         }
         arp: <arpType> like IARP {
             parameters:
-                @display("p=165,120;q=pendingQueue;is=s");
+                @display("p=350,300;q=pendingQueue");
         }
         icmp: ICMP {
             parameters:
-                @display("p=165,70");
+                @display("p=550,100");
         }
         dp: MessageDispatcher {
             parameters:
-                @display("b=300,5");
+                @display("p=450,200;b=480,5");
         }
         igmp: <igmpType> like IIGMP {
             parameters:
-                @display("p=39,33");
+                @display("p=350,100");
         }
         errorHandling: ErrorHandling {
             parameters:
-                @display("p=239,70");
+                @display("p=650,100");
         }
 
     connections allowunconnected:

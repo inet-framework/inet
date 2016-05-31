@@ -72,37 +72,41 @@ module InternetCloud
                 input ifIn @labels(IPDatagram);
                 output ifOut;
             submodules:
-                configurator: IPv4NodeConfigurator;
+                configurator: IPv4NodeConfigurator {
+                    parameters:
+                        @display("p=100,100;is=s");
+                }
                 ip: IPv4 {
                     parameters:
                         timeToLive = 32;
                         multicastTimeToLive = 32;
                         fragmentTimeout = 60s;
                         useProxyARP = true;
-                        @display("p=85,95;q=queue");
+                        @display("p=350,200;q=queue");
                 }
 
                 routingTable: IPv4RoutingTable {
                     parameters:
                         forwarding = true;
                         routerId = "auto";
-                        @display("p=60,196");
+                        @display("p=100,200;is=s");
                 }
                 delayer: <default("MatrixCloudDelayer")> like ICloudDelayer {
-                    @display("p=160,123");
+                    parameters:
+                        @display("p=450,200");
                 }
                 arp: ARP {
                     parameters:
                         respondToProxyARP = proxyARP;
-                        @display("p=163,206;q=pendingQueue");
+                        @display("p=250,200;q=pendingQueue");
                 }
                 icmp: ICMP {
                     parameters:
-                        @display("p=160,33");
+                        @display("p=350,108");
                 }
                 errorHandling: ErrorHandling {
                     parameters:
-                        @display("p=239,33");
+                        @display("p=450,108");
                 }
             connections allowunconnected:
                 // transport Layer
@@ -120,22 +124,23 @@ module InternetCloud
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=60,131");
+                @display("p=100,100;is=s");
         }
         pcapRecorder[numPcapRecorders]: PcapRecorder {
-            @display("p=291,60");
+            parameters:
+                @display("p=100,200");
         }
         ipv4: InternetCloudNetworkLayer {
             parameters:
-                @display("p=267,157;q=queue");
+                @display("p=400,100;q=queue");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=125,257,row,110;q=l2queue");
+                @display("p=400,300,row,110;q=l2queue");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=426,207");
+                @display("p=400,200;b=380,5,,,,1");
         }
 
     connections allowunconnected:

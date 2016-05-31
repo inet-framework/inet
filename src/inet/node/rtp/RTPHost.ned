@@ -33,13 +33,15 @@ module RTPHost extends StandardHost
                 bandwidth = bandwidth;
                 fileName = fileName;
                 payloadType = payloadType;
-                @display("p=254,42");
+                @display("p=300,100");
         }
         rtp: RTP {
-            @display("p=254,111");
+            parameters:
+                @display("p=300,300");
         }
         rtcp: RTCP {
-            @display("p=391,111");
+            parameters:
+	            @display("p=350,200");
         }
 
     connections allowunconnected:

@@ -49,7 +49,7 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         }
         tn: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=550,400");
+                @display("p=550,400;b=580,5,,,,1");
         }
 
     connections allowunconnected:

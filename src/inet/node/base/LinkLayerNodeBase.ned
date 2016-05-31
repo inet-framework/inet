@@ -46,11 +46,11 @@ module LinkLayerNodeBase extends NodeBase
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=100,450;is=s");
+                @display("p=100,500;is=s");
         }
         pcapRecorder: PcapRecorder if hasPcapRecorder {
             parameters:
-                @display("p=100,550;is=s");
+                @display("p=100,600;is=s");
         }
         lo0: LoopbackInterface {
             parameters:
@@ -76,11 +76,11 @@ module LinkLayerNodeBase extends NodeBase
         }
         ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
             parameters:
-                @display("p=700,700,row,50;q=txQueue;i=block/ifcard");
+                @display("p=700,700,row,50;q=txQueue");
         }
         tun[numTunInterfaces]: <default("TunInterface")> like ITunNic {
             parameters:
-                @display("p=800,700,row,50;q=txQueue;i=block/ifcard");
+                @display("p=800,700,row,50;q=txQueue");
         }
 
     connections allowunconnected:

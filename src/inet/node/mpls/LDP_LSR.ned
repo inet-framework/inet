@@ -85,7 +85,7 @@ module LDP_LSR
         }
         tn: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=409,185");
+                @display("p=409,185;b=580,5,,,,1");
         }
         ipv4: IPv4NetworkLayer {
             parameters:
@@ -93,7 +93,7 @@ module LDP_LSR
         }
         nm: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=409,271");
+                @display("p=409,271;b=580,5,,,,1");
         }
         lo0: LoopbackInterface {
             @display("p=50,388");
@@ -115,7 +115,7 @@ module LDP_LSR
 
         ml: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=409,350");
+                @display("p=409,350;b=580,5,,,,1");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> tn.upperLayerIn++;

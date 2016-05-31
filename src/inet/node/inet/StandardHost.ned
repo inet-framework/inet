@@ -66,23 +66,23 @@ module StandardHost extends TransportLayerNodeBase
     submodules:
         tunApp[numTunInterfaces]: <> like ITunApp {
             parameters:
-                @display("p=280,40");
+                @display("p=800,100");
         }
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
-                @display("p=147,54,row,60");
+                @display("p=500,100,row,60");
         }
         udpApp[numUdpApps]: <> like IUDPApp {
             parameters:
-                @display("p=329,54,row,60");
+                @display("p=400,100,row,60");
         }
         sctpApp[numSctpApps]: <> like ISCTPApp {
             parameters:
-                @display("p=527,54,row,60");
+                @display("p=600,100,row,60");
         }
         pingApp[numPingApps]: <default("PingApp")> like IPingApp {
             parameters:
-                @display("p=635,141,row,60");
+                @display("p=700,100,row,60");
         }
     connections allowunconnected:
         for i=0..numTcpApps-1 {

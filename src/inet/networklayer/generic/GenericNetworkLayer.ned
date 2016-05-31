@@ -49,23 +49,23 @@ module GenericNetworkLayer like INetworkLayer
     submodules:
         routingTable: GenericRoutingTable {
             parameters:
-                @display("p=100,50;is=s");
+                @display("p=100,100;is=s");
         }
         gnp: GenericNetworkProtocol {
             parameters:
-                @display("p=85,95;q=queue");
+                @display("p=350,300;q=queue");
         }
         echo: EchoProtocol {
             parameters:
-                @display("p=160,63");
+                @display("p=450,100");
         }
         arp: GenericARP {
             parameters:
-                @display("p=202,142;q=pendingQueue");
+                @display("p=250,300;q=pendingQueue");
         }
         dp: MessageDispatcher {
             parameters:
-                @display("b=300,5");
+                @display("p=350,200;b=380,5");
         }
 
     connections allowunconnected:

@@ -38,19 +38,19 @@ module NodeBase
     submodules:
         status: NodeStatus if hasStatus {
             parameters:
-                @display("p=100,50;is=s");
+                @display("p=100,100;is=s");
         }
         energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
             parameters:
-                @display("p=100,250;is=s");
+                @display("p=100,300;is=s");
         }
         energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
             parameters:
-                @display("p=100,350;is=s");
+                @display("p=100,400;is=s");
         }
         // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints 
         mobility: <mobilityType> like IMobility if mobilityType != "" {
             parameters:
-                @display("p=100,150;is=s");
+                @display("p=100,200;is=s");
         }
 }
