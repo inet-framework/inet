@@ -38,9 +38,9 @@ simple AODVRouting
 {
     parameters:
         @display("i=block/network2");
-        string routingTableModule = default("^.networkLayer.routingTable");
+        string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");
-        string networkProtocolModule = default("^.networkLayer.ip");
+        string networkProtocolModule = default("^.ipv4.ip");
 
         bool askGratuitousRREP = default(false); // see RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // see RFC 3561: 6.9

@@ -58,7 +58,7 @@ module StandardHost extends TransportLayerNodeBase
         hasTcp = default(numTcpApps > 0);
         hasSctp = default(numSctpApps > 0);
         forwarding = default(false);  // disable routing by default
-        networkLayer.proxyARP = default(false);
+        ipv4.proxyARP = default(false);
     submodules:
         tunApp[numTunInterfaces]: <> like ITunApp {
             parameters:

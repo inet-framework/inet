@@ -35,8 +35,8 @@ simple DYMO
 
         // context parameters
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule = default(absPath("^.networkLayer.routingTable"));
-        string networkProtocolModule = default(absPath("^.networkLayer.ip"));
+        string routingTableModule = default(absPath("^.ipv4.routingTable"));
+        string networkProtocolModule = default(absPath("^.ipv4.ip"));
 
         // 1. DYMO parameter group
         string clientAddresses = default("10.10.0.0/24 10.20.0.0"); // CLIENT_ADDRESSES

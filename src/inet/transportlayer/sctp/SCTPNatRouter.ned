@@ -28,7 +28,7 @@ module SCTPNatRouter extends StandardHost
 {
     parameters:
         forwarding = true;
-        natHook.networkProtocolModule = default(absPath(".networkLayer.ip"));
+        natHook.networkProtocolModule = default(absPath(".ipv4.ip"));
         natHook.natTableModule = default(absPath(".natTable"));
         submodules:
         natHook: SCTPNatHook {
@@ -40,6 +40,6 @@ module SCTPNatRouter extends StandardHost
                 @display( "p=60,132;i=block/table");
         }
     connections:
-        natHook.out --> networkLayer.transportIn++;
-        natHook.in <-- networkLayer.transportOut++;
+        natHook.out --> ipv4.transportIn++;
+        natHook.in <-- ipv4.transportOut++;
 }

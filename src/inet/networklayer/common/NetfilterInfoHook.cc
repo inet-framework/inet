@@ -69,7 +69,7 @@ void NetfilterInfoHook::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER) {
-        netfilter = check_and_cast<INetfilter *>(getContainingNode(this)->getModuleByPath(".networkLayer.ip"));
+        netfilter = check_and_cast<INetfilter *>(getContainingNode(this)->getModuleByPath(".ipv4.ip"));
         netfilter->registerHook(0, this);
     }
 }

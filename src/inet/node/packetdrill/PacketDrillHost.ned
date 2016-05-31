@@ -68,24 +68,24 @@ module PacketDrillHost extends TransportLayerNodeBase
             tunApp[i].tcpIn <-- tcp.appOut++;
         }
 
-        tcp.ipOut --> networkLayer.transportIn++ if hasTcpTun;
-        tcp.ipIn <-- networkLayer.transportOut++ if hasTcpTun;
+        tcp.ipOut --> ipv4.transportIn++ if hasTcpTun;
+        tcp.ipIn <-- ipv4.transportOut++ if hasTcpTun;
 
         for i=0..numUdpTunApps-1 {
             tunApp[numTcpTunApps+i].udpOut --> udp.appIn++ if hasUdpTun;
             tunApp[numTcpTunApps+i].udpIn <-- udp.appOut++ if hasUdpTun;
         }
 
-        udp.ipOut --> networkLayer.transportIn++ if hasUdpTun;
-        udp.ipIn <-- networkLayer.transportOut++ if hasUdpTun;
+        udp.ipOut --> ipv4.transportIn++ if hasUdpTun;
+        udp.ipIn <-- ipv4.transportOut++ if hasUdpTun;
 
         for i=0..numSctpTunApps-1 {
             tunApp[numTcpTunApps+numUdpTunApps+i].sctpOut --> sctp.from_appl++ if hasSctpTun;
             tunApp[numTcpTunApps+numUdpTunApps+i].sctpIn <-- sctp.to_appl++ if hasSctpTun;
         }
 
-        sctp.to_ip --> networkLayer.transportIn++ if hasSctpTun;
-        sctp.from_ip <-- networkLayer.transportOut++ if hasSctpTun;
+        sctp.to_ip --> ipv4.transportIn++ if hasSctpTun;
+        sctp.from_ip <-- ipv4.transportOut++ if hasSctpTun;
 
         for i=0..numTunInterfaces-1 {
             tunApp[i].tunOut --> tun[i].appIn;
