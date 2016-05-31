@@ -1,0 +1,8 @@
+2016-01-08  Levente Meszaros
+
+    Added initial implementation:
+    LinkVisualizerBase, MediumVisualizerBase, MobilityVisualizerBase,
+    NetworkNodeVisualizerBase, NetworkConnectionVisualizerBase,
+    PhysicalEnvironmentVisualizerBase, RouteVisualizerBase,
+    SceneOsgVisualizerBase, SceneVisualizerBase, StatisticVisualizerBase,
+    TracingObstacleLossVisualizerBase, VisualizerBase

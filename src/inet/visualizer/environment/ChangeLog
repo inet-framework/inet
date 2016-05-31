@@ -1,0 +1,5 @@
+2016-01-08  Levente Meszaros
+
+    Added initial implementation:
+    PhysicalEnvironmentCanvasVisualizer, PhysicalEnvironmentOsgVisualizer,
+    PhysicalEnvironmentVisualizer.

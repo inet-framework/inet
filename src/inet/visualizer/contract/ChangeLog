@@ -1,0 +1,7 @@
+2016-01-08  Levente Meszaros
+
+    Added initial implementation:
+    IConnectivityVisualizer, IIntegratedVisualizer, IMediumVisualizer,
+    IMobilityVisualizer, INetworkNodeVisualizer, IPhysicalEnvironmentVisualizer
+    IRouteVisualizer, ISceneVisualizer, IStatisticVisualizer,
+    ITracingObstacleLossVisualizer

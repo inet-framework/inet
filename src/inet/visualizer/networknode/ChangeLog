@@ -1,0 +1,7 @@
+2016-01-08  Levente Meszaros
+
+    Added initial implementation:
+    NetworkNodeCanvasVisualizer, NetworkNodeOsgVisualizer, NetworkNodeVisualizer,
+    NetworkNodeCanvasVisualization, NetworkNodeOsgVisualization,
+    NetworkConnectionCanvasVisualizer, NetworkConnectionOsgVisualizer,
+    NetworkConnectionVisualizer,
