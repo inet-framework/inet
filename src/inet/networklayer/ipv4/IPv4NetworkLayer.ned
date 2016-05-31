@@ -18,6 +18,7 @@
 
 package inet.networklayer.ipv4;
 
+import inet.common.MessageDispatcher;
 import inet.networklayer.contract.IARP;
 import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
@@ -76,6 +77,10 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=165,70");
         }
+        dp: MessageDispatcher {
+            parameters:
+                @display("b=300,5");
+        }
         igmp: <igmpType> like IIGMP {
             parameters:
                 @display("p=39,33");
@@ -86,18 +91,8 @@ module IPv4NetworkLayer like INetworkLayer
         }
 
     connections allowunconnected:
-        for i=0..sizeof(transportIn)-1 {
-            transportIn[i] --> { @display("m=n"); } --> ip.transportIn++;
-        }
-        for i=0..sizeof(transportOut)-1 {
-            ip.transportOut++ --> { @display("m=n"); } --> transportOut[i];
-        }
-
-        ip.transportOut++ --> icmp.localIn;
-        ip.transportIn++ <-- icmp.sendOut;
-
-        ip.transportOut++ --> igmp.ipIn;
-        ip.transportIn++ <-- igmp.ipOut;
+        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
 
         for i=0..sizeof(pingOut)-1 {
             icmp.pingOut++ --> { @display("m=n"); } --> pingOut[i];
@@ -106,19 +101,24 @@ module IPv4NetworkLayer like INetworkLayer
             icmp.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
         }
 
+        dp.upperLayerOut++ --> icmp.localIn;
+        dp.upperLayerIn++ <-- icmp.sendOut;
+
+        dp.upperLayerOut++ --> igmp.ipIn;
+        dp.upperLayerIn++ <-- igmp.ipOut;
+
         icmp.errorOut --> errorHandling.in;
 
-        ip.arpOut --> arp.netwIn;
-        ip.arpIn <-- arp.netwOut;
+        ip.transportOut --> dp.lowerLayerIn++;
+        ip.transportIn <-- dp.lowerLayerOut++;
 
         igmp.routerOut --> igmpOut;
         igmp.routerIn <-- igmpIn;
 
-        for i=0..sizeof(ifIn)-1 {
-            ip.queueIn[i] <-- { @display("m=s"); } <-- ifIn[i];
-        }
-        for i=0..sizeof(ifOut)-1 {
-            ip.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
-        }
+        ip.arpOut --> arp.netwIn;
+        ip.arpIn <-- arp.netwOut;
+
+        ip.queueIn <-- { @display("m=s"); } <-- ifIn;
+        ip.queueOut --> { @display("m=s"); } --> ifOut;
 }
 

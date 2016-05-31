@@ -17,8 +17,10 @@
 
 package inet.networklayer.common;
 
+import inet.common.MessageDispatcher;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.INetworkProtocol;
+
 
 //
 // This module provides a simple network layer.
@@ -48,29 +50,28 @@ module SimpleNetworkLayer like INetworkLayer
             parameters:
                 @display("p=160,63");
         }
+        dp: MessageDispatcher {
+            parameters:
+                @display("b=300,5");
+        }
 
     connections allowunconnected:
-        for i=0..sizeof(transportIn)-1 {
-            transportIn[i] --> { @display("m=n"); } --> np.upperLayerIn++;
-        }
-        for i=0..sizeof(transportOut)-1 {
-            np.upperLayerOut++ --> { @display("m=n"); } --> transportOut[i];
-        }
+        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
 
-        np.upperLayerOut++ --> echo.localIn;
-        np.upperLayerIn++ <-- echo.sendOut;
+        np.upperLayerOut --> dp.lowerLayerIn++;
+        np.upperLayerIn <-- dp.lowerLayerOut++;
+
+        dp.upperLayerOut++ --> echo.localIn;
+        dp.upperLayerIn++ <-- echo.sendOut;
+
+        ifIn --> { @display("m=s"); } --> np.lowerLayerIn;
+        np.lowerLayerOut --> { @display("m=s"); } --> ifOut;
 
         for i=0..sizeof(pingOut)-1 {
             echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];
         }
         for i=0..sizeof(pingIn)-1 {
             echo.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
-        }
-
-        for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> { @display("m=s"); } --> np.lowerLayerIn[i];
-        }
-        for i=0..sizeof(ifOut)-1 {
-            np.lowerLayerOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }

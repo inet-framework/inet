@@ -17,6 +17,7 @@
 
 package inet.networklayer.generic;
 
+import inet.common.MessageDispatcher;
 import inet.networklayer.arp.generic.GenericARP;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
@@ -62,16 +63,14 @@ module GenericNetworkLayer like INetworkLayer
             parameters:
                 @display("p=202,142;q=pendingQueue");
         }
-    connections allowunconnected:
-        for i=0..sizeof(transportIn)-1 {
-            transportIn[i] --> { @display("m=n"); } --> gnp.transportIn++;
-        }
-        for i=0..sizeof(transportOut)-1 {
-            gnp.transportOut++ --> { @display("m=n"); } --> transportOut[i];
+        dp: MessageDispatcher {
+            parameters:
+                @display("b=300,5");
         }
 
-        gnp.transportOut++ --> echo.localIn;
-        gnp.transportIn++ <-- echo.sendOut;
+    connections allowunconnected:
+        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
 
         for i=0..sizeof(pingOut)-1 {
             echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];
@@ -80,13 +79,15 @@ module GenericNetworkLayer like INetworkLayer
             echo.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
         }
 
+        gnp.transportOut --> dp.lowerLayerIn++;
+        gnp.transportIn <-- dp.lowerLayerOut++;
+
+        dp.upperLayerOut++ --> echo.localIn;
+        dp.upperLayerIn++ <-- echo.sendOut;
+
         gnp.arpOut --> arp.netwIn;
         gnp.arpIn <-- arp.netwOut;
 
-        for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> { @display("m=s"); } --> gnp.queueIn[i];
-        }
-        for i=0..sizeof(ifOut)-1 {
-            gnp.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
-        }
+        ifIn --> { @display("m=s"); } --> gnp.queueIn;
+        gnp.queueOut --> { @display("m=s"); } --> ifOut;
 }
