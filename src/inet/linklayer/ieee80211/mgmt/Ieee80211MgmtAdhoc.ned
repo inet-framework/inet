@@ -35,6 +35,7 @@ simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
 {
     parameters:
         string macModule;               // The path to the MAC module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/cogwheel");
     gates:
         input upperLayerIn;

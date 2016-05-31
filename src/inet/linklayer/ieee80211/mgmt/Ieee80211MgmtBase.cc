@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
-
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/INETUtils.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
 namespace inet {
 
@@ -45,6 +45,8 @@ void Ieee80211MgmtBase::initialize(int stage)
         // obtain our address from MAC
         cModule *mac = getModuleFromPar<cModule>(par("macModule"), this);
         myAddress.setAddress(mac->par("address").stringValue());
+        interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        myIface = interfaceTable != nullptr ? interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str()) : nullptr;
     }
 }
 

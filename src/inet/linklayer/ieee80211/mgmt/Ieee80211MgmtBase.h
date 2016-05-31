@@ -18,12 +18,12 @@
 #ifndef __INET_IEEE80211MGMTBASE_H
 #define __INET_IEEE80211MGMTBASE_H
 
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -40,6 +40,9 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     // configuration
     MACAddress myAddress;
     bool isOperational;    // for lifecycle
+
+    IInterfaceTable *interfaceTable = nullptr;
+    InterfaceEntry *myIface = nullptr;
 
     // statistics
     long numDataFramesReceived;

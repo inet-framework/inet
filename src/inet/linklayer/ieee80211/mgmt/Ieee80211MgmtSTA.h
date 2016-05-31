@@ -22,7 +22,6 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -94,8 +93,6 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 
   protected:
     cModule *host;
-    IInterfaceTable *interfaceTable;
-    InterfaceEntry *myIface;
 
     // number of channels in RadioMedium -- used if we're told to scan "all" channels
     int numChannels;
@@ -115,7 +112,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     AssociatedAPInfo assocAP;
 
   public:
-    Ieee80211MgmtSTA() : host(nullptr), interfaceTable(nullptr), myIface(nullptr), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(nullptr) {}
+    Ieee80211MgmtSTA() : host(nullptr), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(nullptr) {}
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

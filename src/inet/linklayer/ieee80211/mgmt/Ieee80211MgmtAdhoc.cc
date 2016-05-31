@@ -76,6 +76,7 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
     int tid = frame->getTid();
     if (tid < 8)
         ctrl->setUserPriority(tid); // TID values 0..7 are UP
+    ctrl->setInterfaceId(myIface->getInterfaceId());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP)
         ctrl->setEtherType(frameWithSNAP->getEtherType());
