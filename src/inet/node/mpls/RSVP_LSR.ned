@@ -11,6 +11,7 @@
 //
 package inet.node.mpls;
 
+import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
@@ -41,6 +42,8 @@ module RSVP_LSR
         bool hasStatus = default(false);
         string peers;
         string routerId = default("auto");
+        *.forwarding = true;
+        *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".ipv4.routingTable"));
         *.tedModule = default(absPath(".ted"));
@@ -51,12 +54,6 @@ module RSVP_LSR
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=58,50");
-        }
-        routingTable: IPv4RoutingTable {
-            parameters:
-                forwarding = true;
-                routerId = routerId;
-                @display("p=58,174;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -81,12 +78,20 @@ module RSVP_LSR
             parameters:
                 @display("p=330,67");
         }
-        networkLayer: IPv4NetworkLayer {
+        tn: MessageDispatcher {
             parameters:
-                @display("p=192,195");
-            gates:
-                ifIn[sizeof(pppg)+1];
-                ifOut[sizeof(pppg)+1];
+                @display("b=580,5,,,,1;p=409,185");
+        }
+        ipv4: IPv4NetworkLayer {
+            parameters:
+                @display("p=409,223");
+        }
+        nm: MessageDispatcher {
+            parameters:
+                @display("b=580,5,,,,1;p=409,271");
+        }
+        lo0: LoopbackInterface {
+            @display("p=139,394");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
@@ -95,38 +100,40 @@ module RSVP_LSR
         mpls: MPLS {
             parameters:
                 classifierModule = "^.classifier";
-                @display("p=192,270");
-            gates:
-                netwIn[sizeof(pppg)+1];
-                netwOut[sizeof(pppg)+1];
-                ifIn[sizeof(pppg)+1];
-                ifOut[sizeof(pppg)+1];
+                @display("p=448,311");
         }
         libTable: LIBTable {
             parameters:
                 @display("p=312,268");
         }
-        lo0: LoopbackInterface {
-            @display("p=50,345");
+        ml: MessageDispatcher {
+            parameters:
+                @display("b=580,5,,,,1;p=409,350");
         }
     connections allowunconnected:
-        linkStateRouting.ipOut --> networkLayer.transportIn++;
-        linkStateRouting.ipIn <-- networkLayer.transportOut++;
+        linkStateRouting.ipOut --> tn.upperLayerIn++;
+        tn.upperLayerOut++ --> linkStateRouting.ipIn;
+        ipv4.transportOut --> tn.lowerLayerIn++;
+        tn.lowerLayerOut++ --> ipv4.transportIn;
 
-        rsvp.ipOut --> networkLayer.transportIn++;
-        rsvp.ipIn <-- networkLayer.transportOut++;
+        rsvp.ipOut --> tn.upperLayerIn++;
+        rsvp.ipIn <-- tn.upperLayerOut++;
 
-        lo0.upperLayerOut --> networkLayer.ifIn[0];
-        networkLayer.ifOut[0] --> lo0.upperLayerIn;
+        ipv4.ifOut --> nm.upperLayerIn++;
+        nm.upperLayerOut++ --> ipv4.ifIn;
+
+        lo0.upperLayerOut --> nm.lowerLayerIn++;
+        nm.lowerLayerOut++ --> lo0.upperLayerIn;
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].upperLayerOut --> mpls.ifIn[i+1];
-            ppp[i].upperLayerIn <-- mpls.ifOut[i+1];
-
-            mpls.netwOut[i+1] --> networkLayer.ifIn[i+1];
-            mpls.netwIn[i+1] <-- networkLayer.ifOut[i+1];
+            ppp[i].upperLayerOut --> ml.lowerLayerIn++;
+            ml.lowerLayerOut++ --> ppp[i].upperLayerIn;
         }
+        mpls.ifOut --> ml.upperLayerIn++;
+        ml.upperLayerOut++ --> mpls.ifIn;
+        nm.lowerLayerOut++ --> mpls.netwIn;
+        mpls.netwOut --> nm.lowerLayerIn++;
 }
 
