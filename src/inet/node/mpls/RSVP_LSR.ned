@@ -42,7 +42,7 @@ module RSVP_LSR
         string peers;
         string routerId = default("auto");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.routingTableModule = default(absPath(".routingTable"));
+        *.routingTableModule = default(absPath(".ipv4.routingTable"));
         *.tedModule = default(absPath(".ted"));
         *.rsvpModule = default(absPath(".rsvp"));
         *.libTableModule = default(absPath(".libTable"));

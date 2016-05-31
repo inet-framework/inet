@@ -43,6 +43,7 @@ module NetPerfMeterHost extends TransportLayerNodeBase
         @display("i=device/pc2");
         int numNetPerfMeterApps = default(0);   // T.D. 17.11.09
         forwarding = default(false);  // disable routing by default
+        *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
         netPerfMeterApp[numNetPerfMeterApps]: <default("NetPerfMeter")> like INetPerfMeterApp {  // T.D. 17.11.09

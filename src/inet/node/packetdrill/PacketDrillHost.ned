@@ -44,6 +44,7 @@ module PacketDrillHost extends TransportLayerNodeBase
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailableOrEmpty("UDP"));
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
+        *.routingTableModule = default("^.ipv4.routingTable");
     submodules:
         tunApp[numTunInterfaces] : PacketDrillApp {
             parameters:

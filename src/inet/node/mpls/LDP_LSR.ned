@@ -44,7 +44,7 @@ module LDP_LSR
         string routerId = default("auto");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.routingTableModule = default(absPath(".routingTable"));
+        *.routingTableModule = default(absPath(".ipv4.routingTable"));
         *.tedModule = default(absPath(".ted"));
         *.libTableModule = default(absPath(".libTable"));
     gates:

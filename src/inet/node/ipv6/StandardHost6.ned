@@ -33,5 +33,6 @@ module StandardHost6 extends StandardHost
         networkLayerType = "IPv6NetworkLayer";
         routingTableType = "IPv6RoutingTable";
         routingTable.routes = routes;
+        *.routingTableModule = default("^.ipv6.routingTable");
 }
 

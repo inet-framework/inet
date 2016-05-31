@@ -60,6 +60,7 @@ module Router extends TransportLayerNodeBase
         bool hasPIM = default(false);
         hasUdp = default(hasRIP);
         hasTcp = default(hasBGP);
+        *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
         ospf: <"OSPFRouting"> like IIPRouting if hasOSPF {
