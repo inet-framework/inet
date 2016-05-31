@@ -19,20 +19,6 @@
 
 package inet.routing.dymo;
 
-import inet.networklayer.multi.NetworkDatagramMultiplexer;
-
-//
-// This module interface is used by DYMO implementations.
-//
-moduleinterface IDYMO
-{
-    parameters:
-        @display("i=block/routing");
-    gates:
-        input ipIn;
-        output ipOut;
-}
-
 //
 // This module provides Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
 // based on the IETF draft at http://tools.ietf.org/html/draft-ietf-manet-dymo-24.
@@ -40,7 +26,7 @@ moduleinterface IDYMO
 // Module parameters are copied from the IETF draft and renamed for consistency with
 // INET naming conventions. Some parameters are not yet implemented.
 //
-simple DYMO like IDYMO
+simple DYMO
 {
     parameters:
         // properties
@@ -49,8 +35,8 @@ simple DYMO like IDYMO
 
         // context parameters
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
-        string networkProtocolModule = default("^.networkLayer.ip");
+        string routingTableModule = default(absPath("^.networkLayer.routingTable"));
+        string networkProtocolModule = default(absPath("^.networkLayer.ip"));
 
         // 1. DYMO parameter group
         string clientAddresses = default("10.10.0.0/24 10.20.0.0"); // CLIENT_ADDRESSES
@@ -88,54 +74,4 @@ simple DYMO like IDYMO
     gates:
         input ipIn;
         output ipOut;
-}
-
-//
-// This module provides DYMO routing for multiple network protocols simultaneously.
-//
-module MultiDYMO like IDYMO
-{
-    parameters:
-        @display("i=block/table");
-        bool enableIPv4 = default(true);
-        bool enableIPv6 = default(true);
-        bool enableGeneric = default(true);
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
-
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        ipv4.routingTableModule = default(absPath(routingTableModule)  + ".ipv4");
-        ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
-        ipv6.routingTableModule = default(absPath(routingTableModule)  + ".ipv6");
-        ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
-        generic.routingTableModule = default(absPath(routingTableModule)  + ".generic");
-        generic.networkProtocolModule = default("^.^.networkLayer.generic.gnp");
-
-    gates:
-        input ipIn;
-        output ipOut;
-
-    submodules:
-        ipv4: DYMO if enableIPv4 {
-            @display("p=100,100");
-        }
-        ipv6: DYMO if enableIPv6 {
-            @display("p=200,100");
-        }
-        generic: DYMO if enableGeneric {
-            @display("p=300,100");
-        }
-        multiplexer: NetworkDatagramMultiplexer {
-            @display("p=200,200");
-        }
-
-    connections allowunconnected:
-        multiplexer.upperOut --> ipOut;
-        ipIn --> multiplexer.upperIn;
-        multiplexer.lowerOut++ --> ipv4.ipIn if enableIPv4;
-        ipv4.ipOut --> multiplexer.lowerIn++ if enableIPv4;
-        multiplexer.lowerOut++ --> ipv6.ipIn if enableIPv6;
-        ipv6.ipOut --> multiplexer.lowerIn++ if enableIPv6;
-        multiplexer.lowerOut++ --> generic.ipIn if enableGeneric;
-        generic.ipOut --> multiplexer.lowerIn++ if enableGeneric;
 }

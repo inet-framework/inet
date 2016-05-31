@@ -5,24 +5,21 @@
 package inet.node.dymo;
 
 import inet.node.inet.WirelessHost;
-import inet.routing.dymo.IDYMO;
+import inet.routing.dymo.DYMO;
 
-
-//
-// TODO
-//
 module DYMORouter extends WirelessHost
 {
     parameters:
         @display("i=device/cellphone");
         forwarding = true;
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
-        string dymoType = default("DYMO");
+
     submodules:
-        dymo: <dymoType> like IDYMO {
-            @display("p=527,287");
+        dymo: DYMO {
+            @display("p=700,300");
         }
+
     connections:
-        dymo.ipOut --> networkLayer.transportIn++;
-        dymo.ipIn <-- networkLayer.transportOut++;
+        dymo.ipOut --> tn.upperLayerIn++;
+        dymo.ipIn <-- tn.upperLayerOut++;
 }
