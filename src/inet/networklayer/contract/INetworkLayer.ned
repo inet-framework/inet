@@ -19,10 +19,9 @@
 package inet.networklayer.contract;
 
 //
-// This module interface provides an abstraction for the upper interface of
-// different network layers.
+// This module interface provides an abstraction for different network layers.
 //
-moduleinterface INetworkLayerUpper
+moduleinterface INetworkLayer
 {
     parameters:
         @display("i=block/fork");
@@ -31,27 +30,6 @@ moduleinterface INetworkLayerUpper
         output pingOut[] @labels(PingPayload/up);
         input transportIn @labels(ITransportPacket/down);
         output transportOut @labels(ITransportPacket/up);
-}
-
-//
-// This module interface provides an abstraction for the lower interface of
-// different network layers.
-//
-moduleinterface INetworkLayerLower
-{
-    parameters:
-        @display("i=block/fork");
-    gates:
         input ifIn @labels(INetworkDatagram/up);
         output ifOut @labels(INetworkDatagram/down);
-}
-
-//
-// This module interface provides an abstraction for the upper and lower
-// interfaces of different network layers.
-//
-moduleinterface INetworkLayer extends INetworkLayerUpper, INetworkLayerLower
-{
-    parameters:
-        @display("i=block/fork");
 }
