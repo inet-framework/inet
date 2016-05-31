@@ -82,8 +82,8 @@ module Router extends TransportLayerNodeBase
 
     connections allowunconnected:
         if hasOSPF {
-            ospf.ipOut --> networkLayer.transportIn++;
-            ospf.ipIn <-- networkLayer.transportOut++;
+            ospf.ipOut --> tn.upperLayerIn++;
+            ospf.ipIn <-- tn.upperLayerOut++;
         }
 
         if hasBGP {
@@ -97,7 +97,7 @@ module Router extends TransportLayerNodeBase
         }
 
         if hasPIM {
-            pim.networkLayerOut --> networkLayer.transportIn++;
-            pim.networkLayerIn <-- networkLayer.transportOut++;
+            pim.networkLayerOut --> tn.upperLayerIn++;
+            pim.networkLayerIn <-- tn.upperLayerOut++;
         }
 }
