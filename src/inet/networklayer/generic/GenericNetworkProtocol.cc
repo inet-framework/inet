@@ -412,21 +412,18 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
 void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
 {
     int protocol = datagram->getTransportProtocol();
-    int gateIndex = mapping.findOutputGateForProtocol(protocol);
-    // check if the transportOut port are connected, otherwise discard the packet
-    if (gateIndex >= 0) {
-        cGate *outGate = gate("transportOut", gateIndex);
-        if (outGate->isPathOK()) {
-            // decapsulate and send on appropriate output gate
-            cPacket *packet = decapsulate(datagram);
-            delete datagram;
-            send(packet, "transportOut", gateIndex);
-            return;
-        }
+    if (mapping.findOutputGateForProtocol(protocol) < 0) {
+        EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
+        int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
+        // TODO send an ICMP error: protocol unreachable
+        // icmp->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        delete datagram;
     }
-
-    //TODO send an ICMP error: protocol unreachable
-    delete datagram;
+    else {
+        send(decapsulate(datagram), "transportOut");
+        delete datagram;
+        numLocalDeliver++;
+    }
 }
 
 void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, L3Address nextHop)
