@@ -18,15 +18,7 @@
 
 package inet.node.inet;
 
-import inet.applications.contract.IPingApp;
-import inet.applications.contract.ISCTPApp;
-import inet.applications.contract.ITCPApp;
-import inet.applications.contract.IUDPApp;
-import inet.transportlayer.contract.ISCTP;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
-import inet.applications.contract.ITunApp;
-import inet.node.base.TransportLayerNodeBase;
+import inet.node.base.ApplicationLayerNodeBase;
 
 //
 // IPv4 host with SCTP, TCP, UDP layers and applications.
@@ -45,77 +37,12 @@ import inet.node.base.TransportLayerNodeBase;
 // - If wireless card is present, node mobility can be set using **.mobilityType
 //   see: inet.mobility and ~IMobility
 //
-module StandardHost extends TransportLayerNodeBase
+module StandardHost extends ApplicationLayerNodeBase
 {
     parameters:
         @display("i=device/pc2");
         @figure[submodules];
-        int numTcpApps = default(0);  // no of TCP apps. Specify the app types in INI file with tcpApp[0..1].typename="TCPEchoApp" syntax
-        int numUdpApps = default(0);  // no of UDP apps. Specify the app types in INI file with udpApp[0..1].typename="UDPVideoStreamCli" syntax
-        int numSctpApps = default(0); // no of SCTP apps. Specify the app types in INI file with sctpApp[0..1].typename="SCTPServer" syntax
-        int numPingApps = default(0);  // no of PING apps. Specify the app types in INI file with pingApp[0..1].typename="PingApp" syntax
-        int numIpv4PingApps = default(hasIpv4 ? numPingApps : 0);   //TODO HACK, remove later
-        int numIpv6PingApps = default(!hasIpv4 && hasIpv6 ? numPingApps : 0);   //TODO HACK, remove later
-        bool hasTun = default(numTunInterfaces > 0);
-        hasUdp = default(numUdpApps > 0);
-        hasTcp = default(numTcpApps > 0);
-        hasSctp = default(numSctpApps > 0);
         forwarding = default(false);  // disable routing by default
         ipv4.proxyARP = default(false);
         *.routingTableModule = default("^.ipv4.routingTable");
-    submodules:
-        tunApp[numTunInterfaces]: <> like ITunApp {
-            parameters:
-                @display("p=800,100");
-        }
-        tcpApp[numTcpApps]: <> like ITCPApp {
-            parameters:
-                @display("p=500,100,row,60");
-        }
-        udpApp[numUdpApps]: <> like IUDPApp {
-            parameters:
-                @display("p=400,100,row,60");
-        }
-        sctpApp[numSctpApps]: <> like ISCTPApp {
-            parameters:
-                @display("p=600,100,row,60");
-        }
-        pingApp[numPingApps]: <default("PingApp")> like IPingApp {
-            parameters:
-                @display("p=700,100,row,60");
-        }
-    connections allowunconnected:
-        for i=0..numTcpApps-1 {
-            tcpApp[i].tcpOut --> tcp.appIn++;
-            tcpApp[i].tcpIn <-- tcp.appOut++;
-        }
-
-        for i=0..numUdpApps-1 {
-            udpApp[i].udpOut --> udp.appIn++;
-            udpApp[i].udpIn <-- udp.appOut++;
-        }
-
-        for i=0..numSctpApps-1 {
-            sctpApp[i].sctpOut --> sctp.from_appl++;
-            sctp.to_appl++ --> sctpApp[i].sctpIn;
-        }
-        for i=0..numPingApps-1 {
-            ipv4.pingOut++ --> pingApp[i].pingIn if i < numIpv4PingApps;
-            ipv4.pingIn++ <-- pingApp[i].pingOut if i < numIpv4PingApps;
-        }
-
-        for i=0..numPingApps-1 {
-            ipv6.pingOut++ --> pingApp[i].pingIn if i >= numIpv4PingApps && i < numIpv4PingApps+numIpv6PingApps;
-            ipv6.pingIn++ <-- pingApp[i].pingOut if i >= numIpv4PingApps && i < numIpv4PingApps+numIpv6PingApps;
-        }
-
-        for i=0..numPingApps-1 {
-            generic.pingOut++ --> pingApp[i].pingIn if i >= numIpv4PingApps+numIpv6PingApps;
-            generic.pingIn++ <-- pingApp[i].pingOut if i >= numIpv4PingApps+numIpv6PingApps;
-        }
-
-        for i=0..numTunInterfaces-1 {
-            tunApp[i].tunOut --> tun[i].appIn if hasTun;
-            tunApp[i].tunIn <-- tun[i].appOut if hasTun;
-        }
 }
