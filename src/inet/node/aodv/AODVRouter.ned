@@ -46,6 +46,9 @@ module AODVRouter extends WirelessHost
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
     submodules:
         aodv: AODVRouting {
+            routingTableModule = default(absPath("^."+_firstNL+".routingTable"));
+            interfaceTableModule = default("^.interfaceTable");
+            networkProtocolModule = default(absPath("^."+_firstNL+".ip"));
             @display("p=700,300");
         }
     connections:
