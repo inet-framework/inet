@@ -28,7 +28,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 module SceneVisualizer like ISceneVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("SceneCanvasVisualizer");
         string osgVisualizerType = default("SceneOsgVisualizer");
     submodules:

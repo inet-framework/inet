@@ -42,7 +42,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module IntegratedOsgVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string sceneVisualizerType = default("SceneOsgVisualizer");
         string physicalEnvironmentVisualizerType = default("PhysicalEnvironmentOsgVisualizer");
         string networkNodeVisualizerType = default("NetworkNodeOsgVisualizer");

@@ -119,8 +119,8 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto node = getContainingNode(const_cast<cModule *>(module));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
-        m maxInterferenceRage = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
-        interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRage.get(), -maxInterferenceRage.get(), 2 * maxInterferenceRage.get(), 2 * maxInterferenceRage.get()));
+        m maxInterferenceRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
+        interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRange.get(), -maxInterferenceRange.get(), 2 * maxInterferenceRange.get(), 2 * maxInterferenceRange.get()));
         interferenceRangeFigure->setLineColor(interferenceRangeColor);
         networkNodeVisualization->addFigure(interferenceRangeFigure);
     }

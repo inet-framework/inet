@@ -43,7 +43,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module IntegratedCanvasVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string sceneVisualizerType = default("SceneCanvasVisualizer");
         string physicalEnvironmentVisualizerType = default("PhysicalEnvironmentCanvasVisualizer");
         string networkNodeVisualizerType = default("NetworkNodeCanvasVisualizer");

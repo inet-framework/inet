@@ -28,7 +28,7 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 module NetworkConnectionVisualizer like INetworkConnectionVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("NetworkConnectionCanvasVisualizer");
         string osgVisualizerType = default("NetworkConnectionOsgVisualizer");
     submodules:

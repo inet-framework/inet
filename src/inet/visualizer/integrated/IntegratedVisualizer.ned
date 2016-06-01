@@ -26,7 +26,7 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 module IntegratedVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("IntegratedCanvasVisualizer");
         string osgVisualizerType = default("IntegratedOsgVisualizer");
     submodules:

@@ -797,6 +797,21 @@
         linkerFlags = ""
         />
     <feature
+        id="visualization"
+        name="Visualization"
+        description = "Provides network-level visualization features for physical layer, 
+                       data link layer and network layer communications, and more. 
+                       Supports both canvas (2D) and OSG (3D) graphics."
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.visualizer
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_VISUALIZERS"
+        linkerFlags = ""
+        />
+    <feature
         id="VoIPStream"
         name="VoIPStream"
         description = "Voice over IP tool. Required external libraries: libavcodec libavformat libavresample libavutil"

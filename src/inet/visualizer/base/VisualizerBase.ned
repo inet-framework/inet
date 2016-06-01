@@ -25,6 +25,6 @@ simple VisualizerBase
 {
     parameters:
         @class(VisualizerBase);
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string visualizerTargetModule = default(""); // module path relative to the visualizer where the visualization should appear in the user interface, root module by default
 }

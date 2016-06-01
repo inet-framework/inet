@@ -28,7 +28,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module TransportRouteVisualizer like ITransportRouteVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("TransportRouteCanvasVisualizer");
         string osgVisualizerType = default("TransportRouteOsgVisualizer");
     submodules:

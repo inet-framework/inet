@@ -28,7 +28,7 @@ import inet.visualizer.contract.IStatisticVisualizer;
 module StatisticVisualizer like IStatisticVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("StatisticCanvasVisualizer");
         string osgVisualizerType = default("StatisticOsgVisualizer");
     submodules:

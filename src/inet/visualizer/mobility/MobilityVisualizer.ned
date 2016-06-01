@@ -28,7 +28,7 @@ import inet.visualizer.contract.IMobilityVisualizer;
 module MobilityVisualizer like IMobilityVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("MobilityCanvasVisualizer");
         string osgVisualizerType = default("MobilityOsgVisualizer");
     submodules:

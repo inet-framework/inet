@@ -28,7 +28,7 @@ import inet.visualizer.contract.IPhysicalLinkVisualizer;
 module PhysicalLinkVisualizer like IPhysicalLinkVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("PhysicalLinkCanvasVisualizer");
         string osgVisualizerType = default("PhysicalLinkOsgVisualizer");
     submodules:

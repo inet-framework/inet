@@ -296,8 +296,8 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
             group->addChild(geode);
         }
         if (displayInterferenceRanges) {
-            auto maxInterferenceRage = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(radio);
-            auto circle = inet::osg::createCircleGeometry(Coord::ZERO, maxInterferenceRage.get(), 100);
+            auto maxInterferenceRange = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(radio);
+            auto circle = inet::osg::createCircleGeometry(Coord::ZERO, maxInterferenceRange.get(), 100);
             auto stateSet = inet::osg::createStateSet(cFigure::GREY, 1);
             circle->setStateSet(stateSet);
             auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::NO_ROTATION, false);

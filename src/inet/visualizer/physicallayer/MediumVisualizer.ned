@@ -28,7 +28,7 @@ import inet.visualizer.contract.IMediumVisualizer;
 module MediumVisualizer like IMediumVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("MediumCanvasVisualizer");
         string osgVisualizerType = default("MediumOsgVisualizer");
     submodules:

@@ -28,7 +28,7 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 module PhysicalEnvironmentVisualizer like IPhysicalEnvironmentVisualizer
 {
     parameters:
-        @display("bgb=0,0;i=block/app_s");
+        @display("i=block/app_s");
         string canvasVisualizerType = default("PhysicalEnvironmentCanvasVisualizer");
         string osgVisualizerType = default("PhysicalEnvironmentOsgVisualizer");
     submodules:
