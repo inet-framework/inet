@@ -15,6 +15,7 @@ module MyHost extends StandardHost
 {
     submodules:
         iPv4HookInfo: NetfilterInfoHook {
+            networkProtocolModule = "^.ipv4.ip";
             @display("p=626,265");
         }
 }
@@ -23,6 +24,7 @@ module MyRouter extends Router
 {
     submodules:
         iPv4HookInfo: NetfilterInfoHook {
+            networkProtocolModule = "^.ipv4.ip";
             @display("p=524,98");
         }
 }

@@ -20,4 +20,6 @@ package inet.networklayer.common;
 
 simple NetfilterInfoHook
 {
+    parameters:
+        string networkProtocolModule;
 }
