@@ -34,8 +34,8 @@ simple GPSR
 
         // context parameters
         string interfaceTableModule;
-        string routingTableModule = default("^.ipv4.routingTable");
-        string networkProtocolModule = default("^.ipv4.ip");
+        string routingTableModule;
+        string networkProtocolModule;
 
         // GPSR parameters
         int planarizationMode @enum(0,1) = default(0); // 0 for GG, 1 for RNG

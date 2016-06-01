@@ -35,7 +35,7 @@ simple Ieee80211MgmtSTASimplified like IIeee80211Mgmt
 {
     parameters:
         string accessPointAddress; // MAC address of associate AP
-        string interfaceTableModule;
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
     gates:

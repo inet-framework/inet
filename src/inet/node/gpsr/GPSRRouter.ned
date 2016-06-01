@@ -17,6 +17,8 @@ module GPSRRouter extends WirelessHost
     submodules:
         gpsr: GPSR {
             parameters:
+                routingTableModule = default("^.ipv4.routingTable");
+                networkProtocolModule = default("^.ipv4.ip");
                 @display("p=700,300");
         }
 
