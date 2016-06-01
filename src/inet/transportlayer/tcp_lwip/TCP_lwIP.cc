@@ -110,6 +110,7 @@ void TCP_lwIP::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerProtocol(Protocol::tcp, gate("ipOut"));
+        registerProtocol(Protocol::tcp, gate("appOut"));
     }
     else if (stage == INITSTAGE_LAST) {
         isAliveM = true;

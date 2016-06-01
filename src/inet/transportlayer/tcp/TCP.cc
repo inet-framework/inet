@@ -100,7 +100,7 @@ void TCP::initialize(int stage)
         NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerProtocol(Protocol::tcp, gate("ipOut"));
-        // TODO: registerProtocol(Protocol::tcp, gate("appOut", 0));
+        registerProtocol(Protocol::tcp, gate("appOut"));
     }
 }
 
