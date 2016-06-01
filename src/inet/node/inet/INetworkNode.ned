@@ -26,8 +26,4 @@ moduleinterface INetworkNode
         @display("bgb=,448");
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
-    gates:
-        input radioIn[numWlanInterfaces] @directIn;
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
 }
