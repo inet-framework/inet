@@ -32,7 +32,7 @@ simple DHCPClient like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
+        string routingTableModule = default("^.ipv4.routingTable");   // The path to the RoutingTable module
         string interface = default("");  // which NIC should be configured (i.e. wlan0, eth1 etc.)
         double startTime @unit(s) = default(0s); // starting time of DHCP initialization
         @display("i=block/app2");
