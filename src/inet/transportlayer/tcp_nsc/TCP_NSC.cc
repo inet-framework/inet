@@ -267,6 +267,9 @@ TCP_NSC::~TCP_NSC()
 // send a TCP_I_ESTABLISHED msg to Application Layer
 void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
 {
+    if (connP.sentEstablishedM)
+        return;
+
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);
     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
