@@ -57,7 +57,7 @@ module Ieee80211Nic like IWirelessNic
         input radioIn @labels(IRadioFrame); // to receive radio frames
     submodules:
         classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
-            @display("p=110,59;i=block/classifier");
+            @display("p=110,59");
         }
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
