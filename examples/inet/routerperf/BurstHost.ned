@@ -30,8 +30,10 @@ module BurstHost extends TransportLayerNodeBase
     parameters:
         @networkNode();
         @display("i=device/pc3");
+        @figure[submodules];
         hasUdp = false;
         hasTcp = false;
+        hasSctp = false;
         string trafGenType;
         *.routingTableModule = default("^.ipv4.routingTable");
     submodules:
