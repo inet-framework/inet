@@ -79,7 +79,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     int retryCounter = -1;
 
     /** Messages received from upper layer and to be transmitted later */
-    std::list<CsmaCaMacDataFrame*> transmissionQueue;
+    cPacketQueue transmissionQueue;
 
     /** Passive queue module to request messages from */
     IPassiveQueue *queueModule = nullptr;
