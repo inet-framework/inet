@@ -24,10 +24,11 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 module WirelessNic like IWirelessNic
 {
     parameters:
-        string interfaceTableModule;
-        string energySourceModule;
+        string classifierType = default("");
         string macType;
         string radioType;
+        string interfaceTableModule;
+        string energySourceModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
         @display("i=block/ifcard;bgb=250,300");
@@ -36,18 +37,22 @@ module WirelessNic like IWirelessNic
         output upperLayerOut;
         input radioIn @labels(IRadioFrame);
     submodules:
+        classifier: <classifierType> like IIeee8021dQoSClassifier if classifierType != "" {
+                @display("p=80,70");
+        }
         mac: <macType> like IMACProtocol {
-            parameters:
                 @display("p=150,100");
         }
         radio: <radioType> like IRadio {
-            parameters:
                 @display("p=150,200");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerIn <-- mac.lowerLayerOut;
         radio.upperLayerOut --> mac.lowerLayerIn;
-        upperLayerIn --> { @display("m=n"); } --> mac.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- mac.upperLayerOut;
+
+        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
+        mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
+        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if classifierType != "";
 }
