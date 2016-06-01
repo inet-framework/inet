@@ -1,34 +1,34 @@
 # all tests that require the external TCP/IP stacks (NSC / lwip)
 
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,             50s,             78f5-b2a5 af0a-8ba1/tplx
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0,               50s,             87c7-84e6 5121-ed2d/tplx
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,             50s,             afd9-633f 22fa-ad10/tplx
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,             50s,             1c82-c1d2 23ce-3457/tplx
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0,               50s,             5a86-6051 bb93-c0de/tplx
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0,                50s,             ef20-f939 ca6a-5e35/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,             50s,             78f5-b2a5 1cdf-6d80/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_nsc -r 0,               50s,             87c7-84e6 8f7d-98d0/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,             50s,             afd9-633f 96ea-3448/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,             50s,             1c82-c1d2 bd20-b16b/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_inet -r 0,               50s,             5a86-6051 c7c3-5719/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0,                50s,             ef20-f939 df8d-f99f/tplx
 
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0,                100s,            0000-0000    # object transfer not supported by TCP_NSC
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0,               100s,            0000-0000    # shutdown/restart not supported by TCP_lwIP
 
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux -r 0,     100s,            a2f2-e626 da9d-549a/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux_stream -r 0, 100s,            a2f2-e626 da9d-549a/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux -r 0,     100s,            a2f2-e626 59f5-4114/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux_stream -r 0, 100s,            a2f2-e626 59f5-4114/tplx
 # /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,   100s,         0000-0000    # freebsd NSC stack works on 32 bit system only
 # /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0, 100s,         0000-0000    # freebsd NSC stack works on 32 bit system only
 # /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,         0000-0000    # lwip NSC stack works on 32 bit system only
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,         100s,            64a5-3fec 9f84-ba0c/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,             100s,            122b-1da4 b5fd-93f4/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,             100s,            0034-53b1 1f9c-a3a2/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,        100s,            994a-13bd aaec-66e3/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,     100s,            122b-1da4 b5fd-93f4/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,             100s,            99e0-3f1a 6556-8e3f/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,         100s,            64a5-3fec 0131-b147/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,             100s,            122b-1da4 6ba0-a872/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,             100s,            0034-53b1 a57d-46ba/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,        100s,            994a-13bd c3a4-b5f6/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,     100s,            122b-1da4 6ba0-a872/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,             100s,            99e0-3f1a b8f4-8943/tplx
 
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             ef84-a75a f39c-17d6/tplx
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             9d1f-eb15 f5f9-de83/tplx
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             8197-899e d546-4441/tplx
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             6625-8292 2461-20ba/tplx
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             9da8-ced0 34db-95fc/tplx
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             5dca-5113 81e9-daa0/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             ef84-a75a 6c9c-eedb/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             9d1f-eb15 81cf-6b23/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             8197-899e 9d6f-3a18/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             6625-8292 c561-2d27/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             9da8-ced0 2441-44f7/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             5dca-5113 a698-5bab/tplx
 
-/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,             200s,            4f79-32a2 7a14-a274/tplx
-/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,             200s,            162c-e615 3011-0b23/tplx
-/examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,             200s,            445f-6780 832b-b502/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,             200s,            4f79-32a2 2135-c8ae/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,             200s,            162c-e615 2398-8739/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,             200s,            445f-6780 8120-6470/tplx
