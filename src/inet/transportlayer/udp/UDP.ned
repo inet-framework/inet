@@ -54,7 +54,7 @@ simple UDP like IUDP
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string icmpModule = default("^.ipv4.icmp");
-        string icmpv6Module = default("^.ipv4.icmpv6");
+        string icmpv6Module = default("^.ipv6.icmpv6");
         @display("i=block/transport");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
