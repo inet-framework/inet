@@ -1287,7 +1287,6 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 const struct supported_extensions_parameter *supext;
                                 supext = (struct supported_extensions_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
                                 unsigned short chunkTypes;
-                                //chunklen += 4;
                                 int len = 4;
                                 EV_INFO << "supext->len=" << ntohs(supext->length) << "\n";
                                 while (ntohs(supext->length) > len) {
@@ -1295,7 +1294,6 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                     chunk->setSepChunksArraySize(++chkcounter);
                                     EV_INFO << "Extension " << chunkTypes << " added\n";
                                     chunk->setSepChunks(chkcounter - 1, chunkTypes);
-                                    //chunklen++;
                                     len++;
                                 }
                                 chunklen += ADD_PADDING(len);

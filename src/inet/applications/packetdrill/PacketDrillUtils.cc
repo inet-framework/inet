@@ -74,12 +74,11 @@ PacketDrillConfig::~PacketDrillConfig()
 
 void PacketDrillConfig::parseScriptOptions(cQueue *options)
 {
-    printf("parseScriptOptions\n");
 }
 
 PacketDrillPacket::PacketDrillPacket()
 {
-   // inetPacket = nullptr;
+   inetPacket = nullptr;
 }
 
 PacketDrillPacket::~PacketDrillPacket()

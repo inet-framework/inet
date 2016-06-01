@@ -47,5 +47,3 @@ endif
 
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
-
-CFLAGS += -D__Omnet__

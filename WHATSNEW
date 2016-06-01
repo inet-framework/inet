@@ -9,6 +9,7 @@ This release requires either OMNeT++ 4.6, or 5.0.
 Changes:
 
   - Packetdrill: Added SCTP support and socket options (by Irene Rungeler)
+  - SCTP: added support for the SCTP_ACCEPT command (by Irene Rungeler)
   - Physical layer: added IdealObstacleLoss. This obstacle loss model determines
     power loss by checking if there is any obstructing physical object along the
     straight propagation path. The result is either total power loss if there was

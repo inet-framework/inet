@@ -110,7 +110,7 @@ static inline bool ignore_ifdef(enum ifdef_os os) {
         return false;
     }
 #endif
-#ifdef __Omnet__
+#ifdef OMNETPP_VERSION
     if (os == Omnet_IFDEF) {
         return false;
     }
