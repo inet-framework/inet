@@ -63,6 +63,14 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     };
     typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
 
+    struct SocketDescriptor
+    {
+        int socketId = -1;
+        int protocolId = -1;
+
+        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+    };
+
   protected:
     IIPv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
@@ -85,6 +93,8 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     IPv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
+    std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // ARP related
     PendingPackets pendingPackets;    // map indexed with IPv4Address for outbound packets waiting for ARP resolution

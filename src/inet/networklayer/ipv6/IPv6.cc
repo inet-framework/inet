@@ -22,6 +22,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 
+#include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -110,6 +111,37 @@ void IPv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
 {
     Enter_Method("handleRegisterProtocol");
     mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
+}
+
+void IPv6::handleMessage(cMessage *msg)
+{
+    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
+        ASSERT(command->getControlInfoProtocolId() == Protocol::ipv6.getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(command->getSocketId(), command->getProtoclId());
+        socketIdToSocketDescriptor[command->getSocketId()] = descriptor;
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtoclId(), descriptor));
+        delete msg;
+    }
+    else if (L3SocketCloseCommand *command = dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo())) {
+        ASSERT(command->getControlInfoProtocolId() == Protocol::ipv6.getId());
+        auto it = socketIdToSocketDescriptor.find(command->getSocketId());
+        if (it != socketIdToSocketDescriptor.end()) {
+            int protocol = it->second->protocolId;
+            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
+            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+            for (auto jt = lowerBound; jt != upperBound; jt++) {
+                if (it->second == jt->second) {
+                    protocolIdToSocketDescriptors.erase(jt);
+                    break;
+                }
+            }
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete msg;
+    }
+    else
+        QueueBase::handleMessage(msg);
 }
 
 void IPv6::updateDisplayString()
@@ -579,15 +611,23 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     // #### end CB
 #endif /* WITH_xMIPv6 */
 
-    // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
     cPacket *packet = decapsulate(datagram, fromIE);
-
+    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
+    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+    bool hasSocket = lowerBound != upperBound;
+    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(packet->getControlInfo());
+    for (auto it = lowerBound; it != upperBound; it++) {
+        IPv6ControlInfo *controlInfoCopy = controlInfo->dup();
+        controlInfoCopy->setSocketId(it->second->socketId);
+        cPacket *packetCopy = packet->dup();
+        packetCopy->setControlInfo(controlInfoCopy);
+        send(packetCopy, "transportOut");
+    }
 
     if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage *>(packet)) {
         EV_INFO << "Neigbour Discovery packet: passing it to ND module\n";
         send(packet, "ndOut");
-        packet = nullptr;
     }
 #ifdef WITH_xMIPv6
     else if (protocol == IP_PROT_IPv6EXT_MOB && dynamic_cast<MobilityHeader *>(packet)) {
@@ -596,7 +636,6 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
         if (rt->hasMIPv6Support()) {
             EV_INFO << "MIPv6 packet: passing it to xMIPv6 module\n";
             send(check_and_cast<MobilityHeader *>(packet), "xMIPv6Out");
-            packet = nullptr;
         }
         else {
             // update 12.9.07 - CB
@@ -606,40 +645,26 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
             EV_INFO << "No MIPv6 support on this node!\n";
             IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
             icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
-            packet = nullptr;
         }
     }
 #endif /* WITH_xMIPv6 */
     else if (protocol == IP_PROT_IPv6_ICMP) {
         handleReceivedICMP(check_and_cast<ICMPv6Message *>(packet));
-        packet = nullptr;
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
-        packet = nullptr;
     }
-    else {
-        int gateindex = mapping.findOutputGateForProtocol(protocol);
-        // check if the transportOut port are connected, otherwise discard the packet
-        if (gateindex >= 0) {
-            cGate *outGate = gate("transportOut");
-            if (outGate->isPathOK()) {
-                EV_INFO << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
-                //TODO: Indication of forward progress
-                send(packet, outGate);
-                packet = nullptr;
-                return;
-            }
-        }
-
+    else if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+        EV_INFO << "Protocol " << protocol << ", passing up\n";
+        send(packet, "transportOut");
+    }
+    else if (!hasSocket) {
         // TODO send ICMP Destination Unreacheable error
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
         IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
         icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
-        packet = nullptr;
     }
-    ASSERT(packet == nullptr);
 }
 
 void IPv6::handleReceivedICMP(ICMPv6Message *msg)

@@ -61,6 +61,14 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     };
 
   protected:
+    struct SocketDescriptor
+    {
+        int socketId = -1;
+        int protocolId = -1;
+
+        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+    };
+
     IInterfaceTable *ift = nullptr;
     IPv6RoutingTable *rt = nullptr;
     IPv6NeighbourDiscovery *nd = nullptr;
@@ -73,6 +81,8 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     IPv6FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
+    std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // statistics
     int numMulticast = 0;
@@ -122,6 +132,8 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     virtual IPv6Datagram *encapsulate(cPacket *transportPacket, IPv6ControlInfo *ctrlInfo);
 
     virtual void preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr);
+
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Handle messages (typically packets to be send in IPv6) from transport or ICMP.

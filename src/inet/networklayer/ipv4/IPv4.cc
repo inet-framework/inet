@@ -22,6 +22,7 @@
 #include "inet/networklayer/ipv4/IPv4.h"
 
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -128,7 +129,31 @@ void IPv4::updateDisplayString()
 
 void IPv4::handleMessage(cMessage *msg)
 {
-    if (!msg->isSelfMessage() && msg->getArrivalGate()->isName("arpIn"))
+    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
+        ASSERT(command->getControlInfoProtocolId() == Protocol::ipv4.getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(command->getSocketId(), command->getProtoclId());
+        socketIdToSocketDescriptor[command->getSocketId()] = descriptor;
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtoclId(), descriptor));
+        delete msg;
+    }
+    else if (L3SocketCloseCommand *command = dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo())) {
+        ASSERT(command->getControlInfoProtocolId() == Protocol::ipv4.getId());
+        auto it = socketIdToSocketDescriptor.find(command->getSocketId());
+        if (it != socketIdToSocketDescriptor.end()) {
+            int protocol = it->second->protocolId;
+            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
+            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+            for (auto jt = lowerBound; jt != upperBound; jt++) {
+                if (it->second == jt->second) {
+                    protocolIdToSocketDescriptors.erase(jt);
+                    break;
+                }
+            }
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+    }
+    else if (!msg->isSelfMessage() && msg->getArrivalGate()->isName("arpIn"))
         endService(PK(msg));
     else
         QueueBase::handleMessage(msg);
@@ -608,29 +633,36 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram, const InterfaceEntry *fr
 
 void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
 {
-    // decapsulate and send on appropriate output gate
     int protocol = datagram->getTransportProtocol();
-
+    cPacket *packet = decapsulate(datagram, fromIE);
+    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
+    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+    bool hasSocket = lowerBound != upperBound;
+    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
+    for (auto it = lowerBound; it != upperBound; it++) {
+        IPv4ControlInfo *controlInfoCopy = controlInfo->dup();
+        controlInfoCopy->setSocketId(it->second->socketId);
+        cPacket *packetCopy = packet->dup();
+        packetCopy->setControlInfo(controlInfoCopy);
+        send(packetCopy, "transportOut");
+    }
     if (protocol == IP_PROT_ICMP) {
         // incoming ICMP packets are handled specially
-        handleIncomingICMP(check_and_cast<ICMPMessage *>(decapsulate(datagram, fromIE)));
+        handleIncomingICMP(check_and_cast<ICMPMessage *>(packet));
         numLocalDeliver++;
     }
     else if (protocol == IP_PROT_IP) {
         // tunnelled IP packets are handled separately
-        send(decapsulate(datagram, fromIE), "preRoutingOut");    //FIXME There is no "preRoutingOut" gate in the IPv4 module.
+        send(packet, "preRoutingOut");    //FIXME There is no "preRoutingOut" gate in the IPv4 module.
     }
-    else {
-        if (mapping.findOutputGateForProtocol(protocol) < 0) {
-            EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
-            int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
-            icmp->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
-        }
-        else {
-            send(decapsulate(datagram, fromIE), "transportOut");
-            numLocalDeliver++;
-            return;
-        }
+    else if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+        send(packet, "transportOut");
+        numLocalDeliver++;
+    }
+    else if (!hasSocket) {
+        EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
+        int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
+        icmp->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 

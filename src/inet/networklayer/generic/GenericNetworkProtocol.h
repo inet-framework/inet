@@ -65,6 +65,14 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
         const INetfilter::IHook::Type hookType;
     };
 
+    struct SocketDescriptor
+    {
+        int socketId = -1;
+        int protocolId = -1;
+
+        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+    };
+
     IInterfaceTable *interfaceTable;
     GenericRoutingTable *routingTable;
     IARP *arp;
@@ -74,6 +82,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
 
     // working vars
     ProtocolMapping mapping;    // where to send packets after decapsulation
+    std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // hooks
     typedef std::multimap<int, IHook *> HookList;
@@ -167,6 +177,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
      */
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Processing of generic datagrams. Called when a datagram reaches the front
