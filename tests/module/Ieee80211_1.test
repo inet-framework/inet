@@ -42,11 +42,12 @@ ned-path = .;../../../../src
 **.radio.receiver.energyDetection = -100dBm
 
 # ping app
-*.host*.numPingApps = 1
-*.host*.pingApp[0].count = 1
-*.host*.pingApp[0].printPing = true
-*.host1.pingApp[0].destAddr = "host2"
-*.host2.pingApp[0].destAddr = "host1"
+*.host*.numApps = 1
+*.host*.app[0].typename = "PingApp"
+*.host*.app[0].count = 1
+*.host*.app[0].printPing = true
+*.host1.app[0].destAddr = "host2"
+*.host2.app[0].destAddr = "host1"
 
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 500m
@@ -54,7 +55,7 @@ ned-path = .;../../../../src
         
 **.host1.mobility.initialX = 200m
 **.host2.mobility.initialX = 800m
-*.host*.pingApp[0].startTime = 0s
+*.host*.app[0].startTime = 0s
 
 %contains: results/General-0.elog
 ignoring

@@ -22,17 +22,17 @@ cmdenv-express-mode=false
 *.n = 1
 
 # udp apps
-**.cli[*].numUdpApps = 1
-**.cli[*].udpApp[*].typename = "UDPBasicApp"
-**.cli[*].udpApp[0].destAddresses = "srv"
-**.cli[*].udpApp[0].destPort = 1000
-**.cli[*].udpApp[0].messageLength = 100B
+**.cli[*].numApps = 1
+**.cli[*].app[0].typename = "UDPBasicApp"
+**.cli[*].app[0].destAddresses = "srv"
+**.cli[*].app[0].destPort = 1000
+**.cli[*].app[0].messageLength = 100B
 
-**.cli[*].udpApp[0].startTime = 10s
-**.cli[*].udpApp[0].stopTime = 11s
-**.cli[*].udpApp[0].sendInterval = 10s
+**.cli[*].app[0].startTime = 10s
+**.cli[*].app[0].stopTime = 11s
+**.cli[*].app[0].sendInterval = 10s
 
-**.srv.numUdpApps = 0
+**.srv.numApps = 0
 
 # Ethernet NIC configuration
 **.eth[*].queueType = "DropTailQueue" # in routers

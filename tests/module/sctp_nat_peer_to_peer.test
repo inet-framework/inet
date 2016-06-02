@@ -18,53 +18,50 @@ ned-path = .;../../../../src;../../lib
 **.testTimeout = 0
 
 # udp app (off)
-**.numUdpApps = 0
-**.udpType = ""
 
-**.numTcpApps = 0
-**.tcpType = "TCP"
+# tcp app (off)
 
 # sctp apps
-**.Peer_1.numSctpApps=1
-**.Peer_2.numSctpApps=1
-**.Peer_*.sctpApp[*].typename="SCTPNatPeer"
-**.Peer_1.sctpApp[*].localAddress="10.1.1.1"
-**.Peer_2.sctpApp[0].localAddress="10.1.2.1"
-**.Peer_1.sctpApp[0].localPort=6000
-**.Peer_2.sctpApp[0].localPort=7000
-**.Peer_*.sctpApp[0].connectAddress="100.1.3.1"
-**.Peer_1.sctpApp[0].connectPort=6666
-**.Peer_2.sctpApp[0].connectPort=7777
-**.Peer_1.sctpApp[0].startTime=1s
-**.Peer_2.sctpApp[0].startTime=1s #truncnormal(30, 5)
-**.Peer_1.sctpApp[0].numRequestsPerSession = 10
-**.Peer_2.sctpApp[0].numRequestsPerSession = 0
-**.Peer_1.sctpApp[0].numPacketsToReceive = 0
-**.Peer_2.sctpApp[0].numPacketsToReceive =10
-**.Peer_*.sctpApp[0].outboundStreams = 4
-**.Peer_*.sctpApp[0].inboundStreams = 4
-**.Peer_1.sctpApp[0].ownName=1
-**.Peer_1.sctpApp[0].peerName=2
-**.Peer_2.sctpApp[0].ownName=2
-**.Peer_2.sctpApp[0].peerName=1
-**.Peer_*.sctpApp[0].rendezvous=true
-**.Peer_*.sctpApp[0].multi=true
+**.Peer_1.numApps=1
+**.Peer_2.numApps=1
+**.Peer_*.app[*].typename="SCTPNatPeer"
+**.Peer_1.app[*].localAddress="10.1.1.1"
+**.Peer_2.app[0].localAddress="10.1.2.1"
+**.Peer_1.app[0].localPort=6000
+**.Peer_2.app[0].localPort=7000
+**.Peer_*.app[0].connectAddress="100.1.3.1"
+**.Peer_1.app[0].connectPort=6666
+**.Peer_2.app[0].connectPort=7777
+**.Peer_1.app[0].startTime=1s
+**.Peer_2.app[0].startTime=1s #truncnormal(30, 5)
+**.Peer_1.app[0].numRequestsPerSession = 10
+**.Peer_2.app[0].numRequestsPerSession = 0
+**.Peer_1.app[0].numPacketsToReceive = 0
+**.Peer_2.app[0].numPacketsToReceive =10
+**.Peer_*.app[0].outboundStreams = 4
+**.Peer_*.app[0].inboundStreams = 4
+**.Peer_1.app[0].ownName=1
+**.Peer_1.app[0].peerName=2
+**.Peer_2.app[0].ownName=2
+**.Peer_2.app[0].peerName=1
+**.Peer_*.app[0].rendezvous=true
+**.Peer_*.app[0].multi=true
 
-**.Server.numSctpApps=2
-**.Server.sctpApp[*].typename="SCTPNatServer"
-**.Server.sctpApp[*].queueSize = 0
-**.Server.sctpApp[*].lifetime=0s
-**.Server.sctpApp[*].address=""
-**.Server.sctpApp[0].localPort=6666
-**.Server.sctpApp[1].localPort=7777
-**.Server.sctpApp[*].replyDelay=0
-**.Server.sctpApp[*].echoFactor=0
-**.Server.sctpApp[*].echoDelay=0
-**.Server.sctpApp[*].outboundStreams=4
-**.Server.sctpApp[*].inboundStreams=4
-**.Server.sctpApp[*].numPacketsToSendPerClient = 0
-**.Server.sctpApp[*].numPacketsToReceivePerClient =0
-**.Server.sctpApp[*].requestLength = 1024
+**.Server.numApps=2
+**.Server.app[*].typename="SCTPNatServer"
+**.Server.app[*].queueSize = 0
+**.Server.app[*].lifetime=0s
+**.Server.app[*].address=""
+**.Server.app[0].localPort=6666
+**.Server.app[1].localPort=7777
+**.Server.app[*].replyDelay=0
+**.Server.app[*].echoFactor=0
+**.Server.app[*].echoDelay=0
+**.Server.app[*].outboundStreams=4
+**.Server.app[*].inboundStreams=4
+**.Server.app[*].numPacketsToSendPerClient = 0
+**.Server.app[*].numPacketsToReceivePerClient =0
+**.Server.app[*].requestLength = 1024
 
 # sctp settings
 **.sctp.sctpAlgorithmClass="SCTPAlg"

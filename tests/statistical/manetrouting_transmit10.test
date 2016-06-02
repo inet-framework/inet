@@ -91,38 +91,32 @@ description = "Aodv Simple test"
 **.*host.mobilityType = "StationaryMobility"
 
 # udp apps (on)
-**.senderhost.numUdpApps = 1
-**.senderhost.udpApp[*].typename = "UDPBasicBurst"
+**.senderhost.numApps = 1
+**.senderhost.app[0].typename = "UDPBasicBurst"
 
-**.udpApp[0].destAddresses = "rcvrhost"
-**.udpApp[0].localPort = 1234
-**.udpApp[0].destPort = 1234
-**.udpApp[0].messageLength = 512B  #
-**.udpApp[0].sendInterval = 10s + uniform(-0.001s,0.001s)
-**.udpApp[0].burstDuration = 0
-**.udpApp[0].chooseDestAddrMode = "perBurst"
-**.udpApp[0].sleepDuration = 1s
-# **.udpApp[0].burstDuration = uniform(1s,4s,1)
-# **.udpApp[0].stopTime = uniform(20s,40s,1)
-**.udpApp[0].stopTime = -1s
-##**.udpApp[0].startTime = uniform(0s,4s,1)
-**.udpApp[0].startTime = 10s
-**.udpApp[0].delayLimit = 20s
-**.udpApp[0].destAddrRNG = 0
+**.app[0].destAddresses = "rcvrhost"
+**.app[0].localPort = 1234
+**.app[0].destPort = 1234
+**.app[0].messageLength = 512B  #
+**.app[0].sendInterval = 10s + uniform(-0.001s,0.001s)
+**.app[0].burstDuration = 0
+**.app[0].chooseDestAddrMode = "perBurst"
+**.app[0].sleepDuration = 1s
+# **.app[0].burstDuration = uniform(1s,4s,1)
+# **.app[0].stopTime = uniform(20s,40s,1)
+**.app[0].stopTime = -1s
+##**.app[0].startTime = uniform(0s,4s,1)
+**.app[0].startTime = 10s
+**.app[0].delayLimit = 20s
+**.app[0].destAddrRNG = 0
 
-**.rcvrhost.udpApp[*].typename = "UDPSink"
-**.rcvrhost.numUdpApps = 1
-**.rcvrhost.udpApp[0].localPort = 1234
+**.rcvrhost.numApps = 1
+**.rcvrhost.app[0].typename = "UDPSink"
+**.rcvrhost.app[0].localPort = 1234
 
 # tcp apps (off)
-**.numTcpApps = 0
 
-# ping app (senderhost pinged by others)
 # ping app (off)
-**.pingApp.count = 0
-**.pingApp.startTime = 1s
-**.pingApp.stopTime = -1s
-**.pingApp.printPing = true
 
 # tcp settings
 **.tcp.mss = 1024
@@ -191,7 +185,7 @@ cat("\n  MANETROUTING UDP TEST RESULT:\n")
 cat("\n    CHECKS SENT PACKETS:\n")
 
 x <- dataset$scalars[dataset$scalars$name == "sentPk:count",]
-xx <- x[grep("\\.senderhost\\.udpApp\\[0\\]",x$module),]
+xx <- x[grep("\\.senderhost\\.app\\[0\\]",x$module),]
 
 if(length(xx$value) != linecount)
 {
@@ -212,7 +206,7 @@ if(length(xx$value) != linecount)
 cat("\n    CHECKS RECEIVED PACKETS:\n")
 
 x <- dataset$scalars[dataset$scalars$name == "rcvdPk:count",]
-xx <- x[grep("\\.rcvrhost\\.udpApp\\[0\\]",x$module),]
+xx <- x[grep("\\.rcvrhost\\.app\\[0\\]",x$module),]
 
 if(length(xx$value) != linecount)
 {

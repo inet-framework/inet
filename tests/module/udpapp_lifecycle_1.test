@@ -27,16 +27,16 @@ record-eventlog = true
 **.arp.retryTimeout = 100ms
 
 # udp apps
-**.numUdpApps = 1
-**.client.udpApp[0].typename = "UDPBasicApp"
-**.client.udpApp[0].startTime = 0s
-**.client.udpApp[0].destAddresses = "10.0.0.2"
-**.client.udpApp[0].destPort = 1000
-**.client.udpApp[0].messageLength = 1000B 
-**.client.udpApp[0].sendInterval = 100ms
+**.numApps = 1
+**.client.app[0].typename = "UDPBasicApp"
+**.client.app[0].startTime = 0s
+**.client.app[0].destAddresses = "10.0.0.2"
+**.client.app[0].destPort = 1000
+**.client.app[0].messageLength = 1000B 
+**.client.app[0].sendInterval = 100ms
 
-**.server.udpApp[0].typename = "UDPSink"
-**.server.udpApp[0].localPort = 1000
+**.server.app[0].typename = "UDPSink"
+**.server.app[0].localPort = 1000
 
 %file: test.ned
 
@@ -80,7 +80,7 @@ Test.server starting up
 .*
 Test.server started
 .*
-Test.server.udpApp\[0\]: received 10 packets
+Test.server.app\[0\]: received 10 packets
 .*
 
 %#--------------------------------------------------------------------------------------------------------------

@@ -61,22 +61,22 @@ tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 20s
 
 ## UDP apps
-**.numUdpApps = 2
-**.udpApp[0].typename = "UDPBasicApp"
-**.udpApp[0].destPort = 1234
-#**.udpApp[0].sendInterval = 2ms
-#**.udpApp[0].stopTime = 20s
-**.host*snap.udpApp[0].sendInterval = 1.719ms   #etherframe with snap and gap: 1074 bytes, 2 packets (sent, echoed): 1074*8/10000000*2 = 17.184ms
-**.host*snap.udpApp[0].stopTime = 17.19s
-**.udpApp[0].sendInterval = 1.706ms   #etherframe and gap: 1066 bytes, 2 packets (sent, echoed): 1066*8/10000000*2 = 17.056ms
-**.udpApp[0].stopTime = 17.06s
-**.host1.udpApp[0].destAddresses = "host2"
-**.host2.udpApp[0].destAddresses = "host1"
-**.host1snap.udpApp[0].destAddresses = "host2snap"
-**.host2snap.udpApp[0].destAddresses = "host1snap"
-**.udpApp[0].messageLength = 1000 bytes
-**.udpApp[1].typename = "UDPEchoApp"
-**.udpApp[1].localPort = 1234
+**.numApps = 2
+**.app[0].typename = "UDPBasicApp"
+**.app[0].destPort = 1234
+#**.app[0].sendInterval = 2ms
+#**.app[0].stopTime = 20s
+**.host*snap.app[0].sendInterval = 1.719ms   #etherframe with snap and gap: 1074 bytes, 2 packets (sent, echoed): 1074*8/10000000*2 = 17.184ms
+**.host*snap.app[0].stopTime = 17.19s
+**.app[0].sendInterval = 1.706ms   #etherframe and gap: 1066 bytes, 2 packets (sent, echoed): 1066*8/10000000*2 = 17.056ms
+**.app[0].stopTime = 17.06s
+**.host1.app[0].destAddresses = "host2"
+**.host2.app[0].destAddresses = "host1"
+**.host1snap.app[0].destAddresses = "host2snap"
+**.host2snap.app[0].destAddresses = "host1snap"
+**.app[0].messageLength = 1000 bytes
+**.app[1].typename = "UDPEchoApp"
+**.app[1].localPort = 1234
 
 **.host*snap.eth[*].useSNAP = true
 **.host*.eth[*].queue.frameCapacity = 1
@@ -103,9 +103,9 @@ dataset <- loadDataset(scafile)
 
 cat("\nOMNETPP TEST RESULT:\n")
 
-udpApp <- dataset$scalars[grep("\\.host\\d\\w*\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
-udpSent <- udpApp[udpApp$name == "sentPk:sum(packetBytes)",]
-udpRcvd <- udpApp[udpApp$name == "echoedPk:count",]
+app <- dataset$scalars[grep("\\.host\\d\\w*\\.app\\[\\d\\]$",dataset$scalars$module),]
+udpSent <- app[app$name == "sentPk:sum(packetBytes)",]
+udpRcvd <- app[app$name == "echoedPk:count",]
 
 cat("  UDP SPEED TEST RESULT:\n")
 

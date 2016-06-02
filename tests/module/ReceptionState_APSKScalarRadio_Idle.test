@@ -62,11 +62,12 @@ ned-path = .;../../../../src
 *.host*.wlan[*].radio.receiver.snirThreshold = 10dB
 
 # ping app
-*.host1.numPingApps = 1
-*.host1.pingApp[0].count = 1
-*.host1.pingApp[0].printPing = true
-*.host1.pingApp[0].destAddr = "host2"
-*.host1.pingApp[0].startTime = 0s
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].count = 1
+*.host1.app[0].printPing = true
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].startTime = 0s
 
 %not-contains: results/General-0.elog
 Changing radio reception state from IDLE to BUSY.

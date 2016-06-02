@@ -89,10 +89,11 @@ ned-path = .;../../../../src;../../lib
 **.mobility.constraintAreaMaxY = 600m
 
 # ping app (host[0] pinged by others)
-**.sender.numPingApps = 1
-**.sender.pingApp[0].startTime = uniform(1s,5s)
-**.sender.pingApp[0].printPing = true
-**.sender.pingApp[0].destAddr = "receiver(ipv4)"
+**.sender.numApps = 1
+**.sender.app[0].typename = "PingApp"
+**.sender.app[0].startTime = uniform(1s,5s)
+**.sender.app[0].printPing = true
+**.sender.app[0].destAddr = "receiver(ipv4)"
 
 # nic settings
 **.wlan[*].typename = "IdealWirelessNic"

@@ -51,19 +51,19 @@ network = DhcpExample
 
 *.numHosts = 10
 
-**.numUdpApps = 1
+**.numApps = 1
 
-**.cli[*].udpApp[0].typename = "DHCPClient"
-**.cli[*].udpApp[0].interface="eth0"   # interface toward dhcp server
+**.cli[*].app[0].typename = "DHCPClient"
+**.cli[*].app[0].interface="eth0"   # interface toward dhcp server
 
-**.srv.udpApp[0].typename = "DHCPServer"
-**.srv.udpApp[0].subnetMask = "255.255.255.0"        # netmask to assign
-**.srv.udpApp[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
-**.srv.udpApp[0].maxNumClients = 100     # number of ip to lease
-**.srv.udpApp[0].gateway = "192.168.1.1"     # gateway to assign
-**.srv.udpApp[0].dns = ""         # dns to assign
-**.srv.udpApp[0].leaseTime = 1000s     # lease time in seconds
-**.srv.udpApp[0].interface="eth0"   # interface to listen
+**.srv.app[0].typename = "DHCPServer"
+**.srv.app[0].subnetMask = "255.255.255.0"        # netmask to assign
+**.srv.app[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.srv.app[0].maxNumClients = 100     # number of ip to lease
+**.srv.app[0].gateway = "192.168.1.1"     # gateway to assign
+**.srv.app[0].dns = ""         # dns to assign
+**.srv.app[0].leaseTime = 1000s     # lease time in seconds
+**.srv.app[0].interface="eth0"   # interface to listen
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout

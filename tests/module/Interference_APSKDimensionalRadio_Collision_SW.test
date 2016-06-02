@@ -68,11 +68,12 @@ ned-path = .;../../../../src
 *.hostReceiver.wlan[*].radio.transmitter.power = 0W
 
 # ping app
-*.hostSender*.numPingApps = 1
-*.hostSender*.pingApp[0].count = 1
-*.hostSender*.pingApp[0].printPing = true
-*.hostSender*.pingApp[0].destAddr = "hostReceiver"
-*.hostSender*.pingApp[0].startTime = 0s
+*.hostSender*.numApps = 1
+*.hostSender*.app[0].typename = "PingApp"
+*.hostSender*.app[0].count = 1
+*.hostSender*.app[0].printPing = true
+*.hostSender*.app[0].destAddr = "hostReceiver"
+*.hostSender*.app[0].startTime = 0s
 
 %contains: results/General-0.elog
 Changing radio reception state from IDLE to RECEIVING.

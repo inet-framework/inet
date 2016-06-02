@@ -10,9 +10,10 @@ tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 
-*.host.numPingApps = 1
-*.host.pingApp[0].destAddr = "192.168.0.42"
-*.host.pingApp[0].startTime = 3s
+*.host.numApps = 1
+*.host.app[0].typename = "PingApp"
+*.host.app[0].destAddr = "192.168.0.42"
+*.host.app[0].startTime = 3s
 
 *.host.networkLayer.configurator.networkConfiguratorModule = ""
 
@@ -44,11 +45,11 @@ network Test
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /DEBUG: //
 %contains-regex: stdout
-.*Event #\d+  t=3   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+.*Event #\d+  t=3   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
 Sending ping request #0 to lower layer\.
 .*
-\*\* Event #\d+  t=5   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=5   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Sending ping request #2 to lower layer\.
 .*
 \*\* Event #\d+  t=6   Test\.scenarioManager \(ScenarioManager, id=2\)

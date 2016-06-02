@@ -23,14 +23,14 @@ network Dhcptest
         }
         dhcpClient: StandardHost {
             parameters:
-                numUdpApps = 1;
-                udpApp[0].typename = "DHCPClient";
+                numApps = 1;
+                app[0].typename = "DHCPClient";
                 @display("p=66,76");
         }
         dhcpServer: StandardHost {
             parameters:
-                numUdpApps = 1;
-                udpApp[0].typename = "DHCPServer";
+                numApps = 1;
+                app[0].typename = "DHCPServer";
                 @display("p=277,76");
         }
     connections:
@@ -50,13 +50,13 @@ network = Dhcptest
 sim-time-limit = 10500s
 cmdenv-express-mode = false
 
-**.dhcpServer.udpApp[0].typename = "DHCPServer"
-**.dhcpServer.udpApp[0].subnetMask = "255.255.255.0"        # netmask to assign
-**.dhcpServer.udpApp[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
-**.dhcpServer.udpApp[0].maxNumClients = 100     # number of ip to lease
-**.dhcpServer.udpApp[0].gateway = "192.168.1.1"     # gateway to assign
-**.dhcpServer.udpApp[0].dns = ""         # dns to assign
-**.dhcpServer.udpApp[0].leaseTime = 1000s     # lease time in seconds
+**.dhcpServer.app[0].typename = "DHCPServer"
+**.dhcpServer.app[0].subnetMask = "255.255.255.0"        # netmask to assign
+**.dhcpServer.app[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.dhcpServer.app[0].maxNumClients = 100     # number of ip to lease
+**.dhcpServer.app[0].gateway = "192.168.1.1"     # gateway to assign
+**.dhcpServer.app[0].dns = ""         # dns to assign
+**.dhcpServer.app[0].leaseTime = 1000s     # lease time in seconds
 
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------

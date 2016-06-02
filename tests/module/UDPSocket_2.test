@@ -22,7 +22,7 @@ Define_Module(TestApp);
 void TestApp::activity()
 {
   UDPSocket s;
-  s.setOutputGate(gate("udpOut"));
+  s.setOutputGate(gate("socketOut"));
   s.bind(100);
   s.bind(200); // will fail
 }
@@ -31,13 +31,13 @@ void TestApp::activity()
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: TestApp.ned
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
-simple TestApp like IUDPApp
+simple TestApp like IApp
 {
     gates:
-        input udpIn;
-        output udpOut;
+        input socketIn;
+        output socketOut;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -47,8 +47,8 @@ ned-path = .;../../../../src;../../lib
 network = SimpleTestNetwork
 cmdenv-express-mode = false
 cmdenv-event-banner-details = true
-**.client.numUdpApps = 1
-**.client.udpApp[0].typename = "TestApp"
+**.client.numApps = 1
+**.client.app[0].typename = "TestApp"
 
 %exitcode: 1
 

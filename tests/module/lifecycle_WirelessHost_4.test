@@ -18,8 +18,8 @@ sim-time-limit = 10s
 *.host.numWlanInterfaces=1
 
 *.host.networkLayer.configurator.networkConfiguratorModule = ""
-*.host.numUdpApps = 1
-*.host.udpApp[0].typename = "DHCPClient"
+*.host.numApps = 1
+*.host.app[0].typename = "DHCPClient"
 
 *.host.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m

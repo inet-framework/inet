@@ -136,17 +136,17 @@ num-rngs = 2
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 
-**.numUdpApps = 2
-**.udpApp[0].typename = "UDPBasicApp"
-**.udpApp[0].destPort = 1234
-**.udpApp[0].messageLength = 32 bytes
-**.udpApp[0].sendInterval = 1s
-**.udpApp[0].startTime = 100s + uniform(-0.5s, 0.5s, 1)
-**.udpApp[0].stopTime = this.startTime + 999.9s
-**.H2.udpApp[0].destAddresses = "H1"
-**.H1.udpApp[0].destAddresses = "H2"
-**.udpApp[1].typename = "UDPEchoApp"
-**.udpApp[1].localPort = 1234
+**.numApps = 2
+**.app[0].typename = "UDPBasicApp"
+**.app[0].destPort = 1234
+**.app[0].messageLength = 32 bytes
+**.app[0].sendInterval = 1s
+**.app[0].startTime = 100s + uniform(-0.5s, 0.5s, 1)
+**.app[0].stopTime = this.startTime + 999.9s
+**.H2.app[0].destAddresses = "H1"
+**.H1.app[0].destAddresses = "H2"
+**.app[1].typename = "UDPEchoApp"
+**.app[1].localPort = 1234
 
 **.arp.cacheTimeout = 1s
 
@@ -238,7 +238,7 @@ rcvdPk <- 960
 cat("\nOMNETPP TEST RESULT:\n")
 
 x <- loadDataset('results/General-*.sca')
-ds <- x$scalars[grep("\\.H\\d\\.udpApp\\[\\d\\]$",x$scalars$module),]
+ds <- x$scalars[grep("\\.H\\d\\.app\\[\\d\\]$",x$scalars$module),]
 
 #merge runnumber column to ds:
 y <- subset(x$runattrs, attrname=='runnumber')
