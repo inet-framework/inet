@@ -389,7 +389,7 @@ void TCP_lwIP::handleAppMessage(cMessage *msgP)
         TCPDataTransferMode dataTransferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
 
         // add into appConnMap
-        conn = new TcpLwipConnection(*this, connId, msgP->getArrivalGate()->getIndex(), dataTransferMode);
+        conn = new TcpLwipConnection(*this, connId, dataTransferMode);
         tcpAppConnMapM[connId] = conn;
 
         EV_INFO << this << ": TCP connection created for " << msgP << "\n";
@@ -574,7 +574,7 @@ void TCP_lwIP::finish()
 
 void TCP_lwIP::printConnBrief(TcpLwipConnection& connP)
 {
-    EV_TRACE << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM;
+    EV_TRACE << this << ": connId=" << connP.connIdM;
 }
 
 void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
@@ -760,7 +760,7 @@ void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     connP.fillStatusInfo(*statusInfo);
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
-    send(msgP, "appOut", connP.appGateIndexM);
+    send(msgP, "appOut");
 }
 
 TcpLwipSendQueue *TCP_lwIP::createSendQueue(TCPDataTransferMode transferModeP)

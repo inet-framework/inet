@@ -70,8 +70,7 @@ class INET_API TcpLwipConnection
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIndexP,
-            TCPDataTransferMode dataTransferModeP);
+    TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, TCPDataTransferMode dataTransferModeP);
 
     TcpLwipConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 
@@ -117,7 +116,6 @@ class INET_API TcpLwipConnection
 
   public:
     int connIdM;
-    int appGateIndexM;
     LwipTcpLayer::tcp_pcb *pcbM;
     TcpLwipSendQueue *sendQueueM;
     TcpLwipReceiveQueue *receiveQueueM;

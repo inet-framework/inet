@@ -67,11 +67,9 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment& tcpsegP)
         rcvAckVector.record(tcpsegP.getAckNo());
 }
 
-TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIndexP,
-        TCPDataTransferMode dataTransferModeP)
+TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, TCPDataTransferMode dataTransferModeP)
     :
     connIdM(connIdP),
-    appGateIndexM(gateIndexP),
     pcbM(nullptr),
     sendQueueM(tcpLwipP.createSendQueue(dataTransferModeP)),
     receiveQueueM(tcpLwipP.createReceiveQueue(dataTransferModeP)),
@@ -96,7 +94,6 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIn
 TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP)
     :
     connIdM(connIdP),
-    appGateIndexM(connP.appGateIndexM),
     pcbM(pcbP),
     sendQueueM(check_and_cast<TcpLwipSendQueue *>(inet::utils::createOne(connP.sendQueueM->getClassName()))),
     receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(inet::utils::createOne(connP.receiveQueueM->getClassName()))),
@@ -144,7 +141,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(ind);
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    tcpLwipM.send(msg, "appOut");
     //TODO shouldn't read from lwip until accept arrived
 }
 
@@ -165,7 +162,7 @@ void TcpLwipConnection::sendEstablishedMsg()
 
     msg->setControlInfo(tcpConnectInfo);
 
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    tcpLwipM.send(msg, "appOut");
     sendUpEnabled = true;
     do_SEND();
     //TODO now can read from lwip
@@ -204,7 +201,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     TCPCommand *ind = new TCPCommand();
     ind->setSocketId(connIdM);
     msg->setControlInfo(ind);
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    tcpLwipM.send(msg, "appOut");
 }
 
 void TcpLwipConnection::fillStatusInfo(TCPStatusInfo& statusInfo)
@@ -390,7 +387,7 @@ void TcpLwipConnection::sendUpData()
             dataMsg->setControlInfo(tcpConnectInfo);
             int64_t len = dataMsg->getByteLength();
             // send Msg to Application layer:
-            tcpLwipM.send(dataMsg, "appOut", appGateIndexM);
+            tcpLwipM.send(dataMsg, "appOut");
 //            while (len > 0) {
 //                unsigned int slen = len > 0xffff ? 0xffff : len;
 //                tcpLwipM.getLwipTcpLayer()->tcp_recved(pcbM, slen);

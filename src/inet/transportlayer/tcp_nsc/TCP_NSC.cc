@@ -124,7 +124,6 @@ static std::ostream& operator<<(std::ostream& osP, const TCP_NSC_Connection& con
 {
     osP << "Conn={"
         << "connId=" << connP.connIdM
-        << " appGateIndex=" << connP.appGateIndexM
         << " nscsocket=" << connP.pNscSocketM
         << " sentEstablishedM=" << connP.sentEstablishedM
         << '}';
@@ -277,7 +276,7 @@ void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     msg->setControlInfo(tcpConnectInfo);
-    send(msg, "appOut", connP.appGateIndexM);
+    send(msg, "appOut");
     connP.sentEstablishedM = true;
 }
 
@@ -297,7 +296,7 @@ void TCP_NSC::sendAvailableIndicationMsg(TCP_NSC_Connection& c)
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
     msg->setControlInfo(tcpConnectInfo);
-    send(msg, "appOut", c.appGateIndexM);
+    send(msg, "appOut");
     c.sentEstablishedM = true;
 }
 
@@ -460,7 +459,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
                 TCP_NSC_Connection *conn = &tcpAppConnMapM[newConnId];
                 conn->tcpNscM = this;
                 conn->connIdM = newConnId;
-                conn->appGateIndexM = c.appGateIndexM;
                 conn->forkedConnId = c.connIdM;
                 conn->pNscSocketM = sock;
 
@@ -549,7 +547,7 @@ void TCP_NSC::sendDataToApp(TCP_NSC_Connection& c)
         tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
         dataMsg->setControlInfo(tcpConnectInfo);
         // send Msg to Application layer:
-        send(dataMsg, "appOut", c.appGateIndexM);
+        send(dataMsg, "appOut");
     }
 }
 
@@ -593,7 +591,7 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
         TCPCommand *ind = new TCPCommand();
         ind->setSocketId(c.connIdM);
         msg->setControlInfo(ind);
-                    send(msg, "appOut", c.appGateIndexM);
+        send(msg, "appOut");
     }
 }
 
@@ -641,7 +639,6 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn = &tcpAppConnMapM[connId];
         conn->tcpNscM = this;
         conn->connIdM = connId;
-        conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
         conn->pNscSocketM = nullptr;    // will be filled in within processAppCommand()
 
         TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
@@ -748,8 +745,7 @@ void TCP_NSC::removeConnection(int connIdP)
 
 void TCP_NSC::printConnBrief(TCP_NSC_Connection& connP)
 {
-    EV_DEBUG << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM
-             << " nscsocket=" << connP.pNscSocketM << "\n";
+    EV_DEBUG << this << ": connId=" << connP.connIdM << " nscsocket=" << connP.pNscSocketM << "\n";
 }
 
 void TCP_NSC::loadStack(const char *stacknameP, int bufferSizeP)
@@ -1080,7 +1076,6 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
 
 void TCP_NSC::process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCommandP, cMessage *msgP)
 {
-    EV_DEBUG << "process_ACCEPT: conn=" << connP.connIdM << ", forkedConn=" << connP.forkedConnId << endl;
     connP.forkedConnId = -1;
     sendEstablishedMsg(connP);
 
@@ -1197,7 +1192,7 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
 
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
-    send(msgP, "appOut", connP.appGateIndexM);
+    send(msgP, "appOut");
 }
 
 bool TCP_NSC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
