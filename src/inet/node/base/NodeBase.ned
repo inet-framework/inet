@@ -23,6 +23,12 @@ import inet.node.inet.INetworkNode;
 import inet.power.contract.IEnergyGenerator;
 import inet.power.contract.IEnergyStorage;
 
+//
+// This module contains the most basic infrastructure for network nodes that is
+// not strictly communication protocol related.
+//
+// See derived modules: ~StandardHost, ~WirelessHost, ~AdhocHost, ~Router, etc.
+//
 module NodeBase like INetworkNode
 {
     parameters:

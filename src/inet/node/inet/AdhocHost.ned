@@ -19,14 +19,14 @@ package inet.node.inet;
 
 
 //
-// A wireless host containing routing, mobility and battery components.
-// Supports only IPv4 protocol, TCP and UDP as transport protocol.
+// A wireless host containing routing, mobility and energy components. Supports
+// IPv4 network protocol, TCP, UDP, and SCTP as transport protocol.
 // This is a typical mobile node which can participate in adhoc routing
 // and may have TCP/UDP applications installed. Supports ICMP (ping) too.
 //
-// - By default contains a single wireless cards, however it can be configured
+// - By default contains a single wireless card, however it can be configured
 //   by the numWlanInterfaces parameter. Wirless card type is configured by the
-//   **.wlan.typename parameter. see:  inet.linklayer.ieee80211 or other
+//   **.wlan[*].typename parameter. see:  inet.linklayer.ieee80211 or other
 //   modules implementing ~IWirelessNic
 // - Node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility
