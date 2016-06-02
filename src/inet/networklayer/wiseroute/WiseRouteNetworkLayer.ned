@@ -64,14 +64,14 @@ module WiseRouteNetworkLayer like INetworkLayer
         dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
         dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
 
-        np.upperLayerOut --> dp.lowerLayerIn++;
-        np.upperLayerIn <-- dp.lowerLayerOut++;
+        np.transportOut --> dp.lowerLayerIn++;
+        np.transportIn <-- dp.lowerLayerOut++;
 
         dp.upperLayerOut++ --> echo.localIn;
         dp.upperLayerIn++ <-- echo.sendOut;
 
-        ifIn --> { @display("m=s"); } --> np.lowerLayerIn;
-        np.lowerLayerOut --> { @display("m=s"); } --> ifOut;
+        ifIn --> { @display("m=s"); } --> np.queueIn;
+        np.queueOut --> { @display("m=s"); } --> ifOut;
 
         for i=0..sizeof(pingOut)-1 {
             echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];

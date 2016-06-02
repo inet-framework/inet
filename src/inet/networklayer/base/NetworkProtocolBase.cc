@@ -32,8 +32,8 @@ void NetworkProtocolBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerProtocol(Protocol::gnp, gate("upperLayerOut"));
-        registerProtocol(Protocol::gnp, gate("lowerLayerOut"));
+        registerProtocol(Protocol::gnp, gate("transportOut"));
+        registerProtocol(Protocol::gnp, gate("queueOut"));
     }
 }
 
@@ -46,7 +46,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (message->isPacket())
         emit(packetSentToUpperSignal, message);
-    send(message, "upperLayerOut");
+    send(message, "transportOut");
 }
 
 void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
@@ -56,7 +56,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (interfaceId != -1) {
         cObject *ctrl = message->getControlInfo();
         check_and_cast<IInterfaceControlInfo *>(ctrl)->setInterfaceId(interfaceId);
-        send(message, "lowerLayerOut");
+        send(message, "queueOut");
     }
     else {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
@@ -66,7 +66,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
                 cObject *ctrl = message->getControlInfo()->dup();
                 check_and_cast<IInterfaceControlInfo *>(ctrl)->setInterfaceId(interfaceEntry->getInterfaceId());
                 duplicate->setControlInfo(ctrl);
-                send(duplicate, "lowerLayerOut");
+                send(duplicate, "queueOut");
             }
         }
         delete message;
@@ -75,12 +75,12 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
 
 bool NetworkProtocolBase::isUpperMessage(cMessage *message)
 {
-    return message->getArrivalGate()->isName("upperLayerIn");
+    return message->getArrivalGate()->isName("transportIn");
 }
 
 bool NetworkProtocolBase::isLowerMessage(cMessage *message)
 {
-    return message->getArrivalGate()->isName("lowerLayerIn");
+    return message->getArrivalGate()->isName("queueIn");
 }
 
 } // namespace inet
