@@ -17,97 +17,40 @@
 
 package inet.examples.bgpv4.BGPOpen;
 
-import inet.common.MessageDispatcher;
 import inet.common.misc.MessageChecker;
-import inet.linklayer.contract.IWiredNic;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
+import inet.node.inet.ApplicationLayerNodeBase;
 import inet.routing.bgpv4.BGPRouting;
-import inet.transportlayer.contract.ITCP;
 
 
 //
 // Example IPv4 router with BGPv4 support.
 //
-module BGPRouterSimple
+module BGPRouterSimple extends ApplicationLayerNodeBase
 {
     parameters:
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
-        *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.routingTableModule = default(absPath(".routingTable"));
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
+        forwarding = true;
     submodules:
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=52,108;i=block/table_s");
-        }
-        routingTable: IPv4RoutingTable {
-            parameters:
-                forwarding = true;
-                routerId = "auto";
-                @display("p=52,172;i=block/table2_s");
-        }
         bgp: BGPRouting {
             parameters:
-                ospfRoutingModule = "";
-                @display("p=160,50;i=block/network");
+                ospfRoutingModule = default("");
+                @display("p=364,50;i=block/network");
         }
         snifferIn: MessageChecker {
             parameters:
-                @display("i=block/uparrow_s;p=132,124");
+                @display("i=block/uparrow_s;p=333,124");
         }
         snifferOut: MessageChecker {
             parameters:
-                @display("i=block/downarrow_s;p=196,124");
+                @display("i=block/downarrow_s;p=397,124");
         }
-        tcp: <tcpType> like ITCP if tcpType != "" {
-            parameters:
-                @display("p=160,202;i=block/transport");
-        }
-        tn: MessageDispatcher {
-            parameters:
-                @display("b=580,5,,,,1;p=461,274");
-        }
-        ipv4: IPv4NetworkLayer {
-            parameters:
-                proxyARP = true;
-                @display("p=401,320;i=block/layer;q=queue");
-        }
-        nl: MessageDispatcher {
-            parameters:
-                @display("b=580,5,,,,1;p=461,368");
-        }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
-            parameters:
-                @display("p=401,429,row,110;q=l2queue;i=block/ifcard");
-        }
-
     connections allowunconnected:
         bgp.socketOut --> { @display("m=s"); } --> snifferOut.in;
         bgp.socketIn <-- { @display("m=s"); } <-- snifferIn.out;
 
-        snifferOut.out --> { @display("m=s"); } --> tcp.appIn;
-        snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut;
-
-        tcp.ipOut --> { @display("m=s"); } --> tn.upperLayerIn++;
-        tcp.ipIn <-- { @display("m=s"); } <-- tn.upperLayerOut++;
-
-        tn.lowerLayerOut++ --> { @display("m=s"); } --> ipv4.transportIn;
-        tn.lowerLayerIn++ <-- { @display("m=s"); } <-- ipv4.transportOut;
-
-        ipv4.ifOut --> { @display("m=s"); } --> nl.upperLayerIn++;
-        ipv4.ifIn <-- { @display("m=s"); } <-- nl.upperLayerOut++;
-
-        // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
-            ppp[i].upperLayerOut --> nl.lowerLayerIn++;
-            ppp[i].upperLayerIn <-- nl.lowerLayerOut++;
-        }
+        snifferOut.out --> { @display("m=s"); } --> at.upperLayerIn++;
+        snifferIn.in <-- { @display("m=s"); } <-- at.upperLayerOut++;
 }
 
