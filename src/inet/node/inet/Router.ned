@@ -17,13 +17,11 @@
 
 package inet.node.inet;
 
-import inet.applications.contract.IUDPApp;
-import inet.node.base.TransportLayerNodeBase;
+import inet.applications.contract.IApp;
+import inet.node.base.ApplicationLayerNodeBase;
 import inet.routing.contract.IBGPRouting;
 import inet.routing.contract.IIPRouting;
 import inet.routing.contract.IPIMRouting;
-import inet.transportlayer.contract.ITCP;
-import inet.transportlayer.contract.IUDP;
 
 //
 // IPv4 router that supports wireless, Ethernet, PPP and external interfaces.
@@ -48,7 +46,7 @@ import inet.transportlayer.contract.IUDP;
 // By default, dynamic routing is not supported. Specific routing protocols can
 // be added by setting the hasOSPF/hasRIP/hasBGP parameters.
 //
-module Router extends TransportLayerNodeBase
+module Router extends ApplicationLayerNodeBase
 {
     parameters:
         @display("i=abstract/router");
@@ -82,10 +80,8 @@ module Router extends TransportLayerNodeBase
         }
 
     connections allowunconnected:
-        if hasOSPF {
-            ospf.ipOut --> tn.upperLayerIn++;
-            ospf.ipIn <-- tn.upperLayerOut++;
-        }
+        ospf.ipOut --> tn.upperLayerIn++ if hasOSPF;
+        ospf.ipIn <-- tn.upperLayerOut++ if hasOSPF;
 
         bgp.socketOut --> at.upperLayerIn++ if hasBGP;
         bgp.socketIn <-- at.upperLayerOut++ if hasBGP;
@@ -93,8 +89,6 @@ module Router extends TransportLayerNodeBase
         rip.socketOut --> at.upperLayerIn++ if hasRIP;
         rip.socketIn <-- at.upperLayerOut++ if hasRIP;
 
-        if hasPIM {
-            pim.networkLayerOut --> tn.upperLayerIn++;
-            pim.networkLayerIn <-- tn.upperLayerOut++;
-        }
+        pim.networkLayerOut --> tn.upperLayerIn++ if hasPIM;
+        pim.networkLayerIn <-- tn.upperLayerOut++ if hasPIM;
 }
