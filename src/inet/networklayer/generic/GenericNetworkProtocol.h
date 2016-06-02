@@ -165,7 +165,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     /**
      * Initialization
      */
-    virtual void initialize() override;
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     /**
      * Processing of generic datagrams. Called when a datagram reaches the front
