@@ -409,10 +409,8 @@ std::string HttpServerBase::generateBody()
 void HttpServerBase::registerWithController()
 {
     // Find controller object and register
-    HttpController *controller = check_and_cast_nullable<HttpController *>(getSimulation()->getSystemModule()->getSubmodule("controller"));
-    if (controller == nullptr)
-        throw cRuntimeError("Controller module not found");
-    controller->registerServer(host->getFullPath().c_str(), hostName.c_str(), port, INSERT_END, activationTime);
+    HttpController *controller = getModuleFromPar<HttpController>(par("httpControllerModule"), this);
+    controller->registerServer(this, host->getFullPath().c_str(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

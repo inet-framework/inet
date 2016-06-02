@@ -16,6 +16,7 @@
 //
 
 #include "inet/applications/httptools/configurator/HttpController.h"
+#include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
 
@@ -118,7 +119,7 @@ void HttpController::handleMessage(cMessage *msg)
     }
 }
 
-void HttpController::registerServer(const char *objectName, const char *wwwName, int port, int rank, simtime_t activationTime)
+void HttpController::registerServer(HttpServerBase *serverAppModule, const char *objectName, const char *wwwName, int port, int rank, simtime_t activationTime)
 {
     Enter_Method_Silent();
 
@@ -135,7 +136,7 @@ void HttpController::registerServer(const char *objectName, const char *wwwName,
     en->name = serverName;
     en->host = objectName;
     en->port = port;
-    en->module = getTcpApp(objectName);
+    en->module = serverAppModule;
     en->activationTime = activationTime;
     en->statusSetTime = simTime();
     en->serverStatus = SS_NORMAL;
@@ -268,14 +269,6 @@ int HttpController::getAnyServerInfo(char *wwwName, char *module, int& port)
     port = en->port;
 
     return 0;
-}
-
-cModule *HttpController::getTcpApp(const char *node)
-{
-    cModule *receiverModule = getSimulation()->getModuleByPath(node);
-    ASSERT(receiverModule != nullptr);
-
-    return receiverModule->getSubmodule("tcpApp", 0);    // TODO: CHECK INDEX
 }
 
 void HttpController::setSpecialStatus(const char *www, ServerStatus status, double p, double amortize)
