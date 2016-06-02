@@ -67,7 +67,7 @@ void BGPRouting::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {    //BGP level
         handleTimer(msg);
     }
-    else if (!strcmp(msg->getArrivalGate()->getName(), "tcpIn")) {    //TCP level
+    else if (!strcmp(msg->getArrivalGate()->getName(), "socketIn")) {    //TCP level
         processMessageFromTCP(msg);
     }
     else {
@@ -136,7 +136,7 @@ void BGPRouting::listenConnectionFromPeer(SessionID sessionID)
         _BGPSessions[sessionID]->getSocketListen()->renewSocket();
     }
     if (_BGPSessions[sessionID]->getSocketListen()->getState() != TCPSocket::LISTENING) {
-        _BGPSessions[sessionID]->getSocketListen()->setOutputGate(gate("tcpOut"));
+        _BGPSessions[sessionID]->getSocketListen()->setOutputGate(gate("socketOut"));
         _BGPSessions[sessionID]->getSocketListen()->readDataTransferModePar(*this);
         _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
         _BGPSessions[sessionID]->getSocketListen()->listen();
@@ -154,7 +154,7 @@ void BGPRouting::openTCPConnectionToPeer(SessionID sessionID)
         socket->renewSocket();
     }
     socket->setCallbackObject(this, (void *)sessionID);
-    socket->setOutputGate(gate("tcpOut"));
+    socket->setOutputGate(gate("socketOut"));
     socket->readDataTransferModePar(*this);
     socket->bind(intfEntry->ipv4Data()->getIPAddress(), 0);
     _socketMap.addSocket(socket);
@@ -168,7 +168,7 @@ void BGPRouting::processMessageFromTCP(cMessage *msg)
     if (!socket) {
         socket = new TCPSocket(msg);
         socket->readDataTransferModePar(*this);
-        socket->setOutputGate(gate("tcpOut"));
+        socket->setOutputGate(gate("socketOut"));
         IPv4Address peerAddr = socket->getRemoteAddress().toIPv4();
         SessionID i = findIdFromPeerAddr(_BGPSessions, peerAddr);
         if (i == (SessionID)-1) {

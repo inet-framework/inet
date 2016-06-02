@@ -61,8 +61,8 @@ simple BGPRouting like IBGPRouting
         xml bgpConfig;
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
     gates:
-        input tcpIn;
-        output tcpOut;
+        input socketIn;
+        output socketOut;
 }
 
 
