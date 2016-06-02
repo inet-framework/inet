@@ -26,6 +26,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -433,7 +434,43 @@ void PingApp::sendPing()
     controlInfo->setTransportProtocol(1);    // IP_PROT_ICMP);
     msg->setControlInfo(dynamic_cast<cObject *>(controlInfo));
     EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
-    send(msg, "pingOut");
+
+
+    cModule *outModule = nullptr;
+    switch (destAddr.getType()) {
+        case L3Address::IPv4: {
+#ifdef WITH_IPv4
+            controlInfo->setTransportProtocol(IP_PROT_ICMP);
+            outModule = getParentModule()->getSubmodule("ipv4")->getSubmodule("icmp");
+            break;
+#else
+            throw cRuntimeError("INET compiled without IPv4");
+#endif
+        }
+        case L3Address::IPv6: {
+#ifdef WITH_IPv6
+            controlInfo->setTransportProtocol(IP_PROT_IPv6_ICMP);
+            outModule = getParentModule()->getSubmodule("ipv6")->getSubmodule("icmpv6");
+            break;
+#else
+            throw cRuntimeError("INET compiled without IPv6");
+#endif
+        }
+        case L3Address::MODULEID:
+        case L3Address::MODULEPATH: {
+#ifdef WITH_GENERIC
+            controlInfo->setTransportProtocol(IP_PROT_IPv6_ICMP);       //FIXME ???
+            outModule = getParentModule()->getSubmodule("generic")->getSubmodule("echo");
+            break;
+#else
+            throw cRuntimeError("INET compiled without Generic Network");
+#endif
+        }
+        default:
+            throw cRuntimeError("Unaccepted destination address type: %d (address: %s)", (int)destAddr.getType(), destAddr.str().c_str());
+    }
+
+    sendDirect(msg, outModule, "pingIn", getIndex());
 }
 
 } // namespace inet
