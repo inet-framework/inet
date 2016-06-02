@@ -28,7 +28,7 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 network WirelessA
 {
     @display("bgb=500,500");
-    @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red;label=Number of packets received; moduleName=hostB.udpApp[0]; signalName=rcvdPk);
+    @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red;label=Number of packets received; moduleName=hostB.app[0]; signalName=rcvdPk);
     string hostType = default("WirelessHost");
     string mediumType = default("IdealRadioMedium");
     submodules:
