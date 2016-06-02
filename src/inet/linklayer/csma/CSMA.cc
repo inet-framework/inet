@@ -412,6 +412,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                     txAttempts = 0;
                     nbDroppedFrames++;
                     emit(packetFromUpperDroppedSignal, mac);
+                    emit(frameGivenUpSignal, mac);
                     delete mac;
                     manageQueue();
                 }
@@ -528,6 +529,7 @@ void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
                 cancelEvent(rxAckTimer);
             cMessage *mac = macQueue.front();
             macQueue.pop_front();
+            emit(frameTransmittedSignal, mac);
             txAttempts = 0;
             delete mac;
             delete msg;
@@ -573,6 +575,7 @@ void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
         txAttempts = 0;
         // TODO: send dropped signal
         // emit(packetDropped, mac);
+        emit(frameGivenUpSignal, mac);
         emit(NF_LINK_BREAK, mac);
         delete mac;
     }

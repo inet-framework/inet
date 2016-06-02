@@ -35,6 +35,9 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
     int lowerLayerOutGateId;
     //@}
 
+    static simsignal_t frameTransmittedSignal;
+    static simsignal_t frameGivenUpSignal;
+
     InterfaceEntry *interfaceEntry;
 
   protected:

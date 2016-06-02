@@ -541,6 +541,7 @@ void EtherMAC::handleEndTxPeriod()
         throw cRuntimeError("Frame under transmission cannot be found");
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
+    emit(frameTransmittedSignal, curTxFrame);
 
     if (EtherPauseFrame *pauseFrame = dynamic_cast<EtherPauseFrame *>(curTxFrame)) {
         numPauseFramesSent++;
@@ -678,6 +679,7 @@ void EtherMAC::handleRetransmission()
 {
     if (++backoffs > MAX_ATTEMPTS) {
         EV_DETAIL << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
+        emit(frameGivenUpSignal, curTxFrame);
         delete curTxFrame;
         curTxFrame = nullptr;
         transmitState = TX_IDLE_STATE;

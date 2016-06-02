@@ -34,6 +34,8 @@ Define_Module(IdealMac);
 
 simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
+//TODO frameTransmittedSignal, frameGivenUpSignal
+
 IdealMac::IdealMac()
 {
 }

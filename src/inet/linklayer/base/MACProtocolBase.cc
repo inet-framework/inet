@@ -19,6 +19,9 @@
 
 namespace inet {
 
+simsignal_t MACProtocolBase::frameTransmittedSignal = registerSignal("frameTransmitted");
+simsignal_t MACProtocolBase::frameGivenUpSignal = registerSignal("frameGivenUp");
+
 MACProtocolBase::MACProtocolBase() :
     upperLayerInGateId(-1),
     upperLayerOutGateId(-1),

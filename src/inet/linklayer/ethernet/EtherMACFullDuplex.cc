@@ -267,6 +267,7 @@ void EtherMACFullDuplex::handleEndTxPeriod()
         throw cRuntimeError("Frame under transmission cannot be found");
 
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
+    emit(frameTransmittedSignal, curTxFrame);
 
     if (dynamic_cast<EtherPauseFrame *>(curTxFrame) != nullptr) {
         numPauseFramesSent++;

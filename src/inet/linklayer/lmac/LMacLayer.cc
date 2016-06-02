@@ -496,6 +496,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 
                 EV << "Sending down data packet\n";
                 sendDown(data);
+                emit(frameTransmittedSignal, macQueue.front());
                 delete macQueue.front();
                 macQueue.pop_front();
                 macState = SEND_DATA;

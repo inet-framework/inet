@@ -87,6 +87,7 @@ void Loopback::handleMessage(cMessage *msg)
     // pass up payload
     numRcvdOK++;
     emit(packetSentToUpperSignal, msg);
+    emit(frameTransmittedSignal, msg);
     numSent++;
     send(msg, "netwOut");
 

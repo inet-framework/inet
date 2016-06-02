@@ -368,6 +368,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                 else {
                     EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
                                  " new state  SLEEP" << endl;
+                    emit(frameTransmittedSignal, macQueue.front());
                     delete macQueue.front();
                     macQueue.pop_front();
                     // if something in the queue, wakeup soon.
@@ -400,6 +401,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                                  " SLEEP" << endl;
                     //drop the packet
                     cMessage *mac = macQueue.front();
+                    emit(frameGivenUpSignal, mac);
                     macQueue.pop_front();
                     emit(NF_LINK_BREAK, mac);
                     delete mac;
@@ -435,6 +437,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     nbRecvdAcks++;
                     lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
                     cancelEvent(ack_timeout);
+                    emit(frameTransmittedSignal, macQueue.front());
                     delete macQueue.front();
                     macQueue.pop_front();
                     // if something in the queue, wakeup soon.

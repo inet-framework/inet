@@ -37,6 +37,9 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListen
     bool isOperational = false;    // for use in handleMessage()
     InterfaceEntry *interfaceEntry = nullptr;    // nullptr if no InterfaceTable or node is down
 
+    static simsignal_t frameTransmittedSignal;
+    static simsignal_t frameGivenUpSignal;
+
   public:
     MACBase() {}
     virtual ~MACBase();

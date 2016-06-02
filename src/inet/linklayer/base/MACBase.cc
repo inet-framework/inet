@@ -30,6 +30,9 @@
 
 namespace inet {
 
+simsignal_t MACBase::frameTransmittedSignal = registerSignal("frameTransmitted");
+simsignal_t MACBase::frameGivenUpSignal = registerSignal("frameGivenUp");
+
 MACBase::~MACBase()
 {
 }

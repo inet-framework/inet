@@ -558,12 +558,14 @@ void CsmaCaMac::sendAckFrame()
  */
 void CsmaCaMac::finishCurrentTransmission()
 {
+    emit(frameTransmittedSignal, getCurrentTransmission());
     popTransmissionQueue();
     resetStateVariables();
 }
 
 void CsmaCaMac::giveUpCurrentTransmission()
 {
+    emit(frameGivenUpSignal, getCurrentTransmission());
     emit(NF_LINK_BREAK, getCurrentTransmission());
     popTransmissionQueue();
     resetStateVariables();
