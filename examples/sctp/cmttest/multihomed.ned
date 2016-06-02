@@ -33,6 +33,7 @@ network multihomed
             parameters:
                 forwarding = false;
                 ipv4.configurator.networkConfiguratorModule = "";
+                hasSctp = true;
                 @display("p=61,142;i=device/laptop");
             gates:
                 pppg[2];
@@ -41,6 +42,7 @@ network multihomed
             parameters:
                 forwarding = false;
                 ipv4.configurator.networkConfiguratorModule = "";
+                hasSctp = true;
                 @display("p=426,135;i=device/server2");
             gates:
                 pppg[2];

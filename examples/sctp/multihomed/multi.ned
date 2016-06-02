@@ -43,6 +43,7 @@ network multi
         cli1: StandardHost {
             parameters:
                 forwarding = false;
+                hasSctp = true;
                 @display("p=61,142;i=device/laptop");
             gates:
                 pppg[1];
@@ -50,6 +51,7 @@ network multi
         srv1: StandardHost {
             parameters:
                 forwarding = false;
+                hasSctp = true;
                 @display("p=426,135;i=device/server2");
             gates:
                 pppg[1];

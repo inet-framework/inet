@@ -63,10 +63,12 @@ network NClients
         }
         cli[n]: StandardHost {
             parameters:
+                hasSctp = true;
                 @display("i=device/laptop");
         }
         srv: StandardHost {
             parameters:
+                hasSctp = true;
                 @display("p=544,194;i=device/server_l");
         }
     connections:
