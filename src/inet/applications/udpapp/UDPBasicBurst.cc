@@ -19,7 +19,6 @@
 //
 
 #include "inet/applications/udpapp/UDPBasicBurst.h"
-
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
@@ -117,7 +116,7 @@ cPacket *UDPBasicBurst::createPacket()
 
 void UDPBasicBurst::processStart()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
 
     const char *destAddrs = par("destAddresses");

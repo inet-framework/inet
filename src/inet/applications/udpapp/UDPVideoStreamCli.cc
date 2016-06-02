@@ -74,7 +74,7 @@ void UDPVideoStreamCli::requestStream()
 
     EV_INFO << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
 
     cPacket *pk = new cPacket("VideoStrmReq");

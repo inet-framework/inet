@@ -44,7 +44,7 @@ void TCPSinkApp::initialize(int stage)
 
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
-        socket.setOutputGate(gate("tcpOut"));
+        socket.setOutputGate(gate("socketOut"));
         socket.readDataTransferModePar(*this);
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.listen();
@@ -57,7 +57,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         // we close too
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
-        send(msg, "tcpOut");
+        send(msg, "socketOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         cPacket *pk = PK(msg);

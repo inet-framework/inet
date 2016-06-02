@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.tcpapp;
 
-import inet.applications.contract.ITCPApp;
-
+import inet.applications.contract.IApp;
 
 //
 // Accepts any number of incoming TCP connections, and sends back the
@@ -76,4 +74,3 @@ simple TCPEchoApp extends TCPSrvHostApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
 }
-

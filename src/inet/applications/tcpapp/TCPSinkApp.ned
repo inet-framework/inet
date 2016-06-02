@@ -18,7 +18,7 @@
 
 package inet.applications.tcpapp;
 
-import inet.applications.contract.ITCPApp;
+import inet.applications.contract.IApp;
 
 
 //
@@ -52,7 +52,7 @@ import inet.applications.contract.ITCPApp;
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
-simple TCPSinkApp like ITCPApp
+simple TCPSinkApp like IApp
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
@@ -63,7 +63,7 @@ simple TCPSinkApp like ITCPApp
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
+        input socketIn @labels(TCPCommand/up);
+        output socketOut @labels(TCPCommand/down);
 }
 

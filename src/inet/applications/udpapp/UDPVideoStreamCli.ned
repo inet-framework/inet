@@ -18,7 +18,7 @@
 
 package inet.applications.udpapp;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 
 //
@@ -34,7 +34,7 @@ import inet.applications.contract.IUDPApp;
 //
 // @see ~UDPVideoStreamSvr
 //
-simple UDPVideoStreamCli like IUDPApp
+simple UDPVideoStreamCli like IApp
 {
     parameters:
         int localPort = default(-1);  // local port (-1: use ephemeral port)
@@ -46,7 +46,7 @@ simple UDPVideoStreamCli like IUDPApp
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }
 

@@ -18,15 +18,14 @@
 
 package inet.applications.udpapp;
 
-import inet.applications.contract.IUDPApp;
-
+import inet.applications.contract.IApp;
 
 //
 // Listens on an UDP port, and sends back each received packet to its sender.
 // Note: when used together with ~UDPBasicApp, ~UDPBasicApp's "received packet
 // lifetime" statistic will record round-trip times.
 //
-simple UDPEchoApp like IUDPApp
+simple UDPEchoApp like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -35,6 +34,6 @@ simple UDPEchoApp like IUDPApp
         @signal[pk](type=cPacket);
         @statistic[echoedPk](title="packets echoed"; source=pk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }

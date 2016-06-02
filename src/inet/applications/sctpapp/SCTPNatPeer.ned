@@ -33,9 +33,9 @@ package inet.applications.sctpapp;
 // app sent a single 100 MB message, it will be echoed only when all
 // 100 megabytes have arrived.
 //
-import inet.applications.contract.ISCTPApp;
+import inet.applications.contract.IApp;
 
-simple SCTPNatPeer like ISCTPApp
+simple SCTPNatPeer like IApp
 {
     parameters:
         string localAddress = default(""); // comma separated list of addresses
@@ -71,6 +71,6 @@ simple SCTPNatPeer like ISCTPApp
         bool multi= default(false);
         string streamPriorities = default("");
     gates:
-        input sctpIn;
-        output sctpOut;
+        input socketIn;
+        output socketOut;
 }

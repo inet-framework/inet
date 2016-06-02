@@ -19,7 +19,7 @@
 
 package inet.applications.udpapp;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 
 //
@@ -39,7 +39,7 @@ import inet.applications.contract.IUDPApp;
 // like ~UDPSink), or a ~UDPEchoApp. When used with ~UDPEchoApp, the rcvdPkLifetime
 // statistic will contain the round-trip times.
 //
-simple UDPBasicApp like IUDPApp
+simple UDPBasicApp like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -64,6 +64,6 @@ simple UDPBasicApp like IUDPApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkLifetime](title="received packet lifetime"; source="messageAge(rcvdPk)"; unit=s; record=stats,vector; interpolationmode=none);
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }

@@ -40,7 +40,7 @@ void HttpServer::initialize(int stage)
         int port = par("port");
 
         TCPSocket listensocket;
-        listensocket.setOutputGate(gate("tcpOut"));
+        listensocket.setOutputGate(gate("socketOut"));
         listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
         listensocket.bind(port);
         listensocket.setCallbackObject(this);
@@ -74,7 +74,7 @@ void HttpServer::handleMessage(cMessage *msg)
             EV_DEBUG << "No socket found for the message. Create a new one" << endl;
             // new connection -- create new socket object and server process
             socket = new TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));
+            socket->setOutputGate(gate("socketOut"));
             socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
             socket->setCallbackObject(this, socket);
             sockCollection.addSocket(socket);

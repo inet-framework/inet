@@ -116,7 +116,7 @@ void SCTPPeer::initialize(int stage)
         ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
         timeoutMsg = new cMessage("SrvAppTimer");
-        listeningSocket.setOutputGate(gate("sctpOut"));
+        listeningSocket.setOutputGate(gate("socketOut"));
         listeningSocket.setOutboundStreams(outboundStreams);
         listeningSocket.setInboundStreams(inboundStreams);
 
@@ -131,7 +131,7 @@ void SCTPPeer::initialize(int stage)
         listeningSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
         EV_DEBUG << "SCTPPeer::initialized listen port=" << port << "\n";
         clientSocket.setCallbackObject(this);
-        clientSocket.setOutputGate(gate("sctpOut"));
+        clientSocket.setOutputGate(gate("socketOut"));
 
         if ((simtime_t)par("startTime") > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
             connectTimer = new cMessage("ConnectTimer");
@@ -149,7 +149,7 @@ void SCTPPeer::initialize(int stage)
 void SCTPPeer::sendOrSchedule(cMessage *msg)
 {
     if (delay == 0) {
-        send(msg, "sctpOut");
+        send(msg, "socketOut");
     }
     else {
         scheduleAt(simTime() + delay, msg);

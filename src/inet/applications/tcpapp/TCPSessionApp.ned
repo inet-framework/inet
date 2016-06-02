@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.tcpapp;
 
-
-import inet.applications.contract.ITCPApp;
-
+import inet.applications.contract.IApp;
 
 //
 // Single-connection TCP application: it opens a connection, sends
@@ -85,7 +82,7 @@ import inet.applications.contract.ITCPApp;
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
-simple TCPSessionApp like ITCPApp
+simple TCPSessionApp like IApp
 {
     parameters:
         string localAddress = default("");
@@ -107,7 +104,6 @@ simple TCPSessionApp like ITCPApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
+        input socketIn @labels(TCPCommand/up);
+        output socketOut @labels(TCPCommand/down);
 }
-

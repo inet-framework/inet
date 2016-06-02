@@ -19,13 +19,12 @@
 
 package inet.applications.udpapp;
 
-import inet.applications.contract.IUDPApp;
-
+import inet.applications.contract.IApp;
 
 //
 // Consumes and prints packets received from the ~UDP module.
 //
-simple UDPSink like IUDPApp
+simple UDPSink like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -41,7 +40,7 @@ simple UDPSink like IUDPApp
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }
 

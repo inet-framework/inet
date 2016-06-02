@@ -18,7 +18,7 @@
 
 package inet.applications.voip;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 //
 // Implements a simple VoIP source. It is a constant bitrate source, with 
@@ -44,7 +44,7 @@ import inet.applications.contract.IUDPApp;
 //
 // @authors: Adriano, Zoltan Bojthe
 //
-simple SimpleVoIPSender like IUDPApp
+simple SimpleVoIPSender like IApp
 {
     parameters:
         int localPort = default(-1);
@@ -59,6 +59,6 @@ simple SimpleVoIPSender like IUDPApp
 
         @display("i=block/source");
     gates:
-        output udpOut;
-        input udpIn;
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }

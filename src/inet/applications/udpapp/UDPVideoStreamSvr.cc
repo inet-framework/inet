@@ -147,7 +147,7 @@ void UDPVideoStreamSvr::clearStreams()
 
 bool UDPVideoStreamSvr::handleNodeStart(IDoneCallback *doneCallback)
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
 
     return true;

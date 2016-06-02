@@ -74,7 +74,7 @@ void SCTPServer::initialize(int stage)
         int messagesToPush = par("messagesToPush");
 
         socket = new SCTPSocket();
-        socket->setOutputGate(gate("sctpOut"));
+        socket->setOutputGate(gate("socketOut"));
         socket->setInboundStreams(inboundStreams);
         socket->setOutboundStreams(outboundStreams);
 
@@ -101,7 +101,7 @@ void SCTPServer::initialize(int stage)
 void SCTPServer::sendOrSchedule(cMessage *msg)
 {
     if (delay == 0)
-        send(msg, "sctpOut");
+        send(msg, "socketOut");
     else
         scheduleAt(simTime() + delay, msg);
 }

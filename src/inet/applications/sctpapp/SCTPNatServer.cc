@@ -54,7 +54,7 @@ void SCTPNatServer::initialize()
     lastStream = 0;
 
     socket = new SCTPSocket();
-    socket->setOutputGate(gate("sctpOut"));
+    socket->setOutputGate(gate("socketOut"));
     socket->setInboundStreams(inboundStreams);
     socket->setOutboundStreams(outboundStreams);
 
@@ -102,12 +102,12 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     cmd->setLast(true);
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
-    send(cmsg, "sctpOut");
+    send(cmsg, "socketOut");
     EV << "info sent to peer1\n";
 
     cMessage *abortMsg = new cMessage("abortPeer1", SCTP_C_SHUTDOWN);
     abortMsg->setControlInfo(cmd->dup());
-    send(abortMsg, "sctpOut");
+    send(abortMsg, "socketOut");
     EV << "abortMsg sent to peer1\n";
 
     msg = new NatMessage("Rendezvous");
@@ -143,10 +143,10 @@ void SCTPNatServer::sendInfo(NatInfo *info)
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
     EV << "info sent to peer2\n";
-    send(cmsg, "sctpOut");
+    send(cmsg, "socketOut");
     abortMsg = new cPacket("abortPeer2", SCTP_C_SHUTDOWN);
     abortMsg->setControlInfo(cmd->dup());
-    send(abortMsg, "sctpOut");
+    send(abortMsg, "socketOut");
     EV << "abortMsg sent to peer2\n";
 }
 
@@ -173,7 +173,7 @@ void SCTPNatServer::generateAndSend()
     cmsg->setControlInfo(cmd);
     packetsSent++;
     bytesSent += msg->getBitLength() / 8;
-    send(cmsg, "sctpOut");
+    send(cmsg, "socketOut");
 }
 
 void SCTPNatServer::handleMessage(cMessage *msg)
@@ -199,7 +199,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 delete ind;
                 delete msg;
                 cmsg->setKind(SCTP_C_ABORT);
-                send(cmsg, "sctpOut");
+                send(cmsg, "socketOut");
                 break;
             }
 
@@ -230,7 +230,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 cmsg->setControlInfo(cmd);
                 delete ind;
                 delete msg;
-                send(cmsg, "sctpOut");
+                send(cmsg, "socketOut");
                 break;
             }
 
@@ -342,7 +342,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                 cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                 qinfo->setAssocId(id);
                 cmsg->setControlInfo(qinfo);
-                send(cmsg, "sctpOut");
+                send(cmsg, "socketOut");
 
                 delete command;
                 shutdownReceived = true;
@@ -459,12 +459,12 @@ void SCTPNatServer::handleTimer(cMessage *msg)
             id = atoi(msg->getName());
             cmd->setAssocId(id);
             cmsg->setControlInfo(cmd);
-            send(cmsg, "sctpOut");
+            send(cmsg, "socketOut");
             break;
         }
 
         case SCTP_C_RECEIVE:
-            send(msg, "sctpOut");
+            send(msg, "socketOut");
             break;
 
         default:

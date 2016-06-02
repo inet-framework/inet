@@ -17,10 +17,10 @@
 
 package inet.applications.sctpapp;
 
-import inet.applications.contract.ISCTPApp;
+import inet.applications.contract.IApp;
 
 
-simple SCTPPeer like ISCTPApp
+simple SCTPPeer like IApp
 {
     parameters:
         string localAddress = default(""); // comma separated list of addresses
@@ -55,7 +55,7 @@ simple SCTPPeer like ISCTPApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[echoedPk](title="packets echoed"; source=echoedPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input sctpIn @labels(SCTPCommand/up);
-        output sctpOut @labels(SCTPCommand/down);
+        input socketIn @labels(SCTPCommand/up);
+        output socketOut @labels(SCTPCommand/down);
 }
 

@@ -19,7 +19,7 @@
 
 package inet.applications.voipstream;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 
 //
@@ -34,7 +34,7 @@ import inet.applications.contract.IUDPApp;
 // does not simulate any particular VoIP protocol (e.g. RTP), but instead
 // accepts a "header size" parameter that can be set accordingly.
 //
-simple VoIPStreamSender like IUDPApp
+simple VoIPStreamSender like IApp
 {
     parameters:
         int localPort;
@@ -54,6 +54,6 @@ simple VoIPStreamSender like IUDPApp
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");
     gates:
-        input udpIn;
-        output udpOut;
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }

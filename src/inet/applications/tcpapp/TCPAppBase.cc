@@ -47,7 +47,7 @@ void TCPAppBase::initialize(int stage)
         socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 
         socket.setCallbackObject(this);
-        socket.setOutputGate(gate("tcpOut"));
+        socket.setOutputGate(gate("socketOut"));
 
         setStatusString("waiting");
     }

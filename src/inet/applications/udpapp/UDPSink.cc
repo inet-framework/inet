@@ -112,7 +112,7 @@ void UDPSink::setSocketOptions()
 
 void UDPSink::processStart()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
     setSocketOptions();
 

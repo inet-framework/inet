@@ -34,7 +34,7 @@ void TCPSrvHostApp::initialize(int stage)
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
-        serverSocket.setOutputGate(gate("tcpOut"));
+        serverSocket.setOutputGate(gate("socketOut"));
         serverSocket.readDataTransferModePar(*this);
         serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
         serverSocket.listen();
@@ -68,7 +68,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
         if (!socket) {
             // new connection -- create new socket object and server process
             socket = new TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));
+            socket->setOutputGate(gate("socketOut"));
 
             const char *serverThreadClass = par("serverThreadClass");
             TCPServerThreadBase *proc =

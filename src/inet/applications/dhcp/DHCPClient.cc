@@ -199,7 +199,7 @@ void DHCPClient::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         handleTimer(msg);
     }
-    else if (msg->arrivedOn("udpIn")) {
+    else if (msg->arrivedOn("socketIn")) {
         DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage *>(msg);
         if (!dhcpPacket)
             throw cRuntimeError(dhcpPacket, "Unexpected packet received (not a DHCPMessage)");
@@ -207,6 +207,8 @@ void DHCPClient::handleMessage(cMessage *msg)
         handleDHCPMessage(dhcpPacket);
         delete msg;
     }
+    else
+        throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
 
     if (hasGUI())
         updateDisplayString();
@@ -665,7 +667,7 @@ void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr,
 
 void DHCPClient::openSocket()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     socket.bind(clientPort);
     socket.setBroadcast(true);
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;

@@ -18,13 +18,13 @@
 
 package inet.applications.sctpapp;
 
-import inet.applications.contract.ISCTPApp;
+import inet.applications.contract.IApp;
 
 //
 // Client app for SCTP-based request-reply protocols.
 // Handles a single session (and SCTP connection) at a time.
 //
-simple SCTPClient like ISCTPApp
+simple SCTPClient like IApp
 {
     parameters:
         string localAddress = default(""); // comma separated list of addresses
@@ -64,7 +64,7 @@ simple SCTPClient like ISCTPApp
         @statistic[echoedPk](title="packets echoed"; source=echoedPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input sctpIn;
-        output sctpOut;
+        input socketIn;
+        output socketOut;
 }
 

@@ -19,9 +19,9 @@
 
 package inet.applications.sctpapp;
 
-import inet.applications.contract.ISCTPApp;
+import inet.applications.contract.IApp;
 
-simple SCTPServer like ISCTPApp
+simple SCTPServer like IApp
 {
     parameters:
         string localAddress = default(""); // comma separated list of addresses
@@ -46,7 +46,7 @@ simple SCTPServer like ISCTPApp
         bool streamReset = default(false);
         string streamPriorities = default("");
     gates:
-        input sctpIn;
-        output sctpOut;
+        input socketIn;
+        output socketOut;
 }
 

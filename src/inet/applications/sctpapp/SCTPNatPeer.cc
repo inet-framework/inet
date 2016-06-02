@@ -92,7 +92,6 @@ void SCTPNatPeer::initialize()
     ordered = (bool)par("ordered");
     queueSize = par("queueSize");
     timeoutMsg = new cMessage("SrvAppTimer");
-    clientSocket.setOutputGate(gate("sctpOut"));
     if (addresses.size() == 0) {
         clientSocket.bind(port);
     }
@@ -100,6 +99,7 @@ void SCTPNatPeer::initialize()
         clientSocket.bindx(addresses, port);
     }
     clientSocket.setCallbackObject(this);
+    clientSocket.setOutputGate(gate("socketOut"));
     rendezvous = (bool)par("rendezvous");
     if ((simtime_t)par("startTime") > 0) {
         cMessage *msg = new cMessage("ConnectTimer");
@@ -111,7 +111,7 @@ void SCTPNatPeer::initialize()
 void SCTPNatPeer::sendOrSchedule(cMessage *msg)
 {
     if (delay == 0) {
-        send(msg, "sctpOut");
+        send(msg, "socketOut");
     }
     else {
         scheduleAt(simTime() + delay, msg);
@@ -565,7 +565,7 @@ void SCTPNatPeer::socketPeerClosed(int32, void *)
             const char *addressesString = par("localAddress");
             AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
             int32 port = par("localPort");
-            rendezvousSocket.setOutputGate(gate("sctpOut"));
+            rendezvousSocket.setOutputGate(gate("socketOut"));
             rendezvousSocket.setOutboundStreams(outboundStreams);
             rendezvousSocket.setInboundStreams(inboundStreams);
             if (addresses.size() == 0) {
@@ -597,7 +597,7 @@ void SCTPNatPeer::socketClosed(int32, void *)
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int32 port = par("localPort");
-        rendezvousSocket.setOutputGate(gate("sctpOut"));
+        rendezvousSocket.setOutputGate(gate("socketOut"));
         rendezvousSocket.setOutboundStreams(outboundStreams);
         rendezvousSocket.setInboundStreams(inboundStreams);
         if (addresses.size() == 0) {

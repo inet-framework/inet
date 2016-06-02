@@ -19,7 +19,7 @@
 
 package inet.applications.dhcp;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 //
 // Implements the DHCP client protocol. DHCP (Dynamic Host Configuration Protocol),
@@ -28,7 +28,7 @@ import inet.applications.contract.IUDPApp;
 //
 // @see DHCPServer, DHCPMessage
 //
-simple DHCPClient like IUDPApp
+simple DHCPClient like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -37,8 +37,8 @@ simple DHCPClient like IUDPApp
         double startTime @unit(s) = default(0s); // starting time of DHCP initialization
         @display("i=block/app2");
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }
 
 

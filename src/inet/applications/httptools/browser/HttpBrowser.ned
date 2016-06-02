@@ -17,7 +17,7 @@
 
 package inet.applications.httptools.browser;
 
-import inet.applications.contract.ITCPApp;
+import inet.applications.contract.IApp;
 
 
 //
@@ -107,7 +107,7 @@ import inet.applications.contract.ITCPApp;
 //
 // @author  Kristjan V. Jonsson
 //
-simple HttpBrowser like ITCPApp
+simple HttpBrowser like IApp
 {
     parameters:
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
@@ -117,7 +117,7 @@ simple HttpBrowser like ITCPApp
         xml config;                                     // The XML config file
         string httpBrowserControllerModule = default("controller"); // the absolute path to the http browser controller, @see HttpController
     gates:
-        input tcpIn;
-        output tcpOut;
+        input socketIn;
+        output socketOut;
 }
 

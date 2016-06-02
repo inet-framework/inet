@@ -65,7 +65,7 @@ void VoIPStreamReceiver::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        socket.setOutputGate(gate("udpOut"));
+        socket.setOutputGate(gate("socketOut"));
         socket.bind(localPort);
     }
 }

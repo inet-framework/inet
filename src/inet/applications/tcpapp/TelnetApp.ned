@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.tcpapp;
 
-
-import inet.applications.contract.ITCPApp;
-
+import inet.applications.contract.IApp;
 
 //
 // Models Telnet sessions with a specific user behaviour.
@@ -59,7 +56,7 @@ import inet.applications.contract.ITCPApp;
 //
 //   -# use "bytestream", which transmits real bytes of messages.
 //
-simple TelnetApp like ITCPApp
+simple TelnetApp like IApp
 {
     parameters:
         string localAddress = default(""); // local address or empty ("")
@@ -87,7 +84,7 @@ simple TelnetApp like ITCPApp
         @statistic[numSessions](title="total number of sessions"; source="sum(connect+1)/2"; record=last);
 
     gates:
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
+        input socketIn @labels(TCPCommand/up);
+        output socketOut @labels(TCPCommand/down);
 }
 

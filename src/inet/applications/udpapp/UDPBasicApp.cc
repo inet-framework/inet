@@ -125,7 +125,7 @@ void UDPBasicApp::sendPacket()
 
 void UDPBasicApp::processStart()
 {
-    socket.setOutputGate(gate("udpOut"));
+    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();

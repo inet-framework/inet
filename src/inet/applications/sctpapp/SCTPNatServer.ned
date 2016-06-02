@@ -16,9 +16,9 @@ package inet.applications.sctpapp;//
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-import inet.applications.contract.ISCTPApp;
+import inet.applications.contract.IApp;
 
-simple SCTPNatServer like ISCTPApp
+simple SCTPNatServer like IApp
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
@@ -31,6 +31,6 @@ simple SCTPNatServer like ISCTPApp
         int inboundStreams = default(1);
         bool ordered = default(true);
     gates:
-        input sctpIn;
-        output sctpOut;
+        input socketIn;
+        output socketOut;
 }

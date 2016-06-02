@@ -67,7 +67,7 @@ void SimpleVoIPSender::initialize(int stage)
 
         destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
 
-        socket.setOutputGate(gate("udpOut"));
+        socket.setOutputGate(gate("socketOut"));
         socket.bind(localPort);
 
         EV_INFO << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;

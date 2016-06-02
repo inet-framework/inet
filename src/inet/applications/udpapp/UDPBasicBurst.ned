@@ -20,8 +20,7 @@
 
 package inet.applications.udpapp;
 
-import inet.applications.contract.IUDPApp;
-
+import inet.applications.contract.IApp;
 
 //
 // Sends UDP packets to the given IP address(es) in bursts, or acts as a
@@ -101,7 +100,7 @@ import inet.applications.contract.IUDPApp;
 //  - rcvdPk: statistics of not dropped, not out-of-order packets.
 //  - endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
 //
-simple UDPBasicBurst like IUDPApp
+simple UDPBasicBurst like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -130,7 +129,7 @@ simple UDPBasicBurst like IUDPApp
         @statistic[endToEndDelay](title="delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
         @display("i=block/app");
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }
 

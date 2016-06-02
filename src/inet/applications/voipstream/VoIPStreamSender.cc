@@ -114,7 +114,7 @@ void VoIPStreamSender::initialize(int stage)
         recordScalar("hackForCreateResultsFolder", 0);
 
         destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
-        socket.setOutputGate(gate("udpOut"));
+        socket.setOutputGate(gate("socketOut"));
         socket.bind(localPort);
 
         simtime_t startTime = par("startTime");
