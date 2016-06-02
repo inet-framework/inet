@@ -251,7 +251,7 @@ void ICMP::processEchoReply(ICMPMessage *reply)
     auto i = pingMap.find(originatorId);
     if (i != pingMap.end()) {
         EV_INFO << "Sending " << payload << " to upper layer.\n";
-        send(payload, "pingOut", i->second);
+        sendDirect(payload, getParentModule()->getParentModule()->getSubmodule("app", i->second), "pingIn");
     }
     else {
         EV_WARN << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;

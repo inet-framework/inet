@@ -160,7 +160,7 @@ void ICMPv6::processEchoReply(ICMPv6EchoReplyMsg *reply)
     long originatorId = payload->getOriginatorId();
     auto i = pingMap.find(originatorId);
     if (i != pingMap.end())
-        send(payload, "pingOut", i->second);
+        sendDirect(payload, getParentModule()->getParentModule()->getSubmodule("app", i->second), "pingIn");
     else {
         EV_WARN << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
         delete payload;

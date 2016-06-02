@@ -27,7 +27,7 @@ simple EchoProtocol
         @display("i=block/control");
     gates:
         input localIn @labels(GenericNetworkProtocolControlInfo/up);
-        input pingIn[];  // ping requests from app
+        input pingIn[10];  // ping requests from app
         output pingOut[];  // result of ping
         output sendOut @labels(GenericNetworkProtocolControlInfo/down);  // towards network
 }
