@@ -35,13 +35,13 @@ network Synchronized
         radioMedium: Ieee80211ScalarRadioMedium;
         node[nodeCount]: AdhocHost {
             parameters:
-                numUdpApps = 1;
-                udpApp[0].typename = "UDPBasicApp";
-                udpApp[0].destAddresses = "224.0.0.1";
-                udpApp[0].localPort = 1;
-                udpApp[0].destPort = 1;
-                udpApp[0].messageLength = 100B;
-                udpApp[0].joinLocalMulticastGroups = true;
+                numApps = 1;
+                app[0].typename = "UDPBasicApp";
+                app[0].destAddresses = "224.0.0.1";
+                app[0].localPort = 1;
+                app[0].destPort = 1;
+                app[0].messageLength = 100B;
+                app[0].joinLocalMulticastGroups = true;
         }
         configurator: IPv4NetworkConfigurator;
 }

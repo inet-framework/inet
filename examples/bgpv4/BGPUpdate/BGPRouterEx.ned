@@ -97,11 +97,11 @@ module BGPRouterEx
                 @display("p=196,369,row,110;q=l2queue;i=block/ifcard");
         }
     connections allowunconnected:
-        bgp.tcpOut --> { @display("m=s"); } --> snifferOut.in;
-        bgp.tcpIn <-- { @display("m=s"); } <-- snifferIn.out;
+        bgp.socketOut --> { @display("m=s"); } --> snifferOut.in;
+        bgp.socketIn <-- { @display("m=s"); } <-- snifferIn.out;
 
-        snifferOut.out --> { @display("m=s"); } --> tcp.appIn++;
-        snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut++;
+        snifferOut.out --> { @display("m=s"); } --> tcp.appIn;
+        snifferIn.in <-- { @display("m=s"); } <-- tcp.appOut;
 
         tcp.ipOut --> { @display("m=s"); } --> tn.upperLayerIn++;
         tcp.ipIn <-- { @display("m=s"); } <-- tn.upperLayerOut++;
