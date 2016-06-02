@@ -121,11 +121,11 @@ module LDP_LSR
         linkStateRouting.ipOut --> tn.upperLayerIn++;
         tn.upperLayerOut++ --> linkStateRouting.ipIn;
 
-        ldp.tcpIn <-- tcp.appOut++;
-        ldp.tcpOut --> tcp.appIn++;
+        ldp.tcpIn <-- tcp.appOut;
+        ldp.tcpOut --> tcp.appIn;
 
-        ldp.udpOut --> udp.appIn++;
-        ldp.udpIn <-- udp.appOut++;
+        ldp.udpOut --> udp.appIn;
+        ldp.udpIn <-- udp.appOut;
 
         udp.ipOut --> tn.upperLayerIn++;
         tn.upperLayerOut++ --> udp.ipIn;
