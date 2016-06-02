@@ -72,7 +72,7 @@ module Router extends TransportLayerNodeBase
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=500,100;i=block/network");
         }
-        rip: <"RIPRouting"> like IUDPApp if hasRIP {
+        rip: <"RIPRouting"> like IApp if hasRIP {
             parameters:
                 @display("p=400,100");
         }
@@ -92,10 +92,8 @@ module Router extends TransportLayerNodeBase
             bgp.tcpIn <-- tcp.appOut++;
         }
 
-        if hasRIP {
-            rip.udpOut --> udp.appIn++;
-            rip.udpIn <-- udp.appOut++;
-        }
+        rip.socketOut --> at.upperLayerIn++ if hasRIP;
+        rip.socketIn <-- at.upperLayerOut++ if hasRIP;
 
         if hasPIM {
             pim.networkLayerOut --> tn.upperLayerIn++;

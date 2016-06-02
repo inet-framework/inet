@@ -17,7 +17,7 @@
 
 package inet.routing.rip;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 
 //
@@ -63,7 +63,7 @@ import inet.applications.contract.IUDPApp;
 //     - 'SplitHorizon':   do not sent routes whose next hop is the neighbor
 //     - 'SplitHorizonPoisenedReverse': if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
-simple RIPRouting like IUDPApp
+simple RIPRouting like IApp
 {
     parameters:
         @display("i=block/network2");
@@ -91,6 +91,6 @@ simple RIPRouting like IUDPApp
         @statistic[badResponse](title="bad response received"; source=badResponse; record=count,"vector(constant1)"; interpolationmode=none);
         @statistic[numRoutes](title="number of routes"; source=numRoutes; record=last,vector; interpolationmode=none);
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }

@@ -190,7 +190,7 @@ void RIPRouting::initialize(int stage)
         host = getContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
-        socket.setOutputGate(gate("udpOut"));
+        socket.setOutputGate(gate("socketOut"));
 
         const char *m = par("mode");
         if (!m)
