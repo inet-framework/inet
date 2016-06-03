@@ -303,7 +303,6 @@ class FingerprintTestCase(SimulationTestCase):
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
-            " --fingerprintcalculator-class=inet::CustomFingerprintCalculator" + \
             " --result-dir=" + resultdir + \
             extraOppRunArgs;
         # print "COMMAND: " + command + '\n'
