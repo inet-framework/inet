@@ -63,22 +63,17 @@ import inet.applications.contract.ITCPApp;
 //
 // Compatible with both ~IPv4 and ~IPv6.
 //
-simple TCPEchoApp like ITCPApp
+simple TCPEchoApp extends TCPSrvHostApp
 {
     parameters:
-        string localAddress = default(""); // local address; may be left empty ("")
-        int localPort; // port number to listen on
+        @class(TCPEchoApp);
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
-        @display("i=block/app");
+        serverThreadClass = default("TCPEchoAppThread"); // class name of "thread" objects to launch on incoming connections
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
-    gates:
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
 }
 

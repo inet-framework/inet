@@ -19,9 +19,9 @@
 #define __INET_TCPECHOAPP_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/applications/tcpapp/TCPSrvHostApp.h"
 #include "inet/common/INETMath.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
@@ -30,14 +30,11 @@ namespace inet {
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
+class INET_API TCPEchoApp : public TCPSrvHostApp
 {
   protected:
     simtime_t delay;
     double echoFactor = NaN;
-
-    TCPSocket socket;
-    NodeStatus *nodeStatus = nullptr;
 
     long bytesRcvd = 0;
     long bytesSent = 0;
@@ -46,19 +43,42 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
     static simsignal_t sentPkSignal;
 
   protected:
-    virtual bool isNodeUp();
     virtual void sendDown(cMessage *msg);
-    virtual void startListening();
-    virtual void stopListening();
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void updateDisplay() override;
 
   public:
-    TCPEchoApp() {}
+    TCPEchoApp();
+    ~TCPEchoApp();
+
+    friend class TCPEchoAppThread;
+};
+
+class INET_API TCPEchoAppThread : public TCPServerThreadBase
+{
+  protected:
+    TCPEchoApp *echoAppModule = nullptr;
+
+  public:
+    /**
+     * Called when connection is established.
+     */
+    virtual void established() override;
+
+    /*
+     * Called when a data packet arrives. To be redefined.
+     */
+    virtual void dataArrived(cMessage *msg, bool urgent) override;
+
+    /*
+     * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
+     */
+    virtual void timerExpired(cMessage *timer) override;
+
+    virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) override { hostmod = hostmodule; sock = socket; echoAppModule = check_and_cast<TCPEchoApp *>(hostmod); }
 };
 
 } // namespace inet

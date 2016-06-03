@@ -26,12 +26,22 @@ namespace inet {
 
 Define_Module(TCPEchoApp);
 
+Register_Class(TCPEchoAppThread);
+
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
 
+TCPEchoApp::TCPEchoApp()
+{
+}
+
+TCPEchoApp::~TCPEchoApp()
+{
+}
+
 void TCPEchoApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    TCPSrvHostApp::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         delay = par("echoDelay");
@@ -40,35 +50,7 @@ void TCPEchoApp::initialize(int stage)
         bytesRcvd = bytesSent = 0;
         WATCH(bytesRcvd);
         WATCH(bytesSent);
-
-        socket.setOutputGate(gate("tcpOut"));
-        socket.readDataTransferModePar(*this);
-
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        if (isNodeUp())
-            startListening();
-    }
-}
-
-bool TCPEchoApp::isNodeUp()
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
-void TCPEchoApp::startListening()
-{
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
-    socket.renewSocket();
-    socket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
-    socket.listen();
-}
-
-void TCPEchoApp::stopListening()
-{
-    socket.close();
 }
 
 void TCPEchoApp::sendDown(cMessage *msg)
@@ -81,100 +63,76 @@ void TCPEchoApp::sendDown(cMessage *msg)
     send(msg, "tcpOut");
 }
 
-void TCPEchoApp::handleMessage(cMessage *msg)
+void TCPEchoApp::updateDisplay()
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
-    if (msg->isSelfMessage()) {
-        sendDown(msg);
-    }
-    else if (msg->getKind() == TCP_I_PEER_CLOSED) {
-        // we'll close too
-        msg->setName("close");
-        msg->setKind(TCP_C_CLOSE);
-
-        if (delay == 0)
-            sendDown(msg);
-        else
-            scheduleAt(simTime() + delay, msg); // send after a delay
-    }
-    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
-        cPacket *pkt = check_and_cast<cPacket *>(msg);
-        emit(rcvdPkSignal, pkt);
-        bytesRcvd += pkt->getByteLength();
-
-        if (echoFactor == 0) {
-            delete pkt;
-        }
-        else {
-            // reverse direction, modify length, and send it back
-            pkt->setKind(TCP_C_SEND);
-            TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
-            TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setSocketId(ind->getSocketId());
-            pkt->setControlInfo(cmd);
-            delete ind;
-
-            long byteLen = pkt->getByteLength() * echoFactor;
-
-            if (byteLen < 1)
-                byteLen = 1;
-
-            pkt->setByteLength(byteLen);
-
-            RawPacket *baMsg = dynamic_cast<RawPacket *>(pkt);
-
-            // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
-            if (baMsg) {
-                ByteArray& outdata = baMsg->getByteArray();
-                ByteArray indata = outdata;
-                outdata.setDataArraySize(byteLen);
-
-                for (long i = 0; i < byteLen; i++)
-                    outdata.setData(i, indata.getData(i / echoFactor));
-            }
-
-            if (delay == 0)
-                sendDown(pkt);
-            else
-                scheduleAt(simTime() + delay, pkt); // send after a delay
-        }
-    }
-    else {
-        // some indication -- ignore
-        delete msg;
-    }
-
-    if (hasGUI()) {
-        char buf[80];
-        sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+    char buf[160];
+    sprintf(buf, "threads: %d\nrcvd: %ld bytes\nsent: %ld bytes", socketMap.size(), bytesRcvd, bytesSent);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool TCPEchoApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            startListening();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            // TODO: wait until socket is closed
-            stopListening();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-        ;
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
-}
 
 void TCPEchoApp::finish()
 {
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
+}
+
+void TCPEchoAppThread::established()
+{
+}
+
+void TCPEchoAppThread::dataArrived(cMessage *msg, bool urgent)
+{
+    cPacket *pkt = check_and_cast<cPacket *>(msg);
+    echoAppModule->emit(echoAppModule->rcvdPkSignal, pkt);
+    echoAppModule->bytesRcvd += pkt->getByteLength();
+
+    if (echoAppModule->echoFactor == 0) {
+        delete pkt;
+    }
+    else {
+        // reverse direction, modify length, and send it back
+        pkt->setKind(TCP_C_SEND);
+        TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
+        TCPSendCommand *cmd = new TCPSendCommand();
+        cmd->setSocketId(ind->getSocketId());
+        pkt->setControlInfo(cmd);
+        delete ind;
+
+        long byteLen = pkt->getByteLength() * echoAppModule->echoFactor;
+
+        if (byteLen < 1)
+            byteLen = 1;
+
+        pkt->setByteLength(byteLen);
+
+        RawPacket *baMsg = dynamic_cast<RawPacket *>(pkt);
+
+        // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
+        if (baMsg) {
+            ByteArray& outdata = baMsg->getByteArray();
+            ByteArray indata = outdata;
+            outdata.setDataArraySize(byteLen);
+
+            for (long i = 0; i < byteLen; i++)
+                outdata.setData(i, indata.getData(i / echoAppModule->echoFactor));
+        }
+
+        if (echoAppModule->delay == 0)
+            echoAppModule->sendDown(pkt);
+        else
+            scheduleAt(simTime() + echoAppModule->delay, pkt); // send after a delay
+    }
+}
+
+  /*
+   * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
+   */
+void TCPEchoAppThread::timerExpired(cMessage *timer)
+{
+    cPacket *pkt = PK(timer);
+    pkt->setContextPointer(nullptr);
+    echoAppModule->sendDown(pkt);
 }
 
 } // namespace inet

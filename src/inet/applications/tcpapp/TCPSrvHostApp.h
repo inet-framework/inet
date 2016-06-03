@@ -39,6 +39,8 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
   protected:
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
+    typedef std::set<TCPServerThreadBase *> ThreadSet;
+    ThreadSet threadSet;
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
