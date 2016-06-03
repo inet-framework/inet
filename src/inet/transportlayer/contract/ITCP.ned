@@ -99,8 +99,8 @@ moduleinterface ITCP
 {
     @display("i=block/wheelbarrow");
     gates:
-        input appIn[] @labels(TCPCommand/down);
+        input appIn @labels(TCPCommand/down);
         input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up);
-        output appOut[] @labels(TCPCommand/up);
+        output appOut @labels(TCPCommand/up);
         output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }

@@ -41,10 +41,9 @@ simple TCPSpoof like ITCP
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
+        input appIn @labels(TCPCommand/down); // Not used!
+        output appOut @labels(TCPCommand/up); // Not used!
         output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/down);
-
-        input appIn[] @labels(TCPCommand/down); // Not used!
         input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up); // Not used!
-        output appOut[] @labels(TCPCommand/up); // Not used!
 }
 

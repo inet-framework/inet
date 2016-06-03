@@ -47,9 +47,9 @@ simple TCP_NSC like ITCP
         string receiveQueueClass = default(""); // Obsolete!!!
         @display("i=block/wheelbarrow");
     gates:
-        input appIn[];
+        input appIn;
         input ipIn;
-        output appOut[];
+        output appOut;
         output ipOut;
 }
 

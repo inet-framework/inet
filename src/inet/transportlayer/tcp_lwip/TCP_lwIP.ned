@@ -35,8 +35,8 @@ simple TCP_lwIP like ITCP
         @display("i=block/wheelbarrow");
 
     gates:
-        input appIn[];
+        input appIn;
         input ipIn;
-        output appOut[];
+        output appOut;
         output ipOut;
 }

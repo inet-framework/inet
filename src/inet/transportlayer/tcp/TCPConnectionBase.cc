@@ -178,10 +178,9 @@ TCPConnection::TCPConnection()
 // FSM framework, TCP FSM
 //
 
-TCPConnection::TCPConnection(TCP *_mod, int _appGateIndex, int _socketId)
+TCPConnection::TCPConnection(TCP *_mod, int _socketId)
 {
     tcpMain = _mod;
-    appGateIndex = _appGateIndex;
     socketId = _socketId;
 
     char fsmname[24];

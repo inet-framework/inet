@@ -61,7 +61,7 @@ static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 
 static std::ostream& operator<<(std::ostream& os, const TCP::AppConnKey& app)
 {
-    os << "socketId=" << app.socketId << " appGateIndex=" << app.appGateIndex;
+    os << "socketId=" << app.socketId;
     return os;
 }
 
@@ -171,18 +171,16 @@ void TCP::handleMessage(cMessage *msg)
     }
     else {    // must be from app
         TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->getControlInfo());
-        int appGateIndex = msg->getArrivalGate()->getIndex();
         int socketId = controlInfo->getSocketId();
 
-        TCPConnection *conn = findConnForApp(appGateIndex, socketId);
+        TCPConnection *conn = findConnForApp(socketId);
 
         if (!conn) {
-            conn = createConnection(appGateIndex, socketId);
+            conn = createConnection(socketId);
 
             // add into appConnMap here; it'll be added to connMap during processing
             // the OPEN command in TCPConnection's processAppCommand().
             AppConnKey key;
-            key.appGateIndex = appGateIndex;
             key.socketId = socketId;
             tcpAppConnMap[key] = conn;
 
@@ -197,9 +195,9 @@ void TCP::handleMessage(cMessage *msg)
         updateDisplayString();
 }
 
-TCPConnection *TCP::createConnection(int appGateIndex, int socketId)
+TCPConnection *TCP::createConnection(int socketId)
 {
-    return new TCPConnection(this, appGateIndex, socketId);
+    return new TCPConnection(this, socketId);
 }
 
 void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr)
@@ -361,10 +359,9 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3
     return nullptr;
 }
 
-TCPConnection *TCP::findConnForApp(int appGateIndex, int socketId)
+TCPConnection *TCP::findConnForApp(int socketId)
 {
     AppConnKey key;
-    key.appGateIndex = appGateIndex;
     key.socketId = socketId;
 
     auto i = tcpAppConnMap.find(key);
@@ -454,7 +451,6 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Add
 
     // conn will get a new socketId...
     AppConnKey key;
-    key.appGateIndex = conn->appGateIndex;
     key.socketId = conn->socketId;
     tcpAppConnMap.erase(key);
     conn->listeningSocketId = conn->socketId;
@@ -462,7 +458,6 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Add
     tcpAppConnMap[key] = conn;
 
     // ...and newConn will live on with the old socketId
-    key.appGateIndex = newConn->appGateIndex;
     key.socketId = newConn->socketId;
     tcpAppConnMap[key] = newConn;
 }
@@ -472,7 +467,6 @@ void TCP::removeConnection(TCPConnection *conn)
     EV_INFO << "Deleting TCP connection\n";
 
     AppConnKey key;
-    key.appGateIndex = conn->appGateIndex;
     key.socketId = conn->socketId;
     tcpAppConnMap.erase(key);
 

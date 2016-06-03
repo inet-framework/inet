@@ -217,8 +217,8 @@ simple TCP like ITCP
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
         @display("i=block/wheelbarrow");
     gates:
-        input appIn[] @labels(TCPCommand/down);
+        input appIn @labels(TCPCommand/down);
         input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up);
-        output appOut[] @labels(TCPCommand/up);
+        output appOut @labels(TCPCommand/up);
         output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }
