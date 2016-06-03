@@ -1,0 +1,13 @@
+omnetpp.ini TODO items (they are here because the generated HTML tutorial should not have TODO items in it):
+
+[Config Wireless01]
+*.host*.wlan[0].typename = "IdealWirelessNic" # TODO: merge IdealWirelessNic into WirelessNic and use that here
+*.host*.wlan[0].mac.fullDuplex = false # TODO: make false the default
+# TODO: revise this after merging IdealWirelessNic into WirelessNic
+# TODO: *.host*.wlan[0].bitrate = 1Mbps
+
+[Config Wireless10]
+*.hostType = "AODVRouter" # TODO: configure routing protocol only instead of replacing the host type
+
+[Config Wireless12]
+*.radioMedium.mediumLimitCache.carrierFrequency = 2GHz # TODO: cant we get rid of this?
