@@ -334,6 +334,10 @@ bool TCPConnection::processAppCommand(cMessage *msg)
             process_OPEN_PASSIVE(event, tcpCommand, msg);
             break;
 
+        case TCP_E_ACCEPT:
+            process_ACCEPT(event, tcpCommand, msg);
+            break;
+
         case TCP_E_SEND:
             process_SEND(event, tcpCommand, msg);
             break;
@@ -374,6 +378,9 @@ TCPEventCode TCPConnection::preanalyseAppCommandEvent(int commandCode)
 
         case TCP_C_OPEN_PASSIVE:
             return TCP_E_OPEN_PASSIVE;
+
+        case TCP_C_ACCEPT:
+            return TCP_E_ACCEPT;
 
         case TCP_C_SEND:
             return TCP_E_SEND;

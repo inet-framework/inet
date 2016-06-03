@@ -50,7 +50,14 @@ TCPSocket::TCPSocket(cMessage *msg)
     dataTransferMode = TCP_TRANSFER_UNDEFINED;    // FIXME set dataTransferMode
     gateToTcp = nullptr;
 
-    if (msg->getKind() == TCP_I_ESTABLISHED) {
+    if (msg->getKind() == TCP_I_AVAILABLE) {
+        TCPAvailableInfo *availableInfo = check_and_cast<TCPAvailableInfo *>(msg->getControlInfo());
+        localAddr = availableInfo->getLocalAddr();
+        remoteAddr = availableInfo->getRemoteAddr();
+        localPrt = availableInfo->getLocalPort();
+        remotePrt = availableInfo->getRemotePort();
+    }
+    else if (msg->getKind() == TCP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always
         // set it to CONNECTED in the ctor, whatever TCP_I_xxx arrives.
         // However, for convenience we extract TCPConnectInfo already here, so that
@@ -143,6 +150,15 @@ void TCPSocket::listen(bool fork)
     msg->setControlInfo(openCmd);
     sendToTCP(msg);
     sockstate = LISTENING;
+}
+
+void TCPSocket::accept(int socketId)
+{
+    cMessage *msg = new cMessage("ACCEPT", TCP_C_ACCEPT);
+    TCPAcceptCommand *acceptCmd = new TCPAcceptCommand();
+    acceptCmd->setSocketId(socketId);
+    msg->setControlInfo(acceptCmd);
+    sendToTCP(msg);
 }
 
 void TCPSocket::connect(L3Address remoteAddress, int remotePort)
@@ -253,6 +269,7 @@ void TCPSocket::processMessage(cMessage *msg)
     ASSERT(belongsToSocket(msg));
 
     TCPStatusInfo *status;
+    TCPAvailableInfo *availableInfo;
     TCPConnectInfo *connectInfo;
 
     switch (msg->getKind()) {
@@ -269,6 +286,17 @@ void TCPSocket::processMessage(cMessage *msg)
                 cb->socketDataArrived(connId, yourPtr, PK(msg), true);
             else
                 delete msg;
+
+            break;
+
+        case TCP_I_AVAILABLE:
+            availableInfo = check_and_cast<TCPAvailableInfo *>(msg->getControlInfo());
+            // TODO: implement non-auto accept support, by accepting using the callback interface
+            accept(availableInfo->getNewSocketId());
+
+            if (cb)
+                cb->socketAvailable(connId, yourPtr, availableInfo);
+            delete msg;
 
             break;
 

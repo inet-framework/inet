@@ -38,7 +38,8 @@ enum TcpCommandCode
 {
     TCP_C_OPEN_ACTIVE = 1;   // active open (must carry ~TCPOpenCommand)
     TCP_C_OPEN_PASSIVE = 2;  // passive open (must carry ~TCPOpenCommand)
-    TCP_C_SEND = 3;          // send data (set on data packet)
+    TCP_C_ACCEPT = 3;        // accept connection
+    TCP_C_SEND = 4;          // send data (set on data packet)
     TCP_C_CLOSE = 5;         // "I have no more data to send"
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
@@ -57,15 +58,16 @@ enum TcpStatusInd
 {
     TCP_I_DATA = 1;              // data packet (set on data packet)
     TCP_I_URGENT_DATA = 2;       // urgent data (set on data packet)
-    TCP_I_ESTABLISHED = 3;       // connection established
-    TCP_I_PEER_CLOSED = 4;       // FIN received from remote TCP
-    TCP_I_CLOSED = 5;            // connection closed normally (via FIN exchange)
-    TCP_I_CONNECTION_REFUSED = 6; // connection refused
-    TCP_I_CONNECTION_RESET = 7;  // connection reset
-    TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
-    TCP_I_STATUS = 9;            // status info (will carry ~TCPStatusInfo)
-    TCP_I_SEND_MSG = 10;         // send queue abated, send more messages
-    TCP_I_DATA_NOTIFICATION = 11; // notify the upper layer that data has arrived
+    TCP_I_AVAILABLE = 3;         // conncetion available
+    TCP_I_ESTABLISHED = 4;       // connection established
+    TCP_I_PEER_CLOSED = 5;       // FIN received from remote TCP
+    TCP_I_CLOSED = 6;            // connection closed normally (via FIN exchange)
+    TCP_I_CONNECTION_REFUSED = 7; // connection refused
+    TCP_I_CONNECTION_RESET = 8;  // connection reset
+    TCP_I_TIMED_OUT = 9;         // conn-estab timer went off, or max retransm. count reached
+    TCP_I_STATUS = 10;           // status info (will carry ~TCPStatusInfo)
+    TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
+    TCP_I_DATA_NOTIFICATION = 12; // notify the upper layer that data has arrived
 }
 
 
@@ -169,12 +171,36 @@ class TCPOpenCommand extends TCPCommand
 
 
 //
+// Control info to be used to accept an available connection.
+//
+class TCPAcceptCommand extends TCPCommand
+{
+}
+
+
+//
 // Control info to be used with the SEND command.
 //
 // @see ~TcpCommandCode, ~ITCP
 //
 class TCPSendCommand extends TCPCommand
 {
+}
+
+
+//
+// Sent with message kind TCP_I_AVAILABLE, to let the app know
+// about the local and remote IP address and port.
+//
+// @see ~TcpCommandCode, ~ITCP
+//
+class TCPAvailableInfo extends TCPCommand
+{
+    L3Address localAddr;
+    L3Address remoteAddr;
+    int localPort;
+    int remotePort;
+    int newSocketId;
 }
 
 

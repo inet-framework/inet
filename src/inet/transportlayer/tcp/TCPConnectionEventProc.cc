@@ -108,6 +108,16 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     delete msg;
 }
 
+void TCPConnection::process_ACCEPT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
+{
+    TCPAcceptCommand *acceptCommand = check_and_cast<TCPAcceptCommand *>(tcpCommand);
+    listeningSocketId = -1;
+    sendEstabIndicationToApp();
+    sendAvailableDataToApp();
+    delete acceptCommand;
+    delete msg;
+}
+
 void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommand);
@@ -160,6 +170,8 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
 void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
+    if (isToBeAccepted())
+        throw cRuntimeError("READ without ACCEPT");
     delete msg;
     cMessage *dataMsg;
     while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)

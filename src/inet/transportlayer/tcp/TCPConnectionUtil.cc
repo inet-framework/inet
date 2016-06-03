@@ -103,6 +103,7 @@ const char *TCPConnection::indicationName(int code)
     switch (code) {
         CASE(TCP_I_DATA);
         CASE(TCP_I_URGENT_DATA);
+        CASE(TCP_I_AVAILABLE);
         CASE(TCP_I_ESTABLISHED);
         CASE(TCP_I_PEER_CLOSED);
         CASE(TCP_I_CLOSED);
@@ -300,6 +301,24 @@ void TCPConnection::sendIndicationToApp(int code, const int id)
     sendToApp(msg);
 }
 
+void TCPConnection::sendAvailableIndicationToApp()
+{
+    EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
+    cMessage *msg = new cMessage(indicationName(TCP_I_AVAILABLE));
+    msg->setKind(TCP_I_AVAILABLE);
+
+    TCPAvailableInfo *ind = new TCPAvailableInfo();
+    ind->setSocketId(listeningSocketId);
+    ind->setNewSocketId(connId);
+    ind->setLocalAddr(localAddr);
+    ind->setRemoteAddr(remoteAddr);
+    ind->setLocalPort(localPort);
+    ind->setRemotePort(remotePort);
+
+    msg->setControlInfo(ind);
+    sendToApp(msg);
+}
+
 void TCPConnection::sendEstabIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
@@ -320,6 +339,30 @@ void TCPConnection::sendEstabIndicationToApp()
 void TCPConnection::sendToApp(cMessage *msg)
 {
     tcpMain->send(msg, "appOut", appGateIndex);
+}
+
+void TCPConnection::sendAvailableDataToApp()
+{
+    if (receiveQueue->getAmountOfBufferedBytes()) {
+        cMessage *msg = nullptr;
+
+        if (tcpMain->useDataNotification) {
+            msg = new cMessage("Data Notification");
+            msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
+            TCPCommand *cmd = new TCPCommand();
+            cmd->setSocketId(connId);
+            msg->setControlInfo(cmd);
+            sendToApp(msg);
+        } else {
+            while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
+                msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
+                TCPCommand *cmd = new TCPCommand();
+                cmd->setSocketId(connId);
+                msg->setControlInfo(cmd);
+                sendToApp(msg);
+            }
+        }
+    }
 }
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)

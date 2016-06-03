@@ -132,11 +132,13 @@ class INET_API TCPSocket
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
+    // TODO: add socket parameter to all methods?
     class CallbackInterface
     {
       public:
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) = 0;
+        virtual void socketAvailable(int connId, void *yourPtr, TCPAvailableInfo *availableInfo) {}
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
         virtual void socketClosed(int connId, void *yourPtr) {}
@@ -296,6 +298,11 @@ class INET_API TCPSocket
      * See TCPOpenCommand documentation (neddoc) for more info.
      */
     void listenOnce() { listen(false); }
+
+    /**
+     * Accepts a new incoming connection reported as available.
+     */
+    void accept(int socketId);
 
     /**
      * Active OPEN to the given remote socket.

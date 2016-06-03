@@ -457,6 +457,7 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Add
     key.appGateIndex = conn->appGateIndex;
     key.connId = conn->connId;
     tcpAppConnMap.erase(key);
+    conn->listeningSocketId = conn->connId;
     key.connId = conn->connId = getEnvir()->getUniqueNumber();
     tcpAppConnMap[key] = conn;
 

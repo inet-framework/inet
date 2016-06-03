@@ -303,7 +303,11 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
-        sendEstabIndicationToApp();
+
+        if (isToBeAccepted())
+            sendAvailableIndicationToApp();
+        else
+            sendEstabIndicationToApp();
 
         // This will trigger transition to ESTABLISHED. Timers and notifying
         // app will be taken care of in stateEntered().
@@ -539,24 +543,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                     // as many bytes as requested. rcv_wnd should be decreased
                     // accordingly!
                     //
-                    cMessage *msg = nullptr;
-
-                    if (tcpMain->useDataNotification) {
-                        msg = new cMessage("Data Notification");
-                        msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
-                        TCPCommand *cmd = new TCPCommand();
-                        cmd->setSocketId(connId);
-                        msg->setControlInfo(cmd);
-                        sendToApp(msg);
-                    } else {
-                        while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
-                            msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
-                            TCPCommand *cmd = new TCPCommand();
-                            cmd->setSocketId(connId);
-                            msg->setControlInfo(cmd);
-                            sendToApp(msg);
-                        }
-                    }
+                    if (!isToBeAccepted())
+                        sendAvailableDataToApp();
 
                     // if this segment "filled the gap" until the previously arrived segment
                     // that carried a FIN (i.e.rcv_nxt == rcv_fin_seq), we have to advance
