@@ -771,13 +771,13 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, L3Address
         //"
         //
         // Also, we may need to fork, in order to leave another connection
-        // LISTENing on the port. Note: forking will change our connId.
+        // LISTENing on the port. Note: forking will change our socketId.
         //
         if (state->fork) {
             TCPConnection *conn = cloneListeningConnection();    // "conn" is the clone which will stay LISTENing, while "this" gets updated with the remote address
             tcpMain->addForkedConnection(this, conn, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
-            EV_DETAIL << "Connection forked: this connection got new connId=" << connId << ", "
-                                                                                           "spinoff keeps LISTENing with connId=" << conn->connId << "\n";
+            EV_DETAIL << "Connection forked: this connection got new socketId=" << socketId << ", "
+                                                                                           "spinoff keeps LISTENing with socketId=" << conn->socketId << "\n";
         }
         else {
             tcpMain->updateSockPair(this, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());

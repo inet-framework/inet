@@ -150,7 +150,7 @@ void TCPConnection::printConnBrief() const
 {
     EV_DETAIL << "Connection "
               << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort
-              << "  on app[" << appGateIndex << "], connId=" << connId
+              << "  on app[" << appGateIndex << "], socketId=" << socketId
               << "  in " << stateName(fsm.getState())
               << "\n";
 }
@@ -199,7 +199,7 @@ void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 
 TCPConnection *TCPConnection::cloneListeningConnection()
 {
-    TCPConnection *conn = new TCPConnection(tcpMain, appGateIndex, connId);
+    TCPConnection *conn = new TCPConnection(tcpMain, appGateIndex, socketId);
 
     conn->transferMode = transferMode;
     // following code to be kept consistent with initConnection()
@@ -295,7 +295,7 @@ void TCPConnection::sendIndicationToApp(int code, const int id)
     cMessage *msg = new cMessage(indicationName(code));
     msg->setKind(code);
     TCPCommand *ind = new TCPCommand();
-    ind->setSocketId(connId);
+    ind->setSocketId(socketId);
     ind->setUserId(id);
     msg->setControlInfo(ind);
     sendToApp(msg);
@@ -309,7 +309,7 @@ void TCPConnection::sendAvailableIndicationToApp()
 
     TCPAvailableInfo *ind = new TCPAvailableInfo();
     ind->setSocketId(listeningSocketId);
-    ind->setNewSocketId(connId);
+    ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
@@ -326,7 +326,7 @@ void TCPConnection::sendEstabIndicationToApp()
     msg->setKind(TCP_I_ESTABLISHED);
 
     TCPConnectInfo *ind = new TCPConnectInfo();
-    ind->setSocketId(connId);
+    ind->setSocketId(socketId);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
@@ -350,14 +350,14 @@ void TCPConnection::sendAvailableDataToApp()
             msg = new cMessage("Data Notification");
             msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
             TCPCommand *cmd = new TCPCommand();
-            cmd->setSocketId(connId);
+            cmd->setSocketId(socketId);
             msg->setControlInfo(cmd);
             sendToApp(msg);
         } else {
             while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 TCPCommand *cmd = new TCPCommand();
-                cmd->setSocketId(connId);
+                cmd->setSocketId(socketId);
                 msg->setControlInfo(cmd);
                 sendToApp(msg);
             }

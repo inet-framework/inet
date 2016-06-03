@@ -317,9 +317,9 @@ class INET_API TCPStateVariables : public cObject
 class INET_API TCPConnection
 {
   public:
-    // connection identification by apps: appgateIndex+connId
+    // connection identification by apps: appgateIndex+socketId
     int appGateIndex = -1;    // application gate index
-    int connId = -1;    // identifies connection within the app
+    int socketId = -1;    // identifies connection within the app
     int listeningSocketId = -1;    // identifies listening connection within the app
 
     // socket pair
@@ -553,7 +553,7 @@ class INET_API TCPConnection
     virtual void sendAvailableDataToApp();
 
   public:
-    /** Utility: prints local/remote addr/port and app gate index/connId */
+    /** Utility: prints local/remote addr/port and app gate index/socketId */
     virtual void printConnBrief() const;
     /** Utility: prints important header fields */
     static void printSegmentBrief(TCPSegment *tcpseg);
@@ -583,7 +583,7 @@ class INET_API TCPConnection
     /**
      * The "normal" constructor.
      */
-    TCPConnection(TCP *mod, int appGateIndex, int connId);
+    TCPConnection(TCP *mod, int appGateIndex, int socketId);
 
     /**
      * Note: this default ctor is NOT used to create live connections, only

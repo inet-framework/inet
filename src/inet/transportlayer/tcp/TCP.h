@@ -94,17 +94,17 @@ class TCPReceiveQueue;
 class INET_API TCP : public cSimpleModule, public ILifecycle
 {
   public:
-    struct AppConnKey    // XXX this class is redundant since connId is already globally unique
+    struct AppConnKey    // XXX this class is redundant since socketId is already globally unique
     {
         int appGateIndex;
-        int connId;
+        int socketId;
 
         inline bool operator<(const AppConnKey& b) const
         {
             if (appGateIndex != b.appGateIndex)
                 return appGateIndex < b.appGateIndex;
             else
-                return connId < b.connId;
+                return socketId < b.socketId;
         }
     };
     struct SockPair
@@ -139,11 +139,11 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
   protected:
     /** Factory method; may be overriden for customizing TCP */
-    virtual TCPConnection *createConnection(int appGateIndex, int connId);
+    virtual TCPConnection *createConnection(int appGateIndex, int socketId);
 
     // utility methods
     virtual TCPConnection *findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr);
-    virtual TCPConnection *findConnForApp(int appGateIndex, int connId);
+    virtual TCPConnection *findConnForApp(int appGateIndex, int socketId);
     virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address src, L3Address dest);
     virtual void removeConnection(TCPConnection *conn);
     virtual void updateDisplayString();
@@ -182,7 +182,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
     /**
      * Update conn's socket pair, and register newConn (which'll keep LISTENing).
-     * Also, conn will get a new connId (and newConn will live on with its old connId).
+     * Also, conn will get a new socketId (and newConn will live on with its old socketId).
      */
     virtual void addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
 

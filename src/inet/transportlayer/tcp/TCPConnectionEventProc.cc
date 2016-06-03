@@ -178,7 +178,7 @@ void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCom
     {
         dataMsg->setKind(TCP_I_DATA);
         TCPCommand *cmd = new TCPCommand();
-        cmd->setSocketId(connId);
+        cmd->setSocketId(socketId);
         dataMsg->setControlInfo(cmd);
         sendToApp(dataMsg);
     }
