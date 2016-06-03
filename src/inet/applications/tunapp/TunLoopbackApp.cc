@@ -15,12 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include "inet/applications/tunapp/TunLoopbackApp.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/transportlayer/contract/ITransportPacket.h"
+#include "inet/applications/tunapp/TunLoopbackApp.h"
 
 namespace inet {
 
@@ -43,14 +42,21 @@ void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        tunInterface = par("tunInterface");
         packetsSent = 0;
         packetsReceived = 0;
+        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(tunInterface);
+        if (interfaceEntry == nullptr)
+            throw cRuntimeError("TUN interface not found: %s", tunInterface);
+        tunSocket.setOutputGate(gate("socketOut"));
+        tunSocket.open(interfaceEntry->getInterfaceId());
     }
 }
 
 void TunLoopbackApp::handleMessage(cMessage *message)
 {
-    if (message->getArrivalGate()->isName("tunIn")) {
+    if (message->arrivedOn("socketIn")) {
         EV_INFO << "Message " << message->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
         packetsReceived++;
         INetworkDatagram *networkDatagram = check_and_cast<INetworkDatagram *>(message);
@@ -59,11 +65,12 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         transportPacket->setSourcePort(transportPacket->getDestinationPort());
         networkDatagram->setSourceAddress(networkDatagram->getDestinationAddress());
         networkDatagram->setDestinationAddress(networkDatagram->getSourceAddress());
-        send(message, "tunOut");
+        delete message->removeControlInfo();
+        tunSocket.send(PK(message));
         packetsSent++;
     }
     else
-        throw cRuntimeError("Unknown message");
+        throw cRuntimeError("Unknown message: %s", message->getName());
 }
 
 

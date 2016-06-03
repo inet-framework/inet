@@ -17,13 +17,15 @@
 
 package inet.applications.tunapp;
 
-import inet.applications.contract.ITunApp;
+import inet.applications.contract.IApp;
 
-simple TunLoopbackApp like ITunApp
+simple TunLoopbackApp like IApp
 {
     parameters:
+        string interfaceTableModule;
+        string tunInterface;
         @display("i=block/app");
     gates:
-        input tunIn @labels(TunInterface/up);
-        output tunOut @labels(TunInterface/down);
+        input socketIn @labels(TunInterface/up);
+        output socketOut @labels(TunInterface/down);
 }
