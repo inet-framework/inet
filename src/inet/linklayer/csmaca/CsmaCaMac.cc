@@ -31,8 +31,6 @@ CsmaCaMac::~CsmaCaMac()
     cancelAndDelete(endAckTimeout);
     cancelAndDelete(endData);
     cancelAndDelete(mediumStateChange);
-    for (auto frame : transmissionQueue)
-        delete frame;;
 }
 
 /****************************************************************
@@ -76,7 +74,7 @@ void CsmaCaMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        // initalize self messages
+        // initialize self messages
         endSifs = new cMessage("SIFS");
         endDifs = new cMessage("DIFS");
         endBackoff = new cMessage("Backoff");
@@ -84,6 +82,8 @@ void CsmaCaMac::initialize(int stage)
         endData = new cMessage("Data");
         mediumStateChange = new cMessage("MediumStateChange");
 
+        // set up internal queue
+        transmissionQueue.setName("transmissionQueue");
         // obtain pointer to external queue
         initializeQueueModule();
 
@@ -176,7 +176,7 @@ void CsmaCaMac::handleSelfMessage(cMessage *msg)
 
 void CsmaCaMac::handleUpperPacket(cPacket *msg)
 {
-    if (maxQueueSize != -1 && (int)transmissionQueue.size() == maxQueueSize) {
+    if (maxQueueSize != -1 && (int)transmissionQueue.getLength() == maxQueueSize) {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
         delete msg;
         return;
@@ -184,7 +184,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
     CsmaCaMacDataFrame *frame = encapsulate(msg);
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
     ASSERT(!frame->getReceiverAddress().isUnspecified());
-    transmissionQueue.push_back(frame);
+    transmissionQueue.insert(frame);
     if (fsm.getState() != IDLE)
         EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
     else
@@ -380,7 +380,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     if (fsm.getState() == IDLE) {
         if (isReceiving())
             handleWithFsm(mediumStateChange);
-        else if (!transmissionQueue.empty())
+        else if (!transmissionQueue.isEmpty())
             handleWithFsm(transmissionQueue.front());
     }
 }
@@ -520,6 +520,7 @@ void CsmaCaMac::sendDataFrame(CsmaCaMacDataFrame *frameToSend)
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frameToSend->dup());
 }
+
 void CsmaCaMac::sendAckFrame()
 {
     EV << "sending Ack frame\n";
@@ -560,15 +561,13 @@ void CsmaCaMac::retryCurrentTransmission()
 
 CsmaCaMacDataFrame *CsmaCaMac::getCurrentTransmission()
 {
-    return transmissionQueue.front();
+    return static_cast<CsmaCaMacDataFrame*>(transmissionQueue.front());
 }
 
 void CsmaCaMac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
-    CsmaCaMacFrame *temp = transmissionQueue.front();
-    transmissionQueue.pop_front();
-    delete temp;
+    delete transmissionQueue.pop();
     if (queueModule) {
         // tell queue module that we've become idle
         EV << "requesting another frame from queue module\n";
