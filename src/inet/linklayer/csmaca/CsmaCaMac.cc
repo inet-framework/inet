@@ -17,11 +17,24 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"
 
 namespace inet {
 
 Define_Module(CsmaCaMac);
+
+static int getUPBasedFramePriority(cObject *obj)
+{
+    auto frame = check_and_cast<CsmaCaMacDataFrame*>(obj);
+    int up = frame->getPriority();
+    return (up == UP_BK) ? -2 : (up == UP_BK2) ? -1 : up;  // because UP_BE==0, but background traffic should have lower priority than best effort
+}
+
+static int compareFramesByPriority(cObject *a, cObject *b)
+{
+    return getUPBasedFramePriority(b) - getUPBasedFramePriority(a);
+}
 
 CsmaCaMac::~CsmaCaMac()
 {
@@ -84,6 +97,9 @@ void CsmaCaMac::initialize(int stage)
 
         // set up internal queue
         transmissionQueue.setName("transmissionQueue");
+        if (par("prioritizeByUP"))
+            transmissionQueue.setup(&compareFramesByPriority);
+
         // obtain pointer to external queue
         initializeQueueModule();
 
@@ -410,6 +426,8 @@ CsmaCaMacDataFrame *CsmaCaMac::encapsulate(cPacket *msg)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setTransmitterAddress(address);
     frame->setReceiverAddress(ctrl->getDest());
+    int up = ctrl->getUserPriority();
+    frame->setPriority(up == -1 ? UP_BE : up);  // -1 is unset
     delete ctrl;
 
     frame->encapsulate(msg);
@@ -423,6 +441,7 @@ cPacket *CsmaCaMac::decapsulate(CsmaCaMacDataFrame *frame)
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     ctrl->setSrc(frame->getTransmitterAddress());
     ctrl->setDest(frame->getReceiverAddress());
+    ctrl->setUserPriority(frame->getPriority());
     payload->setControlInfo(ctrl);
 
     delete frame;
