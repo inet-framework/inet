@@ -25,6 +25,8 @@ package inet.linklayer.common;
 //
 simple RandomQoSClassifier like IIeee8021dQoSClassifier
 {
+    parameters:
+        @display("i=block/classifier");
     gates:
         input in;
         output out;
