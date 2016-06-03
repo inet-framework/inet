@@ -22,7 +22,4 @@ moduleinterface ITunNic extends INic
     parameters:
         @nic;
         @display("i=block/ifcard");
-    gates:
-        input appIn;    // from application
-        output appOut;  // to application
 }

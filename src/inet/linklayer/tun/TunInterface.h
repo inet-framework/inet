@@ -17,16 +17,12 @@
 
 // This file is based on the PPP.h of INET written by Andras Varga.
 
-#ifndef __TUNINTERFACE_H
-#define __TUNINTERFACE_H
+#ifndef __INET_TUNINTERFACE_H
+#define __INET_TUNINTERFACE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/linklayer/base/MACBase.h"
 
 namespace inet {
-
-// Forward declarations:
-class InterfaceEntry;
 
 class INET_API TunInterface : public MACBase
 {
@@ -36,23 +32,21 @@ class INET_API TunInterface : public MACBase
         static simsignal_t packetSentToUpperSignal;
         static simsignal_t packetReceivedFromUpperSignal;
 
-    protected:
-        void updateDisplayString();
+        std::vector<int> socketIds;
 
-        // MACBase functions
+    protected:
         InterfaceEntry *createInterfaceEntry() override;
         virtual void flushQueue() override;
         virtual void clearQueue() override;
-        virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
+        virtual bool isUpperMsg(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
-        virtual void handleMessage(cMessage *msg) override;
-        virtual void finish() override;
+        virtual void handleMessage(cMessage *message) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __TUNINTERFACE_H
+#endif // ifndef __INET_TUNINTERFACE_H
 
