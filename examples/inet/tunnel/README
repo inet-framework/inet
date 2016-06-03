@@ -1,0 +1,17 @@
+This example demonstrates how to setup a network tunnel using a TUN interface.
+
+The network contains a client node (running an application) that sends packets
+to a server node (running another application). Packets go through a tunnel that
+starts at a node called inlet and ends at another node called outlet. The tunnel
+is created between these nodes by two additional TunnelApp applications using
+UDP sockets.
+
+The routing tables of the tunnel end nodes (inlet and outlet) are configured to
+forward incoming packets (towards the final client and server) to the TUN
+interface. When the TunnelApp receives a packet from the TUN interface, it
+encapsulates the packet into another UDP packet, and forwards it to the other
+end of the tunnel. When the TunnelApp at the other end receives the packet, it
+decapsulates the received packet, and sends the content to the TUN interface for
+further routing.
+
+The example works with both UDP and TCP applications.
