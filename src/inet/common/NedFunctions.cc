@@ -160,6 +160,19 @@ Define_NED_Function2(nedf_firstAvailableOrEmpty,
     "its C++ implementation class is also available. Returns empty string if "
     "none of the types are available.");
 
+cNEDValue nedf_nanToZero(cComponent *context, cNEDValue argv[], int argc)
+{
+    double x = argv[0].doubleValue();
+    const char *unit = argv[0].getUnit();
+    return std::isnan(x) ? cNEDValue(0, unit) : argv[0];
+}
+
+Define_NED_Function2(nedf_nanToZero,
+        "quantity nanToZero(quantity x)",
+        "math",
+        "Returns the argument if it is not NaN, otherwise returns 0."
+        );
+
 } // namespace utils
 
 } // namespace inet

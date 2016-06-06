@@ -28,6 +28,6 @@ simple VehicleMobility extends MovingMobilityBase
         double speed @unit(mps);
         double initialX @unit(m) = default(uniform(constraintAreaMinX, constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(constraintAreaMinY, constraintAreaMaxY));
-        double initialZ @unit(m) = default(uniform(constraintAreaMinZ, constraintAreaMaxZ));
+        double initialZ @unit(m) = default(nanToZero(uniform(constraintAreaMinZ, constraintAreaMaxZ)));
         bool initFromDisplayString = default(true);
 }
