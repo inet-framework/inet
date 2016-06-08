@@ -1,9 +1,5 @@
 ====== inet-3.x ======
 
-2016-04-19  Levente Meszaros
-
-	Followed recent logging API changes.
-
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------
@@ -22,10 +18,18 @@
 
 2015-06-22  ------ inet-3.0.0 released ------
 
+2015-03-18 Levente Mészáros
+
+	NetPerfMeter: Moved interface under contract.
+
 2015-05-13  ------ inet-2.99.1 released ------
 
-2015-03-02  Levente Meszaros
+2015-01-28  Irene Ruengeler
 
-	Added intial implementation.
+	Added ITunApp
 
-====== inet-2.x ======
+2014-12-09  Levente Meszaros
+
+	Applications: Renamed common subdirectory to base.
+
+	Moved I* module interfaces to contract.

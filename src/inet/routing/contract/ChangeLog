@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2015-03-16  Levente Meszaros
+
+	Added IPIMRouting
+
+2014-12-11  Levente Mészáros
+
+	Routing: Moved module interfaces under contract.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------
@@ -19,20 +27,3 @@
 2015-06-22  ------ inet-3.0.0 released ------
 
 2015-05-13  ------ inet-2.99.1 released ------
-
-2015-01-21  Zoltan Bojthe
-
-	Applied C++ source code modernizer.
-
-2014-11-17  Levente Meszaros
-
-	Fixed copy-paste bug found by Coverity.
-
-2014-11-07  ------ inet-2.99.0 released ------
-
-2014-10-31  Levente Meszaros
-
-	Completely deleted the old battery model.
-	Added new contracts and implementations.
-
-====== inet-2.x ======

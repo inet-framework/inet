@@ -1,10 +1,5 @@
 ====== inet-3.x ======
 
-2016-05-25  Andras Varga
-
-	Added ApplicationPacket, a generic application packet for use by
-	traffic generator modules.
-
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------
@@ -24,15 +19,6 @@
 2015-06-22  ------ inet-3.0.0 released ------
 
 2015-05-13  ------ inet-2.99.1 released ------
-
-2015-01-21  Zoltan Bojthe
-
-	Applied C++ source code modernizer.
-
-2014-12-09  Levente Meszaros
-
-	Renamed common subdirectory to base.
-	Moved I* module interfaces to contract.
 
 2014-11-07  ------ inet-2.99.0 released ------
 
@@ -71,10 +57,16 @@
 
 ====== inet-2.x ======
 
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
 
-2014-01-22  Levente Meszaros
+2013-11-29  Zsolt Prontvai
 
-	Renamed AppBase to ApplicationBase and moved to common.
+	Added STPTester

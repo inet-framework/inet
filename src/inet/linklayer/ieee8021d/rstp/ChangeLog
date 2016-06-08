@@ -1,10 +1,5 @@
 ====== inet-3.x ======
 
-2016-05-25  Andras Varga
-
-	Added ApplicationPacket, a generic application packet for use by
-	traffic generator modules.
-
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------
@@ -17,6 +12,10 @@
 
 2015-12-16  ------ inet-3.2.0 released ------
 
+2015-11-27  Zoltan Bojthe
+
+	Made the code compile with OMNeT++ 5.0b3
+
 2015-10-26  ------ inet-3.1.1 released ------
 
 2015-10-15  ------ inet-3.1.0 released ------
@@ -25,14 +24,25 @@
 
 2015-05-13  ------ inet-2.99.1 released ------
 
+2015-02-12  Zoltan Bojthe
+
+	Fixed BPDU packet length.
+
+2015-01-07  Zoltan Bojthe
+
+	Replaced getParentModule with getContainingNode.
+
 2015-01-21  Zoltan Bojthe
 
 	Applied C++ source code modernizer.
 
-2014-12-09  Levente Meszaros
+2014-12-16  Zoltan Bojthe
 
-	Renamed common subdirectory to base.
-	Moved I* module interfaces to contract.
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-13  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
 
 2014-11-07  ------ inet-2.99.0 released ------
 
@@ -71,10 +81,22 @@
 
 ====== inet-2.x ======
 
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
 2014-06-12  ------ inet-2.4.0 released ------
+
+2014-05-05  Rudolf Hornig
+
+	Ieee802.1d: Added missing INET_API macros
 
 2014-03-19  ------ inet-2.3.0 released ------
 
-2014-01-22  Levente Meszaros
+2013-11-07 Benjamin Seregi
 
-	Renamed AppBase to ApplicationBase and moved to common.
+	RSTP: added IEEE 802.1D-2004 implementation of Spanning Tree Protocol.
+	The source code is based on Juan Luis Garrote Molinero's implementation
+	from INETMANET

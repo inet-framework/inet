@@ -1,5 +1,21 @@
 ====== inet-3.x ======
 
+2016-05-17  Andras Varga
+
+	Added instrument figures: GaugeMeterFigure, LabelMeterFigure,
+	TextMeterFigure, ProgressMeterFigure, all implementing
+	IMeterFigure.
+
+	Instruments display the value set on them via IMeterFigure.
+	MeterFigure.
+
+	In practice, instrument figures will be driven by signals; see
+	the Wireless Tutorial (tutorials/wireless) for an example.
+
+2016-01-18  Levente Meszaros
+
+	Added BarFigure.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------
