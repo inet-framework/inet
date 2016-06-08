@@ -29,8 +29,20 @@ namespace inet {
 class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtocolRegistrationListener
 {
   protected:
-    ProtocolMapping protocolMapping;
+    struct SocketDescriptor
+    {
+        int socketId = -1;
+        int protocolId = -1;
+
+        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+    };
+
+    ProtocolMapping protocolMapping;    // where to send packets after decapsulation
     IInterfaceTable *interfaceTable;
+    // working vars
+    ProtocolMapping mapping;
+    std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
   protected:
     NetworkProtocolBase();
@@ -46,6 +58,8 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
     virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
     virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+
+    virtual void handleUpperCommand(cMessage *msg) override;
 
   public:
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
