@@ -9,7 +9,7 @@
 #include <cassert>
 
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
-#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MACAddress.h"
 
@@ -333,7 +333,7 @@ void ProbabilisticBroadcast::insertNewMessage(ProbabilisticBroadcastDatagram *pk
 cPacket *ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastDatagram *msg)
 {
     cPacket *m = msg->decapsulate();
-    SimpleNetworkProtocolControlInfo *const controlInfo = new SimpleNetworkProtocolControlInfo();
+    GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(msg->getSrcAddr());
     controlInfo->setProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);

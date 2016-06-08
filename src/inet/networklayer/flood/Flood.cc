@@ -24,7 +24,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
-#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -247,7 +247,7 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
  **/
 cMessage *Flood::decapsMsg(FloodDatagram *floodDatagram)
 {
-    SimpleNetworkProtocolControlInfo *controlInfo = new SimpleNetworkProtocolControlInfo();
+    GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(floodDatagram->getSourceAddress());
     controlInfo->setProtocol(floodDatagram->getTransportProtocol());
     cPacket *transportPacket = floodDatagram->decapsulate();

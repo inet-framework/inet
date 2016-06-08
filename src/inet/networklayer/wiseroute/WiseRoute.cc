@@ -35,7 +35,7 @@
 #include "inet/common/FindModule.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
-#include "inet/networklayer/common/SimpleNetworkProtocolControlInfo.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -326,7 +326,7 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 cMessage *WiseRoute::decapsMsg(WiseRouteDatagram *msg)
 {
     cMessage *m = msg->decapsulate();
-    SimpleNetworkProtocolControlInfo *const controlInfo = new SimpleNetworkProtocolControlInfo();
+    GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(msg->getInitialSrcAddr());
     controlInfo->setTransportProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
