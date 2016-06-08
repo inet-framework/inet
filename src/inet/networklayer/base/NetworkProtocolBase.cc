@@ -18,6 +18,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/IInterfaceControlInfo.h"
+#include "inet/common/ProtocolGroup.h"
 
 namespace inet {
 
@@ -39,7 +40,7 @@ void NetworkProtocolBase::initialize(int stage)
 
 void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *gate) {
     Enter_Method("handleRegisterProtocol");
-    protocolMapping.addProtocolMapping(protocol.getId(), gate->getIndex());
+    protocolMapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)
