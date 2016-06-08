@@ -380,7 +380,7 @@ void PingApp::sendPingRequest()
             controlInfo->setTransportProtocol(IP_PROT_IPv6_ICMP);
             auto *request = new ICMPv6EchoRequestMsg(msg->getName());
             outPacket = request;
-            request->setByteLength(4);
+            //request->setByteLength(4);        //FIXME Needed
             request->setType(ICMPv6_ECHO_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
@@ -395,7 +395,7 @@ void PingApp::sendPingRequest()
             controlInfo->setTransportProtocol(IP_PROT_ICMP);       //FIXME ???
             auto *request = new EchoPacket(msg->getName());
             outPacket = request;
-            request->setByteLength(4);
+            //request->setByteLength(4);        //FIXME
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
