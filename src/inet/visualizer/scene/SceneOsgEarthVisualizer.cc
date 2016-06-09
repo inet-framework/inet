@@ -95,7 +95,7 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
     auto geographicSrsEye = coordinateSystem->computeGeographicCoordinate(Coord(euclideanCenter.x(), euclideanCenter.y(), euclideanCenter.z()));
     auto mapSrs = mapNode->getMapSRS();
     auto osgCanvas = visualizerTargetModule->getOsgCanvas();
-    osgCanvas->setEarthViewpoint(osgEarth::Viewpoint(geographicSrsEye.longitude, geographicSrsEye.latitude, geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius, mapSrs->getGeographicSRS()));
+    osgCanvas->setEarthViewpoint(osgEarth::Viewpoint("home", geographicSrsEye.longitude, geographicSrsEye.latitude, geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius));
 }
 
 osg::Group *SceneOsgEarthVisualizer::getMainPart()
