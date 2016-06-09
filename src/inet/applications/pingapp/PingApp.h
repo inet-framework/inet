@@ -101,6 +101,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
   public:
     PingApp();
     virtual ~PingApp();
+    int getPid() const { return pid; }
 };
 
 } // namespace inet
