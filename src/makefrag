@@ -42,12 +42,12 @@ ifeq ($(WITH_VOIPSTREAM), enabled)
 endif
 
 #
-# visualization feature requires (optionally) some extra osg and libraries
+# visualization feature requires (optionally) some extra osg and osgEarth libraries
 #
 WITH_VISUALIZERS := $(shell (cd .. && ./inet_featuretool -q isenabled visualization && echo enabled) )
 ifeq ($(WITH_VISUALIZERS), enabled)
   ifeq ($(WITH_OSG), yes)
-      LIBS += -losgText -losgDB
+      LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil
   endif
 endif
 
