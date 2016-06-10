@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -18,6 +19,7 @@
 package inet.applications.httptools.browser;
 
 import inet.applications.contract.ITCPApp;
+import inet.applications.contract.ISCTPApp;
 
 
 //
@@ -107,17 +109,20 @@ import inet.applications.contract.ITCPApp;
 //
 // @author  Kristjan V. Jonsson
 //
-simple HttpBrowser like ITCPApp
+simple HttpBrowser like ITCPApp, ISCTPApp
 {
     parameters:
+        string protocol = default("TCP");               // The transport protocol of the browser
         int httpProtocol = default(11);                 // The http protocol: 10 for http/1.0, 11 for http/1.1. Not used at the present time.
         string logFile = default("");                   // Name of a browser log file. Browse events are appended, allowing sharing of file for multiple browsers.
         string scriptFile = default("");                // The browsing script file. Blank to disable.
         double activationTime @unit("s") = default(0s); // The initial activation delay. Zero to disable. This is the time at which the browser first comes to life in a simulation scenario. Note that this can be any random distribution which OMNeT++ supports.
         xml config;                                     // The XML config file
         string httpBrowserControllerModule = default("controller"); // the absolute path to the http browser controller, @see HttpController
+        string primaryRemoteInterface = default(""); // Server server's primary interface name (SCTP only; default "")
     gates:
         input tcpIn;
         output tcpOut;
+        input sctpIn;
+        output sctpOut;
 }
-

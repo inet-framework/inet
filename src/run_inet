@@ -7,7 +7,7 @@ VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak
 
 if [ "$1" = "--valgrind" ] ; then
    echo "##### Running with Valgrind! ######"
-   VALGRIND="valgrind $VALGRIND_OPTIONS"
+   VALGRIND="/usr/bin/valgrind $VALGRIND_OPTIONS"
    shift
 fi
 

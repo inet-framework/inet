@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -81,6 +82,9 @@ class INET_API HttpServerBase : public HttpNodeBase
     rdObject *rdTextImageResourceRatio = nullptr;    ///< The ratio of text resources to images referenced in HTML pages.
     rdObject *rdErrorMsgSize = nullptr;    ///< The size of error messages.
 
+    bool useSCTP = false;    // Use SCTP instead of TCP?
+    long maxMsgSize;    // Maximum SCTP response message size (larger responses will be splitted accordingly)
+
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -93,7 +97,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     HttpReplyMessage *handleGetRequest(HttpRequestMessage *request, std::string resource);
     HttpReplyMessage *generateErrorReply(HttpRequestMessage *request, int code);
     virtual std::string generateBody();
-    cPacket *handleReceivedMessage(cMessage *msg);
+    HttpReplyMessage *handleReceivedMessage(cMessage *msg);
     void registerWithController();
     void readSiteDefinition(std::string file);
     std::string readHtmlBodyFile(std::string file, std::string path);

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -20,6 +21,8 @@
 
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocketMap.h"
 #include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
@@ -36,11 +39,15 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInterface
+class INET_API HttpServer : public HttpServerBase,
+                            public TCPSocket::CallbackInterface,
+                            public SCTPSocket::CallbackInterface
 {
   protected:
-    TCPSocket listensocket;
-    TCPSocketMap sockCollection;
+    TCPSocket tcpListensocket;
+    TCPSocketMap tcpSockCollection;
+    SCTPSocket sctpListensocket;
+    SCTPSocketMap sctpSockCollection;
     unsigned long numBroken = 0;
     unsigned long socketsOpened = 0;
 
@@ -50,11 +57,15 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
+    // TCPSocket::CallbackInterface callback methods
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
     virtual void socketPeerClosed(int connId, void *yourPtr) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
+
+    // SCTPSocket::CallbackInterface callback methods
+    virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) override;
 };
 
 } // namespace httptools
@@ -62,4 +73,3 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
 } // namespace inet
 
 #endif // ifndef __INET_HTTPSERVER_H
-

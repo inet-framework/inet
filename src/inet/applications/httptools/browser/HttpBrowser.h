@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -20,6 +21,8 @@
 
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/sctp/SCTPSocketMap.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/applications/httptools/browser/HttpBrowserBase.h"
 
@@ -42,7 +45,9 @@ namespace httptools {
  * @see HttpBrowserBase
  * @see HttpBrowserDirect
  */
-class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackInterface
+class INET_API HttpBrowser : public HttpBrowserBase,
+                             public TCPSocket::CallbackInterface,
+                             public SCTPSocket::CallbackInterface
 {
   protected:
     /*
@@ -55,13 +60,16 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     struct SockData
     {
         HttpRequestQueue messageQueue;    // Queue of pending messages.
-        TCPSocket *socket = nullptr;    // A reference to the socket object.
+        TCPSocket *tcpSocket = nullptr;    // A reference to the socket object.
+        SCTPSocket *sctpSocket = nullptr;    // A reference to the socket object.
         int pending = 0;    // A counter for the number of outstanding replies.
     };
 
-    TCPSocketMap sockCollection;    // List of active sockets
+    TCPSocketMap tcpSockCollection;    // List of active sockets
+    SCTPSocketMap sctpSockCollection;    // List of active sockets
     unsigned long numBroken = 0;    // Counter for the number of broken connections
     unsigned long socketsOpened = 0;    // Counter for opened sockets
+    simtime_t sessionStartTime = -1.0;   // Start time of the session
 
   protected:
     virtual void initialize(int stage) override;
@@ -134,6 +142,10 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
 
     virtual void socketDeleted(int connId, void *yourPtr) override;
 
+    // SCTPSocket::CallbackInterface callback methods
+    virtual void socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg) override;
+    virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) override;
+
     // Socket establishment and data submission
     /*
      * Establishes a socket and queues a single message for transmission.
@@ -150,9 +162,15 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      */
     void submitToSocket(const char *moduleName, int connectPort, HttpRequestQueue& queue);
 
+    void checkStartDownloadDurationMeasurement();
+    void checkEndOfDownloadDurationMeasurement();
+
   public:
     HttpBrowser();
     virtual ~HttpBrowser();
+    
+  private:
+    void appendRemoteInterface(char* szModuleName);
 };
 
 } // namespace httptools
@@ -160,4 +178,3 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
 } // namespace inet
 
 #endif // ifndef __INET_HTTPBROWSER_H
-

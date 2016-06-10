@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -116,6 +117,7 @@ void HttpBrowserBase::initialize(int stage)
         controller = getModuleFromPar<HttpController>(par("httpBrowserControllerModule"), this);
 
         httpProtocol = par("httpProtocol");
+        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
 
         logFileName = par("logFile").stdstringValue();
         enableLogging = logFileName != "";
@@ -276,8 +278,6 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
 void HttpBrowserBase::handleDataMessage(cMessage *msg)
 {
     HttpReplyMessage *appmsg = check_and_cast<HttpReplyMessage *>(msg);
-    if (appmsg == nullptr)
-        throw cRuntimeError("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
 
     logResponse(appmsg);
 
@@ -403,7 +403,10 @@ HttpRequestMessage *HttpBrowserBase::generatePageRequest(std::string www, std::s
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", pageName.c_str());
-    HttpRequestMessage *msg = new HttpRequestMessage(szReq);
+    const int szReqLength = strlen(szReq);
+
+    HttpRequestMessage *msg = new HttpRequestMessage;
+    msg->setName(szReq);
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
@@ -412,6 +415,14 @@ HttpRequestMessage *HttpBrowserBase::generatePageRequest(std::string www, std::s
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     msg->setKind(HTTPT_REQUEST_MESSAGE);
+
+    if(useSCTP) {
+        msg->setDataArraySize(msg->getByteLength());
+        for (int i = 0; i < msg->getByteLength(); i++) {
+            msg->setData(i, (i < szReqLength) ? szReq[i] : 0x00);
+        }
+        msg->setDataLen(msg->getByteLength());
+    }
 
     logRequest(msg);
     htmlRequested++;
@@ -452,8 +463,10 @@ HttpRequestMessage *HttpBrowserBase::generateResourceRequest(std::string www, st
 
     char szReq[MAX_URL_LENGTH + 24];
     sprintf(szReq, "GET %s HTTP/1.1", resource.c_str());
+    const int szReqLength = strlen(szReq);
 
-    HttpRequestMessage *msg = new HttpRequestMessage(szReq);
+    HttpRequestMessage *msg = new HttpRequestMessage;
+    msg->setName(szReq);
     msg->setTargetUrl(www.c_str());
     msg->setProtocol(httpProtocol);
     msg->setHeading(szReq);
@@ -462,6 +475,14 @@ HttpRequestMessage *HttpBrowserBase::generateResourceRequest(std::string www, st
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
     msg->setKind(HTTPT_REQUEST_MESSAGE);
+
+    if(useSCTP) {
+        msg->setDataArraySize(msg->getByteLength());
+        for (int i = 0; i < msg->getByteLength(); i++) {
+            msg->setData(i, (i < szReqLength) ? szReq[i] : 0x00);
+        }
+        msg->setDataLen(msg->getByteLength());
+    }
 
     logRequest(msg);
 
@@ -559,4 +580,3 @@ void HttpBrowserBase::readScriptedEvents(const char *filename)
 } // namespace httptools
 
 } // namespace inet
-

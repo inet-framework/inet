@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -60,6 +61,10 @@ void HttpServerBase::initialize(int stage)
         outputFormat = lf_short;
 
         httpProtocol = par("httpProtocol");
+        useSCTP = (strcmp((const char*)par("protocol"), "SCTP") == 0);
+        maxMsgSize = par("maxMsgSize");
+        if (maxMsgSize < 128)
+            throw cRuntimeError("maxMsgSize setting does not make sense");
 
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement == nullptr)
@@ -202,7 +207,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
     updateDisplay();
 }
 
-cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
+HttpReplyMessage *HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
     if (request == nullptr)
@@ -243,8 +248,20 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
         replymsg = generateErrorReply(request, 400);
     }
 
-    if (replymsg != nullptr)
+    if (replymsg != nullptr) {
+        if(useSCTP) {
+            char replyStr[res[1].size() + 16];
+            snprintf((char*)&replyStr, sizeof(replyStr), "[%s]...", res[1].c_str());
+            const int replyLength = strlen(replyStr);
+
+            replymsg->setDataArraySize(replymsg->getByteLength());
+            for (int i = 0; i < replymsg->getByteLength(); i++) {
+                replymsg->setData(i, replyStr[i % replyLength]);
+            }
+            replymsg->setDataLen(replymsg->getByteLength());
+        }
         logResponse(replymsg);
+    }
 
     return replymsg;
 }
@@ -300,7 +317,8 @@ HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, 
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    HttpReplyMessage *replymsg = new HttpReplyMessage;
+    replymsg->setName(szReply);
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -352,7 +370,8 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    HttpReplyMessage *replymsg = new HttpReplyMessage;
+    replymsg->setName(szReply);
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -371,7 +390,10 @@ HttpReplyMessage *HttpServerBase::generateErrorReply(HttpRequestMessage *request
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szErrStr);
+    const int szErrLength = strlen(szErrStr);
+
+    HttpReplyMessage *replymsg = new HttpReplyMessage;
+    replymsg->setName(szErrStr);
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -380,6 +402,14 @@ HttpReplyMessage *HttpServerBase::generateErrorReply(HttpRequestMessage *request
     replymsg->setResult(code);
     replymsg->setByteLength((int)rdErrorMsgSize->draw());
     replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+
+    if(useSCTP) {
+        replymsg->setDataArraySize(replymsg->getByteLength());
+        for (int i = 0; i < replymsg->getByteLength(); i++) {
+            replymsg->setData(i, (i < szErrLength) ? szErrStr[i] : 0x00);
+        }
+        replymsg->setDataLen(replymsg->getByteLength());
+    }
 
     badRequests++;
     return replymsg;

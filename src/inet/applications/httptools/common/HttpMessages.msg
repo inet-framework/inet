@@ -63,12 +63,19 @@
 //
 
 
+cplusplus {{
+#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+}}
+
 namespace inet::httptools;
+
+class noncobject ::inet::SCTPSimpleMessage;
+
 
 //
 // Base class for HTTP messages
 //
-packet HttpBaseMessage
+packet HttpBaseMessage extends ::inet::SCTPSimpleMessage
 {
     @omitGetVerb(true);
     @fieldNameSuffix("_var");
@@ -113,4 +120,13 @@ packet HttpReplyMessage extends HttpBaseMessage
     @fieldNameSuffix("_var");
     int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
     int contentType @enum(HttpContentType) = CT_UNKNOWN;
+}
+
+
+//
+// Message class for HTTP fragments (SCTP only)
+//
+packet HttpFragmentMessage extends HttpBaseMessage
+{
+    @omitGetVerb(true);
 }

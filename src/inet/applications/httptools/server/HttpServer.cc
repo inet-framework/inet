@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
+// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -39,12 +40,21 @@ void HttpServer::initialize(int stage)
 
         int port = par("port");
 
-        TCPSocket listensocket;
-        listensocket.setOutputGate(gate("tcpOut"));
-        listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        listensocket.bind(port);
-        listensocket.setCallbackObject(this);
-        listensocket.listen();
+        if (!useSCTP) {
+            TCPSocket tcpListenSocket;
+            tcpListenSocket.setOutputGate(gate("tcpOut"));
+            tcpListenSocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
+            tcpListenSocket.bind(port);
+            tcpListenSocket.setCallbackObject(this);
+            tcpListenSocket.listen();
+        }
+        else {
+            SCTPSocket sctpListenSocket;
+            sctpListenSocket.setOutputGate(gate("sctpOut"));
+            sctpListenSocket.bind(port);
+            sctpListenSocket.setCallbackObject(this);
+            sctpListenSocket.listen(true);
+        }
     }
 }
 
@@ -59,7 +69,8 @@ void HttpServer::finish()
     recordScalar("sock.broken", numBroken);
 
     // Clean up sockets and data structures
-    sockCollection.deleteSockets();
+    tcpSockCollection.deleteSockets();
+    sctpSockCollection.deleteSockets();
 }
 
 void HttpServer::handleMessage(cMessage *msg)
@@ -69,18 +80,31 @@ void HttpServer::handleMessage(cMessage *msg)
     }
     else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-        TCPSocket *socket = sockCollection.findSocketFor(msg);
-        if (!socket) {
-            EV_DEBUG << "No socket found for the message. Create a new one" << endl;
-            // new connection -- create new socket object and server process
-            socket = new TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));
-            socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
-            socket->setCallbackObject(this, socket);
-            sockCollection.addSocket(socket);
+        if (!useSCTP) {
+            TCPSocket *tcpSocket = tcpSockCollection.findSocketFor(msg);
+            if (!tcpSocket) {
+                EV_DEBUG << "No socket found for the message. Create a new one" << endl;
+                // new connection -- create new socket object and server process
+                tcpSocket = new TCPSocket(msg);
+                tcpSocket->setOutputGate(gate("tcpOut"));
+                tcpSocket->setDataTransferMode(TCP_TRANSFER_OBJECT);
+                tcpSocket->setCallbackObject(this, tcpSocket);
+                tcpSockCollection.addSocket(tcpSocket);
+            }
+            EV_DEBUG << "Process the message " << msg->getName() << endl;
+            tcpSocket->processMessage(msg);
         }
-        EV_DEBUG << "Process the message " << msg->getName() << endl;
-        socket->processMessage(msg);
+        else {
+            SCTPSocket *sctpSocket = sctpSockCollection.findSocketFor(msg);
+            if (!sctpSocket) {
+                sctpSocket = new SCTPSocket(msg);
+                sctpSocket->setOutputGate(gate("sctpOut"));
+                sctpSocket->setCallbackObject(this, sctpSocket);
+                sctpSockCollection.addSocket(sctpSocket);
+            }
+            EV_DEBUG << "Process the message " << msg->getName() << endl;
+            sctpSocket->processMessage(msg);
+        }
     }
     updateDisplay();
 }
@@ -97,17 +121,84 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket *)yourPtr;
 
     // Should be a HttpReplyMessage
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
-    cMessage *reply = handleReceivedMessage(msg);
+    HttpReplyMessage *reply = handleReceivedMessage(msg);
     if (reply != nullptr) {
-        socket->send(reply);    // Send to socket if the reply is non-zero.
+        if (!useSCTP) {
+            TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+            tcpSocket->send(reply);     // Send to socket if the reply is non-zero.
+        }
+        else {
+            SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+
+            // Fragment reply into SCTP messages of at most maxMsgSize bytes,
+            // if the reply is longer than maxMsgSize.
+            const long totalReplyLength = reply->getByteLength();
+            if (totalReplyLength > maxMsgSize) {
+                long toSend = totalReplyLength;
+                long j      = 0;
+                while (toSend > 0) {
+                    const long txLength = std::min(toSend, maxMsgSize);
+                    toSend -= txLength;
+
+                    // Only the last message is of type HttpReplyMessage. Otherwise,
+                    // the messages are of type HttpFragmentMessage. The receiver
+                    // can then simply ignore them and wait for the last message
+                    // (i.e. HttpReplyMessage type) to have the full HTTP response.
+                    HttpBaseMessage* fragmentMsg =
+                      (toSend > 0) ? (HttpBaseMessage*)new HttpFragmentMessage :
+                                     (HttpBaseMessage*)reply->dup();
+
+                    fragmentMsg->setByteLength(txLength);
+                    fragmentMsg->setDataArraySize(fragmentMsg->getByteLength());
+                    for (int i = 0; i < fragmentMsg->getByteLength(); i++) {
+                        fragmentMsg->setData(i, reply->getData(j++));
+                    }
+
+                    /*
+                    // Debugging code: add a fragment ID to each fragment.
+                    static long fragmentID = 0;
+                    char fragmentStr[16];
+                    snprintf((char*)&fragmentStr, sizeof(fragmentStr), "**F-%06ld**", ++fragmentID);
+                    for (int i = 0; i < std::min((int)strlen(fragmentStr), (int)fragmentMsg->getByteLength()); i++) {
+                        fragmentMsg->setData(i, fragmentStr[i]);
+                    }
+                    */
+
+                    fragmentMsg->setDataLen(fragmentMsg->getByteLength());
+                    sctpSocket->send(fragmentMsg);
+
+                }
+                delete reply;
+            }
+            else {
+               // Reply size <= maxMsgSize => send it as is.
+               sctpSocket->send(reply);
+            }
+
+        }
     }
     delete msg;    // Delete the received message here. Must not be deleted in the handler!
+}
+
+void HttpServer::socketDataNotificationArrived(int assocId, void *yourPtr, cPacket *msg)
+{
+    // SCTP data is available => tell SCTP to forward it!
+    const SCTPCommand* dataIndication = check_and_cast<const SCTPCommand*>(msg->getControlInfo());
+
+    SCTPSendInfo* command = new SCTPSendInfo("SendInfo");
+    command->setAssocId(dataIndication->getAssocId());
+    command->setSid(dataIndication->getSid());
+    command->setNumMsgs(dataIndication->getNumMsgs());
+
+    cPacket* cmsg = new cPacket("SCTP_C_RECEIVE");
+    cmsg->setKind(SCTP_C_RECEIVE);
+    cmsg->setControlInfo(command);
+    send(cmsg, "sctpOut");
 }
 
 void HttpServer::socketPeerClosed(int connId, void *yourPtr)
@@ -116,53 +207,80 @@ void HttpServer::socketPeerClosed(int connId, void *yourPtr)
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket *)yourPtr;
 
     // close the connection (if not already closed)
-    if (socket->getState() == TCPSocket::PEER_CLOSED) {
-        EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
-        socket->close();    // Call the close method to properly dispose of the socket.
+    if (!useSCTP) {
+        TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+        if (tcpSocket->getState() == TCPSocket::PEER_CLOSED) {
+            EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
+            tcpSocket->close();    // Call the close method to properly dispose of the socket.
+        }
+    }
+    else {
+        SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+        if (sctpSocket->getState() == SCTPSocket::PEER_CLOSED) {
+            EV_INFO << "remote SCTP closed, closing here as well. Connection id is " << connId << endl;
+            sctpSocket->close();    // Call the close method to properly dispose of the socket.
+        }
     }
 }
 
 void HttpServer::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "connection closed. Connection id " << connId << endl;
-
     if (yourPtr == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
+
     // Cleanup
-    TCPSocket *socket = (TCPSocket *)yourPtr;
-    sockCollection.removeSocket(socket);
-    delete socket;
+    if (!useSCTP) {
+        TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+        tcpSockCollection.removeSocket(tcpSocket);
+        delete tcpSocket;
+    }
+    else {
+        SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+        sctpSockCollection.removeSocket(sctpSocket);
+        delete sctpSocket;
+   }
 }
 
 void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 {
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
-
     EV_INFO << "connection closed. Connection id " << connId << endl;
-
     if (yourPtr == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket *)yourPtr;
-
-    if (code == TCP_I_CONNECTION_RESET)
-        EV_WARN << "Connection reset!\n";
-    else if (code == TCP_I_CONNECTION_REFUSED)
-        EV_WARN << "Connection refused!\n";
 
     // Cleanup
-    sockCollection.removeSocket(socket);
-    delete socket;
+    if (!useSCTP) {
+        TCPSocket *tcpSocket = (TCPSocket *)yourPtr;
+        if (code == TCP_I_CONNECTION_RESET) {
+            EV_WARN << "Connection reset!\n";
+        }
+        else if (code == TCP_I_CONNECTION_REFUSED) {
+            EV_WARN << "Connection refused!\n";
+        }
+        tcpSockCollection.removeSocket(tcpSocket);
+        delete tcpSocket;
+    }
+    else {
+        SCTPSocket *sctpSocket = (SCTPSocket *)yourPtr;
+        if (code == SCTP_I_CONNECTION_RESET) {
+            EV_WARN << "Connection reset!\n";
+        }
+        else if (code == SCTP_I_CONNECTION_REFUSED) {
+            EV_WARN << "Connection refused!\n";
+        }
+        sctpSockCollection.removeSocket(sctpSocket);
+        delete sctpSocket;
+   }
 }
 
 } // namespace httptools
 
 } // namespace inet
-
