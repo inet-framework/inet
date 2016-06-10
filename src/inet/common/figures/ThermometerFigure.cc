@@ -278,9 +278,11 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
 
     containerFigure->addMoveTo(x, y);
     containerFigure->addLineRel(0, height + offset);
-    // TODO this not works with Qt
-    containerFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
+    //TODO this does not work with Qtenv:
+    //containerFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
+    containerFigure->addArcRel(width/2, width/2, 0, true, false, width, 0);
     containerFigure->addLineRel(0, -height - offset);
+    containerFigure->addArcRel(width/2, width/2, 0, true, false, -width, 0);
 
     double mercuryLevel;
     double overflow = 0;
@@ -298,9 +300,12 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
 
     mercuryFigure->addMoveTo(x, y + offset + height * (1 - mercuryLevel));
     mercuryFigure->addLineRel(0, height * mercuryLevel + overflow);
-    // TODO this not works with Qt
-    mercuryFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
+    //TODO this does not work with Qtenv:
+    //mercuryFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
+    mercuryFigure->addArcRel(width/2, width/2, 0, true, false, width, 0);
     mercuryFigure->addLineRel(0, -height * mercuryLevel - overflow);
+    if (overflow > 0)
+        mercuryFigure->addArcRel(width/2, width/2, 0, true, false, -width, 0);
     mercuryFigure->addClosePath();
 }
 
