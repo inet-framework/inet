@@ -31,8 +31,8 @@ network WirelessA
         @display("bgb=650,500;bgg=100,1,grey95");
         @figure[title](type=label; pos=0,-1; anchor=sw; color=darkblue);
 
-        @figure[rcvdPk](type=textMeter; pos=420,20; anchor=w; font=,20; textFormat=packets received: %g; initialValue=0);
-        @statistic[rcvdPk](source=hostB_rcvdPk; record=figure(count); meterFigure=rcvdPk);
+        @figure[rcvdPkText](type=indicatorText; pos=420,20; anchor=w; font=,20; textFormat="packets received: %g"; initialValue=0);
+        @statistic[rcvdPk](source=hostB_rcvdPk; record=figure(count); targetFigure=rcvdPkText);
         @signal[hostB_rcvdPk];
         @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostB_rcvdPk);
 

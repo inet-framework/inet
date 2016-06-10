@@ -19,31 +19,31 @@
 #include <cstdlib>
 #include "ProgressMeterFigure.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
+//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
-// namespace inet {
 
 Register_Class(ProgressMeterFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
 #define M_PI 3.14159265358979323846
-static const char *BACKGROUND_COLOR_PROPERTY = "backgroundColor";
-static const char *STRIP_COLOR_PROPERTY = "stripColor";
-static const char *CORNER_RADIUS_PROPERTY = "cornerRadius";
-static const char *BORDER_WIDTH_PROPERTY = "borderWidth";
-static const char *MIN_PROPERTY = "min";
-static const char *MAX_PROPERTY = "max";
-static const char *TEXT_PROPERTY = "text";
-static const char *TEXT_FONT_PROPERTY = "textFont";
-static const char *TEXT_COLOR_PROPERTY = "textColor";
-static const char *LABEL_PROPERTY = "label";
-static const char *LABEL_FONT_PROPERTY = "labelFont";
-static const char *LABEL_COLOR_PROPERTY = "labelColor";
-static const char *POS_PROPERTY = "pos";
-static const char *SIZE_PROPERTY = "size";
-static const char *ANCHOR_PROPERTY = "anchor";
-static const char *BOUNDS_PROPERTY = "bounds";
+
+static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
+static const char *PKEY_STRIP_COLOR = "stripColor";
+static const char *PKEY_CORNER_RADIUS = "cornerRadius";
+static const char *PKEY_BORDER_WIDTH = "borderWidth";
+static const char *PKEY_MIN = "min";
+static const char *PKEY_MAX = "max";
+static const char *PKEY_TEXT = "text";
+static const char *PKEY_TEXT_FONT = "textFont";
+static const char *PKEY_TEXT_COLOR = "textColor";
+static const char *PKEY_LABEL = "label";
+static const char *PKEY_LABEL_FONT = "labelFont";
+static const char *PKEY_LABEL_COLOR = "labelColor";
+static const char *PKEY_POS = "pos";
+static const char *PKEY_SIZE = "size";
+static const char *PKEY_ANCHOR = "anchor";
+static const char *PKEY_BOUNDS = "bounds";
 
 ProgressMeterFigure::ProgressMeterFigure(const char *name) : cGroupFigure(name)
 {
@@ -193,29 +193,29 @@ void ProgressMeterFigure::parse(cProperty *property)
     setBounds(parseBounds(property));
 
     const char *s;
-    if ((s = property->getValue(BACKGROUND_COLOR_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_BACKGROUND_COLOR)) != nullptr)
         setBackgroundColor(parseColor(s));
-    if ((s = property->getValue(STRIP_COLOR_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_STRIP_COLOR)) != nullptr)
         setStripColor(parseColor(s));
-    if ((s = property->getValue(CORNER_RADIUS_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_CORNER_RADIUS)) != nullptr)
         setCornerRadius(atof(s));
-    if ((s = property->getValue(BORDER_WIDTH_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_BORDER_WIDTH)) != nullptr)
         setBorderWidth(atof(s));
-    if ((s = property->getValue(MIN_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_MIN)) != nullptr)
         setMin(atof(s));
-    if ((s = property->getValue(MAX_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_MAX)) != nullptr)
         setMax(atof(s));
-    if ((s = property->getValue(TEXT_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_TEXT)) != nullptr)
         setText(s);
-    if ((s = property->getValue(TEXT_FONT_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_TEXT_FONT)) != nullptr)
         setTextFont(parseFont(s));
-    if ((s = property->getValue(TEXT_COLOR_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_TEXT_COLOR)) != nullptr)
         setTextColor(parseColor(s));
-    if ((s = property->getValue(LABEL_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_LABEL)) != nullptr)
         setLabel(s);
-    if ((s = property->getValue(LABEL_FONT_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)
         setLabelFont(parseFont(s));
-    if ((s = property->getValue(TEXT_COLOR_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_TEXT_COLOR)) != nullptr)
         setLabelColor(parseColor(s));
 
 }
@@ -224,9 +224,9 @@ const char **ProgressMeterFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = {BACKGROUND_COLOR_PROPERTY, STRIP_COLOR_PROPERTY, CORNER_RADIUS_PROPERTY, BORDER_WIDTH_PROPERTY,
-                                   MIN_PROPERTY, MAX_PROPERTY, TEXT_PROPERTY, TEXT_FONT_PROPERTY, TEXT_COLOR_PROPERTY, LABEL_PROPERTY,
-                                   LABEL_FONT_PROPERTY, LABEL_COLOR_PROPERTY, POS_PROPERTY, SIZE_PROPERTY,ANCHOR_PROPERTY, BOUNDS_PROPERTY, nullptr};
+        const char *localKeys[] = {PKEY_BACKGROUND_COLOR, PKEY_STRIP_COLOR, PKEY_CORNER_RADIUS, PKEY_BORDER_WIDTH,
+                                   PKEY_MIN, PKEY_MAX, PKEY_TEXT, PKEY_TEXT_FONT, PKEY_TEXT_COLOR, PKEY_LABEL,
+                                   PKEY_LABEL_FONT, PKEY_LABEL_COLOR, PKEY_POS, PKEY_SIZE,PKEY_ANCHOR, PKEY_BOUNDS, nullptr};
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -252,7 +252,7 @@ void ProgressMeterFigure::addChildren()
 
     backgroundFigure->setOutlined(false);
     backgroundFigure->setFilled(true);
-    backgroundFigure->setFillColor(Color("grey"));
+    backgroundFigure->setFillColor(Color("#b8afa6"));
 
     stripFigure->setOutlined(false);
     stripFigure->setFilled(true);

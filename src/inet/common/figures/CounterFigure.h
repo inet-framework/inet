@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PROGRESSMETERFIGURE_H
-#define __INET_PROGRESSMETERFIGURE_H
+#ifndef __INET_COUNTERFIGURE_H
+#define __INET_COUNTERFIGURE_H
 
 #include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
@@ -27,29 +27,30 @@
 
 #if OMNETPP_VERSION >= 0x500
 
-class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicatorFigure
+class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
-    cRectangleFigure *borderFigure;
-    cRectangleFigure *stripFigure;
     cRectangleFigure *backgroundFigure;
-    cTextFigure *valueFigure;
+    std::vector<cRectangleFigure *> digitRectFigures;
+    std::vector<cTextFigure *> digitTextFigures;
     cTextFigure *labelFigure;
 
-    double min = 0;
-    double max = 1;
-    double value = NaN;
-    std::string textFormat = "%g";
+    int value = NaN;
+    int decimalNumber = 1;
+    int prevDecimalNumber = 1;
+    Anchor anchor = ANCHOR_NW;
 
   protected:
     virtual void parse(cProperty *property) override;
     virtual const char **getAllowedPropertyKeys() const override;
+    cFigure::Point calculateRealPos(Point pos);
+    void calculateBounds();
     void addChildren();
     void refresh();
     void layout();
 
   public:
-    ProgressMeterFigure(const char *name = nullptr);
-    virtual ~ProgressMeterFigure() {};
+    CounterFigure(const char *name = nullptr);
+    virtual ~CounterFigure() {};
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
@@ -57,23 +58,20 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     cFigure::Color getBackgroundColor() const;
     void setBackgroundColor(cFigure::Color color);
 
-    cFigure::Color getStripColor() const;
-    void setStripColor(cFigure::Color color);
+    int getDecimalPlaces() const;
+    void setDecimalPlaces(int radius);
 
-    double getCornerRadius() const;
-    void setCornerRadius(double radius);
+    cFigure::Color getDigitBackgroundColor() const;
+    void setDigitBackgroundColor(cFigure::Color color);
 
-    double getBorderWidth() const;
-    void setBorderWidth(double width);
+    cFigure::Color getDigitBorderColor() const;
+    void setDigitBorderColor(cFigure::Color color);
 
-    const char *getText() const;
-    void setText(const char *text);
+    cFigure::Font getDigitFont() const;
+    void setDigitFont(cFigure::Font font);
 
-    cFigure::Font getTextFont() const;
-    void setTextFont(cFigure::Font font);
-
-    cFigure::Color getTextColor() const;
-    void setTextColor(cFigure::Color color);
+    cFigure::Color getDigitColor() const;
+    void setDigitColor(cFigure::Color color);
 
     const char *getLabel() const;
     void setLabel(const char *text);
@@ -84,20 +82,23 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     cFigure::Color getLabelColor() const;
     void setLabelColor(cFigure::Color color);
 
-    Rectangle getBounds() const;
-    void setBounds(Rectangle bounds);
+    Point getLabelPos() const;
+    void setLabelPos(Point pos);
 
-    double getMin() const;
-    void setMin(double value);
+    Anchor getLabelAnchor() const;
+    void setLabelAnchor(Anchor anchor);
 
-    double getMax() const;
-    void setMax(double value);
+    Point getPos() const;
+    void setPos(Point bounds);
+
+    Anchor getAnchor() const;
+    void setAnchor(Anchor anchor);
 };
 
 #else
 
 // dummy figure for OMNeT++ 4.x
-class INET_API ProgressMeterFigure : public cGroupFigure {
+class INET_API CounterFigure : public cGroupFigure {
 
 };
 

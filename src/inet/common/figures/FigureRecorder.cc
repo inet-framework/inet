@@ -27,7 +27,7 @@ void FigureRecorder::init(cComponent *component, const char *statisticName, cons
     cNumericResultRecorder::init(component, statisticName, recordingMode, attrsProperty, manualAttrs);
 
     cModule *module = check_and_cast<cModule*>(getComponent());
-    const char *figureSpec = attrsProperty->getValue("meterFigure");
+    const char *figureSpec = attrsProperty->getValue("targetFigure");
     if (!figureSpec)
         figureSpec = statisticName;
     std::string figureName;
@@ -43,14 +43,14 @@ void FigureRecorder::init(cComponent *component, const char *statisticName, cons
     cFigure *figure = module->getCanvas()->getFigureByPath(figureName.c_str());
     if (!figure)
         throw cRuntimeError("Figure '%s' in module '%s' not found", figureName.c_str(), module->getFullPath().c_str());
-    meterFigure = check_and_cast<IMeterFigure*>(figure);
-    if (series > meterFigure->getNumSeries())
-        throw cRuntimeError("series :%d is out of bounds, figure '%s' supports %d series", series, figureName.c_str(), meterFigure->getNumSeries());
+    indicatorFigure = check_and_cast<IIndicatorFigure*>(figure);
+    if (series > indicatorFigure->getNumSeries())
+        throw cRuntimeError("series :%d is out of bounds, figure '%s' supports %d series", series, figureName.c_str(), indicatorFigure->getNumSeries());
 }
 
 void FigureRecorder::collect(simtime_t_cref t, double value DETAILS_ARG)
 {
-    meterFigure->setValue(series, t, value);
+    indicatorFigure->setValue(series, t, value);
 }
 
 } // namespace inet

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,38 +15,39 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TextMeterFigure.h"
+#include "IndicatorLabelFigure.h"
 #include "inet/common/INETUtils.h"
 
-// namespace inet {
+//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
+using namespace inet;
 
-static const char *TEXT_FORMAT_PROPERTY = "textFormat";
-static const char *INITIAL_VALUE_PROPERTY = "initialValue";
+static const char *PKEY_TEXT_FORMAT = "textFormat";
+static const char *PKEY_INITIAL_VALUE = "initialValue";
 
-Register_Class(TextMeterFigure);
+Register_Class(IndicatorLabelFigure);
 
-const char **TextMeterFigure::getAllowedPropertyKeys() const
+const char **IndicatorLabelFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = { TEXT_FORMAT_PROPERTY, INITIAL_VALUE_PROPERTY, nullptr};
-        concatArrays(keys, cTextFigure::getAllowedPropertyKeys(), localKeys);
+        const char *localKeys[] = { PKEY_TEXT_FORMAT, PKEY_INITIAL_VALUE, nullptr};
+        concatArrays(keys, cLabelFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
 }
 
-void TextMeterFigure::parse(cProperty *property)
+void IndicatorLabelFigure::parse(cProperty *property)
 {
-    cTextFigure::parse(property);
+    cLabelFigure::parse(property);
 
     const char *s;
-    if ((s = property->getValue(TEXT_FORMAT_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_TEXT_FORMAT)) != nullptr)
         setTextFormat(s);
-    if ((s = property->getValue(INITIAL_VALUE_PROPERTY)) != nullptr)
+    if ((s = property->getValue(PKEY_INITIAL_VALUE)) != nullptr)
         setValue(0, simTime(), utils::atod(s));
 }
 
-void TextMeterFigure::setValue(int series, simtime_t timestamp, double value)
+void IndicatorLabelFigure::setValue(int series, simtime_t timestamp, double value)
 {
     // Note: we currently ignore timestamp
     ASSERT(series == 0);
@@ -54,7 +55,7 @@ void TextMeterFigure::setValue(int series, simtime_t timestamp, double value)
     refresh();
 }
 
-void TextMeterFigure::refresh()
+void IndicatorLabelFigure::refresh()
 {
     char buf[64];
     sprintf(buf, textFormat.c_str(), value);

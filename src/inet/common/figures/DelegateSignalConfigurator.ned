@@ -19,29 +19,26 @@
 package inet.common.figures;
 
 //
-// Allows signal values to be displayed in various instruments, meters 
-// and gauges.
+// Implements @delegatesignal properties. @delegatesignal arranges a
+// source signal to be emitted as a target signal, possibly on another
+// module. 
 //
-// Instruments should be added with the @figure property, like any other
-// figure. The figure's C++ implementation must inherit from IMeterFigure,
-// which is basically a wrapper around a setValue() method.
-// 
-// Signals and figures can be associated using @displaysignal properties.
-// A @displaysignal property needs three attributes:
+// A @delegatesignal property needs two attributes:
 // - source is the signal to subscribe to, in <signalName> or 
 //   <modulePath>.<signalName> format
-// - filter is a standard result filter (count, min, max, sum, last, mean, etc)
-// - figure is the name (path) of the figure, it must be in the same module
-//   as the @displaysignal property
+// - target is the signal to emit, in <signalName> or 
+//   <modulePath>.<signalName> format
 //
 // Example:
 // <code>
-// @displaysignal[pkCount](source=hostB.udpA[0].rcvdPk;filter=count;figure=pkCountGauge);
+// @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostBrcvdPk);
 // </code>
 //
-// This module runs at initialization time, finds @displaysignal properties
-// in all modules, and adds the appropriate listeners that update the figures
-// when a signal is emitted.
+// This module runs at initialization time. It finds @delegatesignal properties
+// in all modules, and adds the appropriate signal listeners.
+//
+// This is a helper for instrument figures, as @statistic can only listen on
+// local signals. It can be probably removed in OMNeT++ 5.1. 
 //
 simple DelegateSignalConfigurator
 {

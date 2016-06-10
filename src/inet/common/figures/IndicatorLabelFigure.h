@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TEXTMETERFIGURE_H
-#define __INET_TEXTMETERFIGURE_H
+#ifndef __INET_INDICATORLABELFIGURE_H
+#define __INET_INDICATORLABELFIGURE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
-#include "inet/common/figures/IMeterFigure.h"
+#include "IIndicatorFigure.h"
 
 // namespace inet {
 
 using namespace inet;
 
-class INET_API LabelMeterFigure : public cLabelFigure, public IMeterFigure
+class INET_API IndicatorLabelFigure : public cLabelFigure, public IIndicatorFigure
 {
   protected:
     std::string textFormat = "%g";
@@ -36,7 +36,7 @@ class INET_API LabelMeterFigure : public cLabelFigure, public IMeterFigure
     virtual void parse(cProperty *property) override;
     virtual void refresh();
   public:
-    explicit LabelMeterFigure(const char *name=nullptr) : cLabelFigure(name) {}
+    explicit IndicatorLabelFigure(const char *name=nullptr) : cLabelFigure(name) {}
     virtual void setValue(int series, simtime_t timestamp, double value) override;
     virtual const char *getTextFormat() const { return textFormat.c_str(); }
     virtual void setTextFormat(const char *textFormat) { this->textFormat = textFormat; refresh(); }
@@ -44,5 +44,5 @@ class INET_API LabelMeterFigure : public cLabelFigure, public IMeterFigure
 
 // } // namespace inet
 
-#endif // ifndef __INET_TEXTMETERFIGURE_H
+#endif // ifndef __INET_INDICATORTEXTFIGURE_H
 

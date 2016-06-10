@@ -63,8 +63,8 @@ void DelegateSignalConfigurator::configureDisplaySignal(cModule *module, cProper
         cFigure *figure = module->getCanvas()->getFigureByPath(figurePath);
         if (!figure)
             throw cRuntimeError("Figure '%s' not found", figurePath);
-        IMeterFigure *meterFigure = check_and_cast<IMeterFigure*>(figure);
-        meterFigures.push_back(meterFigure);
+        IIndicatorFigure *meterFigure = check_and_cast<IIndicatorFigure*>(figure);
+        indicatorFigures.push_back(meterFigure);
 
         // instantiate figure recorder
         const char *seriesAttr = property->getValue("series");
@@ -127,7 +127,7 @@ void DelegateSignalConfigurator::parseSignalPath(const char *signalPath, cModule
 
 void DelegateSignalConfigurator::refreshDisplay() const
 {
-    for (IMeterFigure *figure : meterFigures)
+    for (IIndicatorFigure *figure : indicatorFigures)
         figure->refreshDisplay();
 }
 

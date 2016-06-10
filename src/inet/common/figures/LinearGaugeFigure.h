@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PROGRESSMETERFIGURE_H
-#define __INET_PROGRESSMETERFIGURE_H
+#ifndef __INET_LINEARGAUGEFIGURE_H
+#define __INET_LINEARGAUGEFIGURE_H
 
 #include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
@@ -27,55 +27,49 @@
 
 #if OMNETPP_VERSION >= 0x500
 
-class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicatorFigure
+class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
-    cRectangleFigure *borderFigure;
-    cRectangleFigure *stripFigure;
-    cRectangleFigure *backgroundFigure;
-    cTextFigure *valueFigure;
+    cLineFigure *needle;
     cTextFigure *labelFigure;
-
+    cRectangleFigure *backgroundFigure;
+    cLineFigure *axisFigure;
+    std::vector<cLineFigure *> tickFigures;
+    std::vector<cTextFigure *> numberFigures;
     double min = 0;
-    double max = 1;
+    double max = 100;
+    double tickSize = 10;
     double value = NaN;
-    std::string textFormat = "%g";
+    int numTicks = 0;
 
   protected:
     virtual void parse(cProperty *property) override;
     virtual const char **getAllowedPropertyKeys() const override;
     void addChildren();
-    void refresh();
+
+    void setTickGeometry(cLineFigure *tick, int index);
+    void setNumberGeometry(cTextFigure *number, int index);
+    void setNeedleGeometry();
+
+    void redrawTicks();
     void layout();
+    void refresh();
 
   public:
-    ProgressMeterFigure(const char *name = nullptr);
-    virtual ~ProgressMeterFigure() {};
+    LinearGaugeFigure(const char *name = nullptr);
+    virtual ~LinearGaugeFigure();
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
-    // getters and setters
+    Rectangle getBounds() const;
+    void setBounds(Rectangle rect);
+
     cFigure::Color getBackgroundColor() const;
     void setBackgroundColor(cFigure::Color color);
 
-    cFigure::Color getStripColor() const;
-    void setStripColor(cFigure::Color color);
+    cFigure::Color getNeedleColor() const;
+    void setNeedleColor(cFigure::Color color);
 
-    double getCornerRadius() const;
-    void setCornerRadius(double radius);
-
-    double getBorderWidth() const;
-    void setBorderWidth(double width);
-
-    const char *getText() const;
-    void setText(const char *text);
-
-    cFigure::Font getTextFont() const;
-    void setTextFont(cFigure::Font font);
-
-    cFigure::Color getTextColor() const;
-    void setTextColor(cFigure::Color color);
-
-    const char *getLabel() const;
+    const char* getLabel() const;
     void setLabel(const char *text);
 
     cFigure::Font getLabelFont() const;
@@ -84,20 +78,23 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     cFigure::Color getLabelColor() const;
     void setLabelColor(cFigure::Color color);
 
-    Rectangle getBounds() const;
-    void setBounds(Rectangle bounds);
-
     double getMin() const;
     void setMin(double value);
 
     double getMax() const;
     void setMax(double value);
+
+    double getTickSize() const;
+    void setTickSize(double value);
+
+    double getCornerRadius() const;
+    void setCornerRadius(double radius);
 };
 
 #else
 
 // dummy figure for OMNeT++ 4.x
-class INET_API ProgressMeterFigure : public cGroupFigure {
+class INET_API LinearGaugeFigure : public cGroupFigure {
 
 };
 
@@ -105,5 +102,5 @@ class INET_API ProgressMeterFigure : public cGroupFigure {
 
 // } // namespace inet
 
-#endif
+#endif // ifndef __INET_LinearGaugeFigure_H
 

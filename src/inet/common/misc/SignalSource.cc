@@ -15,27 +15,35 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TRAILFIGURE_H
-#define __INET_TRAILFIGURE_H
-
-#include "inet/common/INETDefs.h"
+#include "SignalSource.h"
 
 namespace inet {
 
-class INET_API TrailFigure : public cGroupFigure
+Define_Module(SignalSource);
+
+void SignalSource::initialize()
 {
-  protected:
-    int maxCount;
-    int fadeCounter;
-    bool fadeOut;
+    startTime = par("startTime");
+    endTime = par("endTime");
+    signal = registerSignal(par("signalName"));
+    scheduleAt(startTime, new cMessage("timer"));
+}
 
-  public:
-    TrailFigure(int maxCount, bool fadeOut, const char *name = nullptr);
+void SignalSource::handleMessage(cMessage *msg)
+{
+    if (endTime < 0 || simTime() < endTime) {
+        double value = par("value");
+        emit(signal, value);
+        scheduleAt(simTime()+par("interval"), msg);
+    }
+    else {
+        delete msg;
+    }
+}
 
-    virtual void addFigure(cFigure *figure) override;
-};
+void SignalSource::finish()
+{
+}
 
 } // namespace inet
-
-#endif // ifndef __INET_TRAILFIGURE_H
 

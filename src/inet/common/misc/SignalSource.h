@@ -15,27 +15,29 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TRAILFIGURE_H
-#define __INET_TRAILFIGURE_H
+#ifndef __INET_SIGNALSOURCE_H
+#define __INET_SIGNALSOURCE_H
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-class INET_API TrailFigure : public cGroupFigure
+class INET_API SignalSource : public cSimpleModule
 {
   protected:
-    int maxCount;
-    int fadeCounter;
-    bool fadeOut;
+    simtime_t startTime, endTime;
+    simsignal_t signal;
 
   public:
-    TrailFigure(int maxCount, bool fadeOut, const char *name = nullptr);
+    SignalSource() {}
 
-    virtual void addFigure(cFigure *figure) override;
+  protected:
+    void initialize() override;
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_TRAILFIGURE_H
+#endif // ifndef __INET_SERIESSIGNALSOURCE_H
 

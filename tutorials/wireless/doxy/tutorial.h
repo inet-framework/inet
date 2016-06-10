@@ -118,7 +118,7 @@ kbps) UDP traffic, not counting protocol overhead. Host B contains a
 `UDPSink` application that just discards received packets.
 
 The model also displays the number of packets received by host B. The text
-is added by the `@figure[rcvdPk]` line, and the subsequent few
+is added by the `@figure[rcvdPkText]` line, and the subsequent few
 lines arrange the figure to be updated during the simulation.
 
 <b>Physical layer modeling</b>

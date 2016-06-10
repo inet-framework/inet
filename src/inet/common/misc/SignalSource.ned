@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) 2010 Helene Lageber
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,27 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TRAILFIGURE_H
-#define __INET_TRAILFIGURE_H
+package inet.common.misc;
 
-#include "inet/common/INETDefs.h"
-
-namespace inet {
-
-class INET_API TrailFigure : public cGroupFigure
+//
+// Emits double-valued signals in the specified interval.
+// May be used for testing indicator figures.
+//
+simple SignalSource
 {
-  protected:
-    int maxCount;
-    int fadeCounter;
-    bool fadeOut;
-
-  public:
-    TrailFigure(int maxCount, bool fadeOut, const char *name = nullptr);
-
-    virtual void addFigure(cFigure *figure) override;
-};
-
-} // namespace inet
-
-#endif // ifndef __INET_TRAILFIGURE_H
-
+    parameters:
+        @display("i=block/cogwheel");
+        @signal[signalSourceOutput];
+        double startTime @unit(s) = default(0s);
+        double endTime @unit(s) = default(-1s);
+        volatile double interval @unit(s) = default(1s);
+        string signalName = "signalSourceOutput";
+        volatile double value;
+}

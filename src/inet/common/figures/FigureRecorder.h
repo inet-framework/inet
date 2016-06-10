@@ -18,15 +18,15 @@
 #ifndef __INET_FIGURERECORDER_H
 #define __INET_FIGURERECORDER_H
 
+#include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
-#include "inet/common/figures/IMeterFigure.h"
 
 namespace inet {
 
 class INET_API FigureRecorder : public cNumericResultRecorder
 {
     protected:
-        IMeterFigure *meterFigure = nullptr;
+        IIndicatorFigure *indicatorFigure = nullptr;
         int series = 0;
     protected:
         virtual void init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs=nullptr) override;

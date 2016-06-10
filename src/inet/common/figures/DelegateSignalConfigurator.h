@@ -18,8 +18,8 @@
 #ifndef __INET_DELEGATESIGNALCONFIGURATOR_H
 #define __INET_DELEGATESIGNALCONFIGURATOR_H
 
+#include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
-#include "inet/common/figures/IMeterFigure.h"
 
 namespace inet {
 
@@ -53,14 +53,14 @@ class INET_API DelegateSignalConfigurator : public cSimpleModule
         class INET_API FigureRecorder : public cNumericResultRecorder
         {
             protected:
-                IMeterFigure *meterFigure = nullptr;
+                IIndicatorFigure *indicatorFigure = nullptr;
                 int series = -1;
             protected:
-                virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override { meterFigure->setValue(series, t, value); }
+                virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override { indicatorFigure->setValue(series, t, value); }
             public:
-                FigureRecorder(IMeterFigure *figure, int series) : meterFigure(figure), series(series) {}
+                FigureRecorder(IIndicatorFigure *figure, int series) : indicatorFigure(figure), series(series) {}
         };
-        std::vector<IMeterFigure*> meterFigures;
+        std::vector<IIndicatorFigure*> indicatorFigures;
 
     protected:
         virtual void initialize() override;
