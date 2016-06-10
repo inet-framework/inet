@@ -42,7 +42,7 @@ cmdenv-express-mode=false
 This fragment completes the datagram.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
+Received packet: (inet::ApplicationPacket)UDPBasicAppData-0 (5000 bytes)
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
