@@ -983,7 +983,7 @@
                        inet.linklayer.ieee8021d
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_IEEE8021D"
         linkerFlags = ""
         />
     <feature
