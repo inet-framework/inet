@@ -651,10 +651,6 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
         handleIncomingICMP(check_and_cast<ICMPMessage *>(packet));
         numLocalDeliver++;
     }
-    else if (protocol == IP_PROT_IP) {
-        // tunnelled IP packets are handled separately
-        send(packet, "preRoutingOut");    //FIXME There is no "preRoutingOut" gate in the IPv4 module.
-    }
     else if (mapping.findOutputGateForProtocol(protocol) >= 0) {
         send(packet, "transportOut");
         numLocalDeliver++;
