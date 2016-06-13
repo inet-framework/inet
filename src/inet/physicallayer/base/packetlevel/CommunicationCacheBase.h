@@ -18,7 +18,6 @@
 #ifndef __INET_COMMUNICATIONCACHEBASE_H
 #define __INET_COMMUNICATIONCACHEBASE_H
 
-#include "inet/common/IntervalTree.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
 
 namespace inet {

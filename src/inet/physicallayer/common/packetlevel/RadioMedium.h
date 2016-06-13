@@ -42,21 +42,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 {
   friend Radio;
 
-  public:
-    class INET_API IMediumListener {
-      public:
-        virtual void radioAdded(const IRadio *radio) = 0;
-        virtual void radioRemoved(const IRadio *radio) = 0;
-
-        virtual void transmissionAdded(const ITransmission *transmission) = 0;
-        virtual void transmissionRemoved(const ITransmission *transmission) = 0;
-
-        virtual void transmissionStarted(const ITransmission *transmission) = 0;
-        virtual void transmissionEnded(const ITransmission *transmission) = 0;
-        virtual void receptionStarted(const IReception *reception) = 0;
-        virtual void receptionEnded(const IReception *reception) = 0;
-    };
-
   protected:
     enum RangeFilterKind {
         RANGE_FILTER_ANYWHERE,
@@ -351,8 +336,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
 
-    virtual void addListener(IMediumListener *listener) { listeners.push_back(listener); }
-    virtual void removeListener(IMediumListener *listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+    virtual void addListener(IMediumListener *listener) override { listeners.push_back(listener); }
+    virtual void removeListener(IMediumListener *listener) override { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
 
     virtual const IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }
@@ -361,10 +346,9 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IAnalogModel *getAnalogModel() const override { return analogModel; }
     virtual const IBackgroundNoise *getBackgroundNoise() const override { return backgroundNoise; }
     virtual const IPhysicalEnvironment *getPhysicalEnvironment() const override { return physicalEnvironment; }
-
-    virtual const IMediumLimitCache *getMediumLimitCache() const { return mediumLimitCache; }
-    virtual const INeighborCache *getNeighborCache() const { return neighborCache; }
-    virtual const ICommunicationCache *getCommunicationCache() const { return communicationCache; }
+    virtual const IMediumLimitCache *getMediumLimitCache() const override { return mediumLimitCache; }
+    virtual const INeighborCache *getNeighborCache() const override { return neighborCache; }
+    virtual const ICommunicationCache *getCommunicationCache() const override { return communicationCache; }
 
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
