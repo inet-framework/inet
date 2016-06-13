@@ -61,8 +61,7 @@ simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 enum PingSelfKinds {
     PING_FIRST_ADDR = 1001,
     PING_CHANGE_ADDR,
-    PING_SEND,
-    PING_DO_SEND = 8888,
+    PING_SEND
 };
 
 PingApp::PingApp()
@@ -152,11 +151,6 @@ void PingApp::handleMessage(cMessage *msg)
         }
     }
     if (msg->isSelfMessage()) {
-        if (msg->getKind() == PING_DO_SEND) {   //KLUDGE
-            l3Socket->send(dynamic_cast<cPacket*>(msg->removeControlInfo()));
-            delete msg;
-            return;
-        }
         if (msg->getKind() == PING_FIRST_ADDR) {
             srcAddr = L3AddressResolver().resolve(par("srcAddr"));
             parseDestAddressesPar();
@@ -415,11 +409,7 @@ void PingApp::sendPingRequest()
     }
 
     EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
-    //KLUDGE:
-    cMessage *kludgeMsg = new cMessage("do send", PING_DO_SEND);
-    kludgeMsg->setControlInfo(outPacket);
-    scheduleAt(simTime(), kludgeMsg);
-    // l3Socket->send(outPacket);
+    l3Socket->send(outPacket);
 }
 
 void PingApp::processPingResponse(PingPayload *msg)
