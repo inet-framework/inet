@@ -15,10 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
-#include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
-#include "inet/networklayer/ipv4/IPv4.h"
 #include "inet/visualizer/networklayer/NetworkRouteOsgVisualizer.h"
+
+#ifdef WITH_ETHERNET
+#include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
+#endif
+
+#ifdef DWITH_IEEE8021D
+#include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
+#endif
+
+#ifdef DWITH_IPv4
+#include "inet/networklayer/ipv4/IPv4.h"
+#endif
 
 namespace inet {
 
@@ -28,12 +37,27 @@ Define_Module(NetworkRouteOsgVisualizer);
 
 bool NetworkRouteOsgVisualizer::isPathEnd(cModule *module) const
 {
-    return dynamic_cast<IPv4 *>(module) != nullptr;
+#ifdef DWITH_IPv4
+    if (dynamic_cast<IPv4 *>(module) != nullptr)
+        return true;
+#endif
+
+    return false;
 }
 
 bool NetworkRouteOsgVisualizer::isPathElement(cModule *module) const
 {
-    return dynamic_cast<MACRelayUnit *>(module) != nullptr || dynamic_cast<Ieee8021dRelay *>(module) != nullptr;
+#ifdef WITH_ETHERNET
+    if (dynamic_cast<MACRelayUnit *>(module) != nullptr)
+        return true;
+#endif
+
+#ifdef DWITH_IEEE8021D
+    if (dynamic_cast<Ieee8021dRelay *>(module) != nullptr)
+        return true;
+#endif
+
+    return false;
 }
 
 } // namespace visualizer
