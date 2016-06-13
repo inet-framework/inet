@@ -130,7 +130,7 @@
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4cfb-4572 b495-1ff2/tplx
 
-/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             dcef-f53e 93f2-821e/tplx
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             dcef-f53e e442-742a/tplx
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           3782-6503 9f72-4d20/tplx
 
