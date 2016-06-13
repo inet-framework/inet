@@ -41,6 +41,10 @@ class INET_API IPhysicalEnvironment
     virtual const Coord& getSpaceMax() const = 0;
     virtual const IMaterialRegistry *getMaterialRegistry() const = 0;
 
+    virtual int getNumObjects() const = 0;
+    virtual const IPhysicalObject *getObject(int index) const = 0;
+    virtual const IPhysicalObject *getObjectById(int id) const = 0;
+
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
 };
 

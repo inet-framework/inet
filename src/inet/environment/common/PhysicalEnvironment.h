@@ -94,9 +94,9 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 
     virtual const IMaterialRegistry *getMaterialRegistry() const override { return &MaterialRegistry::singleton; }
 
-    virtual int getNumObjects() const { return objects.size(); }
-    virtual const PhysicalObject *getObject(int index) const { return objects[index]; }
-    virtual const PhysicalObject *getObjectById(int id) const;
+    virtual int getNumObjects() const override { return objects.size(); }
+    virtual const PhysicalObject *getObject(int index) const override { return objects[index]; }
+    virtual const PhysicalObject *getObjectById(int id) const override;
 
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };
