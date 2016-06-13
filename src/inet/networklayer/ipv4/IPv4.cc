@@ -655,7 +655,10 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
         send(packet, "transportOut");
         numLocalDeliver++;
     }
-    else if (!hasSocket) {
+    else if (hasSocket) {
+        delete packet;
+    }
+    else {
         EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
         int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
         icmp->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
