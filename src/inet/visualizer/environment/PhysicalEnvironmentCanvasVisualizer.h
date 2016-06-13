@@ -19,7 +19,6 @@
 #define __INET_PHYSICALENVIRONMENTCANVASVISUALIZER_H
 
 #include "inet/common/geometry/common/CanvasProjection.h"
-#include "inet/environment/common/PhysicalEnvironment.h"
 #include "inet/visualizer/base/PhysicalEnvironmentVisualizerBase.h"
 
 namespace inet {
@@ -39,7 +38,7 @@ class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentV
       public:
         ObjectPositionComparator(const Rotation &viewRotation) : viewRotation(viewRotation) {}
 
-        bool operator() (const PhysicalObject *left, const PhysicalObject *right) const
+        bool operator() (const IPhysicalObject *left, const IPhysicalObject *right) const
         {
             return viewRotation.rotateVectorClockwise(left->getPosition()).z < viewRotation.rotateVectorClockwise(right->getPosition()).z;
         }
@@ -60,7 +59,7 @@ class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentV
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual void computeFacePoints(const PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation) const;
+    virtual void computeFacePoints(const IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation) const;
 };
 
 } // namespace visualizer

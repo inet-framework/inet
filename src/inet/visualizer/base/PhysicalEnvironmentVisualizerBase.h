@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALENVIRONMENTVISUALIZERBASE_H
 #define __INET_PHYSICALENVIRONMENTVISUALIZERBASE_H
 
-#include "inet/environment/common/PhysicalEnvironment.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
@@ -32,7 +32,7 @@ class INET_API PhysicalEnvironmentVisualizerBase : public VisualizerBase
   protected:
     /** @name Parameters */
     //@{
-    const PhysicalEnvironment *physicalEnvironment = nullptr;
+    const IPhysicalEnvironment *physicalEnvironment = nullptr;
     //@}
 
   protected:

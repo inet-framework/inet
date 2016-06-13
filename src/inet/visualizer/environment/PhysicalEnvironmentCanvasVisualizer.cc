@@ -48,7 +48,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
         while (objectsLayer->getNumFigures())
             delete objectsLayer->removeFigure(0);
         // KLUDGE: sorting objects with their rotated position's z coordinate to draw them in a "better" order
-        std::vector<const PhysicalObject *> objectsCopy;
+        std::vector<const IPhysicalObject *> objectsCopy;
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++)
             objectsCopy.push_back(physicalEnvironment->getObject(i));
         std::stable_sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(canvasProjection->getRotation()));
@@ -99,7 +99,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
                 computeFacePoints(object, faces, rotation);
             }
             // add name to the end
-            const char *name = object->getName();
+            const char *name = check_and_cast<const cObject *>(object)->getName();
             if (name) {
                 cLabelFigure *nameFigure = new cLabelFigure("objectName");
                 nameFigure->setPosition(canvasProjection->computeCanvasPoint(position));
@@ -111,7 +111,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
     }
 }
 
-void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation) const
+void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation) const
 {
     const Coord& position = object->getPosition();
     for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)

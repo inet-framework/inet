@@ -53,7 +53,7 @@ void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
     if (physicalEnvironment != nullptr && getSimulation()->getEventNumber() == 0) {
         auto scene = inet::osg::getScene(visualizerTargetModule);
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++) {
-            const PhysicalObject *object = physicalEnvironment->getObject(i);
+            const IPhysicalObject *object = physicalEnvironment->getObject(i);
             const ShapeBase *shape = object->getShape();
             const Coord& position = object->getPosition();
             const EulerAngles& orientation = object->getOrientation();
