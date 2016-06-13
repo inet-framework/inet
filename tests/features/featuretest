@@ -1,0 +1,69 @@
+#!/bin/sh
+# This script builds and runs INET with the various features turned on and off testing
+# whether features can be enabled and disabled independently without causing
+# build or runtime failures.
+
+skipped_features="TCP_NSC VoIPStream"
+
+# test procedure that is run for each test case (assumes to be in INET_ROOT)
+runtest() {
+  (make makefiles >/dev/null && make cleanall >/dev/null && make makefiles >/dev/null) || { echo "*** $1 prepare build: FAIL" ; return; }
+  make -j8 >/$LOG_DIR/$1-build.out 2>/$LOG_DIR/$1-build.err || { echo "*** $1 building: FAIL" ; return; }
+  (cd $DIR; opp_run -l ../../src/INET -u Cmdenv -n ../../src:. >/$LOG_DIR/$1-run.out 2>/$LOG_DIR/$1-run.err) || { echo "*** $1 running: FAIL" ; return; }
+  echo "*** $1: PASS"
+}
+
+cd `dirname $0`
+DIR=`pwd`
+LOG_DIR=`pwd`/_log
+rm -rf $LOG_DIR; mkdir -p $LOG_DIR
+cd ../..
+
+echo "Running feature build and run tests..."
+base_features=$(./inet_featuretool list | grep -v _examples | awk '{print $2;}')
+if [ -n "$skipped_features" ]; then
+  echo "Skipping the following features: $skipped_features"
+fi
+
+# test with all features disabled
+./inet_featuretool -q disable -f all
+runtest all_disabled
+
+# test with default features enabled (except skipped ones)
+./inet_featuretool -q reset
+if [ -n "$skipped_features" ]; then
+  ./inet_featuretool -q disable -f $skipped_features
+fi
+runtest default
+
+# test with all features enabled (except skipped ones)
+./inet_featuretool -q enable -f all
+if [ -n "$skipped_features" ]; then
+  ./inet_featuretool -q disable -f $skipped_features
+fi
+runtest all_enabled
+
+# test with each feature enabled - one by one
+for feature in $base_features; do
+  if echo $skipped_features | grep -q $feature; then
+    echo "*** ${feature}_enabled: SKIPPED"
+  else
+    ./inet_featuretool -q disable -f all
+    ./inet_featuretool -q enable -f $feature
+    runtest ${feature}_enabled
+  fi
+done
+
+# test with each feature disabled - one by one
+for feature in $base_features; do
+  ./inet_featuretool -q enable -f all
+  if [ -n "$skipped_features" ]; then
+    ./inet_featuretool -q disable -f $skipped_features
+  fi
+  if echo $skipped_features | grep -q $feature; then
+    echo "*** ${feature}_disabled: SKIPPED"
+  else
+    ./inet_featuretool -q disable -f $feature
+    runtest ${feature}_disabled
+  fi
+done
