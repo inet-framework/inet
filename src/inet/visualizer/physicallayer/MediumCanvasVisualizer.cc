@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"
 
 namespace inet {
@@ -119,7 +118,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto node = getContainingNode(const_cast<cModule *>(module));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
-        m maxInterferenceRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
+        m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
         interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRange.get(), -maxInterferenceRange.get(), 2 * maxInterferenceRange.get(), 2 * maxInterferenceRange.get()));
         interferenceRangeFigure->setLineColor(interferenceRangeColor);
         networkNodeVisualization->addFigure(interferenceRangeFigure);
@@ -129,7 +128,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto node = getContainingNode(const_cast<cModule *>(module));
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto communicationRangeFigure = new cOvalFigure("communicationRange");
-        m maxCommunicationRange = check_and_cast<const RadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
+        m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
         communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
         communicationRangeFigure->setLineColor(communicationRangeColor);
         networkNodeVisualization->addFigure(communicationRangeFigure);

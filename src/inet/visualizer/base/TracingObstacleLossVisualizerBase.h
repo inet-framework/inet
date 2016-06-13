@@ -18,14 +18,14 @@
 #ifndef __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
 #define __INET_TRACINGOBSTACLELOSSVISUALIZERBASE_H
 
-#include "inet/physicallayer/base/packetlevel/TracingObstacleLossBase.h"
+#include "inet/physicallayer/contract/packetlevel/ITracingObstacleLoss.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicallayer;
+using namespace inet::physicalenvironment;
 
 class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public cListener
 {

@@ -17,7 +17,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OSGUtils.h"
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 #include "inet/visualizer/physicallayer/MediumOsgVisualizer.h"
 

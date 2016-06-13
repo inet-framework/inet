@@ -18,7 +18,7 @@
 #ifndef __INET_MEDIUMVISUALIZERBASE_H
 #define __INET_MEDIUMVISUALIZERBASE_H
 
-#include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace visualizer {
 
 using namespace inet::physicallayer;
 
-class INET_API MediumVisualizerBase : public VisualizerBase, public RadioMedium::IMediumListener
+class INET_API MediumVisualizerBase : public VisualizerBase, public IRadioMedium::IMediumListener
 {
   protected:
     enum SignalShape
@@ -40,7 +40,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public RadioMedium:
   protected:
     /** @name Parameters */
     //@{
-    RadioMedium *radioMedium = nullptr;
+    IRadioMedium *radioMedium = nullptr;
     bool displaySignals = false;
     simtime_t signalPropagationUpdateInterval = NaN;
 

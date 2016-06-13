@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 void TracingObstacleLossVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
@@ -30,14 +32,14 @@ void TracingObstacleLossVisualizerBase::initialize(int stage)
         displayIntersectionTrail = par("displayIntersectionTrail");
         displayFaceNormalVectorTrail = par("displayFaceNormalVectorTrail");
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        subscriptionModule->subscribe(TracingObstacleLossBase::obstaclePenetratedSignal, this);
+        subscriptionModule->subscribe(ITracingObstacleLoss::obstaclePenetratedSignal, this);
     }
 }
 
 void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
 {
     Enter_Method_Silent();
-    auto event = static_cast<TracingObstacleLossBase::ObstaclePenetratedEvent *>(object);
+    auto event = static_cast<ITracingObstacleLoss::ObstaclePenetratedEvent *>(object);
     obstaclePenetrated(event->object, event->intersection1, event->intersection2, event->normal1, event->normal2);
 }
 

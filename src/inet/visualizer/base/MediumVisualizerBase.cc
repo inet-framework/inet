@@ -27,7 +27,7 @@ void MediumVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        radioMedium = getModuleFromPar<RadioMedium>(par("mediumModule"), this, false);
+        radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr)
             radioMedium->addListener(this);
         displaySignals = par("displaySignals");
