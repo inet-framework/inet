@@ -117,12 +117,12 @@
 # /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
 
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          6382-0694 1b82-ba0f/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3078-dde1 fdba-994a/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          2f85-e7ba e8b8-5efe/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          e4e8-e836 6e7f-940a/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          4ac0-a5d5 7a63-0b31/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          0530-f6bf f8ce-9911/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          b069-7ede fa67-13dd/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3078-dde1 fdc2-9e8a/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          2f85-e7ba e3a8-0d20/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          e4e8-e836 c234-0e8f/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          4ac0-a5d5 05d0-b950/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          0530-f6bf 09e5-2b84/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          b069-7ede cd6c-3a54/tplx
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          bdeb-2171 f443-c8fc/tplx
 
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            fbd3-73ef 3b0d-76e4/tplx
