@@ -104,8 +104,10 @@ void SCTP::initialize(int stage)
             testTimeout = (simtime_t)netw->par("testTimeout");
         }
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER)
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerProtocol(Protocol::sctp, gate("ipOut"));
+        registerProtocol(Protocol::sctp, gate("appOut"));
+    }
     else if (stage == INITSTAGE_TRANSPORT_LAYER_2) {
         if (par("udpEncapsEnabled").boolValue()) {
             bindPortForUDP();
