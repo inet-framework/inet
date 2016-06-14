@@ -20,7 +20,12 @@
 cplusplus {{
 #include <vector>
 
+#include "inet/common/IProtocolControlInfo.h"
+#include "inet/common/ISocketControlInfo.h"
+#include "inet/common/Protocol.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/ITransportProtocolControlInfo.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand.h"
 }}
 
@@ -57,6 +62,8 @@ enum SCTPErrorCode
 //
 packet SCTPCommand
 {
+    @implements(ITransportProtocolControlInfo, IProtocolControlInfo, ISocketControlInfo);
+    int controlInfoProtocolId = Protocol::sctp.getId();
     int socketId = -1;   // identifies the socket within the application
     int sid = -1;
     int numMsgs = 1;
