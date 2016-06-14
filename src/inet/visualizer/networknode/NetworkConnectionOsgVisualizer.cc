@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/networknode/NetworkConnectionOsgVisualizer.h"
 
@@ -51,7 +52,7 @@ void NetworkConnectionOsgVisualizer::createConnection(cModule *startNetworkNode,
     auto lineWidth = new osg::LineWidth();
     lineWidth->setWidth(this->lineWidth);
     stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
-    auto scene = inet::osg::getScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
     scene->addChild(geode);
 }
 

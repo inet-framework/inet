@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/networknode/NetworkNodeOsgVisualizer.h"
 
@@ -33,7 +34,7 @@ void NetworkNodeOsgVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayModuleName = par("displayModuleName");
-        auto scene = inet::osg::getScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && networkNodePathMatcher.matches(networkNode->getFullPath().c_str())) {

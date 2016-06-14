@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 #include "inet/visualizer/networknode/NetworkNodeOsgVisualizer.h"
@@ -39,7 +40,8 @@ void SceneOsgVisualizerBase::initializeScene()
     if (osgCanvas->getScene() != nullptr)
         throw cRuntimeError("OSG canvas scene at '%s' has been already initialized", visualizerTargetModule->getFullPath().c_str());
     else {
-        osgCanvas->setScene(new osg::Group());
+        auto topLevelScene = new inet::osg::TopLevelScene();
+        osgCanvas->setScene(topLevelScene);
         const char *clearColor = par("clearColor");
         if (*clearColor != '\0')
             osgCanvas->setClearColor(cFigure::Color(clearColor));
@@ -72,7 +74,7 @@ void SceneOsgVisualizerBase::initializeAxis(double axisLength)
     geode->addChild(inet::osg::createLine(Coord::ZERO, Coord(0.0, 0.0, axisLength), cFigure::ARROW_NONE, cFigure::ARROW_BARBED));
     auto stateSet = inet::osg::createStateSet(cFigure::BLACK, 1.0, false);
     geode->setStateSet(stateSet);
-    auto scene = inet::osg::getScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
     scene->addChild(geode);
     double spacing = 1;
     scene->addChild(inet::osg::createAutoTransform(inet::osg::createText("X", Coord::ZERO, cFigure::BLACK), osg::AutoTransform::ROTATE_TO_SCREEN, true, Coord(axisLength + spacing, 0.0, 0.0)));
@@ -97,7 +99,8 @@ void SceneOsgVisualizerBase::initializePlayground()
         double opacity = par("playgroundOpacity");
         bool shading = par("playgroundShading");
         auto playground = createPlayground(playgroundBounds.getMin(), playgroundBounds.getMax(), color, image, imageSize, opacity, shading);
-        getMainPart()->addChild(playground);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        scene->addChild(playground);
     }
 }
 

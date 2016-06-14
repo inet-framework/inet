@@ -40,9 +40,6 @@ class INET_API SceneOsgVisualizerBase : public SceneVisualizerBase
     virtual osg::Geode *createPlayground(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const;
     virtual osg::BoundingSphere getNetworkBoundingSphere();
 
-  public:
-    virtual osg::Group *getMainPart() = 0;
-
 #endif // ifdef WITH_OSG
 };
 

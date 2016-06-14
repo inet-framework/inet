@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 #include "inet/visualizer/physicallayer/MediumOsgVisualizer.h"
@@ -333,7 +334,7 @@ void MediumOsgVisualizer::transmissionAdded(const ITransmission *transmission)
     if (displaySignals) {
         transmissions.push_back(transmission);
         auto node = createTransmissionNode(transmission);
-        auto scene = inet::osg::getScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(node);
         setCachedOsgNode(transmission, node);
         if (signalPropagationUpdateInterval > 0)
@@ -380,7 +381,7 @@ void MediumOsgVisualizer::receptionStarted(const IReception *reception)
         auto node = static_cast<osg::Node *>(group->getChild(1));
         node->setNodeMask(1);
     }
-    auto scene = inet::osg::getScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
     const ITransmission *transmission = reception->getTransmission();
     if (displayRadioFrames) {
         Coord transmissionPosition = transmission->getStartPosition();

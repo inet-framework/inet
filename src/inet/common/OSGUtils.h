@@ -31,7 +31,6 @@
 #include <osg/ShapeDrawable>
 #include <osg/Texture2D>
 #include <osgText/Text>
-#include <vector>
 #endif // ifdef WITH_OSG
 
 namespace inet {
@@ -41,8 +40,6 @@ namespace osg {
 #ifdef WITH_OSG
 
 using namespace ::osg;
-
-Group *getScene(cModule *module);
 
 inline Vec3d toVec3d(const Coord& coord) { return Vec3d(coord.x, coord.y, coord.z); }
 inline Coord toCoord(const Vec3d& vec3d) { return Coord(vec3d.x(), vec3d.y(), vec3d.z()); }
@@ -58,15 +55,15 @@ Geometry *createAnnulusGeometry(const Coord& center, double outerRadius, double 
 Geometry *createQuadGeometry(const Coord& begin, const Coord& end);
 Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& translation = Coord::ZERO);
 
-osg::Node *createArrowhead(const Coord& begin, const Coord &end);
-osg::Node *createLine(const Coord& begin, const Coord& end, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
-osg::Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
+Node *createArrowhead(const Coord& begin, const Coord &end);
+Node *createLine(const Coord& begin, const Coord& end, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
+Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
 osgText::Text *createText(const char *string, const Coord& position, const cFigure::Color& color);
 
 AutoTransform *createAutoTransform(Drawable *drawable, AutoTransform::AutoRotateMode mode, bool autoScaleToScreen, const Coord& position = Coord::ZERO);
 PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position, const EulerAngles& orientation);
 
-osg::Image* createImage(const char *fileName);
+Image* createImage(const char *fileName);
 Texture2D *createTexture(const char *name, bool repeat);
 
 StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullBackFace = true);

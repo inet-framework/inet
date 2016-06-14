@@ -32,27 +32,6 @@ namespace osg {
 
 #ifdef WITH_OSG
 
-Group *getScene(cModule *module)
-{
-    auto sceneVisualizer = dynamic_cast<inet::visualizer::SceneOsgVisualizerBase *>(getSimulation()->getSystemModule()->getModuleByPath("visualizer.osgVisualizer.sceneVisualizer"));
-    if (sceneVisualizer != nullptr)
-        return sceneVisualizer->getMainPart();
-    else {
-        auto osgCanvas = module->getOsgCanvas();
-        auto scene = static_cast<Group *>(osgCanvas->getScene());
-        if (scene == nullptr) {
-            scene = new Group();
-            // NOTE: these are the default values when there's no SceneOsgVisualizer
-            osgCanvas->setScene(scene);
-            osgCanvas->setClearColor(cFigure::Color("#FFFFFF"));
-            osgCanvas->setZNear(0.1);
-            osgCanvas->setZFar(100000);
-            osgCanvas->setCameraManipulatorType(cOsgCanvas::CAM_TERRAIN);
-        }
-        return scene;
-    }
-}
-
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize)
 {
     auto vertices = new Vec3Array();

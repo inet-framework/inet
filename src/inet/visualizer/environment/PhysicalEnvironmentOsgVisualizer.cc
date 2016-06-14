@@ -20,6 +20,7 @@
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/environment/PhysicalEnvironmentOsgVisualizer.h"
 
@@ -51,7 +52,7 @@ void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
 {
     // only update after initialize
     if (physicalEnvironment != nullptr && getSimulation()->getEventNumber() == 0) {
-        auto scene = inet::osg::getScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++) {
             const IPhysicalObject *object = physicalEnvironment->getObject(i);
             const ShapeBase *shape = object->getShape();

@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/mobility/MobilityOsgVisualizer.h"
 
@@ -77,7 +78,7 @@ MobilityOsgVisualizer::CacheEntry* MobilityOsgVisualizer::ensureCacheEntry(const
         cFigure::Color color = cFigure::GOOD_DARK_COLORS[module->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
         trail->setStateSet(inet::osg::createStateSet(color, 1.0));
         auto networkNode = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
-        auto scene = inet::osg::getScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(trail);
         cacheEntry = new CacheEntry(networkNode, trail);
         setCacheEntry(mobility, cacheEntry);

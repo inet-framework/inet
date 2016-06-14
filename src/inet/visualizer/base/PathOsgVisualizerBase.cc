@@ -17,6 +17,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PathOsgVisualizerBase.h"
@@ -46,7 +47,7 @@ void PathOsgVisualizerBase::addPath(std::pair<int, int> sourceAndDestination, co
 {
     PathVisualizerBase::addPath(sourceAndDestination, path);
     auto osgPath = static_cast<const OsgPath *>(path);
-    auto scene = inet::osg::getScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
     scene->addChild(osgPath->node);
 }
 

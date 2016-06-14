@@ -34,10 +34,8 @@ class INET_API SceneOsgVisualizer : public SceneOsgVisualizerBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void initializeScene() override;
     virtual void initializeViewpoint();
-
-  public:
-    virtual osg::Group *getMainPart() override;
 
 #endif // ifdef WITH_OSG
 };

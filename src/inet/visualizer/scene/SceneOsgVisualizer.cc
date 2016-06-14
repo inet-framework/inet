@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/scene/SceneOsgVisualizer.h"
 
@@ -48,6 +49,13 @@ void SceneOsgVisualizer::initialize(int stage)
     }
 }
 
+void SceneOsgVisualizer::initializeScene()
+{
+    SceneOsgVisualizerBase::initializeScene();
+    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(visualizerTargetModule->getOsgCanvas()->getScene());
+    topLevelScene->addChild(new inet::osg::SimulationScene());
+}
+
 void SceneOsgVisualizer::initializeViewpoint()
 {
     auto boundingSphere = getNetworkBoundingSphere();
@@ -58,12 +66,6 @@ void SceneOsgVisualizer::initializeViewpoint()
     auto viewpointCenter = cOsgCanvas::Vec3d(center.x(), center.y(), center.z());
     auto osgCanvas = visualizerTargetModule->getOsgCanvas();
     osgCanvas->setGenericViewpoint(cOsgCanvas::Viewpoint(eye, viewpointCenter, cOsgCanvas::Vec3d(0, 0, 1)));
-}
-
-osg::Group *SceneOsgVisualizer::getMainPart()
-{
-    auto osgCanvas = visualizerTargetModule->getOsgCanvas();
-    return check_and_cast<osg::Group *>(osgCanvas->getScene());
 }
 
 #endif // ifdef WITH_OSG

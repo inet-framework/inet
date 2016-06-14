@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -70,13 +71,14 @@ void SceneOsgEarthVisualizer::initializeScene()
         throw cRuntimeError("Could not read earth map file '%s'", mapFileString);
     auto osgCanvas = visualizerTargetModule->getOsgCanvas();
     osgCanvas->setViewerStyle(cOsgCanvas::STYLE_EARTH);
-    auto group = static_cast<osg::Group *>(osgCanvas->getScene());
-    group->addChild(mapScene);
+    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(osgCanvas->getScene());
+    topLevelScene->addChild(mapScene);
     mapNode = MapNode::findMapNode(mapScene);
     if (mapNode == nullptr)
         throw cRuntimeError("Could not find map node in the scene");
     locatorNode = new osgEarth::Util::ObjectLocatorNode(mapNode->getMap());
-    group->addChild(locatorNode);
+    locatorNode->addChild(new inet::osg::SimulationScene());
+    topLevelScene->addChild(locatorNode);
 }
 
 void SceneOsgEarthVisualizer::initializeLocator()
@@ -93,14 +95,8 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
     auto radius = boundingSphere.radius();
     auto euclideanCenter = boundingSphere.center();
     auto geographicSrsEye = coordinateSystem->computeGeographicCoordinate(Coord(euclideanCenter.x(), euclideanCenter.y(), euclideanCenter.z()));
-    auto mapSrs = mapNode->getMapSRS();
     auto osgCanvas = visualizerTargetModule->getOsgCanvas();
     osgCanvas->setEarthViewpoint(osgEarth::Viewpoint("home", geographicSrsEye.longitude, geographicSrsEye.latitude, geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius));
-}
-
-osg::Group *SceneOsgEarthVisualizer::getMainPart()
-{
-    return locatorNode;
 }
 
 #endif // ifdef WITH_OSG

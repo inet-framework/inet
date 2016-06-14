@@ -48,9 +48,6 @@ class INET_API SceneOsgEarthVisualizer : public SceneOsgVisualizerBase
     virtual void initializeLocator();
     virtual void initializeViewpoint();
 
-  public:
-    virtual osg::Group *getMainPart() override;
-
 #endif // ifdef WITH_OSG
 };
 

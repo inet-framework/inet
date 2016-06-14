@@ -17,6 +17,7 @@
 
 #include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/physicallayer/obstacleloss/TracingObstacleLossOsgVisualizer.h"
 
@@ -39,7 +40,7 @@ void TracingObstacleLossOsgVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         trailNode = new osg::Group();
-        auto scene = inet::osg::getScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(trailNode);
     }
 }

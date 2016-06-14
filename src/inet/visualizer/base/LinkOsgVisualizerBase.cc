@@ -17,6 +17,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/LinkOsgVisualizerBase.h"
@@ -47,7 +48,7 @@ void LinkOsgVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, co
 {
     LinkVisualizerBase::addLink(sourceAndDestination, link);
     auto osgLink = static_cast<const OsgLink *>(link);
-    auto scene = inet::osg::getScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
     scene->addChild(osgLink->node);
 }
 
