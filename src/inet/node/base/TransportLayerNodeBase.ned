@@ -59,8 +59,8 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         tcp.ipOut --> tn.upperLayerIn++ if hasTcp;
         tcp.ipIn <-- tn.upperLayerOut++ if hasTcp;
 
-        sctp.to_ip --> tn.upperLayerIn++ if hasSctp;
-        tn.upperLayerOut++ --> sctp.from_ip if hasSctp;
+        sctp.ipOut --> tn.upperLayerIn++ if hasSctp;
+        tn.upperLayerOut++ --> sctp.ipIn if hasSctp;
 
         tn.lowerLayerOut++ --> ipv4.transportIn if hasIpv4;
         tn.lowerLayerIn++ <-- ipv4.transportOut if hasIpv4;

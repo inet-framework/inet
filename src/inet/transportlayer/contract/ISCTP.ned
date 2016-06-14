@@ -25,8 +25,8 @@ moduleinterface ISCTP
 {
     @display("i=block/wheelbarrow");
     gates:
-        input from_appl[];
-        input from_ip;
-        output to_appl[];
-        output to_ip;
+        input appIn[];
+        input ipIn[];
+        output appOut[];
+        output ipOut[];
 }

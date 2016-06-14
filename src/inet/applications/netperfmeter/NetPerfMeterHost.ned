@@ -54,8 +54,8 @@ module NetPerfMeterHost extends TransportLayerNodeBase
         for i=0..numNetPerfMeterApps-1 {
             netPerfMeterApp[i].tcpOut --> tcp.appIn;
             netPerfMeterApp[i].tcpIn <-- tcp.appOut;
-            netPerfMeterApp[i].sctpOut --> sctp.from_appl++;
-            netPerfMeterApp[i].sctpIn <-- sctp.to_appl++;
+            netPerfMeterApp[i].sctpOut --> sctp.appIn++;
+            netPerfMeterApp[i].sctpIn <-- sctp.appOut++;
             netPerfMeterApp[i].udpOut --> udp.appIn;
             netPerfMeterApp[i].udpIn <-- udp.appOut;
         }

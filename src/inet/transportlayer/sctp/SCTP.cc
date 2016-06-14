@@ -79,7 +79,7 @@ void SCTP::bindPortForUDP()
 {
     EV_INFO << "Binding to UDP port " << SCTP_UDP_PORT << endl;
 
-    udpSocket.setOutputGate(gate("to_ip"));
+    udpSocket.setOutputGate(gate("ipOut"));
     udpSocket.bind(SCTP_UDP_PORT);
 }
 
@@ -105,7 +105,7 @@ void SCTP::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
-        registerProtocol(Protocol::sctp, gate("to_ip"));
+        registerProtocol(Protocol::sctp, gate("ipOut"));
     else if (stage == INITSTAGE_TRANSPORT_LAYER_2) {
         if (par("udpEncapsEnabled").boolValue()) {
             bindPortForUDP();
@@ -149,7 +149,7 @@ void SCTP::handleMessage(cMessage *msg)
                 removeAssociation(assoc);
         }
     }
-    else if (msg->arrivedOn("from_ip")) {
+    else if (msg->arrivedOn("ipIn")) {
         EV_INFO << "Message from IP\n";
         printInfoAssocMap();
         if (!dynamic_cast<SCTPMessage *>(msg)) {
@@ -240,7 +240,7 @@ void SCTP::handleMessage(cMessage *msg)
             cmsg->setControlInfo(indication);
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
-            send(cmsg, "to_appl", 0);
+            send(cmsg, "appOut", 0);
             delete msg;
         } else {
             SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
@@ -389,7 +389,7 @@ void SCTP::send_to_ip(SCTPMessage *msg)
     serializer::SCTPSerializer().serializePacket(msg, b, ctx);
     ASSERT(b.getPos() == msg->getByteLength());
 #endif
-    send(msg, "to_ip");
+    send(msg, "ipOut");
 }
 
 void SCTP::updateDisplayString()

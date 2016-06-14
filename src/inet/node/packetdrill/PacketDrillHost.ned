@@ -81,12 +81,12 @@ module PacketDrillHost extends TransportLayerNodeBase
         udp.ipIn <-- ipv4.transportOut++ if hasUdpTun;
 
         for i=0..numSctpTunApps-1 {
-            tunApp[numTcpTunApps+numUdpTunApps+i].sctpOut --> sctp.from_appl++ if hasSctpTun;
-            tunApp[numTcpTunApps+numUdpTunApps+i].sctpIn <-- sctp.to_appl++ if hasSctpTun;
+            tunApp[numTcpTunApps+numUdpTunApps+i].sctpOut --> sctp.appIn++ if hasSctpTun;
+            tunApp[numTcpTunApps+numUdpTunApps+i].sctpIn <-- sctp.appOut++ if hasSctpTun;
         }
 
-        sctp.to_ip --> ipv4.transportIn++ if hasSctpTun;
-        sctp.from_ip <-- ipv4.transportOut++ if hasSctpTun;
+        sctp.ipOut --> ipv4.transportIn++ if hasSctpTun;
+        sctp.ipIn <-- ipv4.transportOut++ if hasSctpTun;
 
         for i=0..numTunInterfaces-1 {
             tunApp[i].tunOut --> tun[i].appIn;

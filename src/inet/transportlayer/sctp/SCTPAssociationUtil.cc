@@ -384,7 +384,7 @@ void SCTPAssociation::sendIndicationToApp(const int32 code, const int32 value)
     indication->setRemoteAddr(remoteAddr);
     indication->setRemotePort(remotePort);
     msg->setControlInfo(indication);
-    sctpMain->send(msg, "to_appl", appGateIndex);
+    sctpMain->send(msg, "appOut", appGateIndex);
 }
 
 void SCTPAssociation::sendEstabIndicationToApp()
@@ -406,7 +406,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
     establishIndication->setOutboundStreams(outboundStreams);
     establishIndication->setNumMsgs(state->sendQueueLimit);
     msg->setControlInfo(establishIndication);
-    sctpMain->send(msg, "to_appl", appGateIndex);
+    sctpMain->send(msg, "appOut", appGateIndex);
 
     char vectorName[128];
     for (uint16 i = 0; i < inboundStreams; i++) {
@@ -417,7 +417,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
 
 void SCTPAssociation::sendToApp(cMessage *msg)
 {
-    sctpMain->send(msg, "to_appl", appGateIndex);
+    sctpMain->send(msg, "appOut", appGateIndex);
 }
 
 void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
