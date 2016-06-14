@@ -49,8 +49,8 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
         at.lowerLayerOut++ --> tcp.appIn if hasTcp;
         at.lowerLayerIn++ <-- tcp.appOut if hasTcp;
 
-        at.lowerLayerOut++ --> sctp.appIn++ if hasSctp;
-        at.lowerLayerIn++ <-- sctp.appOut++ if hasSctp;
+        at.lowerLayerOut++ --> sctp.appIn if hasSctp;
+        at.lowerLayerIn++ <-- sctp.appOut if hasSctp;
 
         at.lowerLayerOut++ --> tn.upperLayerIn++;
         at.lowerLayerIn++ <-- tn.upperLayerOut++;
