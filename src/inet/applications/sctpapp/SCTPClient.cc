@@ -288,7 +288,7 @@ void SCTPClient::sendQueueRequest()
     SCTPInfo *qinfo = new SCTPInfo();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-    qinfo->setAssocId(socket.getConnectionId());
+    qinfo->setSocketId(socket.getConnectionId());
     cmsg->setControlInfo(qinfo);
     EV_INFO << "Sending queue request ..." << endl;
     socket.sendRequest(cmsg);
@@ -490,7 +490,7 @@ void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *m
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
     SCTPSendInfo *cmd = new SCTPSendInfo();
-    cmd->setAssocId(ind->getAssocId());
+    cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
     cmsg->setKind(SCTP_C_RECEIVE);
@@ -505,7 +505,7 @@ void SCTPClient::shutdownReceivedArrived(int connId)
         cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
         SCTPInfo *qinfo = new SCTPInfo();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setAssocId(connId);
+        qinfo->setSocketId(connId);
         cmsg->setControlInfo(qinfo);
         socket.sendNotification(cmsg);
     }
@@ -580,7 +580,7 @@ void SCTPClient::setPrimaryPath(const char *str)
         }
     }
 
-    pinfo->setAssocId(socket.getConnectionId());
+    pinfo->setSocketId(socket.getConnectionId());
     cmsg->setKind(SCTP_C_PRIMARY);
     cmsg->setControlInfo(pinfo);
     socket.sendNotification(cmsg);
@@ -592,7 +592,7 @@ void SCTPClient::sendStreamResetNotification()
     if (type >= 6 && type <= 9) {
         cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
         SCTPResetInfo *rinfo = new SCTPResetInfo();
-        rinfo->setAssocId(socket.getConnectionId());
+        rinfo->setSocketId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
         rinfo->setRequestType((unsigned short int)type);
         cmsg->setKind(SCTP_C_STREAM_RESET);

@@ -250,7 +250,7 @@ void SCTP::handleMessage(cMessage *msg)
                 appGateIndex = controlInfo->getGate();
             else
                 appGateIndex = msg->getArrivalGate()->getIndex();
-            int32 assocId = controlInfo->getAssocId();
+            int32 assocId = controlInfo->getSocketId();
             EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
             SCTPAssociation *assoc = findAssocForApp(appGateIndex, assocId);
 

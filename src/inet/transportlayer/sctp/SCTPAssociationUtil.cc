@@ -378,7 +378,7 @@ void SCTPAssociation::sendIndicationToApp(const int32 code, const int32 value)
     msg->setKind(code);
 
     SCTPCommand *indication = new SCTPCommand(indicationName(code));
-    indication->setAssocId(assocId);
+    indication->setSocketId(assocId);
     indication->setLocalAddr(localAddr);
     indication->setLocalPort(localPort);
     indication->setRemoteAddr(remoteAddr);
@@ -396,7 +396,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
     msg->setKind(SCTP_I_ESTABLISHED);
 
     SCTPConnectInfo *establishIndication = new SCTPConnectInfo("ConnectInfo");
-    establishIndication->setAssocId(assocId);
+    establishIndication->setSocketId(assocId);
     establishIndication->setLocalAddr(localAddr);
     establishIndication->setRemoteAddr(remoteAddr);
     establishIndication->setLocalPort(localPort);
@@ -1752,7 +1752,7 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
     cPacket *cmsg = new cPacket("SCTP_I_DATA_NOTIFICATION");
     cmsg->setKind(SCTP_I_DATA_NOTIFICATION);
     SCTPCommand *cmd = new SCTPCommand("notification");
-    cmd->setAssocId(assocId);
+    cmd->setSocketId(assocId);
     cmd->setSid(sid);
     cmd->setNumMsgs(1);
     cmsg->setControlInfo(cmd);
@@ -1894,7 +1894,7 @@ void SCTPAssociation::pushUlp()
             cMessage *msg = (cMessage *)chunk->userData;
             msg->setKind(SCTP_I_DATA);
             SCTPRcvInfo *cmd = new SCTPRcvInfo("push");
-            cmd->setAssocId(assocId);
+            cmd->setSocketId(assocId);
             cmd->setGate(appGateIndex);
             cmd->setSid(chunk->sid);
             cmd->setSsn(chunk->ssn);
@@ -2659,7 +2659,7 @@ void SCTPAssociation::pathStatusIndication(const SCTPPathVariables *path,
     msg->setKind(SCTP_I_STATUS);
     SCTPStatusInfo *cmd = new SCTPStatusInfo();
     cmd->setPathId(path->remoteAddress);
-    cmd->setAssocId(assocId);
+    cmd->setSocketId(assocId);
     cmd->setActive(status);
     msg->setControlInfo(cmd);
     if (!status) {

@@ -230,17 +230,17 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     if (listenSet) {
                         if (acceptSet) {
                             sctpSocket.setState(SCTPSocket::CONNECTED);
-                            sctpAssocId = check_and_cast<SCTPCommand *>(msg->getControlInfo())->getAssocId();
+                            sctpAssocId = check_and_cast<SCTPCommand *>(msg->getControlInfo())->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            sctpAssocId = check_and_cast<SCTPCommand *>(msg->getControlInfo())->getAssocId();
+                            sctpAssocId = check_and_cast<SCTPCommand *>(msg->getControlInfo())->getSocketId();
                             establishedPending = true;
                         }
                     } else {
                         sctpSocket.setState(SCTPSocket::CONNECTED);
                         SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
-                        sctpAssocId = connectInfo->getAssocId();
+                        sctpAssocId = connectInfo->getSocketId();
                         sctpSocket.setInboundStreams(connectInfo->getInboundStreams());
                         sctpSocket.setOutboundStreams(connectInfo->getOutboundStreams());
                         delete connectInfo;
@@ -251,7 +251,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     if (recvFromSet) {
                         cPacket* cmsg = new cPacket("ReceiveRequest", SCTP_C_RECEIVE);
                         SCTPSendInfo *cmd = new SCTPSendInfo("Send2");
-                        cmd->setAssocId(sctpAssocId);
+                        cmd->setSocketId(sctpAssocId);
                         cmd->setSid(0);
                         cmsg->setControlInfo(cmd);
                         send(cmsg, "sctpOut");
@@ -927,7 +927,7 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
                 case IP_PROT_SCTP: {
                     cPacket* pkt = new cPacket("dataRequest", SCTP_C_RECEIVE);
                     SCTPSendInfo *sctpcmd = new SCTPSendInfo();
-                    sctpcmd->setAssocId(sctpAssocId);
+                    sctpcmd->setSocketId(sctpAssocId);
                     sctpcmd->setSid(0);
                     pkt->setControlInfo(sctpcmd);
                     send(pkt, "sctpOut");

@@ -1978,7 +1978,7 @@ void SCTPAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
 
         SCTPSendQueueAbated *sendQueueAbatedIndication =
             new SCTPSendQueueAbated(indicationName(SCTP_I_SENDQUEUE_ABATED));
-        sendQueueAbatedIndication->setAssocId(assocId);
+        sendQueueAbatedIndication->setSocketId(assocId);
         sendQueueAbatedIndication->setLocalAddr(localAddr);
         sendQueueAbatedIndication->setRemoteAddr(remoteAddr);
         sendQueueAbatedIndication->setNumMsgs(bytes);    // NOTE: Legacy API!

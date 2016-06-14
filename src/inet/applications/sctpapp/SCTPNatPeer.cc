@@ -135,7 +135,7 @@ void SCTPNatPeer::generateAndSend()
     msg->setBitLength(numBytes * 8);
     cmsg->encapsulate(msg);
     SCTPSendInfo *cmd = new SCTPSendInfo();
-    cmd->setAssocId(serverAssocId);
+    cmd->setSocketId(serverAssocId);
     if (ordered)
         cmd->setSendUnordered(COMPLETE_MESG_ORDERED);
     else
@@ -237,8 +237,8 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo()->dup());
                     cMessage *cmsg = new cMessage("Notification");
                     SCTPSendInfo *cmd = new SCTPSendInfo();
-                    id = ind->getAssocId();
-                    cmd->setAssocId(id);
+                    id = ind->getSocketId();
+                    cmd->setSocketId(id);
                     cmd->setSid(ind->getSid());
                     cmd->setNumMsgs(ind->getNumMsgs());
                     cmsg->setControlInfo(cmd);
@@ -258,7 +258,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                     int32 count = 0;
                     SCTPConnectInfo *connectInfo = check_and_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                     numSessions++;
-                    serverAssocId = connectInfo->getAssocId();
+                    serverAssocId = connectInfo->getSocketId();
                     id = serverAssocId;
                     outboundStreams = connectInfo->getOutboundStreams();
                     inboundStreams = connectInfo->getInboundStreams();
@@ -304,7 +304,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                                 SCTPInfo *qinfo = new SCTPInfo();
                                 qinfo->setText(queueSize);
                                 cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-                                qinfo->setAssocId(id);
+                                qinfo->setSocketId(id);
                                 cmsg->setControlInfo(qinfo);
                                 sendOrSchedule(cmsg);
                             }
@@ -325,7 +325,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                                 //SCTPInfo* qinfo = new SCTPInfo();
                                 SCTPCommand *cmd = new SCTPCommand();
                                 cmsg->setKind(SCTP_C_SHUTDOWN);
-                                cmd->setAssocId(serverAssocId);
+                                cmd->setSocketId(serverAssocId);
                                 //qinfo->setAssocId(id);
                                 //cmsg->setControlInfo(qinfo);
                                 cmsg->setControlInfo(cmd);
@@ -342,8 +342,8 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                 SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
                 SCTPSendInfo *cmd = new SCTPSendInfo();
-                id = ind->getAssocId();
-                cmd->setAssocId(id);
+                id = ind->getSocketId();
+                cmd->setSocketId(id);
                 cmd->setSid(ind->getSid());
                 cmd->setNumMsgs(ind->getNumMsgs());
                 cmsg->setKind(SCTP_C_RECEIVE);
@@ -360,7 +360,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
 
             case SCTP_I_DATA: {
                 SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo());
-                id = ind->getAssocId();
+                id = ind->getSocketId();
                 if (rendezvous) {
                     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                     NatMessage *nat = check_and_cast<NatMessage *>(smsg->decapsulate());
@@ -401,7 +401,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                                     cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                                     SCTPInfo *qinfo = new SCTPInfo();
                                     cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-                                    qinfo->setAssocId(id);
+                                    qinfo->setSocketId(id);
                                     cmsg->setControlInfo(qinfo);
                                     sendOrSchedule(cmsg);
                                 }
@@ -410,7 +410,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                         }
                         else {
                             SCTPSendInfo *cmd = new SCTPSendInfo();
-                            cmd->setAssocId(id);
+                            cmd->setSocketId(id);
 
                             SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
                             auto j = endToEndDelay.find(id);
@@ -440,7 +440,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
 
             case SCTP_I_SHUTDOWN_RECEIVED: {
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-                id = command->getAssocId();
+                id = command->getSocketId();
                 EV << "peer: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
                 auto i = rcvdPacketsPerAssoc.find(id);
                 if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
@@ -450,7 +450,7 @@ void SCTPNatPeer::handleMessage(cMessage *msg)
                         cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
                         SCTPInfo *qinfo = new SCTPInfo();
                         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-                        qinfo->setAssocId(id);
+                        qinfo->setSocketId(id);
                         cmsg->setControlInfo(qinfo);
                         sendOrSchedule(cmsg);
                     }
@@ -519,7 +519,7 @@ void SCTPNatPeer::handleTimer(cMessage *msg)
             cmsg = new cMessage("CLOSE", SCTP_C_CLOSE);
             cmd = new SCTPCommand();
             id = atoi(msg->getName());
-            cmd->setAssocId(id);
+            cmd->setSocketId(id);
             cmsg->setControlInfo(cmd);
             sendOrSchedule(cmsg);
             break;
@@ -545,7 +545,7 @@ void SCTPNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, cPacket
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
     SCTPSendInfo *cmd = new SCTPSendInfo();
-    cmd->setAssocId(ind->getAssocId());
+    cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
     cmsg->setKind(SCTP_C_RECEIVE);
@@ -718,7 +718,7 @@ void SCTPNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
         if ((bool)par("multi")) {
             cMessage *cmesg = new cMessage("SCTP_C_SEND_ASCONF");
             SCTPCommand *cmd = new SCTPCommand();
-            cmd->setAssocId(clientSocket.getConnectionId());
+            cmd->setSocketId(clientSocket.getConnectionId());
             cmesg->setControlInfo(cmd);
             cmesg->setKind(SCTP_C_SEND_ASCONF);
             clientSocket.sendNotification(cmesg);
@@ -778,7 +778,7 @@ void SCTPNatPeer::sendQueueRequest()
     SCTPInfo *qinfo = new SCTPInfo();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-    qinfo->setAssocId(clientSocket.getConnectionId());
+    qinfo->setSocketId(clientSocket.getConnectionId());
     cmsg->setControlInfo(qinfo);
     clientSocket.sendRequest(cmsg);
 }
@@ -838,7 +838,7 @@ void SCTPNatPeer::shutdownReceivedArrived(int32 connId)
         cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
         SCTPInfo *qinfo = new SCTPInfo();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setAssocId(connId);
+        qinfo->setSocketId(connId);
         cmsg->setControlInfo(qinfo);
         clientSocket.sendNotification(cmsg);
     }
@@ -884,7 +884,7 @@ void SCTPNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
 
         SCTPSendInfo* sendCommand = new SCTPSendInfo;
         sendCommand->setLast(true);
-        sendCommand->setAssocId(assocId);
+        sendCommand->setSocketId(assocId);
         cmsg->setControlInfo(sendCommand);
 
         clientSocket.sendMsg(cmsg);

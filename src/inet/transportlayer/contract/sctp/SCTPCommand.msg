@@ -57,7 +57,7 @@ enum SCTPErrorCode
 //
 packet SCTPCommand
 {
-    int assocId = -1;   // identifies the socket within the application
+    int socketId = -1;   // identifies the socket within the application
     int sid = -1;
     int numMsgs = 1;
     int ssn = -1;

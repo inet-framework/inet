@@ -395,7 +395,7 @@ void NetPerfMeter::handleMessage(cMessage* msg)
             const SCTPCommand* dataIndication =
                check_and_cast<const SCTPCommand*>(msg->getControlInfo());
             SCTPSendInfo* command = new SCTPSendInfo("SendCommand");
-            command->setAssocId(dataIndication->getAssocId());
+            command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
             cPacket* cmsg = new cPacket("ReceiveRequest");
@@ -597,7 +597,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
       }
 
       SCTPConnectInfo* connectInfo = check_and_cast<SCTPConnectInfo*>(msg->getControlInfo());
-      ConnectionID = connectInfo->getAssocId();
+      ConnectionID = connectInfo->getSocketId();
       sendSCTPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
 
@@ -932,7 +932,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             dataMessage->setDataLen(msgSize);
 
             SCTPSendInfo* command = new SCTPSendInfo("SendRequest");
-            command->setAssocId(ConnectionID);
+            command->setSocketId(ConnectionID);
             command->setSid(streamID);
             command->setSendUnordered( (sendUnordered == true) ?
                                        COMPLETE_MESG_UNORDERED : COMPLETE_MESG_ORDERED );
@@ -1193,7 +1193,7 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
 
    SCTPInfo* queueInfo = new SCTPInfo();
    queueInfo->setText(queueSize);
-   queueInfo->setAssocId(ConnectionID);
+   queueInfo->setSocketId(ConnectionID);
 
    cPacket* cmsg = new cPacket("QueueRequest");
    cmsg->setKind(SCTP_C_QUEUE_BYTES_LIMIT);
