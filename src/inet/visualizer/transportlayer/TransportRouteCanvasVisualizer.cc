@@ -21,7 +21,7 @@
 #include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
 #endif
 
-#ifdef DWITH_IEEE8021D
+#ifdef WITH_IEEE8021D
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
@@ -61,7 +61,7 @@ bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
         return true;
 #endif
 
-#ifdef DWITH_IEEE8021D
+#ifdef WITH_IEEE8021D
     if (dynamic_cast<Ieee8021dRelay *>(module) != nullptr)
         return true;
 #endif
