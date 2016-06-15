@@ -149,6 +149,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         int syscallClose(struct syscall_spec *syscall, cQueue *args, char **error);
 
+        int syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *args, char **error);
+
         bool compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram);
 
         bool compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp);

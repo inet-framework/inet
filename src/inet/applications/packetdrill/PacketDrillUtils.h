@@ -121,6 +121,8 @@ struct int_symbol {
 #define SCTP_DELAYED_SACK 4
 #define SCTP_MAX_BURST 5
 
+#define SCTP_UNORDERED  1
+
 enum direction_t {
     DIRECTION_INVALID,
     DIRECTION_INBOUND,  /* packet coming into the kernel under test */
@@ -435,6 +437,8 @@ class INET_API PacketDrillExpression : public cObject
 
         int unescapeCstringExpression(const char *input_string, char **error);
         int getS32(int32 *value, char **error);
+        int getU16(uint16 *value, char **error);
+        int getU32(uint32 *value, char **error);
         int symbolToInt(const char *input_symbol, int64 *output_integer, char **error);
         bool lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols);
 };

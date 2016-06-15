@@ -190,6 +190,11 @@ static void yyerror(const char *message) {
         current_script_path, yylineno, yytext, message);
 }
 
+static void semantic_error(const char* message)
+{
+    printf("%s\n", message);
+    throw cTerminationException("Packetdrill error: Script error");
+}
 
 /* Create and initalize a new integer expression with the given
  * literal value and format string.
@@ -254,7 +259,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
  * have ALL_CAPS names, and nonterminal symbols have lower_case names.
  */
 %token ELLIPSIS
-%token <reserved> UDP
+%token <reserved> UDP _HTONS_ _HTONL_
 %token <reserved> ACK WIN WSCALE MSS NOP TIMESTAMP ECR EOL TCPSACK VAL SACKOK
 %token <reserved> OPTION
 %token <reserved> CHUNK MYDATA MYINIT MYINIT_ACK MYHEARTBEAT MYHEARTBEAT_ACK MYABORT
@@ -380,18 +385,18 @@ event
     $1->getTimeType();
     if ($$->getEventTimeEnd() != NO_TIME_RANGE) {
         if ($$->getEventTimeEnd() < $$->getEventTime())
-            printf("Semantic error: time range is backwards\n");
+            semantic_error("time range is backwards");
     }
     if ($$->getTimeType() == ANY_TIME &&  ($$->getType() != PACKET_EVENT ||
         ($$->getPacket())->getDirection() != DIRECTION_OUTBOUND)) {
         yylineno = $$->getLineNumber();
-        printf("Semantic error: event time <star> can only be used with outbound packets\n");
+        semantic_error("event time <star> can only be used with outbound packets");
     } else if (($$->getTimeType() == ABSOLUTE_RANGE_TIME ||
         $$->getTimeType() == RELATIVE_RANGE_TIME) &&
         ($$->getType() != PACKET_EVENT ||
         ($$->getPacket())->getDirection() != DIRECTION_OUTBOUND)) {
         yylineno = $$->getLineNumber();
-        printf("Semantic error: event time range can only be used with outbound packets\n");
+        semantic_error("event time range can only be used with outbound packets");
     }
     delete($1);
 }
@@ -434,13 +439,13 @@ event_time
 time
 : MYFLOAT {
     if ($1 < 0) {
-        printf("Semantic error: negative time\n");
+        semantic_error("negative time");
     }
     $$ = (int64)($1 * 1.0e6); /* convert float secs to s64 microseconds */
 }
 | INTEGER {
     if ($1 < 0) {
-        printf("Semantic error: negative time\n");
+        semantic_error("negative time");
     }
     $$ = (int64)($1 * 1000000); /* convert int secs to s64 microseconds */
 }
@@ -448,7 +453,11 @@ time
 
 action
 : packet_spec {
-    $$ = new PacketDrillEvent(PACKET_EVENT);  $$->setPacket($1);
+    if ($1) {
+        $$ = new PacketDrillEvent(PACKET_EVENT);  $$->setPacket($1);
+    } else {
+        $$ = NULL;
+    }
 }
 | syscall_spec {
     $$ = new PacketDrillEvent(SYSCALL_EVENT);
@@ -518,13 +527,17 @@ sctp_packet_spec
     PacketDrillPacket *inner = NULL;
     enum direction_t direction = $1->getDirection();
     cPacket* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, $4);
-    if (direction == DIRECTION_INBOUND)
-        pkt->setName("parserInbound");
-    else
-        pkt->setName("parserOutbound");
-    inner = new PacketDrillPacket();
-    inner->setInetPacket(pkt);
-    inner->setDirection(direction);
+    if (pkt) {
+        if (direction == DIRECTION_INBOUND)
+            pkt->setName("parserInbound");
+        else
+            pkt->setName("parserOutbound");
+        inner = new PacketDrillPacket();
+        inner->setInetPacket(pkt);
+        inner->setDirection(direction);
+    } else {
+        semantic_error("inbound packets must be fully specified");
+    }
     $$ = inner;
 }
 ;
@@ -557,13 +570,13 @@ opt_flags
 : FLAGS '=' ELLIPSIS    { $$ = -1; }
 | FLAGS '=' HEX_INTEGER {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
 | FLAGS '=' INTEGER     {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
@@ -573,7 +586,7 @@ opt_len
 : LEN '=' ELLIPSIS { $$ = -1; }
 | LEN '=' INTEGER  {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: length value out of range\n");
+        semantic_error("length value out of range");
     }
     $$ = $3;
 }
@@ -600,13 +613,13 @@ chunk_types_list
 byte
 : HEX_INTEGER {
     if (!is_valid_u8($1)) {
-        printf("Semantic error: byte value out of range\n");
+        semantic_error("byte value out of range");
     }
     $$ = $1;
 }
 | INTEGER {
     if (!is_valid_u8($1)) {
-        printf("Semantic error: byte value out of range\n");
+        semantic_error("byte value out of range");
     }
     $$ = $1;
 }
@@ -615,13 +628,13 @@ byte
 chunk_type
 : HEX_INTEGER {
     if (!is_valid_u8($1)) {
-        printf("Semantic error: type value out of range\n");
+        semantic_error("type value out of range");
     }
     $$ = $1;
 }
 | INTEGER {
     if (!is_valid_u8($1)) {
-        printf("Semantic error: type value out of range\n");
+        semantic_error("type value out of range");
     }
     $$ = $1;
 }
@@ -667,13 +680,13 @@ opt_data_flags
 : FLAGS '=' ELLIPSIS    { $$ = -1; }
 | FLAGS '=' HEX_INTEGER {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
 | FLAGS '=' INTEGER     {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
@@ -686,35 +699,34 @@ opt_data_flags
         switch (*c) {
         case 'I':
             if (flags & SCTP_DATA_CHUNK_I_BIT) {
-                printf("Semantic error: I-bit specified multiple times\n");
+                semantic_error("I-bit specified multiple times");
             } else {
                 flags |= SCTP_DATA_CHUNK_I_BIT;
             }
             break;
         case 'U':
             if (flags & SCTP_DATA_CHUNK_U_BIT) {
-                printf("Semantic error: U-bit specified multiple times\n");
+                semantic_error("U-bit specified multiple times");
             } else {
                 flags |= SCTP_DATA_CHUNK_U_BIT;
             }
             break;
         case 'B':
             if (flags & SCTP_DATA_CHUNK_B_BIT) {
-                printf("Semantic error: B-bit specified multiple times\n");
+                semantic_error("B-bit specified multiple times");
             } else {
                 flags |= SCTP_DATA_CHUNK_B_BIT;
             }
             break;
         case 'E':
             if (flags & SCTP_DATA_CHUNK_E_BIT) {
-                printf("Semantic error: E-bit specified multiple times\n");
+                semantic_error("E-bit specified multiple times");
             } else {
                 flags |= SCTP_DATA_CHUNK_E_BIT;
             }
             break;
         default:
-            printf("Semantic error: Only expecting IUBE as flags\n");
-            break;
+            semantic_error("Only expecting IUBE as flags");
         }
     }
     $$ = flags;
@@ -725,13 +737,13 @@ opt_abort_flags
 : FLAGS '=' ELLIPSIS    { $$ = -1; }
 | FLAGS '=' HEX_INTEGER {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
 | FLAGS '=' INTEGER     {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
@@ -744,14 +756,13 @@ opt_abort_flags
         switch (*c) {
         case 'T':
             if (flags & SCTP_ABORT_CHUNK_T_BIT) {
-                printf("Semantic error: T-bit specified multiple times\n");
+                semantic_error("T-bit specified multiple times");
             } else {
                 flags |= SCTP_ABORT_CHUNK_T_BIT;
             }
             break;
         default:
-            printf("Semantic error: Only expecting T as flags\n");
-            break;
+            semantic_error("Only expecting T as flags");
         }
     }
     $$ = flags;
@@ -762,13 +773,13 @@ opt_shutdown_complete_flags
 : FLAGS '=' ELLIPSIS    { $$ = -1; }
 | FLAGS '=' HEX_INTEGER {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
 | FLAGS '=' INTEGER     {
     if (!is_valid_u8($3)) {
-        printf("Semantic error: flags value out of range\n");
+        semantic_error("flags value out of range");
     }
     $$ = $3;
 }
@@ -781,14 +792,13 @@ opt_shutdown_complete_flags
         switch (*c) {
         case 'T':
             if (flags & SCTP_SHUTDOWN_COMPLETE_CHUNK_T_BIT) {
-                printf("Semantic error: T-bit specified multiple times\n");
+                semantic_error("T-bit specified multiple times");
             } else {
                 flags |= SCTP_SHUTDOWN_COMPLETE_CHUNK_T_BIT;
             }
             break;
         default:
-            printf("Semantic error: Only expecting T as flags\n");
-            break;
+            semantic_error("Only expecting T as flags");
         }
     }
     $$ = flags;
@@ -800,7 +810,7 @@ opt_tag
 : TAG '=' ELLIPSIS { $$ = -1; }
 | TAG '=' INTEGER  {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: tag value out of range\n");
+        semantic_error("tag value out of range");
     }
     $$ = $3;
 }
@@ -810,7 +820,7 @@ opt_a_rwnd
 : A_RWND '=' ELLIPSIS   { $$ = -1; }
 | A_RWND '=' INTEGER    {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: a_rwnd value out of range\n");
+        semantic_error("a_rwnd value out of range");
     }
     $$ = $3;
 }
@@ -820,7 +830,7 @@ opt_os
 : OS '=' ELLIPSIS { $$ = -1; }
 | OS '=' INTEGER  {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: os value out of range\n");
+        semantic_error("os value out of range");
     }
     $$ = $3;
 }
@@ -830,7 +840,7 @@ opt_is
 : IS '=' ELLIPSIS { $$ = -1; }
 | IS '=' INTEGER  {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: is value out of range\n");
+        semantic_error("is value out of range");
     }
     $$ = $3;
 }
@@ -840,7 +850,7 @@ opt_tsn
 : TSN '=' ELLIPSIS { $$ = -1; }
 | TSN '=' INTEGER  {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: tsn value out of range\n");
+        semantic_error("tsn value out of range");
     }
     $$ = $3;
 }
@@ -850,7 +860,7 @@ opt_sid
 : MYSID '=' ELLIPSIS { $$ = -1; }
 | MYSID '=' INTEGER  {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: sid value out of range\n");
+        semantic_error("sid value out of range");
     }
     $$ = $3;
 }
@@ -860,7 +870,7 @@ opt_ssn
 : SSN '=' ELLIPSIS { $$ = -1; }
 | SSN '=' INTEGER  {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: ssn value out of range\n");
+        semantic_error("ssn value out of range");
     }
     $$ = $3;
 }
@@ -871,13 +881,13 @@ opt_ppid
 : PPID '=' ELLIPSIS { $$ = -1; }
 | PPID '=' INTEGER  {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: ppid value out of range\n");
+        semantic_error("ppid value out of range");
     }
     $$ = $3;
 }
 | PPID '=' HEX_INTEGER  {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: ppid value out of range\n");
+        semantic_error("ppid value out of range");
     }
     $$ = $3;
 }
@@ -887,7 +897,7 @@ opt_cum_tsn
 : CUM_TSN '=' ELLIPSIS { $$ = -1; }
 | CUM_TSN '=' INTEGER  {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: cum_tsn value out of range\n");
+        semantic_error("cum_tsn value out of range");
     }
     $$ = $3;
 }
@@ -911,7 +921,7 @@ sctp_data_chunk_spec
 : MYDATA '[' opt_data_flags ',' opt_len ',' opt_tsn ',' opt_sid ',' opt_ssn ',' opt_ppid ']' {
     if (($5 != -1) &&
         (!is_valid_u16($5) || ($5 < SCTP_DATA_CHUNK_LENGTH))) {
-        printf("Semantic error: length value out of range\n");
+        semantic_error("length value out of range");
     }
     $$ = PacketDrill::buildDataChunk($3, $5, $7, $9, $11, $13);
 }
@@ -962,14 +972,14 @@ sctp_cookie_echo_chunk_spec
 : MYCOOKIE_ECHO '[' opt_flags ',' opt_len ',' opt_val ']' {
     if (($5 != -1) &&
         (!is_valid_u16($5) || ($5 < SCTP_COOKIE_ACK_LENGTH))) {
-        printf("Semantic error: length value out of range\n");
+        semantic_error("length value out of range");
     }
     if (($5 != -1) && ($7 != NULL) &&
         ($5 != SCTP_COOKIE_ACK_LENGTH + $7->getListLength())) {
-        printf("Semantic error: length value incompatible with val\n");
+        semantic_error("length value incompatible with val");
     }
     if (($5 == -1) && ($7 != NULL)) {
-        printf("Semantic error: length needs to be specified\n");
+        semantic_error("length needs to be specified");
     }
     $$ = PacketDrill::buildCookieEchoChunk($3, $5, $7);
 }
@@ -986,6 +996,7 @@ sctp_shutdown_complete_chunk_spec
 
 opt_parameter_list
 : ',' ELLIPSIS                 { $$ = NULL; }
+|                              { $$ = new cQueue("empty"); }
 | ',' sctp_parameter_list { $$ = $2; }
 ;
 
@@ -1015,14 +1026,14 @@ sctp_heartbeat_information_parameter
 | HEARTBEAT_INFORMATION '[' opt_len ',' opt_val ']' {
     if (($3 != -1) &&
         (!is_valid_u16($3) || ($3 < 4))) {
-        printf("Semantic error: length value out of range\n");
+        semantic_error("length value out of range");
     }
     if (($3 != -1) && ($5 != NULL) &&
         ($3 != 4 + $5->getListLength())) {
-        printf("Semantic error: length value incompatible with val\n");
+        semantic_error("length value incompatible with val");
     }
     if (($3 == -1) && ($5 != NULL)) {
-        printf("Semantic error: length needs to be specified\n");
+        semantic_error("length needs to be specified");
     }
     $$ = new PacketDrillSctpParameter(HEARTBEAT_INFORMATION, $3, $5);
 }
@@ -1044,7 +1055,7 @@ sctp_state_cookie_parameter
 }
 | STATE_COOKIE '[' LEN '=' INTEGER ',' VAL '=' ELLIPSIS ']' {
     if (($5 < 4) || !is_valid_u32($5)) {
-        printf("Semantic error: len value out of range\n");
+        semantic_error("len value out of range");
     }
     $$ = new PacketDrillSctpParameter(STATE_COOKIE, $5, NULL);
 }
@@ -1226,10 +1237,10 @@ gap_list
 gap
 : INTEGER ':' INTEGER {
     if (!is_valid_u16($1)) {
-        printf("Semantic error: start value out of range\n");
+        semantic_error("start value out of range");
     }
     if (!is_valid_u16($3)) {
-        printf("Semantic error: end value out of range\n");
+        semantic_error("end value out of range");
     }
     $$ = new PacketDrillStruct($1, $3);
 }
@@ -1249,10 +1260,10 @@ dup_list
 dup
 : INTEGER ':' INTEGER {
     if (!is_valid_u16($1)) {
-        printf("Semantic error: start value out of range\n");
+        semantic_error("start value out of range");
     }
     if (!is_valid_u16($3)) {
-        printf("Semantic error: end value out of range\n");
+        semantic_error("end value out of range");
     }
     $$ = new PacketDrillStruct($1, $3);
 }
@@ -1333,6 +1344,24 @@ expression
     $$ = $1; }
 | hex_integer {
     $$ = $1;
+}
+| _HTONL_ '(' INTEGER ')' {
+    if (!is_valid_u32($3)) {
+        semantic_error("number out of range");
+    }
+    $$ = new_integer_expression($3, "%lu");
+}
+| _HTONL_ '(' HEX_INTEGER ')' {
+    if (!is_valid_u32($3)) {
+        semantic_error("number out of range");
+    }
+    $$ = new_integer_expression($3, "%lu");
+}
+| _HTONS_ '(' INTEGER ')' {
+    if (!is_valid_u16($3)) {
+        semantic_error("number out of range");
+    }
+    $$ = new_integer_expression($3, "%lu");
 }
 | MYWORD {
     $$ = new PacketDrillExpression(EXPR_WORD);
@@ -1465,7 +1494,7 @@ sctp_rtoinfo
 sinit_num_ostreams
 : SINIT_NUM_OSTREAMS '=' INTEGER {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: sinit_num_ostreams out of range\n");
+        semantic_error("sinit_num_ostreams out of range");
     }
     $$ = new_integer_expression($3, "%hu");
 }
@@ -1475,7 +1504,7 @@ sinit_num_ostreams
 sinit_max_instreams
 : SINIT_MAX_INSTREAMS '=' INTEGER {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: sinit_max_instreams out of range\n");
+        semantic_error("sinit_max_instreams out of range");
     }
     $$ = new_integer_expression($3, "%hu");
 }
@@ -1485,7 +1514,7 @@ sinit_max_instreams
 sinit_max_attempts
 : SINIT_MAX_ATTEMPTS '=' INTEGER {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: sinit_max_attempts out of range\n");
+        semantic_error("sinit_max_attempts out of range");
     }
     $$ = new_integer_expression($3, "%hu");
 }
@@ -1495,7 +1524,7 @@ sinit_max_attempts
 sinit_max_init_timeo
 : SINIT_MAX_INIT_TIMEO '=' INTEGER {
     if (!is_valid_u16($3)) {
-        printf("Semantic error: sinit_max_init_timeo out of range\n");
+        semantic_error("sinit_max_init_timeo out of range");
     }
     $$ = new_integer_expression($3, "%hu");
 }
@@ -1535,7 +1564,7 @@ sctp_assoc_value
 sack_delay
 : MYSACK_DELAY '=' INTEGER {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: sack_delay out of range\n");
+        semantic_error("sack_delay out of range");
     }
     $$ = new_integer_expression($3, "%u");
 }
@@ -1546,7 +1575,7 @@ sack_delay
 sack_freq
 : SACK_FREQ '=' INTEGER {
     if (!is_valid_u32($3)) {
-        printf("Semantic error: sack_freq out of range\n");
+        semantic_error("sack_freq out of range");
     }
     $$ = new_integer_expression($3, "%u");
 }

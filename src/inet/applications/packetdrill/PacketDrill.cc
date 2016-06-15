@@ -221,7 +221,7 @@ cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direct
         uint16 optionsCounter = 0;
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {
-            PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(iter());
+            PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(*iter);
             option = setOptionValues(opt);
             tcpOptionsLength += opt->getLength();
             // write option to tcp header
@@ -247,15 +247,132 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
     PacketDrillApp *app = PacketDrill::pdapp;
     SCTPMessage *sctpmsg = new SCTPMessage();
     sctpmsg->setByteLength(SCTP_COMMON_HEADER);
-    if (direction == DIRECTION_INBOUND)
-    {
+    if (direction == DIRECTION_INBOUND) {
         sctpmsg->setSrcPort(app->getRemotePort());
         sctpmsg->setDestPort(app->getLocalPort());
         sctpmsg->setTag(app->getPeerVTag());
         sctpmsg->setName("SCTPInbound");
-    }
-    else if (direction == DIRECTION_OUTBOUND)
-    {
+        for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
+            PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
+            SCTPChunk *sctpchunk = (SCTPChunk *)chunk->getChunk();
+            switch (chunk->getType()) {
+                case SCTP_DATA_CHUNK_TYPE:
+                    if (sctpchunk->getFlags() & FLAG_CHUNK_FLAGS_NOCHECK) {
+                        printf("chunk flags must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_CHUNK_LENGTH_NOCHECK) {
+                        printf("chunk length must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_DATA_CHUNK_TSN_NOCHECK) {
+                        printf("TSN must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_DATA_CHUNK_SID_NOCHECK) {
+                        printf("SID must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_DATA_CHUNK_SSN_NOCHECK) {
+                        printf("SSN must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_DATA_CHUNK_PPID_NOCHECK) {
+                        printf("PPID must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+                case INIT:
+                    if (sctpchunk->getFlags() & FLAG_INIT_CHUNK_TAG_NOCHECK) {
+                        printf("TAG must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_CHUNK_A_RWND_NOCHECK) {
+                        printf("A_RWND must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_CHUNK_OS_NOCHECK) {
+                        printf("OS must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_CHUNK_IS_NOCHECK) {
+                        printf("IS must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_CHUNK_OPT_PARAM_NOCHECK) {
+                        printf("list of optional parameters must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+               case INIT_ACK:
+                    if (sctpchunk->getFlags() & FLAG_INIT_ACK_CHUNK_TAG_NOCHECK) {
+                        printf("TAG must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK) {
+                        printf("A_RWND must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_ACK_CHUNK_OS_NOCHECK) {
+                        printf("OS must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_ACK_CHUNK_IS_NOCHECK) {
+                        printf("IS must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_INIT_ACK_CHUNK_OPT_PARAM_NOCHECK) {
+                        printf("list of optional parameters must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+               case SCTP_SACK_CHUNK_TYPE:
+                    if (sctpchunk->getFlags() & FLAG_SACK_CHUNK_CUM_TSN_NOCHECK) {
+                        printf("CUM_TSN must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_SACK_CHUNK_A_RWND_NOCHECK) {
+                        printf("A_RWND must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK) {
+                        printf("GAP_BLOCKS must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK) {
+                        printf("DUP_TSNS must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+               case SCTP_ABORT_CHUNK_TYPE:
+                    if (sctpchunk->getFlags() & FLAG_CHUNK_LENGTH_NOCHECK) {
+                        printf("error causes must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+               case SCTP_SHUTDOWN_CHUNK_TYPE:
+                    if (sctpchunk->getFlags() & FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK) {
+                        printf("TSN must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+               default:
+                    if (sctpchunk->getFlags() & FLAG_CHUNK_TYPE_NOCHECK) {
+                        printf("chunk type must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_CHUNK_FLAGS_NOCHECK) {
+                        printf("chunk flags must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    if (sctpchunk->getFlags() & FLAG_CHUNK_LENGTH_NOCHECK) {
+                        printf("chunk length must be specified for inbound packets\n");
+                        return nullptr;
+                    }
+                    break;
+            }
+        }
+    } else if (direction == DIRECTION_OUTBOUND) {
         sctpmsg->setSrcPort(app->getLocalPort());
         sctpmsg->setDestPort(app->getRemotePort());
         sctpmsg->setTag(app->getLocalVTag());
@@ -264,7 +381,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
     sctpmsg->setChecksumOk(true);
 
     for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-        PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) iter();
+        PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
         sctpmsg->addChunk(chunk->getChunk());
     }
 
@@ -290,6 +407,9 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 t
         }
         if (flgs & SCTP_DATA_CHUNK_E_BIT) {
             datachunk->setEBit(1);
+        }
+        if (flgs & SCTP_DATA_CHUNK_U_BIT) {
+            datachunk->setUBit(1);
         }
     } else {
         flags |= FLAG_CHUNK_FLAGS_NOCHECK;
@@ -391,11 +511,9 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
         PacketDrillSctpParameter *parameter;
         uint16 parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (iter());
-            printf("parameter type=%d\n", parameter->getType());
+            parameter = (PacketDrillSctpParameter*) (*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    printf("SUPPORTED_EXTENSIONS\n");
                     ByteArray *ba = (ByteArray *)(parameter->getByteList());
                     parLen = ba->getDataArraySize();
                     initchunk->setSepChunksArraySize(parLen);
@@ -410,6 +528,8 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
                 default: printf("Parameter type not implemented\n");
             }
         }
+    } else {
+        flags |= FLAG_INIT_CHUNK_OPT_PARAM_NOCHECK;
     }
     initchunk->setAddressesArraySize(0);
     initchunk->setUnrecognizedParametersArraySize(0);
@@ -510,7 +630,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         sackchunk->setGapStartArraySize(gaps->getLength());
         sackchunk->setGapStopArraySize(gaps->getLength());
         for (cQueue::Iterator iter(*gaps); !iter.end(); iter++) {
-            gap = (PacketDrillStruct*) iter();
+            gap = (PacketDrillStruct*) (*iter);
             sackchunk->setGapStart(num, gap->getValue1());
             sackchunk->setGapStop(num, gap->getValue2());
             num++;
@@ -532,7 +652,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         sackchunk->setDupTsnsArraySize(dups->getLength());
 
         for (cQueue::Iterator iter(*dups); !iter.end(); iter++) {
-            tsn = (PacketDrillStruct*) iter();
+            tsn = (PacketDrillStruct*) (*iter);
             sackchunk->setDupTsns(num, tsn->getValue1());
             num++;
         }
@@ -614,7 +734,6 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownCompleteChunk(int64 flgs)
     shutdowncompletechunk->setName("SHUTDOWN_COMPLETE");
 
     if (flgs != -1) {
-        printf("T-Bit\n");
         shutdowncompletechunk->setTBit(flgs);
     } else {
         flgs |= FLAG_CHUNK_FLAGS_NOCHECK;
@@ -773,8 +892,8 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
 {
     cQueue *node_ptr = out_list;
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
-        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(it()))->getType());
-        if (evaluate((PacketDrillExpression *)(it()), outExpr, error)) {
+        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(*it))->getType());
+        if (evaluate((PacketDrillExpression *)(*it), outExpr, error)) {
             delete(outExpr);
             return STATUS_ERR;
         }

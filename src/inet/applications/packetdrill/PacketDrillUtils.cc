@@ -51,6 +51,7 @@ struct int_symbol platform_symbols_table[] = {
     { SCTP_MAXSEG,                      "SCTP_MAXSEG"                     },
     { SCTP_DELAYED_SACK,                "SCTP_DELAYED_SACK"               },
     { SCTP_MAX_BURST,                   "SCTP_MAX_BURST"                  },
+    { SCTP_UNORDERED,                   "SCTP_UNORDERED"                  },
     /* Sentinel marking the end of the table. */
     { 0, NULL },
 };
@@ -171,6 +172,30 @@ int PacketDrillExpression::getS32(int32 *val, char **error)
     return STATUS_OK;
 }
 
+int PacketDrillExpression::getU32(uint32 *val, char **error)
+{
+    if (type != EXPR_INTEGER)
+        return STATUS_ERR;
+    if ((value.num > UINT32_MAX) || (value.num < 0)) {
+        EV_DEBUG << "Value out of range for 32-bit unsigned integer: " << value.num << endl;
+        return STATUS_ERR;
+    }
+    *val = value.num;
+    return STATUS_OK;
+}
+
+int PacketDrillExpression::getU16(uint16 *val, char **error)
+{
+    if (type != EXPR_INTEGER)
+        return STATUS_ERR;
+    if ((value.num > UINT16_MAX) || (value.num < 0)) {
+        EV_DEBUG << "Value out of range for 16-bit unsigned integer: " << value.num << endl;
+        return STATUS_ERR;
+    }
+    *val = value.num;
+    return STATUS_OK;
+}
+
 
 /* Do a symbol->int lookup, and return true if we found the symbol. */
 bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols)
@@ -218,7 +243,7 @@ PacketDrillScript::PacketDrillScript(const char *scriptFile)
 PacketDrillScript::~PacketDrillScript()
 {
     for (cQueue::Iterator iter(*eventList); !iter.end(); iter++)
-        delete (PacketDrillEvent *)(iter());
+        delete (PacketDrillEvent *) (*iter);
 }
 
 void PacketDrillScript::readScript()
