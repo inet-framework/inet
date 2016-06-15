@@ -37,7 +37,6 @@ checkmakefiles:
 
 # generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
 src/inet/features.h: $(wildcard .oppfeaturestate) .oppfeatures
-	@chmod +x ./inet_featuretool
 	@./inet_featuretool defines >src/inet/features.h
 
 doc:
