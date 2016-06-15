@@ -95,7 +95,11 @@ Physical enviromment:
 
 Misc:
 
-  - UDPBasicApp/UDPSink: record received pk sequence numbers
+  - Added ApplicationPacket that can be used as generic application payload.
+    Currently it contains a sequence number.
+
+  - UDPBasicApp/UDPSink: changed to use ApplicationPacket, and record
+    received packet sequence numbers
 
   - RelayUnit: Added packetReceivedFromLowerSignal and packetSentToLowerSignal signals.
 
@@ -113,7 +117,7 @@ Build:
 
   - Added a top level 'doc' target to build all INET documentation in a single step
 
-  - Added project feature tests (test/feature)
+  - Added project feature tests (tests/features)
 
 
 INET-3.3.0 (Jun, 2016) - stable
