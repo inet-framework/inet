@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
 2016-05-25  Andras Varga
 
 	Added ApplicationPacket, a generic application packet for use by

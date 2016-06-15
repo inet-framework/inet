@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
 2016-05-31  Levente Meszaros
 
 	TracingObstacleLoss: Changed obstaclePenetrated to use a signal

@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
 2016-01-04  Levente Meszaros
 
 	Added VehicleMobility that simulates turning at waypoints.

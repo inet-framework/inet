@@ -1,3 +1,7 @@
+====== inet-3.x ======
+
+2016-06-15  ------ inet-3.4.0 released ------
+
 2016-06-03  Andras Varga
 
     * Added support for priority queueing, based on 802.1d UP.
