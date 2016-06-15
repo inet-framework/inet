@@ -14,8 +14,10 @@
 
 2015-10-14  Levente Meszaros
 
-	Mobility: Added facing towards movement: added getCurrentAngularPosition()
-        to MovingMobilityBase.
+	Mobility: Added facing towards movement: added getCurrentAngular-
+	Position() to MovingMobilityBase. Now all mobile nodes face (i.e.
+	set the  orientation to) the direction of movement. This affects
+	radio reception when direction antenna is used.
 
 2016-05-04  Levente Meszaros
 
