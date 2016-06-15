@@ -42,6 +42,7 @@ a few new lines. Consecutive steps mostly share the same network, defined in NED
 - @ref step12
 - @ref step13
 - @ref step14
+- @ref conclusion
 
 @nav{index,step1}
 @fixupini
@@ -95,7 +96,7 @@ in INET, for example `WirelessHost`, which is basically a `StandardHost`
 preconfigured for wireless scenarios.
 
 As you can see, the hosts' type is parametric in this NED file (defined via
-a `hostType` parameter and the `INetworkNode` module interface). This done
+a `hostType` parameter and the `INetworkNode` module interface). This is done
 so that in later steps we can replace hosts with a different NED type. The
 actual NED type here is `WirelessHost` (given near the top of the NED
 file), and later steps will override this setting using `omnetpp.ini`.
@@ -105,8 +106,8 @@ file), and later steps will override this setting using `omnetpp.ini`.
 IP addresses are assigned to hosts by an `IPv4NetworkConfigurator` module,
 which appears as the `configurator` submodule in the network. The hosts
 also need to know each others' MAC addresses to communicate, which in this
-model is taken care of by using a `GlobalARP` module instead of a real ARP
-protocol.
+model is taken care of by using per-host `GlobalARP` modules instead of
+real ARP.
 
 <b>Traffic model</b>
 
@@ -727,12 +728,18 @@ count will be reset).
 This operation roughly corresponds to the basic IEEE 802.11b MAC ad-hoc mode
 operation.
 
-Note that when ACKs are lost, the receiver MAC will send each correctly
-received copy of the data frame up to the higher layers, introducing
-duplicates in the packet stream. This could be eliminated by adding
-sequence numbers to frames and maintaining per-sender sequence numbers in
-each receiver, but the `CsmaCaMac` module does not contain such a duplicate
-detection algorithm in order to keep its code simple and accessible.
+Note that when ACKs (in contrast to data frames) are lost, retransmissions
+will introduce duplicates in the packet stream the MAC sends up to to the
+higher layer protocols in the receiver host. This could be eliminated by
+adding sequence numbers to frames and maintaining per-sender sequence
+numbers in each receiver, but the `CsmaCaMac` module does not contain such
+a duplicate detection algorithm in order to keep its code simple and
+accessible.
+
+Another detail worth mentioning is that when a frame exceeds the maximum
+number of retries and is discarded, the MAC emits a <i>link break</i>
+signal. This signal may be interpreted by routing protocols such as AODV as
+a sign that a route has become broken, and a new one needs to be found.
 
 @dontinclude omnetpp.ini
 @skipline [Config Wireless07]
@@ -1315,7 +1322,7 @@ the case of the two-ray ground reflection model, the bit error rate is greater.
 
 @page step14 Step 14 - Introducing antenna gain
 
-@nav{step13,index}
+@nav{step13,conclusion}
 
 @section s14goals Goals
 
@@ -1346,14 +1353,32 @@ only two hops to get to host B every time, as opposed to the previous step,
 where it sometimes required three. Therefore, at the beginning of the
 simulation, host R1 can reach host B directly.  Also, host R1 goes out of host
 A's communication range only at the very end of the simulation. When this
-happens, host A's transmission is routed through host R3, which is again just
+happens, host A's transmission is routed through host R2, which is again just
 two hops.
 
 <img src="step14_2.gif">
 
 <b>Number of packets received by host B: 1045</b>
 
-@nav{step13,index}
+@nav{step13,conclusion}
 @fixupini
+
+<!------------------------------------------------------------------------>
+
+@page conclusion Conclusion
+
+@nav{step14,index}
+
+Congratulations, you've made it! You should now be familiar with the basic 
+concepts of modeling wireless networks with the INET Framework.
+
+We are planning further tutorials to touch on topics that have not made it into
+the present one. These topics include using multi-dimensional signal modeling;
+bit-precise signal modeling; forward error correction, scrambling, interleaving;
+and run-time optimization by using MAC address and range filtering.
+
+A separate tutorial will be devoted to 802.11 simulations.
+
+@nav{step14,index}
 
 */
