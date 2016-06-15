@@ -36,7 +36,7 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     cTextFigure *labelFigure;
 
     double min = 0;
-    double max = 1;
+    double max = 100;
     double value = NaN;
     std::string textFormat = "%g";
 
@@ -87,11 +87,11 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     Rectangle getBounds() const;
     void setBounds(Rectangle bounds);
 
-    double getMin() const;
-    void setMin(double value);
+    double getMinValue() const;
+    void setMinValue(double value);
 
-    double getMax() const;
-    void setMax(double value);
+    double getMaxValue() const;
+    void setMaxValue(double value);
 };
 
 #else

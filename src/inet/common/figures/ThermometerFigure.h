@@ -47,7 +47,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     virtual const char **getAllowedPropertyKeys() const override;
     void addChildren();
 
-    void getContainerGeometry(double &x, double &y, double &width, double &height, double &offset);
+    void getContainerGeometry(double& x, double& y, double& width, double& height, double& offset);
     void setTickGeometry(cLineFigure *tick, int index);
     void setNumberGeometry(cTextFigure *number, int index);
     void setMercuryAndContainerGeometry();
@@ -68,7 +68,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     cFigure::Color getMercuryColor() const;
     void setMercuryColor(cFigure::Color color);
 
-    const char* getLabel() const;
+    const char *getLabel() const;
     void setLabel(const char *text);
 
     cFigure::Font getLabelFont() const;
@@ -77,11 +77,11 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     cFigure::Color getLabelColor() const;
     void setLabelColor(cFigure::Color color);
 
-    double getMin() const;
-    void setMin(double value);
+    double getMinValue() const;
+    void setMinValue(double value);
 
-    double getMax() const;
-    void setMax(double value);
+    double getMaxValue() const;
+    void setMaxValue(double value);
 
     double getTickSize() const;
     void setTickSize(double value);

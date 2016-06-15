@@ -31,12 +31,14 @@ class INET_API IndicatorTextFigure : public cTextFigure, public IIndicatorFigure
   protected:
     std::string textFormat = "%g";
     double value = NaN;
+
   protected:
     virtual const char **getAllowedPropertyKeys() const override;
     virtual void parse(cProperty *property) override;
     virtual void refresh();
+
   public:
-    explicit IndicatorTextFigure(const char *name=nullptr) : cTextFigure(name) {}
+    explicit IndicatorTextFigure(const char *name = nullptr) : cTextFigure(name) {}
     virtual void setValue(int series, simtime_t timestamp, double value) override;
     virtual const char *getTextFormat() const { return textFormat.c_str(); }
     virtual void setTextFormat(const char *textFormat) { this->textFormat = textFormat; refresh(); }

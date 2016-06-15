@@ -76,7 +76,7 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     cFigure::Color getNeedleColor() const;
     void setNeedleColor(cFigure::Color color);
 
-    const char* getLabel() const;
+    const char *getLabel() const;
     void setLabel(const char *text);
 
     cFigure::Font getLabelFont() const;
@@ -85,17 +85,17 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     cFigure::Color getLabelColor() const;
     void setLabelColor(cFigure::Color color);
 
-    double getMin() const;
-    void setMin(double value);
+    double getMinValue() const;
+    void setMinValue(double value);
 
-    double getMax() const;
-    void setMax(double value);
+    double getMaxValue() const;
+    void setMaxValue(double value);
 
     double getTickSize() const;
     void setTickSize(double value);
 
-    const char* getColorStrip() const;
-    void setColorStrip(const char* colorStrip);
+    const char *getColorStrip() const;
+    void setColorStrip(const char *colorStrip);
 };
 
 #else

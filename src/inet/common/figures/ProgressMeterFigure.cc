@@ -16,8 +16,8 @@
 //
 //
 
-#include <cstdlib>
 #include "ProgressMeterFigure.h"
+#include "inet/common/INETUtils.h"
 
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
@@ -26,20 +26,21 @@ Register_Class(ProgressMeterFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
-#define M_PI 3.14159265358979323846
+#define M_PI    3.14159265358979323846
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_STRIP_COLOR = "stripColor";
 static const char *PKEY_CORNER_RADIUS = "cornerRadius";
 static const char *PKEY_BORDER_WIDTH = "borderWidth";
-static const char *PKEY_MIN = "min";
-static const char *PKEY_MAX = "max";
+static const char *PKEY_MIN_VALUE = "minValue";
+static const char *PKEY_MAX_VALUE = "maxValue";
 static const char *PKEY_TEXT = "text";
 static const char *PKEY_TEXT_FONT = "textFont";
 static const char *PKEY_TEXT_COLOR = "textColor";
 static const char *PKEY_LABEL = "label";
 static const char *PKEY_LABEL_FONT = "labelFont";
 static const char *PKEY_LABEL_COLOR = "labelColor";
+static const char *PKEY_INITIAL_VALUE = "initialValue";
 static const char *PKEY_POS = "pos";
 static const char *PKEY_SIZE = "size";
 static const char *PKEY_ANCHOR = "anchor";
@@ -162,25 +163,26 @@ void ProgressMeterFigure::setBounds(Rectangle bounds)
 {
     borderFigure->setBounds(bounds);
     layout();
+    refresh();
 }
 
-double ProgressMeterFigure::getMin() const
+double ProgressMeterFigure::getMinValue() const
 {
     return min;
 }
 
-void ProgressMeterFigure::setMin(double value)
+void ProgressMeterFigure::setMinValue(double value)
 {
     min = value;
     refresh();
 }
 
-double ProgressMeterFigure::getMax() const
+double ProgressMeterFigure::getMaxValue() const
 {
     return max;
 }
 
-void ProgressMeterFigure::setMax(double value)
+void ProgressMeterFigure::setMaxValue(double value)
 {
     max = value;
     refresh();
@@ -198,13 +200,13 @@ void ProgressMeterFigure::parse(cProperty *property)
     if ((s = property->getValue(PKEY_STRIP_COLOR)) != nullptr)
         setStripColor(parseColor(s));
     if ((s = property->getValue(PKEY_CORNER_RADIUS)) != nullptr)
-        setCornerRadius(atof(s));
+        setCornerRadius(utils::atod(s));
     if ((s = property->getValue(PKEY_BORDER_WIDTH)) != nullptr)
-        setBorderWidth(atof(s));
-    if ((s = property->getValue(PKEY_MIN)) != nullptr)
-        setMin(atof(s));
-    if ((s = property->getValue(PKEY_MAX)) != nullptr)
-        setMax(atof(s));
+        setBorderWidth(utils::atod(s));
+    if ((s = property->getValue(PKEY_MIN_VALUE)) != nullptr)
+        setMinValue(utils::atod(s));
+    if ((s = property->getValue(PKEY_MAX_VALUE)) != nullptr)
+        setMaxValue(utils::atod(s));
     if ((s = property->getValue(PKEY_TEXT)) != nullptr)
         setText(s);
     if ((s = property->getValue(PKEY_TEXT_FONT)) != nullptr)
@@ -215,18 +217,22 @@ void ProgressMeterFigure::parse(cProperty *property)
         setLabel(s);
     if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)
         setLabelFont(parseFont(s));
-    if ((s = property->getValue(PKEY_TEXT_COLOR)) != nullptr)
+    if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)
         setLabelColor(parseColor(s));
-
+    if ((s = property->getValue(PKEY_INITIAL_VALUE)) != nullptr)
+        setValue(0, simTime(), utils::atod(s));
 }
 
 const char **ProgressMeterFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = {PKEY_BACKGROUND_COLOR, PKEY_STRIP_COLOR, PKEY_CORNER_RADIUS, PKEY_BORDER_WIDTH,
-                                   PKEY_MIN, PKEY_MAX, PKEY_TEXT, PKEY_TEXT_FONT, PKEY_TEXT_COLOR, PKEY_LABEL,
-                                   PKEY_LABEL_FONT, PKEY_LABEL_COLOR, PKEY_POS, PKEY_SIZE,PKEY_ANCHOR, PKEY_BOUNDS, nullptr};
+        const char *localKeys[] = {
+            PKEY_BACKGROUND_COLOR, PKEY_STRIP_COLOR, PKEY_CORNER_RADIUS, PKEY_BORDER_WIDTH,
+            PKEY_MIN_VALUE, PKEY_MAX_VALUE, PKEY_TEXT, PKEY_TEXT_FONT, PKEY_TEXT_COLOR, PKEY_LABEL,
+            PKEY_LABEL_FONT, PKEY_LABEL_COLOR, PKEY_INITIAL_VALUE, PKEY_POS, PKEY_SIZE, PKEY_ANCHOR,
+            PKEY_BOUNDS, nullptr
+        };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -238,8 +244,8 @@ void ProgressMeterFigure::layout()
     stripFigure->setBounds(bounds);
     backgroundFigure->setBounds(bounds);
 
-    valueFigure->setPosition(Point(bounds.x + bounds.width/2, bounds.y + bounds.height/2));
-    labelFigure->setPosition(Point(bounds.x + bounds.width/2, bounds.y + bounds.height));
+    valueFigure->setPosition(Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
+    labelFigure->setPosition(Point(bounds.x + bounds.width / 2, bounds.y + bounds.height));
 }
 
 void ProgressMeterFigure::addChildren()
@@ -287,7 +293,7 @@ void ProgressMeterFigure::refresh()
     // adjust strip
     double stripValue = std::isnan(value) ? min : std::max(min, std::min(max, value));
     cFigure::Rectangle bounds = borderFigure->getBounds();
-    bounds.width = bounds.width * (stripValue - min)/(max - min);
+    bounds.width = bounds.width * (stripValue - min) / (max - min);
     stripFigure->setBounds(bounds);
 
     // update displayed number
@@ -297,10 +303,13 @@ void ProgressMeterFigure::refresh()
         char buf[32];
         double percent = (value - min) / (max - min) * 100;
         sprintf(buf, getText(), value, percent);
+        if (value < min || value > max)
+            strcat(buf, "*");
         valueFigure->setText(buf);
     }
 }
 
-#endif // omnetpp 5
+#endif    // omnetpp 5
 
 // } // namespace inet
+

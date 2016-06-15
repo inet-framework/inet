@@ -19,7 +19,6 @@
 #include "inet/common/INETUtils.h"
 
 namespace inet {
-
 Define_Module(DelegateSignalConfigurator);
 
 void DelegateSignalConfigurator::initialize()
@@ -35,6 +34,7 @@ void DelegateSignalConfigurator::configure(cModule *module)
             configureDisplaySignal(module, properties->get(i));
         else if (!strcmp(properties->get(i)->getName(), "delegatesignal"))
             configureDelegateSignal(module, properties->get(i));
+
 
     for (cModule::SubmoduleIterator it(module); !it.end(); ++it)
         configure(*it);
@@ -63,7 +63,7 @@ void DelegateSignalConfigurator::configureDisplaySignal(cModule *module, cProper
         cFigure *figure = module->getCanvas()->getFigureByPath(figurePath);
         if (!figure)
             throw cRuntimeError("Figure '%s' not found", figurePath);
-        IIndicatorFigure *meterFigure = check_and_cast<IIndicatorFigure*>(figure);
+        IIndicatorFigure *meterFigure = check_and_cast<IIndicatorFigure *>(figure);
         indicatorFigures.push_back(meterFigure);
 
         // instantiate figure recorder
@@ -107,7 +107,7 @@ void DelegateSignalConfigurator::configureDelegateSignal(cModule *module, cPrope
     }
 }
 
-void DelegateSignalConfigurator::parseSignalPath(const char *signalPath, cModule *context, cModule *&module, simsignal_t& signal)
+void DelegateSignalConfigurator::parseSignalPath(const char *signalPath, cModule *context, cModule *& module, simsignal_t& signal)
 {
     const char *signalName;
     if (strchr(signalPath, '.') == nullptr) {
@@ -130,6 +130,5 @@ void DelegateSignalConfigurator::refreshDisplay() const
     for (IIndicatorFigure *figure : indicatorFigures)
         figure->refreshDisplay();
 }
-
-} // namespace inet
+}    // namespace inet
 

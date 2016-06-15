@@ -22,18 +22,17 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 class INET_API FigureRecorder : public cNumericResultRecorder
 {
-    protected:
-        IIndicatorFigure *indicatorFigure = nullptr;
-        int series = 0;
-    protected:
-        virtual void init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs=nullptr) override;
-        virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override;
+  protected:
+    IIndicatorFigure *indicatorFigure = nullptr;
+    int series = 0;
+
+  protected:
+    virtual void init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs = nullptr) override;
+    virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override;
 };
+}    // namespace inet
 
-} // namespace inet
-
-#endif
+#endif // ifndef __INET_FIGURERECORDER_H
 

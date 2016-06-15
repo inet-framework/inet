@@ -30,7 +30,9 @@ const char **IndicatorTextFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = { PKEY_TEXT_FORMAT, PKEY_INITIAL_VALUE, nullptr};
+        const char *localKeys[] = {
+            PKEY_TEXT_FORMAT, PKEY_INITIAL_VALUE, nullptr
+        };
         concatArrays(keys, cTextFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -57,11 +59,15 @@ void IndicatorTextFigure::setValue(int series, simtime_t timestamp, double value
 
 void IndicatorTextFigure::refresh()
 {
-    char buf[64];
-    sprintf(buf, textFormat.c_str(), value);
-    setText(buf);
+    if (std::isnan(value)) {
+        setText("");
+    }
+    else {
+        char buf[64];
+        sprintf(buf, textFormat.c_str(), value);
+        setText(buf);
+    }
 }
-
 
 // } // namespace inet
 

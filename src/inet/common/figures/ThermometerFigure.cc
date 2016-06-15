@@ -17,7 +17,7 @@
 //
 
 #include "ThermometerFigure.h"
-#include <cstdlib>
+#include "inet/common/INETUtils.h"
 
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
@@ -26,20 +26,23 @@ Register_Class(ThermometerFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
-static const double CONTAINER_LINE_WIDTH_PERCENT = 0.01;  //TODO Misi: if I change this to 0.05, the whole figure falls apart!
-static const double TICK_LINE_WIDTH_PERCENT = 0.005;  //TODO apparently unused?
+static const double CONTAINER_LINE_WIDTH_PERCENT = 0.05;
+static const double TICK_LINE_WIDTH_PERCENT = 0.01;
 static const double TICK_LENGTH_PERCENT = 0.2;
+static const double FONT_SIZE_PERCENT = 0.05;
 static const double CONTAINER_POS_PERCENT = 0.05;
 static const double CONTAINER_WIDTH_PERCENT = 0.35;
 static const double CONTAINER_OFFSET_PERCENT = 0.02;
+static const double NUMBER_DISTANCE_FROM_TICK_PERCENT = 0.15;
 
 static const char *PKEY_MERCURY_COLOR = "mercuryColor";
 static const char *PKEY_LABEL = "label";
 static const char *PKEY_LABEL_FONT = "labelFont";
 static const char *PKEY_LABEL_COLOR = "labelColor";
-static const char *PKEY_MIN_VALUE = "min";
-static const char *PKEY_MAX_VALUE = "max";
+static const char *PKEY_MIN_VALUE = "minValue";
+static const char *PKEY_MAX_VALUE = "maxValue";
 static const char *PKEY_TICK_SIZE = "tickSize";
+static const char *PKEY_INITIAL_VALUE = "initialValue";
 static const char *PKEY_POS = "pos";
 static const char *PKEY_SIZE = "size";
 static const char *PKEY_ANCHOR = "anchor";
@@ -53,8 +56,7 @@ ThermometerFigure::ThermometerFigure(const char *name) : cGroupFigure(name)
 ThermometerFigure::~ThermometerFigure()
 {
     // delete figures which is not in canvas
-    for(int i = numTicks; i < tickFigures.size(); ++i)
-    {
+    for (int i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }
@@ -81,7 +83,7 @@ void ThermometerFigure::setMercuryColor(cFigure::Color color)
     mercuryFigure->setFillColor(color);
 }
 
-const char* ThermometerFigure::getLabel() const
+const char *ThermometerFigure::getLabel() const
 {
     return labelFigure->getText();
 }
@@ -111,30 +113,28 @@ void ThermometerFigure::setLabelColor(cFigure::Color color)
     labelFigure->setColor(color);
 }
 
-double ThermometerFigure::getMin() const
+double ThermometerFigure::getMinValue() const
 {
     return min;
 }
 
-void ThermometerFigure::setMin(double value)
+void ThermometerFigure::setMinValue(double value)
 {
-    if(min != value)
-    {
+    if (min != value) {
         min = value;
         redrawTicks();
         refresh();
     }
 }
 
-double ThermometerFigure::getMax() const
+double ThermometerFigure::getMaxValue() const
 {
     return max;
 }
 
-void ThermometerFigure::setMax(double value)
+void ThermometerFigure::setMaxValue(double value)
 {
-    if(max != value)
-    {
+    if (max != value) {
         max = value;
         redrawTicks();
         refresh();
@@ -148,8 +148,7 @@ double ThermometerFigure::getTickSize() const
 
 void ThermometerFigure::setTickSize(double value)
 {
-    if(tickSize != value)
-    {
+    if (tickSize != value) {
         tickSize = value;
         redrawTicks();
         refresh();
@@ -173,22 +172,26 @@ void ThermometerFigure::parse(cProperty *property)
         setLabelFont(parseFont(s));
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)
         setLabelColor(parseColor(s));
-    // This must be initialize before min and max because it is possible to be too much unnecessary tick and number
+    // This must be initialized before min and max, because it is possible to have too many unnecessary ticks
     if ((s = property->getValue(PKEY_TICK_SIZE)) != nullptr)
-        setTickSize(atof(s));
+        setTickSize(utils::atod(s));
     if ((s = property->getValue(PKEY_MIN_VALUE)) != nullptr)
-        setMin(atof(s));
+        setMinValue(utils::atod(s));
     if ((s = property->getValue(PKEY_MAX_VALUE)) != nullptr)
-        setMax(atof(s));
+        setMaxValue(utils::atod(s));
+    if ((s = property->getValue(PKEY_INITIAL_VALUE)) != nullptr)
+        setValue(0, simTime(), utils::atod(s));
 }
 
 const char **ThermometerFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = {PKEY_MERCURY_COLOR, PKEY_LABEL, PKEY_LABEL_FONT,
-                                   PKEY_LABEL_COLOR, PKEY_MIN_VALUE, PKEY_MAX_VALUE, PKEY_TICK_SIZE,
-                                   PKEY_POS, PKEY_SIZE, PKEY_ANCHOR, PKEY_BOUNDS, nullptr};
+        const char *localKeys[] = {
+            PKEY_MERCURY_COLOR, PKEY_LABEL, PKEY_LABEL_FONT,
+            PKEY_LABEL_COLOR, PKEY_MIN_VALUE, PKEY_MAX_VALUE, PKEY_TICK_SIZE,
+            PKEY_INITIAL_VALUE, PKEY_POS, PKEY_SIZE, PKEY_ANCHOR, PKEY_BOUNDS, nullptr
+        };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -201,7 +204,7 @@ void ThermometerFigure::addChildren()
     labelFigure = new cTextFigure("label");
 
     mercuryFigure->setFilled(true);
-    mercuryFigure->setFillColor(RED);
+    mercuryFigure->setFillColor("darkorange");
     mercuryFigure->setLineOpacity(0);
 
     labelFigure->setAnchor(cFigure::ANCHOR_N);
@@ -223,46 +226,44 @@ void ThermometerFigure::setValue(int series, simtime_t timestamp, double newValu
 
 void ThermometerFigure::setTickGeometry(cLineFigure *tick, int index)
 {
-    if(numTicks - 1 == 0)
+    if (numTicks - 1 == 0)
         return;
 
     double x, y, width, height, offset;
     getContainerGeometry(x, y, width, height, offset);
 
-    double lineWidth = getBounds().height * CONTAINER_LINE_WIDTH_PERCENT/2;
+    double lineWidth = getBounds().height * TICK_LINE_WIDTH_PERCENT / 2;
     x += width + lineWidth;
 
-    tick->setStart(Point(x, y + offset + height * index/(numTicks - 1)));
-    tick->setEnd(Point(x + getBounds().width * TICK_LENGTH_PERCENT, y + offset + height * index/(numTicks - 1)));
+    tick->setStart(Point(x, y + offset + height * index / (numTicks - 1)));
+    tick->setEnd(Point(x + getBounds().width * TICK_LENGTH_PERCENT, y + offset + height * index / (numTicks - 1)));
     tick->setLineWidth(lineWidth);
-
 }
 
-void ThermometerFigure::getContainerGeometry(double &x, double &y, double &width, double &height, double &offset)
+void ThermometerFigure::getContainerGeometry(double& x, double& y, double& width, double& height, double& offset)
 {
     x = getBounds().x + getBounds().width * CONTAINER_POS_PERCENT;
     y = getBounds().y + getBounds().width * CONTAINER_POS_PERCENT;
     width = getBounds().width * CONTAINER_WIDTH_PERCENT;
     offset = getBounds().height * CONTAINER_OFFSET_PERCENT;
-    height = getBounds().height - width * (1 + 2*CONTAINER_POS_PERCENT) - getBounds().width*CONTAINER_POS_PERCENT - offset;
+    height = getBounds().height - width * (1 + 2 * CONTAINER_POS_PERCENT) - getBounds().width * CONTAINER_POS_PERCENT - offset;
 }
 
 void ThermometerFigure::setNumberGeometry(cTextFigure *number, int index)
 {
-    if(numTicks - 1 == 0)
+    if (numTicks - 1 == 0)
         return;
 
     double x, y, width, height, offset;
     getContainerGeometry(x, y, width, height, offset);
 
-    double lineWidth = getBounds().height * CONTAINER_LINE_WIDTH_PERCENT;
+    double lineWidth = getBounds().height * TICK_LINE_WIDTH_PERCENT;
     x += width + lineWidth + getBounds().width * TICK_LENGTH_PERCENT;
-    y += offset + height * (numTicks - index - 1)/(numTicks - 1);
+    y += offset + height * (numTicks - index - 1) / (numTicks - 1);
 
-    size_t maxLength = std::to_string(int(max)).size();
-    double pointSize = (getBounds().x + getBounds().width - x) / (maxLength / 2.0);
+    double pointSize = getBounds().height * FONT_SIZE_PERCENT;
 
-    number->setPosition(Point(x, y));
+    number->setPosition(Point(x + pointSize * NUMBER_DISTANCE_FROM_TICK_PERCENT, y));
     number->setFont(cFigure::Font("", pointSize, 0));
 }
 
@@ -277,35 +278,41 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
     getContainerGeometry(x, y, width, height, offset);
 
     containerFigure->addMoveTo(x, y);
-    containerFigure->addLineRel(0, height + offset);
+    containerFigure->addLineRel(0, height + 2*offset);
     //TODO this does not work with Qtenv:
     //containerFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
-    containerFigure->addArcRel(width/2, width/2, 0, true, false, width, 0);
-    containerFigure->addLineRel(0, -height - offset);
-    containerFigure->addArcRel(width/2, width/2, 0, true, false, -width, 0);
+    containerFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
+    containerFigure->addLineRel(0, -height - 2*offset);
+    containerFigure->addArcRel(width / 2, width / 2, 0, true, false, -width, 0);
 
     double mercuryLevel;
     double overflow = 0;
-    if(std::isnan(value) || value < min)
+    if(std::isnan(value))
         return;
-    else if(value > max)
+    else if (value < min)
     {
+        mercuryFigure->addMoveTo(x, y + 2*offset + height);
+        mercuryFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
+        mercuryFigure->addClosePath();
+        return;
+    }
+    else if (value > max) {
         mercuryLevel = 1;
         // value < max so the mercury will be overflow
-        overflow = offset;
+        overflow = 2*offset;
         offset = 0;
     }
     else
-        mercuryLevel = (value - min)/(max - min);
+        mercuryLevel = (value - min) / (max - min);
 
     mercuryFigure->addMoveTo(x, y + offset + height * (1 - mercuryLevel));
-    mercuryFigure->addLineRel(0, height * mercuryLevel + overflow);
+    mercuryFigure->addLineRel(0, height * mercuryLevel + overflow + offset);
     //TODO this does not work with Qtenv:
     //mercuryFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
-    mercuryFigure->addArcRel(width/2, width/2, 0, true, false, width, 0);
-    mercuryFigure->addLineRel(0, -height * mercuryLevel - overflow);
+    mercuryFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
+    mercuryFigure->addLineRel(0, -height * mercuryLevel - overflow - offset);
     if (overflow > 0)
-        mercuryFigure->addArcRel(width/2, width/2, 0, true, false, -width, 0);
+        mercuryFigure->addArcRel(width / 2, width / 2, 0, true, false, -width, 0);
     mercuryFigure->addClosePath();
 }
 
@@ -317,9 +324,8 @@ void ThermometerFigure::redrawTicks()
     numTicks = std::max(0.0, std::abs(max - min) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
-    if(numTicks > tickFigures.size())
-        while(numTicks > tickFigures.size())
-        {
+    if (numTicks > tickFigures.size()) {
+        while (numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
 
@@ -328,36 +334,33 @@ void ThermometerFigure::redrawTicks()
             tickFigures.push_back(tick);
             numberFigures.push_back(number);
         }
+    }
 
     // Add or remove figures from canvas according to previous number of ticks
-    for(int i = numTicks; i < prevNumTicks; ++i)
-    {
+    for (int i = numTicks; i < prevNumTicks; ++i) {
         removeFigure(tickFigures[i]);
         removeFigure(numberFigures[i]);
     }
-    for(int i = prevNumTicks; i < numTicks; ++i)
-    {
+    for (int i = prevNumTicks; i < numTicks; ++i) {
         addFigure(tickFigures[i]);
         addFigure(numberFigures[i]);
     }
 
-    for(int i = 0; i < numTicks; ++i)
-    {
+    for (int i = 0; i < numTicks; ++i) {
         setTickGeometry(tickFigures[i], i);
 
         char buf[32];
-        sprintf(buf, "%g", min + i*tickSize);
+        sprintf(buf, "%g", min + i * tickSize);
         numberFigures[i]->setText(buf);
         setNumberGeometry(numberFigures[i], i);
-     }
+    }
 }
 
 void ThermometerFigure::layout()
 {
     setMercuryAndContainerGeometry();
 
-    for(int i = 0; i < numTicks; ++i)
-    {
+    for (int i = 0; i < numTicks; ++i) {
         setTickGeometry(tickFigures[i], i);
         setNumberGeometry(numberFigures[i], i);
     }
@@ -370,6 +373,7 @@ void ThermometerFigure::refresh()
     setMercuryAndContainerGeometry();
 }
 
-#endif // omnetpp 5
+#endif    // omnetpp 5
 
 // } // namespace inet
+

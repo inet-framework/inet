@@ -16,8 +16,8 @@
 //
 //
 
-#include <cstdlib>
 #include "CounterFigure.h"
+#include "inet/common/INETUtils.h"
 
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
@@ -26,24 +26,30 @@ Register_Class(CounterFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
-#define M_PI 3.14159265358979323846
+#define M_PI    3.14159265358979323846
 
-static const int FRAME_SIZE = 4;
-static const int DIGIT_FRAME_SIZE = 2;
+static const int PADDING = 4;
+static const int DIGIT_PADDING = 2;
 static const double DIGIT_WIDTH_PERCENT = 0.9;
-static const double DIGIT_HEIGHT_PERCENT = 1;
+static const double DIGIT_HEIGHT_PERCENT = 1.1;
+static const char *INIT_BACKGROUND_COLOR = "#808080";
+static const char *INIT_DIGIT_BACKGROUND_COLOR = "white";
+static const char *INIT_DIGIT_BORDER_COLOR = "black";
+static const char *INIT_DIGIT_TEXT_COLOR = "black";
+static const char *INIT_FONT_NAME = "Arial";
+static const double INIT_FONT_SIZE = 16;
+static const int INIT_DECIMAL_PLACES = 3;
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_DECIMAL_PLACES = "decimalPlaces";
-static const char *PKEY_DIGIT_BACKGROUND_COLOR = "digitBackgoundColor";
+static const char *PKEY_DIGIT_BACKGROUND_COLOR = "digitBackgroundColor";
 static const char *PKEY_DIGIT_BORDER_COLOR = "digitBorderColor";
 static const char *PKEY_DIGIT_FONT = "digitFont";
 static const char *PKEY_DIGIT_COLOR = "digitColor";
 static const char *PKEY_LABEL = "label";
 static const char *PKEY_LABEL_FONT = "labelFont";
 static const char *PKEY_LABEL_COLOR = "labelColor";
-static const char *LABEL_POS = "labelPos";
-static const char *LABEL_ANCHOR = "labelAnchor";
+static const char *PKEY_INITIAL_VALUE = "initialValue";
 static const char *PKEY_POS = "pos";
 static const char *PKEY_ANCHOR = "anchor";
 
@@ -64,16 +70,35 @@ void CounterFigure::setBackgroundColor(cFigure::Color color)
 
 int CounterFigure::getDecimalPlaces() const
 {
-    return decimalNumber;
+    return digits.size();
 }
 
 void CounterFigure::setDecimalPlaces(int number)
 {
     ASSERT(number > 0);
-    if(decimalNumber != number)
-    {
-        prevDecimalNumber = decimalNumber;
-        decimalNumber = number;
+    if (digits.size() != number) {
+        if (digits.size() > number)
+            // Remove unnecessary figures from canvas
+            for (int i = digits.size() - 1; i > number - 1; --i) {
+                delete removeFigure(digits[i].bounds);
+                delete removeFigure(digits[i].text);
+                digits.pop_back();
+            }
+        else
+            // Add figure to canvas if it's necessary
+            while (digits.size() < number) {
+                Digit digit(new cRectangleFigure(), new cTextFigure());
+                digit.bounds->setFilled(true);
+                digit.bounds->setFillColor(getDigitBackgroundColor());
+                digit.bounds->setZoomLineWidth(true);
+                digit.text->setAnchor(ANCHOR_CENTER);
+                digit.text->setFont(getDigitFont());
+
+                addFigure(digit.bounds);
+                addFigure(digit.text);
+
+                digits.push_back(digit);
+            }
 
         calculateBounds();
         layout();
@@ -82,35 +107,35 @@ void CounterFigure::setDecimalPlaces(int number)
 
 cFigure::Color CounterFigure::getDigitBackgroundColor() const
 {
-    return digitRectFigures.size() ? digitRectFigures[0]->getFillColor() : Color();
+    return digits.size() ? digits[0].bounds->getFillColor() : Color(INIT_DIGIT_BACKGROUND_COLOR);
 }
 
 void CounterFigure::setDigitBackgroundColor(cFigure::Color color)
 {
-    for(cRectangleFigure *figure : digitRectFigures)
-        figure->setFillColor(color);
+    for (Digit digit : digits)
+        digit.bounds->setFillColor(color);
 }
 
 cFigure::Color CounterFigure::getDigitBorderColor() const
 {
-    return digitRectFigures.size() ? digitRectFigures[0]->getLineColor() : Color();
+    return digits.size() ? digits[0].bounds->getLineColor() : Color(INIT_DIGIT_BORDER_COLOR);
 }
 
 void CounterFigure::setDigitBorderColor(cFigure::Color color)
 {
-    for(cRectangleFigure *figure : digitRectFigures)
-        figure->setLineColor(color);
+    for (Digit digit : digits)
+        digit.bounds->setLineColor(color);
 }
 
 cFigure::Font CounterFigure::getDigitFont() const
 {
-    return digitTextFigures.size() ? digitTextFigures[0]->getFont() : Font();
+    return digits.size() ? digits[0].text->getFont() : Font(INIT_FONT_NAME, INIT_FONT_SIZE, cFigure::FONT_BOLD);
 }
 
 void CounterFigure::setDigitFont(cFigure::Font font)
 {
-    for(cTextFigure *figure : digitTextFigures)
-        figure->setFont(font);
+    for (Digit digit : digits)
+        digit.text->setFont(font);
 
     calculateBounds();
     layout();
@@ -118,13 +143,13 @@ void CounterFigure::setDigitFont(cFigure::Font font)
 
 cFigure::Color CounterFigure::getDigitColor() const
 {
-    return digitTextFigures.size() ? digitTextFigures[0]->getColor() : Color();
+    return digits.size() ? digits[0].text->getColor() : Color(INIT_DIGIT_TEXT_COLOR);
 }
 
 void CounterFigure::setDigitColor(cFigure::Color color)
 {
-    for(cTextFigure *figure : digitTextFigures)
-        figure->setColor(color);
+    for (Digit digit : digits)
+        digit.text->setColor(color);
 }
 
 const char *CounterFigure::getLabel() const
@@ -157,73 +182,53 @@ void CounterFigure::setLabelColor(cFigure::Color color)
     labelFigure->setColor(color);
 }
 
-cFigure::Point CounterFigure::getLabelPos() const
-{
-    return labelFigure->getPosition();
-}
-
-void CounterFigure::setLabelPos(Point pos)
-{
-    labelFigure->setPosition(pos);
-}
-
-cFigure::Anchor CounterFigure::getLabelAnchor() const
-{
-    return labelFigure->getAnchor();
-}
-
-void CounterFigure::setLabelAnchor(Anchor anchor)
-{
-    labelFigure->setAnchor(anchor);
-}
-
 cFigure::Point CounterFigure::getPos() const
 {
     Rectangle bounds = backgroundFigure->getBounds();
-        switch (anchor) {
-            case cFigure::ANCHOR_CENTER:
-                bounds.x += bounds.width / 2;
-                bounds.y += bounds.height / 2;
-                break;
+    switch (anchor) {
+        case cFigure::ANCHOR_CENTER:
+            bounds.x += bounds.width / 2;
+            bounds.y += bounds.height / 2;
+            break;
 
-            case cFigure::ANCHOR_N:
-                bounds.x += bounds.width / 2;
-                break;
+        case cFigure::ANCHOR_N:
+            bounds.x += bounds.width / 2;
+            break;
 
-            case cFigure::ANCHOR_E:
-                bounds.x += bounds.width;
-                bounds.y += bounds.height / 2;
-                break;
+        case cFigure::ANCHOR_E:
+            bounds.x += bounds.width;
+            bounds.y += bounds.height / 2;
+            break;
 
-            case cFigure::ANCHOR_S:
-            case cFigure::ANCHOR_BASELINE_MIDDLE:
-                bounds.x += bounds.width / 2;
-                bounds.y += bounds.height;
-                break;
+        case cFigure::ANCHOR_S:
+        case cFigure::ANCHOR_BASELINE_MIDDLE:
+            bounds.x += bounds.width / 2;
+            bounds.y += bounds.height;
+            break;
 
-            case cFigure::ANCHOR_W:
-                bounds.y += bounds.height / 2;
-                break;
+        case cFigure::ANCHOR_W:
+            bounds.y += bounds.height / 2;
+            break;
 
-            case cFigure::ANCHOR_NW:
-                break;
+        case cFigure::ANCHOR_NW:
+            break;
 
-            case cFigure::ANCHOR_NE:
-                bounds.x += bounds.width;
-                break;
+        case cFigure::ANCHOR_NE:
+            bounds.x += bounds.width;
+            break;
 
-            case cFigure::ANCHOR_SE:
-            case cFigure::ANCHOR_BASELINE_END:
-                bounds.x += bounds.width;
-                bounds.y += bounds.height;
-                break;
+        case cFigure::ANCHOR_SE:
+        case cFigure::ANCHOR_BASELINE_END:
+            bounds.x += bounds.width;
+            bounds.y += bounds.height;
+            break;
 
-            case cFigure::ANCHOR_SW:
-            case cFigure::ANCHOR_BASELINE_START:
-                bounds.y += bounds.width;
-                break;
-        }
-        return Point(bounds.x, bounds.y);
+        case cFigure::ANCHOR_SW:
+        case cFigure::ANCHOR_BASELINE_START:
+            bounds.y += bounds.width;
+            break;
+    }
+    return Point(bounds.x, bounds.y);
 }
 
 void CounterFigure::setPos(Point pos)
@@ -244,8 +249,7 @@ cFigure::Anchor CounterFigure::getAnchor() const
 
 void CounterFigure::setAnchor(Anchor anchor)
 {
-    if(anchor != this->anchor)
-    {
+    if (anchor != this->anchor) {
         this->anchor = anchor;
 
         calculateBounds();
@@ -309,8 +313,8 @@ void CounterFigure::calculateBounds()
     double rectHeight = getDigitFont().pointSize * DIGIT_HEIGHT_PERCENT;
 
     Rectangle bounds = backgroundFigure->getBounds();
-    backgroundFigure->setBounds(Rectangle(0, 0, 2*FRAME_SIZE + (rectWidth + DIGIT_FRAME_SIZE) * decimalNumber,
-                                          rectHeight + 2*FRAME_SIZE));
+    backgroundFigure->setBounds(Rectangle(0, 0, 2 * PADDING + (rectWidth + DIGIT_PADDING) * digits.size(),
+                    rectHeight + 2 * PADDING));
     Point pos = calculateRealPos(Point(bounds.x, bounds.y));
     bounds = backgroundFigure->getBounds();
     bounds.x = pos.x;
@@ -329,10 +333,12 @@ void CounterFigure::parse(cProperty *property)
         setBackgroundColor(parseColor(s));
     if ((s = property->getValue(PKEY_ANCHOR)) != nullptr)
         setAnchor(parseAnchor(s));
+    if ((s = property->getValue(PKEY_DECIMAL_PLACES)) != nullptr)
+        setDecimalPlaces(utils::atod(s));
+    else
+        setDecimalPlaces(INIT_DECIMAL_PLACES);
     if ((s = property->getValue(PKEY_DIGIT_FONT)) != nullptr)
         setDigitFont(parseFont(s));
-    if ((s = property->getValue(PKEY_DECIMAL_PLACES)) != nullptr)
-        setDecimalPlaces(atoi(s));
     if ((s = property->getValue(PKEY_DIGIT_BACKGROUND_COLOR)) != nullptr)
         setDigitBackgroundColor(parseColor(s));
     if ((s = property->getValue(PKEY_DIGIT_BORDER_COLOR)) != nullptr)
@@ -345,19 +351,21 @@ void CounterFigure::parse(cProperty *property)
         setLabelFont(parseFont(s));
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)
         setLabelColor(parseColor(s));
-    if ((s = property->getValue(LABEL_POS)) != nullptr)
-        setLabelPos(parsePoint(property, LABEL_POS, 0));
-    if ((s = property->getValue(LABEL_ANCHOR)) != nullptr)
-        setLabelAnchor(parseAnchor(s));
+    if ((s = property->getValue(PKEY_INITIAL_VALUE)) != nullptr)
+        setValue(0, simTime(), utils::atod(s));
+
+    refresh();
 }
 
 const char **CounterFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = {PKEY_BACKGROUND_COLOR, PKEY_DECIMAL_PLACES, PKEY_DIGIT_BACKGROUND_COLOR,
-                                   PKEY_DIGIT_BORDER_COLOR, PKEY_DIGIT_FONT, PKEY_DIGIT_COLOR, PKEY_LABEL, PKEY_LABEL_FONT,
-                                   PKEY_LABEL_COLOR, LABEL_POS, LABEL_ANCHOR, PKEY_POS, PKEY_ANCHOR, nullptr};
+        const char *localKeys[] = {
+            PKEY_BACKGROUND_COLOR, PKEY_DECIMAL_PLACES, PKEY_DIGIT_BACKGROUND_COLOR,
+            PKEY_DIGIT_BORDER_COLOR, PKEY_DIGIT_FONT, PKEY_DIGIT_COLOR, PKEY_LABEL, PKEY_LABEL_FONT,
+            PKEY_LABEL_COLOR, PKEY_INITIAL_VALUE, PKEY_POS, PKEY_ANCHOR, nullptr
+        };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -365,75 +373,42 @@ const char **CounterFigure::getAllowedPropertyKeys() const
 
 void CounterFigure::layout()
 {
-    ASSERT(digitRectFigures.size() == digitTextFigures.size());
     Rectangle bounds = backgroundFigure->getBounds();
 
-    // Remove unnecessary figures from canvas
-    for(int i = decimalNumber; i < prevDecimalNumber; ++i)
-    {
-        removeFigure(digitRectFigures[i]);
-        removeFigure(digitTextFigures[i]);
-    }
-    // Add figure to canvas if it's necessary
-    for(int i = prevDecimalNumber; i < decimalNumber; ++i)
-    {
-        if(i == digitRectFigures.size())
-        {
-            digitRectFigures.push_back(new cRectangleFigure());
-            digitTextFigures.push_back(new cTextFigure());
-
-            digitRectFigures[i]->setFilled(true);
-            digitRectFigures[i]->setFillColor(getDigitBackgroundColor());
-
-            digitTextFigures[i]->setAnchor(ANCHOR_CENTER);
-            digitTextFigures[i]->setFont(getDigitFont());
-        }
-        addFigure(digitRectFigures[i]);
-        addFigure(digitTextFigures[i]);
-    }
-
     // Add frame
-    bounds.x += FRAME_SIZE + DIGIT_FRAME_SIZE/2;
+    bounds.x += PADDING + DIGIT_PADDING / 2;
 
-    for(int i = 0; i < decimalNumber; ++i)
-    {
+    for (int i = 0; i < digits.size(); ++i) {
         double rectWidth = getDigitFont().pointSize * DIGIT_WIDTH_PERCENT;
         double rectHeight = getDigitFont().pointSize * DIGIT_HEIGHT_PERCENT;
-        double x = bounds.x + (rectWidth + DIGIT_FRAME_SIZE)*i;
-        double y = bounds.y + FRAME_SIZE;
+        double x = bounds.x + (rectWidth + DIGIT_PADDING) * i;
+        double y = bounds.y + PADDING;
 
-        digitRectFigures[i]->setBounds(Rectangle(x, y, rectWidth, rectHeight));
-        digitTextFigures[i]->setPosition(digitRectFigures[i]->getBounds().getCenter());
+        digits[i].bounds->setBounds(Rectangle(x, y, rectWidth, rectHeight));
+        digits[i].text->setPosition(digits[i].bounds->getBounds().getCenter());
     }
+
+    labelFigure->setPosition(Point(bounds.x + bounds.width / 2, bounds.y + bounds.height));
 }
 
 void CounterFigure::addChildren()
 {
     backgroundFigure = new cRectangleFigure("background");
-    digitRectFigures.push_back(new cRectangleFigure());
-    digitTextFigures.push_back(new cTextFigure());
     labelFigure = new cTextFigure("label");
 
     backgroundFigure->setFilled(true);
-    backgroundFigure->setFillColor(Color("grey"));
-
-    digitRectFigures[0]->setFilled(true);
-    digitRectFigures[0]->setFillColor("lightgrey");
-
-    digitTextFigures[0]->setAnchor(ANCHOR_CENTER);
-    digitTextFigures[0]->setFont(Font("", 12, cFigure::FONT_BOLD));
+    backgroundFigure->setFillColor(Color(INIT_BACKGROUND_COLOR));
+    backgroundFigure->setZoomLineWidth(true);
 
     labelFigure->setAnchor(ANCHOR_N);
 
     addFigure(backgroundFigure);
-    addFigure(digitRectFigures[0]);
-    addFigure(digitTextFigures[0]);
     addFigure(labelFigure);
 }
 
 void CounterFigure::setValue(int series, simtime_t timestamp, double newValue)
 {
-    ASSERT(series == 0 && newValue >= 0);
+    ASSERT(series == 0);
 
     // Note: we currently ignore timestamp
     if (value != newValue) {
@@ -445,26 +420,28 @@ void CounterFigure::setValue(int series, simtime_t timestamp, double newValue)
 void CounterFigure::refresh()
 {
     // update displayed number
-    if (std::isnan(value))
-        for(cTextFigure *figure : digitTextFigures)
-            figure->setText("");
-    else {
-        int max = std::pow(10, decimalNumber);
-        if(value >= max)
-            value = max - 1;
+    int max = std::pow(10, digits.size());
+    if(std::isnan(value))
+        for (Digit digit : digits)
+            digit.text->setText("");
 
+    else if (value >= max || value < 0)
+        for (Digit digit : digits)
+            digit.text->setText("*");
+
+    else {
         int pow = 1;
-        for(int i = decimalNumber - 1; i >= 0; --i)
-        {
+        for (int i = digits.size() - 1; i >= 0; --i) {
             char buf[32];
             pow *= 10;
-            int actValue = (value % pow) / (pow/10);
+            int actValue = ((int)value % pow) / (pow / 10);
             sprintf(buf, "%d", actValue);
-            digitTextFigures[i]->setText(buf);
+            digits[i].text->setText(buf);
         }
     }
 }
 
-#endif // omnetpp 5
+#endif    // omnetpp 5
 
 // } // namespace inet
+

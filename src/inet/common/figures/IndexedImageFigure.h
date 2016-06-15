@@ -15,68 +15,53 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_COUNTERFIGURE_H
-#define __INET_COUNTERFIGURE_H
+#ifndef __INET_INDEXEDIMAGEFIGURE_H
+#define __INET_INDEXEDIMAGEFIGURE_H
 
-#include "IIndicatorFigure.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
+#include "IIndicatorFigure.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
-//namespace inet {
+//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
+using namespace inet;
 
 #if OMNETPP_VERSION >= 0x500
 
-class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigure
+class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
-    struct Digit
-    {
-        cRectangleFigure *bounds;
-        cTextFigure *text;
-
-        Digit(cRectangleFigure *bounds, cTextFigure *text) : bounds(bounds), text(text) {}
-    };
-
-    cRectangleFigure *backgroundFigure;
-    std::vector<Digit> digits;
+    std::vector<const char*> images;
+    cImageFigure *image;
     cTextFigure *labelFigure;
 
     double value = NaN;
-    Anchor anchor = ANCHOR_NW;
 
   protected:
     virtual void parse(cProperty *property) override;
     virtual const char **getAllowedPropertyKeys() const override;
-    cFigure::Point calculateRealPos(Point pos);
-    void calculateBounds();
     void addChildren();
     void refresh();
-    void layout();
 
   public:
-    CounterFigure(const char *name = nullptr);
-    virtual ~CounterFigure() {};
+    IndexedImageFigure(const char *name = nullptr);
+    virtual ~IndexedImageFigure() {};
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     // getters and setters
-    cFigure::Color getBackgroundColor() const;
-    void setBackgroundColor(cFigure::Color color);
+    std::vector<const char *> getImages() const;
+    void setImages(std::vector<const char *> images);
 
-    int getDecimalPlaces() const;
-    void setDecimalPlaces(int radius);
+    double getTintAmount() const;
+    void setTintAmount(double tintAmount);
 
-    cFigure::Color getDigitBackgroundColor() const;
-    void setDigitBackgroundColor(cFigure::Color color);
+    Color getTintColor() const;
+    void setTintColor(Color color);
 
-    cFigure::Color getDigitBorderColor() const;
-    void setDigitBorderColor(cFigure::Color color);
+    double getOpacity() const;
+    void setOpacity(double opacity);
 
-    cFigure::Font getDigitFont() const;
-    void setDigitFont(cFigure::Font font);
-
-    cFigure::Color getDigitColor() const;
-    void setDigitColor(cFigure::Color color);
+    Interpolation getInterpolation() const;
+    void setInterpolation(Interpolation interpolation);
 
     const char *getLabel() const;
     void setLabel(const char *text);
@@ -87,23 +72,24 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
     cFigure::Color getLabelColor() const;
     void setLabelColor(cFigure::Color color);
 
-    Point getLabelPos() const;
-    void setLabelPos(Point pos);
+    Point getLabelOffset() const;
+    void setLabelOffset(Point offset);
 
-    Anchor getLabelAnchor() const;
-    void setLabelAnchor(Anchor anchor);
+    Point getSize() const;
+    void setSize(Point bounds);
 
     Point getPos() const;
-    void setPos(Point bounds);
+    void setPos(Point point);
 
     Anchor getAnchor() const;
     void setAnchor(Anchor anchor);
+
 };
 
 #else
 
 // dummy figure for OMNeT++ 4.x
-class INET_API CounterFigure : public cGroupFigure {
+class INET_API IndexedImageFigure : public cGroupFigure {
 
 };
 

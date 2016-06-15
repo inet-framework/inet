@@ -22,7 +22,6 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-
 /**
  * This is a 3-in-1 class:
  *    1. implements the @delegatesignal properties
@@ -33,45 +32,47 @@ namespace inet {
  */
 class INET_API DelegateSignalConfigurator : public cSimpleModule
 {
-    protected:
-        class INET_API DelegatingListener : public cIListener
-        {
-            protected:
-                cComponent *component;
-                simsignal_t signal;
-            public:
-                DelegatingListener(cComponent *component, simsignal_t signal) : component(component), signal(signal) {}
-                virtual void receiveSignal(cComponent*, simsignal_t, bool b, cObject* details) { component->emit(signal, b, details); }
-                virtual void receiveSignal(cComponent*, simsignal_t, long l, cObject* details) { component->emit(signal, l, details); }
-                virtual void receiveSignal(cComponent*, simsignal_t, unsigned long l, cObject* details) { component->emit(signal, l, details); }
-                virtual void receiveSignal(cComponent*, simsignal_t, double d, cObject* details)  { component->emit(signal, d, details); }
-                virtual void receiveSignal(cComponent*, simsignal_t, const SimTime& t, cObject* details) { component->emit(signal, t, details); }
-                virtual void receiveSignal(cComponent*, simsignal_t, const char* s, cObject* details) { component->emit(signal, s, details); }
-                virtual void receiveSignal(cComponent*, simsignal_t, cObject* obj, cObject* details) { component->emit(signal, obj, details); }
-        };
+  protected:
+    class INET_API DelegatingListener : public cIListener
+    {
+      protected:
+        cComponent *component;
+        simsignal_t signal;
 
-        class INET_API FigureRecorder : public cNumericResultRecorder
-        {
-            protected:
-                IIndicatorFigure *indicatorFigure = nullptr;
-                int series = -1;
-            protected:
-                virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override { indicatorFigure->setValue(series, t, value); }
-            public:
-                FigureRecorder(IIndicatorFigure *figure, int series) : indicatorFigure(figure), series(series) {}
-        };
-        std::vector<IIndicatorFigure*> indicatorFigures;
+      public:
+        DelegatingListener(cComponent *component, simsignal_t signal) : component(component), signal(signal) {}
+        virtual void receiveSignal(cComponent *, simsignal_t, bool b, cObject *details) { component->emit(signal, b, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, long l, cObject *details) { component->emit(signal, l, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, unsigned long l, cObject *details) { component->emit(signal, l, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, double d, cObject *details) { component->emit(signal, d, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, const SimTime& t, cObject *details) { component->emit(signal, t, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, const char *s, cObject *details) { component->emit(signal, s, details); }
+        virtual void receiveSignal(cComponent *, simsignal_t, cObject *obj, cObject *details) { component->emit(signal, obj, details); }
+    };
 
-    protected:
-        virtual void initialize() override;
-        virtual void configure(cModule *module);
-        virtual void configureDisplaySignal(cModule *module, cProperty *property);
-        virtual void configureDelegateSignal(cModule *module, cProperty *property);
-        virtual void parseSignalPath(const char *signalPath, cModule *context, cModule *&module, simsignal_t& signal);
-        virtual void refreshDisplay() const override;
+    class INET_API FigureRecorder : public cNumericResultRecorder
+    {
+      protected:
+        IIndicatorFigure *indicatorFigure = nullptr;
+        int series = -1;
+
+      protected:
+        virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override { indicatorFigure->setValue(series, t, value); }
+
+      public:
+        FigureRecorder(IIndicatorFigure *figure, int series) : indicatorFigure(figure), series(series) {}
+    };
+    std::vector<IIndicatorFigure *> indicatorFigures;
+
+  protected:
+    virtual void initialize() override;
+    virtual void configure(cModule *module);
+    virtual void configureDisplaySignal(cModule *module, cProperty *property);
+    virtual void configureDelegateSignal(cModule *module, cProperty *property);
+    virtual void parseSignalPath(const char *signalPath, cModule *context, cModule *& module, simsignal_t& signal);
+    virtual void refreshDisplay() const override;
 };
+}    // namespace inet
 
-} // namespace inet
-
-#endif
+#endif // ifndef __INET_DELEGATESIGNALCONFIGURATOR_H
 
