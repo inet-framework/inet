@@ -52,15 +52,10 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=100,600;is=s");
         }
-        lo0: LoopbackInterface {
+        lo[numLoInterfaces]: LoopbackInterface {
             parameters:
                 @display("p=300,700,row,50;");
         }
-        // TODO: use submodule vector
-        //        lo[numLoInterfaces]: LoopbackInterface {
-        //            parameters:
-        //                @display("p=300,700,row,50;");
-        //        }
         // TODO: move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
         wlan[numWlanInterfaces]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:

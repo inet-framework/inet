@@ -65,10 +65,9 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         generic.ifIn <-- nl.upperLayerOut++ if networkLayerType != "";
         generic.ifOut --> nl.upperLayerIn++ if networkLayerType != "";
 
-		// TODO: use lo submodule vector
         for i=0..numLoInterfaces-1 {
-            nl.lowerLayerOut++ --> lo0.upperLayerIn;
-            lo0.upperLayerOut --> nl.lowerLayerIn++;
+            nl.lowerLayerOut++ --> lo[i].upperLayerIn;
+            lo[i].upperLayerOut --> nl.lowerLayerIn++;
         }
 
         for i=0..sizeof(radioIn)-1 {

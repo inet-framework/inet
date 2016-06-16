@@ -40,6 +40,7 @@ module RSVP_LSR
         @labels(node,mpls-node);
         @display("i=abstract/router");
         bool hasStatus = default(false);
+        int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
         *.forwarding = true;
@@ -90,7 +91,7 @@ module RSVP_LSR
             parameters:
                 @display("p=409,271;b=580,5,,,,1");
         }
-        lo0: LoopbackInterface {
+        lo[numLoInterfaces]: LoopbackInterface {
             @display("p=139,394");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
@@ -122,8 +123,10 @@ module RSVP_LSR
         ipv4.ifOut --> nm.upperLayerIn++;
         nm.upperLayerOut++ --> ipv4.ifIn;
 
-        lo0.upperLayerOut --> nm.lowerLayerIn++;
-        nm.lowerLayerOut++ --> lo0.upperLayerIn;
+        for i=0..numLoInterfaces-1 {
+            lo[i].upperLayerOut --> nm.lowerLayerIn++;
+            nm.lowerLayerOut++ --> lo[i].upperLayerIn;
+        }
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;

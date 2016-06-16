@@ -41,6 +41,7 @@ module LDP_LSR
         bool hasStatus = default(false);
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
+        int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
@@ -95,7 +96,7 @@ module LDP_LSR
             parameters:
                 @display("p=409,271;b=580,5,,,,1");
         }
-        lo0: LoopbackInterface {
+        lo[numLoInterfaces]: LoopbackInterface {
             @display("p=50,388");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
@@ -133,8 +134,10 @@ module LDP_LSR
         tcp.ipOut --> tn.upperLayerIn++;
         tn.upperLayerOut++ --> tcp.ipIn;
 
-        lo0.upperLayerOut --> nm.lowerLayerIn++;
-        nm.lowerLayerOut++ --> lo0.upperLayerIn;
+        for i=0..numLoInterfaces-1 {
+            lo[i].upperLayerOut --> nm.lowerLayerIn++;
+            nm.lowerLayerOut++ --> lo[i].upperLayerIn;
+        }
 
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
