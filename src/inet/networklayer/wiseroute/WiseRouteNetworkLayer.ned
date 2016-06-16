@@ -49,15 +49,15 @@ module WiseRouteNetworkLayer like INetworkLayer
         np: WiseRoute {
             parameters:
                 arpModule = "^.arp";
-                @display("p=200,300;q=queue");
+                @display("p=250,300;q=queue");
         }
         echo: EchoProtocol {
             parameters:
-                @display("p=300,100");
+                @display("p=400,100");
         }
         dp: MessageDispatcher {
             parameters:
-                @display("p=200,200;b=280,5");
+                @display("p=250,200;b=380,5");
         }
 
     connections allowunconnected:

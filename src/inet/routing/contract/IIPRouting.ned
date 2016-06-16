@@ -17,6 +17,8 @@ package inet.routing.contract;
 //
 moduleinterface IIPRouting
 {
+    parameters:
+        @display("i=block/network");
     gates:
         input ipIn @labels(IPv4ControlInfo/up);
         output ipOut @labels(IPv4ControlInfo/down);

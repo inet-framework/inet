@@ -59,7 +59,7 @@ module EtherSwitch
             @display("p=73,111;is=s");
         }
         l2NodeConfigurator: L2NodeConfigurator if spanningTreeProtocol != "" {
-            @display("p=73,208");
+            @display("p=73,208;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=73,65;is=s");

@@ -55,7 +55,7 @@ module LDP_LSR
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=73,45");
+            @display("p=73,45;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:

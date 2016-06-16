@@ -24,13 +24,13 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
 {
     parameters:
         int numApps = default(0);
-        @figure[applicationLayer](type=rectangle; pos=250,0; size=600,200; fillColor=#ffff00; cornerRadius=12; fillOpacity=0.1);
-        @figure[applicationLayer.title](type=text; pos=740,10; text="application layer");
+        @figure[applicationLayer](type=rectangle; pos=250,0; size=680,200; fillColor=#ffff00; cornerRadius=12; fillOpacity=0.1);
+        @figure[applicationLayer.title](type=text; pos=800,10; text="application layer");
 
     submodules:
         app[numApps]: <> like IApp {
             parameters:
-                @display("p=550,100,row,100");
+                @display("p=300,100,row,100");
         }
         at: MessageDispatcher {
             parameters:

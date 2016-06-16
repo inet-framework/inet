@@ -29,4 +29,5 @@ moduleinterface IBGPRouting extends IApp
         string routingTableModule;
         string ospfRoutingModule;
         string dataTransferMode @enum("bytecount","object","bytestream");
+        @display("i=block/app");
 }

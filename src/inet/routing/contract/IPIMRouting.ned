@@ -20,6 +20,8 @@ package inet.routing.contract;
 
 moduleinterface IPIMRouting
 {
+    parameters:
+        @display("i=block/network");
     gates:
         input networkLayerIn;
         output networkLayerOut;

@@ -35,8 +35,8 @@ module LinkLayerNodeBase extends NodeBase
         int numTunInterfaces = default(0);
         mobilityType = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        @figure[linkLayer](type=rectangle; pos=250,600; size=600,200; fillColor=#0000ff; cornerRadius=12; fillOpacity=0.1);
-        @figure[linkLayer.title](type=text; pos=740,610; text="link layer");
+        @figure[linkLayer](type=rectangle; pos=250,600; size=680,200; fillColor=#0000ff; cornerRadius=12; fillOpacity=0.1);
+        @figure[linkLayer.title](type=text; pos=800,610; text="link layer");
 
     gates:
         input radioIn[numWlanInterfaces] @directIn;

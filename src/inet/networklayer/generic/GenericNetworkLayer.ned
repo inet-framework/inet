@@ -57,11 +57,11 @@ module GenericNetworkLayer like INetworkLayer
         }
         echo: EchoProtocol {
             parameters:
-                @display("p=450,100");
+                @display("p=500,100");
         }
         arp: GenericARP {
             parameters:
-                @display("p=250,300;q=pendingQueue");
+                @display("p=200,300;q=pendingQueue");
         }
         dp: MessageDispatcher {
             parameters:

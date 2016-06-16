@@ -74,7 +74,7 @@ module IPv4NetworkLayer like INetworkLayer
         }
         arp: <arpType> like IARP {
             parameters:
-                @display("p=350,300;q=pendingQueue");
+                @display("p=300,300;q=pendingQueue");
         }
         icmp: ICMP {
             parameters:
@@ -86,7 +86,7 @@ module IPv4NetworkLayer like INetworkLayer
         }
         igmp: <igmpType> like IIGMP {
             parameters:
-                @display("p=350,100");
+                @display("p=300,100");
         }
         errorHandling: ErrorHandling {
             parameters:

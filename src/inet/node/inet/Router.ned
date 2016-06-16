@@ -68,11 +68,11 @@ module Router extends ApplicationLayerNodeBase
         bgp: <"BGPRouting"> like IBGPRouting if hasBGP {
             parameters:
                 ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
-                @display("p=500,100;i=block/network");
+                @display("p=600,100");
         }
         rip: <"RIPRouting"> like IApp if hasRIP {
             parameters:
-                @display("p=400,100");
+                @display("p=700,100");
         }
         pim: <"PIMRouting"> like IPIMRouting if hasPIM {
             parameters:

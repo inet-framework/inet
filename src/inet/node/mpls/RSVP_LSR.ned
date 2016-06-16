@@ -54,7 +54,7 @@ module RSVP_LSR
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=58,50");
+            @display("p=58,50;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:

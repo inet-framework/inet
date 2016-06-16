@@ -79,11 +79,11 @@ module IPv6NetworkLayer like INetworkLayer
         }
         iptunneling: <default(firstAvailable("IPv6Tunneling"))> like IIPv6Tunneling {
             parameters:
-                @display("p=550,300");
+                @display("p=600,300");
         }
         mipv6support: <default("xMIPv6Support")> like IxMIPv6Support if xMIPv6Support {
             parameters:
-                @display("p=550,388");
+                @display("p=600,388");
         }
         dp: MessageDispatcher {
             parameters:

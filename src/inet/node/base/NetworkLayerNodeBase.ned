@@ -34,8 +34,8 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
         *.multicastForwarding = multicastForwarding;
-        @figure[networkLayer](type=rectangle; pos=250,400; size=600,200; fillColor=#00ff00; cornerRadius=12; fillOpacity=0.1);
-        @figure[networkLayer.title](type=text; pos=740,410; text="network layer");
+        @figure[networkLayer](type=rectangle; pos=250,400; size=680,200; fillColor=#00ff00; cornerRadius=12; fillOpacity=0.1);
+        @figure[networkLayer.title](type=text; pos=800,410; text="network layer");
 
     submodules:
         ipv4: IPv4NetworkLayer if hasIpv4 {

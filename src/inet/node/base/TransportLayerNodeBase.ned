@@ -31,8 +31,8 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default(firstAvailableOrEmpty("UDP"));
         string sctpType = default(firstAvailableOrEmpty("SCTP"));
-        @figure[transportLayer](type=rectangle; pos=250,200; size=600,200; fillColor=#ff0000; cornerRadius=12; fillOpacity=0.1);
-        @figure[transportLayer.title](type=text; pos=740,210; text="transport layer");
+        @figure[transportLayer](type=rectangle; pos=250,200; size=680,200; fillColor=#ff0000; cornerRadius=12; fillOpacity=0.1);
+        @figure[transportLayer.title](type=text; pos=800,210; text="transport layer");
 
     submodules:
         udp: <udpType> like IUDP if hasUdp {
