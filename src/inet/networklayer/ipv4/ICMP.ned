@@ -23,7 +23,7 @@ package inet.networklayer.ipv4;
 // ICMP implementation
 //
 // Receive ICMP message from localDeliver and process it:
-//   - echo/timestamp reply: strip ICMP header and send to pingOut
+//   - echo/timestamp reply: drop
 //   - echo/timestamp request: create reply and send to IPSend
 //   - destination unreachable: ignore/send to IPRouting (static)?
 //   - time exceeded: ignore ?
@@ -31,7 +31,7 @@ package inet.networklayer.ipv4;
 //   - redirect ?
 //#FIXME question marks above...
 //
-// Receive echo/timestamp message from pingIn: encapsulate in ICMP header
+// Receive echo/timestamp message: encapsulate in ICMP header
 // and send to IPSend
 //
 // author: Jochen Reber
