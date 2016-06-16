@@ -71,8 +71,8 @@
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         0ef1-219f 45cc-249e/tplx
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,         f6db-0a91 6d15-47c8/tplx
 /examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         7ea1-1200 f4f5-a3cf/tplx
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          d47b-8740 e297-d730/tplx
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          6eb8-8eb9 1a23-e85b/tplx
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          d47b-8740 1e52-f70e/tplx
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          6eb8-8eb9 2d12-060b/tplx
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,         0000-0000   # LargeNet extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,         0000-0000   # RSTP extended
