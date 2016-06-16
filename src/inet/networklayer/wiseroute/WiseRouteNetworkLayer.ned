@@ -31,7 +31,7 @@ module WiseRouteNetworkLayer like INetworkLayer
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        @display("i=block/fork");
+        @display("i=block/fork;bgb=382,240");
 
     gates:
         input ifIn @labels(INetworkDatagram);
@@ -41,32 +41,31 @@ module WiseRouteNetworkLayer like INetworkLayer
 
     submodules:
         arp: GenericARP {
-            parameters:
-	            @display("p=100,300");
+            @display("p=129,169");
         }
         np: WiseRoute {
             parameters:
                 arpModule = "^.arp";
                 @display("p=250,300;q=queue");
         }
-        echo: EchoProtocol {
+        dp: MessageDispatcher {
             parameters:
                 @display("p=400,100");
         }
-        dp: MessageDispatcher {
+        echo: EchoProtocol {
             parameters:
                 @display("p=250,200;b=380,5");
         }
 
     connections allowunconnected:
-        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
         dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
-
-        np.transportOut --> dp.lowerLayerIn++;
-        np.transportIn <-- dp.lowerLayerOut++;
+        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
 
         dp.upperLayerOut++ --> echo.ipIn;
         dp.upperLayerIn++ <-- echo.ipOut;
+
+        np.transportOut --> dp.lowerLayerIn++;
+        np.transportIn <-- dp.lowerLayerOut++;
 
         ifIn --> { @display("m=s"); } --> np.queueIn;
         np.queueOut --> { @display("m=s"); } --> ifOut;

@@ -28,13 +28,14 @@
 #include <algorithm>
 
 #include "inet/networklayer/wiseroute/WiseRoute.h"
-#include "inet/common/INETMath.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
+
 #include "inet/common/FindModule.h"
+#include "inet/common/INETMath.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
@@ -375,9 +376,9 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
  */
 cObject *WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
+    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setDest(pDestAddr);
-    cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    cCtrlInfo->setProtocol(ETHERTYPE_INET_GENERIC);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

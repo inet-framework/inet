@@ -21,9 +21,10 @@
  **************************************************************************/
 
 #include "inet/networklayer/flood/Flood.h"
+
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
@@ -304,7 +305,7 @@ cObject *Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDest
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
     cCtrlInfo->setDest(pDestAddr);
-    cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    cCtrlInfo->setProtocol(ETHERTYPE_INET_GENERIC);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

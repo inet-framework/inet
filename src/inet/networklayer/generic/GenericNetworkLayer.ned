@@ -41,8 +41,8 @@ module GenericNetworkLayer like INetworkLayer
     gates:
         input ifIn @labels(INetworkDatagram);
         output ifOut @labels(INetworkDatagram);
-        input transportIn @labels(IPv4ControlInfo/down);
-        output transportOut @labels(IPv4ControlInfo/up);
+        input transportIn @labels(GenericNetworkProtocolControlInfo/down);
+        output transportOut @labels(GenericNetworkProtocolControlInfo/up);
 
     submodules:
         routingTable: GenericRoutingTable {

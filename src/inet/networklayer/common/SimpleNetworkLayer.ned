@@ -31,7 +31,7 @@ module SimpleNetworkLayer like INetworkLayer
         string interfaceTableModule;
         string networkProtocolType;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
-        @display("i=block/fork");
+        @display("i=block/fork;bgb=575,267");
 
     gates:
         input ifIn @labels(INetworkDatagram);
@@ -42,15 +42,15 @@ module SimpleNetworkLayer like INetworkLayer
     submodules:
         np: <networkProtocolType> like INetworkProtocol {
             parameters:
-                @display("p=200,300;q=queue");
-        }
-        echo: EchoProtocol {
-            parameters:
-                @display("p=300,100");
+                @display("p=392,190;q=queue");
         }
         dp: MessageDispatcher {
             parameters:
-                @display("p=200,200;b=280,5");
+                @display("b=300,5,,,,1;p=392,123");
+        }
+        echo: EchoProtocol {
+            parameters:
+                @display("p=311,60");
         }
 
     connections allowunconnected:
