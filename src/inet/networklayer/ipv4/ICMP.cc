@@ -51,13 +51,6 @@ void ICMP::handleMessage(cMessage *msg)
         processICMPMessage(check_and_cast<ICMPMessage *>(msg));
         return;
     }
-
-    // request from application
-    if (!strcmp(arrivalGate->getName(), "pingIn")) {
-        EV_INFO << "Received " << msg << " from upper layer.\n";
-        sendEchoRequest(check_and_cast<PingPayload *>(msg));
-        return;
-    }
 }
 
 void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code)
@@ -200,7 +193,7 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
             break;
 
         case ICMP_ECHO_REPLY:
-            processEchoReply(icmpmsg);
+            delete icmpmsg;
             break;
 
         case ICMP_TIMESTAMP_REQUEST:
@@ -208,7 +201,7 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
             break;
 
         case ICMP_TIMESTAMP_REPLY:
-            processEchoReply(icmpmsg);
+            delete icmpmsg;
             break;
 
         default:
@@ -239,40 +232,6 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     ctrl->setDestAddr(src);
 
     sendToIP(reply);
-}
-
-void ICMP::processEchoReply(ICMPMessage *reply)
-{
-    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(reply->removeControlInfo());
-    PingPayload *payload = check_and_cast<PingPayload *>(reply->decapsulate());
-    payload->setControlInfo(ctrl);
-    delete reply;
-    long originatorId = payload->getOriginatorId();
-    auto i = pingMap.find(originatorId);
-    if (i != pingMap.end()) {
-        EV_INFO << "Sending " << payload << " to upper layer.\n";
-        sendDirect(payload, getParentModule()->getParentModule()->getSubmodule("app", i->second), "pingIn");
-    }
-    else {
-        EV_WARN << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
-        delete payload;
-    }
-}
-
-void ICMP::sendEchoRequest(PingPayload *msg)
-{
-    cGate *arrivalGate = msg->getArrivalGate();
-    int i = arrivalGate->getIndex();
-    pingMap[msg->getOriginatorId()] = i;
-
-    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-    ctrl->setProtocol(IP_PROT_ICMP);
-    ICMPMessage *request = new ICMPMessage(msg->getName());
-    request->setByteLength(4);
-    request->setType(ICMP_ECHO_REQUEST);
-    request->encapsulate(msg);
-    request->setControlInfo(ctrl);
-    sendToIP(request);
 }
 
 void ICMP::sendToIP(ICMPMessage *msg, const IPv4Address& dest)
