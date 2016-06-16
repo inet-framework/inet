@@ -25,11 +25,11 @@
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
-#ifdef WITH_UDP
+#ifdef WITH_TCP_INET
 #include "inet/transportlayer/tcp/TCP.h"
 #endif
 
-#ifdef WITH_TCP_INET
+#ifdef WITH_UDP
 #include "inet/transportlayer/udp/UDP.h"
 #endif
 

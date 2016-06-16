@@ -23,7 +23,9 @@
 #include "inet/common/geometry/common/CoordinateSystem.h"
 #include "inet/common/INETMath.h"
 #include "inet/mobility/base/MobilityBase.h"
+#ifdef WITH_VISUALIZERS
 #include "inet/visualizer/mobility/MobilityCanvasVisualizer.h"
+#endif
 
 namespace inet {
 
@@ -154,9 +156,11 @@ void MobilityBase::handleMessage(cMessage *message)
 void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
+#ifdef WITH_VISUALIZERS
     if (hasGUI() && visualRepresentation != nullptr) {
         inet::visualizer::MobilityCanvasVisualizer::setPosition(visualRepresentation, canvasProjection->computeCanvasPoint(lastPosition));
     }
+#endif
 }
 
 void MobilityBase::emitMobilityStateChangedSignal()

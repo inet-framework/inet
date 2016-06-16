@@ -721,7 +721,7 @@
         name="IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio"
+        requires = "mobility radio idealwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -1020,7 +1020,7 @@
         name="PacketDrill testing"
         description = "PacketDrill testing application"
         initiallyEnabled = "true"
-        requires = "TUN"
+        requires = "TUN TCP_INET UDP SCTP IPv4"
         labels = ""
         nedPackages = "
                        inet.applications.packetdrill
