@@ -105,23 +105,11 @@ void ARP::handleMessage(cMessage *msg)
     }
 
     if (msg->isSelfMessage()) {
-        if (ARPPacket *arp = dynamic_cast<ARPPacket*>(msg)) {
-            if (arp->getContextPointer() == nullptr) {
-                processARPPacket(arp);
-            }
-            else {
-                send(arp, "ifOut");
-            }
-            return;
-        }
         requestTimedOut(msg);
     }
-    else { // incoming packet
-        cModule *m = getModuleByPath("^.ip");
-        simtime_t procDelay = m->par("procDelay");
+    else {
         ARPPacket *arp = check_and_cast<ARPPacket *>(msg);
-        arp->setContextPointer(nullptr);
-        scheduleAt(simTime() + procDelay, arp);
+        processARPPacket(arp);
     }
 
     if (hasGUI())
@@ -228,8 +216,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
 
     // send out
     EV_INFO << "Sending " << msg << " to network protocol.\n";
-    msg->setContextPointer(this);
-    scheduleAt(simTime(), msg);
+    send(msg, "ifOut");
 }
 
 void ARP::sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress)
