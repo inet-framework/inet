@@ -314,6 +314,7 @@ class FingerprintTestCase(SimulationTestCase):
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
             " --result-dir=" + resultdir + \
+            " --fingerprintcalculator-class=inet::CustomFingerprintCalculator" + \
             extraOppRunArgs;
         # print "COMMAND: " + command + '\n'
         anyFingerprintBad = False;
