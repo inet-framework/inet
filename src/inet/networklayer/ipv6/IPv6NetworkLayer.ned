@@ -53,8 +53,6 @@ module IPv6NetworkLayer like INetworkLayer
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
-        input pingIn[] @labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
     submodules:
         routingTable: IPv6RoutingTable {
             parameters:
@@ -109,14 +107,6 @@ module IPv6NetworkLayer like INetworkLayer
 
         // ICMPv6 to IPv6ErrorHandling
         icmpv6.errorOut --> ipv6ErrorHandling.in;
-
-        // ICMPv6 to ping I/O
-        for i=0..sizeof(pingOut)-1 {
-            icmpv6.pingOut++ --> { @display("m=n"); } --> pingOut[i];
-        }
-        for i=0..sizeof(pingIn)-1 {
-            icmpv6.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
-        }
 
         // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.ipv6In;

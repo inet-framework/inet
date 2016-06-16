@@ -26,8 +26,6 @@ moduleinterface INetworkLayer
     parameters:
         @display("i=block/fork");
     gates:
-        input pingIn[]@labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
         input transportIn @labels(ITransportPacket/down);
         output transportOut @labels(ITransportPacket/up);
         input ifIn @labels(INetworkDatagram/up);

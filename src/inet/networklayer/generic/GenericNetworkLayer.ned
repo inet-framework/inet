@@ -43,8 +43,6 @@ module GenericNetworkLayer like INetworkLayer
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
-        input pingIn[] @labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
 
     submodules:
         routingTable: GenericRoutingTable {
@@ -71,13 +69,6 @@ module GenericNetworkLayer like INetworkLayer
     connections allowunconnected:
         dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
         dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
-
-        for i=0..sizeof(pingOut)-1 {
-            echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];
-        }
-        for i=0..sizeof(pingIn)-1 {
-            echo.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
-        }
 
         gnp.transportOut --> dp.lowerLayerIn++;
         gnp.transportIn <-- dp.lowerLayerOut++;

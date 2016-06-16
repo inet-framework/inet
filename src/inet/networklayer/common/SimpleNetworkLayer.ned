@@ -38,8 +38,6 @@ module SimpleNetworkLayer like INetworkLayer
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(ITransportPacket/down);
         output transportOut @labels(ITransportPacket/up);
-        input pingIn[] @labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
 
     submodules:
         np: <networkProtocolType> like INetworkProtocol {
@@ -67,11 +65,4 @@ module SimpleNetworkLayer like INetworkLayer
 
         ifIn --> { @display("m=s"); } --> np.queueIn;
         np.queueOut --> { @display("m=s"); } --> ifOut;
-
-        for i=0..sizeof(pingOut)-1 {
-            echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];
-        }
-        for i=0..sizeof(pingIn)-1 {
-            echo.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
-        }
 }

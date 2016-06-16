@@ -51,8 +51,6 @@ module IPv4NetworkLayer like INetworkLayer
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
-        input pingIn[] @labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
         input igmpIn;
         output igmpOut;
         input arpIn;
@@ -101,12 +99,6 @@ module IPv4NetworkLayer like INetworkLayer
         dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
         dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
 
-        for i=0..sizeof(pingOut)-1 {
-            icmp.pingOut++ --> { @display("m=n"); } --> pingOut[i];
-        }
-        for i=0..sizeof(pingIn)-1 {
-            icmp.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
-        }
 
         dp.upperLayerOut++ --> icmp.localIn;
         dp.upperLayerIn++ <-- icmp.sendOut;
