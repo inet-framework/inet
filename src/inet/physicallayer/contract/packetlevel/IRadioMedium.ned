@@ -26,5 +26,5 @@ package inet.physicallayer.contract.packetlevel;
 moduleinterface IRadioMedium
 {
     parameters:
-        @display("i=misc/sun_s");
+        @display("i=misc/sun");
 }

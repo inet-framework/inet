@@ -54,5 +54,5 @@ package inet.common.lifecycle;
 //
 simple LifecycleController
 {
-    @display("i=block/cogwheel_s");
+    @display("i=block/cogwheel");
 }

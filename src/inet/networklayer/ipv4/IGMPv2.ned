@@ -117,7 +117,7 @@ simple IGMPv2 like IIGMP
         int    lastMemberQueryCount = default(robustnessVariable);
         double unsolicitedReportInterval @unit("s") = default(10s);
 //      double version1RouterPresentInterval @unit("s") = default(400s);
-        @display("i=block/cogwheel_s");
+        @display("i=block/cogwheel");
 
     gates:
         input ipIn @labels(IPv4ControlInfo/up);  // delivered IGMP packets

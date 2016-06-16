@@ -167,7 +167,7 @@ module PhysicalEnvironment like IPhysicalEnvironment
         string viewTranslation = default("0 0"); // the translation is applied on the 2 dimensional projection
         double axisLength @unit(m) = default(0m/0); // the length of the x, y, and z axes
         xml config = default(xml("<config/>"));
-        @display("i=misc/town_s");
+        @display("i=misc/town");
         @class(PhysicalEnvironment);
     submodules:
         objectCache: <objectCacheType> like IObjectCache if objectCacheType != "" {

@@ -26,6 +26,6 @@ simple RoutingTableRecorder
 {
     parameters:
         bool enabled = default(true);
-        @display("i=block/control_s");
+        @display("i=block/control");
 }
 

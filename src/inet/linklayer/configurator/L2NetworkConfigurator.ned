@@ -37,7 +37,7 @@ package inet.linklayer.configurator;
 simple L2NetworkConfigurator
 {
     parameters:
-        @display("i=block/cogwheel_s");
+        @display("i=block/cogwheel");
         xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
 }
 

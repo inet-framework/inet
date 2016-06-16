@@ -24,5 +24,5 @@ simple STPTester
     parameters:
         double checkTime @unit("s") = default(500ms);
         
-        @display("i=block/cogwheel_s");
+        @display("i=block/cogwheel");
 }

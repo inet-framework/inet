@@ -50,7 +50,6 @@ simple IPv4RoutingTable like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        @display("i=block/table");
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
@@ -59,6 +58,7 @@ simple IPv4RoutingTable like IRoutingTable
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
         string routingFile = default("");  // routing table file name
+        @display("i=block/table");
         @signal[NF_ROUTE_ADDED](type=IPv4Route);
         @signal[NF_ROUTE_DELETED](type=IPv4Route);
         @signal[NF_ROUTE_CHANGED](type=IPv4Route);
