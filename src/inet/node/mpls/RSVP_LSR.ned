@@ -12,14 +12,7 @@
 package inet.node.mpls;
 
 import inet.common.MessageDispatcher;
-import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.contract.IWiredNic;
-import inet.linklayer.loopback.LoopbackInterface;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.mpls.MPLS;
 import inet.networklayer.rsvp_te.RSVP;
 import inet.networklayer.rsvp_te.SimpleClassifier;
 import inet.networklayer.ted.LinkStateRouting;
@@ -33,110 +26,64 @@ import inet.networklayer.ted.TED;
 // itself. RSVP uses transport protocols to route packets. ~TED is used
 // to calculate shortest paths.
 //
-module RSVP_LSR
+module RSVP_LSR extends MplsNetworkLayerNodeBase
 {
     parameters:
         @networkNode();
         @labels(node,mpls-node);
-        @display("i=abstract/router");
-        bool hasStatus = default(false);
-        int numLoInterfaces = default(1);
+        @display("i=abstract/router;bgb=916,851");
         string peers;
         string routerId = default("auto");
-        *.forwarding = true;
-        *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.routingTableModule = default(absPath(".ipv4.routingTable"));
+        *.routingTableModule = default("^." + (hasIpv4 ? "ipv4.routingTable" : hasIpv6 ? "ipv6.routingTable" : hasGn ? "gn.routingTable" : ""));
         *.tedModule = default(absPath(".ted"));
         *.rsvpModule = default(absPath(".rsvp"));
         *.libTableModule = default(absPath(".libTable"));
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
+        mpls.classifierModule = "^.classifier";
+        @figure[submodules];
     submodules:
-        status: NodeStatus if hasStatus {
-            @display("p=58,50;is=s");
-        }
-        interfaceTable: InterfaceTable {
+        ted: TED {  // FIXME the TED module must be ahead of RSVP
             parameters:
-                @display("p=58,242;is=s");
+                @display("p=820,281");
         }
-        ted: TED {
+        rsvp: RSVP {  // FIXME the TED module must be ahead of RSVP
             parameters:
-                @display("p=312,203");
+                peers = peers;
+                classifierModule = "^.classifier";
+                @display("p=600,334");
+        }
+        classifier: SimpleClassifier {
+            parameters:
+                @display("p=820,150");
         }
         linkStateRouting: LinkStateRouting {
             parameters:
                 peers = peers;
-                @display("p=254,115");
-        }
-        rsvp: RSVP {
-            parameters:
-                peers = peers;
-                classifierModule = "^.classifier";
-                @display("p=156,67");
-        }
-        classifier: SimpleClassifier {
-            parameters:
-                @display("p=330,67");
-        }
-        tn: MessageDispatcher {
-            parameters:
-                @display("p=409,185;b=580,5,,,,1");
-        }
-        ipv4: IPv4NetworkLayer {
-            parameters:
-                @display("p=409,223");
-        }
-        nm: MessageDispatcher {
-            parameters:
-                @display("p=409,271;b=580,5,,,,1");
-        }
-        lo[numLoInterfaces]: LoopbackInterface {
-            @display("p=139,394");
-        }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
-            parameters:
-                @display("p=132,345,row,90;q=l2queue");
-        }
-        mpls: MPLS {
-            parameters:
-                classifierModule = "^.classifier";
-                @display("p=448,311");
+                @display("p=730,334");
         }
         libTable: LIBTable {
             parameters:
-                @display("p=312,268");
+                @display("p=820,346");
         }
-        ml: MessageDispatcher {
+        tn: MessageDispatcher {
             parameters:
-                @display("p=409,350;b=580,5,,,,1");
+                @display("b=580,5,,,,1;p=550,400");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> tn.upperLayerIn++;
-        tn.upperLayerOut++ --> linkStateRouting.ipIn;
-        ipv4.transportOut --> tn.lowerLayerIn++;
-        tn.lowerLayerOut++ --> ipv4.transportIn;
+        linkStateRouting.ipIn <-- tn.upperLayerOut++;
 
         rsvp.ipOut --> tn.upperLayerIn++;
         rsvp.ipIn <-- tn.upperLayerOut++;
 
-        ipv4.ifOut --> nm.upperLayerIn++;
-        nm.upperLayerOut++ --> ipv4.ifIn;
+        tn.lowerLayerOut++ --> ipv4.transportIn if hasIpv4;
+        tn.lowerLayerIn++ <-- ipv4.transportOut if hasIpv4;
 
-        for i=0..numLoInterfaces-1 {
-            lo[i].upperLayerOut --> nm.lowerLayerIn++;
-            nm.lowerLayerOut++ --> lo[i].upperLayerIn;
-        }
+        tn.lowerLayerOut++ --> ipv4.icmpIn if hasIpv4;
+        tn.lowerLayerIn++ <-- ipv4.icmpOut if hasIpv4;
 
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
+        tn.lowerLayerOut++ --> ipv4.igmpIn if hasIpv4;
+        tn.lowerLayerIn++ <-- ipv4.igmpOut if hasIpv4;
 
-            ppp[i].upperLayerOut --> ml.lowerLayerIn++;
-            ml.lowerLayerOut++ --> ppp[i].upperLayerIn;
-        }
-        mpls.ifOut --> ml.upperLayerIn++;
-        ml.upperLayerOut++ --> mpls.ifIn;
-        nm.lowerLayerOut++ --> mpls.netwIn;
-        mpls.netwOut --> nm.lowerLayerIn++;
 }
 

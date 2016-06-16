@@ -184,7 +184,7 @@ void MPLS::processPacketFromL2(cMessage *msg)
         }
     }
     else {
-        throw cRuntimeError("Unknown message received");
+        sendToL3(msg);
     }
 }
 
