@@ -35,12 +35,10 @@ package inet.networklayer.ipv6;
 // an ~IPv6ControlInfo to the packet, with the source and destination IPv6 address,
 // etc. of the IPv6 datagram in which the packet arrived.
 //
-// ~IPv6 can serve several higher-layer protocols. The higher layer protocols should
-// send one or more RegisterProtocol message (a simple cMessage with
-// ~IPRegisterProtocolCommand controlinfo and kind=IP_C_REGISTER_PROTOCOL)
-// to IPv4 module, for fill up the protocol-to-gateindex map.
-// When delivering packets to them, the output gate is determined from the Protocol
-// field in the IPv6 header.
+// ~IPv6 can serve several higher-layer protocols. The higher layer protocols
+// should call registerProtocol with their gate towards the IPv6 module,
+// for fill up the protocol-to-gateindex map. When delivering packets to them,
+// the output gate is determined from the Protocol field in the IPv6 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //

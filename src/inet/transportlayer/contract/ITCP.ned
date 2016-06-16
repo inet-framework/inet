@@ -74,10 +74,9 @@ package inet.transportlayer.contract;
 // (TCP_I_ESTABLISHED, etc.) and ~TCPCommand as control info.
 //
 // One TCP module can serve several application modules, and several
-// connections per application. The <i>k</i>th application connects to TCP's
-// appIn[k] and appOut[k] ports. When talking to applications, a
-// connection is identified by the (application port index, connId) pair,
-// where connId is assigned by the application in the OPEN call.
+// connections per application. When talking to applications, a
+// connection is identified by the connId that is assigned by the application in
+// the OPEN call.
 //
 // <b>Sockets</b>
 //
