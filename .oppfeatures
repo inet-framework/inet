@@ -371,7 +371,7 @@
         name="Network emulation support"
         description = "Support for connecting the simulation to a real network.
                        The ExternalInterface module is responsible for sending/receiving
-                       packets on the network. This feature requires at least version 1.5.3 
+                       packets on the network. This feature requires at least version 1.5.3
                        of the libpcap-dev package."
         initiallyEnabled = "false"
         requires = "IPv4"
@@ -752,7 +752,7 @@
         id="apskradio"
         name="APSK radio"
         description = "Provides a hypothetical generic radio for APSK modulations"
-        requires = "mobility radio"
+        requires = "mobility radio Ieee80211"
         labels = ""
         nedPackages = "
                        inet.physicallayer.apskradio
@@ -800,8 +800,8 @@
     <feature
         id="visualization"
         name="Visualization"
-        description = "Provides network-level visualization features for physical layer, 
-                       data link layer and network layer communications, and more. 
+        description = "Provides network-level visualization features for physical layer,
+                       data link layer and network layer communications, and more.
                        Supports both canvas (2D) and OSG (3D) graphics."
         initiallyEnabled = "true"
         requires = ""
@@ -811,6 +811,20 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_VISUALIZERS"
+        linkerFlags = ""
+        />
+    <feature
+        id="visualization_examples"
+        name="Visualization examples"
+        description = "Provides examples for the various visualization modules."
+        initiallyEnabled = "true"
+        requires = "visualization physicalenvironment DYMO Ieee80211 IPv4 MultiNet Ethernet"
+        labels = ""
+        nedPackages = "
+                       inet.examples.visualization
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
         linkerFlags = ""
         />
     <feature
