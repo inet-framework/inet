@@ -26,8 +26,6 @@ Register_Class(ProgressMeterFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
-#define M_PI    3.14159265358979323846
-
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_STRIP_COLOR = "stripColor";
 static const char *PKEY_CORNER_RADIUS = "cornerRadius";

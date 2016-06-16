@@ -26,8 +26,6 @@ Register_Class(CounterFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
-#define M_PI    3.14159265358979323846
-
 static const int PADDING = 4;
 static const int DIGIT_PADDING = 2;
 static const double DIGIT_WIDTH_PERCENT = 0.9;
