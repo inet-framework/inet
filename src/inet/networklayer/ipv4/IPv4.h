@@ -230,6 +230,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual ~IPv4();
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual cModule *handleLookupProtocol(const Protocol& protocol, cGate *gate) override { return nullptr; }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

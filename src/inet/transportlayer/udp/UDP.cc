@@ -140,6 +140,7 @@ void UDP::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerProtocol(Protocol::udp, gate("ipOut"));
         registerProtocol(Protocol::udp, gate("appOut"));
+        std::cout << "XXX: " << lookupProtocol(Protocol::ipv4, gate("ipOut"))->getFullPath() << endl;
     }
 }
 

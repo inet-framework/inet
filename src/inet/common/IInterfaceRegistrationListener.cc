@@ -27,5 +27,15 @@ void registerInterface(const InterfaceEntry& interface, cGate *gate)
         interfaceRegistration->handleRegisterInterface(interface, pathEndGate);
 }
 
+cModule *lookupInterface(const InterfaceEntry& interface, cGate *gate)
+{
+    auto pathEndGate = gate->getPathEndGate();
+    auto listener = dynamic_cast<IInterfaceRegistrationListener *>(pathEndGate->getOwner());
+    if (listener != nullptr)
+        return listener->handleLookupInterface(interface, pathEndGate);
+    else
+        return nullptr;
+}
+
 } // namespace inet
 

@@ -24,10 +24,14 @@ namespace inet {
 
 INET_API void registerProtocol(const Protocol& protocol, cGate *gate);
 
+INET_API cModule *lookupProtocol(const Protocol& protocol, cGate *gate);
+
 class INET_API IProtocolRegistrationListener
 {
   public:
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) = 0;
+
+    virtual cModule *handleLookupProtocol(const Protocol& protocol, cGate *gate) = 0;
 };
 
 } // namespace inet

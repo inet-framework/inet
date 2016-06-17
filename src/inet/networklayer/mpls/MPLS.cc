@@ -270,6 +270,11 @@ void MPLS::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingat
     registerInterface(interface, gate("netwOut"));
 }
 
+cModule *MPLS::handleLookupInterface(const InterfaceEntry &interface, cGate *ingate)
+{
+    return lookupInterface(interface, gate("ifOut"));
+}
+
 void MPLS::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
 {
     if (!strcmp("ifIn", protocolGate->getName())) {
@@ -277,6 +282,18 @@ void MPLS::handleRegisterProtocol(const Protocol& protocol, cGate *protocolGate)
     }
     else if (!strcmp("netwIn", protocolGate->getName())) {
         registerProtocol(protocol, gate("ifOut"));
+    }
+    else
+        throw cRuntimeError("Unknown gate: %s", protocolGate->getName());
+}
+
+cModule *MPLS::handleLookupProtocol(const Protocol& protocol, cGate *protocolGate)
+{
+    if (!strcmp("ifIn", protocolGate->getName())) {
+        return handleLookupProtocol(protocol, gate("netwOut"));
+    }
+    else if (!strcmp("netwIn", protocolGate->getName())) {
+        return handleLookupProtocol(protocol, gate("ifOut"));
     }
     else
         throw cRuntimeError("Unknown gate: %s", protocolGate->getName());

@@ -63,6 +63,7 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
 
   public:
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual cModule *handleLookupProtocol(const Protocol& protocol, cGate *gate) override { return nullptr; }
 };
 
 } // namespace inet

@@ -165,6 +165,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     ~GenericNetworkProtocol();
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual cModule *handleLookupProtocol(const Protocol& protocol, cGate *gate) override { return nullptr; }
 
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(int priority, IHook *hook) override;

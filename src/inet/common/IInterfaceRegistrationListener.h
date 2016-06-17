@@ -24,10 +24,14 @@ namespace inet {
 
 INET_API void registerInterface(const InterfaceEntry& interface, cGate *gate);
 
+INET_API cModule *lookupInterface(const InterfaceEntry& interface, cGate *gate);
+
 class INET_API IInterfaceRegistrationListener
 {
   public:
     virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *gate) = 0;
+
+    virtual cModule *handleLookupInterface(const InterfaceEntry &interface, cGate *gate) = 0;
 };
 
 } // namespace inet

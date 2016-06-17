@@ -60,7 +60,10 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
         MessageDispatcher();
 
         virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+        virtual cModule *handleLookupProtocol(const Protocol& protocol, cGate *gate) override;
+
         virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *gate) override;
+        virtual cModule *handleLookupInterface(const InterfaceEntry &interface, cGate *gate) override;
 };
 
 } // namespace inet

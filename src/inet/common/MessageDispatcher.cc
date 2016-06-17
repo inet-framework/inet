@@ -195,6 +195,26 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
         throw cRuntimeError("handleRegisterProtocol(): Unknown gate: %s", protocolGate->getName());
 }
 
+cModule *MessageDispatcher::handleLookupProtocol(const Protocol& protocol, cGate *protocolGate)
+{
+    if (!strcmp("upperLayerIn", protocolGate->getName())) {
+        auto it = protocolIdToLowerLayerGateIndex.find(protocol.getId());
+        if (it != protocolIdToLowerLayerGateIndex.end())
+            return lookupProtocol(protocol, gate("lowerLayerOut", it->second));
+        else
+            return nullptr;
+    }
+    else if (!strcmp("lowerLayerIn", protocolGate->getName())) {
+        auto it = protocolIdToUpperLayerGateIndex.find(protocol.getId());
+        if (it != protocolIdToUpperLayerGateIndex.end())
+            return lookupProtocol(protocol, gate("upperLayerOut", it->second));
+        else
+            return nullptr;
+    }
+    else
+        throw cRuntimeError("handleLookupProtocol(): Unknown gate: %s", protocolGate->getName());
+}
+
 void MessageDispatcher::handleRegisterInterface(const InterfaceEntry &interface, cGate *interfaceGate)
 {
     if (!strcmp("upperLayerIn", interfaceGate->getName()))
@@ -207,6 +227,19 @@ void MessageDispatcher::handleRegisterInterface(const InterfaceEntry &interface,
     }
     else
         throw cRuntimeError("handleRegisterInterface(): Unknown gate: %s", interfaceGate->getName());
+}
+
+cModule *MessageDispatcher::handleLookupInterface(const InterfaceEntry &interface, cGate *interfaceGate)
+{
+    if (!strcmp("upperLayerIn", interfaceGate->getName())) {
+        auto it = interfaceIdToLowerLayerGateIndex.find(interface.getInterfaceId());
+        if (it != interfaceIdToLowerLayerGateIndex.end())
+            return lookupInterface(interface, gate("lowerLayerOut", it->second));
+        else
+            return nullptr;
+    }
+    else
+        throw cRuntimeError("handleLookupInterface(): Unknown gate: %s", interfaceGate->getName());
 }
 
 } // namespace inet

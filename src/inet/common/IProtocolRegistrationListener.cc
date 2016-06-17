@@ -19,12 +19,33 @@
 
 namespace inet {
 
+std::set<std::pair<int, int>> protocolRegistrations;
+
 void registerProtocol(const Protocol& protocol, cGate *gate)
 {
+    protocolRegistrations.insert(std::make_pair<int, int>(protocol.getId(), gate->getOwnerModule()->getId()));
     cGate* pathEndGate = gate->getPathEndGate();
     IProtocolRegistrationListener *protocolRegistration = dynamic_cast<IProtocolRegistrationListener *>(pathEndGate->getOwner());
     if (protocolRegistration != nullptr)
         protocolRegistration->handleRegisterProtocol(protocol, pathEndGate);
+}
+
+cModule *lookupProtocol(const Protocol& protocol, cGate *pathStartGate)
+{
+    auto pathEndGate = pathStartGate->getPathEndGate();
+    auto pathEndModule = pathEndGate->getOwnerModule();
+//    std::cout << "PATH: " << pathStartGate->getFullPath() << " --> " << pathEndGate->getFullPath() << endl;
+//    std::cout << "Lookup: " << protocol.getId() << ", " << pathEndGate->getId() << ", " << pathEndGate->getFullPath() << endl;
+    auto it = protocolRegistrations.find(std::make_pair<int, int>(protocol.getId(), pathEndModule->getId()));
+    if (it != protocolRegistrations.end())
+        return pathEndModule;
+    else {
+        auto listener = dynamic_cast<IProtocolRegistrationListener *>(pathEndModule);
+        if (listener != nullptr)
+            return listener->handleLookupProtocol(protocol, pathEndGate);
+        else
+            return nullptr;
+    }
 }
 
 } // namespace inet

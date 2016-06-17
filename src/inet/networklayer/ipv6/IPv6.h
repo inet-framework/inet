@@ -215,6 +215,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     ~IPv6();
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+    virtual cModule *handleLookupProtocol(const Protocol& protocol, cGate *gate) override { return nullptr; }
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;
