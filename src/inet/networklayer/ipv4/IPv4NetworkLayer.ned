@@ -53,8 +53,6 @@ module IPv4NetworkLayer like INetworkLayer
         output transportOut @labels(IPv4ControlInfo/up);
         input igmpIn;
         output igmpOut;
-        input arpIn;
-        output arpOut;
 
     submodules:
         configurator: IPv4NodeConfigurator {
