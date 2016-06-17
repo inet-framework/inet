@@ -99,12 +99,6 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
     virtual void processEchoReply(ICMPv6EchoReplyMsg *);
 
     /**
-     *  Ping a machine. The information needed to do this is in the cMessage
-     *  parameter.  TODO where in cMessage? document!!!
-     */
-    virtual void sendEchoRequest(PingPayload *);
-
-    /**
      * Validate the received IPv6 datagram before responding with error message.
      */
     virtual bool validateDatagramPromptingError(IPv6Datagram *datagram);
