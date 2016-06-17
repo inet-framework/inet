@@ -32,14 +32,9 @@ class PingPayload;
 class INET_API EchoProtocol : public cSimpleModule
 {
   protected:
-    typedef std::map<long, int> PingMap;
-    PingMap pingMap;
-
-  protected:
     virtual void processPacket(EchoPacket *packet);
     virtual void processEchoRequest(EchoPacket *packet);
     virtual void processEchoReply(EchoPacket *packet);
-    virtual void sendEchoRequest(PingPayload *packet);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

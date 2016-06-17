@@ -38,8 +38,6 @@ void EchoProtocol::handleMessage(cMessage *msg)
     cGate *arrivalGate = msg->getArrivalGate();
     if (!strcmp(arrivalGate->getName(), "ipIn"))
         processPacket(check_and_cast<EchoPacket *>(msg));
-    else if (!strcmp(arrivalGate->getName(), "pingIn"))
-        sendEchoRequest(check_and_cast<PingPayload *>(msg));
 }
 
 void EchoProtocol::processPacket(EchoPacket *msg)
@@ -77,34 +75,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
 
 void EchoProtocol::processEchoReply(EchoPacket *reply)
 {
-    cObject *controlInfo = reply->removeControlInfo();
-    PingPayload *payload = check_and_cast<PingPayload *>(reply->decapsulate());
-    payload->setControlInfo(controlInfo);
     delete reply;
-    long originatorId = payload->getOriginatorId();
-    auto i = pingMap.find(originatorId);
-    if (i != pingMap.end())
-        sendDirect(payload, getParentModule()->getParentModule()->getSubmodule("app", i->second), "pingIn");
-    else {
-        EV_INFO << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
-        delete payload;
-    }
-}
-
-void EchoProtocol::sendEchoRequest(PingPayload *msg)
-{
-    cGate *arrivalGate = msg->getArrivalGate();
-    int i = arrivalGate->getIndex();
-    pingMap[msg->getOriginatorId()] = i;
-    cObject *controlInfo = msg->removeControlInfo();
-    INetworkProtocolControlInfo *networkControlInfo = check_and_cast<INetworkProtocolControlInfo *>(controlInfo);
-    // TODO: remove
-    networkControlInfo->setTransportProtocol(IP_PROT_ICMP);
-    EchoPacket *request = new EchoPacket(msg->getName());
-    request->setType(ECHO_PROTOCOL_REQUEST);
-    request->encapsulate(msg);
-    request->setControlInfo(controlInfo);
-    send(request, "sendOut");
 }
 
 } // namespace inet
