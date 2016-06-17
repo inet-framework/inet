@@ -48,14 +48,14 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     // getters and setters
-    std::vector<const char *> getImages() const;
-    void setImages(std::vector<const char *> images);
+    const std::vector<const char *>& getImages() const;
+    void setImages(const std::vector<const char *>& images);
 
     double getTintAmount() const;
     void setTintAmount(double tintAmount);
 
-    Color getTintColor() const;
-    void setTintColor(Color color);
+    const Color& getTintColor() const;
+    void setTintColor(const Color& color);
 
     double getOpacity() const;
     void setOpacity(double opacity);
@@ -66,20 +66,20 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
     const char *getLabel() const;
     void setLabel(const char *text);
 
-    cFigure::Font getLabelFont() const;
-    void setLabelFont(cFigure::Font font);
+    const Font& getLabelFont() const;
+    void setLabelFont(const Font& font);
 
-    cFigure::Color getLabelColor() const;
-    void setLabelColor(cFigure::Color color);
+    const Color& getLabelColor() const;
+    void setLabelColor(const Color& color);
 
-    Point getLabelOffset() const;
-    void setLabelOffset(Point offset);
+    const Point& getLabelOffset() const;
+    void setLabelOffset(const Point& offset);
 
-    Point getSize() const;
-    void setSize(Point bounds);
+    const Point& getSize() const;
+    void setSize(const Point& bounds);
 
-    Point getPos() const;
-    void setPos(Point point);
+    const Point& getPos() const;
+    void setPos(const Point& point);
 
     Anchor getAnchor() const;
     void setAnchor(Anchor anchor);

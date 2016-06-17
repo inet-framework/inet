@@ -62,23 +62,23 @@ ThermometerFigure::~ThermometerFigure()
     }
 }
 
-cFigure::Rectangle ThermometerFigure::getBounds() const
+const cFigure::Rectangle& ThermometerFigure::getBounds() const
 {
     return bounds;
 }
 
-void ThermometerFigure::setBounds(Rectangle rect)
+void ThermometerFigure::setBounds(const Rectangle& rect)
 {
     bounds = rect;
     layout();
 }
 
-cFigure::Color ThermometerFigure::getMercuryColor() const
+const cFigure::Color& ThermometerFigure::getMercuryColor() const
 {
     return mercuryFigure->getLineColor();
 }
 
-void ThermometerFigure::setMercuryColor(cFigure::Color color)
+void ThermometerFigure::setMercuryColor(const Color& color)
 {
     mercuryFigure->setFillColor(color);
 }
@@ -93,22 +93,22 @@ void ThermometerFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-cFigure::Font ThermometerFigure::getLabelFont() const
+const cFigure::Font& ThermometerFigure::getLabelFont() const
 {
     return labelFigure->getFont();
 }
 
-void ThermometerFigure::setLabelFont(cFigure::Font font)
+void ThermometerFigure::setLabelFont(const Font& font)
 {
     labelFigure->setFont(font);
 }
 
-cFigure::Color ThermometerFigure::getLabelColor() const
+const cFigure::Color& ThermometerFigure::getLabelColor() const
 {
     return labelFigure->getColor();
 }
 
-void ThermometerFigure::setLabelColor(cFigure::Color color)
+void ThermometerFigure::setLabelColor(const Color& color)
 {
     labelFigure->setColor(color);
 }

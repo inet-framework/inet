@@ -54,11 +54,11 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     // getters and setters
-    cFigure::Color getBackgroundColor() const;
-    void setBackgroundColor(cFigure::Color color);
+    const Color& getBackgroundColor() const;
+    void setBackgroundColor(const Color& color);
 
-    cFigure::Color getStripColor() const;
-    void setStripColor(cFigure::Color color);
+    const Color& getStripColor() const;
+    void setStripColor(const Color& color);
 
     double getCornerRadius() const;
     void setCornerRadius(double radius);
@@ -69,23 +69,23 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     const char *getText() const;
     void setText(const char *text);
 
-    cFigure::Font getTextFont() const;
-    void setTextFont(cFigure::Font font);
+    const Font& getTextFont() const;
+    void setTextFont(const Font& font);
 
-    cFigure::Color getTextColor() const;
-    void setTextColor(cFigure::Color color);
+    const Color& getTextColor() const;
+    void setTextColor(const Color& color);
 
     const char *getLabel() const;
     void setLabel(const char *text);
 
-    cFigure::Font getLabelFont() const;
-    void setLabelFont(cFigure::Font font);
+    const Font& getLabelFont() const;
+    void setLabelFont(const Font& font);
 
-    cFigure::Color getLabelColor() const;
-    void setLabelColor(cFigure::Color color);
+    const Color& getLabelColor() const;
+    void setLabelColor(const Color& color);
 
-    Rectangle getBounds() const;
-    void setBounds(Rectangle bounds);
+    const Rectangle& getBounds() const;
+    void setBounds(const Rectangle& bounds);
 
     double getMinValue() const;
     void setMinValue(double value);

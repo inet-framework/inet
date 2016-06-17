@@ -67,33 +67,33 @@ LinearGaugeFigure::~LinearGaugeFigure()
     }
 }
 
-cFigure::Rectangle LinearGaugeFigure::getBounds() const
+const cFigure::Rectangle& LinearGaugeFigure::getBounds() const
 {
     return backgroundFigure->getBounds();
 }
 
-void LinearGaugeFigure::setBounds(Rectangle rect)
+void LinearGaugeFigure::setBounds(const Rectangle& rect)
 {
     backgroundFigure->setBounds(rect);
     layout();
 }
 
-cFigure::Color LinearGaugeFigure::getBackgroundColor() const
+const cFigure::Color& LinearGaugeFigure::getBackgroundColor() const
 {
     return backgroundFigure->getFillColor();
 }
 
-void LinearGaugeFigure::setBackgroundColor(cFigure::Color color)
+void LinearGaugeFigure::setBackgroundColor(const Color& color)
 {
     backgroundFigure->setFillColor(color);
 }
 
-cFigure::Color LinearGaugeFigure::getNeedleColor() const
+const cFigure::Color& LinearGaugeFigure::getNeedleColor() const
 {
     return needle->getLineColor();
 }
 
-void LinearGaugeFigure::setNeedleColor(cFigure::Color color)
+void LinearGaugeFigure::setNeedleColor(const Color& color)
 {
     needle->setLineColor(color);
 }
@@ -108,22 +108,22 @@ void LinearGaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-cFigure::Font LinearGaugeFigure::getLabelFont() const
+const cFigure::Font& LinearGaugeFigure::getLabelFont() const
 {
     return labelFigure->getFont();
 }
 
-void LinearGaugeFigure::setLabelFont(cFigure::Font font)
+void LinearGaugeFigure::setLabelFont(const Font& font)
 {
     labelFigure->setFont(font);
 }
 
-cFigure::Color LinearGaugeFigure::getLabelColor() const
+const cFigure::Color& LinearGaugeFigure::getLabelColor() const
 {
     return labelFigure->getColor();
 }
 
-void LinearGaugeFigure::setLabelColor(cFigure::Color color)
+void LinearGaugeFigure::setLabelColor(const Color& color)
 {
     labelFigure->setColor(color);
 }

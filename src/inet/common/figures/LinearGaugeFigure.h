@@ -60,23 +60,23 @@ class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorF
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
-    Rectangle getBounds() const;
-    void setBounds(Rectangle rect);
+    const Rectangle& getBounds() const;
+    void setBounds(const Rectangle& rect);
 
-    cFigure::Color getBackgroundColor() const;
-    void setBackgroundColor(cFigure::Color color);
+    const Color& getBackgroundColor() const;
+    void setBackgroundColor(const Color& color);
 
-    cFigure::Color getNeedleColor() const;
-    void setNeedleColor(cFigure::Color color);
+    const Color& getNeedleColor() const;
+    void setNeedleColor(const Color& color);
 
     const char *getLabel() const;
     void setLabel(const char *text);
 
-    cFigure::Font getLabelFont() const;
-    void setLabelFont(cFigure::Font font);
+    const Font& getLabelFont() const;
+    void setLabelFont(const Font& font);
 
-    cFigure::Color getLabelColor() const;
-    void setLabelColor(cFigure::Color color);
+    const Color& getLabelColor() const;
+    void setLabelColor(const Color& color);
 
     double getMinValue() const;
     void setMinValue(double value);

@@ -73,33 +73,33 @@ GaugeFigure::~GaugeFigure()
     }
 }
 
-cFigure::Rectangle GaugeFigure::getBounds() const
+const cFigure::Rectangle& GaugeFigure::getBounds() const
 {
     return backgroundFigure->getBounds();
 }
 
-void GaugeFigure::setBounds(Rectangle rect)
+void GaugeFigure::setBounds(const Rectangle& rect)
 {
     backgroundFigure->setBounds(rect);
     layout();
 }
 
-cFigure::Color GaugeFigure::getBackgroundColor() const
+const cFigure::Color& GaugeFigure::getBackgroundColor() const
 {
     return backgroundFigure->getFillColor();
 }
 
-void GaugeFigure::setBackgroundColor(cFigure::Color color)
+void GaugeFigure::setBackgroundColor(const Color& color)
 {
     backgroundFigure->setFillColor(color);
 }
 
-cFigure::Color GaugeFigure::getNeedleColor() const
+const cFigure::Color& GaugeFigure::getNeedleColor() const
 {
     return needle->getFillColor();
 }
 
-void GaugeFigure::setNeedleColor(cFigure::Color color)
+void GaugeFigure::setNeedleColor(const Color& color)
 {
     needle->setFillColor(color);
 }
@@ -114,22 +114,22 @@ void GaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-cFigure::Font GaugeFigure::getLabelFont() const
+const cFigure::Font& GaugeFigure::getLabelFont() const
 {
     return labelFigure->getFont();
 }
 
-void GaugeFigure::setLabelFont(cFigure::Font font)
+void GaugeFigure::setLabelFont(const Font& font)
 {
     labelFigure->setFont(font);
 }
 
-cFigure::Color GaugeFigure::getLabelColor() const
+const cFigure::Color& GaugeFigure::getLabelColor() const
 {
     return labelFigure->getColor();
 }
 
-void GaugeFigure::setLabelColor(cFigure::Color color)
+void GaugeFigure::setLabelColor(const Color& color)
 {
     labelFigure->setColor(color);
 }

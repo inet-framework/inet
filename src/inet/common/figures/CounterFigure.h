@@ -47,7 +47,7 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
   protected:
     virtual void parse(cProperty *property) override;
     virtual const char **getAllowedPropertyKeys() const override;
-    cFigure::Point calculateRealPos(Point pos);
+    Point calculateRealPos(const Point& pos);
     void calculateBounds();
     void addChildren();
     void refresh();
@@ -60,41 +60,41 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     // getters and setters
-    cFigure::Color getBackgroundColor() const;
-    void setBackgroundColor(cFigure::Color color);
+    const Color& getBackgroundColor() const;
+    void setBackgroundColor(const Color& color);
 
     int getDecimalPlaces() const;
     void setDecimalPlaces(int radius);
 
-    cFigure::Color getDigitBackgroundColor() const;
-    void setDigitBackgroundColor(cFigure::Color color);
+    Color getDigitBackgroundColor() const;
+    void setDigitBackgroundColor(const Color& color);
 
-    cFigure::Color getDigitBorderColor() const;
-    void setDigitBorderColor(cFigure::Color color);
+    Color getDigitBorderColor() const;
+    void setDigitBorderColor(const Color& color);
 
-    cFigure::Font getDigitFont() const;
-    void setDigitFont(cFigure::Font font);
+    Font getDigitFont() const;
+    void setDigitFont(const Font& font);
 
-    cFigure::Color getDigitColor() const;
-    void setDigitColor(cFigure::Color color);
+    Color getDigitColor() const;
+    void setDigitColor(const Color& color);
 
     const char *getLabel() const;
     void setLabel(const char *text);
 
-    cFigure::Font getLabelFont() const;
-    void setLabelFont(cFigure::Font font);
+    const Font& getLabelFont() const;
+    void setLabelFont(const Font& font);
 
-    cFigure::Color getLabelColor() const;
-    void setLabelColor(cFigure::Color color);
+    const Color& getLabelColor() const;
+    void setLabelColor(const Color& color);
 
-    Point getLabelPos() const;
-    void setLabelPos(Point pos);
+    const Point& getLabelPos() const;
+    void setLabelPos(const Point& pos);
 
     Anchor getLabelAnchor() const;
     void setLabelAnchor(Anchor anchor);
 
     Point getPos() const;
-    void setPos(Point bounds);
+    void setPos(const Point& bounds);
 
     Anchor getAnchor() const;
     void setAnchor(Anchor anchor);
