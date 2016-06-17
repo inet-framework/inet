@@ -115,8 +115,8 @@ module InternetCloud
 
             connections allowunconnected:
                 // transport Layer
-                ip.transportOut --> icmp.localIn;
-                ip.transportIn <-- icmp.sendOut;
+                ip.transportOut --> icmp.ipIn;
+                ip.transportIn <-- icmp.ipOut;
 
                 icmp.errorOut --> errorHandling.in;
 

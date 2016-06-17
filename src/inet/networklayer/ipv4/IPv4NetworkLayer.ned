@@ -100,8 +100,8 @@ module IPv4NetworkLayer like INetworkLayer
         dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
 
 
-        dp.upperLayerOut++ --> icmp.localIn;
-        dp.upperLayerIn++ <-- icmp.sendOut;
+        dp.upperLayerOut++ --> icmp.ipIn;
+        dp.upperLayerIn++ <-- icmp.ipOut;
 
         dp.upperLayerOut++ --> igmp.ipIn;
         dp.upperLayerIn++ <-- igmp.ipOut;

@@ -73,8 +73,8 @@ module GenericNetworkLayer like INetworkLayer
         gnp.transportOut --> dp.lowerLayerIn++;
         gnp.transportIn <-- dp.lowerLayerOut++;
 
-        dp.upperLayerOut++ --> echo.localIn;
-        dp.upperLayerIn++ <-- echo.sendOut;
+        dp.upperLayerOut++ --> echo.ipIn;
+        dp.upperLayerIn++ <-- echo.ipOut;
 
         gnp.arpOut --> arp.netwIn;
         gnp.arpIn <-- arp.netwOut;

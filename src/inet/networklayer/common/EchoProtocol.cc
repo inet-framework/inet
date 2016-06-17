@@ -30,13 +30,13 @@ void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER)
-        registerProtocol(Protocol::icmpv4, gate("sendOut"));
+        registerProtocol(Protocol::icmpv4, gate("ipOut"));
 }
 
 void EchoProtocol::handleMessage(cMessage *msg)
 {
     cGate *arrivalGate = msg->getArrivalGate();
-    if (!strcmp(arrivalGate->getName(), "localIn"))
+    if (!strcmp(arrivalGate->getName(), "ipIn"))
         processPacket(check_and_cast<EchoPacket *>(msg));
     else if (!strcmp(arrivalGate->getName(), "pingIn"))
         sendEchoRequest(check_and_cast<PingPayload *>(msg));
@@ -72,7 +72,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     ctrl->setInterfaceId(-1);
     ctrl->setSourceAddress(dest);
     ctrl->setDestinationAddress(src);
-    send(reply, "sendOut");
+    send(reply, "ipOut");
 }
 
 void EchoProtocol::processEchoReply(EchoPacket *reply)

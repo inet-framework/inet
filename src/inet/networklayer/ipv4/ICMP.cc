@@ -38,7 +38,7 @@ void ICMP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER)
-        registerProtocol(Protocol::icmpv4, gate("sendOut"));
+        registerProtocol(Protocol::icmpv4, gate("ipOut"));
 }
 
 void ICMP::handleMessage(cMessage *msg)
@@ -46,7 +46,7 @@ void ICMP::handleMessage(cMessage *msg)
     cGate *arrivalGate = msg->getArrivalGate();
 
     // process arriving ICMP message
-    if (!strcmp(arrivalGate->getName(), "localIn")) {
+    if (!strcmp(arrivalGate->getName(), "ipIn")) {
         EV_INFO << "Received " << msg << " from network protocol.\n";
         processICMPMessage(check_and_cast<ICMPMessage *>(msg));
         return;
@@ -247,7 +247,7 @@ void ICMP::sendToIP(ICMPMessage *msg)
 {
     // assumes IPv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
-    send(msg, "sendOut");
+    send(msg, "ipOut");
 }
 
 } // namespace inet

@@ -65,8 +65,8 @@ module WiseRouteNetworkLayer like INetworkLayer
         np.transportOut --> dp.lowerLayerIn++;
         np.transportIn <-- dp.lowerLayerOut++;
 
-        dp.upperLayerOut++ --> echo.localIn;
-        dp.upperLayerIn++ <-- echo.sendOut;
+        dp.upperLayerOut++ --> echo.ipIn;
+        dp.upperLayerIn++ <-- echo.ipOut;
 
         ifIn --> { @display("m=s"); } --> np.queueIn;
         np.queueOut --> { @display("m=s"); } --> ifOut;
