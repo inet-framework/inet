@@ -19,7 +19,7 @@ echo "INET Version: $VERSION"
 if [ "$BUILDID" = "" ]; then
   # generate our own build identifier
   export BUILDDATE=`date +%Y%m%d`
-  export BUILDHASH=`git describe --tags | awk -F '-g' '{print $2;}'`
+  export BUILDHASH=`git describe --tags --long | awk -F '-g' '{print $2;}'`
   export BUILDID="$VERSION-$BUILDHASH"
 fi
 
