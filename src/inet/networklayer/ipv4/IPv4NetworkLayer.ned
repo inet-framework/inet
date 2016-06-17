@@ -53,6 +53,8 @@ module IPv4NetworkLayer like INetworkLayer
         output transportOut @labels(IPv4ControlInfo/up);
         input igmpIn;
         output igmpOut;
+        input icmpIn;
+        output icmpOut;
 
     submodules:
         configurator: IPv4NodeConfigurator {
@@ -114,5 +116,8 @@ module IPv4NetworkLayer like INetworkLayer
 
         ifdp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
         ifdp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
+
+        icmp.transportIn <-- { @display("m=n"); } <-- icmpIn;
+        icmp.transportOut --> { @display("m=n"); } --> icmpOut;
 }
 

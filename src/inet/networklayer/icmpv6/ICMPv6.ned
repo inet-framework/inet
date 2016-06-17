@@ -35,6 +35,8 @@ simple ICMPv6
         string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/control");
     gates:
+        input transportIn;
+        output transportOut;
         input ipv6In;
         output ipv6Out;
 }

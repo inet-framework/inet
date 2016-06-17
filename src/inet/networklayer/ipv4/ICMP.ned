@@ -45,6 +45,8 @@ simple ICMP
         string routingTableModule;
         @display("i=block/control");
     gates:
+        input transportIn;
+        output transportOut;
         input ipIn @labels(IPv4ControlInfo/up);  // delivered ICMP packets
         output ipOut @labels(IPv4ControlInfo/down);  // towards network
 }
