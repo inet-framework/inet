@@ -105,8 +105,8 @@
 /examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             cd16-9d0b c1c9-5c80/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             932c-9062 4b41-5e80/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             1cc3-48bb 00db-ee4f/tplx
-/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             18fd-c880 cae7-a191/tplx
-/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        7775-28ad e01a-f3f5/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             18fd-c880 db9a-c383/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        7775-28ad d520-f940/tplx
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            b4fd-7612 a9d3-3dc5/tplx
 
@@ -117,7 +117,7 @@
 # /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
 
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          6382-0694 c3aa-9b52/tplx
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3078-dde1 fdc2-9e8a/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          3078-dde1 484d-a7e4/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          2f85-e7ba e3a8-0d20/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          e4e8-e836 c234-0e8f/tplx
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          4ac0-a5d5 05d0-b950/tplx
@@ -339,11 +339,11 @@
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f9d3-a124 589f-ae82/tplx
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            da70-cae8 18ce-fc86/tplx
 /examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,         f5ab-9b00 daaa-21e5/tplx
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,         8613-0e36 5fe1-509d/tplx
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,         0f21-f5f4 fa09-6490/tplx
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,         6a16-f94a 4de2-f876/tplx
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,         8613-0e36 3fa7-dd44/tplx
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,         0f21-f5f4 625d-8799/tplx
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,         6a16-f94a 3382-de20/tplx
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            19a4-cae6 56de-a10a/tplx
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         7a37-2331 c056-a77d/tplx
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,         7a37-2331 0ae4-3173/tplx
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,         dc4e-8f34 397e-d777/tplx
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
