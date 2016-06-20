@@ -27,7 +27,6 @@ import inet.networklayer.arp.ipv4.ARP;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.internetcloud.ICloudDelayer;
-import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.IPv4RoutingTable;
@@ -104,10 +103,6 @@ module InternetCloud
                     parameters:
                         @display("p=350,108");
                 }
-                errorHandling: ErrorHandling {
-                    parameters:
-                        @display("p=450,108");
-                }
                 dp: MessageDispatcher {
                     parameters:
                         @display("p=350,286;b=380,5,,,,1");
@@ -117,8 +112,6 @@ module InternetCloud
                 // transport Layer
                 ip.transportOut --> icmp.ipIn;
                 ip.transportIn <-- icmp.ipOut;
-
-                icmp.errorOut --> errorHandling.in;
 
                 arp.netwIn <-- dp.upperLayerOut++;
                 arp.netwOut --> dp.upperLayerIn++;

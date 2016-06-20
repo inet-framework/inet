@@ -47,6 +47,5 @@ simple ICMP
     gates:
         input ipIn @labels(IPv4ControlInfo/up);  // delivered ICMP packets
         output ipOut @labels(IPv4ControlInfo/down);  // towards network
-        output errorOut;  // errors
 }
 

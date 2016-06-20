@@ -291,7 +291,6 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
 
 void ICMPv6::errorOut(ICMPv6Message *icmpv6msg)
 {
-    send(icmpv6msg, "errorOut");
 }
 
 bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

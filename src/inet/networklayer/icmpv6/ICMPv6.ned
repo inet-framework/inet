@@ -37,7 +37,6 @@ simple ICMPv6
     gates:
         input ipv6In;
         output ipv6Out;
-        output errorOut;  // for errors
 }
 
 

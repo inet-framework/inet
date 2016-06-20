@@ -84,10 +84,6 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,100");
         }
-        errorHandling: ErrorHandling {
-            parameters:
-                @display("p=650,100");
-        }
         ifdp: MessageDispatcher {
             parameters:
                 @display("p=450,400;b=480,5");
@@ -103,8 +99,6 @@ module IPv4NetworkLayer like INetworkLayer
 
         dp.upperLayerOut++ --> igmp.ipIn;
         dp.upperLayerIn++ <-- igmp.ipOut;
-
-        icmp.errorOut --> errorHandling.in;
 
         ip.transportOut --> dp.lowerLayerIn++;
         ip.transportIn <-- dp.lowerLayerOut++;
