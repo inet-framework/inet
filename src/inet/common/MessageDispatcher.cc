@@ -68,6 +68,7 @@ const char *MessageDispatcher::findProtocolName(int protocolId)
 }
 
 void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t) {
+    Enter_Method_Silent();
     cGate *outGate = nullptr;
     if (!strcmp("upperLayerIn", inGate->getName())) {
         if (message->isPacket())
