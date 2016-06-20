@@ -91,11 +91,20 @@ module IPv6NetworkLayer like INetworkLayer
                 @display("p=450,200;b=480,5");
         }
 
+        tn: MessageDispatcher {
+            parameters:
+                @display("p=465,50;b=480,5");
+        }
+
     connections allowunconnected:  // FIXME remove 'nocheck'!
-        dp.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
-        dp.upperLayerIn++ <-- { @display("m=n"); } <-- transportIn;
-        icmpv6.transportIn <-- icmpIn;
-        icmpv6.transportOut --> icmpOut;
+        transportIn --> { @display("m=n"); } --> tn.upperLayerIn++;
+        tn.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+
+        tn.lowerLayerOut++ --> dp.upperLayerIn++;
+        tn.lowerLayerIn++ <-- dp.upperLayerOut++;
+
+        tn.lowerLayerOut++ --> icmpv6.transportIn;
+        icmpv6.transportOut --> tn.lowerLayerIn++;
 
         // IPv6 to IPv6 Tunneling
         iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;

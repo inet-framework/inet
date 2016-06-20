@@ -669,24 +669,8 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 
 void IPv6::handleReceivedICMP(ICMPv6Message *msg)
 {
-    int type = msg->getType();
-    if (type < 128) {
-        // ICMP errors are delivered to the appropriate higher layer protocols
-        EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
-        IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
-        int protocol = bogusPacket->getTransportProtocol();
-        int gateindex = mapping.getOutputGateForProtocol(protocol);
-        send(msg, "transportOut");
-    }
-    else {
-        // all others are delivered to ICMP:
-        // ICMPv6_ECHO_REQUEST, ICMPv6_ECHO_REPLY, ICMPv6_MLD_QUERY, ICMPv6_MLD_REPORT,
-        // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
-        // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
-        EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
-        int gateindex = mapping.getOutputGateForProtocol(IP_PROT_IPv6_ICMP);
-        send(msg, "transportOut");
-    }
+    EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
+    send(msg, "transportOut");
 }
 
 cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)

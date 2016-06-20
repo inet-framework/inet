@@ -274,27 +274,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
 
 void IPv4::handleIncomingICMP(ICMPMessage *packet)
 {
-    switch (packet->getType()) {
-        case ICMP_REDIRECT:    // TODO implement redirect handling
-        case ICMP_DESTINATION_UNREACHABLE:
-        case ICMP_TIME_EXCEEDED:
-        case ICMP_PARAMETER_PROBLEM: {
-            // TODO: kludge to instruct the dispatcher to forward this packet to the transport protocol
-            IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(packet->getEncapsulatedPacket());
-            check_and_cast<IPv4ControlInfo *>(packet->getControlInfo())->setTransportProtocol(bogusPacket->getTransportProtocol());
-
-            // ICMP errors are delivered to the appropriate higher layer protocol
-            send(packet, "transportOut");
-            break;
-        }
-
-        default: {
-            // all others are delivered to ICMP: ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY,
-            // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
-            send(packet, "transportOut");
-            break;
-        }
-    }
+    send(packet, "transportOut");
 }
 
 void IPv4::handlePacketFromHL(cPacket *packet)

@@ -48,6 +48,7 @@ void ICMPv6::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerProtocol(Protocol::icmpv6, gate("ipv6Out"));
+        registerProtocol(Protocol::icmpv6, gate("transportOut"));
     }
 }
 
@@ -61,11 +62,28 @@ void ICMPv6::handleMessage(cMessage *msg)
         processICMPv6Message(check_and_cast<ICMPv6Message *>(msg));
         return;
     }
+    else
+        throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }
 
 void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
 {
-    ASSERT(dynamic_cast<ICMPv6Message *>(icmpv6msg));
+    int type = icmpv6msg->getType();
+    if (type < 128) {
+        // ICMP errors are delivered to the appropriate higher layer protocols
+        EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
+        IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(icmpv6msg->getEncapsulatedPacket());
+        int transportProtocol = bogusPacket->getTransportProtocol();
+        if (transportProtocol == IP_PROT_IPv6_ICMP) {
+            // ICMP error answer to an ICMP packet:
+            errorOut(icmpv6msg);
+        }
+        else {
+            check_and_cast<IPv6ControlInfo *>(icmpv6msg->getControlInfo())->setTransportProtocol(transportProtocol);
+            send(icmpv6msg, "transportOut");
+        }
+    }
+    else {
     if (dynamic_cast<ICMPv6DestUnreachableMsg *>(icmpv6msg)) {
         EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
         errorOut(icmpv6msg);
@@ -92,6 +110,7 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
     }
     else
         throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(),icmpv6msg->getName());
+    }
 }
 
 /*

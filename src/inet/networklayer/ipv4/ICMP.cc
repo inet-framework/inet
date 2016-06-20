@@ -37,8 +37,10 @@ Define_Module(ICMP);
 void ICMP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_NETWORK_LAYER)
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         registerProtocol(Protocol::icmpv4, gate("ipOut"));
+        registerProtocol(Protocol::icmpv4, gate("transportOut"));
+    }
 }
 
 void ICMP::handleMessage(cMessage *msg)
@@ -46,11 +48,13 @@ void ICMP::handleMessage(cMessage *msg)
     cGate *arrivalGate = msg->getArrivalGate();
 
     // process arriving ICMP message
-    if (!strcmp(arrivalGate->getName(), "ipIn")) {
+    if (arrivalGate->isName("ipIn")) {
         EV_INFO << "Received " << msg << " from network protocol.\n";
         processICMPMessage(check_and_cast<ICMPMessage *>(msg));
         return;
     }
+    else
+        throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }
 
 void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code)
@@ -172,21 +176,27 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
 void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
 {
     switch (icmpmsg->getType()) {
-        case ICMP_DESTINATION_UNREACHABLE:
-            errorOut(icmpmsg);
-            break;
-
         case ICMP_REDIRECT:
-            errorOut(icmpmsg);
+            // TODO implement redirect handling
+            delete icmpmsg;
             break;
 
+        case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
-            errorOut(icmpmsg);
+        case ICMP_PARAMETER_PROBLEM: {
+            // ICMP errors are delivered to the appropriate higher layer protocol
+            IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(icmpmsg->getEncapsulatedPacket());
+            int transportProtocol = bogusPacket->getTransportProtocol();
+            if (transportProtocol == IP_PROT_ICMP) {
+                // ICMP error answer to an ICMP packet:
+                errorOut(icmpmsg);
+            }
+            else {
+                check_and_cast<IPv4ControlInfo *>(icmpmsg->getControlInfo())->setTransportProtocol(transportProtocol);
+                send(icmpmsg, "transportOut");
+            }
             break;
-
-        case ICMP_PARAMETER_PROBLEM:
-            errorOut(icmpmsg);
-            break;
+        }
 
         case ICMP_ECHO_REQUEST:
             processEchoRequest(icmpmsg);
@@ -208,6 +218,7 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
             throw cRuntimeError("Unknown ICMP type %d", icmpmsg->getType());
     }
 }
+
 
 void ICMP::errorOut(ICMPMessage *icmpmsg)
 {
