@@ -182,6 +182,9 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      */
     virtual void sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr);
 
+    void sendIcmpError(IPv6Datagram *origDatagram, ICMPv6Type type, int code);
+    void sendIcmpError(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
+
     // NetFilter functions:
 
   protected:

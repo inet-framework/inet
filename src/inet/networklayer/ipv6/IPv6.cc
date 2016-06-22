@@ -644,7 +644,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
                ICMP Parameter Problem, Code 1, message to the sender of the packet*/
             EV_INFO << "No MIPv6 support on this node!\n";
             IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
-            icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+            sendIcmpError(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
         }
     }
 #endif /* WITH_xMIPv6 */
@@ -663,7 +663,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
         // TODO send ICMP Destination Unreacheable error
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
         IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
-        icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+        sendIcmpError(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
     }
 }
 
@@ -748,7 +748,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
     if (datagram->getHopLimit() <= 0) {
         // drop datagram, destruction responsibility in ICMP
         EV_INFO << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
-        icmp->sendErrorMessage(datagram, ICMPv6_TIME_EXCEEDED, 0);    // FIXME check icmp 'code'
+        sendIcmpError(datagram, ICMPv6_TIME_EXCEEDED, 0);    // FIXME check icmp 'code'
         return;
     }
 
@@ -783,7 +783,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
     // routed datagrams are not fragmented
     if (!fromHL) {
         // FIXME check for multicast datagrams, how many ICMP error should be sent
-        icmp->sendErrorMessage(datagram, ICMPv6_PACKET_TOO_BIG, 0);    // TODO set MTU
+        sendIcmpError(datagram, ICMPv6_PACKET_TOO_BIG, 0);    // TODO set MTU
         return;
     }
 
@@ -847,7 +847,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
             if (rt->isRouter()) {
                 EV_INFO << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
                 numUnroutable++;
-                icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0);    // FIXME check ICMP 'code'
+                sendIcmpError(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0);    // FIXME check ICMP 'code'
             }
             else {    // host
                 EV_INFO << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
@@ -1130,6 +1130,16 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(INetworkDatagram *datagram,
         }
     }
     return INetfilter::IHook::ACCEPT;
+}
+
+void IPv6::sendIcmpError(IPv6Datagram *origDatagram, ICMPv6Type type, int code)
+{
+    icmp->sendErrorMessage(origDatagram, type, code);
+}
+
+void IPv6::sendIcmpError(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
+{
+    icmp->sendErrorMessage(transportPacket, ctrl, type, code);
 }
 
 } // namespace inet

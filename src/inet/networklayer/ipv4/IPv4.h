@@ -225,6 +225,9 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
 
     virtual void sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie);
 
+    virtual void sendIcmpError(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code);
+    virtual void sendIcmpError(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code);
+
   public:
     IPv4();
     virtual ~IPv4();

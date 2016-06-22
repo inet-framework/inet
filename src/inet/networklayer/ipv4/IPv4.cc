@@ -199,7 +199,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
         double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getByteLength();
         if (dblrand() <= relativeHeaderLength) {
             EV_WARN << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
-            icmp->sendErrorMessage(datagram, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
+            sendIcmpError(datagram, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
     }
@@ -430,7 +430,7 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
     if (!destIE) {    // no route found
         EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
         numUnroutable++;
-        icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
+        sendIcmpError(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
         L3Address nextHop(nextHopAddr);
@@ -613,7 +613,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
     else {
         EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
         IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(packet->removeControlInfo());
-        icmp->sendErrorMessage(packet, ctrlInfo, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        sendIcmpError(packet, ctrlInfo, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 
@@ -661,7 +661,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     if (datagram->getTimeToLive() < 0) {
         // drop datagram, destruction responsibility in ICMP
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        sendIcmpError(datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
@@ -677,7 +677,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (datagram->getDontFragment()) {
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-        icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
+        sendIcmpError(datagram, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
         return;
@@ -1161,6 +1161,16 @@ void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj 
     if (signalID == IARP::failedARPResolutionSignal) {
         arpResolutionTimedOut(check_and_cast<IARP::Notification *>(obj));
     }
+}
+
+void IPv4::sendIcmpError(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code)
+{
+    icmp->sendErrorMessage(origDatagram, inputInterfaceId, type, code);
+}
+
+void IPv4::sendIcmpError(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code)
+{
+    icmp->sendErrorMessage(transportPacket, ctrl, type, code);
 }
 
 } // namespace inet
