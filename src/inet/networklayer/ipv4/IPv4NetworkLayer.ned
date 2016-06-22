@@ -51,8 +51,6 @@ module IPv4NetworkLayer like INetworkLayer
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
-        input igmpIn;
-        output igmpOut;
 
     submodules:
         configurator: IPv4NodeConfigurator {
@@ -111,8 +109,8 @@ module IPv4NetworkLayer like INetworkLayer
         arp.ifOut --> ifdp.upperLayerIn++;
         arp.ifIn <-- ifdp.upperLayerOut++;
 
-        igmp.routerOut --> igmpOut;
-        igmp.routerIn <-- igmpIn;
+        igmp.routerOut --> tn.lowerLayerIn++;
+        igmp.routerIn <-- tn.lowerLayerOut++;
 
         ip.queueIn <-- ifdp.upperLayerOut++;
         ip.queueOut --> ifdp.upperLayerIn++;
