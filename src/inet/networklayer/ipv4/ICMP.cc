@@ -185,15 +185,21 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
-            IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(icmpmsg->getEncapsulatedPacket());
-            int transportProtocol = bogusPacket->getTransportProtocol();
+            IPv4Datagram *bogusL3Packet = check_and_cast<IPv4Datagram *>(icmpmsg->getEncapsulatedPacket());
+            int transportProtocol = bogusL3Packet->getTransportProtocol();
             if (transportProtocol == IP_PROT_ICMP) {
-                // ICMP error answer to an ICMP packet:
+                // received ICMP error answer to an ICMP packet:
                 errorOut(icmpmsg);
             }
             else {
-                check_and_cast<IPv4ControlInfo *>(icmpmsg->getControlInfo())->setTransportProtocol(transportProtocol);
-                send(icmpmsg, "transportOut");
+                if (transportProtocols.find(transportProtocol) == transportProtocols.end()) {
+                    EV_ERROR << "Transport protocol " << transportProtocol << " not registered, packet dropped\n";
+                    delete icmpmsg;
+                }
+                else {
+                    check_and_cast<IPv4ControlInfo *>(icmpmsg->getControlInfo())->setTransportProtocol(transportProtocol);
+                    send(icmpmsg, "transportOut");
+                }
             }
             break;
         }
@@ -219,9 +225,9 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
     }
 }
 
-
 void ICMP::errorOut(ICMPMessage *icmpmsg)
 {
+    delete icmpmsg;
 }
 
 void ICMP::processEchoRequest(ICMPMessage *request)
@@ -258,6 +264,14 @@ void ICMP::sendToIP(ICMPMessage *msg)
     // assumes IPv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     send(msg, "ipOut");
+}
+
+void ICMP::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("transportIn", gate->getBaseName())) {
+        transportProtocols.insert(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol));
+    }
 }
 
 } // namespace inet

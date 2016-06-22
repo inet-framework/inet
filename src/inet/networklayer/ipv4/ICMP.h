@@ -24,6 +24,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 
 namespace inet {
@@ -34,8 +35,10 @@ class IPv4ControlInfo;
 /**
  * ICMP module.
  */
-class INET_API ICMP : public cSimpleModule
+class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
 {
+  protected:
+    std::set<int> transportProtocols;    // where to send up packets
   protected:
     virtual void processICMPMessage(ICMPMessage *);
     virtual void errorOut(ICMPMessage *);
@@ -43,6 +46,7 @@ class INET_API ICMP : public cSimpleModule
     virtual void sendToIP(ICMPMessage *, const IPv4Address& dest);
     virtual void sendToIP(ICMPMessage *msg);
     virtual bool possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId);
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
   public:
     /**
