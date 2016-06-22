@@ -53,9 +53,6 @@ module IPv6NetworkLayer like INetworkLayer
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
-        input icmpIn;
-        output icmpOut;
-
     submodules:
         routingTable: IPv6RoutingTable {
             parameters:
