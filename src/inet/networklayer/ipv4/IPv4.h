@@ -290,11 +290,6 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
 
     /**
-     * send packet on transportOut gate specified by protocolId
-     */
-    void sendOnTransportOutGateByProtocolId(cPacket *packet, int protocolId);
-
-    /**
      * ILifecycle method
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
