@@ -28,6 +28,7 @@
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/common/IPSocket.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
@@ -216,6 +217,9 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
 void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
 {
     IPv4Address& destAddr = datagram->getDestAddress();
+
+    // remove control info
+    delete datagram->removeControlInfo();
 
     // route packet
 
@@ -483,8 +487,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
     if (!route) {
         EV_WARN << "Multicast route does not exist, try to add.\n";
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_NEW_MULTICAST, datagram, const_cast<InterfaceEntry *>(fromIE));
+        emit(NF_IPv4_NEW_MULTICAST, datagram);
 
         // read new record
         route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
@@ -499,8 +502,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
 
     if (route->getInInterface() && fromIE != route->getInInterface()->getInterface()) {
         EV_ERROR << "Did not arrive on input interface, packet dropped.\n";
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_DATA_ON_NONRPF, datagram, const_cast<InterfaceEntry *>(fromIE));
+        emit(NF_IPv4_DATA_ON_NONRPF, datagram);
         numDropped++;
         delete datagram;
     }
@@ -511,8 +513,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
         delete datagram;
     }
     else {
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_DATA_ON_RPF, datagram, const_cast<InterfaceEntry *>(fromIE));    // forwarding hook
+        emit(NF_IPv4_DATA_ON_RPF, datagram);    // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
@@ -532,8 +533,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
             }
         }
 
-        // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_MDATA_REGISTER, datagram, const_cast<InterfaceEntry *>(fromIE));    // postRouting hook
+        emit(NF_IPv4_MDATA_REGISTER, datagram);    // postRouting hook
 
         // only copies sent, delete original datagram
         delete datagram;
@@ -588,6 +588,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
         packetCopy->setControlInfo(controlInfoCopy);
         send(packetCopy, "transportOut");
     }
+
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {
         send(packet, "transportOut");
         numLocalDeliver++;
