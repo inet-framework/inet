@@ -272,11 +272,6 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
     }
 }
 
-void IPv4::handleIncomingICMP(ICMPMessage *packet)
-{
-    send(packet, "transportOut");
-}
-
 void IPv4::handlePacketFromHL(cPacket *packet)
 {
     EV_INFO << "Received " << packet << " from upper layer.\n";
@@ -598,12 +593,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
         packetCopy->setControlInfo(controlInfoCopy);
         send(packetCopy, "transportOut");
     }
-    if (protocol == IP_PROT_ICMP) {
-        // incoming ICMP packets are handled specially
-        handleIncomingICMP(check_and_cast<ICMPMessage *>(packet));
-        numLocalDeliver++;
-    }
-    else if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+    if (mapping.findOutputGateForProtocol(protocol) >= 0) {
         send(packet, "transportOut");
         numLocalDeliver++;
     }

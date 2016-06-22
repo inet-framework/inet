@@ -160,11 +160,6 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
 
     /**
-     * Handle incoming ICMP messages.
-     */
-    virtual void handleIncomingICMP(ICMPMessage *packet);
-
-    /**
      * Performs unicast routing. Based on the routing decision, it sends the
      * datagram through the outgoing interface.
      */
