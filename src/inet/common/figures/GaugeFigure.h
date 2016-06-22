@@ -34,6 +34,8 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     cTextFigure *labelFigure;
     cOvalFigure *backgroundFigure;
     std::vector<cArcFigure *> curveFigures;
+
+    // TODO Create a structure with cLineFigure* and cTextFigure*
     std::vector<cLineFigure *> tickFigures;
     std::vector<cTextFigure *> numberFigures;
     const char *colorStrip = "";
@@ -42,6 +44,7 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     double tickSize = 10;
     double value = NaN;
     int numTicks = 0;
+    double shifting = 0;
     int curvesOnCanvas = 0;
 
   protected:

@@ -306,7 +306,7 @@ void GaugeFigure::setTickGeometry(cLineFigure *tick, int index)
     tick->setLineWidth(zeroToOne(getBounds().width * TICK_LINE_WIDTH_PERCENT));
 
     Transform trans;
-    trans.rotate(index * (M_PI + M_PI / 2) / (numTicks - 1), getBounds().getCenter()).
+    trans.rotate((M_PI + M_PI / 2)*(index * tickSize + shifting)/(max-min), getBounds().getCenter()).
             rotate(-M_PI / 4, getBounds().getCenter());
     tick->setTransform(trans);
 }
@@ -321,9 +321,9 @@ void GaugeFigure::setNumberGeometry(cTextFigure *number, int index)
     number->setPosition(textPos);
 
     Transform trans;
-    trans.rotate(-index * (M_PI + M_PI / 2) / (numTicks - 1), textPos).
+    trans.rotate(-(M_PI + M_PI / 2)*(index * tickSize + shifting)/(max-min), textPos).
             rotate(M_PI / 4, textPos).
-            rotate(index * (M_PI + M_PI / 2) / (numTicks - 1), getBounds().getCenter()).
+            rotate((M_PI + M_PI / 2)*(index * tickSize + shifting)/(max-min), getBounds().getCenter()).
             rotate(-M_PI / 4, getBounds().getCenter());
     number->setTransform(trans);
 }
@@ -373,8 +373,14 @@ void GaugeFigure::redrawTicks()
 {
     ASSERT(tickFigures.size() == numberFigures.size());
 
+    double fraction = std::abs(fmod(min / tickSize, 1));
+    shifting = tickSize*(min < 0 ? fraction : 1 - fraction);
+    // if fraction == 0 then shifting == tickSize therefore don't have to shift the ticks
+    if(shifting == tickSize)
+        shifting = 0;
+
     int prevNumTicks = numTicks;
-    numTicks = std::max(0.0, std::abs(max - min) / tickSize + 1);
+    numTicks = std::max(0.0, std::abs(max - min - shifting) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
     if (numTicks > tickFigures.size())
@@ -402,7 +408,12 @@ void GaugeFigure::redrawTicks()
         setTickGeometry(tickFigures[i], i);
 
         char buf[32];
-        sprintf(buf, "%g", min + i * tickSize);
+
+        double number = min + i * tickSize + shifting;
+        if(std::abs(number) < tickSize / 2)
+            number = 0;
+
+        sprintf(buf, "%g", number);
         numberFigures[i]->setText(buf);
         setNumberGeometry(numberFigures[i], i);
     }
