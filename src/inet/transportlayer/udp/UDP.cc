@@ -490,6 +490,9 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
+    char buff[80];
+    snprintf(buff, sizeof(buff), "Port %d unreachable", udpPacket->getDestinationPort());
+    udpPacket->setName(buff);
     if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
 #ifdef WITH_IPv4
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
