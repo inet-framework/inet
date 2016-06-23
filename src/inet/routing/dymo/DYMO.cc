@@ -140,7 +140,29 @@ void DYMO::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        registerProtocol(Protocol::manet, gate("ipOut"));
+        socket.setOutputGate(gate("ipOut"));
+        L3Address::AddressType addrType = routingTable->getRouterIdAsGeneric().getType();
+        int protocolId = -1;
+        switch (addrType) {
+            case L3Address::IPv4:
+                protocolId = Protocol::ipv4.getId();
+                break;
+
+            case L3Address::IPv6:
+                protocolId = Protocol::ipv6.getId();
+                break;
+
+            case L3Address::MODULEID:
+            case L3Address::MODULEPATH:
+                protocolId = Protocol::gnp.getId();
+                break;
+
+            default:
+                throw cRuntimeError("unknown router ID address type: %s(%i)", L3Address::getTypeName(addrType), addrType);
+        }
+        socket.setControlInfoProtocolId(protocolId);
+        socket.bind(IP_PROT_MANET);
+
         host->subscribe(NF_LINK_BREAK, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);

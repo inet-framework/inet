@@ -22,12 +22,15 @@
 
 #include <vector>
 #include <map>
-#include <omnetpp.h>
+
+#include "inet/common/INETDefs.h"
+
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/contract/L3Socket.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/routing/dymo/DYMOdefs.h"
 #include "inet/routing/dymo/DYMORouteData.h"
@@ -78,6 +81,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     int maxHopLimit;
 
     // context
+    L3Socket socket;
     cModule *host;
     NodeStatus *nodeStatus;
     IL3AddressType *addressType;
