@@ -65,7 +65,7 @@
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,         209c-5014 0ab1-ae48/tplx
 
-/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         d9b2-1cf9 d87b-282d/tplx
+/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         d9b2-1cf9 0405-c081/tplx
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,         c2a3-6895 9bc1-d275/tplx
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,         8720-fe74 9fe6-f35d/tplx
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         0ef1-219f 1b18-2407/tplx

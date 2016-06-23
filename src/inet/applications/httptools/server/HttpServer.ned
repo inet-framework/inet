@@ -112,7 +112,7 @@ simple HttpServer like IApp
         string siteDefinition = default("");            // The site script file. Blank to disable.
         double activationTime @unit("s") = default(0s); // The initial activation delay. Zero to disable.
         xml config;                                     // The XML configuration file for random sites
-        string httpControllerModule = default("controller"); // ModulePath for HttpController module
+        string httpControllerModule = default("httpController"); // ModulePath for HttpController module
     gates:
         input socketIn;
         output socketOut;

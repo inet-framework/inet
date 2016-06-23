@@ -46,6 +46,7 @@ simple HttpServerDirectEvilB like IHttpDirectApp
         int minBadRequests;                               // The lower bound of bad requests.
         int maxBadRequests;                               // The upper bound of bad requests
         xml config;                                       // The XML configuration file for random sites
+        string httpControllerModule = default("httpController"); // the absolute path to the http browser controller, @see HttpController
     gates:
         input httpIn @directIn;
 }

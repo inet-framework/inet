@@ -30,7 +30,7 @@ network HttpSockPair
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("i=block/cogwheel");
         }
-        controller: HttpController {
+        httpController: HttpController {
             parameters:
                 @display("p=62,60;i=block/cogwheel");
         }

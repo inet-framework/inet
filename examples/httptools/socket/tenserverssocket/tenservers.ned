@@ -62,7 +62,7 @@ network Http10Servers
                 //                nonIPModuleTypes = "";
                 @display("p=58,79;i=block/cogwheel");
         }
-        controller: HttpController {
+        httpController: HttpController {
             parameters:
                 @display("p=62,156;i=block/cogwheel");
         }

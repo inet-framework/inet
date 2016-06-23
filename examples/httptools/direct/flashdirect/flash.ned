@@ -47,7 +47,7 @@ network HttpDirectFlash
         double num_browsers @prompt("Number of browsers") = default(2);
         @display("bgb=754,559");
     submodules:
-        controller: HttpController {
+        httpController: HttpController {
             parameters:
                 @display("p=54,60;i=block/cogwheel");
         }

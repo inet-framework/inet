@@ -113,7 +113,7 @@ void HttpBrowserBase::initialize(int stage)
         if (rdProcessingDelay == nullptr)
             throw cRuntimeError("Processing delay random object could not be created");
 
-        controller = getModuleFromPar<HttpController>(par("httpBrowserControllerModule"), this);
+        controller = getModuleFromPar<HttpController>(par("httpControllerModule"), this);
 
         httpProtocol = par("httpProtocol");
 

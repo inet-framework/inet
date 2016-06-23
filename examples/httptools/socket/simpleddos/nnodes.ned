@@ -68,7 +68,7 @@ network HttpNnodes
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.x.x'/></config>");
                 @display("p=50,64;i=block/cogwheel");
         }
-        controller: HttpController {
+        httpController: HttpController {
             parameters:
                 @display("p=46,140;i=block/cogwheel");
         }

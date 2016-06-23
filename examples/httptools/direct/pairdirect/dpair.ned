@@ -42,7 +42,7 @@ network HttpDirectPair
     parameters:
         @display("bgb=474,374");
     submodules:
-        controller: HttpController {
+        httpController: HttpController {
             parameters:
                 @display("p=62,60;i=block/cogwheel");
         }
