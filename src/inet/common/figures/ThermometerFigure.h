@@ -41,6 +41,7 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     double tickSize = 10;
     double value = NaN;
     int numTicks = 0;
+    double shifting = 0;
 
   protected:
     virtual void parse(cProperty *property) override;

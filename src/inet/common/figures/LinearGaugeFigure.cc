@@ -259,7 +259,8 @@ void LinearGaugeFigure::setValue(int series, simtime_t timestamp, double newValu
 void LinearGaugeFigure::setTickGeometry(cLineFigure *tick, int index)
 {
     double axisWidth = axisFigure->getEnd().x - axisFigure->getStart().x - axisFigure->getLineWidth();
-    double x = axisFigure->getStart().x + axisFigure->getLineWidth() / 2 + index * axisWidth / (numTicks - 1);
+    double x = axisFigure->getStart().x + axisFigure->getLineWidth() / 2
+            + axisWidth * (index * tickSize + shifting) / (max - min);
     tick->setStart(Point(x, getBounds().getCenter().y));
 
     Point endPos = tick->getStart();
@@ -272,7 +273,8 @@ void LinearGaugeFigure::setTickGeometry(cLineFigure *tick, int index)
 void LinearGaugeFigure::setNumberGeometry(cTextFigure *number, int index)
 {
     double axisWidth = axisFigure->getEnd().x - axisFigure->getStart().x - axisFigure->getLineWidth() / 2;
-    double x = axisFigure->getStart().x + axisFigure->getLineWidth() / 2 + index * axisWidth / (numTicks - 1);
+    double x = axisFigure->getStart().x + axisFigure->getLineWidth() / 2
+            + axisWidth * (index * tickSize + shifting) / (max - min);
     Point textPos = Point(x, axisFigure->getStart().y + getBounds().height * NUMBER_Y_PERCENT);
     number->setPosition(textPos);
     number->setFont(cFigure::Font("", getBounds().height * NUMBER_FONTSIZE_PERCENT, 0));
@@ -306,8 +308,14 @@ void LinearGaugeFigure::redrawTicks()
 {
     ASSERT(tickFigures.size() == numberFigures.size());
 
+    double fraction = std::abs(fmod(min / tickSize, 1));
+    shifting = tickSize*(min < 0 ? fraction : 1 - fraction);
+    // if fraction == 0 then shifting == tickSize therefore don't have to shift the ticks
+    if(shifting == tickSize)
+        shifting = 0;
+
     int prevNumTicks = numTicks;
-    numTicks = std::max(0.0, std::abs(max - min) / tickSize + 1);
+    numTicks = std::max(0.0, std::abs(max - min - shifting) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
     if (numTicks > tickFigures.size())
@@ -334,8 +342,12 @@ void LinearGaugeFigure::redrawTicks()
     for (int i = 0; i < numTicks; ++i) {
         setTickGeometry(tickFigures[i], i);
 
+        double number = min + i * tickSize + shifting;
+        if(std::abs(number) < tickSize / 2)
+            number = 0;
+
         char buf[32];
-        sprintf(buf, "%g", min + i * tickSize);
+        sprintf(buf, "%g", number);
         numberFigures[i]->setText(buf);
         setNumberGeometry(numberFigures[i], i);
     }
