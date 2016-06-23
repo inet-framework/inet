@@ -237,13 +237,13 @@
 
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           e660-6932 9649-c759/tplx
 
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            01a6-2ee6 0c4d-1ce3/tplx
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            adc5-77df ed38-57a9/tplx
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            c5be-600b 3db7-bc30/tplx
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            c294-75f0 9de1-8844/tplx
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            a454-861b 461b-cf85/tplx
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            e13f-59be 27b7-2c79/tplx
-/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            fef1-a7a4 186e-0b33/tplx
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            01a6-2ee6 6c2d-4d34/tplx
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            adc5-77df 405b-1a3e/tplx
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            c5be-600b 3991-7838/tplx
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            c294-75f0 7b82-08b8/tplx
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            a454-861b d714-6e00/tplx
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            e13f-59be 343b-8e5c/tplx
+/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            fef1-a7a4 e2b8-51f8/tplx
 
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          95f1-63aa a7a5-b535/tplx
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             fcb7-35d6 940b-9ee3/tplx
@@ -355,9 +355,9 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            db21-a060 6a4c-81b2/tplx
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            b1c5-f6db d348-1867/tplx
 
-/examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            68a1-bafe 6e10-d331/tplx
-/examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2f37-be67 dd09-3736/tplx
-/examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            7728-94ae e7af-a02a/tplx
+/examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            68a1-bafe 891d-24f4/tplx
+/examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2f37-be67 5cc0-9205/tplx
+/examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            7728-94ae 1b56-f73f/tplx
 
 ### /examples/voipstream/* : see voipstream.csv
 
