@@ -1,10 +1,10 @@
 # Failures:
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             2678-6e1c c272-63f2/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             0000-0000 c47a-e8f5/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             80ba-daae 3d5d-bd6a/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             2a63-2ffe c027-908d/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             0000-0000 c47a-e8f5/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             4f98-d087 54e1-019e/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            10s,             2a63-2ffe b299-6c83/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             2678-6e1c 02ff-794b/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             0000-0000 5b80-0005/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             80ba-daae ebd5-f3e3/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             2a63-2ffe 6bbb-985c/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             0000-0000 5b80-0005/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             4f98-d087 73a5-eada/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            10s,             2a63-2ffe 8a88-cfd4/tplx
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            10s,             0000-0000 5fe9-22ea/tplx         # IPv6: Shutdown not supported
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0,         10s,             4f98-d087 c74c-6c07/tplx         # Shutdown not supported
