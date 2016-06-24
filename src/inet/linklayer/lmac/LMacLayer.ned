@@ -46,4 +46,6 @@ simple LMacLayer extends MACProtocolBase like IMACProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(LMacLayer);
+        @signal[frameTransmitted](type=cPacket);
+        @signal[frameGivenUp](type=cPacket);
 }

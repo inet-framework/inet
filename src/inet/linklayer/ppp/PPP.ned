@@ -63,6 +63,8 @@ simple PPP
         @signal[NF_PP_TX_BEGIN](type=TxNotifDetails);
         @signal[NF_PP_TX_END](type=TxNotifDetails);
         @signal[NF_PP_RX_END](type=TxNotifDetails);
+        @signal[frameTransmitted](type=PPPFrame);
+        @signal[frameGivenUp](type=PPPFrame);
         @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

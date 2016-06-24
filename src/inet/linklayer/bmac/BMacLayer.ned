@@ -77,4 +77,6 @@ simple BMacLayer extends MACProtocolBase like IMACProtocol
 
         @class(BMacLayer);
         @signal[NF_LINK_BREAK](type=BMacFrame);
+        @signal[frameTransmitted](type=cPacket);
+        @signal[frameGivenUp](type=cPacket);
 }
