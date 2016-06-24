@@ -192,6 +192,8 @@ void UDPBasicApp::scheduleNextSend()
             return;
         }
     }
+    if (stopTime < SIMTIME_ZERO)
+        return;
     selfMsg->setKind(STOP);
     scheduleAt(stopTime, selfMsg);
 }
