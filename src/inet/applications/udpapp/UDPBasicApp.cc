@@ -31,6 +31,9 @@ Define_Module(UDPBasicApp);
 simsignal_t UDPBasicApp::sentPkSignal = registerSignal("sentPk");
 simsignal_t UDPBasicApp::rcvdPkSignal = registerSignal("rcvdPk");
 
+simsignal_t UDPBasicApp::frameTransmittedSignal = registerSignal("frameTransmitted");
+simsignal_t UDPBasicApp::frameGivenUpSignal = registerSignal("frameGivenUp");
+
 
 UDPBasicApp::~UDPBasicApp()
 {
@@ -52,9 +55,17 @@ void UDPBasicApp::initialize(int stage)
         startTime = par("startTime").doubleValue();
         stopTime = par("stopTime").doubleValue();
         packetName = par("packetName");
+        waitPacketSent = par("waitPacketSent").boolValue();
+
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
+
+        cModule *hostModule = findContainingNode(this);
+        if (hostModule) {
+            hostModule->subscribe(frameTransmittedSignal, this);
+            hostModule->subscribe(frameGivenUpSignal, this);
+        }
     }
 }
 
@@ -121,6 +132,7 @@ void UDPBasicApp::sendPacket()
     L3Address destAddr = chooseDestAddr();
 
     emit(sentPkSignal, payload);
+    outgoingPacketTreeId = payload->getTreeId();
     socket.sendTo(payload, destAddr, destPort);
     numSent++;
 }
@@ -160,15 +172,28 @@ void UDPBasicApp::processStart()
 void UDPBasicApp::processSend()
 {
     sendPacket();
-    simtime_t d = simTime() + par("sendInterval").doubleValue();
-    if (stopTime < SIMTIME_ZERO || d < stopTime) {
-        selfMsg->setKind(SEND);
-        scheduleAt(d, selfMsg);
+    scheduleNextSend();
+}
+
+void UDPBasicApp::scheduleNextSend()
+{
+    if (stopTime >= SIMTIME_ZERO && simTime() >= stopTime)
+        return;
+    if (!waitPacketSent || outgoingPacketTreeId == -1) {
+        simtime_t d = simTime() + par("sendInterval").doubleValue();
+        if (waitPacketSent && selfMsg->isScheduled() && selfMsg->getKind() == STOP) {
+            if (d >= stopTime)
+                return;
+            cancelEvent(selfMsg);
+        }
+        if (stopTime < SIMTIME_ZERO || d < stopTime) {
+            selfMsg->setKind(SEND);
+            scheduleAt(d, selfMsg);
+            return;
+        }
     }
-    else {
-        selfMsg->setKind(STOP);
-        scheduleAt(stopTime, selfMsg);
-    }
+    selfMsg->setKind(STOP);
+    scheduleAt(stopTime, selfMsg);
 }
 
 void UDPBasicApp::processStop()
@@ -247,6 +272,25 @@ void UDPBasicApp::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
+
+void UDPBasicApp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+{
+    Enter_Method_Silent();
+
+    if (outgoingPacketTreeId != -1) {
+        if (signalID == frameTransmittedSignal || signalID == frameGivenUpSignal) {
+            for (cPacket *pk = dynamic_cast<cPacket *>(obj); pk != nullptr; pk = pk->getEncapsulatedPacket()) {
+                if (pk->getTreeId() == outgoingPacketTreeId) {
+                    outgoingPacketTreeId = -1;
+                    if (waitPacketSent)
+                        scheduleNextSend();
+                    break;
+                }
+            }
+        }
+    }
+}
+
 
 } // namespace inet
 

@@ -31,7 +31,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicApp : public ApplicationBase
+class INET_API UDPBasicApp : public ApplicationBase, public cListener
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -42,10 +42,12 @@ class INET_API UDPBasicApp : public ApplicationBase
     simtime_t startTime;
     simtime_t stopTime;
     const char *packetName = nullptr;
+    bool waitPacketSent = false;
 
     // state
     UDPSocket socket;
     cMessage *selfMsg = nullptr;
+    long outgoingPacketTreeId = -1;
 
     // statistics
     int numSent = 0;
@@ -53,6 +55,9 @@ class INET_API UDPBasicApp : public ApplicationBase
 
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
+
+    static simsignal_t frameTransmittedSignal;
+    static simsignal_t frameGivenUpSignal;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -69,10 +74,13 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual void processStart();
     virtual void processSend();
     virtual void processStop();
+    virtual void scheduleNextSend();
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
 
   public:
     UDPBasicApp() {}
