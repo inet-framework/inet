@@ -1,7 +1,7 @@
 .PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy doc
 
 all: checkmakefiles src/inet/features.h 
-	cd src && $(MAKE) all
+	cd src && $(MAKE)
 
 clean: checkmakefiles
 	cd src && $(MAKE) clean

@@ -34,6 +34,7 @@ src/Makefile.vc
 .oppfeaturestate
 .nedexclusions
 src/inet/features.h
+precompiled.h.*
 # ignore binary files
 out/
 *.so

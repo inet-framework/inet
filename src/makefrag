@@ -56,3 +56,39 @@ endif
 
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
+
+#########################################################################
+# precompiled header support for GCC and CLANG
+
+ifeq ($(TOOLCHAIN_NAME),gcc)
+PRECOMPILED_EXT=gch
+else ifeq ($(TOOLCHAIN_NAME),clang)
+PRECOMPILED_EXT=pch
+else
+PRECOMPILED_EXT=
+endif
+
+PRECOMPILED_HEADER=inet/common/precompiled.h
+PRECOMPILED_HEADER_PCH=$(PRECOMPILED_HEADER).$(PRECOMPILED_EXT)
+PRECOMPILED_HEADER_D=$(PRECOMPILED_HEADER_PCH:%.$(PRECOMPILED_EXT)=%.d)
+CFLAGS += -include $(PRECOMPILED_HEADER)
+
+# Main target
+all-pch: | pch all
+
+.PHONY: pch clean-pch
+
+pch : $(PRECOMPILED_HEADER_PCH)
+
+$(PRECOMPILED_HEADER_PCH): $(PRECOMPILED_HEADER)
+ifneq ("$(PRECOMPILED_EXT)","")
+	@echo Creating precompiled header for $(TOOLCHAIN_NAME)...
+	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(COPTS) -o $@ $<
+endif
+
+clean: clean-pch
+
+clean-pch:
+	$(Q)-rm -f $(PRECOMPILED_HEADER_D) $(PRECOMPILED_HEADER_PCH)
+
+-include $(PRECOMPILED_HEADER_D)
