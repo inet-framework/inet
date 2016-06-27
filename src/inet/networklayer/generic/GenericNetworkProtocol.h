@@ -43,7 +43,7 @@ namespace inet {
  */
 // TODO: rename this and its friends to something that is more specific
 // TODO: that expresses to some extent how this network protocol works
-class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
 {
   protected:
     /**
@@ -86,8 +86,6 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // hooks
-    typedef std::multimap<int, IHook *> HookList;
-    HookList hooks;
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
 
@@ -167,7 +165,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
     virtual void registerHook(int priority, IHook *hook) override;
-    virtual void unregisterHook(int priority, IHook *hook) override;
+    virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const INetworkDatagram *datagram) override;
     virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
 

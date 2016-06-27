@@ -42,7 +42,7 @@ class IIPv4RoutingTable;
 /**
  * Implements the IPv4 protocol.
  */
-class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
+class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
 {
   public:
     /**
@@ -105,8 +105,6 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     int numForwarded = 0;
 
     // hooks
-    typedef std::multimap<int, IHook *> HookList;
-    HookList hooks;
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
 
@@ -277,7 +275,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     /**
      * unregisters a Hook to be executed during datagram processing
      */
-    virtual void unregisterHook(int priority, IHook *hook) override;
+    virtual void unregisterHook(IHook *hook) override;
 
     /**
      * drop a previously queued datagram

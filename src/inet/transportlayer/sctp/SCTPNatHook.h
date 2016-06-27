@@ -11,7 +11,7 @@ class IPv4;
 
 namespace sctp {
 
-class INET_API SCTPNatHook : public cSimpleModule, INetfilter::IHook
+class INET_API SCTPNatHook : public cSimpleModule, NetfilterBase::HookBase
 {
   protected:
     IPv4 *ipLayer;    // IPv4 module

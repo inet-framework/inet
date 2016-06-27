@@ -24,7 +24,7 @@
 
 namespace inet {
 
-class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHook
+class INET_API NetfilterInfoHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   protected:
     INetfilter *netfilter;
@@ -125,7 +125,8 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(INetworkDatagr
 
 void NetfilterInfoHook::finish()
 {
-    netfilter->unregisterHook(0, this);
+    if (isRegisteredHook())
+        netfilter->unregisterHook(this);
 }
 
 } // namespace inet

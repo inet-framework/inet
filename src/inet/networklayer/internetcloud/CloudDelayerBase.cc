@@ -34,10 +34,6 @@ CloudDelayerBase::CloudDelayerBase()
 
 CloudDelayerBase::~CloudDelayerBase()
 {
-    //TODO unregister hook if ipv4Layer exists
-    networkProtocol = findModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
-    if (networkProtocol)
-        networkProtocol->unregisterHook(0, this);
 }
 
 void CloudDelayerBase::initialize(int stage)
@@ -54,9 +50,8 @@ void CloudDelayerBase::initialize(int stage)
 
 void CloudDelayerBase::finish()
 {
-    if (networkProtocol)
-        networkProtocol->unregisterHook(0, this);
-    networkProtocol = nullptr;
+    if (isRegisteredHook())
+        networkProtocol->unregisterHook(this);
 }
 
 void CloudDelayerBase::handleMessage(cMessage *msg)

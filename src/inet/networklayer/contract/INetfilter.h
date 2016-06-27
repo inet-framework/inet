@@ -101,7 +101,7 @@ class INET_API INetfilter
     /**
      * Removes the provided hook from the list of registered hooks.
      */
-    virtual void unregisterHook(int priority, IHook *hook) = 0;
+    virtual void unregisterHook(IHook *hook) = 0;
 
     /**
      * Requests the network layer to drop the datagram, because it's no longer
@@ -116,6 +116,44 @@ class INET_API INetfilter
      * route discovery process.
      */
     virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) = 0;
+};
+
+class INET_API NetfilterBase : public INetfilter {
+  public:
+    class INET_API HookBase : public INetfilter::IHook {
+      friend class NetfilterBase;
+
+      protected:
+        INetfilter *netfilter = nullptr;
+
+      public:
+        virtual ~HookBase() { if (netfilter) netfilter->unregisterHook(this); };
+
+        void registeredTo(INetfilter *nf) { ASSERT(netfilter == nullptr); netfilter = nf; }
+        void unregisteredFrom(INetfilter *nf) { ASSERT(netfilter == nf); netfilter = nullptr; }
+        bool isRegisteredHook() { return netfilter != nullptr; }
+    };
+
+  protected:
+    std::multimap<int, IHook *> hooks;
+
+  public:
+    virtual void registerHook(int priority, INetfilter::IHook *hook) override
+    {
+        hooks.insert(std::pair<int, INetfilter::IHook *>(priority, hook));
+        check_and_cast<HookBase *>(hook)->registeredTo(this);
+    }
+
+    virtual void unregisterHook(INetfilter::IHook *hook) override
+    {
+        for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
+            if (iter->second == hook) {
+                hooks.erase(iter);
+                check_and_cast<HookBase *>(hook)->unregisteredFrom(this);
+                return;
+            }
+        }
+    }
 };
 
 } // namespace inet

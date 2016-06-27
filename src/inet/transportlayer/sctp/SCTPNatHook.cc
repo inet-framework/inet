@@ -23,9 +23,6 @@ SCTPNatHook::SCTPNatHook()
 
 SCTPNatHook::~SCTPNatHook()
 {
-    ipLayer = check_and_cast_nullable<IPv4 *>(getModuleByPath(par("networkProtocolModule")));
-    if (ipLayer)
-        ipLayer->unregisterHook(0, this);
 }
 
 void SCTPNatHook::initialize()
@@ -299,8 +296,8 @@ void SCTPNatHook::sendBackError(IPv4Datagram *dgram)
 
 void SCTPNatHook::finish()
 {
-    if (ipLayer)
-        ipLayer->unregisterHook(0, this);
+    if (isRegisteredHook())
+        ipLayer->unregisterHook(this);
     ipLayer = nullptr;
     std::cout << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }

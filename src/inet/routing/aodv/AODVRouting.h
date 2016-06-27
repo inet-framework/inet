@@ -39,7 +39,7 @@ namespace inet {
  * in the IP-layer required by this protocol.
  */
 
-class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INetfilter::IHook, public cListener
+class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public NetfilterBase::HookBase, public cListener
 {
   protected:
     /*

@@ -40,7 +40,7 @@ class ICMPv6Message;
 /**
  * IPv6 implementation.
  */
-class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -114,8 +114,6 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
 #endif /* WITH_xMIPv6 */
 
     // netfilter hook variables
-    typedef std::multimap<int, IHook *> HookList;
-    HookList hooks;
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
 
@@ -221,7 +219,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
 
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;
-    virtual void unregisterHook(int priority, IHook *hook) override;
+    virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const INetworkDatagram *daragram) override;
     virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
 

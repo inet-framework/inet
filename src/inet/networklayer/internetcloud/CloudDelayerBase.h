@@ -28,7 +28,7 @@ namespace inet {
 
 //forward declarations:
 
-class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
+class INET_API CloudDelayerBase : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
     CloudDelayerBase();

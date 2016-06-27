@@ -937,18 +937,13 @@ bool IPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 void IPv6::registerHook(int priority, INetfilter::IHook *hook)
 {
     Enter_Method("registerHook()");
-    hooks.insert(std::pair<int, INetfilter::IHook *>(priority, hook));
+    NetfilterBase::registerHook(priority, hook);
 }
 
-void IPv6::unregisterHook(int priority, INetfilter::IHook *hook)
+void IPv6::unregisterHook(INetfilter::IHook *hook)
 {
     Enter_Method("unregisterHook()");
-    for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-        if ((iter->first == priority) && (iter->second == hook)) {
-            hooks.erase(iter);
-            return;
-        }
-    }
+    NetfilterBase::unregisterHook(hook);
 }
 
 void IPv6::dropQueuedDatagram(const INetworkDatagram *datagram)
