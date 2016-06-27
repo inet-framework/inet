@@ -31,17 +31,22 @@ simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
 simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
-void EtherEncap::initialize()
+void EtherEncap::initialize(int stage)
 {
-    seqNum = 0;
-    WATCH(seqNum);
-
-    totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
-    useSNAP = par("useSNAP").boolValue();
-
-    WATCH(totalFromHigherLayer);
-    WATCH(totalFromMAC);
-    WATCH(totalPauseSent);
+    if (stage == INITSTAGE_LOCAL) {
+        seqNum = 0;
+        WATCH(seqNum);
+        totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
+        useSNAP = par("useSNAP").boolValue();
+        WATCH(totalFromHigherLayer);
+        WATCH(totalFromMAC);
+        WATCH(totalPauseSent);
+    }
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
+        IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        InterfaceEntry *myIface = ift != nullptr ? ift->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str()) : nullptr;
+        interfaceId = (myIface != nullptr) ? myIface->getInterfaceId() : -1;
+    }
 }
 
 void EtherEncap::handleMessage(cMessage *msg)
@@ -135,6 +140,7 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
+    etherctrl->setInterfaceId(interfaceId);
     if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
         etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
     else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)
