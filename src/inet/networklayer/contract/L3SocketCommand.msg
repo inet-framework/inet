@@ -32,7 +32,7 @@ class L3SocketCommand
 
 class L3SocketBindCommand extends L3SocketCommand
 {
-    int protoclId;
+    int protocolId;
 }
 
 class L3SocketCloseCommand extends L3SocketCommand

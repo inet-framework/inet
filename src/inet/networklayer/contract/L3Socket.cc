@@ -47,7 +47,7 @@ void L3Socket::bind(int protocolId)
     L3SocketBindCommand *command = new L3SocketBindCommand();
     command->setControlInfoProtocolId(controlInfoProtocolId);
     command->setSocketId(socketId);
-    command->setProtoclId(protocolId);
+    command->setProtocolId(protocolId);
     cMessage *bind = new cMessage("bind");
     bind->setControlInfo(command);
     sendToOutput(bind);
