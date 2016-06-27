@@ -56,5 +56,6 @@ simple MatrixCloudDelayer like ICloudDelayer
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        string networkProtocolModule;
         xml config;
 }

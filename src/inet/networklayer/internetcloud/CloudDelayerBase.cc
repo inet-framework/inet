@@ -29,32 +29,34 @@ Define_Module(CloudDelayerBase);
 
 CloudDelayerBase::CloudDelayerBase()
 {
-    ipv4Layer = nullptr;
+    networkProtocol = nullptr;
 }
 
 CloudDelayerBase::~CloudDelayerBase()
 {
     //TODO unregister hook if ipv4Layer exists
-    ipv4Layer = check_and_cast_nullable<IPv4 *>(getModuleByPath("^.ip"));
-    if (ipv4Layer)
-        ipv4Layer->unregisterHook(0, this);
+    networkProtocol = findModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+    if (networkProtocol)
+        networkProtocol->unregisterHook(0, this);
 }
 
 void CloudDelayerBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER) {
-        ipv4Layer = check_and_cast<IPv4 *>(getModuleByPath("^.ip"));
-        ipv4Layer->registerHook(0, this);
+    if (stage == INITSTAGE_LOCAL) {
+        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        networkProtocol->registerHook(0, this);
     }
 }
 
 void CloudDelayerBase::finish()
 {
-    if (ipv4Layer)
-        ipv4Layer->unregisterHook(0, this);
-    ipv4Layer = nullptr;
+    if (networkProtocol)
+        networkProtocol->unregisterHook(0, this);
+    networkProtocol = nullptr;
 }
 
 void CloudDelayerBase::handleMessage(cMessage *msg)
@@ -62,7 +64,7 @@ void CloudDelayerBase::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         INetworkDatagram *context = (INetworkDatagram *)msg->getContextPointer();
         delete msg;
-        ipv4Layer->reinjectQueuedDatagram(context);
+        networkProtocol->reinjectQueuedDatagram(context);
     }
 }
 

@@ -32,5 +32,6 @@ package inet.networklayer.internetcloud;
 moduleinterface ICloudDelayer
 {
     parameters:
+        string networkProtocolModule;
         @display("i=block/delay");
 }

@@ -27,7 +27,6 @@
 namespace inet {
 
 //forward declarations:
-class IPv4;
 
 class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
 {
@@ -54,7 +53,7 @@ class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
     virtual INetfilter::IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
 
   protected:
-    IPv4 *ipv4Layer;
+    INetfilter *networkProtocol;
 };
 
 } // namespace inet
