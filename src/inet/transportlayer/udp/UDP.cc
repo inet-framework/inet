@@ -39,6 +39,7 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 #endif // ifdef WITH_IPv6
@@ -408,39 +409,52 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
 void UDP::processICMPError(cPacket *pk)
 {
     // extract details from the error message, then try to notify socket that sent bogus packet
+
+    // icmp error packet with fragmented udp maybe contains raw packet
+    // icmp error packet with fragmented udp packet maybe not contains UDPPacket
+    // icmp error packet with fragmented udp packet maybe contains entire UDPPacket, but the real packet not contains udp header
+
     int type, code;
     L3Address localAddr, remoteAddr;
     ushort localPort, remotePort;
+    bool udpHeaderAvailable = false;
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<ICMPMessage *>(pk)) {
-        ICMPMessage *icmpMsg = (ICMPMessage *)pk;
+    if (ICMPMessage *icmpMsg = dynamic_cast<ICMPMessage *>(pk)) {
         type = icmpMsg->getType();
         code = icmpMsg->getCode();
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
         IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
-        localAddr = datagram->getSrcAddress();
-        remoteAddr = datagram->getDestAddress();
-        localPort = packet->getSourcePort();
-        remotePort = packet->getDestinationPort();
-        delete icmpMsg;
+        if (datagram->getDontFragment() || datagram->getFragmentOffset() == 0) {
+            UDPPacket *packet = dynamic_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
+            if (packet) {
+                localAddr = datagram->getSrcAddress();
+                remoteAddr = datagram->getDestAddress();
+                localPort = packet->getSourcePort();
+                remotePort = packet->getDestinationPort();
+                udpHeaderAvailable = true;
+            }
+        }
     }
     else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-    if (dynamic_cast<ICMPv6Message *>(pk)) {
-        ICMPv6Message *icmpMsg = (ICMPv6Message *)pk;
+    if (ICMPv6Message *icmpMsg = dynamic_cast<ICMPv6Message *>(pk)) {
         type = icmpMsg->getType();
         code = -1;    // FIXME this is dependent on getType()...
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
         IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
-        UDPPacket *packet = check_and_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
-        localAddr = datagram->getSrcAddress();
-        remoteAddr = datagram->getDestAddress();
-        localPort = packet->getSourcePort();
-        remotePort = packet->getDestinationPort();
-        delete icmpMsg;
+        IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+        if (!fh || fh->getFragmentOffset() == 0) {
+            UDPPacket *packet = dynamic_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
+            if (packet) {
+                localAddr = datagram->getSrcAddress();
+                remoteAddr = datagram->getDestAddress();
+                localPort = packet->getSourcePort();
+                remotePort = packet->getDestinationPort();
+                udpHeaderAvailable = true;
+            }
+        }
     }
     else
 #endif // ifdef WITH_IPv6
@@ -453,15 +467,21 @@ void UDP::processICMPError(cPacket *pk)
             << remoteAddr << ":" << remotePort << "\n";
 
     // identify socket and report error to it
-    SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
-    if (!sd) {
-        EV_WARN << "No socket on that local port, ignoring ICMP error\n";
-        return;
+    if (udpHeaderAvailable) {
+        SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
+        if (sd) {
+            // send UDP_I_ERROR to socket
+            EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
+            sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort);
+        }
+        else {
+            EV_WARN << "No socket on that local port, ignoring ICMP error\n";
+        }
     }
+    else
+        EV_WARN << "UDP header not available, ignoring ICMP error\n";
 
-    // send UDP_I_ERROR to socket
-    EV_DETAIL << "Source socket is sockId=" << sd->sockId << ", notifying.\n";
-    sendUpErrorIndication(sd, localAddr, localPort, remoteAddr, remotePort);
+    delete pk;
 }
 
 void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
