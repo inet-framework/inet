@@ -46,6 +46,7 @@ module IPv4NetworkLayer like INetworkLayer
         *.icmpModule = default(absPath(".icmp"));
         arp.respondToProxyARP = proxyARP;
         @display("i=block/fork");
+
     gates:
         input ifIn @labels(INetworkDatagram);
         output ifOut @labels(INetworkDatagram);
@@ -94,34 +95,33 @@ module IPv4NetworkLayer like INetworkLayer
         }
 
     connections allowunconnected:
-        up.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
         transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
+        transportOut <-- { @display("m=n"); } <-- up.upperLayerOut++;
 
-        igmp.routerOut --> up.lowerLayerIn++;
-        igmp.routerIn <-- up.lowerLayerOut++;
+        up.lowerLayerOut++ --> igmp.routerIn;
+        up.lowerLayerIn++ <-- igmp.routerOut;
 
-        mp.upperLayerOut++ --> { @display("m=n"); } --> up.lowerLayerIn++;
-        up.lowerLayerOut++ --> { @display("m=n"); } --> mp.upperLayerIn++;
+        up.lowerLayerOut++ --> mp.upperLayerIn++;
+        up.lowerLayerIn++ <-- mp.upperLayerOut++;
 
         up.lowerLayerOut++ --> icmp.transportIn;
-        icmp.transportOut --> up.lowerLayerIn++;
+        up.lowerLayerIn++ <-- icmp.transportOut;
 
-        mp.upperLayerOut++ --> igmp.ipIn;
-        mp.upperLayerIn++ <-- igmp.ipOut;
+        igmp.ipOut --> mp.upperLayerIn++;
+        igmp.ipIn <-- mp.upperLayerOut++;
 
-        mp.upperLayerOut++ --> icmp.ipIn;
-        mp.upperLayerIn++ <-- icmp.ipOut;
+        icmp.ipOut --> mp.upperLayerIn++;
+        icmp.ipIn <-- mp.upperLayerOut++;
 
-        ip.transportOut --> mp.lowerLayerIn++;
-        ip.transportIn <-- mp.lowerLayerOut++;
+        mp.lowerLayerOut++ --> ip.transportIn;
+        mp.lowerLayerIn++ <-- ip.transportOut;
 
         arp.ifOut --> lp.upperLayerIn++;
         arp.ifIn <-- lp.upperLayerOut++;
 
-        ip.queueIn <-- lp.upperLayerOut++;
         ip.queueOut --> lp.upperLayerIn++;
+        ip.queueIn <-- lp.upperLayerOut++;
 
-        lp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
         lp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
+        lp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
 }
-

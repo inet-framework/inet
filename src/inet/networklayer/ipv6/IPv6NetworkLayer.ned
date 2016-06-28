@@ -48,11 +48,13 @@ module IPv6NetworkLayer like INetworkLayer
         *.icmpv6Module = default(absPath(".icmpv6"));
         *.ipv6TunnelingModule = default(absPath(".iptunneling"));
         @display("i=block/fork");
+
     gates:
         input ifIn @labels(INetworkDatagram);
         output ifOut @labels(INetworkDatagram);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
+
     submodules:
         routingTable: IPv6RoutingTable {
             parameters:
@@ -90,37 +92,32 @@ module IPv6NetworkLayer like INetworkLayer
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
         transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
-        up.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        transportOut <-- { @display("m=n"); } <-- up.upperLayerOut++;
 
         up.lowerLayerOut++ --> lp.upperLayerIn++;
         up.lowerLayerIn++ <-- lp.upperLayerOut++;
 
         up.lowerLayerOut++ --> icmpv6.transportIn;
-        icmpv6.transportOut --> up.lowerLayerIn++;
+        up.lowerLayerIn++ <-- icmpv6.transportOut;
+
+        icmpv6.ipv6Out --> lp.upperLayerIn++;
+        icmpv6.ipv6In <-- lp.upperLayerOut++;
 
         lp.lowerLayerOut++ --> ipv6.transportIn;
         lp.lowerLayerIn++ <-- ipv6.transportOut;
 
-        // IPv6 to ICMPv6
-        lp.upperLayerOut++ --> icmpv6.ipv6In;
-        lp.upperLayerIn++ <-- icmpv6.ipv6Out;
-
-        // IPv6 to IPv6 Tunneling
-        iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
         iptunneling.upperLayerOut --> ipv6.upperTunnelingIn;
-        iptunneling.linkLayerIn <-- ipv6.lowerTunnelingOut;
+        iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
+
         iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
+        iptunneling.linkLayerIn <-- ipv6.lowerTunnelingOut;
 
-        // IPv6 to Neighbour Discovery
-        ipv6.ndOut --> neighbourDiscovery.ipv6In;
-        ipv6.ndIn <-- neighbourDiscovery.ipv6Out;
+        neighbourDiscovery.ipv6Out --> ipv6.ndIn;
+        neighbourDiscovery.ipv6In <-- ipv6.ndOut;
 
-        //IPv6 to Mobile IPv6
-        ipv6.xMIPv6Out --> mipv6support.fromIPv6 if xMIPv6Support;
-        ipv6.xMIPv6In <-- mipv6support.toIPv6 if xMIPv6Support;
+        mipv6support.fromIPv6 <-- ipv6.xMIPv6Out if xMIPv6Support;
+        mipv6support.toIPv6 --> ipv6.xMIPv6In if xMIPv6Support;
 
-        // IPv6 to L2
-        ifIn --> { @display("m=s"); } --> ipv6.queueIn;
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
+        ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;
 }
-
