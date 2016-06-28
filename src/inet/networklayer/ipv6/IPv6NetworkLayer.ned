@@ -67,10 +67,6 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=600,200");
         }
-        ipv6ErrorHandling: IPv6ErrorHandling {
-            parameters:
-                @display("p=700,200");
-        }
         neighbourDiscovery: IPv6NeighbourDiscovery {
             parameters:
                 @display("p=300,400");
