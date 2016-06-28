@@ -20,9 +20,10 @@
 #define __INET_IGMPV2_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IGMPMessage_m.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 
 #include <set>
 
@@ -31,7 +32,7 @@ namespace inet {
 class IInterfaceTable;
 class IIPv4RoutingTable;
 
-class INET_API IGMPv2 : public cSimpleModule, protected cListener
+class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListener, public cListener
 {
   protected:
     enum RouterState {
@@ -167,6 +168,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
     virtual ~IGMPv2();
 

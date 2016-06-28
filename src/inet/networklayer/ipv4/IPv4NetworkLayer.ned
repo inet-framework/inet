@@ -90,7 +90,7 @@ module IPv4NetworkLayer like INetworkLayer
         }
         tn: MessageDispatcher {
             parameters:
-                @display("p=450,100;b=280,5");
+                @display("p=450,100;b=480,5");
         }
 
     connections allowunconnected:
@@ -110,8 +110,8 @@ module IPv4NetworkLayer like INetworkLayer
         arp.ifOut --> ifdp.upperLayerIn++;
         arp.ifIn <-- ifdp.upperLayerOut++;
 
-        igmp.routerOut --> igmpOut;
-        igmp.routerIn <-- igmpIn;
+        igmp.routerOut --> tn.lowerLayerIn++;
+        igmp.routerIn <-- tn.lowerLayerOut++;
 
         ip.queueIn <-- ifdp.upperLayerOut++;
         ip.queueOut --> ifdp.upperLayerIn++;

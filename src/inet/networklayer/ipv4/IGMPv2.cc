@@ -17,12 +17,13 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/ipv4/IGMPv2.h"
-#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IGMPv2.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 
 #include <algorithm>
 
@@ -336,8 +337,8 @@ void IGMPv2::initialize(int stage)
         host->subscribe(NF_IPv4_MCAST_JOIN, this);
         host->subscribe(NF_IPv4_MCAST_LEAVE, this);
 
+        externalRouter = false;
         enabled = par("enabled");
-        externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();
         robustness = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
@@ -484,6 +485,12 @@ void IGMPv2::handleMessage(cMessage *msg)
         processIgmpMessage((IGMPMessage *)msg);
     else
         ASSERT(false);
+}
+
+void IGMPv2::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+{
+    if (protocol.getId() == Protocol::igmp.getId())
+        externalRouter = true;
 }
 
 void IGMPv2::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr)
