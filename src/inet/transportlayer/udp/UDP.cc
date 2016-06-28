@@ -18,34 +18,36 @@
 
 #include <algorithm>
 #include <string>
-#include "inet/common/IProtocolRegistrationListener.h"
+
 #include "inet/transportlayer/udp/UDP.h"
-#include "inet/transportlayer/udp/UDPPacket.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/transportlayer/udp/UDPPacket.h"
 
 #ifdef WITH_IPv4
+#include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/ipv4/ICMP.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
+#include "inet/networklayer/icmpv6/ICMPv6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/networklayer/icmpv6/ICMPv6.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
