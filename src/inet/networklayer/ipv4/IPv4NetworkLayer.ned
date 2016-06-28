@@ -63,14 +63,13 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=100,200;is=s");
         }
-        ip: IPv4 {
+        up: MessageDispatcher {
             parameters:
-                useProxyARP = true; // as routes with unspecified next-hop addr are quite common
-                @display("p=450,400;q=queue");
+                @display("p=450,100;b=480,5");
         }
-        arp: <arpType> like IARP {
+        igmp: <igmpType> like IIGMP {
             parameters:
-                @display("p=300,400;q=pendingQueue");
+                @display("p=300,200");
         }
         icmp: ICMP {
             parameters:
@@ -80,28 +79,38 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=450,300;b=480,5");
         }
-        igmp: <igmpType> like IIGMP {
+        ip: IPv4 {
             parameters:
-                @display("p=300,200");
+                useProxyARP = true; // as routes with unspecified next-hop addr are quite common
+                @display("p=450,400;q=queue");
+        }
+        arp: <arpType> like IARP {
+            parameters:
+                @display("p=300,400;q=pendingQueue");
         }
         lp: MessageDispatcher {
             parameters:
                 @display("p=450,500;b=480,5");
         }
-        up: MessageDispatcher {
-            parameters:
-                @display("p=450,100;b=480,5");
-        }
 
     connections allowunconnected:
+        up.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
+
+        igmp.routerOut --> up.lowerLayerIn++;
+        igmp.routerIn <-- up.lowerLayerOut++;
+
         mp.upperLayerOut++ --> { @display("m=n"); } --> up.lowerLayerIn++;
         up.lowerLayerOut++ --> { @display("m=n"); } --> mp.upperLayerIn++;
 
-        mp.upperLayerOut++ --> icmp.ipIn;
-        mp.upperLayerIn++ <-- icmp.ipOut;
+        up.lowerLayerOut++ --> icmp.transportIn;
+        icmp.transportOut --> up.lowerLayerIn++;
 
         mp.upperLayerOut++ --> igmp.ipIn;
         mp.upperLayerIn++ <-- igmp.ipOut;
+
+        mp.upperLayerOut++ --> icmp.ipIn;
+        mp.upperLayerIn++ <-- icmp.ipOut;
 
         ip.transportOut --> mp.lowerLayerIn++;
         ip.transportIn <-- mp.lowerLayerOut++;
@@ -109,19 +118,10 @@ module IPv4NetworkLayer like INetworkLayer
         arp.ifOut --> lp.upperLayerIn++;
         arp.ifIn <-- lp.upperLayerOut++;
 
-        igmp.routerOut --> up.lowerLayerIn++;
-        igmp.routerIn <-- up.lowerLayerOut++;
-
         ip.queueIn <-- lp.upperLayerOut++;
         ip.queueOut --> lp.upperLayerIn++;
 
         lp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
         lp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
-
-        up.lowerLayerOut++ --> icmp.transportIn;
-        icmp.transportOut --> up.lowerLayerIn++;
-
-        up.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
-        transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
 }
 

@@ -58,18 +58,26 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=100,100;is=s");
         }
-        // TODO: rename to ip
-        ipv6: IPv6 {
+        up: MessageDispatcher {
             parameters:
-                @display("p=450,400");
+                @display("p=450,100;b=480,5");
         }
         icmpv6: ICMPv6 {
             parameters:
                 @display("p=600,200");
         }
+        lp: MessageDispatcher {
+            parameters:
+                @display("p=450,300;b=480,5");
+        }
         neighbourDiscovery: IPv6NeighbourDiscovery {
             parameters:
                 @display("p=300,400");
+        }
+        // TODO: rename to ip
+        ipv6: IPv6 {
+            parameters:
+                @display("p=450,400");
         }
         iptunneling: <default(firstAvailable("IPv6Tunneling"))> like IIPv6Tunneling {
             parameters:
@@ -78,15 +86,6 @@ module IPv6NetworkLayer like INetworkLayer
         mipv6support: <default("xMIPv6Support")> like IxMIPv6Support if xMIPv6Support {
             parameters:
                 @display("p=600,500");
-        }
-        lp: MessageDispatcher {
-            parameters:
-                @display("p=450,300;b=480,5");
-        }
-
-        up: MessageDispatcher {
-            parameters:
-                @display("p=450,100;b=480,5");
         }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
@@ -99,18 +98,18 @@ module IPv6NetworkLayer like INetworkLayer
         up.lowerLayerOut++ --> icmpv6.transportIn;
         icmpv6.transportOut --> up.lowerLayerIn++;
 
-        // IPv6 to IPv6 Tunneling
-        iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
-        iptunneling.upperLayerOut --> ipv6.upperTunnelingIn;
-        iptunneling.linkLayerIn <-- ipv6.lowerTunnelingOut;
-        iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
+        lp.lowerLayerOut++ --> ipv6.transportIn;
+        lp.lowerLayerIn++ <-- ipv6.transportOut;
 
         // IPv6 to ICMPv6
         lp.upperLayerOut++ --> icmpv6.ipv6In;
         lp.upperLayerIn++ <-- icmpv6.ipv6Out;
 
-        lp.lowerLayerOut++ --> ipv6.transportIn;
-        lp.lowerLayerIn++ <-- ipv6.transportOut;
+        // IPv6 to IPv6 Tunneling
+        iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
+        iptunneling.upperLayerOut --> ipv6.upperTunnelingIn;
+        iptunneling.linkLayerIn <-- ipv6.lowerTunnelingOut;
+        iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
 
         // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.ipv6In;
