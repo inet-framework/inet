@@ -119,10 +119,10 @@ module IPv4NetworkLayer like INetworkLayer
         ifdp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
         ifdp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
 
-        tn.lowerLayerOut++ --> { @display("m=n"); } --> icmp.transportIn;
-        icmp.transportOut --> { @display("m=n"); } --> tn.lowerLayerIn++;
+        tn.lowerLayerOut++ --> icmp.transportIn;
+        icmp.transportOut --> tn.lowerLayerIn++;
 
-        tn.upperLayerOut++ --> transportOut;
-        transportIn --> tn.upperLayerIn++;
+        tn.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        transportIn --> { @display("m=n"); } --> tn.upperLayerIn++;
 }
 
