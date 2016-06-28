@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PACKETDISPATCHER_H
-#define __INET_PACKETDISPATCHER_H
+#ifndef __INET_MESSAGEDISPATCHER_H
+#define __INET_MESSAGEDISPATCHER_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/IInterfaceRegistrationListener.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
@@ -65,5 +65,5 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
 
 } // namespace inet
 
-#endif // ifndef __INET_PACKETDISPATCHER_H
+#endif // ifndef __INET_MESSAGEDISPATCHER_H
 

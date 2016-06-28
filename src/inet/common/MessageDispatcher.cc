@@ -159,7 +159,7 @@ cGate *MessageDispatcher::handleUpperLayerCommand(cMessage *message, cGate *inGa
 cGate *MessageDispatcher::handleLowerLayerCommand(cMessage *message, cGate *inGate)
 {
     int socketId = computeSocketId(message);
-    int protocolId = computeLowerLayerProtocolId(message);
+    int protocolId = computeUpperLayerProtocolId(message);
     if (socketId != -1) {
         auto it = socketIdToUpperLayerGateIndex.find(socketId);
         if (it != socketIdToUpperLayerGateIndex.end())
