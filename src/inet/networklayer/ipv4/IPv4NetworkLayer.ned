@@ -66,32 +66,31 @@ module IPv4NetworkLayer like INetworkLayer
         ip: IPv4 {
             parameters:
                 useProxyARP = true; // as routes with unspecified next-hop addr are quite common
-                @display("p=450,300;q=queue");
+                @display("p=450,400;q=queue");
         }
         arp: <arpType> like IARP {
             parameters:
-                @display("p=300,300;q=pendingQueue");
+                @display("p=300,400;q=pendingQueue");
         }
         icmp: ICMP {
             parameters:
-                @display("p=550,100");
+                @display("p=600,200");
         }
         dp: MessageDispatcher {
             parameters:
-                @display("p=450,200;b=480,5");
+                @display("p=450,300;b=480,5");
         }
         igmp: <igmpType> like IIGMP {
             parameters:
-                @display("p=300,100");
+                @display("p=300,200");
         }
         ifdp: MessageDispatcher {
             parameters:
-                @display("p=450,400;b=480,5");
+                @display("p=450,500;b=480,5");
         }
-
         tn: MessageDispatcher {
             parameters:
-                @display("p=519,41;b=354,5");
+                @display("p=450,100;b=280,5");
         }
 
     connections allowunconnected:
