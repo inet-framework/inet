@@ -79,25 +79,25 @@ module IPv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=600,500");
         }
-        dp: MessageDispatcher {
+        lp: MessageDispatcher {
             parameters:
                 @display("p=450,300;b=480,5");
         }
 
-        tn: MessageDispatcher {
+        up: MessageDispatcher {
             parameters:
                 @display("p=450,100;b=480,5");
         }
 
     connections allowunconnected:  // FIXME remove 'nocheck'!
-        transportIn --> { @display("m=n"); } --> tn.upperLayerIn++;
-        tn.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
+        up.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
 
-        tn.lowerLayerOut++ --> dp.upperLayerIn++;
-        tn.lowerLayerIn++ <-- dp.upperLayerOut++;
+        up.lowerLayerOut++ --> lp.upperLayerIn++;
+        up.lowerLayerIn++ <-- lp.upperLayerOut++;
 
-        tn.lowerLayerOut++ --> icmpv6.transportIn;
-        icmpv6.transportOut --> tn.lowerLayerIn++;
+        up.lowerLayerOut++ --> icmpv6.transportIn;
+        icmpv6.transportOut --> up.lowerLayerIn++;
 
         // IPv6 to IPv6 Tunneling
         iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;
@@ -106,11 +106,11 @@ module IPv6NetworkLayer like INetworkLayer
         iptunneling.linkLayerOut --> ipv6.lowerTunnelingIn;
 
         // IPv6 to ICMPv6
-        dp.upperLayerOut++ --> icmpv6.ipv6In;
-        dp.upperLayerIn++ <-- icmpv6.ipv6Out;
+        lp.upperLayerOut++ --> icmpv6.ipv6In;
+        lp.upperLayerIn++ <-- icmpv6.ipv6Out;
 
-        dp.lowerLayerOut++ --> ipv6.transportIn;
-        dp.lowerLayerIn++ <-- ipv6.transportOut;
+        lp.lowerLayerOut++ --> ipv6.transportIn;
+        lp.lowerLayerIn++ <-- ipv6.transportOut;
 
         // IPv6 to Neighbour Discovery
         ipv6.ndOut --> neighbourDiscovery.ipv6In;

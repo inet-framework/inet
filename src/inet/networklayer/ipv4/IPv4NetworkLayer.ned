@@ -76,7 +76,7 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=600,200");
         }
-        dp: MessageDispatcher {
+        mp: MessageDispatcher {
             parameters:
                 @display("p=450,300;b=480,5");
         }
@@ -84,45 +84,44 @@ module IPv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,200");
         }
-        ifdp: MessageDispatcher {
+        lp: MessageDispatcher {
             parameters:
                 @display("p=450,500;b=480,5");
         }
-        tn: MessageDispatcher {
+        up: MessageDispatcher {
             parameters:
                 @display("p=450,100;b=480,5");
         }
 
     connections allowunconnected:
-        dp.upperLayerOut++ --> { @display("m=n"); } --> tn.lowerLayerIn++;
-        tn.lowerLayerOut++ --> { @display("m=n"); } --> dp.upperLayerIn++;
+        mp.upperLayerOut++ --> { @display("m=n"); } --> up.lowerLayerIn++;
+        up.lowerLayerOut++ --> { @display("m=n"); } --> mp.upperLayerIn++;
 
+        mp.upperLayerOut++ --> icmp.ipIn;
+        mp.upperLayerIn++ <-- icmp.ipOut;
 
-        dp.upperLayerOut++ --> icmp.ipIn;
-        dp.upperLayerIn++ <-- icmp.ipOut;
+        mp.upperLayerOut++ --> igmp.ipIn;
+        mp.upperLayerIn++ <-- igmp.ipOut;
 
-        dp.upperLayerOut++ --> igmp.ipIn;
-        dp.upperLayerIn++ <-- igmp.ipOut;
+        ip.transportOut --> mp.lowerLayerIn++;
+        ip.transportIn <-- mp.lowerLayerOut++;
 
-        ip.transportOut --> dp.lowerLayerIn++;
-        ip.transportIn <-- dp.lowerLayerOut++;
+        arp.ifOut --> lp.upperLayerIn++;
+        arp.ifIn <-- lp.upperLayerOut++;
 
-        arp.ifOut --> ifdp.upperLayerIn++;
-        arp.ifIn <-- ifdp.upperLayerOut++;
+        igmp.routerOut --> up.lowerLayerIn++;
+        igmp.routerIn <-- up.lowerLayerOut++;
 
-        igmp.routerOut --> tn.lowerLayerIn++;
-        igmp.routerIn <-- tn.lowerLayerOut++;
+        ip.queueIn <-- lp.upperLayerOut++;
+        ip.queueOut --> lp.upperLayerIn++;
 
-        ip.queueIn <-- ifdp.upperLayerOut++;
-        ip.queueOut --> ifdp.upperLayerIn++;
+        lp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
+        lp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
 
-        ifdp.lowerLayerIn++ <-- { @display("m=s"); } <-- ifIn;
-        ifdp.lowerLayerOut++ --> { @display("m=s"); } --> ifOut;
+        up.lowerLayerOut++ --> icmp.transportIn;
+        icmp.transportOut --> up.lowerLayerIn++;
 
-        tn.lowerLayerOut++ --> icmp.transportIn;
-        icmp.transportOut --> tn.lowerLayerIn++;
-
-        tn.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
-        transportIn --> { @display("m=n"); } --> tn.upperLayerIn++;
+        up.upperLayerOut++ --> { @display("m=n"); } --> transportOut;
+        transportIn --> { @display("m=n"); } --> up.upperLayerIn++;
 }
 
