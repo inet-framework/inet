@@ -34,7 +34,7 @@ class IPv6ExtensionHeader;
  *
  * See the IPv6ControlInfo.msg file for more info.
  */
-class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo, public IProtocolControlInfo, public ISocketControlInfo
 {
   protected:
     IPv6Datagram *dgram;
@@ -53,7 +53,6 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     virtual IPv6ControlInfo *dup() const override { return new IPv6ControlInfo(*this); }
 
     virtual int getControlInfoProtocolId() const override { return Protocol::ipv6.getId(); }
-    virtual int getPacketProtocolId() const override { return ProtocolGroup::ipprotocol.getProtocol(getTransportProtocol())->getId(); }
 
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const { return dgram; }

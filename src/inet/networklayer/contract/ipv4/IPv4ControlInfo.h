@@ -35,7 +35,7 @@ class IPv4Datagram;
  *
  * See the IPv4ControlInfo.msg file for more info.
  */
-class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkProtocolControlInfo, public IProtocolControlInfo, public ISocketControlInfo
 {
   protected:
     IPv4Datagram *dgram;
@@ -52,7 +52,6 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     virtual IPv4ControlInfo *dup() const override { return new IPv4ControlInfo(*this); }
 
     virtual int getControlInfoProtocolId() const override { return Protocol::ipv4.getId(); }
-    virtual int getPacketProtocolId() const override { return ProtocolGroup::ipprotocol.getProtocol(getTransportProtocol())->getId(); }
 
     virtual int getSocketId() const override { return IPv4ControlInfo_Base::getSocketId(); }
     virtual void setSocketId(int id) override { return IPv4ControlInfo_Base::setSocketId(id); }
