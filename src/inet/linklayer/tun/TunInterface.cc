@@ -17,9 +17,10 @@
 
 #include <algorithm>
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
-#include "inet/linklayer/tun/TunInterface.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
+#include "inet/linklayer/tun/TunInterface.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -65,7 +66,7 @@ void TunInterface::handleMessage(cMessage *message)
                 SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
                 // TODO: should we determine the network protocol by looking at the packet?!
                 controlInfo->setNetworkProtocol(ETHERTYPE_IPv4);
-                controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+                message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 delete message->removeControlInfo();
                 message->setControlInfo(controlInfo);
                 emit(packetSentToUpperSignal, message);

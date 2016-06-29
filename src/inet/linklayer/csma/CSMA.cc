@@ -36,6 +36,7 @@
 #include "inet/common/FindModule.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/linklayer/csma/CSMAFrame_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -930,7 +931,7 @@ cPacket *CSMA::decapsulate(CSMAFrame *macPkt)
     cPacket *packet = macPkt->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
     controlInfo->setSrc(macPkt->getSrcAddr());
-    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     controlInfo->setNetworkProtocol(macPkt->getNetworkProtocol());
     packet->setControlInfo(controlInfo);
     delete macPkt;

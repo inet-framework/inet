@@ -24,6 +24,7 @@
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -142,7 +143,7 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
-    etherctrl->setInterfaceId(interfaceId);
+    higherlayermsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
         etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
     else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)

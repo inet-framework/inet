@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/common/FindModule.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -634,7 +635,7 @@ cPacket *LMacLayer::decapsulate(LMacFrame *msg)
     cPacket *packet = msg->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
     controlInfo->setSrc(msg->getSrcAddr());
-    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     controlInfo->setNetworkProtocol(msg->getNetworkProtocol());
     packet->setControlInfo(controlInfo);
     EV_DETAIL << " message decapsulated " << endl;

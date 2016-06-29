@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "inet/linklayer/loopback/Loopback.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -84,6 +85,7 @@ void Loopback::handleMessage(cMessage *msg)
     numRcvdOK++;
     emit(packetSentToUpperSignal, msg);
     numSent++;
+    msg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(msg, "upperLayerOut");
 }
 

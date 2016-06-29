@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/linklayer/bmac/BMacLayer.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -719,7 +720,7 @@ cPacket *BMacLayer::decapsulate(BMacFrame *msg)
     cPacket *packet = msg->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
     controlInfo->setSrc(msg->getSrcAddr());
-    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     controlInfo->setNetworkProtocol(msg->getNetworkProtocol());
     packet->setControlInfo(controlInfo);
     EV_DETAIL << " message decapsulated " << endl;

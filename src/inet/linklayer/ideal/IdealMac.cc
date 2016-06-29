@@ -27,6 +27,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/INETUtils.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -291,7 +292,7 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
     etherctrl->setEtherType(frame->getNetworkProtocol());
-    etherctrl->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->setControlInfo(etherctrl);
 
     delete frame;

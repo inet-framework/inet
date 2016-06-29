@@ -17,6 +17,7 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -95,7 +96,7 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
         if (tid < 8)
             ctrl->setUserPriority(tid); // TID values 0..7 are UP
     }
-    ctrl->setInterfaceId(myIface->getInterfaceId());
+    payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP)
         ctrl->setEtherType(frameWithSNAP->getEtherType());
