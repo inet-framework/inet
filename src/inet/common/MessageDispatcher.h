@@ -49,12 +49,10 @@ class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistr
         virtual cGate *handleUpperLayerCommand(cMessage *message, cGate *inGate);
         virtual cGate *handleLowerLayerCommand(cMessage *message, cGate *inGate);
 
-        virtual int computeSocketId(cMessage *message);
+        virtual int computeSocketReqSocketId(cMessage *message);
+        virtual int computeSocketIndSocketId(cMessage *message);
         virtual int computeInterfaceId(cMessage *message);
-        virtual int computeUpperLayerProtocolId(cMessage *message);
-        virtual int computeLowerLayerProtocolId(cMessage *message);
-
-        virtual const char *findProtocolName(int protocolId);
+        virtual const Protocol *computeProtocol(cMessage *message);
 
     public:
         MessageDispatcher();
