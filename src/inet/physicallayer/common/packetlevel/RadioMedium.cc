@@ -569,6 +569,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
         auto radioFrame = static_cast<RadioFrame *>(createReceiverRadioFrame(transmission));
         cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
         ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
+        radioFrame->clearTags();
         const_cast<Radio *>(transmitterRadio)->sendDirect(radioFrame, propagationTime, transmission->getDuration(), gate);
         communicationCache->setCachedFrame(receiverRadio, transmission, radioFrame);
         radioFrameSendCount++;
@@ -707,6 +708,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                     simtime_t duration = delay > 0 ? radioFrame->getDuration() : radioFrame->getDuration() + delay;
                     cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
                     ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
+                    radioFrame->clearTags();
                     const_cast<Radio *>(transmitterRadio)->sendDirect(radioFrame, delay > 0 ? delay : 0, duration, gate);
                     communicationCache->setCachedFrame(receiverRadio, transmission, radioFrame);
                     radioFrameSendCount++;

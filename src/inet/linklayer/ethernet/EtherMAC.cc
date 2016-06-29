@@ -485,6 +485,7 @@ void EtherMAC::startFrameTransmission()
 
     currentSendPkTreeID = phyFrame->getTreeId();
     int64_t sentFrameByteLength = phyFrame->getByteLength();
+    phyFrame->clearTags();
     send(phyFrame, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)

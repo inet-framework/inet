@@ -85,6 +85,7 @@ void Loopback::handleMessage(cMessage *msg)
     numRcvdOK++;
     emit(packetSentToUpperSignal, msg);
     numSent++;
+    msg->clearTags();
     msg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(msg, "upperLayerOut");
 }

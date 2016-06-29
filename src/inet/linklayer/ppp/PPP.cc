@@ -219,6 +219,7 @@ void PPP::startTransmitting(cPacket *msg)
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
     emit(txStateSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
+    pppFrame->clearTags();
     send(pppFrame, physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
