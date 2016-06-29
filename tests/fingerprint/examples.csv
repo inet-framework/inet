@@ -336,7 +336,7 @@
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            95d8-38bd 9f6f-11ac/tplx
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            4496-fd0d 61b1-1e8c/tplx
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f9d3-a124 8d26-4124/tplx
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f9d3-a124 f337-716f/tplx
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            da70-cae8 083f-08d7/tplx
 /examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,         f5ab-9b00 daaa-21e5/tplx
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,         8613-0e36 3fa7-dd44/tplx

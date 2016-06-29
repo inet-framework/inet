@@ -64,8 +64,10 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     // get ownership
     take(origDatagram);
 
-    // don't send ICMP error messages in response to broadcast or multicast messages
+    IPv4Address origSrcAddr = origDatagram->getSrcAddress();
     IPv4Address origDestAddr = origDatagram->getDestAddress();
+
+    // don't send ICMP error messages in response to broadcast or multicast messages
     if (origDestAddr.isMulticast() || origDestAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origDestAddr, inputInterfaceId)) {
         EV_DETAIL << "won't send ICMP error messages for broadcast/multicast message " << origDatagram << endl;
         delete origDatagram;
@@ -73,8 +75,7 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     }
 
     // don't send ICMP error messages response to unspecified, broadcast or multicast addresses
-    IPv4Address origSrcAddr = origDatagram->getSrcAddress();
-    if (origSrcAddr.isUnspecified() || origSrcAddr.isMulticast() || origSrcAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
+    if (origSrcAddr.isMulticast() || origSrcAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
         EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << origDatagram << endl;
         delete origDatagram;
         return;
@@ -118,7 +119,7 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
-    if (origDatagram->getSrcAddress().isUnspecified()) {
+    if (origSrcAddr.isUnspecified()) {
         // pretend it came from the IPv4 layer
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setSrcAddr(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
