@@ -125,8 +125,8 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          b069-7ede cd6c-3a54/tplx
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          bdeb-2171 9563-79c6/tplx
 
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            fbd3-73ef 3b0d-76e4/tplx
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            4afd-cad0 a7a9-c562/tplx
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            fbd3-73ef 179b-ed2e/tplx
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            4afd-cad0 0b00-8ad8/tplx
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4cfb-4572 bba1-f9a5/tplx
 
@@ -134,7 +134,7 @@
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           3782-6503 9f34-d3fe/tplx
 
-/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           45c0-3f5f 97fe-fa4d/tplx
+/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           45c0-3f5f 71d3-6b56/tplx
 
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         981d-c7bd 7225-66fc/tplx
 /examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           50s,             af5a-0b58 54eb-3902/tplx
