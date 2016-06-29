@@ -21,7 +21,6 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ISocketControlInfo.h"
-#include "inet/common/IProtocolControlInfo.h"
 #include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo_m.h"
 
@@ -31,7 +30,7 @@ namespace inet {
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public IMACProtocolControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public IMACProtocolControlInfo, public ISocketControlInfo
 {
   public:
     SimpleLinkLayerControlInfo() : SimpleLinkLayerControlInfo_Base() {}
@@ -39,8 +38,6 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
     SimpleLinkLayerControlInfo& operator=(const SimpleLinkLayerControlInfo& other) { SimpleLinkLayerControlInfo_Base::operator=(other); return *this; }
 
     virtual SimpleLinkLayerControlInfo *dup() const override { return new SimpleLinkLayerControlInfo(*this); }
-
-    virtual int getControlInfoProtocolId() const override { return -1; }
 
     virtual MACAddress getSourceAddress() const override { return getSrc(); }
     virtual void setSourceAddress(const MACAddress& address) override { setSrc(address); }

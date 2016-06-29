@@ -118,14 +118,12 @@ bool NetworkProtocolBase::isLowerMessage(cMessage *message)
 void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        ASSERT(command->getControlInfoProtocolId() == Protocol::gnp.getId());
         SocketDescriptor *descriptor = new SocketDescriptor(command->getSocketId(), command->getProtocolId());
         socketIdToSocketDescriptor[command->getSocketId()] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
     else if (L3SocketCloseCommand *command = dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo())) {
-        ASSERT(command->getControlInfoProtocolId() == Protocol::gnp.getId());
         auto it = socketIdToSocketDescriptor.find(command->getSocketId());
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;

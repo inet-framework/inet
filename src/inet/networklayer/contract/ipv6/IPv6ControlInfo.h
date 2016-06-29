@@ -18,7 +18,6 @@
 #ifndef __INET_IPV6CONTROLINFO_H
 #define __INET_IPV6CONTROLINFO_H
 
-#include "inet/common/IProtocolControlInfo.h"
 #include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo_m.h"
@@ -34,7 +33,7 @@ class IPv6ExtensionHeader;
  *
  * See the IPv6ControlInfo.msg file for more info.
  */
-class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo, public ISocketControlInfo
 {
   protected:
     IPv6Datagram *dgram;
@@ -51,8 +50,6 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other);
     virtual IPv6ControlInfo *dup() const override { return new IPv6ControlInfo(*this); }
-
-    virtual int getControlInfoProtocolId() const override { return Protocol::ipv6.getId(); }
 
     virtual void setOrigDatagram(IPv6Datagram *d);
     virtual IPv6Datagram *getOrigDatagram() const { return dgram; }

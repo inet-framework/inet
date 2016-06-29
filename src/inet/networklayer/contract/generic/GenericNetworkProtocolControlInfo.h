@@ -18,7 +18,6 @@
 #ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 #define __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 
-#include "inet/common/IProtocolControlInfo.h"
 #include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo_m.h"
@@ -27,7 +26,7 @@
 
 namespace inet {
 
-class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo, public ISocketControlInfo
 {
   private:
     void copy(const GenericNetworkProtocolControlInfo& other) {}
@@ -37,8 +36,6 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     GenericNetworkProtocolControlInfo(const GenericNetworkProtocolControlInfo& other) : GenericNetworkProtocolControlInfo_Base(other) { copy(other); }
     GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) { if (this == &other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
     virtual GenericNetworkProtocolControlInfo *dup() const override { return new GenericNetworkProtocolControlInfo(*this); }
-
-    virtual int getControlInfoProtocolId() const override { return Protocol::gnp.getId(); }
 
     virtual int getSocketId() const override { return GenericNetworkProtocolControlInfo_Base::getSocketId(); }
     virtual void setSocketId(int socketId) override { GenericNetworkProtocolControlInfo_Base::setSocketId(socketId); }

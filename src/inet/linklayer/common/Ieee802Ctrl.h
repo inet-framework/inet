@@ -21,7 +21,6 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ISocketControlInfo.h"
-#include "inet/common/IProtocolControlInfo.h"
 #include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 
@@ -31,7 +30,7 @@ namespace inet {
  * Represents a IEEE 802 control info. More info in the Ieee802Ctrl.msg file
  * (and the documentation generated from it).
  */
-class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControlInfo, public IProtocolControlInfo, public ISocketControlInfo
+class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControlInfo, public ISocketControlInfo
 {
   public:
     Ieee802Ctrl() : Ieee802Ctrl_Base() {}
@@ -39,8 +38,6 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControl
     Ieee802Ctrl& operator=(const Ieee802Ctrl& other) { Ieee802Ctrl_Base::operator=(other); return *this; }
 
     virtual Ieee802Ctrl *dup() const override { return new Ieee802Ctrl(*this); }
-
-    virtual int getControlInfoProtocolId() const override { return -1; }
 
     virtual MACAddress getSourceAddress() const override { return getSrc(); }
     virtual void setSourceAddress(const MACAddress& address) override { setSrc(address); }

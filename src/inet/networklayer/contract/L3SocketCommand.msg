@@ -17,7 +17,6 @@
 
 cplusplus {{
 #include "inet/common/Protocol.h"
-#include "inet/common/IProtocolControlInfo.h"
 #include "inet/common/ISocketControlInfo.h"
 }}
 
@@ -25,8 +24,7 @@ namespace inet;
 
 class L3SocketCommand
 {
-    @implements(ISocketControlInfo, IProtocolControlInfo);
-    int controlInfoProtocolId = Protocol::ipv4.getId();
+    @implements(ISocketControlInfo);
     int socketId;
 }
 
