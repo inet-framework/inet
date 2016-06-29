@@ -382,14 +382,16 @@ void IGMPv2::initialize(int stage)
         WATCH(numLeavesRecv);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_INTERFACE_CREATED, this);
+        registerProtocol(Protocol::igmp, gate("ipOut"));
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
         for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
                 configureInterface(ie);
         }
-        cModule *host = getContainingNode(this);
-        host->subscribe(NF_INTERFACE_CREATED, this);
-        registerProtocol(Protocol::igmp, gate("ipOut"));
     }
 }
 

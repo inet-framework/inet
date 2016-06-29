@@ -431,17 +431,16 @@ void IGMPv3::initialize(int stage)
         WATCH(numReportsRecv);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
-            InterfaceEntry *ie = ift->getInterface(i);
-            if (ie->isMulticast())
-                configureInterface(ie);
-        }
-
         cModule *host = getContainingNode(this);
         host->subscribe(NF_INTERFACE_CREATED, this);
         registerProtocol(Protocol::igmp, gate("ipOut"));
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // ipv4Data() created in INITSTAGE_NETWORK_LAYER
+        for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (ie->isMulticast())
+                configureInterface(ie);
+        }
         // in multicast routers: join to ALL_IGMPv3_ROUTERS_MCAST address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {
             for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
