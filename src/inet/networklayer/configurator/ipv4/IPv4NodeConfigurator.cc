@@ -46,7 +46,7 @@ void IPv4NodeConfigurator::initialize(int stage)
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routingTable = L3AddressResolver().findIPv4RoutingTableOf(node);
+        routingTable = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
 
         if (!networkConfiguratorPath[0])
             networkConfigurator = nullptr;
