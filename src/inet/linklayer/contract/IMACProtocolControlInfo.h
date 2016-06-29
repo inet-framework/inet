@@ -32,8 +32,6 @@ class INET_API IMACProtocolControlInfo
     virtual void setSourceAddress(const MACAddress& address) = 0;
     virtual MACAddress getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const MACAddress& address) = 0;
-    virtual int getInterfaceId() const = 0;
-    virtual void setInterfaceId(int id) = 0;
 };
 
 } // namespace inet

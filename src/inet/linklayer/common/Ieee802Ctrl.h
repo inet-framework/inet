@@ -23,7 +23,6 @@
 #include "inet/common/IPacketControlInfo.h"
 #include "inet/common/ISocketControlInfo.h"
 #include "inet/common/IProtocolControlInfo.h"
-#include "inet/common/IInterfaceControlInfo.h"
 #include "inet/linklayer/contract/IMACProtocolControlInfo.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 
@@ -33,7 +32,7 @@ namespace inet {
  * Represents a IEEE 802 control info. More info in the Ieee802Ctrl.msg file
  * (and the documentation generated from it).
  */
-class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo, public IInterfaceControlInfo
+class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControlInfo, public IPacketControlInfo, public IProtocolControlInfo, public ISocketControlInfo
 {
   public:
     Ieee802Ctrl() : Ieee802Ctrl_Base() {}
@@ -51,8 +50,6 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControl
     virtual void setDestinationAddress(const MACAddress& address) override { setDest(address); };
     virtual int getNetworkProtocol() const override { return getEtherType(); }
     virtual void setNetworkProtocol(int protocolId) override { setEtherType(protocolId); }
-    virtual int getInterfaceId() const override { return Ieee802Ctrl_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) override { Ieee802Ctrl_Base::setInterfaceId(interfaceId); }
     virtual int getSocketId() const override { return Ieee802Ctrl_Base::getSocketId(); }
     virtual void setSocketId(int socketId) override { Ieee802Ctrl_Base::setSocketId(socketId); }
 };

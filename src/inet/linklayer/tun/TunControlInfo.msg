@@ -19,14 +19,13 @@
 
 cplusplus {{
 #include "inet/common/ISocketControlInfo.h"
-#include "inet/common/IInterfaceControlInfo.h"
 }}
 
 namespace inet;
 
 class TunControlInfo
 {
-    @implements(IInterfaceControlInfo, ISocketControlInfo);
+    @implements(ISocketControlInfo);
     int socketId = -1;
     int interfaceId = -1;
 }
