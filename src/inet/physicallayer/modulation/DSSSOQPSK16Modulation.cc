@@ -22,8 +22,12 @@ namespace inet {
 namespace physicallayer {
 
 DSSSOQPSK16Modulation::DSSSOQPSK16Modulation() :
-    APSKModulationBase(nullptr)
+    APSKModulationBase(new std::vector<APSKSymbol>())
 {
+}
+
+DSSSOQPSK16Modulation::~DSSSOQPSK16Modulation() {
+    delete constellation;
 }
 
 double DSSSOQPSK16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
@@ -33,7 +37,12 @@ double DSSSOQPSK16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrat
     // Following formula is defined in IEEE 802.15.4 standard, please check the
     // 2006 standard, page 268, section E.4.1.8 Bit error rate (BER)
     // calculations, formula 7). Here you can see that the factor of 20.0 is correct ;).
-    const double dSNRFct = 20.0 *snir *bandwidth.get() / bitrate.get(); // TODO is this correct?
+
+    // without these, the calculation does not make sense
+    ASSERT(bandwidth >= MHz(2));
+    ASSERT(bitrate == kbps(250));
+
+    const double dSNRFct = 20.0 * snir;
     double dSumK = 0;
     register int k = 2;
 
@@ -69,7 +78,7 @@ double DSSSOQPSK16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrat
 
 double DSSSOQPSK16Modulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
-    throw cRuntimeError("Not yet implemented");
+    return NAN;
 }
 
 } // namespace physicallayer
