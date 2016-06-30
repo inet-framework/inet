@@ -87,7 +87,7 @@ std::string InterfaceEntry::info() const
 {
     std::stringstream out;
     out << (getName()[0] ? getName() : "*");
-    out << " ID:" << getInterfaceId();
+    out << "  ID:" << getInterfaceId();
     out << "  MTU:" << getMTU();
     if (!isUp())
         out << " DOWN";
@@ -126,8 +126,8 @@ std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
     out << "name:" << (getName()[0] ? getName() : "*");
-    out << " ID:" << getInterfaceId();
-    out << "MTU: " << getMTU() << " \t";
+    out << "  ID:" << getInterfaceId();
+    out << "  MTU: " << getMTU() << " \t";
     if (!isUp())
         out << "DOWN ";
     if (isBroadcast())
