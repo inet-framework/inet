@@ -30,20 +30,21 @@ module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
         carrierFrequency = 2450 MHz;
 
         // B_20dB ATmega256RFR2 (page 564)
-        // *.bandwidth = default(2.8 MHz);
-        // what is meant by bandwidth here?
-        // the B_20dB bandwidth would lead to far too low BERs
-        bandwidth = default(0.25 MHz);
+        bandwidth = default(2.8 MHz);
 
         // 802.15.4-2006 (page 28)
         *.bitrate = default(250 kbps);
 
-        // PHY Header, 802.15.4-2006 (page 43)
-        // 4 octets Preamble
+        // PHY Header (without preamble), 802.15.4-2006 (page 43)
         // 1 octet SFD
         // 7 bit Frame length
         // 1 bit Reserved
-        *.headerBitLength = (4*8 + 1*8 + 7 + 1) * 1 b;
+        *.headerBitLength = (1*8 + 7 + 1) * 1 b;
+
+        // Preamble
+        // 4 octets Preamble
+        // 1 symbol of 16us -> 4 bit
+        transmitter.preambleDuration = (4*8/4) * 16 us;
 
         // RSSI sensitivity (ATmega256RFR2, page 566)
         receiver.energyDetection = default(-90dBm);
@@ -67,5 +68,5 @@ module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
         // TX Output power (typ. 3.5 dBm, ATmega256RFR2, page 564)
         transmitter.power = default(2.24mW);
 
-        @class(Radio);
+        @class(FlatRadioBase);
 }
