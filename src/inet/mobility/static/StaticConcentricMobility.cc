@@ -26,40 +26,34 @@ namespace inet {
 
 Define_Module(StaticConcentricMobility);
 
-int circleOfIndex(int idx) {
-    // Returns the inverse of f(x)=sum_{r=1}^x floor(2*pi*r)
-    // f(x) is the number of nodes on x concentric circles
-    if(idx > 0) {
-        return (1+sqrt(1+(4.0*idx)/M_PI))/2;
-    }
-    else {
-        return 0;
-    }
-}
-
-int nodesOnCircles(int circles) {
-    if(circles < 0) {
-        return 0;
-    }
-    else {
-        int nodes = 1;
-        for(int r = 0; r <= circles; r++) {
-            nodes += (int)(2*M_PI*r);
-        }
-        return nodes;
-    }
-}
 
 void StaticConcentricMobility::setInitialPosition()
 {
-    int numHosts = par("numHosts");
+    unsigned int numHosts = par("numHosts");
     double distance = par("distance");
 
-    int index = visualRepresentation->getIndex();
+    unsigned int index = visualRepresentation->getIndex();
 
-    unsigned int myCircle = circleOfIndex(index);
-    unsigned int totalCircles = circleOfIndex(numHosts-1); // -1 for center node
-    unsigned int nodesOnInnerCircles = nodesOnCircles(myCircle-1);
+    unsigned int totalCircles = 0;
+    unsigned int totalNodesOnInnerCircles = 0;
+    unsigned int nodesOnThisCircle = 1;
+
+    unsigned int myCircle = 0;
+    unsigned int nodesOnInnerCircles = 0;
+
+    for(unsigned int i = 0; i < numHosts; i++) {
+        if(i - totalNodesOnInnerCircles >= nodesOnThisCircle) {
+            // start new circle
+            totalCircles++;
+            totalNodesOnInnerCircles += nodesOnThisCircle;
+            nodesOnThisCircle = (int)(2*M_PI*totalCircles);
+        }
+
+        if(i == index) {
+            myCircle = totalCircles;
+            nodesOnInnerCircles = totalNodesOnInnerCircles;
+        }
+    }
 
     lastPosition.x = distance*totalCircles;
     lastPosition.y = distance*totalCircles;
