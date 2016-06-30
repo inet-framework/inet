@@ -76,7 +76,7 @@ cmdenv-express-mode = false
 
 %contains: stdout
 --------------------------------------------------------
-	Test.hostSource.pingApp[0]
+	Test.hostSource.app[0]
 --------------------------------------------------------
 sent: 81   received: 30   loss rate (%): 62.963
 round-trip min/avg/max (ms): 0.456262/0.813337/1.66852

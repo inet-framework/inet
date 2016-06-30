@@ -33,6 +33,7 @@ cmdenv-express-mode=false
 **.cli[*].app[0].sendInterval = 10s
 
 **.srv.numApps = 0
+**.srv.hasUdp = false
 
 # Ethernet NIC configuration
 **.eth[*].queueType = "DropTailQueue" # in routers

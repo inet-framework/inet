@@ -72,12 +72,12 @@ network=IGMPTestNetwork
 %file: scenario.xml
 <scenario>
 
-<join t="100" module="host2.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<join t="110" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<leave t="120" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<leave t="140" module="host2.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<join t="100" module="host2.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<join t="110" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<leave t="120" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<leave t="140" module="host2.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
 
-<join t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+<join t="200" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.2"/>
 
 </scenario>
 

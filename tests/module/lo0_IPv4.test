@@ -12,7 +12,7 @@ network LocalUDP
     submodules:
         host: StandardHost {
             parameters:
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
                 @display("i=device/pc3");
         }
 }
@@ -48,11 +48,11 @@ total-stack = 7MiB
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar LocalUDP.host.lo0.lo 	passedUpPk:count 	3200
+scalar LocalUDP.host.lo[0].lo 	passedUpPk:count 	3200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.lo0.lo 	rcvdPkFromHL:count 	3200
+scalar LocalUDP.host.lo[0].lo 	rcvdPkFromHL:count 	3200
 attr
 
 %contains: results/General-0.sca

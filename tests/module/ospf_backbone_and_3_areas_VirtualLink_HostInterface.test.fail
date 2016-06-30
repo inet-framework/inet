@@ -155,7 +155,8 @@ sim-time-limit = 200s
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 
-**.numUdpApps = 2
+**.H1.numApps = 2
+**.H2.numApps = 2
 **.udpApp[0].typename = "UDPBasicApp"
 **.udpApp[0].destPort = 1234
 **.udpApp[0].messageLength = 32 bytes

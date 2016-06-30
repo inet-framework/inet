@@ -15,7 +15,7 @@ cmdenv-express-mode = false
 *.host.app[0].destAddr = "192.168.0.42"
 *.host.app[0].startTime = 3s
 
-*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.ipv4.configurator.networkConfiguratorModule = ""
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
@@ -60,7 +60,9 @@ Test\.host shutting down
 Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.host
 Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.host
+Clear all sockets
 Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.host
+remove route dest:127\.0\.0\.0  gw:\*  mask:255\.0\.0\.0  metric:1 if:lo0\(127\.0\.0\.1\)  DIRECT IFACENETMASK
 IPv4::flush\(\): packets in queue: empty
 IPv4::flush\(\): pending packets:
 IPv4::flush\(\): packets in hooks: 0

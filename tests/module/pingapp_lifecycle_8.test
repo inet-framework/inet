@@ -16,7 +16,7 @@ cmdenv-express-mode = false
 *.host.app[0].startTime = 0s
 *.host.app[0].stopTime = 6s
 
-*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.ipv4.configurator.networkConfiguratorModule = ""
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")

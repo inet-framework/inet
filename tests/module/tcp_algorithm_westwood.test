@@ -35,20 +35,21 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 
 
 ## tcp apps
-**.numTcpApps = 1
-**.client.tcpApp[*].typename = "TCPSessionApp"
-**.client.tcpApp[0].active = true
-**.client.tcpApp[0].localPort = -1
-**.client.tcpApp[0].connectAddress = "server"
-**.client.tcpApp[0].connectPort = 1000
-**.client.tcpApp[0].tOpen = 0.2s
-**.client.tcpApp[0].tSend = 0.4s
-**.client.tcpApp[0].sendBytes = 1000000B
-**.client.tcpApp[0].sendScript = ""
-**.client.tcpApp[0].tClose = 25s
+**.client.numApps = 1
+**.client.app[0].typename = "TCPSessionApp"
+**.client.app[0].active = true
+**.client.app[0].localPort = -1
+**.client.app[0].connectAddress = "server"
+**.client.app[0].connectPort = 1000
+**.client.app[0].tOpen = 0.2s
+**.client.app[0].tSend = 0.4s
+**.client.app[0].sendBytes = 1000000B
+**.client.app[0].sendScript = ""
+**.client.app[0].tClose = 25s
 
-**.server.tcpApp[*].typename="TCPSinkApp"
-**.server*.tcpApp[0].localPort = 1000
+**.server.numApps = 1
+**.server.app[0].typename="TCPSinkApp"
+**.server*.app[0].localPort = 1000
 
 # NIC configuration
 **.ppp[*].queueType = "DropTailQueue"
@@ -60,25 +61,25 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 %#################################################################################################################
 
 %contains: results/General-0.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %contains: results/General-1.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %contains: results/General-2.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %contains: results/General-3.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %contains: results/General-4.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %contains: results/General-5.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %contains: results/General-6.sca
-scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+scalar ClientServer.server.app[0] 	rcvdPk:sum(packetBytes) 	1000000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

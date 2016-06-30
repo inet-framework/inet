@@ -25,10 +25,10 @@ network TcpTestNet1
             @display("p=198,178");
         }
     connections allowunconnected:
-        cli_app.tcpOut --> cli_tcp.appIn++;
-        cli_app.tcpIn <-- cli_tcp.appOut++;
-        srv_app.tcpOut --> srv_tcp.appIn++;
-        srv_app.tcpIn <-- srv_tcp.appOut++;
+        cli_app.socketOut --> cli_tcp.appIn;
+        cli_app.socketIn <-- cli_tcp.appOut;
+        srv_app.socketOut --> srv_tcp.appIn;
+        srv_app.socketIn <-- srv_tcp.appOut;
 
         cli_tcp.ipOut --> {  delay = 1ms; } --> tcptester.in1;
         cli_tcp.ipIn <-- {  delay = 1ms; } <-- tcptester.out1;
@@ -59,10 +59,10 @@ network TcpTestNet2
             @display("p=198,178");
         }
     connections allowunconnected:
-        cli_app.tcpOut --> cli_tcp.appIn++;
-        cli_app.tcpIn <-- cli_tcp.appOut++;
-        srv_app.tcpOut --> srv_tcp.appIn++;
-        srv_app.tcpIn <-- srv_tcp.appOut++;
+        cli_app.socketOut --> cli_tcp.appIn;
+        cli_app.socketIn <-- cli_tcp.appOut;
+        srv_app.socketOut --> srv_tcp.appIn;
+        srv_app.socketIn <-- srv_tcp.appOut;
 
         cli_tcp.ipOut --> tcptester.in1;
         cli_tcp.ipIn <-- tcptester.out1;
