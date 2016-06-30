@@ -19,10 +19,12 @@
 #define __INET_TCPSRVHOSTAPP_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
+
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
 
 namespace inet {
 
@@ -41,6 +43,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     TCPSocketMap socketMap;
     typedef std::set<TCPServerThreadBase *> ThreadSet;
     ThreadSet threadSet;
+    NodeStatus *nodeStatus = nullptr;
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -48,8 +51,11 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     virtual void finish() override;
     virtual void updateDisplay();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    bool isNodeUp() { return !nodeStatus || nodeStatus->getState() == NodeStatus::UP; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void start();
+    virtual void stop();
+    virtual void crash();
 
   public:
     virtual void removeThread(TCPServerThreadBase *thread);
