@@ -79,6 +79,7 @@ void GPSR::initialize(int stage)
         host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        outputInterface = par("outputInterface");
         mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
         routingTable = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
@@ -582,8 +583,8 @@ INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const 
         EV_INFO << "Next hop found: source = " << source << ", destination = " << destination << ", nextHop: " << nextHop << endl;
         GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
         gpsrOption->setSenderAddress(getSelfAddress());
-        // KLUDGE: find output interface
-        outputInterfaceEntry = interfaceTable->getInterface(1);
+        outputInterfaceEntry = interfaceTable->getInterfaceByName(outputInterface);
+        ASSERT(outputInterfaceEntry);
         return ACCEPT;
     }
 }

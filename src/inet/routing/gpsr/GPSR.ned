@@ -50,6 +50,7 @@ simple GPSR like IGPSR
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string networkProtocolModule = default("^.networkLayer.ip");
+        string outputInterface = default("wlan0");
 
         // GPSR parameters
         int planarizationMode @enum(0,1) = default(0); // 0 for GG, 1 for RNG
