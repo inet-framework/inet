@@ -745,7 +745,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     udpPacket->setSourcePort(aodvUDPPort);
     udpPacket->setDestinationPort(aodvUDPPort);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
-    udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();

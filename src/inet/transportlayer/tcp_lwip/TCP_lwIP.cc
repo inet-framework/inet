@@ -36,6 +36,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3Address.h"
 
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
@@ -619,7 +620,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     send(tcpseg, "ipOut");
 }
 

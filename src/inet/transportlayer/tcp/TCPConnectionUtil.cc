@@ -262,7 +262,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     controlInfo->setSourceAddress(localAddr);
     controlInfo->setDestinationAddress(remoteAddr);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     tcpMain->send(tcpseg, "ipOut");
 }
 
@@ -278,7 +278,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
 }
 

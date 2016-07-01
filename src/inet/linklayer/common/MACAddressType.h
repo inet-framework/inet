@@ -41,6 +41,7 @@ class INET_API MACAddressType : public IL3AddressType
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return MACAddress(-109); }    // TODO: constant
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return MACAddress(-9); }    // TODO: constant
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const override { return new GenericNetworkProtocolControlInfo(); }
+    virtual const Protocol *getNetworkProtocol() const override { throw cRuntimeError("address is MACAddress, unknown L3 protocol"); }
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return MACAddress::UNSPECIFIED_ADDRESS; }
 };
 

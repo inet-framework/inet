@@ -934,7 +934,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     send(tcpseg, "ipOut");
 }
 

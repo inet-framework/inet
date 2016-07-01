@@ -390,7 +390,6 @@ void DYMO::processRREQHolddownTimer(RREQHolddownTimer *message)
 
 void DYMO::sendUDPPacket(UDPPacket *packet, double delay)
 {
-    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     if (delay == 0)
         send(packet, "ipOut");
     else
@@ -431,6 +430,7 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     udpPacket->setSourcePort(DYMO_UDP_PORT);
     udpPacket->setDestinationPort(DYMO_UDP_PORT);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
+    udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     sendUDPPacket(udpPacket, delay);
 }
 

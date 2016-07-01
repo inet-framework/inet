@@ -194,7 +194,7 @@ void IPvXTrafGen::sendPacket()
     EV_INFO << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
-    payload->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    payload->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     send(payload, "ipOut");
     numSent++;
 }

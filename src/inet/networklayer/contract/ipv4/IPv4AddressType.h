@@ -19,6 +19,8 @@
 #define __INET_IPV4ADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
@@ -42,6 +44,8 @@ class INET_API IPv4AddressType : public IL3AddressType
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return IPv4Address::LL_MANET_ROUTERS; }
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ALL_RIP_ROUTERS_MCAST; }
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const override { return new IPv4ControlInfo(); }
+    virtual const Protocol *getNetworkProtocol() const override { return &Protocol::ipv4; }
+
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return IPv4Address::UNSPECIFIED_ADDRESS; }
 };
 
