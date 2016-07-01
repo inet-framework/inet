@@ -40,7 +40,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     cPar *sendInterval = nullptr;
     cPar *numPacketsPerBurst = nullptr;
     cPar *packetLength = nullptr;
-    int etherType = 0;
+    int etherType = -1;
     MACAddress destMACAddress;
     NodeStatus *nodeStatus = nullptr;
 

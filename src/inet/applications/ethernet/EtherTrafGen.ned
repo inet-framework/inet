@@ -27,7 +27,7 @@ simple EtherTrafGen
 {
     parameters:
         string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
-        int etherType = default(0);  // etherType to set on outgoing packets
+        int etherType = default(-1);  // etherType to set on outgoing packets
         double startTime @unit(s) = default(this.sendInterval);  // time of sending the first packet
         double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
         volatile double sendInterval @unit(s);  // interval between sending bursts
