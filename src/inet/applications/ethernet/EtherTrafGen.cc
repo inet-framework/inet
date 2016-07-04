@@ -21,9 +21,10 @@
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
 
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -186,6 +187,7 @@ void EtherTrafGen::sendBurstPackets()
         etherctrl->setEtherType(etherType);
         etherctrl->setDest(destMACAddress);
         datapacket->setControlInfo(etherctrl);
+        datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B type=" << etherType << "\n";
         emit(sentPkSignal, datapacket);
