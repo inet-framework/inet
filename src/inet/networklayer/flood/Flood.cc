@@ -20,12 +20,14 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/flood/Flood.h"
+
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 
 namespace inet {
 
@@ -291,10 +293,10 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
     EV << "sendDown: nHop=L3BROADCAST -> message has to be broadcasted"
        << " -> set destMac=L2BROADCAST" << endl;
 
-    setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
-
     //encapsulate the application packet
     pkt->encapsulate(appPkt);
+    setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
+
     EV << " pkt encapsulated\n";
     return pkt;
 }
@@ -307,6 +309,8 @@ cObject *Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDest
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
     cCtrlInfo->setDest(pDestAddr);
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
+    pMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

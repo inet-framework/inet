@@ -21,13 +21,14 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #include "inet/networklayer/generic/GenericRoute.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -489,7 +490,9 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+        //Peer to peer interface, no broadcast, no MACAddress. // packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+        datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
         datagram->setControlInfo(controlInfo);
         send(datagram, "queueOut");
         return;
@@ -511,7 +514,9 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setDest(nextHopMAC);
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+        datagram->ensureTag<MACAddressReq>()->setDestinationAddress(nextHopMAC);
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+        datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
         datagram->setControlInfo(controlInfo);
 
         // send out

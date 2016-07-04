@@ -286,13 +286,13 @@ cPacket *ProbabilisticBroadcast::encapsulate(cPacket *msg)
     pkt->setAppTtl(timeToLive);
     pkt->setId(getNextID());
     pkt->setTransportProtocol(networkControlInfo->getTransportProtocol());
+    // clean-up
+    delete controlInfo;
 
-    setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
     //encapsulate the application packet
     pkt->encapsulate(msg);
 
-    // clean-up
-    delete controlInfo;
+    setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
 
     return pkt;
 }
@@ -352,6 +352,7 @@ cObject *ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const 
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
     cCtrlInfo->setDest(pDestAddr);
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
