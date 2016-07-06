@@ -145,6 +145,9 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSrc(frame->getSrc());
     etherctrl->setDest(frame->getDest());
+    auto macAddressInd = higherlayermsg->ensureTag<MACAddressInd>();
+    macAddressInd->setSourceAddress(frame->getSrc());
+    macAddressInd->setDestinationAddress(frame->getDest());
     higherlayermsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
         etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
