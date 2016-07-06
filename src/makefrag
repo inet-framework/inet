@@ -74,7 +74,7 @@ PRECOMPILED_HEADER_D=$(PRECOMPILED_HEADER_PCH:%.$(PRECOMPILED_EXT)=%.d)
 CFLAGS += -include $(PRECOMPILED_HEADER)
 
 # Main target
-all-pch: | pch all
+all-pch: | pch msgheaders all
 
 .PHONY: pch clean-pch
 
@@ -86,9 +86,35 @@ ifneq ("$(PRECOMPILED_EXT)","")
 	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(COPTS) -o $@ $<
 endif
 
-clean: clean-pch
+clean: clean-pch clean-defines
 
 clean-pch:
 	$(Q)-rm -f $(PRECOMPILED_HEADER_D) $(PRECOMPILED_HEADER).pch $(PRECOMPILED_HEADER).gch
 
 -include $(PRECOMPILED_HEADER_D)
+
+# Create opp_defines.h so important WITH_* macros from OMNeT++ can be included as macros from a header file
+# This helps the IDE to properly enable/disable conditional code in the editor
+DEFINES_FILE=inet/opp_defines.h
+
+msgheaders: $(DEFINES_FILE)
+
+clean-defines:
+	$(Q)-rm -f $(DEFINES_FILE)
+
+$(DEFINES_FILE) : $(COPTS_FILE)
+	@echo "// Generated file, do not edit" >$(DEFINES_FILE)
+ifeq ($(WITH_OSG),yes)
+	@echo "#ifndef WITH_OSG" >>$(DEFINES_FILE)
+	@echo "#define WITH_OSG" >>$(DEFINES_FILE)
+	@echo "#endif" >>$(DEFINES_FILE)
+endif
+
+# dump out the actual compiler and linker command line for easier debugging
+ifneq ($(MAKECMDGOALS),clean)
+$(info *** COMPILING with:)
+$(info $(CXX) -c $(CXXFLAGS) $(COPTS))
+$(info *** LINKING with:)
+$(info $(SHLIB_LD) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS))
+$(info Compiling...)
+endif
