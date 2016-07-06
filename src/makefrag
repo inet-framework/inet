@@ -89,6 +89,6 @@ endif
 clean: clean-pch
 
 clean-pch:
-	$(Q)-rm -f $(PRECOMPILED_HEADER_D) $(PRECOMPILED_HEADER_PCH)
+	$(Q)-rm -f $(PRECOMPILED_HEADER_D) $(PRECOMPILED_HEADER).pch $(PRECOMPILED_HEADER).gch
 
 -include $(PRECOMPILED_HEADER_D)
