@@ -209,7 +209,6 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
 {
     // add control info with MAC address
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
     msg->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

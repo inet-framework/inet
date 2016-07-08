@@ -17,16 +17,17 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
 
-#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NotifierConsts.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/common/INETUtils.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -218,7 +219,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
 
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    frame->setAddress3(ctrl->getDest());
+    frame->setAddress3(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
     frame->setEtherType(ctrl->getEtherType());
     int up = ctrl->getUserPriority();
     if (up >= 0) {
@@ -238,8 +239,9 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
     cPacket *payload = frame->decapsulate();
 
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getAddress3());
-    ctrl->setDest(frame->getReceiverAddress());
+    auto macAddressInd = payload->ensureTag<MACAddressInd>();
+    macAddressInd->setSourceAddress(frame->getAddress3());
+    macAddressInd->setDestinationAddress(frame->getReceiverAddress());
     if (frame->getType() == ST_DATA_WITH_QOS) {
         int tid = frame->getTid();
         if (tid < 8)

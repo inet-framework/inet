@@ -16,7 +16,9 @@
 //
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
+
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include <string.h>
 
 #ifdef WITH_ETHERNET
@@ -82,8 +84,9 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
         case ENCAP_DECAP_TRUE: {
             cPacket *payload = frame->decapsulate();
             Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-            ctrl->setSrc(frame->getTransmitterAddress());
-            ctrl->setDest(frame->getAddress3());
+            auto macAddressInd = payload->ensureTag<MACAddressInd>();
+            macAddressInd->setSourceAddress(frame->getTransmitterAddress());
+            macAddressInd->setDestinationAddress(frame->getAddress3());
             int tid = frame->getTid();
             if (tid < 8)
                 ctrl->setUserPriority(tid); // TID values 0..7 are UP
@@ -184,8 +187,8 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
             frame->setFromDS(true);
 
             // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
-            frame->setAddress3(ctrl->getSrc());
-            frame->setReceiverAddress(ctrl->getDest());
+            frame->setAddress3(msg->getMandatoryTag<MACAddressReq>()->getSourceAddress());
+            frame->setReceiverAddress(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
             frame->setEtherType(ctrl->getEtherType());
             int up = ctrl->getUserPriority();
             if (up >= 0) {

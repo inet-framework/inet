@@ -930,7 +930,7 @@ cPacket *CSMA::decapsulate(CSMAFrame *macPkt)
 {
     cPacket *packet = macPkt->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
-    controlInfo->setSrc(macPkt->getSrcAddr());
+    packet->ensureTag<MACAddressInd>()->setSourceAddress(macPkt->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macPkt->getNetworkProtocol()));
     controlInfo->setNetworkProtocol(macPkt->getNetworkProtocol());

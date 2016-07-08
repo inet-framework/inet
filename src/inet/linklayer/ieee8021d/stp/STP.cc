@@ -18,9 +18,11 @@
 // Authors: ANSA Team, Benjamin Martin Seregi
 //
 
-#include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ieee8021d/stp/STP.h"
+
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -140,16 +142,22 @@ void STP::handleTCN(BPDU *tcn)
 
     Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(tcn->getControlInfo());
     int arrivalGate = controlInfo->getSwitchPort();
-    MACAddress address = controlInfo->getSrc();
+    MACAddressInd *addressInd = tcn->removeMandatoryTag<MACAddressInd>();
+    MACAddress srcAddress = addressInd->getSourceAddress();
+    MACAddress destAddress = addressInd->getDestinationAddress();
+    delete addressInd;
 
     // send ACK to the sender
     EV_INFO << "Sending Topology Change Notification ACK." << endl;
-    generateBPDU(arrivalGate, address, false, true);
+    generateBPDU(arrivalGate, srcAddress, false, true);
 
     controlInfo->setSwitchPort(rootPort);    // send TCN to the Root Switch
 
-    if (!isRoot)
+    if (!isRoot) {
+        tcn->ensureTag<MACAddressReq>()->setSourceAddress(srcAddress);
+        tcn->ensureTag<MACAddressReq>()->setDestinationAddress(destAddress);
         send(tcn, "relayOut");
+    }
     else
         delete tcn;
 }
@@ -158,7 +166,7 @@ void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tc
 {
     BPDU *bpdu = new BPDU();
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(address);
+    bpdu->ensureTag<MACAddressReq>()->setDestinationAddress(address);
     controlInfo->setSwitchPort(port);
 
     bpdu->setName("BPDU");
@@ -210,7 +218,7 @@ void STP::generateTCN()
             tcn->setBpduType(1);
 
             Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-            controlInfo->setDest(MACAddress::STP_MULTICAST_ADDRESS);
+            tcn->ensureTag<MACAddressReq>()->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
             controlInfo->setSwitchPort(rootPort);
             tcn->setControlInfo(controlInfo);
 

@@ -307,7 +307,6 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
 cObject *Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
-    cCtrlInfo->setDest(pDestAddr);
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     pMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);

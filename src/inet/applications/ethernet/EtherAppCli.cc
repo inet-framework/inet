@@ -23,6 +23,7 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -202,8 +203,8 @@ void EtherAppCli::sendPacket()
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
     etherctrl->setDsap(remoteSAP);
-    etherctrl->setDest(destMACAddress);
     datapacket->setControlInfo(etherctrl);
+    datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
 
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");

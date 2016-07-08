@@ -14,6 +14,7 @@
 #include "inet/applications/ethernet/EthernetApplication.h"
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -101,8 +102,8 @@ void EthernetApplication::sendPacket()
     datapacket->setResponseBytes(respLen);
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setDest(destMACAddress);
     datapacket->setControlInfo(etherctrl);
+    datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
 
     send(datapacket, "out");
     packetsSent++;
@@ -119,7 +120,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
         EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
         emit(rcvdPkSignal, req);
         Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
-        MACAddress srcAddr = ctrl->getSrc();
+        MACAddress srcAddr = req->getMandatoryTag<MACAddressInd>()->getSourceAddress();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
         delete ctrl;
@@ -148,8 +149,8 @@ void EthernetApplication::receivePacket(cMessage *msg)
 void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
 {
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setDest(destAddr);
     datapacket->setControlInfo(etherctrl);
+    datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destAddr);
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");
 }

@@ -18,6 +18,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h"
 
 namespace inet {
@@ -53,7 +54,7 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
 
     // copy receiver address from the control info (sender address will be set in MAC)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    frame->setReceiverAddress(ctrl->getDest());
+    frame->setReceiverAddress(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
     frame->setEtherType(ctrl->getEtherType());
     int up = ctrl->getUserPriority();
     if (up >= 0) {
@@ -73,8 +74,9 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
     cPacket *payload = frame->decapsulate();
 
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getTransmitterAddress());
-    ctrl->setDest(frame->getReceiverAddress());
+    auto macAddressInd = payload->ensureTag<MACAddressInd>();
+    macAddressInd->setSourceAddress(frame->getTransmitterAddress());
+    macAddressInd->setDestinationAddress(frame->getReceiverAddress());
     int tid = frame->getTid();
     if (tid < 8)
         ctrl->setUserPriority(tid); // TID values 0..7 are UP

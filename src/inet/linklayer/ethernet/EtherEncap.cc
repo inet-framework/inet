@@ -143,8 +143,6 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 
     // add Ieee802Ctrl to packet
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setSrc(frame->getSrc());
-    etherctrl->setDest(frame->getDest());
     auto macAddressInd = higherlayermsg->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getSrc());
     macAddressInd->setDestinationAddress(frame->getDest());
@@ -175,7 +173,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int pauseUnits = etherctrl->getPauseUnits();
-    MACAddress dest = etherctrl->getDest();
+    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     delete etherctrl;
 
     EV_DETAIL << "Creating and sending PAUSE frame, with duration = " << pauseUnits << " units\n";

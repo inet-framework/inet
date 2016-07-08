@@ -636,7 +636,7 @@ cPacket *LMacLayer::decapsulate(LMacFrame *msg)
 {
     cPacket *packet = msg->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
-    controlInfo->setSrc(msg->getSrcAddr());
+    packet->ensureTag<MACAddressInd>()->setSourceAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
     controlInfo->setNetworkProtocol(msg->getNetworkProtocol());

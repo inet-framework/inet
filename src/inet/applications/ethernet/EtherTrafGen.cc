@@ -185,7 +185,6 @@ void EtherTrafGen::sendBurstPackets()
 
         Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
         etherctrl->setEtherType(etherType);
-        etherctrl->setDest(destMACAddress);
         datapacket->setControlInfo(etherctrl);
         datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
 

@@ -824,7 +824,6 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(macAddr);
     controlInfo->setEtherType(ETHERTYPE_IPv6);
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());

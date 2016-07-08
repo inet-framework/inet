@@ -512,7 +512,6 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     else {
         // add control info with MAC address
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-        controlInfo->setDest(nextHopMAC);
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
         datagram->ensureTag<MACAddressReq>()->setDestinationAddress(nextHopMAC);
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

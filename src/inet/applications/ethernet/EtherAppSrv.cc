@@ -22,6 +22,7 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -83,7 +84,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     emit(rcvdPkSignal, req);
 
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
-    MACAddress srcAddr = ctrl->getSrc();
+    MACAddress srcAddr = req->getMandatoryTag<MACAddressInd>()->getSourceAddress();
     int srcSap = ctrl->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
@@ -114,8 +115,9 @@ void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr, in
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
     etherctrl->setDsap(destSap);
-    etherctrl->setDest(destAddr);
     datapacket->setControlInfo(etherctrl);
+    datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destAddr);
+
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");
     packetsSent++;

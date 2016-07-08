@@ -37,10 +37,6 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
 
     virtual SimpleLinkLayerControlInfo *dup() const override { return new SimpleLinkLayerControlInfo(*this); }
 
-    virtual MACAddress getSourceAddress() const { return getSrc(); }
-    virtual void setSourceAddress(const MACAddress& address) { setSrc(address); }
-    virtual MACAddress getDestinationAddress() const { return getDest(); }
-    virtual void setDestinationAddress(const MACAddress& address) { setDest(address); };
     virtual int getNetworkProtocol() const { return SimpleLinkLayerControlInfo_Base::getProtocol(); }
     virtual void setNetworkProtocol(int protocol) { SimpleLinkLayerControlInfo_Base::setProtocol(protocol); }
     virtual int getSocketId() const override { return SimpleLinkLayerControlInfo_Base::getSocketId(); }

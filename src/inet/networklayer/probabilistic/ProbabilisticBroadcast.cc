@@ -350,7 +350,6 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
 cObject *ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
-    cCtrlInfo->setDest(pDestAddr);
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     pMsg->setControlInfo(cCtrlInfo);

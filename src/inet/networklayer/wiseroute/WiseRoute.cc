@@ -378,7 +378,6 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 cObject *WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
-    cCtrlInfo->setDest(pDestAddr);
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->setControlInfo(cCtrlInfo);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);

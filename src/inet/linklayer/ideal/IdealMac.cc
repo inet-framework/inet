@@ -22,12 +22,13 @@
 
 #include "inet/linklayer/ideal/IdealMac.h"
 
-#include "inet/linklayer/ideal/IdealMacFrame_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/queue/IPassiveQueue.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ideal/IdealMacFrame_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
@@ -154,7 +155,7 @@ void IdealMac::startTransmitting(cPacket *msg)
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
-    MACAddress dest = ctrl->getDestinationAddress();
+    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     IdealMacFrame *frame = encapsulate(msg);
 
     if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
@@ -252,8 +253,9 @@ IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     IdealMacFrame *frame = new IdealMacFrame(msg->getName());
     frame->setByteLength(headerLength);
-    frame->setSrc(ctrl->getSrc());
-    frame->setDest(ctrl->getDest());
+    auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
+    frame->setSrc(macAddressReq->getSourceAddress());
+    frame->setDest(macAddressReq->getDestinationAddress());
     frame->encapsulate(msg);
     frame->setSrcModuleId(getId());
     frame->setNetworkProtocol(ctrl->getNetworkProtocol());
@@ -290,9 +292,10 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     // decapsulate and attach control info
     cPacket *packet = frame->decapsulate();
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setSrc(frame->getSrc());
-    etherctrl->setDest(frame->getDest());
     etherctrl->setEtherType(frame->getNetworkProtocol());
+    auto macAddressReq = packet->ensureTag<MACAddressReq>();
+    macAddressReq->setSourceAddress(frame->getSrc());
+    macAddressReq->setDestinationAddress(frame->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
     packet->setControlInfo(etherctrl);

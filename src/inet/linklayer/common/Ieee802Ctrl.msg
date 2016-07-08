@@ -77,8 +77,6 @@ class Ieee802Ctrl
 {
     @customize(true);
 
-    MACAddress src;  // src MAC address (can be left empty when sending)
-    MACAddress dest; // dest MAC address
     int etherType @enum(EtherType) = -1;   // used with ~EthernetIIFrame
     int socketId = -1;
     int switchPort = -1; // swich port index (only in swiches)

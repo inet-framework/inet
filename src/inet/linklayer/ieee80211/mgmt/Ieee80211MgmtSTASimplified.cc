@@ -15,10 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h"
+
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -69,8 +71,9 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
 
     // destination address is in address3
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    ASSERT(!ctrl->getDest().isUnspecified());
-    frame->setAddress3(ctrl->getDest());
+    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
+    ASSERT(!dest.isUnspecified());
+    frame->setAddress3(dest);
     frame->setEtherType(ctrl->getEtherType());
     int up = ctrl->getUserPriority();
     if (up >= 0) {
@@ -88,10 +91,10 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
 cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
-
+    auto macAddressInd = payload->ensureTag<MACAddressInd>();
     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getAddress3());
-    ctrl->setDest(frame->getReceiverAddress());
+    macAddressInd->setSourceAddress(frame->getAddress3());
+    macAddressInd->setDestinationAddress(frame->getReceiverAddress());
     if (frame->getType() == ST_DATA_WITH_QOS) {
         int tid = frame->getTid();
         if (tid < 8)

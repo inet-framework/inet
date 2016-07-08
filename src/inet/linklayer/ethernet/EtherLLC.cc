@@ -20,6 +20,7 @@
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
@@ -143,7 +144,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     frame->setControl(0);
     frame->setSsap(etherctrl->getSsap());
     frame->setDsap(etherctrl->getDsap());
-    frame->setDest(etherctrl->getDest());    // src address is filled in by MAC
+    frame->setDest(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());    // src address is filled in by MAC
     frame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH);
     delete etherctrl;
 
@@ -173,9 +174,10 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(frame->getSsap());
     etherctrl->setDsap(frame->getDsap());
-    etherctrl->setSrc(frame->getSrc());
-    etherctrl->setDest(frame->getDest());
     higherlayermsg->setControlInfo(etherctrl);
+    auto macaddressInd = higherlayermsg->ensureTag<MACAddressInd>();
+    macaddressInd->setSourceAddress(frame->getSrc());
+    macaddressInd->setDestinationAddress(frame->getDest());
 
     EV << "Decapsulating frame `" << frame->getName() << "', "
                                                          "passing up contained packet `" << higherlayermsg->getName() << "' "
@@ -249,7 +251,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename);
     frame->setPauseTime(pauseUnits);
-    MACAddress dest = etherctrl->getDest();
+    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
     frame->setDest(dest);
