@@ -264,8 +264,8 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
     }
-    setDownControlInfo(pkt, nextHopMacAddr);
     pkt->encapsulate(static_cast<cPacket *>(msg));
+    setDownControlInfo(pkt, nextHopMacAddr);
     sendDown(pkt);
     nbDataPacketsSent++;
 }
