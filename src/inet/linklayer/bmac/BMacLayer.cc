@@ -738,14 +738,13 @@ BMacFrame *BMacLayer::encapsulate(cPacket *netwPkt)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    IMACProtocolControlInfo *cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
-    pkt->setNetworkProtocol(cInfo->getNetworkProtocol());
     auto dest = netwPkt->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<ProtocolInd>()->getProtocol()));
     pkt->setDestAddr(dest);
 
     //delete the control info
-    delete cInfo;
+    delete netwPkt->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
     pkt->setSrcAddr(address);

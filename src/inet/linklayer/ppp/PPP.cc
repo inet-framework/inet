@@ -355,9 +355,8 @@ void PPP::refreshDisplay() const
 
 PPPFrame *PPP::encapsulate(cPacket *msg)
 {
-    IMACProtocolControlInfo *controlInfo = check_and_cast<IMACProtocolControlInfo *>(msg->getControlInfo());
     PPPFrame *pppFrame = new PPPFrame(msg->getName());
-    pppFrame->setProtocol(controlInfo->getNetworkProtocol());
+    pppFrame->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<ProtocolInd>()->getProtocol()));
     pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
     pppFrame->encapsulate(msg);
     return pppFrame;
