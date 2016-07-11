@@ -30,6 +30,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -209,6 +210,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
+    msg->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->setControlInfo(controlInfo);
 

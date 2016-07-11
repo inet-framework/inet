@@ -32,6 +32,7 @@
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/FindModule.h"
 #include "inet/common/ModuleAccess.h"
@@ -380,6 +381,7 @@ cObject *WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& p
     cCtrlInfo->setDest(pDestAddr);
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->setControlInfo(cCtrlInfo);
+    pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     return cCtrlInfo;
 }
 

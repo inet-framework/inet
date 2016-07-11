@@ -13,6 +13,7 @@
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 

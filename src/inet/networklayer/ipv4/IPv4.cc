@@ -38,6 +38,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -855,6 +856,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
+    packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->setControlInfo(controlInfo);
 

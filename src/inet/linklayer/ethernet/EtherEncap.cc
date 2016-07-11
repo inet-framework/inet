@@ -26,6 +26,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -100,15 +101,15 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV_DETAIL << "Encapsulating higher layer packet `" << msg->getName() << "' for MAC\n";
 
-    IMACProtocolControlInfo *controlInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(controlInfo);
+    auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     EtherFrame *frame = nullptr;
 
     if (useSNAP) {
         EtherFrameWithSNAP *snapFrame = new EtherFrameWithSNAP(msg->getName());
 
-        snapFrame->setSrc(controlInfo->getSourceAddress());    // if blank, will be filled in by MAC
-        snapFrame->setDest(controlInfo->getDestinationAddress());
+        snapFrame->setSrc(macAddressReq->getSourceAddress());    // if blank, will be filled in by MAC
+        snapFrame->setDest(macAddressReq->getDestinationAddress());
         snapFrame->setOrgCode(0);
         if (etherctrl)
             snapFrame->setLocalcode(etherctrl->getEtherType());
@@ -117,13 +118,13 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     else {
         EthernetIIFrame *eth2Frame = new EthernetIIFrame(msg->getName());
 
-        eth2Frame->setSrc(controlInfo->getSourceAddress());    // if blank, will be filled in by MAC
-        eth2Frame->setDest(controlInfo->getDestinationAddress());
+        eth2Frame->setSrc(macAddressReq->getSourceAddress());    // if blank, will be filled in by MAC
+        eth2Frame->setDest(macAddressReq->getDestinationAddress());
         if (etherctrl)
             eth2Frame->setEtherType(etherctrl->getEtherType());
         frame = eth2Frame;
     }
-    delete controlInfo;
+    delete etherctrl;
 
     ASSERT(frame->getByteLength() > 0); // length comes from msg file
 

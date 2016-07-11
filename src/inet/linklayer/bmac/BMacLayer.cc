@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/linklayer/bmac/BMacLayer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -738,9 +739,10 @@ BMacFrame *BMacLayer::encapsulate(cPacket *netwPkt)
     // copy dest address from the Control Info attached to the network
     // message by the network layer
     IMACProtocolControlInfo *cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
-    EV_DETAIL << "CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
     pkt->setNetworkProtocol(cInfo->getNetworkProtocol());
-    pkt->setDestAddr(cInfo->getDestinationAddress());
+    auto dest = netwPkt->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
+    EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
+    pkt->setDestAddr(dest);
 
     //delete the control info
     delete cInfo;
