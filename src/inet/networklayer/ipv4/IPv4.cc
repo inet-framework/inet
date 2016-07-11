@@ -617,6 +617,7 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
 
+    packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
     packet->setControlInfo(controlInfo);
