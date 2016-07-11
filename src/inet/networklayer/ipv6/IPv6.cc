@@ -828,6 +828,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     controlInfo->setEtherType(ETHERTYPE_IPv6);
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
+    datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv6);
     datagram->setControlInfo(controlInfo);
     send(datagram, "queueOut");
 }
