@@ -64,10 +64,10 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
 {
     MACAddress macSrcAddr;
     ProbabilisticBroadcastDatagram *m = check_and_cast<ProbabilisticBroadcastDatagram *>(msg);
-    IMACProtocolControlInfo *cInfo = check_and_cast<IMACProtocolControlInfo *>(m->removeControlInfo());
+    auto macAddressInd = m->getMandatoryTag<MACAddressInd>();
     m->setNbHops(m->getNbHops() + 1);
-    macSrcAddr = cInfo->getSourceAddress();
-    delete cInfo;
+    macSrcAddr = macAddressInd->getSourceAddress();
+    delete m->removeControlInfo();
     ++nbDataPacketsReceived;
     nbHops = nbHops + m->getNbHops();
     oneHopLatencies.record(SIMTIME_DBL(simTime() - m->getTimestamp()));
