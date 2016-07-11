@@ -53,8 +53,11 @@ class noncobject MACAddress;
 // When ~IPv4 delivers a packet to higher layers, it also attaches an ~IPv4ControlInfo
 // to it. It fills in the following fields:
 //  - srcAddr, destAddr, protocol, TypeOfService: values from the original datagram
-//  - interfaceId: the interface on which the datagram arrived, or -1 if it was
-//    created locally
+//
+// When ~IPv4 delivers a packet to higher layers, it also attaches next tags:
+//  - InterfaceInd: the interface on which the datagram arrived
+//  - ProtocolInd: ipv4
+//  - ProtocolReq: upper layer protocol
 //
 // ~IPv4 also puts the original datagram object into the control info, because
 // it may be needed by higher layers (for example, by ~ICMP for error reporting).
