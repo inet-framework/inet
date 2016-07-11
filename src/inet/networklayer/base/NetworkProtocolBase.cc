@@ -19,6 +19,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
@@ -85,6 +86,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
+        message->removeTag<ProtocolReq>();         // send to NIC
         message->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
@@ -93,6 +95,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
+                duplicate->removeTag<ProtocolReq>();         // send to NIC
                 duplicate->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }

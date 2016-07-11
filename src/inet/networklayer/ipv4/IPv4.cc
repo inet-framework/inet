@@ -766,6 +766,7 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
             delete datagram->removeControlInfo();
             SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
             controlInfo->setProtocol(ETHERTYPE_IPv4);
+            datagram->removeTag<ProtocolReq>();         // send to NIC
             datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
             datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4);
             datagram->setControlInfo(controlInfo);
@@ -858,6 +859,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setEtherType(etherType);
     packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
+    packet->removeTag<ProtocolReq>();         // send to NIC
     packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->setControlInfo(controlInfo);

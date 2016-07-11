@@ -827,6 +827,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setEtherType(ETHERTYPE_IPv6);
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
+    datagram->removeTag<ProtocolReq>();         // send to NIC
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv6);
     datagram->setControlInfo(controlInfo);

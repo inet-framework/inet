@@ -496,6 +496,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
         //Peer to peer interface, no broadcast, no MACAddress. // packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
+        datagram->removeTag<ProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
         datagram->setControlInfo(controlInfo);
@@ -519,6 +520,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
         datagram->ensureTag<MACAddressReq>()->setDestinationAddress(nextHopMAC);
+        datagram->removeTag<ProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
         datagram->setControlInfo(controlInfo);

@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
@@ -648,6 +649,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
     controlInfo->setDestAddr(destAddr);
     controlInfo->setSrcAddr(srcAddr);
     controlInfo->setHopLimit(255);
+    msg->removeTag<ProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     EV_INFO << "ControlInfo appended successfully. Sending mobility message to IPv6 module\n";
 

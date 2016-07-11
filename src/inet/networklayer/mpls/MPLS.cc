@@ -119,6 +119,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
         delete mplsPacket;
         ipdatagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
+        ipdatagram->removeTag<ProtocolReq>();         // send to NIC
         ipdatagram->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(ipdatagram);
     }
@@ -126,6 +127,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         cObject *ctrl = ipdatagram->removeControlInfo();
         mplsPacket->setControlInfo(ctrl);
         mplsPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::mpls);
+        mplsPacket->removeTag<ProtocolReq>();         // send to NIC
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(mplsPacket);
     }
@@ -245,6 +247,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
 
         //ASSERT(labelIf[outgoingPort]);
+        mplsPacket->removeTag<ProtocolReq>();         // send to NIC
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
         mplsPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::mpls);
         sendToL2(mplsPacket);
@@ -260,6 +263,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         delete mplsPacket;
 
         if (outgoingInterface) {
+            nativeIP->removeTag<ProtocolReq>();         // send to NIC
             nativeIP->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
             nativeIP->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
             sendToL2(nativeIP);

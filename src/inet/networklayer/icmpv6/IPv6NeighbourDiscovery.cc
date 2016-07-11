@@ -19,6 +19,7 @@
 #include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -759,6 +760,7 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
     controlInfo->setSrcAddr(srcAddr);
     controlInfo->setHopLimit(255);
     msg->setControlInfo(controlInfo);
+    msg->removeTag<ProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
     send(msg, "ipv6Out");
