@@ -134,6 +134,14 @@ class INET_API NetfilterBase : public INetfilter {
         bool isRegisteredHook() { return netfilter != nullptr; }
     };
 
+    virtual ~NetfilterBase() {
+        for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
+            auto hook = iter->second;
+            hooks.erase(iter);
+            check_and_cast<HookBase *>(hook)->unregisteredFrom(this);
+        }
+    }
+
   protected:
     std::multimap<int, IHook *> hooks;
 

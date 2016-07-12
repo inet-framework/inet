@@ -192,7 +192,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
 
     // capabilities
     e->setMtu(par("mtu").longValue());
-    e->setMulticast(false);
+    e->setMulticast(true);
     e->setBroadcast(true);
 
     return e;
@@ -487,7 +487,7 @@ void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
         bool expectAck = useMACAcks;
-        if (!packet->getDestAddr().isBroadcast()) {
+        if (!packet->getDestAddr().isBroadcast() && !packet->getDestAddr().isMulticast()) {
             //unicast
             EV_DETAIL << "(4) FSM State TRANSMITFRAME_4, "
                       << "EV_FRAME_TRANSMITTED [Unicast]: ";
@@ -910,7 +910,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
             }
         }
     }
-    else if (dest.isBroadcast()) {
+    else if (dest.isBroadcast() || dest.isMulticast()) {
         executeMac(EV_BROADCAST_RECEIVED, macPkt);
     }
     else {

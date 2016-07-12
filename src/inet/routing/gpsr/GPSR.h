@@ -61,6 +61,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     IMobility *mobility = nullptr;
     IL3AddressType *addressType = nullptr;
     IInterfaceTable *interfaceTable = nullptr;
+    const char *outputInterface = nullptr;
     IRoutingTable *routingTable = nullptr;    // TODO: delete when necessary functions are moved to interface table
     INetfilter *networkProtocol = nullptr;
     static PositionTable globalPositionTable;    // KLUDGE: implement position registry protocol
