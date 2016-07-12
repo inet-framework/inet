@@ -33,6 +33,7 @@ ParabolicAntenna::ParabolicAntenna() :
 
 void ParabolicAntenna::initialize(int stage)
 {
+    AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         maxGain = math::dB2fraction(par("maxGain"));
         minGain = math::dB2fraction(par("minGain"));

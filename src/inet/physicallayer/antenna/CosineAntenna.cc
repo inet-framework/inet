@@ -32,6 +32,7 @@ CosineAntenna::CosineAntenna() :
 
 void CosineAntenna::initialize(int stage)
 {
+    AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         maxGain = math::dB2fraction(par("maxGain"));
         beamWidth = degree(par("beamWidth"));
