@@ -134,33 +134,21 @@ class INET_API NetfilterBase : public INetfilter {
         bool isRegisteredHook() { return netfilter != nullptr; }
     };
 
-    virtual ~NetfilterBase() {
-        for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
-            auto hook = iter->second;
-            hooks.erase(iter);
-            check_and_cast<HookBase *>(hook)->unregisteredFrom(this);
-        }
-    }
-
   protected:
     std::multimap<int, IHook *> hooks;
 
   public:
-    ~NetfilterBase()
-    {
-        for (auto hook: hooks) {
+    virtual ~NetfilterBase() {
+        for (auto hook: hooks)
             check_and_cast<HookBase *>(hook.second)->unregisteredFrom(this);
-        }
     }
 
-    virtual void registerHook(int priority, INetfilter::IHook *hook) override
-    {
+    virtual void registerHook(int priority, INetfilter::IHook *hook) override {
         hooks.insert(std::pair<int, INetfilter::IHook *>(priority, hook));
         check_and_cast<HookBase *>(hook)->registeredTo(this);
     }
 
-    virtual void unregisterHook(INetfilter::IHook *hook) override
-    {
+    virtual void unregisterHook(INetfilter::IHook *hook) override {
         for (auto iter = hooks.begin(); iter != hooks.end(); iter++) {
             if (iter->second == hook) {
                 hooks.erase(iter);
