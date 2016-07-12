@@ -60,14 +60,10 @@ enum UDPStatusInd
 // Base class for UDP control info classes. The most convenient way to handle
 // ~UDP is the UDPSocket class, which hides control info from you.
 //
-// sockId must uniquely identify the socket in the ~UDP module; the best way
-// to achieve that is to obtain the value from UDPSocket::generateSocketId().
-//
 // @see ~UDPCommandCode
 //
 class UDPControlInfo
 {
-    int socketId = -1;  // must uniquely identify the socket in the ~UDP module
 }
 
 //

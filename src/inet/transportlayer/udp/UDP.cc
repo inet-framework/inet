@@ -21,6 +21,7 @@
 
 #include "inet/transportlayer/udp/UDP.h"
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -181,28 +182,29 @@ void UDP::refreshDisplay() const
 
 void UDP::processCommandFromApp(cMessage *msg)
 {
+    int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
     switch (msg->getKind()) {
         case UDP_C_BIND: {
             UDPBindCommand *ctrl = check_and_cast<UDPBindCommand *>(msg->getControlInfo());
-            bind(ctrl->getSocketId(), msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
+            bind(socketId, msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
             break;
         }
 
         case UDP_C_CONNECT: {
             UDPConnectCommand *ctrl = check_and_cast<UDPConnectCommand *>(msg->getControlInfo());
-            connect(ctrl->getSocketId(), msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
+            connect(socketId, msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
             break;
         }
 
         case UDP_C_CLOSE: {
             UDPCloseCommand *ctrl = check_and_cast<UDPCloseCommand *>(msg->getControlInfo());
-            close(ctrl->getSocketId());
+            close(socketId);
             break;
         }
 
         case UDP_C_SETOPTION: {
             UDPSetOptionCommand *ctrl = check_and_cast<UDPSetOptionCommand *>(msg->getControlInfo());
-            SockDesc *sd = getOrCreateSocket(ctrl->getSocketId());
+            SockDesc *sd = getOrCreateSocket(socketId);
 
             if (dynamic_cast<UDPSetTimeToLiveCommand *>(ctrl))
                 setTimeToLive(sd, ((UDPSetTimeToLiveCommand *)ctrl)->getTtl());
@@ -289,8 +291,8 @@ void UDP::processCommandFromApp(cMessage *msg)
 void UDP::processPacketFromApp(cPacket *appData)
 {
     UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
-
-    SockDesc *sd = getOrCreateSocket(ctrl->getSocketId());
+    int socketId = appData->getMandatoryTag<SocketReq>()->getSocketId();
+    SockDesc *sd = getOrCreateSocket(socketId);
     const L3Address& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
     int destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
@@ -727,7 +729,6 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
 
     // send payload with UDPControlInfo up to the application
     UDPDataIndication *udpCtrl = new UDPDataIndication();
-    udpCtrl->setSocketId(sd->sockId);
     udpCtrl->setSrcAddr(srcAddr);
     udpCtrl->setDestAddr(destAddr);
     udpCtrl->setSrcPort(srcPort);
@@ -737,6 +738,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     udpCtrl->setTypeOfService(tos);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
+    payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
 
     emit(passedUpPkSignal, payload);
     send(payload, "appOut");
@@ -747,12 +749,12 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 {
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
     UDPErrorIndication *udpCtrl = new UDPErrorIndication();
-    udpCtrl->setSocketId(sd->sockId);
     udpCtrl->setSrcAddr(localAddr);
     udpCtrl->setDestAddr(remoteAddr);
     udpCtrl->setSrcPort(sd->localPort);
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
+    notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
 
     send(notifyMsg, "appOut");
 }
