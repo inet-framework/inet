@@ -15,14 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
-class noncobject MACAddress;
 namespace inet;
-
-
 
 //
 // Message kind values used with in communication between L3 and IEEE 802 L2

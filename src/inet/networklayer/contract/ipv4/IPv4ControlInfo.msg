@@ -19,7 +19,6 @@
 cplusplus {{
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
@@ -27,7 +26,6 @@ namespace inet;
 enum IPProtocolId;
 
 class noncobject IPv4Address;
-class noncobject MACAddress;
 
 //
 // Control information for sending/receiving packets over IPv4.

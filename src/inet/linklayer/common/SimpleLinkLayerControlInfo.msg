@@ -1,10 +1,4 @@
-cplusplus {{
-    #include "inet/linklayer/common/MACAddress.h"
-}}
-
 namespace inet;
-
-class noncobject MACAddress;
 
 class SimpleLinkLayerControlInfo
 {
