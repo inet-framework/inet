@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TCPGenericSrvApp.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -86,8 +87,10 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
         EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
+    int socketId = msg->getMandatoryTag<SocketInd>()->getSocketId();
     msg->clearTags();
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<SocketReq>()->setSocketId(socketId);
     send(msg, "socketOut");
 }
 
@@ -123,7 +126,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             maxMsgDelay = msgDelay;
 
         bool doClose = appmsg->getServerClose();
-        int connId = check_and_cast<TCPCommand *>(appmsg->getControlInfo())->getSocketId();
+        int connId = appmsg->getMandatoryTag<SocketInd>()->getSocketId();
 
         if (requestedBytes == 0) {
             delete msg;
@@ -131,7 +134,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         else {
             delete appmsg->removeControlInfo();
             TCPSendCommand *cmd = new TCPSendCommand();
-            cmd->setSocketId(connId);
+            appmsg->ensureTag<SocketReq>()->setSocketId(connId);
             appmsg->setControlInfo(cmd);
 
             // set length and send it back
@@ -144,7 +147,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             cMessage *msg = new cMessage("close");
             msg->setKind(TCP_C_CLOSE);
             TCPCommand *cmd = new TCPCommand();
-            cmd->setSocketId(connId);
+            msg->ensureTag<SocketReq>()->setSocketId(connId);
             msg->setControlInfo(cmd);
             sendOrSchedule(msg, delay + maxMsgDelay);
         }

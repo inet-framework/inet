@@ -16,6 +16,7 @@
 //
 
 #include <string.h>
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/transportlayer/tcp/TCP.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
@@ -178,7 +179,7 @@ void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCom
     {
         dataMsg->setKind(TCP_I_DATA);
         TCPCommand *cmd = new TCPCommand();
-        cmd->setSocketId(socketId);
+        dataMsg->ensureTag<SocketInd>()->setSocketId(socketId);
         dataMsg->setControlInfo(cmd);
         sendToApp(dataMsg);
     }

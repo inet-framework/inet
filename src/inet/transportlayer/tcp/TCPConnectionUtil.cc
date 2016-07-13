@@ -21,6 +21,7 @@
 #include <string.h>
 #include <algorithm>    // min,max
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/transportlayer/tcp/TCP.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
@@ -298,8 +299,8 @@ void TCPConnection::sendIndicationToApp(int code, const int id)
     cMessage *msg = new cMessage(indicationName(code));
     msg->setKind(code);
     TCPCommand *ind = new TCPCommand();
-    ind->setSocketId(socketId);
     ind->setUserId(id);
+    msg->ensureTag<SocketInd>()->setSocketId(socketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
@@ -311,13 +312,13 @@ void TCPConnection::sendAvailableIndicationToApp()
     msg->setKind(TCP_I_AVAILABLE);
 
     TCPAvailableInfo *ind = new TCPAvailableInfo();
-    ind->setSocketId(listeningSocketId);
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
 
+    msg->ensureTag<SocketInd>()->setSocketId(listeningSocketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
@@ -329,12 +330,11 @@ void TCPConnection::sendEstabIndicationToApp()
     msg->setKind(TCP_I_ESTABLISHED);
 
     TCPConnectInfo *ind = new TCPConnectInfo();
-    ind->setSocketId(socketId);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
-
+    msg->ensureTag<SocketInd>()->setSocketId(socketId);
     msg->setControlInfo(ind);
     sendToApp(msg);
 }
@@ -353,14 +353,14 @@ void TCPConnection::sendAvailableDataToApp()
             msg = new cMessage("Data Notification");
             msg->setKind(TCP_I_DATA_NOTIFICATION);  // TBD currently we never send TCP_I_URGENT_DATA
             TCPCommand *cmd = new TCPCommand();
-            cmd->setSocketId(socketId);
+            msg->ensureTag<SocketInd>()->setSocketId(socketId);
             msg->setControlInfo(cmd);
             sendToApp(msg);
         } else {
             while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 TCPCommand *cmd = new TCPCommand();
-                cmd->setSocketId(socketId);
+                msg->ensureTag<SocketInd>()->setSocketId(socketId);
                 msg->setControlInfo(cmd);
                 sendToApp(msg);
             }

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TCPEchoApp.h"
 
 #include "inet/common/RawPacket.h"
@@ -62,6 +63,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
     }
 
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->getMandatoryTag<SocketReq>();
     send(msg, "socketOut");
 }
 
@@ -97,7 +99,9 @@ void TCPEchoAppThread::dataArrived(cMessage *msg, bool urgent)
         pkt->setKind(TCP_C_SEND);
         TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
         TCPSendCommand *cmd = new TCPSendCommand();
-        cmd->setSocketId(ind->getSocketId());
+        int socketId = pkt->getMandatoryTag<SocketInd>()->getSocketId();
+        pkt->clearTags();
+        pkt->ensureTag<SocketReq>()->setSocketId(socketId);
         pkt->setControlInfo(cmd);
         delete ind;
 

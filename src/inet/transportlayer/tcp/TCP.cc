@@ -17,6 +17,7 @@
 
 #include "inet/transportlayer/tcp/TCP.h"
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
@@ -170,8 +171,7 @@ void TCP::handleMessage(cMessage *msg)
         }
     }
     else {    // must be from app
-        TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->getControlInfo());
-        int socketId = controlInfo->getSocketId();
+        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
 
         TCPConnection *conn = findConnForApp(socketId);
 

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TCPSinkApp.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -56,10 +57,12 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we close too
+        int socketId = msg->getMandatoryTag<SocketInd>()->getSocketId();
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
         msg->clearTags();
         msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+        msg->ensureTag<SocketReq>()->setSocketId(socketId);
         send(msg, "socketOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {

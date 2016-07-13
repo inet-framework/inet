@@ -92,7 +92,6 @@ enum TCPErrorCode
 //
 class TCPCommand
 {
-    int socketId = -1;   // identifies the socket within the application
     int userId = -1;   // id than can be freely used by the app
 }
 

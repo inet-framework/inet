@@ -28,6 +28,7 @@
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
@@ -583,7 +584,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
       }
 
       TCPCommand* connectInfo = check_and_cast<TCPCommand*>(msg->getControlInfo());
-      ConnectionID = connectInfo->getSocketId();
+      ConnectionID = msg->getMandatoryTag<SocketInd>()->getSocketId();
       sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
    else if(TransportProtocol == SCTP) {
@@ -1218,11 +1219,11 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
 
    TCPCommand* queueInfo = new TCPCommand();
    queueInfo->setUserId(queueSize);
-   queueInfo->setSocketId(ConnectionID);
 
    cPacket* cmsg = new cPacket("QueueRequest");
    cmsg->setKind(TCP_C_QUEUE_BYTES_LIMIT);
    cmsg->setControlInfo(queueInfo);
+   cmsg->ensureTag<SocketReq>()->setSocketId(ConnectionID);
    if(IncomingSocketTCP) {
       IncomingSocketTCP->sendCommand(cmsg);
    }
