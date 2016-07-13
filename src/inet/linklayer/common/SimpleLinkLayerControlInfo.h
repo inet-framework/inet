@@ -39,8 +39,6 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
 
     virtual int getNetworkProtocol() const { return SimpleLinkLayerControlInfo_Base::getProtocol(); }
     virtual void setNetworkProtocol(int protocol) { SimpleLinkLayerControlInfo_Base::setProtocol(protocol); }
-    virtual int getSocketId() const override { return SimpleLinkLayerControlInfo_Base::getSocketId(); }
-    virtual void setSocketId(int socketId) override { SimpleLinkLayerControlInfo_Base::setSocketId(socketId); }
 };
 
 } // namespace inet
