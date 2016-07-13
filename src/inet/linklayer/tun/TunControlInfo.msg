@@ -20,7 +20,6 @@ namespace inet;
 
 class TunControlInfo
 {
-    int interfaceId = -1;
 }
 
 class TunOpenCommand extends TunControlInfo

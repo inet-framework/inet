@@ -64,11 +64,11 @@ void TunInterface::handleMessage(cMessage *message)
                 emit(packetReceivedFromUpperSignal, message);
                 delete message->removeControlInfo();
                 for (int socketId : socketIds) {
-                    TunControlInfo *controlInfo = new TunControlInfo();
-                    controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
                     cMessage *copy = message->dup();
-                    copy->setControlInfo(controlInfo);
                     copy->ensureTag<SocketInd>()->setSocketId(socketId);
+                    copy->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                    TunControlInfo *controlInfo = new TunControlInfo();
+                    copy->setControlInfo(controlInfo);
                     send(copy, "upperLayerOut");
                 }
                 delete message;
