@@ -37,17 +37,3 @@ class GenericNetworkProtocolControlInfo  //TODO rename!!!!
     short protocol @enum(IPProtocolId);  // encapsulated protocol
     short hopLimit;     // maximum hop count
 }
-
-
-//
-// Control info attached to packets sent from ~GenericNetworkProtocol to ~GenericARP.
-//
-// Next hop address is used on a LAN to determine the MAC destination
-// address (and it may be used on other multicast networks for similar
-// addressing purpose).
-//
-class GenericRoutingDecision
-{
-    int interfaceId = -1; 
-    L3Address nextHop;
-}
