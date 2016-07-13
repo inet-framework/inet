@@ -3,6 +3,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/scenario/IScriptable.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -100,7 +101,7 @@ void TestIGMP::configureInterface(InterfaceEntry *ie)
 void TestIGMP::processIgmpMessage(IGMPMessage *msg)
 {
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
-    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     IPv4Address group = IPv4Address::UNSPECIFIED_ADDRESS;
     switch (msg->getType())
     {

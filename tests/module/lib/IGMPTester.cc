@@ -3,6 +3,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/scenario/IScriptable.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
@@ -383,10 +385,10 @@ void IGMPTester::sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_IGMP);
-    controlInfo->setInterfaceId(ie->getInterfaceId());
     controlInfo->setTimeToLive(1);
-    controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
+    msg->ensureTag<InterfaceInd>()->setInterfaceId(ie->getInterfaceId());
+    msg->ensureTag<L3AddressInd>()->setDestination(dest);
 
     EV << "IGMPTester: Sending: " << msg << ".\n";
     send(msg, "igmpOut");

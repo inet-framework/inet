@@ -19,6 +19,8 @@
 
 #include "TCPTester.h"
 
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 
 namespace inet {
@@ -175,6 +177,13 @@ void TCPScriptableTester::dispatchSegment(TCPSegment *seg)
 void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
 {
     int segno = fromA ? ++fromASeq : ++fromBSeq;
+    const Protocol *protInd = seg->getMandatoryTag<ProtocolInd>()->getProtocol();
+    const Protocol *protReq = seg->getMandatoryTag<ProtocolReq>()->getProtocol();
+    seg->ensureTag<ProtocolReq>()->setProtocol(protInd);
+    seg->ensureTag<ProtocolInd>()->setProtocol(protReq);
+    seg->ensureTag<L3AddressInd>()->setSource(seg->getMandatoryTag<L3AddressReq>()->getSource());
+    seg->ensureTag<L3AddressInd>()->setDestination(seg->getMandatoryTag<L3AddressReq>()->getDestination());
+    delete seg->removeMandatoryTag<L3AddressReq>();
 
     // find entry in script
     Command *cmd = NULL;
@@ -203,6 +212,7 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
             simtime_t d = cmd->delays[i];
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
             segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->getControlInfo())));
+
             if (d==0)
             {
                 bubble("forwarding after 0 delay");
@@ -268,6 +278,14 @@ void TCPRandomTester::dispatchSegment(TCPSegment *seg)
 void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
 {
     if (fromA) ++fromASeq; else ++fromBSeq;
+
+    const Protocol *protInd = seg->getMandatoryTag<ProtocolInd>()->getProtocol();
+    const Protocol *protReq = seg->getMandatoryTag<ProtocolReq>()->getProtocol();
+    seg->ensureTag<ProtocolReq>()->setProtocol(protInd);
+    seg->ensureTag<ProtocolInd>()->setProtocol(protReq);
+    seg->ensureTag<L3AddressInd>()->setSource(seg->getMandatoryTag<L3AddressReq>()->getSource());
+    seg->ensureTag<L3AddressInd>()->setDestination(seg->getMandatoryTag<L3AddressReq>()->getDestination());
+    delete seg->removeMandatoryTag<L3AddressReq>();
 
     // decide what to do
     double x = dblrand();
