@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/linklayer/tun/TunSocket.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
 
@@ -29,6 +30,7 @@ void TunSocket::sendToTun(cMessage *msg)
 {
     if (!outputGate)
         throw cRuntimeError("TunSocket: setOutputGate() must be invoked before socket can be used");
+    msg->ensureTag<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(msg, outputGate);
 }
 
@@ -37,7 +39,6 @@ void TunSocket::open(int interfaceId)
     this->interfaceId = interfaceId;
     cMessage *message = new cMessage("OPEN");
     TunOpenCommand *command = new TunOpenCommand();
-    command->setSocketId(socketId);
     command->setInterfaceId(interfaceId);
     message->setControlInfo(command);
     sendToTun(message);
@@ -48,7 +49,6 @@ void TunSocket::send(cPacket *packet)
     if (interfaceId == -1)
         throw cRuntimeError("Socket is closed");
     TunSendCommand *command = new TunSendCommand();
-    command->setSocketId(socketId);
     command->setInterfaceId(interfaceId);
     packet->setControlInfo(command);
     sendToTun(packet);
@@ -59,7 +59,6 @@ void TunSocket::close()
     this->interfaceId = -1;
     cMessage *message = new cMessage("CLOSE");
     TunCloseCommand *command = new TunCloseCommand();
-    command->setSocketId(socketId);
     command->setInterfaceId(interfaceId);
     message->setControlInfo(command);
     sendToTun(message);

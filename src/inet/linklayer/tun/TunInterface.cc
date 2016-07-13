@@ -16,6 +16,7 @@
 //
 
 #include <algorithm>
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
@@ -64,10 +65,10 @@ void TunInterface::handleMessage(cMessage *message)
                 delete message->removeControlInfo();
                 for (int socketId : socketIds) {
                     TunControlInfo *controlInfo = new TunControlInfo();
-                    controlInfo->setSocketId(socketId);
                     controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
                     cMessage *copy = message->dup();
                     copy->setControlInfo(controlInfo);
+                    copy->ensureTag<SocketInd>()->setSocketId(socketId);
                     send(copy, "upperLayerOut");
                 }
                 delete message;
@@ -75,17 +76,18 @@ void TunInterface::handleMessage(cMessage *message)
         }
         else {
             cObject *controlInfo = message->getControlInfo();
-            if (TunOpenCommand *openCommand = dynamic_cast<TunOpenCommand *>(controlInfo)) {
-                auto it = std::find(socketIds.begin(), socketIds.end(), openCommand->getSocketId());
+            int socketId = message->getMandatoryTag<SocketReq>()->getSocketId();
+            if (dynamic_cast<TunOpenCommand *>(controlInfo) != nullptr) {
+                auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
                 if (it != socketIds.end())
-                    throw cRuntimeError("Socket is already open: %d", openCommand->getSocketId());
-                socketIds.push_back(openCommand->getSocketId());
+                    throw cRuntimeError("Socket is already open: %d", socketId);
+                socketIds.push_back(socketId);
                 delete message;
             }
-            else if (TunCloseCommand *closeCommand = dynamic_cast<TunCloseCommand *>(controlInfo)) {
-                auto it = std::find(socketIds.begin(), socketIds.end(), closeCommand->getSocketId());
+            else if (dynamic_cast<TunCloseCommand *>(controlInfo) != nullptr) {
+                auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
                 if (it == socketIds.end())
-                    throw cRuntimeError("Socket is already closed: %d", closeCommand->getSocketId());
+                    throw cRuntimeError("Socket is already closed: %d", socketId);
                 socketIds.erase(it);
                 delete message;
             }

@@ -20,7 +20,6 @@ namespace inet;
 
 class TunControlInfo
 {
-    int socketId = -1;
     int interfaceId = -1;
 }
 
