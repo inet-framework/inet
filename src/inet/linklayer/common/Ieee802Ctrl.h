@@ -39,8 +39,6 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base
 
     virtual int getNetworkProtocol() const { return getEtherType(); }
     virtual void setNetworkProtocol(int protocolId) { setEtherType(protocolId); }
-    virtual int getSocketId() const override { return Ieee802Ctrl_Base::getSocketId(); }
-    virtual void setSocketId(int socketId) override { Ieee802Ctrl_Base::setSocketId(socketId); }
 };
 
 } // namespace inet
