@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/generic/GenericNetworkProtocol.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -100,13 +101,15 @@ void GenericNetworkProtocol::refreshDisplay() const
 void GenericNetworkProtocol::handleMessage(cMessage *msg)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        SocketDescriptor *descriptor = new SocketDescriptor(command->getSocketId(), command->getProtocolId());
-        socketIdToSocketDescriptor[command->getSocketId()] = descriptor;
+        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
-    else if (L3SocketCloseCommand *command = dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo())) {
-        auto it = socketIdToSocketDescriptor.find(command->getSocketId());
+    else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;
             auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);

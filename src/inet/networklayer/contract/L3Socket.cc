@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/L3Socket.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
@@ -39,6 +40,7 @@ void L3Socket::sendToOutput(cMessage *message)
     if (!outputGate)
         throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
     message->ensureTag<ProtocolReq>()->setProtocol(Protocol::getProtocol(controlInfoProtocolId));
+    message->ensureTag<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }
 
@@ -47,7 +49,6 @@ void L3Socket::bind(int protocolId)
     ASSERT(!bound);
     ASSERT(controlInfoProtocolId != -1);
     L3SocketBindCommand *command = new L3SocketBindCommand();
-    command->setSocketId(socketId);
     command->setProtocolId(protocolId);
     cMessage *bind = new cMessage("bind");
     bind->setControlInfo(command);
@@ -65,7 +66,6 @@ void L3Socket::close()
     ASSERT(bound);
     ASSERT(controlInfoProtocolId != -1);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
-    command->setSocketId(socketId);
     cMessage *close = new cMessage("close");
     close->setControlInfo(command);
     sendToOutput(close);

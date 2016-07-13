@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/ipv4/IPv4.h"
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
@@ -130,13 +131,15 @@ void IPv4::refreshDisplay() const
 void IPv4::handleMessage(cMessage *msg)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
-        SocketDescriptor *descriptor = new SocketDescriptor(command->getSocketId(), command->getProtocolId());
-        socketIdToSocketDescriptor[command->getSocketId()] = descriptor;
+        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
         delete msg;
     }
-    else if (L3SocketCloseCommand *command = dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo())) {
-        auto it = socketIdToSocketDescriptor.find(command->getSocketId());
+    else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+        int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             int protocol = it->second->protocolId;
             auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);

@@ -19,7 +19,6 @@ namespace inet;
 
 class L3SocketCommand
 {
-    int socketId;
 }
 
 class L3SocketBindCommand extends L3SocketCommand
@@ -30,4 +29,3 @@ class L3SocketBindCommand extends L3SocketCommand
 class L3SocketCloseCommand extends L3SocketCommand
 {
 }
-
