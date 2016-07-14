@@ -293,9 +293,9 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     cPacket *packet = frame->decapsulate();
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setEtherType(frame->getNetworkProtocol());
-    auto macAddressReq = packet->ensureTag<MACAddressReq>();
-    macAddressReq->setSourceAddress(frame->getSrc());
-    macAddressReq->setDestinationAddress(frame->getDest());
+    auto macAddressInd = packet->ensureTag<MACAddressInd>();
+    macAddressInd->setSourceAddress(frame->getSrc());
+    macAddressInd->setDestinationAddress(frame->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
     packet->setControlInfo(etherctrl);
