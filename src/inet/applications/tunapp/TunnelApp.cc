@@ -78,10 +78,12 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
         cObject *controlInfo = message->getControlInfo();
         if (dynamic_cast<IPv4ControlInfo *>(controlInfo)) {
             delete message->removeControlInfo();
+            message->clearTags();
             tunSocket.send(PK(message));
         }
         else if (dynamic_cast<UDPControlInfo *>(controlInfo)) {
             delete message->removeControlInfo();
+            message->clearTags();
             tunSocket.send(PK(message));
         }
         else if (dynamic_cast<TunControlInfo *>(controlInfo)) {
@@ -90,11 +92,14 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
                 IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
                 controlInfo->setTransportProtocol(IP_PROT_IP);
                 message->setControlInfo(controlInfo);
+                message->clearTags();
                 message->ensureTag<L3AddressReq>()->setDestination(L3AddressResolver().resolve(destinationAddress));
                 l3Socket.send(PK(message));
             }
-            else if (protocol == &Protocol::udp)
+            else if (protocol == &Protocol::udp) {
+                message->clearTags();
                 clientSocket.send(PK(message));
+            }
             else
                 throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
         }

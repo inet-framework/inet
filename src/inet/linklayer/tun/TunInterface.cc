@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
@@ -48,12 +49,11 @@ void TunInterface::handleMessage(cMessage *message)
 {
     if (message->arrivedOn("upperLayerIn")) {
         if (message->isPacket()) {
-            cObject *controlInfo = message->getControlInfo();
-            if (dynamic_cast<TunSendCommand *>(controlInfo)) {
+            if (dynamic_cast<TunSendCommand *>(message->getControlInfo())) {
+                delete message->removeControlInfo();
                 // TODO: should we determine the network protocol by looking at the packet?!
                 message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                delete message->removeControlInfo();
-                message->setControlInfo(controlInfo);
+                message->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
                 emit(packetSentToUpperSignal, message);
                 send(message, "upperLayerOut");
             }
