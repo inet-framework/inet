@@ -728,13 +728,13 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     UDPDataIndication *udpCtrl = new UDPDataIndication();
     udpCtrl->setSrcPort(srcPort);
     udpCtrl->setDestPort(destPort);
-    udpCtrl->setInterfaceId(interfaceId);
     udpCtrl->setTtl(ttl);
     udpCtrl->setTypeOfService(tos);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
     delete payload->removeTag<ProtocolReq>();
     payload->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+    payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->ensureTag<L3AddressInd>()->setSource(srcAddr);
@@ -753,6 +753,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
     notifyMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+    //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     notifyMsg->ensureTag<L3AddressInd>()->setSource(localAddr);
     notifyMsg->ensureTag<L3AddressInd>()->setDestination(remoteAddr);

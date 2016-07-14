@@ -28,6 +28,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -161,8 +162,9 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
 
     // check that the packet arrived on the interface we are supposed to serve
     UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    int inputInterfaceId = ctrl->getInterfaceId();
+    int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete ctrl;
+
     if (inputInterfaceId != ie->getInterfaceId()) {
         EV_WARN << "DHCP message arrived on a different interface, dropping\n";
         delete packet;

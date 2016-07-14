@@ -33,6 +33,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ted/TED.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -514,7 +515,7 @@ void LDP::processLDPHello(LDPHello *msg)
     UDPDataIndication *controlInfo = check_and_cast<UDPDataIndication *>(msg->getControlInfo());
     //IPv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     IPv4Address peerAddr = msg->getSenderAddress();
-    int interfaceId = controlInfo->getInterfaceId();
+    int interfaceId = msg->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
     EV_INFO << "Received LDP Hello from " << peerAddr << ", ";

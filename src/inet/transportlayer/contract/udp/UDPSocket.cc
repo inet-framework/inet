@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -316,7 +317,7 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     L3Address destAddr = l3Addresses->getDestination();
     int srcPort = ctrl->getSrcPort();
     int destPort = ctrl->getDestPort();
-    int interfaceID = ctrl->getInterfaceId();
+    int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     int ttl = ctrl->getTtl();
     int tos = ctrl->getTypeOfService();
 

@@ -27,6 +27,7 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/transportlayer/udp/UDP.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include "inet/routing/rip/RIPPacket_m.h"
 #include "inet/routing/rip/RIPRouting.h"
@@ -601,7 +602,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
     L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
     int srcPort = ctrlInfo->getSrcPort();
-    int interfaceId = ctrlInfo->getInterfaceId();
+    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete ctrlInfo;
     packet->clearTags();
 
@@ -754,7 +755,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
 
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
     L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
-    int interfaceId = ctrlInfo->getInterfaceId();
+    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete ctrlInfo;
     packet->clearTags();
 
