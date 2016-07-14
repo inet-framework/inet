@@ -488,12 +488,12 @@ void SCTPAssociation::sendInit()
 
     peerVTag = initChunk->getInitTag();
     EV_INFO << "INIT from " << localAddr << ":InitTag=" << peerVTag << "\n";
-    initChunk->setA_rwnd(sctpMain->par("arwnd"));
+    initChunk->setA_rwnd(sctpMain->par("arwnd").longValue());
     state->localRwnd = (long)sctpMain->par("arwnd");
     initChunk->setNoOutStreams(outboundStreams);
     initChunk->setNoInStreams(inboundStreams);
     initChunk->setInitTSN(1000);
-    initChunk->setMsg_rwnd(sctpMain->par("messageAcceptLimit"));
+    initChunk->setMsg_rwnd(sctpMain->par("messageAcceptLimit").longValue());
     state->nextTSN = initChunk->getInitTSN();
     state->lastTSN = initChunk->getInitTSN() + state->numRequests - 1;
     state->streamResetSequenceNumber = state->nextTSN;
@@ -762,9 +762,9 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
     cookie->setByteLength(SCTP_COOKIE_LENGTH + 4);
     initAckChunk->setStateCookie(cookie);
     initAckChunk->setCookieArraySize(0);
-    initAckChunk->setA_rwnd(sctpMain->par("arwnd"));
+    initAckChunk->setA_rwnd(sctpMain->par("arwnd").longValue());
     state->localRwnd = (long)sctpMain->par("arwnd");
-    initAckChunk->setMsg_rwnd(sctpMain->par("messageAcceptLimit"));
+    initAckChunk->setMsg_rwnd(sctpMain->par("messageAcceptLimit").longValue());
     initAckChunk->setNoOutStreams((unsigned int)min(outboundStreams, initChunk->getNoInStreams()));
     initAckChunk->setNoInStreams((unsigned int)min(inboundStreams, initChunk->getNoOutStreams()));
     initTsn = initAckChunk->getInitTSN();
@@ -1162,7 +1162,7 @@ void SCTPAssociation::sendPacketDrop(const bool flag)
     pktdrop->setTFlag(false);
     pktdrop->setBFlag(flag);
     pktdrop->setMFlag(false);
-    pktdrop->setMaxRwnd(sctpMain->par("arwnd"));
+    pktdrop->setMaxRwnd(sctpMain->par("arwnd").longValue());
     pktdrop->setQueuedData(state->queuedReceivedBytes);
     pktdrop->setTruncLength(0);
     pktdrop->setByteLength(SCTP_PKTDROP_CHUNK_LENGTH);
