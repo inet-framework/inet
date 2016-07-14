@@ -733,6 +733,8 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     udpCtrl->setTypeOfService(tos);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
+    delete payload->removeTag<ProtocolReq>();
+    payload->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->ensureTag<L3AddressInd>()->setSource(srcAddr);
@@ -752,6 +754,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     udpCtrl->setSrcPort(sd->localPort);
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
+    notifyMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
 
     send(notifyMsg, "appOut");
