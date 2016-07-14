@@ -107,13 +107,11 @@ class UDPConnectCommand extends UDPControlInfo
 // If the socket is connected, destAddr/destPort may be left blank (send()),
 // otherwise it must contain the destination for the packet (sendto()).
 //
-// @see ~UDPCommandCode
+// @see ~UDPCommandCode, ~L3AddressReq, ~InterfaceReq
 //
 class UDPSendCommand extends UDPControlInfo
 {
-    L3Address destAddr; // destination IPv4 or IPv6 address
     int destPort = -1;     // destination port
-    L3Address srcAddr;       // source address
 }
 
 

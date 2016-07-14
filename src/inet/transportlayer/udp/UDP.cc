@@ -291,15 +291,25 @@ void UDP::processCommandFromApp(cMessage *msg)
 
 void UDP::processPacketFromApp(cPacket *appData)
 {
+    L3Address srcAddr, destAddr;
+
     UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
     int socketId = appData->getMandatoryTag<SocketReq>()->getSocketId();
     SockDesc *sd = getOrCreateSocket(socketId);
-    const L3Address& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
+
+    auto addressReq = appData->getTag<L3AddressReq>();
+    if (addressReq) {
+        srcAddr = addressReq->getSource();
+        destAddr = addressReq->getDestination();
+    }
+    if (destAddr.isUnspecified())
+        destAddr = sd->remoteAddr;
     int destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
         throw cRuntimeError("send: missing destination address or port when sending over unconnected port");
+    if (srcAddr.isUnspecified())
+        srcAddr = sd->localAddr;
 
-    const L3Address& srcAddr = ctrl->getSrcAddr().isUnspecified() ? sd->localAddr : ctrl->getSrcAddr();
     auto interfaceReq = appData->getTag<InterfaceReq>();
     int interfaceId = interfaceReq ? interfaceReq->getInterfaceId() : -1;
     if (interfaceId == -1 && destAddr.isMulticast()) {
