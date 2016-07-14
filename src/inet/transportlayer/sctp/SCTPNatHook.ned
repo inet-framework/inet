@@ -1,12 +1,10 @@
 package inet.transportlayer.sctp;
 
-import inet.common.IHook;
-
 
 //
 // SCTPNatHook module.
 //
-simple SCTPNatHook like IHook
+simple SCTPNatHook
 {
     parameters:
         string interfaceTableModule;
