@@ -300,7 +300,8 @@ void UDP::processPacketFromApp(cPacket *appData)
         throw cRuntimeError("send: missing destination address or port when sending over unconnected port");
 
     const L3Address& srcAddr = ctrl->getSrcAddr().isUnspecified() ? sd->localAddr : ctrl->getSrcAddr();
-    int interfaceId = ctrl->getInterfaceId();
+    auto interfaceReq = appData->getTag<InterfaceReq>();
+    int interfaceId = interfaceReq ? interfaceReq->getInterfaceId() : -1;
     if (interfaceId == -1 && destAddr.isMulticast()) {
         auto membership = sd->findFirstMulticastMembership(destAddr);
         interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
@@ -776,7 +777,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
     // set source and destination port
     udpPacket->setSourcePort(srcPort);
     udpPacket->setDestinationPort(destPort);
-    udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+    if (interfaceId != -1)
+        udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     if (destAddr.getType() == L3Address::IPv4) {
         // send to IPv4
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";

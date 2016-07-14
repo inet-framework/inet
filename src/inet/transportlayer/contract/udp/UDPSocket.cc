@@ -98,7 +98,7 @@ void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort, const Send
     ctrl->setDestPort(destPort);
     if (options) {
         ctrl->setSrcAddr(options->srcAddr);
-        ctrl->setInterfaceId(options->outInterfaceId);
+        pk->ensureTag<InterfaceReq>()->setInterfaceId(options->outInterfaceId);
     }
     pk->setControlInfo(ctrl);
     sendToUDP(pk);
