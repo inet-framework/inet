@@ -235,6 +235,9 @@
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            fe0e-efae 2e8e-2067/tplx
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            12eb-b797 663a-031b/tplx
 
+/examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             e660-6932 347e-3397/tplx
+/examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             e660-6932 6f76-8110/tplx
+
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           e660-6932 9649-c759/tplx
 
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            01a6-2ee6 6c2d-4d34/tplx
