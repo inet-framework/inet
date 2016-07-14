@@ -749,13 +749,13 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 {
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
     UDPErrorIndication *udpCtrl = new UDPErrorIndication();
-    udpCtrl->setSrcAddr(localAddr);
-    udpCtrl->setDestAddr(remoteAddr);
     udpCtrl->setSrcPort(sd->localPort);
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
     notifyMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
+    notifyMsg->ensureTag<L3AddressInd>()->setSource(localAddr);
+    notifyMsg->ensureTag<L3AddressInd>()->setDestination(remoteAddr);
 
     send(notifyMsg, "appOut");
 }

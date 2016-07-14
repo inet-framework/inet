@@ -153,8 +153,6 @@ class UDPDataIndication extends UDPControlInfo
 //
 class UDPErrorIndication extends UDPControlInfo
 {
-    L3Address srcAddr;   // source IPv4 or IPv6 address of the undeliverable packet
-    L3Address destAddr;  // destination IPv4 or IPv6 address of the undeliverable packet
     int srcPort;           // source port of the undeliverable packet
     int destPort;          // destination port of the undeliverable packet
 }
