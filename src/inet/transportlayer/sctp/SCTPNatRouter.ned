@@ -39,7 +39,4 @@ module SCTPNatRouter extends StandardHost
             parameters:
                 @display( "p=60,132;i=block/table");
         }
-    connections:
-        natHook.out --> ipv4.transportIn++;
-        natHook.in <-- ipv4.transportOut++;
 }
