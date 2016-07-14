@@ -19,77 +19,51 @@
 
 package inet.node.packetdrill;
 
-import inet.node.base.TransportLayerNodeBase;
+import inet.applications.packetdrill.PacketDrillApp;
+import inet.node.inet.StandardHost;
+import inet.transportlayer.contract.ISCTP;
 import inet.transportlayer.contract.ITCP;
 import inet.transportlayer.contract.IUDP;
-import inet.transportlayer.contract.ISCTP;
-import inet.linklayer.tun.TunInterface;
-import inet.applications.packetdrill.PacketDrillApp;
 
 
 //
 // IPv4 host with SCTP, TCP, UDP layers and a packetdrill application.
 // The application has a direct connection to the TunInterface.
 //
-module PacketDrillHost extends TransportLayerNodeBase
+module PacketDrillHost extends StandardHost
 {
     parameters:
         @display("i=device/pc2;bgl=4");
         int numTcpTunApps = default(0);    // no of TCP packetdrill apps.
         int numUdpTunApps = default(0);    // no of UDP packetdrill apps.
         int numSctpTunApps = default(0);   // no of SCTP packetdrill apps.
-        bool hasTcpTun = default(numTcpTunApps>0);
-        bool hasUdpTun = default(numUdpTunApps>0);
-        bool hasSctpTun = default(numSctpTunApps>0);
-        string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
-        string udpType = default(firstAvailableOrEmpty("UDP"));
-        string sctpType = default(firstAvailableOrEmpty("SCTP"));
-        *.routingTableModule = default("^.ipv4.routingTable");
+        hasTcp = default(true || numTcpTunApps>0);
+        hasUdp = default(true || numUdpTunApps>0);
+        hasSctp = default(false || numSctpTunApps>0);
     submodules:
         tunApp[numTunInterfaces]: PacketDrillApp {
             parameters:
                 @display("p=800,100");
         }
-        tcp: <tcpType> like ITCP if hasTcpTun {
-            parameters:
-                @display("p=500,250");
-        }
-        udp: <udpType> like IUDP if hasUdpTun {
-            parameters:
-                @display("p=400,250");
-        }
-        sctp: <sctpType> like ISCTP if hasSctpTun {
-            parameters:
-                @display("p=600,250");
-        }
 
     connections allowunconnected:
         for i=0..numTcpTunApps-1 {
-            tunApp[i].tcpOut --> tcp.appIn++;
-            tunApp[i].tcpIn <-- tcp.appOut++;
+            tunApp[i].tcpOut --> at.upperLayerIn++;
+            tunApp[i].tcpIn <-- at.upperLayerOut++;
         }
-
-        tcp.ipOut --> ipv4.transportIn++ if hasTcpTun;
-        tcp.ipIn <-- ipv4.transportOut++ if hasTcpTun;
 
         for i=0..numUdpTunApps-1 {
-            tunApp[numTcpTunApps+i].udpOut --> udp.appIn++ if hasUdpTun;
-            tunApp[numTcpTunApps+i].udpIn <-- udp.appOut++ if hasUdpTun;
+            tunApp[numTcpTunApps+i].udpOut --> at.upperLayerIn++ if hasUdpTun;
+            tunApp[numTcpTunApps+i].udpIn <-- at.upperLayerOut++ if hasUdpTun;
         }
-
-        udp.ipOut --> ipv4.transportIn++ if hasUdpTun;
-        udp.ipIn <-- ipv4.transportOut++ if hasUdpTun;
 
         for i=0..numSctpTunApps-1 {
             tunApp[numTcpTunApps+numUdpTunApps+i].sctpOut --> sctp.appIn if hasSctpTun;
             tunApp[numTcpTunApps+numUdpTunApps+i].sctpIn <-- sctp.appOut if hasSctpTun;
         }
 
-        sctp.ipOut --> ipv4.transportIn++ if hasSctpTun;
-        sctp.ipIn <-- ipv4.transportOut++ if hasSctpTun;
-
         for i=0..numTunInterfaces-1 {
-            tunApp[i].tunOut --> tun[i].appIn;
-            tunApp[i].tunIn <-- tun[i].appOut;
+            tunApp[i].socketOut --> at.upperLayerIn++;
+            tunApp[i].socketIn <-- at.upperLayerOut++;
         }
 }
