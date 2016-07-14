@@ -125,7 +125,8 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
     }
     else {
         cObject *ctrl = ipdatagram->removeControlInfo();
-        mplsPacket->setControlInfo(ctrl);
+        if (ctrl)
+            mplsPacket->setControlInfo(ctrl);
         mplsPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::mpls);
         mplsPacket->removeTag<ProtocolReq>();         // send to NIC
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
@@ -212,7 +213,8 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
         IPv4Datagram *ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
         cObject *ctrl = mplsPacket->removeControlInfo();
-        ipdatagram->setControlInfo(ctrl);
+        if (ctrl)
+            ipdatagram->setControlInfo(ctrl);
         delete mplsPacket;
         sendToL3(ipdatagram);
         return;
@@ -259,7 +261,8 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
         IPv4Datagram *nativeIP = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
         cObject *ctrl = mplsPacket->removeControlInfo();
-        nativeIP->setControlInfo(ctrl);
+        if (ctrl)
+            nativeIP->setControlInfo(ctrl);
         delete mplsPacket;
 
         if (outgoingInterface) {
@@ -276,7 +279,6 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
 void MPLS::sendToL2(cMessage *msg)
 {
-    ASSERT(msg->getControlInfo());
     ASSERT(msg->getTag<InterfaceReq>());
     ASSERT(msg->getTag<ProtocolInd>());
     send(msg, "ifOut");
@@ -284,7 +286,6 @@ void MPLS::sendToL2(cMessage *msg)
 
 void MPLS::sendToL3(cMessage *msg)
 {
-    ASSERT(msg->getControlInfo());
     ASSERT(msg->getTag<InterfaceInd>());
     ASSERT(msg->getTag<ProtocolReq>());
     send(msg, "netwOut");
