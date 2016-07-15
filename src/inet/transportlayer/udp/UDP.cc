@@ -198,7 +198,6 @@ void UDP::processCommandFromApp(cMessage *msg)
         }
 
         case UDP_C_CLOSE: {
-            UDPCloseCommand *ctrl = check_and_cast<UDPCloseCommand *>(msg->getControlInfo());
             close(socketId);
             break;
         }
@@ -743,8 +742,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     udpCtrl->setTypeOfService(tos);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
-    delete payload->removeTag<ProtocolReq>();
-    payload->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+    delete payload->removeTag<DispatchProtocolReq>();
     payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
@@ -763,7 +761,6 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     udpCtrl->setSrcPort(sd->localPort);
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
-    notifyMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
     //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     notifyMsg->ensureTag<L3AddressInd>()->setSource(localAddr);
