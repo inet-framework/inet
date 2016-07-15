@@ -49,7 +49,17 @@ void TunInterface::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         if (message->isPacket()) {
             cObject *controlInfo = message->getControlInfo();
-            if (dynamic_cast<IMACProtocolControlInfo *>(controlInfo)) {
+            if (dynamic_cast<TunSendCommand *>(controlInfo)) {
+                SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
+                // TODO: should we determine the network protocol by looking at the packet?!
+                controlInfo->setNetworkProtocol(ETHERTYPE_IPv4);
+                message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                delete message->removeControlInfo();
+                message->setControlInfo(controlInfo);
+                emit(packetSentToUpperSignal, message);
+                send(message, "upperLayerOut");
+            }
+            else {
                 emit(packetReceivedFromUpperSignal, message);
                 delete message->removeControlInfo();
                 for (int socketId : socketIds) {
@@ -62,18 +72,6 @@ void TunInterface::handleMessage(cMessage *message)
                 }
                 delete message;
             }
-            else if (dynamic_cast<TunSendCommand *>(controlInfo)) {
-                SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
-                // TODO: should we determine the network protocol by looking at the packet?!
-                controlInfo->setNetworkProtocol(ETHERTYPE_IPv4);
-                message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                delete message->removeControlInfo();
-                message->setControlInfo(controlInfo);
-                emit(packetSentToUpperSignal, message);
-                send(message, "upperLayerOut");
-            }
-            else
-                throw cRuntimeError("Unknown packet: %s", message->getName());
         }
         else {
             cObject *controlInfo = message->getControlInfo();
