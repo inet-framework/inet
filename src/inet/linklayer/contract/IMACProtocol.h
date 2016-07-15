@@ -18,7 +18,7 @@
 #ifndef __INET_IMACPROTOCOL_H
 #define __INET_IMACPROTOCOL_H
 
-#include "inet/linklayer/contract/IMACProtocolControlInfo.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
@@ -26,8 +26,6 @@ class INET_API IMACProtocol
 {
   public:
     virtual ~IMACProtocol() {}
-
-//    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };
 
 } // namespace inet

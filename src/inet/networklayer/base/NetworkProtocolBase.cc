@@ -69,8 +69,6 @@ void NetworkProtocolBase::sendUp(cMessage *message)
         else if (!hasSocket) {
             EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
             //TODO send an ICMP error: protocol unreachable
-            // IMACProtocolControlInfo *controlInfo = dynamic_cast<IMACProtocolControlInfo *>(PK(datagram)->getControlInfo());
-            // int inputInterfaceId = controlInfo != nullptr ? controlInfo->getInterfaceId() : -1;
             // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
             delete packet;
         }
