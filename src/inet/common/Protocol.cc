@@ -81,6 +81,7 @@ const Protocol Protocol::igp("igp");
 const Protocol Protocol::ipv4("ipv4");
 const Protocol Protocol::ipv6("ipv6");
 const Protocol Protocol::manet("manet");
+const Protocol Protocol::mpls("mpls");
 const Protocol Protocol::ospf("ospf");
 const Protocol Protocol::pim("pim");
 const Protocol Protocol::rsvp("rsvp");

@@ -66,6 +66,7 @@ const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x0806, &Protocol::arp},
     { 0x86DD, &Protocol::ipv6 },
     { 0x86FF, &Protocol::gnp },         // ETHERTYPE_INET_GENERIC
+    { 0x8847, &Protocol::mpls },
 });
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
