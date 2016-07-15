@@ -36,6 +36,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -175,8 +176,8 @@ void IPv4::endService(cPacket *packet)
 
 const InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *packet)
 {
-    IMACProtocolControlInfo *controlInfo = dynamic_cast<IMACProtocolControlInfo *>(packet->getControlInfo());
-    return controlInfo != nullptr ? ift->getInterfaceById(controlInfo->getInterfaceId()) : nullptr;
+    auto interfaceInd = packet->getTag<InterfaceInd>();
+    return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
 void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
@@ -762,7 +763,7 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
             delete datagram->removeControlInfo();
             SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
             controlInfo->setProtocol(ETHERTYPE_IPv4);
-            controlInfo->setInterfaceId(ie->getInterfaceId());
+            datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
             datagram->setControlInfo(controlInfo);
             sendPacketToNIC(datagram, ie);
         }
@@ -853,7 +854,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
-    controlInfo->setInterfaceId(ie->getInterfaceId());
+    packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->setControlInfo(controlInfo);
 
     sendPacketToNIC(packet, ie);

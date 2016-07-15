@@ -38,6 +38,7 @@
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -239,8 +240,8 @@ void IPv6::endService(cPacket *msg)
 
 InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
 {
-    IMACProtocolControlInfo *controlInfo = dynamic_cast<IMACProtocolControlInfo *>(packet->getControlInfo());
-    return controlInfo != nullptr ? ift->getInterfaceById(controlInfo->getInterfaceId()) : nullptr;
+    auto interfaceInd = packet->getTag<InterfaceInd>();
+    return interfaceInd != nullptr ? ift->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
 }
 
 void IPv6::preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
@@ -822,7 +823,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddr);
     controlInfo->setEtherType(ETHERTYPE_IPv6);
-    controlInfo->setInterfaceId(destIE->getInterfaceId());
+    datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     datagram->setControlInfo(controlInfo);
     send(datagram, "queueOut");
 }

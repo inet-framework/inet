@@ -14,11 +14,10 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#include "inet/networklayer/base/NetworkProtocolBase.h"
-
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/IInterfaceControlInfo.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
@@ -84,8 +83,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        cObject *ctrl = message->getControlInfo();
-        check_and_cast<IInterfaceControlInfo *>(ctrl)->setInterfaceId(interfaceId);
+        message->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
     else {
@@ -93,9 +91,8 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage *duplicate = message->dup();
-                cObject *ctrl = message->getControlInfo()->dup();
-                check_and_cast<IInterfaceControlInfo *>(ctrl)->setInterfaceId(interfaceEntry->getInterfaceId());
-                duplicate->setControlInfo(ctrl);
+                duplicate->setControlInfo(message->getControlInfo()->dup());
+                duplicate->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }
         }

@@ -19,7 +19,6 @@
 
 #include "inet/networklayer/mpls/MPLS.h"
 
-#include "inet/common/IInterfaceControlInfo.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/mpls/IClassifier.h"
 #include "inet/networklayer/rsvp_te/Utils.h"
@@ -27,6 +26,7 @@
 // FIXME temporary fix
 #include "inet/networklayer/ldp/LDP.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -113,15 +113,13 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         // yes, this may happen - if we'are both ingress and egress
         ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
         delete mplsPacket;
-        IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(ipdatagram->getControlInfo());
-        controlInfo->setInterfaceId(outInterfaceId);
+        ipdatagram->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(ipdatagram);
     }
     else {
         cObject *ctrl = ipdatagram->removeControlInfo();
         mplsPacket->setControlInfo(ctrl);
-        IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(ctrl);
-        controlInfo->setInterfaceId(outInterfaceId);
+        mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(mplsPacket);
     }
 
@@ -190,8 +188,7 @@ void MPLS::processPacketFromL2(cMessage *msg)
 
 void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 {
-    IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(mplsPacket->getControlInfo());
-    int incomingInterfaceId = controlInfo->getInterfaceId();
+    int incomingInterfaceId = mplsPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getName();
     ASSERT(mplsPacket->hasLabel());
@@ -241,7 +238,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
 
         //ASSERT(labelIf[outgoingPort]);
-        controlInfo->setInterfaceId(outgoingInterface->getInterfaceId());
+        mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
         sendToL2(mplsPacket);
     }
     else {
@@ -255,8 +252,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         delete mplsPacket;
 
         if (outgoingInterface) {
-            IInterfaceControlInfo *controlInfo = check_and_cast<IInterfaceControlInfo *>(nativeIP->getControlInfo());
-            controlInfo->setInterfaceId(outgoingInterface->getInterfaceId());
+            nativeIP->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
             sendToL2(nativeIP);
         }
         else {
