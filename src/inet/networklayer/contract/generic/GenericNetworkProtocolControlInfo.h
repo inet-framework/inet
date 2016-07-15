@@ -18,7 +18,6 @@
 #ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 #define __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 
-#include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
@@ -26,7 +25,7 @@
 
 namespace inet {
 
-class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo, public ISocketControlInfo
+class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo
 {
   private:
     void copy(const GenericNetworkProtocolControlInfo& other) {}

@@ -15,16 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/Protocol.h"
-#include "inet/common/ISocketControlInfo.h"
-}}
-
 namespace inet;
 
 class L3SocketCommand
 {
-    @implements(ISocketControlInfo);
     int socketId;
 }
 

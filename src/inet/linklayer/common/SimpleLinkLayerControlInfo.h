@@ -20,7 +20,6 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/ISocketControlInfo.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo_m.h"
 
 namespace inet {
@@ -29,7 +28,7 @@ namespace inet {
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public ISocketControlInfo
+class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base
 {
   public:
     SimpleLinkLayerControlInfo() : SimpleLinkLayerControlInfo_Base() {}

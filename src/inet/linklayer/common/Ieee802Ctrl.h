@@ -20,7 +20,6 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/ISocketControlInfo.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 
 namespace inet {
@@ -29,7 +28,7 @@ namespace inet {
  * Represents a IEEE 802 control info. More info in the Ieee802Ctrl.msg file
  * (and the documentation generated from it).
  */
-class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public ISocketControlInfo
+class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base
 {
   public:
     Ieee802Ctrl() : Ieee802Ctrl_Base() {}

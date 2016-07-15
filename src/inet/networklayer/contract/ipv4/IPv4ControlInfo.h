@@ -20,7 +20,6 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -34,7 +33,7 @@ class IPv4Datagram;
  *
  * See the IPv4ControlInfo.msg file for more info.
  */
-class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkProtocolControlInfo, public ISocketControlInfo
+class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkProtocolControlInfo
 {
   protected:
     IPv4Datagram *dgram;

@@ -18,7 +18,6 @@
 
 
 cplusplus {{
-#include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
@@ -68,7 +67,6 @@ enum UDPStatusInd
 //
 class UDPControlInfo
 {
-    @implements(ISocketControlInfo);
     int socketId = -1;  // must uniquely identify the socket in the ~UDP module
 }
 

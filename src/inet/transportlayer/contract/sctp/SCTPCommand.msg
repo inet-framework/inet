@@ -19,8 +19,6 @@
 
 cplusplus {{
 #include <vector>
-
-#include "inet/common/ISocketControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand.h"
@@ -59,7 +57,6 @@ enum SCTPErrorCode
 //
 packet SCTPCommand
 {
-    @implements(ISocketControlInfo);
     int socketId = -1;   // identifies the socket within the application
     int sid = -1;
     int numMsgs = 1;
