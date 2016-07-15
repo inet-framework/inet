@@ -33,6 +33,13 @@ Protocol::Protocol(const char *name) :
     nameToProtocol[name] = this;
 }
 
+std::string Protocol::info() const
+{
+    std::ostringstream os;
+    os << getName() << "(" << id << ")";
+    return os.str();
+}
+
 const Protocol *Protocol::findProtocol(int id)
 {
     auto it = idToProtocol.find(id);
