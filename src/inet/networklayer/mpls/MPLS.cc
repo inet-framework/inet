@@ -17,6 +17,8 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/ProtocolTag_m.h"
+
 #include "inet/networklayer/mpls/MPLS.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -44,6 +46,9 @@ void MPLS::initialize(int stage)
         lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         pct = getModuleFromPar<IClassifier>(par("classifierModule"), this);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        registerProtocol(Protocol::mpls, gate("ifOut"));
     }
 }
 
@@ -113,12 +118,14 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         // yes, this may happen - if we'are both ingress and egress
         ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
         delete mplsPacket;
+        ipdatagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
         ipdatagram->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(ipdatagram);
     }
     else {
         cObject *ctrl = ipdatagram->removeControlInfo();
         mplsPacket->setControlInfo(ctrl);
+        mplsPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::mpls);
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(mplsPacket);
     }
@@ -239,6 +246,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
         //ASSERT(labelIf[outgoingPort]);
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
+        mplsPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::mpls);
         sendToL2(mplsPacket);
     }
     else {
@@ -253,12 +261,29 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
         if (outgoingInterface) {
             nativeIP->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
+            nativeIP->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
             sendToL2(nativeIP);
         }
         else {
             sendToL3(nativeIP);
         }
     }
+}
+
+void MPLS::sendToL2(cMessage *msg)
+{
+    ASSERT(msg->getControlInfo());
+    ASSERT(msg->getTag<InterfaceReq>());
+    ASSERT(msg->getTag<ProtocolInd>());
+    send(msg, "ifOut");
+}
+
+void MPLS::sendToL3(cMessage *msg)
+{
+    ASSERT(msg->getControlInfo());
+    ASSERT(msg->getTag<InterfaceInd>());
+    ASSERT(msg->getTag<ProtocolReq>());
+    send(msg, "netwOut");
 }
 
 void MPLS::handleRegisterInterface(const InterfaceEntry &interface, cGate *ingate)
