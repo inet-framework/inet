@@ -466,7 +466,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                 const MACAddress& src = mac->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
                     EV_DETAIL << "Local delivery " << mac << endl;
-                    sendUp(decapsMsg(mac));
+                    sendUp(decapsulate(mac));
                 }
                 else {
                     EV_DETAIL << "Received " << mac << " is not for us, dropping frame." << endl;
@@ -613,7 +613,7 @@ bool BMacLayer::addToQueue(cMessage *msg)
         return false;
     }
 
-    BMacFrame *macPkt = encapsMsg((cPacket *)msg);
+    BMacFrame *macPkt = encapsulate((cPacket *)msg);
     macQueue.push_back(macPkt);
     EV_DETAIL << "Max queue length: " << queueLength << ", packet put in queue"
                                                         "\n  queue size: " << macQueue.size() << " macState: "
@@ -715,7 +715,7 @@ void BMacLayer::refreshDisplay() const
     macState = newState;
    }*/
 
-cPacket *BMacLayer::decapsMsg(BMacFrame *msg)
+cPacket *BMacLayer::decapsulate(BMacFrame *msg)
 {
     cPacket *packet = msg->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
@@ -728,7 +728,7 @@ cPacket *BMacLayer::decapsMsg(BMacFrame *msg)
     return packet;
 }
 
-BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
+BMacFrame *BMacLayer::encapsulate(cPacket *netwPkt)
 {
     BMacFrame *pkt = new BMacFrame(netwPkt->getName(), netwPkt->getKind());
     pkt->setBitLength(headerLength);

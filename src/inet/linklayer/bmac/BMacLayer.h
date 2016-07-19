@@ -241,8 +241,8 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 
     virtual void clearQueue();
 
-    cPacket *decapsMsg(BMacFrame *msg);
-    BMacFrame *encapsMsg(cPacket *netwPkt);
+    cPacket *decapsulate(BMacFrame *msg);
+    BMacFrame *encapsulate(cPacket *netwPkt);
 };
 
 } // namespace inet
