@@ -136,7 +136,6 @@ class UDPDataIndication extends UDPControlInfo
 {
     int srcPort;           // source port of the received packet
     int destPort;          // destination port of the received packet
-    int ttl;               // TTL field of the received packet
     unsigned char typeOfService; // IPv4 Type of Service / IPv6 Traffic Class field of received packet
 }
 

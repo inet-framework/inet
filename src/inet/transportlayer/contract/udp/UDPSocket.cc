@@ -17,6 +17,7 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
@@ -320,7 +321,7 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     int srcPort = ctrl->getSrcPort();
     int destPort = ctrl->getDestPort();
     int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    int ttl = ctrl->getTtl();
+    int ttl = pk->getMandatoryTag<HopLimitInd>()->getHopLimit();
     int tos = ctrl->getTypeOfService();
 
     std::stringstream os;

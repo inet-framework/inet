@@ -20,6 +20,7 @@
 #include <functional>
 
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -819,7 +820,7 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
             EV_WARN << "source address is not link-local: " << srcAddr << "\n";
             return false;
         }
-        if (ctrlInfo->getTtl() != 255) {
+        if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
             EV_WARN << "ttl is not 255";
             return false;
         }

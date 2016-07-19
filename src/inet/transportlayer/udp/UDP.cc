@@ -737,7 +737,6 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     UDPDataIndication *udpCtrl = new UDPDataIndication();
     udpCtrl->setSrcPort(srcPort);
     udpCtrl->setDestPort(destPort);
-    udpCtrl->setTtl(ttl);
     udpCtrl->setTypeOfService(tos);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
@@ -747,6 +746,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->ensureTag<L3AddressInd>()->setSource(srcAddr);
     payload->ensureTag<L3AddressInd>()->setDestination(destAddr);
+    payload->ensureTag<HopLimitInd>()->setHopLimit(ttl);
 
     emit(passedUpPkSignal, payload);
     send(payload, "appOut");
