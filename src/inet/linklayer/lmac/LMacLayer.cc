@@ -154,7 +154,7 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
  */
 void LMacLayer::handleUpperPacket(cPacket *msg)
 {
-    LMacFrame *mac = static_cast<LMacFrame *>(encapsMsg(static_cast<cPacket *>(msg)));
+    LMacFrame *mac = static_cast<LMacFrame *>(encapsulate(static_cast<cPacket *>(msg)));
 
     // message has to be queued if another message is waiting to be send
     // or if we are already trying to send another message
@@ -342,7 +342,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
                     EV_DETAIL << "sending pkt to upper...\n";
-                    sendUp(decapsMsg(mac));
+                    sendUp(decapsulate(mac));
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
@@ -532,7 +532,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
                     EV_DETAIL << "sending pkt to upper...\n";
-                    sendUp(decapsMsg(mac));
+                    sendUp(decapsulate(mac));
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
@@ -629,7 +629,7 @@ void LMacLayer::findNewSlot()
     slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId() - 4);
 }
 
-cPacket *LMacLayer::decapsMsg(LMacFrame *msg)
+cPacket *LMacLayer::decapsulate(LMacFrame *msg)
 {
     cPacket *packet = msg->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
@@ -647,7 +647,7 @@ cPacket *LMacLayer::decapsMsg(LMacFrame *msg)
  * header fields.
  */
 
-LMacFrame *LMacLayer::encapsMsg(cPacket *netwPkt)
+LMacFrame *LMacLayer::encapsulate(cPacket *netwPkt)
 {
     LMacFrame *pkt = new LMacFrame(netwPkt->getName(), netwPkt->getKind());
     pkt->setBitLength(headerLength);

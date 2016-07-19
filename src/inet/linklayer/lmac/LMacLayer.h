@@ -115,8 +115,8 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
 
     /** @brief Encapsulate the NetwPkt into an MacPkt */
-    virtual LMacFrame *encapsMsg(cPacket *);
-    virtual cPacket *decapsMsg(LMacFrame *);
+    virtual LMacFrame *encapsulate(cPacket *);
+    virtual cPacket *decapsulate(LMacFrame *);
 
   protected:
     /** @brief Generate new interface address*/
