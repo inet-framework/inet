@@ -173,7 +173,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Decapsulate and return encapsulated packet after attaching IPv6ControlInfo.
      */
-    virtual cPacket *decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE);
+    virtual cPacket *decapsulate(IPv6Datagram *datagram);
 
     /**
      * Last hoplimit check, then send datagram on the given interface.

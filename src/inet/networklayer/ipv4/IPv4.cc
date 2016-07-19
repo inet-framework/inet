@@ -579,7 +579,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram, const InterfaceEntry *fr
 void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
 {
     int protocol = datagram->getTransportProtocol();
-    cPacket *packet = decapsulate(datagram, fromIE);
+    cPacket *packet = decapsulate(datagram);
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
@@ -605,7 +605,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
     }
 }
 
-cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
+cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
 {
     // decapsulate transport packet
     cPacket *packet = datagram->decapsulate();
@@ -620,7 +620,6 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
     packet->setControlInfo(controlInfo);
     packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1); // TODO: delete, this is added in the interface
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSrcAddress());
     l3AddressInd->setDestination(datagram->getDestAddress());

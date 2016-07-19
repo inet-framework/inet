@@ -616,7 +616,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 #endif /* WITH_xMIPv6 */
 
     int protocol = datagram->getTransportProtocol();
-    cPacket *packet = decapsulate(datagram, fromIE);
+    cPacket *packet = decapsulate(datagram);
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
@@ -677,7 +677,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
     send(msg, "transportOut");
 }
 
-cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
+cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
 {
     // decapsulate transport packet
     cPacket *packet = datagram->decapsulate();
@@ -694,7 +694,6 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
     packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
     packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());

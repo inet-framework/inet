@@ -194,7 +194,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Decapsulate and return encapsulated packet after attaching IPv4ControlInfo.
      */
-    virtual cPacket *decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE);
+    virtual cPacket *decapsulate(IPv4Datagram *datagram);
 
     /**
      * Call PostRouting Hook and continue with fragmentAndSend() if accepted
