@@ -597,11 +597,11 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
 
     IL3AddressType *addressType = destP.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    controlInfo->setTransportProtocol(IP_PROT_TCP);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
 
-    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    tcpseg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
     addresses->setSource(srcP);
     addresses->setDestination(destP);

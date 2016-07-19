@@ -142,7 +142,7 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(ind);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketInd>()->setSocketId(listenConnId);
     tcpLwipM.send(msg, "appOut");
     //TODO shouldn't read from lwip until accept arrived
@@ -163,7 +163,7 @@ void TcpLwipConnection::sendEstablishedMsg()
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(tcpConnectInfo);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     msg->ensureTag<SocketInd>()->setSocketId(connIdM);
 
     tcpLwipM.send(msg, "appOut");
@@ -204,7 +204,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     msg->setKind(code);
     TCPCommand *ind = new TCPCommand();
     msg->setControlInfo(ind);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketInd>()->setSocketId(connIdM);
     tcpLwipM.send(msg, "appOut");
 }
@@ -389,7 +389,7 @@ void TcpLwipConnection::sendUpData()
             tcpConnectInfo->setLocalPort(pcbM->local_port);
             tcpConnectInfo->setRemotePort(pcbM->remote_port);
             dataMsg->setControlInfo(tcpConnectInfo);
-            dataMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+            dataMsg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
             dataMsg->ensureTag<SocketInd>()->setSocketId(connIdM);
 //            int64_t len = dataMsg->getByteLength();
             // send Msg to Application layer:

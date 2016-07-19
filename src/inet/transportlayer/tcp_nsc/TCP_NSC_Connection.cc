@@ -186,7 +186,7 @@ void TCP_NSC_Connection::do_SEND()
             msg->setKind(TCP_I_CLOSED);
             TCPCommand *ind = new TCPCommand();
             msg->setControlInfo(ind);
-            msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+            msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
             msg->ensureTag<SocketInd>()->setSocketId(connIdM);
             tcpNscM->send(msg, "appOut");
             //FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!

@@ -279,7 +279,7 @@ void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     msg->setControlInfo(tcpConnectInfo);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketInd>()->setSocketId(connP.connIdM);
     send(msg, "appOut");
     connP.sentEstablishedM = true;
@@ -300,7 +300,7 @@ void TCP_NSC::sendAvailableIndicationMsg(TCP_NSC_Connection& c)
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
     msg->setControlInfo(tcpConnectInfo);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketInd>()->setSocketId(c.forkedConnId);
     send(msg, "appOut");
     c.sentEstablishedM = true;
@@ -551,7 +551,6 @@ void TCP_NSC::sendDataToApp(TCP_NSC_Connection& c)
         tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
         tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
         dataMsg->setControlInfo(tcpConnectInfo);
-        dataMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
         dataMsg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
         // send Msg to Application layer:
         send(dataMsg, "appOut");
@@ -597,7 +596,7 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
         msg->setKind(code);
         TCPCommand *ind = new TCPCommand();
         msg->setControlInfo(ind);
-        msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+        msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
         msg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
         send(msg, "appOut");
     }
@@ -907,9 +906,10 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
     IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    controlInfo->setTransportProtocol(IP_PROT_TCP);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    tcpseg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
     addresses->setSource(src);
     addresses->setDestination(dest);
