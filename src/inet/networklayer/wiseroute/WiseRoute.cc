@@ -32,6 +32,7 @@
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

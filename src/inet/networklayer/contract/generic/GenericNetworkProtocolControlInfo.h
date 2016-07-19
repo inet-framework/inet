@@ -18,27 +18,7 @@
 #ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 #define __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo_m.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-
-namespace inet {
-
-class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo
-{
-  private:
-    void copy(const GenericNetworkProtocolControlInfo& other) {}
-
-  public:
-    GenericNetworkProtocolControlInfo() : GenericNetworkProtocolControlInfo_Base() {}
-    GenericNetworkProtocolControlInfo(const GenericNetworkProtocolControlInfo& other) : GenericNetworkProtocolControlInfo_Base(other) { copy(other); }
-    GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) { if (this == &other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
-    virtual GenericNetworkProtocolControlInfo *dup() const override { return new GenericNetworkProtocolControlInfo(*this); }
-
-};
-
-} // namespace inet
 
 #endif // ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 
