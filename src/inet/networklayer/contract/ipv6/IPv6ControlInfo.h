@@ -101,8 +101,6 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
      */
     IPv6ExtensionHeader *removeFirstExtensionHeader();
 
-    virtual short getHopLimit() const override { return IPv6ControlInfo_Base::getHopLimit(); }
-    virtual void setHopLimit(short hopLimit) override { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };
 
 } // namespace inet

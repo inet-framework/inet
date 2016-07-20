@@ -24,6 +24,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
@@ -684,7 +685,6 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     controlInfo->setTrafficClass(datagram->getTrafficClass());
-    controlInfo->setHopLimit(datagram->getHopLimit());
 
     // original IP datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
@@ -697,6 +697,7 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
     packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
     packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
+    packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
 
     return packet;
 }
@@ -709,6 +710,10 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     IPv6Address src = addresses->getSource().toIPv6();
     IPv6Address dest = addresses->getDestination().toIPv6();
     delete addresses;
+
+    auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
+    short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
+    delete hopLimitReq;
 
     // set source and destination address
     datagram->setDestAddress(dest);
@@ -731,7 +736,8 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
 
     // set other fields
     datagram->setTrafficClass(controlInfo->getTrafficClass());
-    datagram->setHopLimit(controlInfo->getHopLimit() > 0 ? controlInfo->getHopLimit() : 32);    //FIXME use iface hop limit instead of 32?
+    datagram->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
+    ASSERT(datagram->getHopLimit() > 0);
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present

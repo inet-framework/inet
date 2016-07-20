@@ -27,8 +27,6 @@ class INET_API INetworkProtocolControlInfo
 {
   public:
     virtual ~INetworkProtocolControlInfo() {}
-    virtual short getHopLimit() const = 0;
-    virtual void setHopLimit(short hopLimit) = 0;
 };
 
 } // namespace inet

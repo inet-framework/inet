@@ -24,6 +24,7 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -612,7 +613,6 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
     // create and fill in control info
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setTypeOfService(datagram->getTypeOfService());
-    controlInfo->setTimeToLive(datagram->getTimeToLive());
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
@@ -624,6 +624,7 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSrcAddress());
     l3AddressInd->setDestination(datagram->getDestAddress());
+    packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getTimeToLive());
 
     return packet;
 }
@@ -720,6 +721,11 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     delete l3AddressReq;
 
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
+
+    auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
+    short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
+    delete hopLimitReq;
+
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
@@ -744,9 +750,9 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     datagram->setDontFragment(controlInfo->getDontFragment());
     datagram->setFragmentOffset(0);
 
-    short ttl;
-    if (controlInfo->getTimeToLive() > 0)
-        ttl = controlInfo->getTimeToLive();
+    if (ttl != -1) {
+        ASSERT(ttl > 0);
+    }
     else if (datagram->getDestAddress().isLinkLocalMulticast())
         ttl = 1;
     else if (datagram->getDestAddress().isMulticast())

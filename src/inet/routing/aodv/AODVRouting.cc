@@ -20,6 +20,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
@@ -156,9 +157,9 @@ void AODVRouting::handleMessage(cMessage *msg)
     else {
         UDPPacket *udpPacket = check_and_cast<UDPPacket *>(msg);
         L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
+        unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
         INetworkProtocolControlInfo *udpProtocolCtrlInfo = check_and_cast<INetworkProtocolControlInfo *>(udpPacket->getControlInfo());
-        unsigned int arrivalPacketTTL = udpProtocolCtrlInfo->getHopLimit();
 
         switch (ctrlPacket->getPacketType()) {
             case RREQ:
@@ -732,7 +733,6 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     ASSERT(timeToLive != 0);
 
     INetworkProtocolControlInfo *networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
-    networkProtocolControlInfo->setHopLimit(timeToLive);
 
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
@@ -748,6 +748,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSource(getSelfIPAddress());
     addresses->setDestination(destAddr);
+    udpPacket->ensureTag<HopLimitReq>()->setHopLimit(timeToLive);
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();

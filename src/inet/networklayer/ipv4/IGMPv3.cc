@@ -26,6 +26,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -659,13 +660,13 @@ void IGMPv3::sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address d
     ASSERT(ie->isMulticast());
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setTimeToLive(1);
     msg->setControlInfo(controlInfo);
     msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<HopLimitReq>()->setHopLimit(1);
 
     send(msg, "ipOut");
 }
@@ -675,13 +676,13 @@ void IGMPv3::sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address des
     ASSERT(ie->isMulticast());
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setTimeToLive(1);
     msg->setControlInfo(controlInfo);
     msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<HopLimitReq>()->setHopLimit(1);
     send(msg, "ipOut");
 }
 

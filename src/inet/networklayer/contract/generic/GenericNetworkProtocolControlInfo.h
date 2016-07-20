@@ -36,8 +36,6 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) { if (this == &other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
     virtual GenericNetworkProtocolControlInfo *dup() const override { return new GenericNetworkProtocolControlInfo(*this); }
 
-    virtual short getHopLimit() const override { return GenericNetworkProtocolControlInfo_Base::getHopLimit(); }
-    virtual void setHopLimit(short hopLimit) override { GenericNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
 
 } // namespace inet

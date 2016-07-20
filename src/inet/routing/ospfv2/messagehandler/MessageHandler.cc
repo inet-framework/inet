@@ -19,6 +19,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/routing/ospfv2/router/OSPFRouter.h"
@@ -309,10 +310,10 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
 void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int outputIfIndex, short ttl)
 {
     IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
-    ipControlInfo->setTimeToLive(ttl);
     packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
     packet->ensureTag<L3AddressReq>()->setDestination(destination);
+    packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
 
     packet->setControlInfo(ipControlInfo);
     switch (packet->getType()) {

@@ -24,6 +24,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -423,8 +424,6 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
     udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::manet);
-    // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
-    networkProtocolControlInfo->setHopLimit(255);
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.
     udpPacket->setSourcePort(DYMO_UDP_PORT);
     udpPacket->setDestinationPort(DYMO_UDP_PORT);
@@ -435,6 +434,8 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSource(getSelfAddress());
     addresses->setDestination(nextHop);
+    // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
+    udpPacket->ensureTag<HopLimitReq>()->setHopLimit(255);
     sendUDPPacket(udpPacket, delay);
 }
 
@@ -468,7 +469,7 @@ bool DYMO::permissibleRteMsg(RteMsg *rteMsg)
     //    message contained in the packet MUST be disregarded by AODVv2.
     // FIXME: we should rather compare with 255 but unfortunately IPv4 decrements
     // FIXME: TTL too early in the sender, see http://en.wikipedia.org/wiki/Time_to_live
-    if (networkProtocolControlInfo->getHopLimit() != 254)
+    if (rteMsg->getMandatoryTag<HopLimitInd>()->getHopLimit() != 254)
         return false;
     // 2. If the RteMsg.<msg-hop-limit> is equal to 0, then the message is disregarded.
     if (rteMsg->getHopLimit() == 0)

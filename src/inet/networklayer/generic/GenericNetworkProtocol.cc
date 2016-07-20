@@ -24,6 +24,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
@@ -395,14 +396,13 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
         ifTag->setInterfaceId(fromIE->getInterfaceId());
     }
 
-    controlInfo->setHopLimit(datagram->getHopLimit());
-
     // attach control info
     packet->setControlInfo(controlInfo);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSourceAddress());
     l3AddressInd->setDestination(datagram->getDestinationAddress());
+    packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
     delete datagram;
 
     return packet;
@@ -419,6 +419,11 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     delete l3AddressReq;
 
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
+
+    auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
+    short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
+    delete hopLimitReq;
+
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
@@ -440,9 +445,9 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     }
 
     // set other fields
-    short ttl;
-    if (controlInfo->getHopLimit() > 0)
-        ttl = controlInfo->getHopLimit();
+    if (ttl != -1) {
+        ASSERT(ttl > 0);
+    }
     else if (false) //TODO: datagram->getDestinationAddress().isLinkLocalMulticast())
         ttl = 1;
     else

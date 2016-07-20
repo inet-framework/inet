@@ -41,7 +41,7 @@ class noncobject IPv4Address;
 // Optional fields:
 // - srcAddr: it will be set to the address of the outgoing interface
 // - typeOfService: (default: 0)
-// - timeToLive: default defined as module parameter
+// - timeToLive: @see ~HopCountReq, ~HopCountInd
 // - dontFragment: default: false
 //
 // Not supported:
@@ -67,7 +67,6 @@ class IPv4ControlInfo
     unsigned char typeOfService;  // Type of Service byte (low 6 bits: DSCP)
     abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
-    short timeToLive;     // maximum hop count
     bool dontFragment;    // "don't fragment" bit
 }
 

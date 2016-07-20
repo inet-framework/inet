@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 
@@ -1653,7 +1654,6 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
 void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
 {
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setTimeToLive(1);
     packet->setControlInfo(ctrl);
     packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
@@ -1662,6 +1662,7 @@ void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
     auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSource(srcAddr);
     addresses->setDestination(destAddr);
+    packet->ensureTag<HopLimitReq>()->setHopLimit(1);
     send(packet, "ipOut");
 }
 

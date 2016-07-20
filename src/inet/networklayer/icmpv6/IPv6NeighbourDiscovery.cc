@@ -22,6 +22,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
@@ -756,7 +757,6 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
         const IPv6Address& srcAddr, int interfaceId)
 {
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-    controlInfo->setHopLimit(255);
     msg->setControlInfo(controlInfo);
     msg->removeTag<DispatchProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
@@ -764,6 +764,7 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
     auto addressReq = msg->ensureTag<L3AddressReq>();
     addressReq->setSource(srcAddr);
     addressReq->setDestination(destAddr);
+    msg->ensureTag<HopLimitReq>()->setHopLimit(255);
 
     send(msg, "ipv6Out");
 }
@@ -1171,7 +1172,7 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
 
        - The IP Hop Limit field has a value of 255, i.e., the packet
        could not possibly have been forwarded by a router.*/
-    if (rsCtrlInfo->getHopLimit() != 255) {
+    if (rs->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop limit is not 255! RS validation failed!\n";
         result = false;
     }
@@ -1794,7 +1795,7 @@ bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra,
 
     //- The IP Hop Limit field has a value of 255, i.e., the packet
     //  could not possibly have been forwarded by a router.
-    if (raCtrlInfo->getHopLimit() != 255) {
+    if (ra->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop limit is not 255! RA validation failed!\n";
         result = false;
     }
@@ -1896,7 +1897,7 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns,
        messages that do not satisfy all of the following validity checks:*/
     //- The IP Hop Limit field has a value of 255, i.e., the packet
     //could not possibly have been forwarded by a router.
-    if (nsCtrlInfo->getHopLimit() != 255) {
+    if (ns->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop limit is not 255! NS validation failed!\n";
         result = false;
     }
@@ -2228,7 +2229,7 @@ bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na,
 
     //- The IP Hop Limit field has a value of 255, i.e., the packet
     //  could not possibly have been forwarded by a router.
-    if (naCtrlInfo->getHopLimit() != 255) {
+    if (na->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop Limit is not 255! NA validation failed!\n";
         result = false;
     }
