@@ -385,7 +385,7 @@ void TcpLwipConnection::sendUpData()
             tcpConnectInfo->setLocalPort(pcbM->local_port);
             tcpConnectInfo->setRemotePort(pcbM->remote_port);
             dataMsg->setControlInfo(tcpConnectInfo);
-            int64_t len = dataMsg->getByteLength();
+//            int64_t len = dataMsg->getByteLength();
             // send Msg to Application layer:
             tcpLwipM.send(dataMsg, "appOut");
 //            while (len > 0) {

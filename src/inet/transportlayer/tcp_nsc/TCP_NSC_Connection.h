@@ -28,8 +28,8 @@
 #include "inet/networklayer/common/L3Address.h"
 
 // forward declarations:
-class INetStack;
-class INetStreamSocket;
+struct INetStack;
+struct INetStreamSocket;
 
 namespace inet {
 
