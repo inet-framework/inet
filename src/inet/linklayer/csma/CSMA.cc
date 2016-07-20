@@ -272,9 +272,8 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
 
         case EV_FRAME_RECEIVED:
             EV_DETAIL << "(15) FSM State IDLE_1, EV_FRAME_RECEIVED: setting up radio tx -> WAITSIFS." << endl;
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             nbRxFrames++;
-            delete msg;
 
             if (useMACAcks) {
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
@@ -286,8 +285,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
         case EV_BROADCAST_RECEIVED:
             EV_DETAIL << "(23) FSM State IDLE_1, EV_BROADCAST_RECEIVED: Nothing to do." << endl;
             nbRxFrames++;
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
-            delete msg;
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         default:
@@ -345,15 +343,13 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg)
             else {
                 EV_DETAIL << "sending frame up and resuming normal operation.";
             }
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
-            delete msg;
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         case EV_BROADCAST_RECEIVED:
             EV_DETAIL << "(29) FSM State BACKOFF, EV_BROADCAST_RECEIVED:"
                       << "sending frame up and resuming normal operation." << endl;
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
-            delete msg;
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         default:
@@ -462,15 +458,13 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
             else {
                 EV_DETAIL << " Nothing to do." << endl;
             }
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
-            delete msg;
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         case EV_BROADCAST_RECEIVED:
             EV_DETAIL << "(24) FSM State BACKOFF, EV_BROADCAST_RECEIVED:"
                       << " Nothing to do." << endl;
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
-            delete msg;
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         default:
@@ -543,7 +537,7 @@ void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
 
         case EV_BROADCAST_RECEIVED:
         case EV_FRAME_RECEIVED:
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         case EV_DUPLICATE_RECEIVED:
@@ -607,8 +601,7 @@ void CSMA::updateStatusSIFS(t_mac_event event, cMessage *msg)
         case EV_BROADCAST_RECEIVED:
         case EV_FRAME_RECEIVED:
             EV << "Error ! Received a frame during SIFS !" << endl;
-            sendUp(decapsMsg(static_cast<CSMAFrame *>(msg)));
-            delete msg;
+            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
             break;
 
         default:
@@ -932,7 +925,7 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value DE
     }
 }
 
-cPacket *CSMA::decapsMsg(CSMAFrame *macPkt)
+cPacket *CSMA::decapsulate(CSMAFrame *macPkt)
 {
     cPacket *packet = macPkt->decapsulate();
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
@@ -940,6 +933,7 @@ cPacket *CSMA::decapsMsg(CSMAFrame *macPkt)
     controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     controlInfo->setNetworkProtocol(macPkt->getNetworkProtocol());
     packet->setControlInfo(controlInfo);
+    delete macPkt;
     return packet;
 }
 

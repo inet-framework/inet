@@ -320,7 +320,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
 
     virtual simtime_t scheduleBackoff();
 
-    virtual cPacket *decapsMsg(CSMAFrame *macPkt);
+    virtual cPacket *decapsulate(CSMAFrame *macPkt);
 
     CSMAFrame *ackMessage;
 
