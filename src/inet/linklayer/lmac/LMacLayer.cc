@@ -14,10 +14,10 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/lmac/LMacFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/common/FindModule.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -635,12 +635,9 @@ void LMacLayer::findNewSlot()
 cPacket *LMacLayer::decapsulate(LMacFrame *msg)
 {
     cPacket *packet = msg->decapsulate();
-    SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
     packet->ensureTag<MACAddressInd>()->setSourceAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
-    controlInfo->setNetworkProtocol(msg->getNetworkProtocol());
-    packet->setControlInfo(controlInfo);
     EV_DETAIL << " message decapsulated " << endl;
     delete msg;
     return packet;

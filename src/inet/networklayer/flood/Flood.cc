@@ -28,7 +28,6 @@
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 
 namespace inet {
 

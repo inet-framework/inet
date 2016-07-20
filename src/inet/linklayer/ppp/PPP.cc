@@ -28,7 +28,6 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -365,11 +364,8 @@ PPPFrame *PPP::encapsulate(cPacket *msg)
 cPacket *PPP::decapsulate(PPPFrame *pppFrame)
 {
     cPacket *payload = pppFrame->decapsulate();
-    SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
     payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppFrame->getProtocol()));
-    controlInfo->setNetworkProtocol(pppFrame->getProtocol());
-    payload->setControlInfo(controlInfo);
     delete pppFrame;
     return payload;
 }

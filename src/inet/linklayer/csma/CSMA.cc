@@ -32,9 +32,9 @@
 #include "inet/common/INETMath.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/linklayer/csma/CSMAFrame_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -929,12 +929,9 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value DE
 cPacket *CSMA::decapsulate(CSMAFrame *macPkt)
 {
     cPacket *packet = macPkt->decapsulate();
-    SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
     packet->ensureTag<MACAddressInd>()->setSourceAddress(macPkt->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macPkt->getNetworkProtocol()));
-    controlInfo->setNetworkProtocol(macPkt->getNetworkProtocol());
-    packet->setControlInfo(controlInfo);
     delete macPkt;
     return packet;
 }

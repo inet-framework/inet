@@ -9,7 +9,6 @@
 #include <cassert>
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"

@@ -37,7 +37,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/FindModule.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {

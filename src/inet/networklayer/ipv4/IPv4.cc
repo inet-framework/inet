@@ -22,7 +22,6 @@
 #include "inet/networklayer/ipv4/IPv4.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -773,12 +772,9 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
         bool isIeee802Lan = ie->isBroadcast() && !ie->getMacAddress().isUnspecified();    // we only need/can do ARP on IEEE 802 LANs
         if (!isIeee802Lan) {
             delete datagram->removeControlInfo();
-            SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
-            controlInfo->setProtocol(ETHERTYPE_IPv4);
             datagram->removeTag<ProtocolReq>();         // send to NIC
             datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
             datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4);
-            datagram->setControlInfo(controlInfo);
             sendPacketToNIC(datagram, ie);
         }
         else {
