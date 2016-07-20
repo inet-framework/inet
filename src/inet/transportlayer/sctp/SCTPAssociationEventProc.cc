@@ -208,7 +208,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
             // Find lowest priority
             for (cQueue::Iterator iter(*strq); !iter.end(); iter++) {
-                SCTPDataMsg *msg = (SCTPDataMsg *)iter();
+                SCTPDataMsg *msg = (SCTPDataMsg *)(*iter);
 
                 if (msg->getPriority() > lowestPriority)
                     lowestPriority = msg->getPriority();

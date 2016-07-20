@@ -150,7 +150,7 @@ void EdcaUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
-    if (maxQueueSize > 0 && acData[ac].transmissionQueue.length() >= maxQueueSize && dynamic_cast<Ieee80211DataFrame *>(frame)) {
+    if (maxQueueSize > 0 && acData[ac].transmissionQueue.getLength() >= maxQueueSize && dynamic_cast<Ieee80211DataFrame *>(frame)) {
         EV << "Dataframe " << frame << " received from higher layer, but its MAC subqueue is full, dropping\n";
         delete frame;
         return;
@@ -343,7 +343,7 @@ void EdcaUpperMac::frameExchangeFinished(IFrameExchange *what, bool successful)
     delete acData[ac].frameExchange;
     acData[ac].frameExchange = nullptr;
 
-    if (!acData[ac].transmissionQueue.empty()) {
+    if (!acData[ac].transmissionQueue.isEmpty()) {
         Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(acData[ac].transmissionQueue.pop());
         int txIndex = (int)ac;  //one-to-one mapping
         startSendDataFrameExchange(frame, txIndex, ac);

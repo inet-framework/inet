@@ -129,7 +129,7 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
     }
 
     for (cModule::SubmoduleIterator i(submodule); !i.end(); i++) {
-        cModule *child = i();
+        cModule *child = *i;
         doOneStage(operation, child);
     }
 }
