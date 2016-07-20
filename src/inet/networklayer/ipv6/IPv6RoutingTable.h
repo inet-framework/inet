@@ -146,7 +146,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const IPv6Address& address);
+    virtual InterfaceEntry *getInterfaceByAddress(const IPv6Address& address) const;
     //@}
 
     /**
@@ -388,7 +388,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(IPv6Address());    /*TODO getRouterId();*/ }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIPv6()); }
     virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override { return getInterfaceByAddress(address.toIPv6()); }
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const override;
     virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return nullptr;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return const_cast<IPv6Route *>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
     virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const override { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : nullptr; }

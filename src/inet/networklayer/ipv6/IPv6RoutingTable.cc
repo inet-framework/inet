@@ -406,7 +406,7 @@ void IPv6RoutingTable::configureTunnelFromXML(cXMLElement *cfg)
     }
 }
 
-InterfaceEntry *IPv6RoutingTable::getInterfaceByAddress(const IPv6Address& addr)
+InterfaceEntry *IPv6RoutingTable::getInterfaceByAddress(const IPv6Address& addr) const
 {
     Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
 
@@ -419,6 +419,11 @@ InterfaceEntry *IPv6RoutingTable::getInterfaceByAddress(const IPv6Address& addr)
             return ie;
     }
     return nullptr;
+}
+
+InterfaceEntry *IPv6RoutingTable::getInterfaceByAddress(const L3Address& address) const
+{
+    return getInterfaceByAddress(address.toIPv6());
 }
 
 bool IPv6RoutingTable::isLocalAddress(const IPv6Address& dest) const
