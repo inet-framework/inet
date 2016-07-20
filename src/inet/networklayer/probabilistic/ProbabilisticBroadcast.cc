@@ -51,7 +51,7 @@ void ProbabilisticBroadcast::handleUpperPacket(cPacket *msg)
     ProbabilisticBroadcastDatagram *pkt;
 
     // encapsulate message in a network layer packet.
-    pkt = check_and_cast<ProbabilisticBroadcastDatagram *>(encapsMsg(check_and_cast<cPacket *>(msg)));
+    pkt = check_and_cast<ProbabilisticBroadcastDatagram *>(encapsulate(check_and_cast<cPacket *>(msg)));
     nbDataPacketsSent++;
     EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleUpperMsg(): Pkt ID = " << pkt->getId() << " TTL = " << pkt->getAppTtl() << endl;
     // submit packet for first insertion in queue.
@@ -99,7 +99,7 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
         // TODO: implement an application subscription mechanism.
         if (true) {
             ProbabilisticBroadcastDatagram *mCopy = check_and_cast<ProbabilisticBroadcastDatagram *>(m->dup());
-            sendUp(decapsMsg(mCopy));
+            sendUp(decapsulate(mCopy));
         }
     }
 }
@@ -268,7 +268,7 @@ ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQ
     return msgDesc;
 }
 
-cPacket *ProbabilisticBroadcast::encapsMsg(cPacket *msg)
+cPacket *ProbabilisticBroadcast::encapsulate(cPacket *msg)
 {
     ProbabilisticBroadcastDatagram *pkt = new ProbabilisticBroadcastDatagram(msg->getName());
     cObject *controlInfo = msg->removeControlInfo();
@@ -330,7 +330,7 @@ void ProbabilisticBroadcast::insertNewMessage(ProbabilisticBroadcastDatagram *pk
     }
 }
 
-cPacket *ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastDatagram *msg)
+cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg)
 {
     cPacket *m = msg->decapsulate();
     GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();

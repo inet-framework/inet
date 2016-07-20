@@ -100,7 +100,7 @@ void Flood::finish()
  **/
 void Flood::handleUpperPacket(cPacket *m)
 {
-    FloodDatagram *msg = encapsMsg(m);
+    FloodDatagram *msg = encapsulate(m);
 
     msg->setSeqNum(seqNum);
     seqNum++;
@@ -151,7 +151,7 @@ void Flood::handleLowerPacket(cPacket *m)
         if (interfaceTable->isLocalAddress(msg->getDestinationAddress())) {
             EV << " data msg for me! send to Upper" << endl;
             nbHops = nbHops + (defaultTtl + 1 - msg->getTtl());
-            sendUp(decapsMsg(msg));
+            sendUp(decapsulate(msg));
             nbDataPacketsReceived++;
         }
         //broadcast message
@@ -172,7 +172,7 @@ void Flood::handleLowerPacket(cPacket *m)
 
             // message has to be forwarded to upper layer
             nbHops = nbHops + (defaultTtl + 1 - msg->getTtl());
-            sendUp(decapsMsg(msg));
+            sendUp(decapsulate(msg));
             nbDataPacketsReceived++;
         }
         //not for me -> rebroadcast
@@ -245,7 +245,7 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
 /**
  * Decapsulates the packet from the received Network packet
  **/
-cMessage *Flood::decapsMsg(FloodDatagram *floodDatagram)
+cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
 {
     GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(floodDatagram->getSourceAddress());
@@ -260,7 +260,7 @@ cMessage *Flood::decapsMsg(FloodDatagram *floodDatagram)
  * Encapsulates the received ApplPkt into a NetwPkt and set all needed
  * header fields.
  **/
-FloodDatagram *Flood::encapsMsg(cPacket *appPkt)
+FloodDatagram *Flood::encapsulate(cPacket *appPkt)
 {
     L3Address netwAddr;
 

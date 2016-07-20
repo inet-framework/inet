@@ -121,12 +121,12 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     /** @brief Returns a network layer packet which encapsulates the upper layer
      *         packet passed to the function.
      **/
-    virtual cPacket *encapsMsg(cPacket *msg);
+    virtual cPacket *encapsulate(cPacket *msg);
 
     /** @brief extracts and returns the application layer packet which is encapsulated
-     *         in the network layer packet given in argument.
+     *         in the network layer packet given in argument, delete network layer packet.
      **/
-    virtual cPacket *decapsMsg(ProbabilisticBroadcastDatagram *msg);
+    virtual cPacket *decapsulate(ProbabilisticBroadcastDatagram *msg);
 
     /** @brief Insert a new message in both known ID list and message queue.
      *         The message comes either from upper layer or from lower layer.

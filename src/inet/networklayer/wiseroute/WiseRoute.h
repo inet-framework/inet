@@ -170,8 +170,8 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
      */
     virtual void updateRouteTable(const tRouteTable::key_type& origin, const L3Address& lastHop, double rssi, double ber);
 
-    /** @brief Decapsulate a message */
-    cMessage *decapsMsg(WiseRouteDatagram *msg);
+    /** @brief Decapsulate a message and delete original msg */
+    cMessage *decapsulate(WiseRouteDatagram *msg);
 
     /** @brief update flood table. returns detected flood type (general or unicast flood to forward,
      *         duplicate flood to delete, unicast flood to me

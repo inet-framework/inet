@@ -169,7 +169,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
             else
                 msgCopy = netwMsg;
             if (msgCopy->getKind() == DATA) {
-                sendUp(decapsMsg(msgCopy));
+                sendUp(decapsulate(msgCopy));
                 nbDataPacketsReceived++;
             }
             else {
@@ -323,7 +323,7 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
     }
 }
 
-cMessage *WiseRoute::decapsMsg(WiseRouteDatagram *msg)
+cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
 {
     cMessage *m = msg->decapsulate();
     GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
