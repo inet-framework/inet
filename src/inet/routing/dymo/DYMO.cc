@@ -19,6 +19,7 @@
 
 #include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/routing/dymo/DYMO.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
@@ -389,6 +390,7 @@ void DYMO::processRREQHolddownTimer(RREQHolddownTimer *message)
 
 void DYMO::sendUDPPacket(UDPPacket *packet, double delay)
 {
+    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     if (delay == 0)
         send(packet, "ipOut");
     else

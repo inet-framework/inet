@@ -17,6 +17,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include <string.h>
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/EchoProtocol.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
@@ -70,6 +71,8 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     ctrl->setInterfaceId(-1);
     ctrl->setSourceAddress(dest);
     ctrl->setDestinationAddress(src);
+    reply->clearTags();
+    reply->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
     send(reply, "ipOut");
 }
 

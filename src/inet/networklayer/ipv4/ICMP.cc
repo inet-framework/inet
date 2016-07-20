@@ -29,6 +29,7 @@
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -199,6 +200,7 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
                 }
                 else {
                     check_and_cast<IPv4ControlInfo *>(icmpmsg->getControlInfo())->setTransportProtocol(transportProtocol);
+                    icmpmsg->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
                     send(icmpmsg, "transportOut");
                 }
             }
@@ -235,6 +237,7 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 {
     // turn request into a reply
     ICMPMessage *reply = request;
+    reply->clearTags();
     reply->setName((std::string(request->getName()) + "-reply").c_str());
     reply->setType(ICMP_ECHO_REPLY);
 
@@ -264,6 +267,7 @@ void ICMP::sendToIP(ICMPMessage *msg)
 {
     // assumes IPv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(msg, "ipOut");
 }
 

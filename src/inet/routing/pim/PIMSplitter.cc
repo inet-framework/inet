@@ -18,6 +18,8 @@
 //          Tamas Borbely (tomi@omnetpp.org)
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -66,6 +68,7 @@ void PIMSplitter::handleMessage(cMessage *msg)
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
         // Send other packets to the network layer
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
+        msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
         send(msg, ipOut);
     }
     else

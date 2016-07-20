@@ -18,6 +18,7 @@
 
 #include "inet/applications/generic/IPvXTrafGen.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -193,6 +194,7 @@ void IPvXTrafGen::sendPacket()
     EV_INFO << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
+    payload->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(payload, "ipOut");
     numSent++;
 }

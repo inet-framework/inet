@@ -33,6 +33,7 @@
 #include "inet/transportlayer/tcp/TCPReceiveQueue.h"
 #include "inet/transportlayer/tcp/TCPAlgorithm.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -261,6 +262,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     controlInfo->setSourceAddress(localAddr);
     controlInfo->setDestinationAddress(remoteAddr);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     tcpMain->send(tcpseg, "ipOut");
 }
 
@@ -276,6 +278,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
 }
 

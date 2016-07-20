@@ -22,6 +22,7 @@
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/routing/pim/modes/PIMSM.h"
 
 namespace inet {
@@ -1543,6 +1544,7 @@ void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
     ctrl->setTimeToLive(ttl);
     ctrl->setInterfaceId(outInterfaceId);
     packet->setControlInfo(ctrl);
+    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(packet, "ipOut");
 }
 

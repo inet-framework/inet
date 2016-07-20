@@ -20,6 +20,7 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/flood/Flood.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
@@ -252,6 +253,7 @@ cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
     controlInfo->setProtocol(floodDatagram->getTransportProtocol());
     cPacket *transportPacket = floodDatagram->decapsulate();
     transportPacket->setControlInfo(controlInfo);
+    transportPacket->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     delete floodDatagram;
     return transportPacket;
 }

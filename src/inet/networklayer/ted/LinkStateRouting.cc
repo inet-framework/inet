@@ -17,6 +17,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/ted/LinkStateRouting.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -226,6 +227,7 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 
     msg->addPar("color") = TED_TRAFFIC;
 
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(msg, "ipOut");
 }
 

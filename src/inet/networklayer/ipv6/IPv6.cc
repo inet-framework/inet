@@ -20,6 +20,7 @@
 
 #include "inet/networklayer/ipv6/IPv6.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
@@ -688,6 +689,7 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 
     // attach control info
     packet->setControlInfo(controlInfo);
+    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
 
     return packet;
 }

@@ -21,6 +21,7 @@
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -60,6 +61,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
         emit(sentPkSignal, (cPacket *)msg);
     }
 
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
     send(msg, "socketOut");
 }
 

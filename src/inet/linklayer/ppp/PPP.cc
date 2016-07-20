@@ -23,6 +23,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -367,6 +368,7 @@ cPacket *PPP::decapsulate(PPPFrame *pppFrame)
     cPacket *payload = pppFrame->decapsulate();
     SimpleLinkLayerControlInfo *controlInfo = new SimpleLinkLayerControlInfo();
     payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppFrame->getProtocol()));
     controlInfo->setNetworkProtocol(pppFrame->getProtocol());
     payload->setControlInfo(controlInfo);
     delete pppFrame;

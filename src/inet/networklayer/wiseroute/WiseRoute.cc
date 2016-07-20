@@ -27,6 +27,7 @@
 #include <limits>
 #include <algorithm>
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/wiseroute/WiseRoute.h"
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -329,6 +330,7 @@ cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
     controlInfo->setSourceAddress(msg->getInitialSrcAddr());
     controlInfo->setTransportProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
+    m->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     nbHops = nbHops + msg->getNbHops();
     // delete the netw packet
     delete msg;

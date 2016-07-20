@@ -24,6 +24,7 @@
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/routing/pim/modes/PIMBase.h"
 
 namespace inet {
@@ -177,8 +178,8 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     ctrl->setTimeToLive(1);
     ctrl->setInterfaceId(pimInterface->getInterfaceId());
     msg->setControlInfo(ctrl);
-
     msg->setByteLength(byteLength);
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
 
     emit(sentHelloPkSignal, msg);
 

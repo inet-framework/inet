@@ -20,6 +20,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
@@ -246,8 +247,10 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
     }
     payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
-    if (frameWithSNAP)
+    if (frameWithSNAP) {
         ctrl->setEtherType(frameWithSNAP->getEtherType());
+        payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+    }
     payload->setControlInfo(ctrl);
 
     delete frame;

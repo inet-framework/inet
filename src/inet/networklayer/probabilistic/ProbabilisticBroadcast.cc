@@ -8,6 +8,7 @@
 
 #include <cassert>
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -337,6 +338,7 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
     controlInfo->setSourceAddress(msg->getSrcAddr());
     controlInfo->setProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
+    m->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     delete msg;
     return m;
 }

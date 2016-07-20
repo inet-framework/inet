@@ -19,6 +19,7 @@
 #include "inet/networklayer/generic/GenericNetworkProtocol.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
@@ -392,6 +393,7 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 
     // attach control info
     packet->setControlInfo(controlInfo);
+    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     delete datagram;
 
     return packet;

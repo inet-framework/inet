@@ -28,6 +28,8 @@
 #endif // ifdef WITH_IPv6
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
@@ -932,6 +934,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(tcpseg, "ipOut");
 }
 

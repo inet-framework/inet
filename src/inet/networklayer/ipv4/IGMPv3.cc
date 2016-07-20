@@ -26,6 +26,7 @@
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 
 #include <algorithm>
 #include <bitset>
@@ -660,7 +661,7 @@ void IGMPv3::sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address d
     controlInfo->setTimeToLive(1);
     controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
-
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(msg, "ipOut");
 }
 
@@ -674,7 +675,7 @@ void IGMPv3::sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address des
     controlInfo->setTimeToLive(1);
     controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
-
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(msg, "ipOut");
 }
 

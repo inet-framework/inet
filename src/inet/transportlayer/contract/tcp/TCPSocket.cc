@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
@@ -102,6 +103,7 @@ void TCPSocket::sendToTCP(cMessage *msg)
     if (!gateToTcp)
         throw cRuntimeError("TCPSocket: setOutputGate() must be invoked before socket can be used");
 
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 

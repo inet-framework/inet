@@ -31,6 +31,8 @@
 #endif // ifdef WITH_IPv6
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
@@ -617,6 +619,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(tcpseg, "ipOut");
 }
 

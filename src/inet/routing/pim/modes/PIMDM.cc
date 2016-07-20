@@ -19,6 +19,7 @@
 
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/routing/pim/modes/PIMDM.h"
 
 namespace inet {
@@ -1649,6 +1650,7 @@ void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
     ctrl->setTimeToLive(1);
     ctrl->setInterfaceId(outInterfaceId);
     packet->setControlInfo(ctrl);
+    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(packet, "ipOut");
 }
 

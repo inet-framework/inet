@@ -19,6 +19,7 @@
 
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/routing/ospfv2/router/OSPFRouter.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -361,6 +362,7 @@ void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int
             break;
     }
 
+    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     ospfModule->send(packet, "ipOut");
 }
 

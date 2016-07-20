@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -57,6 +58,8 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         // we close too
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
+        msg->clearTags();
+        msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
         send(msg, "socketOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {

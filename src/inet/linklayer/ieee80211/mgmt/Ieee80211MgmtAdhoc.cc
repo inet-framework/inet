@@ -15,9 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.h"
 
 namespace inet {
 
@@ -79,8 +80,11 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
         ctrl->setUserPriority(tid); // TID values 0..7 are UP
     payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
-    if (frameWithSNAP)
+    if (frameWithSNAP) {
         ctrl->setEtherType(frameWithSNAP->getEtherType());
+        if (frameWithSNAP->getEtherType() != -1)
+            payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+    }
     payload->setControlInfo(ctrl);
 
     delete frame;

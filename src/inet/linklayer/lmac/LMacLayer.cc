@@ -13,6 +13,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/INETMath.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/lmac/LMacFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -636,6 +637,7 @@ cPacket *LMacLayer::decapsulate(LMacFrame *msg)
     SimpleLinkLayerControlInfo *const controlInfo = new SimpleLinkLayerControlInfo();
     controlInfo->setSrc(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
     controlInfo->setNetworkProtocol(msg->getNetworkProtocol());
     packet->setControlInfo(controlInfo);
     EV_DETAIL << " message decapsulated " << endl;

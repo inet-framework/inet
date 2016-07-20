@@ -13,6 +13,7 @@
 //
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/rsvp_te/RSVP.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -1871,6 +1872,7 @@ void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
 
     msg->addPar("color") = RSVP_TRAFFIC;
 
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     send(msg, "ipOut");
 }
 

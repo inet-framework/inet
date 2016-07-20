@@ -18,7 +18,8 @@
 
 #include <algorithm>
 #include <string>
-
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/transportlayer/udp/UDP.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -785,6 +786,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTimeToLive(ttl);
         ipControlInfo->setTypeOfService(tos);
+        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
@@ -801,6 +803,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         ipControlInfo->setTrafficClass(tos);
+        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv6);
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
@@ -818,6 +821,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         //ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         //ipControlInfo->setTrafficClass(tos);
+        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
 
         emit(sentPkSignal, udpPacket);

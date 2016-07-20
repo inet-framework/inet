@@ -18,6 +18,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolTag_m.h"
 
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
@@ -80,6 +81,7 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
         }
         else {
             check_and_cast<IPv6ControlInfo *>(icmpv6msg->getControlInfo())->setTransportProtocol(transportProtocol);
+            icmpv6msg->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
             send(icmpv6msg, "transportOut");
         }
     }

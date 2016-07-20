@@ -19,6 +19,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IGMPv2.h"
@@ -613,6 +614,7 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
     controlInfo->setInterfaceId(ie->getInterfaceId());
     controlInfo->setTimeToLive(1);
     controlInfo->setDestAddr(dest);
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->setControlInfo(controlInfo);
 
     send(msg, "ipOut");

@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "GenericAppMsg_m.h"
 
@@ -85,6 +86,8 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
         EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
+    msg->clearTags();
+    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
     send(msg, "socketOut");
 }
 
