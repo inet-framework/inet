@@ -23,6 +23,7 @@
 #include "inet/networklayer/flood/Flood.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
@@ -103,11 +104,17 @@ void Flood::finish()
  **/
 void Flood::handleUpperPacket(cPacket *m)
 {
+    auto hopLimitReq = m->removeTag<HopLimitReq>();
+    int ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
+    delete hopLimitReq;
+    if (ttl == -1)
+        ttl = defaultTtl;
+
     FloodDatagram *msg = encapsulate(m);
 
     msg->setSeqNum(seqNum);
     seqNum++;
-    msg->setTtl(defaultTtl);
+    msg->setTtl(ttl);
 
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
@@ -258,6 +265,7 @@ cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
     auto addressInd = transportPacket->ensureTag<L3AddressInd>();
     addressInd->setSource(floodDatagram->getSourceAddress());
     addressInd->setDestination(floodDatagram->getDestinationAddress());
+    transportPacket->ensureTag<HopLimitInd>()->setHopLimit(floodDatagram->getTtl());
     delete floodDatagram;
     return transportPacket;
 }
