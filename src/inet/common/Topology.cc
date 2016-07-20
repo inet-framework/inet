@@ -216,7 +216,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
         cModule *mod = getSimulation()->getModule(node->moduleId);
 
         for (cModule::GateIterator i(mod); !i.end(); i++) {
-            cGate *gate = i();
+            cGate *gate = *i;
             if (gate->getType() != cGate::OUTPUT)
                 continue;
 

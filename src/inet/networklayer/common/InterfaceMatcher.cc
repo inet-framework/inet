@@ -170,7 +170,7 @@ void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule *>& 
             if (neighborNode != excludedNode)
                 deviceNodes.push_back(neighborNode);
             for (cModule::GateIterator it(neighborNode); !it.end(); it++) {
-                cGate *gate = it();
+                cGate *gate = *it;
                 if (gate->getType() == cGate::OUTPUT)
                     collectNeighbors(gate, hostNodes, deviceNodes, excludedNode);
             }

@@ -213,7 +213,7 @@ PacketDrillScript::PacketDrillScript(const char *scriptFile)
 PacketDrillScript::~PacketDrillScript()
 {
     for (cQueue::Iterator iter(*eventList); !iter.end(); iter++)
-        delete (PacketDrillEvent *)(iter());
+        delete (PacketDrillEvent *)(*iter);
 }
 
 void PacketDrillScript::readScript()
