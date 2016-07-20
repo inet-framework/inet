@@ -114,7 +114,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
 
     // returns nullptr if not found
     GPSROption *findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram);
-    const GPSROption *findGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram) const { return const_cast<GPSR *>(this)->findGpsrOptionFromNetworkDatagram(datagram); }
+    const GPSROption *findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram) const { return const_cast<GPSR *>(this)->findGpsrOptionInNetworkDatagram(datagram); }
 
     // throws an error when not found
     GPSROption *getGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram);
