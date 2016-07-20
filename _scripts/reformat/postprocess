@@ -1,0 +1,34 @@
+#! /usr/bin/env python
+# This script fixes newlines around namespace blocks in src folder and subdirectories
+#
+
+import re
+import string
+import sys
+import fnmatch
+import os
+
+
+def processFile(filecontent):
+    filecontent = re.sub("^(namespace \w+ {)\n+", "\\1\n\n", filecontent, 0, re.MULTILINE)
+    filecontent = re.sub("\n+(} *// *namespace \w+)$", "\n\n\\1", filecontent, 0, re.MULTILINE)
+    return filecontent
+
+# configuration parameters
+
+filelist = open(sys.argv[1], 'r')
+
+for line in filelist:
+    fullpath = line.rstrip('\n\r')
+    if fullpath.endswith(('.h', '.cc')):
+        print "Postprocess", fullpath
+        f = open(fullpath, 'r')
+        content = f.read()
+        f.close()
+        newContent = processFile(content)
+        if newContent != content:
+            f2 = open(fullpath, 'w')
+            f2.write(newContent)
+            f2.close()
+            print "---Updated", fullpath
+
