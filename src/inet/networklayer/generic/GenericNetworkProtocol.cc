@@ -393,6 +393,7 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 
     // attach control info
     packet->setControlInfo(controlInfo);
+    delete datagram;
 
     return packet;
 }
@@ -469,7 +470,6 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
         // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         delete packet;
     }
-    delete datagram;
 }
 
 void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, L3Address nextHop)
