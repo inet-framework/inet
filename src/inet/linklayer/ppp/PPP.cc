@@ -279,7 +279,6 @@ void PPP::handleMessage(cMessage *msg)
             emit(packetSentToUpperSignal, payload);
             EV_INFO << "Sending " << payload << " to upper layer.\n";
             send(payload, "upperLayerOut");
-            delete pppFrame;
         }
     }
     else {    // arrived on gate "upperLayerIn"
@@ -368,6 +367,7 @@ cPacket *PPP::decapsulate(PPPFrame *pppFrame)
     controlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     controlInfo->setNetworkProtocol(pppFrame->getProtocol());
     payload->setControlInfo(controlInfo);
+    delete pppFrame;
     return payload;
 }
 
