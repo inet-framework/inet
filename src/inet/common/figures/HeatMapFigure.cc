@@ -19,7 +19,6 @@
 
 namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
 HeatMapFigure::HeatMapFigure(int size, const char *name) :
     cPixmapFigure(name)
 {
@@ -91,7 +90,6 @@ void HeatMapFigure::coolDown()
                 setHeat(x, y, getHeat(x, y) * factor);
     }
 }
-#endif
 
 } // namespace inet
 

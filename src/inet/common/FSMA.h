@@ -159,11 +159,6 @@ namespace inet {
         throw cRuntimeError(&___fsm, "Unhandled event"); \
     }
 
-
-#if OMNETPP_VERSION < 0x500
-#define E_INFLOOP    eINFLOOP
-#endif // if OMNETPP_VERSION < 0x500
-
 } // namespace inet
 
 #endif // ifndef __INET_FSMA_H

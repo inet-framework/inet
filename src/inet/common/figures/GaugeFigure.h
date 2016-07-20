@@ -23,8 +23,6 @@
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API GaugeFigure : public cOvalFigure, protected cListener, protected cISimulationLifecycleListener
 {
     cPathFigure *needle;
@@ -60,15 +58,6 @@ class INET_API GaugeFigure : public cOvalFigure, protected cListener, protected 
 
     virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) override;
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API GaugeFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

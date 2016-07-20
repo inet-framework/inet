@@ -30,18 +30,14 @@
 
 using namespace omnetpp;
 
-#if OMNETPP_VERSION < 0x0406
-#  error At least OMNeT++/OMNEST version 4.6 required
-#endif // if OMNETPP_VERSION < 0x0406
+#if OMNETPP_VERSION < 0x0500
+#  error At least OMNeT++/OMNEST version 5.0 required
+#endif // if OMNETPP_VERSION < 0x0500
 
 // OMNETPP_BUILDNUM was introduced around OMNeT++ 5.0beta2, with the initial value of 1001.
 // The following lines fake a build number for earlier versions.
 #ifndef OMNETPP_BUILDNUM
-#  if OMNETPP_VERSION < 0x0500
-#    define OMNETPP_BUILDNUM 0
-#  else
-#    define OMNETPP_BUILDNUM 1000
-#  endif
+#  define OMNETPP_BUILDNUM 1000
 #endif
 
 #define INET_VERSION  0x0302

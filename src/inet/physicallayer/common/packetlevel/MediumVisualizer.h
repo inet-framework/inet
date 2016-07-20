@@ -57,12 +57,10 @@ class INET_API MediumVisualizer : public cSimpleModule
      */
     bool leaveCommunicationTrail;
 
-#if OMNETPP_VERSION >= 0x500
     /**
      * Specifies whether successful communication between radios leave a heat map or not.
      */
     bool leaveCommunicationHeat;
-#endif
 
     /**
      * Specifies the size of the communication heat map.
@@ -101,12 +99,10 @@ class INET_API MediumVisualizer : public cSimpleModule
      */
     TrailFigure *communicationTrail;
 
-#if OMNETPP_VERSION >= 0x500
     /**
      * The heat map figure that shows the recent successful communications.
      */
     HeatMapFigure *communicationHeat;
-#endif
     //@}
 
   protected:

@@ -489,11 +489,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
 {
     std::vector<L3Address> result;
 
-#if OMNETPP_VERSION < 0x500
-    int lastId = getSimulation()->getLastModuleId();
-#else // if OMNETPP_VERSION < 0x500
     int lastId = getSimulation()->getLastComponentId();
-#endif // if OMNETPP_VERSION < 0x500
 
     for (int i = 0; i <= lastId; i++)
     {

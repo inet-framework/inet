@@ -459,11 +459,7 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
 
 void TCP_lwIP::updateDisplayString()
 {
-#if OMNETPP_VERSION < 0x0500
-    if (getEnvir()->isDisabled()) {
-#else
     if (getEnvir()->isExpressMode()) {
-#endif
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
         getDisplayString().setTagArg("t", 0, "");

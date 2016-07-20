@@ -25,8 +25,6 @@ using namespace inet;
 
 Register_Class(GaugeFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 #define M_PI 3.14159265358979323846
 
 static const double START_ANGLE = -M_PI/2;
@@ -247,7 +245,5 @@ void GaugeFigure::lifecycleEvent(SimulationLifecycleEventType eventType, cObject
         module->subscribe(signalName, this);
     }
 }
-
-#endif // omnetpp 5
 
 // } // namespace inet

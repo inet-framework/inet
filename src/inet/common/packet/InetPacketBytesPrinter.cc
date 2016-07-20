@@ -19,8 +19,6 @@
 
 namespace inet {
 
-#if OMNETPP_VERSION >= 0x0405
-
 class INET_API InetPacketBytesPrinter : public cMessagePrinter
 {
   protected:
@@ -59,8 +57,6 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
     }
     os << outs;
 }
-
-#endif    // Register_MessagePrinter
 
 } // namespace inet
 

@@ -103,11 +103,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
     } else {
         if (msg->getArrivalGate()->isName("tunIn")) {
             if (outboundPackets->getLength() == 0) {
-#if OMNETPP_VERSION < 0x500
-                cMessage *nextMsg = getSimulation()->getScheduler()->getNextEvent();
-#else
                 cEvent *nextMsg = getSimulation()->getScheduler()->guessNextEvent();
-#endif
                 if (nextMsg) {
                     if ((simTime() + par("latency")) < nextMsg->getArrivalTime()) {
                         delete (PacketDrillInfo *)msg->getContextPointer();
