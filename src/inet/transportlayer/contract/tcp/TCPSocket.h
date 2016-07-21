@@ -201,7 +201,7 @@ class INET_API TCPSocket
      * CONNECTED, etc. Messages received from TCP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState() { return sockstate; }
+    int getState() const { return sockstate; }
 
     /**
      * Returns name of socket state code returned by getState().
