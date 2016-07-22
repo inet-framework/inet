@@ -26,14 +26,12 @@ import inet.applications.contract.IApp;
 // and launches a new "thread" object for each incoming connection.
 //
 // Server threads should be subclassed from the TCPServerThreadBase
-// C++ class, registered in the C++ code using the Register_Class() macro,
-// and the class name should be specified in the serverThreadClass
+// C++ class, registered in the C++ code using the Define_Module() macro,
+// and the module type should be specified in the serverThreadModuleType
 // parameter of ~TCPSrvHostApp. The thread object will receive events
 // via a callback interface (methods like established(), dataArrived(),
 // peerClosed(), timerExpired()), and can send packets via TCPSocket's send()
 // method.
-//
-// Example server thread class: TCPGenericSrvThread (in the C++ documentation only).
 //
 // IMPORTANT: Before you try to use this module, make sure you actually need it!
 // In most cases, ~TCPGenericSrvApp and ~GenericAppMsg will be completely
@@ -74,7 +72,7 @@ simple TCPSrvHostApp like IApp
     parameters:
         string localAddress = default(""); // may be left empty ("")
         int localPort = default(1000); // port number to listen on
-        string serverThreadClass; // class name of "thread" objects to launch on incoming connections
+        string serverThreadModuleType; // module type of "thread" module to launch on incoming connections
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/app");
     gates:

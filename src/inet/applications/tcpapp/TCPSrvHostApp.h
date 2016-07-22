@@ -67,7 +67,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
  *
  * @see TCPSrvHostApp
  */
-class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackInterface
+class INET_API TCPServerThreadBase : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSrvHostApp *hostmod;
@@ -98,17 +98,6 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
      * Returns pointer to the host module
      */
     virtual TCPSrvHostApp *getHostModule() { return hostmod; }
-
-    /**
-     * Schedule an event. Do not use getContextPointer() of cMessage, because
-     * TCPServerThreadBase uses it for its own purposes.
-     */
-    virtual void scheduleAt(simtime_t t, cMessage *msg) { msg->setContextPointer(this); hostmod->scheduleAt(t, msg); }
-
-    /*
-     *  Cancel an event
-     */
-    virtual void cancelEvent(cMessage *msg) { hostmod->cancelEvent(msg); }
 
     /**
      * Called when connection is established. To be redefined.

@@ -18,6 +18,7 @@
 #include "inet/applications/tcpapp/TCPAppBase.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
 

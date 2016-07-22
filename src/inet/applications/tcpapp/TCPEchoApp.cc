@@ -26,7 +26,7 @@ namespace inet {
 
 Define_Module(TCPEchoApp);
 
-Register_Class(TCPEchoAppThread);
+Define_Module(TCPEchoAppThread);
 
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
