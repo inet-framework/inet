@@ -75,6 +75,8 @@ simple BMacLayer extends MACProtocolBase like IMACProtocol
 
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
+        int maxTxAttempts = default(2);     //  Maximum transmission attempts per data packet, when ACKs are used
+
         @class(BMacLayer);
         @signal[NF_LINK_BREAK](type=BMacFrame);
 }
