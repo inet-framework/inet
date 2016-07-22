@@ -81,6 +81,8 @@ class INET_API TCPServerThreadBase : public cSimpleModule, public TCPSocket::Cal
     virtual void socketFailure(int, void *, int code) override { failure(code); }
     virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) override { statusArrived(status); }
 
+    virtual void refreshDisplay() const override;
+
   public:
 
     TCPServerThreadBase() { sock = nullptr; hostmod = nullptr; }

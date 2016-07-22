@@ -149,5 +149,11 @@ bool TCPSrvHostApp::handleOperationStage(LifecycleOperation *operation, int stag
     return true;
 }
 
+void TCPServerThreadBase::refreshDisplay() const
+{
+    getDisplayString().setTagArg("t", 0, TCPSocket::stateName(sock->getState()));
+}
+
+
 } // namespace inet
 
