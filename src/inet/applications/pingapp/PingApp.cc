@@ -54,7 +54,7 @@ Define_Module(PingApp);
 
 simsignal_t PingApp::rttSignal = registerSignal("rtt");
 simsignal_t PingApp::numLostSignal = registerSignal("numLost");
-simsignal_t PingApp::outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+simsignal_t PingApp::numOutOfOrderArrivalsSignal = registerSignal("numOutOfOrderArrivals");
 simsignal_t PingApp::pingTxSeqSignal = registerSignal("pingTxSeq");
 simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 
@@ -480,7 +480,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
         EV_DETAIL << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
         lossCount--;
-        emit(outOfOrderArrivalsSignal, outOfOrderArrivalCount);
+        emit(numOutOfOrderArrivalsSignal, outOfOrderArrivalCount);
         emit(numLostSignal, lossCount);
     }
 }
