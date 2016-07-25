@@ -25,6 +25,10 @@ namespace omnetpp { }  // so "using namespace omnetpp" in INETDefs.h doesn't cau
 
 namespace inet {
 
+#if OMNETPP_VERSION < 0x501
+#define cResultFilterType cResultFilterDescriptor
+#endif
+
 #if OMNETPP_VERSION >= 0x500
     typedef uint64_t uint64;
     typedef int64_t  int64;

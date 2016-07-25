@@ -53,7 +53,7 @@ void DelegateSignalConfigurator::configureDisplaySignal(cModule *module, cProper
         // instantiate filter
         cResultFilter *filter = nullptr;
         if (const char *filterName = property->getValue("filter")) {
-            filter = cResultFilterDescriptor::get(filterName)->create();
+            filter = cResultFilterType::get(filterName)->create();
         }
 
         // find figure
