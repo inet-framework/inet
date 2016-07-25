@@ -76,7 +76,7 @@ simple PingApp like IPingApp
         @display("i=block/app");
         @signal[rtt](type=simtime_t);
         @signal[numLost](type=long);
-        @signal[outOfOrderArrivals](type=long);
+        @signal[numOutOfOrderArrivals](type=long);
         @signal[pingTxSeq](type=long);
         @signal[pingRxSeq](type=long);
         @statistic[rtt](title="ping round-trip time"; unit=s; record=histogram,vector; interpolationmode=none);

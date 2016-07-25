@@ -70,7 +70,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     cStdDev rttStat;
     static simsignal_t rttSignal;
     static simsignal_t numLostSignal;
-    static simsignal_t outOfOrderArrivalsSignal;
+    static simsignal_t numOutOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
     long sentCount = 0;    // number of sent Ping requests
