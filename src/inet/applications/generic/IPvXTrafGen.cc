@@ -189,7 +189,7 @@ void IPvXTrafGen::sendPacket()
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     //controlInfo->setSourceAddress();
     payload->setControlInfo(check_and_cast<cObject *>(controlInfo));
-    payload->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
+    payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
     payload->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     payload->ensureTag<L3AddressReq>()->setDestination(destAddr);
 
@@ -207,7 +207,7 @@ void IPvXTrafGen::printPacket(cPacket *msg)
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
     if (ctrl != nullptr) {
-        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<ProtocolTag>()->getProtocol());
+        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol());
     }
     L3AddressTag *addresses = msg->getTag<L3AddressReq>();
     if (addresses == nullptr)

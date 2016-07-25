@@ -70,7 +70,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     auto addressInd = reply->removeMandatoryTag<L3AddressInd>();
     reply->clearTags();
     reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
-    reply->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setSource(addressInd->getDestination());
     addressReq->setDestination(addressInd->getSource());

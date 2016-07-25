@@ -416,7 +416,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 
         // get rid of the encapsulation of the IPv6 module
         cMessage *packet = dgram->decapsulate();
-        packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(dgram->getTransportProtocol()));
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(dgram->getTransportProtocol()));
         delete dgram;
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
@@ -468,7 +468,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
 
     dgram->setControlInfo(controlInfo);
-    dgram->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv6);
+    dgram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto addresses = dgram->ensureTag<L3AddressInd>();
     addresses->setSource(tunnels[vIfIndex].entry);
     addresses->setDestination(tunnels[vIfIndex].exit);

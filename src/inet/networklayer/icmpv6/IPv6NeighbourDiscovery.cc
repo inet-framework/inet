@@ -760,7 +760,7 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
     msg->setControlInfo(controlInfo);
     msg->removeTag<DispatchProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = msg->ensureTag<L3AddressReq>();
     addressReq->setSource(srcAddr);
     addressReq->setDestination(destAddr);
@@ -1178,7 +1178,7 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs,
     }
 
     //- ICMP Code is 0.
-    if (rs->getMandatoryTag<ProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
+    if (rs->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
         EV_WARN << "ICMP Code is not 0! RS validation failed!\n";
         result = false;
     }
@@ -1801,7 +1801,7 @@ bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra,
     }
 
     //- ICMP Code is 0.
-    if (ra->getMandatoryTag<ProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
+    if (ra->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
         EV_WARN << "ICMP Code is not 0! RA validation failed!\n";
         result = false;
     }

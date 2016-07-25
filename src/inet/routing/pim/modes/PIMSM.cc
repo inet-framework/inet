@@ -1542,7 +1542,7 @@ void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
 {
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     packet->setControlInfo(ctrl);
-    packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::pim);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
@@ -1569,7 +1569,7 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
     // set control info
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     data->setControlInfo(ctrl);
-    data->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    data->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     data->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     // XXX data->ensureTag<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
     data->ensureTag<L3AddressReq>()->setDestination(datagram->getDestAddress());

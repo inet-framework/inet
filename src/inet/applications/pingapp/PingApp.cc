@@ -369,7 +369,7 @@ void PingApp::sendPingRequest()
             request->setType(ICMP_ECHO_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
-            request->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
+            request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without IPv4");
@@ -383,7 +383,7 @@ void PingApp::sendPingRequest()
             request->setType(ICMPv6_ECHO_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
-            request->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
+            request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
             throw cRuntimeError("INET compiled without IPv6");
@@ -398,7 +398,7 @@ void PingApp::sendPingRequest()
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
-            request->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
+            request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without Generic Network");

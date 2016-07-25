@@ -94,7 +94,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
                 message->setControlInfo(controlInfo);
                 message->clearTags();
                 message->ensureTag<L3AddressReq>()->setDestination(L3AddressResolver().resolve(destinationAddress));
-                message->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv4);
+                message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
                 l3Socket.send(PK(message));
             }
             else if (protocol == &Protocol::udp) {

@@ -88,7 +88,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
 
     if (ctrl != nullptr) {
-        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<ProtocolTag>()->getProtocol());
+        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol());
     }
     L3AddressTag *addresses = msg->getTag<L3AddressReq>();
     if (addresses == nullptr)

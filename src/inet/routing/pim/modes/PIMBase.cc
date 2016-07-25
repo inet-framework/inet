@@ -179,7 +179,7 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     msg->setControlInfo(ctrl);
     msg->setByteLength(byteLength);
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::pim);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);

@@ -118,7 +118,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         // yes, this may happen - if we'are both ingress and egress
         ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
         delete mplsPacket;
-        ipdatagram->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv4);
+        ipdatagram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         ipdatagram->removeTag<DispatchProtocolReq>();         // send to NIC
         ipdatagram->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(ipdatagram);
@@ -127,7 +127,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
         cObject *ctrl = ipdatagram->removeControlInfo();
         if (ctrl)
             mplsPacket->setControlInfo(ctrl);
-        mplsPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::mpls);
+        mplsPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
         mplsPacket->removeTag<DispatchProtocolReq>();         // send to NIC
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
         sendToL2(mplsPacket);
@@ -251,7 +251,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         //ASSERT(labelIf[outgoingPort]);
         mplsPacket->removeTag<DispatchProtocolReq>();         // send to NIC
         mplsPacket->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-        mplsPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::mpls);
+        mplsPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
         sendToL2(mplsPacket);
     }
     else {
@@ -268,7 +268,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         if (outgoingInterface) {
             nativeIP->removeTag<DispatchProtocolReq>();         // send to NIC
             nativeIP->ensureTag<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-            nativeIP->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
+            nativeIP->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4); // TODO: this ipv4 protocol is a lie somewhat, because this is the mpls protocol
             sendToL2(nativeIP);
         }
         else {
@@ -280,7 +280,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 void MPLS::sendToL2(cMessage *msg)
 {
     ASSERT(msg->getTag<InterfaceReq>());
-    ASSERT(msg->getTag<ProtocolTag>());
+    ASSERT(msg->getTag<PacketProtocolTag>());
     send(msg, "ifOut");
 }
 

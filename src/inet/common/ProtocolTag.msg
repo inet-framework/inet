@@ -43,7 +43,7 @@ class DispatchProtocolInd extends ProtocolTagBase
 //
 // This tag specifies the protocol of the packet.
 //
-class ProtocolTag extends ProtocolTagBase
+class PacketProtocolTag extends ProtocolTagBase
 {
 }
 

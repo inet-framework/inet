@@ -418,7 +418,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     L3Address dest = l3AddressReq->getDestination();
     delete l3AddressReq;
 
-    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
+    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;

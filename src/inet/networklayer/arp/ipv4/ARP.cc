@@ -213,7 +213,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
     msg->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     msg->removeTag<DispatchProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::arp);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
     msg->setControlInfo(controlInfo);
 
     // send out

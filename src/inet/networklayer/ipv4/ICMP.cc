@@ -267,7 +267,7 @@ void ICMP::sendToIP(ICMPMessage *msg)
     // assumes IPv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
     send(msg, "ipOut");
 }
 

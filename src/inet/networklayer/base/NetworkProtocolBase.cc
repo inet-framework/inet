@@ -53,7 +53,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
     if (cPacket *packet = dynamic_cast<cPacket *>(message)) {
         INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(packet->getControlInfo());
 
-        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<ProtocolTag>()->getProtocol());
+        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol());
         auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;

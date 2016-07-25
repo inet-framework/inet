@@ -792,7 +792,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTypeOfService(tos);
         udpPacket->setControlInfo(ipControlInfo);
-        udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
@@ -810,7 +810,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(ipControlInfo);
-        udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
@@ -830,7 +830,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         //ipControlInfo->setMulticastLoop(multicastLoop);
         //ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
-        udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();

@@ -240,7 +240,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
     pkt->setInitialSrcAddr(myNetwAddr);
     pkt->setSrcAddr(myNetwAddr);
     pkt->setNbHops(0);
-    pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<ProtocolTag>()->getProtocol()));
+    pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     delete cInfo;
 
     if (finalDestAddr.isBroadcast())
@@ -332,7 +332,7 @@ cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
     GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
     m->setControlInfo(controlInfo);
     m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
-    m->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    m->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<L3AddressInd>()->setSource(msg->getInitialSrcAddr());
     nbHops = nbHops + msg->getNbHops();
     // delete the netw packet

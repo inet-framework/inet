@@ -1655,7 +1655,7 @@ void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
 {
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     packet->setControlInfo(ctrl);
-    packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::pim);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);

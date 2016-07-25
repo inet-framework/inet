@@ -658,7 +658,7 @@ LMacFrame *LMacLayer::encapsulate(cPacket *netwPkt)
     auto dest = netwPkt->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
     pkt->setDestAddr(dest);
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<ProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     //delete the control info
     delete netwPkt->removeControlInfo();

@@ -618,7 +618,7 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
     controlInfo->setOrigDatagram(datagram);
 
     packet->setControlInfo(controlInfo);
-    packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSrcAddress());
@@ -719,7 +719,7 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     IPv4Address dest = l3AddressReq->getDestination().toIPv4();
     delete l3AddressReq;
 
-    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
+    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
@@ -875,7 +875,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
 void IPv4::sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie)
 {
     EV_INFO << "Sending " << packet << " to output interface = " << ie->getName() << ".\n";
-    packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv4);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<NetworkProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

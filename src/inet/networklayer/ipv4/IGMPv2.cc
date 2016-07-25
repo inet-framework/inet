@@ -615,7 +615,7 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     msg->setControlInfo(controlInfo);
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

@@ -692,7 +692,7 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     // attach control info
     packet->setControlInfo(controlInfo);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
     packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
@@ -737,7 +737,7 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     datagram->setTrafficClass(controlInfo->getTrafficClass());
     datagram->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(datagram->getHopLimit() > 0);
-    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
+    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
     while (0 < controlInfo->getExtensionHeaderArraySize()) {
@@ -841,7 +841,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
     datagram->removeTag<DispatchProtocolReq>();         // send to NIC
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
-    datagram->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv6);
+    datagram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     datagram->ensureTag<NetworkProtocolTag>()->setProtocol(&Protocol::ipv6);
     datagram->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     datagram->setControlInfo(controlInfo);

@@ -1869,7 +1869,7 @@ void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     msg->setControlInfo(controlInfo);
     msg->addPar("color") = RSVP_TRAFFIC;
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::rsvp);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::rsvp);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::rsvp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<L3AddressReq>()->setDestination(destAddr);

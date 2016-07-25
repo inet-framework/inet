@@ -146,7 +146,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
-    reply->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setDestination(addressInd->getSource());
 
@@ -216,7 +216,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     if (origDatagram->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
-        errorMsg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
+        errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
         errorMsg->setControlInfo(ctrlInfo);
         errorMsg->ensureTag<L3AddressInd>()->setSource(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
@@ -245,7 +245,7 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
     IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
     msg->setControlInfo(ctrlInfo);
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
 
     send(msg, "ipv6Out");
 }

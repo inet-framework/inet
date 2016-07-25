@@ -224,7 +224,7 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 
     msg->addPar("color") = TED_TRAFFIC;
 
-    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ospf);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ospf);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<L3AddressReq>()->setDestination(destAddr);

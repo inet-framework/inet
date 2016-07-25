@@ -232,7 +232,7 @@ void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     INetworkProtocolControlInfo *networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
     UDPPacket *udpPacket = new UDPPacket(beacon->getName());
-    udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->encapsulate(beacon);
     udpPacket->setSourcePort(GPSR_UDP_PORT);
     udpPacket->setDestinationPort(GPSR_UDP_PORT);
