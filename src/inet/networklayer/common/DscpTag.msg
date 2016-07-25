@@ -1,0 +1,35 @@
+//
+// This program is property of its copyright holder. All rights reserved.
+//
+
+cplusplus{{
+#include "inet/common/TagBase_m.h"
+}}
+
+namespace inet;
+
+class TagBase extends cObject;
+
+//
+// This is an abstract base class that should not be directly added as a tag.
+//
+class DscpTagBase extends TagBase
+{
+    int differentiatedServicesCodePoint = -1; // differentiated services code point
+}
+
+//
+// This request determines the differentiated services code point that should be used to transmit the packet.
+// It may be present on a packet from the application to the network protocol.
+//
+class DscpReq extends DscpTagBase
+{
+}
+
+//
+// This indication specifies the differentiated services code point that was used to receive the packet.
+// It may be present on a packet from the network protocol to the application.
+//
+class DscpInd extends DscpTagBase
+{
+}
