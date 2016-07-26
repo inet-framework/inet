@@ -18,6 +18,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/ipv6/IPv6.h"
 
@@ -686,6 +687,7 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(datagram->getDiffServCodePoint());
+    packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(datagram->getExplicitCongestionNotification());
 
     // original IP datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
@@ -738,6 +740,10 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     auto dscpReq = transportPacket->getTag<DscpReq>();
     if (dscpReq != nullptr)
         datagram->setDiffServCodePoint(transportPacket->getTag<DscpReq>()->getDifferentiatedServicesCodePoint());
+    auto ecnReq = transportPacket->getTag<EcnReq>();
+    if (ecnReq != nullptr)
+        datagram->setExplicitCongestionNotification(ecnReq->getExplicitCongestionNotification());
+
     datagram->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(datagram->getHopLimit() > 0);
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
