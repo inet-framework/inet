@@ -29,7 +29,6 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/common/ProtocolMap.h"
 
@@ -134,7 +133,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual GenericDatagram *encapsulate(cPacket *transportPacket, const InterfaceEntry *& destIE);
 
     /**
-     * Decapsulate and return encapsulated packet after attaching GenericNetworkProtocolControlInfo.
+     * Decapsulate and return encapsulated packet.
      */
     virtual cPacket *decapsulate(GenericDatagram *datagram);
 

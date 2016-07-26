@@ -15,7 +15,7 @@
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
+
 namespace inet {
 
 using std::make_pair;
@@ -334,8 +334,7 @@ void ProbabilisticBroadcast::insertNewMessage(ProbabilisticBroadcastDatagram *pk
 cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg)
 {
     cPacket *m = msg->decapsulate();
-    GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
-    m->setControlInfo(controlInfo);
+    m->setControlInfo(new cObject());
     m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<L3AddressInd>()->setSource(msg->getSrcAddr());

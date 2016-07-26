@@ -26,7 +26,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
@@ -257,9 +256,8 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
  **/
 cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
 {
-    GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
     cPacket *transportPacket = floodDatagram->decapsulate();
-    transportPacket->setControlInfo(controlInfo);
+    transportPacket->setControlInfo(new cObject());
     transportPacket->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     auto addressInd = transportPacket->ensureTag<L3AddressInd>();

@@ -21,7 +21,6 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -40,7 +39,7 @@ class INET_API MACAddressType : public IL3AddressType
     virtual L3Address getBroadcastAddress() const override { return MACAddress::BROADCAST_ADDRESS; }
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return MACAddress(-109); }    // TODO: constant
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return MACAddress(-9); }    // TODO: constant
-    virtual cObject *createNetworkProtocolControlInfo() const override { return new GenericNetworkProtocolControlInfo(); }
+    virtual cObject *createNetworkProtocolControlInfo() const override { return new cObject(); }
     virtual const Protocol *getNetworkProtocol() const override { throw cRuntimeError("address is MACAddress, unknown L3 protocol"); }
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return MACAddress::UNSPECIFIED_ADDRESS; }
 };

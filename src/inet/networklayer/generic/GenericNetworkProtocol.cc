@@ -27,7 +27,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #include "inet/networklayer/generic/GenericRoute.h"
@@ -390,14 +389,13 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
-    GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
     if (fromIE) {
         auto ifTag = packet->ensureTag<InterfaceInd>();
         ifTag->setInterfaceId(fromIE->getInterfaceId());
     }
 
     // attach control info
-    packet->setControlInfo(controlInfo);
+    packet->setControlInfo(new cObject());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSourceAddress());
@@ -410,7 +408,6 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 
 GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, const InterfaceEntry *& destIE)
 {
-    GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo *>(transportPacket->removeControlInfo());
     GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
 //    datagram->setByteLength(HEADER_BYTES); //TODO parameter
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
@@ -457,7 +454,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
 
     // setting GenericNetworkProtocol options is currently not supported
 
-    delete controlInfo;
+    delete transportPacket->removeControlInfo();
     return datagram;
 }
 
@@ -469,11 +466,9 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
-    GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
-        GenericNetworkProtocolControlInfo *controlInfoCopy = controlInfo->dup();
         cPacket *packetCopy = packet->dup();
-        packetCopy->setControlInfo(controlInfoCopy);
+        packetCopy->setControlInfo(new cObject());
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }

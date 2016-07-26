@@ -26,6 +26,6 @@ simple EchoProtocol
     parameters:
         @display("i=block/control");
     gates:
-        input ipIn @labels(GenericNetworkProtocolControlInfo/up);
-        output ipOut @labels(GenericNetworkProtocolControlInfo/down);  // towards network
+        input ipIn;
+        output ipOut;
 }

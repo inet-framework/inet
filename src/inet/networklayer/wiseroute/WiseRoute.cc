@@ -38,7 +38,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/FindModule.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -329,8 +328,7 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
 {
     cMessage *m = msg->decapsulate();
-    GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
-    m->setControlInfo(controlInfo);
+    m->setControlInfo(new cObject());
     m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<L3AddressInd>()->setSource(msg->getInitialSrcAddr());

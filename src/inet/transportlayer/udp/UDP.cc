@@ -33,7 +33,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
@@ -362,7 +361,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = destAddr.toIPv6().isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
-    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != nullptr) {
+    else if (ctrl != nullptr) {
         tos = 0;    // TODO: ctrl->getTrafficClass();
         isMulticast = destAddr.isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
@@ -520,7 +519,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
         delete ctrl;
 #endif // ifdef WITH_IPv6
     }
-    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != nullptr) {
+    else if (ctrl != nullptr) {
         delete udpPacket;
         delete ctrl;
     }
