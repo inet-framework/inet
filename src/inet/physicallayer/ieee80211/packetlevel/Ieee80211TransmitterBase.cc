@@ -83,14 +83,6 @@ const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(con
         return channel;
 }
 
-W Ieee80211TransmitterBase::computeTransmissionPower(const TransmissionRequest *transmissionRequest) const
-{
-    if (transmissionRequest != nullptr && !std::isnan(transmissionRequest->getPower().get()))
-        return transmissionRequest->getPower();
-    else
-        return power;
-}
-
 void Ieee80211TransmitterBase::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     if (this->modeSet != modeSet) {

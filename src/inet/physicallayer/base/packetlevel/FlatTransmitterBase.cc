@@ -16,6 +16,7 @@
 //
 
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -49,6 +50,12 @@ std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level
                << ", bitrate = " << bitrate
                << ", power = " << power;
     return NarrowbandTransmitterBase::printToStream(stream, level);
+}
+
+W FlatTransmitterBase::computeTransmissionPower(const cPacket *macFrame) const
+{
+    auto signalPowerReq = const_cast<cPacket *>(macFrame)->getTag<SignalPowerReq>();
+    return signalPowerReq != nullptr ? signalPowerReq->getPower() : power;
 }
 
 } // namespace physicallayer

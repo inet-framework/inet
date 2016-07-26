@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmitter.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKDimensionalTransmitter.h"
 
 namespace inet {
 
@@ -47,7 +47,7 @@ std::ostream& APSKDimensionalTransmitter::printToStream(std::ostream& stream, in
 const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
     TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
-    W transmissionPower = controlInfo && !std::isnan(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
+    W transmissionPower = computeTransmissionPower(macFrame);
     bps transmissionBitrate = controlInfo && !std::isnan(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
     const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();

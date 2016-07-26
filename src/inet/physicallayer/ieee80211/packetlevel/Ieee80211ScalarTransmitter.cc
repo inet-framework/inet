@@ -43,7 +43,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(transmissionRequest);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(transmissionRequest);
-    W transmissionPower = computeTransmissionPower(transmissionRequest);
+    W transmissionPower = computeTransmissionPower(macFrame);
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
