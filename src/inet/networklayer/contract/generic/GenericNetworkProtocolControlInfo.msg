@@ -17,7 +17,6 @@
 
 cplusplus {{
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 }}
 
 namespace inet;
@@ -29,6 +28,5 @@ enum IPProtocolId;
 //
 class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 {
-    @implements(INetworkProtocolControlInfo);
 }
 

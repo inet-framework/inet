@@ -29,7 +29,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 
@@ -418,7 +417,6 @@ void DYMO::processUDPPacket(UDPPacket *packet)
 
 void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay)
 {
-    INetworkProtocolControlInfo *networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
@@ -427,7 +425,7 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.
     udpPacket->setSourcePort(DYMO_UDP_PORT);
     udpPacket->setDestinationPort(DYMO_UDP_PORT);
-    udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
+    udpPacket->setControlInfo(addressType->createNetworkProtocolControlInfo());
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     if (interfaceEntry)
         udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
@@ -460,7 +458,7 @@ bool DYMO::permissibleRteMsg(RteMsg *rteMsg)
     // 7.5. Handling a Received RteMsg
     AddressBlock& originatorNode = rteMsg->getOriginatorNode();
     AddressBlock& targetNode = rteMsg->getTargetNode();
-    INetworkProtocolControlInfo *networkProtocolControlInfo = check_and_cast<INetworkProtocolControlInfo *>(rteMsg->getControlInfo());
+    auto networkProtocolControlInfo = rteMsg->getControlInfo();
     // 1. HandlingRtr MUST handle AODVv2 messages only from adjacent
     //    routers as specified in Section 5.4. AODVv2 messages from other
     //    sources MUST be disregarded.
@@ -954,7 +952,7 @@ void DYMO::processRERR(RERR *rerrIncoming)
     if (rerrIncoming->getHopLimit() == 0 || rerrIncoming->getUnreachableNodeArraySize() == 0)
         return;
     else {
-        INetworkProtocolControlInfo *networkProtocolControlInfo = check_and_cast<INetworkProtocolControlInfo *>(rerrIncoming->getControlInfo());
+        auto networkProtocolControlInfo = rerrIncoming->getControlInfo();
         L3Address srcAddr = rerrIncoming->getMandatoryTag<L3AddressInd>()->getSource();
         auto incomingIfTag = rerrIncoming->getMandatoryTag<InterfaceInd>();
         // Otherwise, for each UnreachableNode.Address, HandlingRtr searches its
@@ -1139,7 +1137,7 @@ IRoute *DYMO::createRoute(RteMsg *rteMsg, AddressBlock& addressBlock)
 void DYMO::updateRoute(RteMsg *rteMsg, AddressBlock& addressBlock, IRoute *route)
 {
     // 6.2. Applying Route Updates To Route Table Entries
-    INetworkProtocolControlInfo *networkProtocolControlInfo = check_and_cast<INetworkProtocolControlInfo *>(rteMsg->getControlInfo());
+    auto networkProtocolControlInfo = rteMsg->getControlInfo();
     DYMORouteData *routeData = check_and_cast<DYMORouteData *>(route->getProtocolData());
     // Route.Address := RteMsg.Addr
     const L3Address& address = addressBlock.getAddress();
@@ -1470,7 +1468,7 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj 
             INetworkDatagram *datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
             if (datagram) {
                 // TODO: get nexthop and interface from the packet
-                // INetworkProtocolControlInfo * networkProtocolControlInfo = dynamic_cast<INetworkProtocolControlInfo *>(datagram->getControlInfo());
+                // auto networkProtocolControlInfo = datagram->getControlInfo();
                 const L3Address& destination = datagram->getDestinationAddress();
                 if (destination.getAddressType() == addressType) {
                     IRoute *route = routingTable->findBestMatchingRoute(destination);

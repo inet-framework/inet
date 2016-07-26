@@ -363,8 +363,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
     else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != nullptr) {
-        GenericNetworkProtocolControlInfo *ctrlGeneric = (GenericNetworkProtocolControlInfo *)ctrl;
-        tos = 0;    // TODO: ctrlGeneric->getTrafficClass();
+        tos = 0;    // TODO: ctrl->getTrafficClass();
         isMulticast = destAddr.isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
@@ -826,10 +825,9 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         // send to generic
         EV_INFO << "Sending app packet " << appData->getName() << endl;
         IL3AddressType *addressType = destAddr.getAddressType();
-        INetworkProtocolControlInfo *ipControlInfo = addressType->createNetworkProtocolControlInfo();
         //ipControlInfo->setMulticastLoop(multicastLoop);
         //ipControlInfo->setTrafficClass(tos);
-        udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
+        udpPacket->setControlInfo(addressType->createNetworkProtocolControlInfo());
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);

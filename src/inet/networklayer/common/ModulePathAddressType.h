@@ -40,7 +40,7 @@ class INET_API ModulePathAddressType : public IL3AddressType
     virtual L3Address getBroadcastAddress() const override { return ModulePathAddress(-1); }
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return ModulePathAddress(-109); }    // TODO: constant
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ModulePathAddress(-9); }    // TODO: constant
-    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const override { return new GenericNetworkProtocolControlInfo(); }
+    virtual cObject *createNetworkProtocolControlInfo() const override { return new GenericNetworkProtocolControlInfo(); }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::gnp; }
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return ModulePathAddress(); }    // TODO constant
 };

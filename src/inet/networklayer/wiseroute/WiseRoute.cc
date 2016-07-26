@@ -221,7 +221,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
     L3Address nextHopAddr;
     MACAddress nextHopMacAddr;
     WiseRouteDatagram *pkt = new WiseRouteDatagram(msg->getName(), DATA);
-    INetworkProtocolControlInfo *cInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
+    auto cInfo = msg->removeControlInfo();
 
     pkt->setByteLength(headerLength);
 

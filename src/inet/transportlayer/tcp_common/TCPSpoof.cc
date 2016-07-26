@@ -15,7 +15,6 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
@@ -71,8 +70,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     //printSegmentBrief(tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->setControlInfo(addressType->createNetworkProtocolControlInfo());
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();

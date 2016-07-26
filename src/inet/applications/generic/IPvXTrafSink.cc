@@ -20,7 +20,6 @@
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -84,9 +83,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
 {
     L3Address src, dest;
     int protocol = -1;
-
-    INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-
+    auto ctrl = msg->getControlInfo();
     if (ctrl != nullptr) {
         protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol());
     }

@@ -24,7 +24,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 #include "inet/applications/pingapp/PingPayload_m.h"
 
@@ -37,7 +36,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPMessage.h"
@@ -357,7 +355,7 @@ void PingApp::sendPingRequest()
     sendSeqNo++;
     sentCount++;
     IL3AddressType *addressType = destAddr.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+    auto controlInfo = addressType->createNetworkProtocolControlInfo();
 
     cPacket *outPacket = nullptr;
     switch (destAddr.getType()) {
@@ -368,7 +366,7 @@ void PingApp::sendPingRequest()
             request->setByteLength(4);
             request->setType(ICMP_ECHO_REQUEST);
             request->encapsulate(msg);
-            request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+            request->setControlInfo(controlInfo);
             request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
@@ -382,7 +380,7 @@ void PingApp::sendPingRequest()
             request->setByteLength(4);
             request->setType(ICMPv6_ECHO_REQUEST);
             request->encapsulate(msg);
-            request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+            request->setControlInfo(controlInfo);
             request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
@@ -397,7 +395,7 @@ void PingApp::sendPingRequest()
             request->setByteLength(4);
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->encapsulate(msg);
-            request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+            request->setControlInfo(controlInfo);
             request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
@@ -425,7 +423,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     }
 
     // get src, hopCount etc from packet, and print them
-    INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
+    auto ctrl = msg->getControlInfo();
     L3Address src = msg->getMandatoryTag<L3AddressInd>()->getSource();
     //L3Address dest = msg->getMandatoryTag<L3AddressInd>()->getDestination();
     auto msgHopCountTag = msg->getTag<HopLimitInd>();

@@ -27,7 +27,6 @@
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"
@@ -259,8 +258,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->setControlInfo(addressType->createNetworkProtocolControlInfo());
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
@@ -276,8 +274,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     printSegmentBrief(tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->setControlInfo(addressType->createNetworkProtocolControlInfo());
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);

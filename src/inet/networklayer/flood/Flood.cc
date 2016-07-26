@@ -26,7 +26,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -281,7 +280,7 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
 
     EV << "in encaps...\n";
 
-    INetworkProtocolControlInfo *cInfo = check_and_cast_nullable<INetworkProtocolControlInfo *>(appPkt->removeControlInfo());
+    auto cInfo = appPkt->removeControlInfo();
     FloodDatagram *pkt = new FloodDatagram(appPkt->getName(), appPkt->getKind());
     pkt->setBitLength(headerLength);
 

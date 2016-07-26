@@ -26,7 +26,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -186,9 +185,7 @@ void IPvXTrafGen::sendPacket()
     L3Address destAddr = chooseDestAddr();
 
     IL3AddressType *addressType = destAddr.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    //controlInfo->setSourceAddress();
-    payload->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    payload->setControlInfo(addressType->createNetworkProtocolControlInfo());
     payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
     payload->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     payload->ensureTag<L3AddressReq>()->setDestination(destAddr);
@@ -204,8 +201,7 @@ void IPvXTrafGen::printPacket(cPacket *msg)
 {
     L3Address src, dest;
     int protocol = -1;
-
-    INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
+    auto *ctrl = msg->getControlInfo();
     if (ctrl != nullptr) {
         protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol());
     }

@@ -18,7 +18,6 @@
 #ifndef __INET_IPV6CONTROLINFO_H
 #define __INET_IPV6CONTROLINFO_H
 
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 
@@ -32,7 +31,7 @@ class IPv6ExtensionHeader;
  *
  * See the IPv6ControlInfo.msg file for more info.
  */
-class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo
+class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
 {
   protected:
     IPv6Datagram *dgram;

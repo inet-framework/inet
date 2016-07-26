@@ -275,10 +275,8 @@ cPacket *ProbabilisticBroadcast::encapsulate(cPacket *msg)
 {
     ProbabilisticBroadcastDatagram *pkt = new ProbabilisticBroadcastDatagram(msg->getName());
     cObject *controlInfo = msg->removeControlInfo();
-    INetworkProtocolControlInfo *networkControlInfo = check_and_cast<INetworkProtocolControlInfo *>(controlInfo);
     L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
 
-    ASSERT(networkControlInfo);
     pkt->setByteLength(headerLength);
     pkt->setSrcAddr(myNetwAddr);
     pkt->setDestAddr(broadcastAddress);

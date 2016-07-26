@@ -345,9 +345,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
     }
     else {
         IL3AddressType *addressType = dest.getAddressType();
-        INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-        //controlInfo->setSourceAddress();
-        sctpmsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        sctpmsg->setControlInfo(addressType->createNetworkProtocolControlInfo());
         sctpmsg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         sctpmsg->ensureTag<L3AddressReq>()->setDestination(dest);
         sctpMain->send_to_ip(sctpmsg);

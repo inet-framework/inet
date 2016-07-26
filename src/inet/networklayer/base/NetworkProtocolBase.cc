@@ -22,7 +22,6 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
 namespace inet {
@@ -51,14 +50,14 @@ void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (cPacket *packet = dynamic_cast<cPacket *>(message)) {
-        INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(packet->getControlInfo());
+        auto controlInfo = packet->getControlInfo();
 
         int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol());
         auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;
         for (auto it = lowerBound; it != upperBound; it++) {
-            INetworkProtocolControlInfo *controlInfoCopy = check_and_cast<INetworkProtocolControlInfo *>(check_and_cast<cObject *>(controlInfo)->dup());
+            auto controlInfoCopy = controlInfo->dup();
             cPacket *packetCopy = packet->dup();
             packetCopy->setControlInfo(check_and_cast<cObject *>(controlInfoCopy));
             packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);

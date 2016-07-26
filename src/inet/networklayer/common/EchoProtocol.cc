@@ -21,7 +21,6 @@
 #include "inet/networklayer/common/EchoProtocol.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
 
 namespace inet {
@@ -66,7 +65,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     reply->setType(ECHO_PROTOCOL_REPLY);
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(reply->getControlInfo());
+    auto ctrl = reply->getControlInfo();
     auto addressInd = reply->removeMandatoryTag<L3AddressInd>();
     reply->clearTags();
     reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);

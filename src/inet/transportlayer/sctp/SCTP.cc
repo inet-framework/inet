@@ -22,7 +22,6 @@
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/sctp/SCTPSerializer.h"
@@ -182,7 +181,7 @@ void SCTP::handleMessage(cMessage *msg)
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
             EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
         } else {
-            INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
+            auto controlInfo = msg->removeControlInfo();
             srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSource();
             destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestination();
             delete controlInfo;
@@ -345,8 +344,7 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
         udpSocket.sendTo(msg, toAddr, SCTP_UDP_PORT);
     }
     else {
-        INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
-        msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        msg->setControlInfo(toAddr.getAddressType()->createNetworkProtocolControlInfo());
         msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         auto addresses = msg->ensureTag<L3AddressReq>();
         addresses->setSource(fromAddr);
@@ -375,9 +373,8 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH * 8);
     msg->addChunk(scChunk);
 
-    INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
     msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-    msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    msg->setControlInfo(toAddr.getAddressType()->createNetworkProtocolControlInfo());
     auto addresses = msg->ensureTag<L3AddressReq>();
     addresses->setSource(fromAddr);
     addresses->setDestination(toAddr);

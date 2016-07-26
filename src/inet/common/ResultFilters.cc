@@ -21,7 +21,6 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
