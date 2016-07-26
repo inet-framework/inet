@@ -386,7 +386,6 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
 
     emit(rcvdGraftPkSignal, pkt);
 
-    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     IPv4Address sender = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
@@ -540,7 +539,6 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
 
     emit(rcvdGraftAckPkSignal, pkt);
 
-    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     IPv4Address destAddress = pkt->getMandatoryTag<L3AddressInd>()->getDestination().toIPv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
@@ -596,7 +594,6 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
     }
 
     // check if State Refresh msg has came from RPF neighbor
-    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     auto ifTag = pkt->getMandatoryTag<InterfaceInd>();
     IPv4Address srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     UpstreamInterface *upstream = route->upstreamInterface;
@@ -684,7 +681,6 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 
 void PIMDM::processAssertPacket(PIMAssert *pkt)
 {
-    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     int incomingInterfaceId = pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     IPv4Address srcAddrFromTag = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     IPv4Address source = pkt->getSourceAddress();

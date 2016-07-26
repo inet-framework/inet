@@ -79,7 +79,6 @@ void PIMSplitter::handleMessage(cMessage *msg)
 
 void PIMSplitter::processPIMPacket(PIMPacket *pkt)
 {
-    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 

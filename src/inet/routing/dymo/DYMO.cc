@@ -458,7 +458,6 @@ bool DYMO::permissibleRteMsg(RteMsg *rteMsg)
     // 7.5. Handling a Received RteMsg
     AddressBlock& originatorNode = rteMsg->getOriginatorNode();
     AddressBlock& targetNode = rteMsg->getTargetNode();
-    auto networkProtocolControlInfo = rteMsg->getControlInfo();
     // 1. HandlingRtr MUST handle AODVv2 messages only from adjacent
     //    routers as specified in Section 5.4. AODVv2 messages from other
     //    sources MUST be disregarded.
@@ -952,7 +951,6 @@ void DYMO::processRERR(RERR *rerrIncoming)
     if (rerrIncoming->getHopLimit() == 0 || rerrIncoming->getUnreachableNodeArraySize() == 0)
         return;
     else {
-        auto networkProtocolControlInfo = rerrIncoming->getControlInfo();
         L3Address srcAddr = rerrIncoming->getMandatoryTag<L3AddressInd>()->getSource();
         auto incomingIfTag = rerrIncoming->getMandatoryTag<InterfaceInd>();
         // Otherwise, for each UnreachableNode.Address, HandlingRtr searches its
@@ -1137,7 +1135,6 @@ IRoute *DYMO::createRoute(RteMsg *rteMsg, AddressBlock& addressBlock)
 void DYMO::updateRoute(RteMsg *rteMsg, AddressBlock& addressBlock, IRoute *route)
 {
     // 6.2. Applying Route Updates To Route Table Entries
-    auto networkProtocolControlInfo = rteMsg->getControlInfo();
     DYMORouteData *routeData = check_and_cast<DYMORouteData *>(route->getProtocolData());
     // Route.Address := RteMsg.Addr
     const L3Address& address = addressBlock.getAddress();

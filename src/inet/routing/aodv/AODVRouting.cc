@@ -159,7 +159,6 @@ void AODVRouting::handleMessage(cMessage *msg)
         L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
         unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
-        auto udpProtocolCtrlInfo = udpPacket->getControlInfo();
 
         switch (ctrlPacket->getPacketType()) {
             case RREQ:

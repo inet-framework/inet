@@ -423,7 +423,6 @@ void PingApp::processPingResponse(PingPayload *msg)
     }
 
     // get src, hopCount etc from packet, and print them
-    auto ctrl = msg->getControlInfo();
     L3Address src = msg->getMandatoryTag<L3AddressInd>()->getSource();
     //L3Address dest = msg->getMandatoryTag<L3AddressInd>()->getDestination();
     auto msgHopCountTag = msg->getTag<HopLimitInd>();

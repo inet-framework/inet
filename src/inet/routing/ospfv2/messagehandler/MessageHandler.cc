@@ -193,7 +193,6 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
 
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
-        IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
         int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
         AreaID areaID = packet->getAreaID();
         Area *area = router->getAreaByID(areaID);

@@ -583,7 +583,6 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          IncomingSocketTCP->readDataTransferModePar(*this);
       }
 
-      TCPCommand* connectInfo = check_and_cast<TCPCommand*>(msg->getControlInfo());
       ConnectionID = msg->getMandatoryTag<SocketInd>()->getSocketId();
       sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
    }

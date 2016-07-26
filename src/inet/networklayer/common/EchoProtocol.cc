@@ -65,7 +65,6 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     reply->setType(ECHO_PROTOCOL_REPLY);
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    auto ctrl = reply->getControlInfo();
     auto addressInd = reply->removeMandatoryTag<L3AddressInd>();
     reply->clearTags();
     reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);

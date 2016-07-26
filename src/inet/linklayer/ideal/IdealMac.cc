@@ -154,7 +154,6 @@ void IdealMac::startTransmitting(cPacket *msg)
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
     MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     IdealMacFrame *frame = encapsulate(msg);
 

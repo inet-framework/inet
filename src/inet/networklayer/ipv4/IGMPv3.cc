@@ -857,7 +857,6 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, c
 // RFC 3376 5.2
 void IGMPv3::processQuery(IGMPv3Query *msg)
 {
-    IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     IPv4Address groupAddr = msg->getGroupAddress();
@@ -998,7 +997,6 @@ void IGMPv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
 
 void IGMPv3::processReport(IGMPv3Report *msg)
 {
-    IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     ASSERT(ie->isMulticast());

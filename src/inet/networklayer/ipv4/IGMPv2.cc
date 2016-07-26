@@ -627,7 +627,6 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
 
 void IGMPv2::processIgmpMessage(IGMPMessage *msg)
 {
-    IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:

@@ -143,7 +143,6 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     reply->setType(ICMPv6_ECHO_REPLY);
     reply->encapsulate(request->decapsulate());
 
-    IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);

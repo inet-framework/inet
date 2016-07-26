@@ -1295,7 +1295,6 @@ void RSVP::processHelloMsg(RSVPHelloMsg *msg)
     EV_INFO << "Received RSVP_HELLO" << endl;
     //print(msg);
 
-    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(msg->getControlInfo());
     IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     IPv4Address peer = tedmod->primaryAddress(sender);
 
