@@ -35,6 +35,9 @@ class INET_API FlatTransmitterBase : public NarrowbandTransmitterBase
   protected:
     virtual void initialize(int stage) override;
 
+    virtual bps computeTransmissionPreambleBitrate(const cPacket *macFrame) const;
+    virtual bps computeTransmissionHeaderBitrate(const cPacket *macFrame) const;
+    virtual bps computeTransmissionDataBitrate(const cPacket *macFrame) const;
     virtual W computeTransmissionPower(const cPacket *macFrame) const;
 
   public:
