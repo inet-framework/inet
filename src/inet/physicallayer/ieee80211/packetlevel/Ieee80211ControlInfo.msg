@@ -51,13 +51,6 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 }
 
 //
-// Control info attached to a mac frame that is sent down to the ~Ieee80211Radio.
-//
-class Ieee80211TransmissionRequest extends TransmissionRequest
-{
-}
-
-//
 // Control info attached to a mac frame that is sent up from the ~Ieee80211Radio.
 //
 class Ieee80211ReceptionIndication extends ReceptionIndication

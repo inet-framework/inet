@@ -118,8 +118,6 @@ Ieee80211ACKFrame *MacUtils::buildAckFrame(Ieee80211DataOrMgmtFrame *dataFrame) 
 Ieee80211Frame *MacUtils::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode) const
 {
     ASSERT(frame->getControlInfo() == nullptr);
-    Ieee80211TransmissionRequest *ctrl = new Ieee80211TransmissionRequest();
-    frame->setControlInfo(ctrl);
     frame->ensureTag<Ieee80211ModeReq>()->setMode(mode);
     return frame;
 }
