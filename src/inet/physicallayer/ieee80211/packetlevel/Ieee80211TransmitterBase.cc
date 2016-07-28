@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
@@ -74,13 +75,10 @@ const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Tr
         return mode;
 }
 
-const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(const TransmissionRequest *transmissionRequest) const
+const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(const cPacket *macFrame) const
 {
-    const Ieee80211TransmissionRequest *ieee80211TransmissionRequest = dynamic_cast<const Ieee80211TransmissionRequest *>(transmissionRequest);
-    if (ieee80211TransmissionRequest != nullptr && ieee80211TransmissionRequest->getChannel() != nullptr)
-        return ieee80211TransmissionRequest->getChannel();
-    else
-        return channel;
+    auto channelReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ChannelReq>();
+    return channelReq != nullptr ? channelReq->getChannel() : channel;
 }
 
 void Ieee80211TransmitterBase::setModeSet(const Ieee80211ModeSet *modeSet)
