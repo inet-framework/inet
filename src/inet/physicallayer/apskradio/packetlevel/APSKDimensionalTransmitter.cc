@@ -48,6 +48,8 @@ const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio
 {
     TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = computeTransmissionPower(macFrame);
+    Hz transmissionCarrierFrequency = computeCarrierFrequency(macFrame);
+    Hz transmissionBandwidth = computeBandwidth(macFrame);
     bps transmissionBitrate = controlInfo && !std::isnan(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
     const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
@@ -59,7 +61,7 @@ const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
-    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerBitLength, macFrame->getBitLength(), transmissionBitrate, modulation, carrierFrequency, bandwidth, powerMapping);
+    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerBitLength, macFrame->getBitLength(), transmissionBitrate, modulation, transmissionCarrierFrequency, transmissionBandwidth, powerMapping);
 }
 
 } // namespace physicallayer

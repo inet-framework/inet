@@ -41,6 +41,8 @@ const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *tra
 {
     TransmissionRequest *controlInfo = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = computeTransmissionPower(macFrame);
+    Hz transmissionCarrierFrequency = computeCarrierFrequency(macFrame);
+    Hz transmissionBandwidth = computeBandwidth(macFrame);
     bps transmissionBitrate = controlInfo && !std::isnan(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
     const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
@@ -51,7 +53,7 @@ const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *tra
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
+    return new ScalarTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

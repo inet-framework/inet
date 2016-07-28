@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandTransmitterBase.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -46,6 +47,19 @@ std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int
                << ", carrierFrequency = " << carrierFrequency
                << ", bandwidth = " << bandwidth;
     return stream;
+}
+
+
+Hz NarrowbandTransmitterBase::computeCarrierFrequency(const cPacket *macFrame) const
+{
+    auto signalBandReq = const_cast<cPacket *>(macFrame)->getTag<SignalBandReq>();
+    return signalBandReq != nullptr ? signalBandReq->getCarrierFrequency() : carrierFrequency;
+}
+
+Hz NarrowbandTransmitterBase::computeBandwidth(const cPacket *macFrame) const
+{
+    auto signalBandReq = const_cast<cPacket *>(macFrame)->getTag<SignalBandReq>();
+    return signalBandReq != nullptr ? signalBandReq->getBandwidth() : bandwidth;
 }
 
 } // namespace physicallayer

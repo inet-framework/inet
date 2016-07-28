@@ -57,8 +57,6 @@ class ConfigureRadioCommand
 class TransmissionRequest
 {
     bps bitrate = bps(NaN);        // override default bitrate in the range (0, +infinity) or NaN if not set.
-    Hz carrierFrequency = Hz(NaN); // override default carrier frequency in the range (0, +infinity) or NaN if not set.
-    Hz bandwidth = Hz(NaN);        // override default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
 
 //

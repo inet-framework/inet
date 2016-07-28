@@ -35,6 +35,9 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
   protected:
     virtual void initialize(int stage) override;
 
+    virtual Hz computeCarrierFrequency(const cPacket *macFrame) const;
+    virtual Hz computeBandwidth(const cPacket *macFrame) const;
+
   public:
     NarrowbandTransmitterBase();
 
