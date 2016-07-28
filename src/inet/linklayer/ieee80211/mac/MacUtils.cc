@@ -23,6 +23,7 @@
 #include "inet/linklayer/ieee80211/oldmac/Ieee80211Consts.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HTMode.h"
@@ -118,15 +119,14 @@ Ieee80211Frame *MacUtils::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mo
 {
     ASSERT(frame->getControlInfo() == nullptr);
     Ieee80211TransmissionRequest *ctrl = new Ieee80211TransmissionRequest();
-    ctrl->setMode(mode);
     frame->setControlInfo(ctrl);
+    frame->ensureTag<Ieee80211ModeReq>()->setMode(mode);
     return frame;
 }
 
 const IIeee80211Mode *MacUtils::getFrameMode(Ieee80211Frame *frame) const
 {
-    Ieee80211TransmissionRequest *ctrl = check_and_cast<Ieee80211TransmissionRequest*>(frame->getControlInfo());
-    return ctrl->getMode();
+    return frame->getMandatoryTag<Ieee80211ModeReq>()->getMode();
 }
 
 bool MacUtils::isForUs(Ieee80211Frame *frame) const

@@ -55,7 +55,6 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 //
 class Ieee80211TransmissionRequest extends TransmissionRequest
 {
-    IIeee80211ModePtr mode = nullptr;      // override default transmission mode or nullptr if not set.
 }
 
 //

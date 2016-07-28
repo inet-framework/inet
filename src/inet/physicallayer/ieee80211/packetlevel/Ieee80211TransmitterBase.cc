@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
@@ -61,16 +62,17 @@ std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int 
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const TransmissionRequest *transmissionRequest) const
+const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const cPacket *macFrame) const
 {
-    const Ieee80211TransmissionRequest *ieee80211TransmissionRequest = dynamic_cast<const Ieee80211TransmissionRequest *>(transmissionRequest);
-    if (ieee80211TransmissionRequest != nullptr && ieee80211TransmissionRequest->getMode() != nullptr) {
-        if (modeSet != nullptr && !modeSet->containsMode(ieee80211TransmissionRequest->getMode()))
+    auto modeReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ModeReq>();
+    auto bitrateReq = const_cast<cPacket *>(macFrame)->getTag<SignalBitrateReq>();
+    if (modeReq != nullptr) {
+        if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
-        return ieee80211TransmissionRequest->getMode();
+        return modeReq->getMode();
     }
-    else if (modeSet != nullptr && transmissionRequest != nullptr && !std::isnan(transmissionRequest->getBitrate().get()))
-        return modeSet->getMode(transmissionRequest->getBitrate());
+    else if (modeSet != nullptr && bitrateReq != nullptr)
+        return modeSet->getMode(bitrateReq->getDataBitrate());
     else
         return mode;
 }

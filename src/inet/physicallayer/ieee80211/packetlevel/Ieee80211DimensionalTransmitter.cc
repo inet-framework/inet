@@ -50,7 +50,7 @@ std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& strea
 const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
     const TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
-    const IIeee80211Mode *transmissionMode = computeTransmissionMode(transmissionRequest);
+    const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(macFrame);
     W transmissionPower = computeTransmissionPower(macFrame);
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();

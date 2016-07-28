@@ -26,6 +26,7 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
@@ -323,9 +324,9 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
     TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
-    Ieee80211TransmissionRequest *ieee80211TransmissionRequest = dynamic_cast<Ieee80211TransmissionRequest *>(transmissionRequest);
+    auto modeReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ModeReq>();
     if (isCompliant)
-        mode = ieee80211TransmissionRequest != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(ieee80211TransmissionRequest->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
+        mode = modeReq != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(modeReq->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
     else if (!mode)
         mode = computeMode(bandwidth);
     const ITransmissionBitModel *bitModel = nullptr;
