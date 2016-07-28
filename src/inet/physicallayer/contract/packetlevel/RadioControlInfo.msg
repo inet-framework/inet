@@ -56,7 +56,6 @@ class ConfigureRadioCommand
 //
 class TransmissionRequest
 {
-    bps bitrate = bps(NaN);        // override default bitrate in the range (0, +infinity) or NaN if not set.
 }
 
 //

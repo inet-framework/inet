@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/idealradio/IdealTransmitter.h"
 #include "inet/physicallayer/idealradio/IdealTransmission.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -63,8 +64,8 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
 
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    auto controlInfo = dynamic_cast<TransmissionRequest*>(macFrame->getControlInfo());
-    auto transmissionBitrate = controlInfo && !std::isnan(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
+    auto signalBitrateReq = const_cast<cPacket *>(macFrame)->getTag<SignalBitrateReq>();
+    auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     auto headerDuration = headerBitLength / transmissionBitrate.get();
     auto dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
     auto duration = preambleDuration + headerDuration + dataDuration;

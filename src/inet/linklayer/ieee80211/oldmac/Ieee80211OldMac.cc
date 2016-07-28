@@ -22,6 +22,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -1523,7 +1524,7 @@ void Ieee80211OldMac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameT
     double bitRate = dataFrameMode->getDataMode()->getNetBitrate().get();
     TransmissionRequest *trq = dynamic_cast<TransmissionRequest *>(frameToSend->getControlInfo());
     if (trq) {
-        bitRate = trq->getBitrate().get();
+        bitRate = frameToSend->getMandatoryTag<SignalBitrateReq>()->getDataBitrate().get();
         if (bitRate == 0)
             bitRate = dataFrameMode->getDataMode()->getNetBitrate().get();
     }
@@ -1760,7 +1761,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211OldMac::buildDataFrame(Ieee80211DataOrMgmtFra
             int size = (*nextframeToSend)->getBitLength();
             TransmissionRequest *trRq = dynamic_cast<TransmissionRequest *>(transmissionQueue()->front()->getControlInfo());
             if (trRq) {
-                bitRate = trRq->getBitrate().get();
+                bitRate = transmissionQueue()->front()->getMandatoryTag<SignalBitrateReq>()->getDataBitrate().get();
                 if (bitRate == 0)
                     bitRate = dataFrameMode->getDataMode()->getNetBitrate().get();
             }
@@ -1830,8 +1831,8 @@ Ieee80211Frame *Ieee80211OldMac::setBasicBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo() == nullptr);
     TransmissionRequest *ctrl = new TransmissionRequest();
-    ctrl->setBitrate(bps(basicFrameMode->getDataMode()->getNetBitrate()));
     frame->setControlInfo(ctrl);
+    frame->ensureTag<SignalBitrateReq>()->setDataBitrate(basicFrameMode->getDataMode()->getNetBitrate());
     return frame;
 }
 
@@ -1839,8 +1840,8 @@ Ieee80211Frame *Ieee80211OldMac::setControlBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo()==nullptr);
     TransmissionRequest *ctrl = new TransmissionRequest();
-    ctrl->setBitrate((bps)controlFrameMode->getDataMode()->getNetBitrate());
     frame->setControlInfo(ctrl);
+    frame->ensureTag<SignalBitrateReq>()->setDataBitrate(controlFrameMode->getDataMode()->getNetBitrate());
     return frame;
 }
 
@@ -1859,7 +1860,7 @@ Ieee80211Frame *Ieee80211OldMac::setBitrateFrame(Ieee80211Frame *frame)
     else
         ctrl = dynamic_cast<TransmissionRequest *>(frame->getControlInfo());
     if (ctrl)
-        ctrl->setBitrate(bps(getBitrate()));
+        frame->ensureTag<SignalBitrateReq>()->setDataBitrate(bps(getBitrate()));
     return frame;
 }
 
@@ -2001,8 +2002,9 @@ double Ieee80211OldMac::computeFrameDuration(Ieee80211Frame *msg)
     EV_DEBUG << *msg;
     ctrl = dynamic_cast<TransmissionRequest *>(msg->removeControlInfo());
     if (ctrl) {
-        EV_DEBUG << "Per frame2 params bitrate " << ctrl->getBitrate().get() / 1e6 << "Mb" << endl;
-        duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate().get());
+        auto bitrate = msg->getMandatoryTag<SignalBitrateReq>()->getDataBitrate();
+        EV_DEBUG << "Per frame2 params bitrate " << bitrate.get() / 1e6 << "Mb" << endl;
+        duration = computeFrameDuration(msg->getBitLength(), bitrate.get());
         delete ctrl;
         return duration;
     }
