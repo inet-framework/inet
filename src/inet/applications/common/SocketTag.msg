@@ -10,7 +10,7 @@ namespace inet;
 
 class TagBase extends cObject;
 
-class SocketTag extends TagBase
+class SocketTagBase extends TagBase
 {
     int socketId = -1; // a locally unique (network node) identifier that determines the application socket
 }
@@ -18,13 +18,13 @@ class SocketTag extends TagBase
 //
 // Determines the application socket of an outgoing packet, sent by the application.
 //
-class SocketReq extends SocketTag
+class SocketReq extends SocketTagBase
 {
 }
 
 //
 // Specifies the application socket of an incoming packet, received by the application.
 //
-class SocketInd extends SocketTag
+class SocketInd extends SocketTagBase
 {
 }

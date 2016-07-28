@@ -10,7 +10,7 @@ namespace inet;
 
 class TagBase extends cObject;
 
-class InterfaceTag extends TagBase
+class InterfaceTagBase extends TagBase
 {
     int interfaceId = -1; // a locally unique (network node) identifier that determines the interface registered in the ~InterfaceTable  
 }
@@ -18,13 +18,13 @@ class InterfaceTag extends TagBase
 //
 // Determines the outgoing interface where the packet should leave the network node.
 //
-class InterfaceReq extends InterfaceTag
+class InterfaceReq extends InterfaceTagBase
 {
 }
 
 //
 // Specifies the incoming interface where the packet has arrived at the network node.
 //
-class InterfaceInd extends InterfaceTag
+class InterfaceInd extends InterfaceTagBase
 {
 }

@@ -12,7 +12,7 @@ namespace inet;
 class noncobject MACAddress;
 class TagBase extends cObject;
 
-class MACAddressTag extends TagBase
+class MACAddressTagBase extends TagBase
 {
     MACAddress sourceAddress;      // may be unspecified
     MACAddress destinationAddress; // always specified
@@ -21,13 +21,13 @@ class MACAddressTag extends TagBase
 //
 // Determines the source and destination MAC addresses for an outgoing packet.
 //
-class MACAddressReq extends MACAddressTag
+class MACAddressReq extends MACAddressTagBase
 {
 }
 
 //
 // Specifies the source and destination MAC addresses for an incoming packet.
 //
-class MACAddressInd extends MACAddressTag
+class MACAddressInd extends MACAddressTagBase
 {
 }

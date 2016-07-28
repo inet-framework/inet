@@ -12,7 +12,7 @@ namespace inet;
 class noncobject L3Address;
 class TagBase extends cObject;
 
-class L3AddressTag extends TagBase
+class L3AddressTagBase extends TagBase
 {
     L3Address source;      // may be unspecified
     L3Address destination; // always specified
@@ -21,13 +21,13 @@ class L3AddressTag extends TagBase
 //
 // Determines the source and destination network addresses for an outgoing packet.
 //
-class L3AddressReq extends L3AddressTag
+class L3AddressReq extends L3AddressTagBase
 {
 }
 
 //
 // Specifies the source and destination network addresses for an incoming packet.
 //
-class L3AddressInd extends L3AddressTag
+class L3AddressInd extends L3AddressTagBase
 {
 }

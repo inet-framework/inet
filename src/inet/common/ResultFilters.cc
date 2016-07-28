@@ -90,7 +90,7 @@ Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
     if (cMessage *msg = dynamic_cast<cMessage *>(object)) {
-        L3AddressTag *addresses = msg->getTag<L3AddressReq>();
+        L3AddressTagBase *addresses = msg->getTag<L3AddressReq>();
         if (!addresses)
             addresses = msg->getTag<L3AddressInd>();
         if (addresses != nullptr) {

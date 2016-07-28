@@ -90,7 +90,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     if (ctrl != nullptr) {
         protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol());
     }
-    L3AddressTag *addresses = msg->getTag<L3AddressReq>();
+    L3AddressTagBase *addresses = msg->getTag<L3AddressReq>();
     if (addresses == nullptr)
         addresses = msg->getTag<L3AddressInd>();
     if (addresses != nullptr) {
