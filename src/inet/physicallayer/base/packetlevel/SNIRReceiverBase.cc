@@ -51,7 +51,6 @@ bool SNIRReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
 const ReceptionIndication *SNIRReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
     auto indication = const_cast<ReceptionIndication *>(ReceiverBase::computeReceptionIndication(snir));
-    indication->setMinSNIR(snir->getMin());
     return indication;
 }
 

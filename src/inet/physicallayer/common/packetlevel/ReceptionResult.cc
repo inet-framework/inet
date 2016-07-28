@@ -21,17 +21,12 @@ namespace inet {
 
 namespace physicallayer {
 
-ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication) :
+ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const cPacket *macFrame) :
     reception(reception),
     decisions(decisions),
     indication(indication),
-    macFrame(nullptr)
+    macFrame(macFrame)
 {
-    macFrame = reception->getTransmission()->getMacFrame()->dup();
-    bool isReceptionSuccessful = true;
-    for (auto decision : *decisions)
-        isReceptionSuccessful &= decision->isReceptionSuccessful();
-    const_cast<cPacket *>(macFrame)->setBitError(!isReceptionSuccessful);
 }
 
 ReceptionResult::~ReceptionResult()

@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 LayeredReceptionResult::LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel) :
-    ReceptionResult(reception, decisions, indication),
+    ReceptionResult(reception, decisions, indication, nullptr),
     packetModel(packetModel),
     bitModel(bitModel),
     symbolModel(symbolModel),

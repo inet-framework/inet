@@ -37,6 +37,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
 #include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -405,7 +406,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     delete dataFieldPacketModel;
 
     ReceptionIndication *receptionIndication = new ReceptionIndication();
-    receptionIndication->setMinSNIR(snir->getMin());
+    const_cast<cPacket *>(packetModel->getPacket())->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
     receptionIndication->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, packetModel->isPacketErrorless()
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionIndication, packetModel, bitModel, symbolModel, sampleModel, analogModel);

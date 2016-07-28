@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 #ifdef NS3_VALIDATION
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -500,7 +501,7 @@ void Radio::captureReception(cMessage *timer)
 void Radio::sendUp(cPacket *macFrame)
 {
     auto indication = check_and_cast<const ReceptionIndication *>(macFrame->getControlInfo());
-    emit(minSNIRSignal, indication->getMinSNIR());
+    emit(minSNIRSignal, macFrame->getMandatoryTag<SnirInd>()->getMinimumSnir());
     if (!std::isnan(indication->getPacketErrorRate()))
         emit(packetErrorRateSignal, indication->getPacketErrorRate());
     if (!std::isnan(indication->getBitErrorRate()))

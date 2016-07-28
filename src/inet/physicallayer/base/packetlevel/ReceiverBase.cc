@@ -18,6 +18,7 @@
 #include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
@@ -94,7 +95,13 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     // TODO: add all cached decisions?
     auto decisions = new std::vector<const IReceptionDecision *>();
     decisions->push_back(radioMedium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE));
-    return new ReceptionResult(reception, decisions, indication);
+    auto macFrame = reception->getTransmission()->getMacFrame()->dup();
+    macFrame->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
+    bool isReceptionSuccessful = true;
+    for (auto decision : *decisions)
+        isReceptionSuccessful &= decision->isReceptionSuccessful();
+    macFrame->setBitError(!isReceptionSuccessful);
+    return new ReceptionResult(reception, decisions, indication, macFrame);
 }
 
 } // namespace physicallayer

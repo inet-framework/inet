@@ -18,6 +18,7 @@
 #include "inet/physicallayer/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
@@ -171,13 +172,13 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     const APSKPhyFrame *phyFrame = createPhyFrame(packetModel);
     ReceptionIndication *receptionIndication = new ReceptionIndication();
-    receptionIndication->setMinSNIR(snir->getMin());
 //    receptionIndication->setMinRSSI(analogModel->getMinRSSI());
 //    receptionIndication->setSymbolErrorRate(bitModel->getBitErrorRate());
 //    receptionIndication->setBitErrorRate(symbolModel->getSymbolErrorRate());
 //    receptionIndication->setPacketErrorRate(packetModel->getPacketErrorRate());
     const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(phyFrame, new BitVector(*packetModel->getSerializedPacket()), bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
+    const_cast<cPacket *>(packetModel->getPacket())->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
 // TODO: true, true, receptionPacketModel->isPacketErrorless()
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionIndication, receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
 }
