@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "RandomQoSClassifier.h"
 #include "Ieee802Ctrl.h"
 
@@ -24,9 +25,7 @@ Define_Module(RandomQoSClassifier);
 
 void RandomQoSClassifier::handleMessage(cMessage *msg)
 {
-    int userPriority = intrand(8);
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->getControlInfo());
-    ctrl->setUserPriority(userPriority);
+    msg->ensureTag<UserPriorityReq>()->setUserPriority(intrand(8));
     send(msg, "out");
 }
 

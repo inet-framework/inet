@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -56,12 +57,12 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setReceiverAddress(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
     frame->setEtherType(ctrl->getEtherType());
-    int up = ctrl->getUserPriority();
-    if (up >= 0) {
+    auto userPriorityReq = msg->getTag<UserPriorityReq>();
+    if (userPriorityReq != nullptr) {
         // make it a QoS frame, and set TID
         frame->setType(ST_DATA_WITH_QOS);
         frame->addBitLength(QOSCONTROL_BITS);
-        frame->setTid(up);
+        frame->setTid(userPriorityReq->getUserPriority());
     }
     delete ctrl;
 
@@ -79,7 +80,7 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
     macAddressInd->setDestinationAddress(frame->getReceiverAddress());
     int tid = frame->getTid();
     if (tid < 8)
-        ctrl->setUserPriority(tid); // TID values 0..7 are UP
+        payload->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
     payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP) {

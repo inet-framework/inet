@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "ExampleQoSClassifier.h"
 #include "UserPriority.h"
 
@@ -45,9 +46,7 @@ void ExampleQoSClassifier::initialize()
 
 void ExampleQoSClassifier::handleMessage(cMessage *msg)
 {
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->getControlInfo());
-    int userPriority = getUserPriority(msg);
-    ctrl->setUserPriority(userPriority);
+    msg->ensureTag<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
     send(msg, "out");
 }
 
