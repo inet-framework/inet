@@ -54,7 +54,6 @@ std::ostream& Ieee80211IdealTransmitter::printToStream(std::ostream& stream, int
 
 const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
-    const TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");

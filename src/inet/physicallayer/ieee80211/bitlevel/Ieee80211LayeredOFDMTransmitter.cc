@@ -323,7 +323,6 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
 
 const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     auto modeReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ModeReq>();
     if (isCompliant)
         mode = modeReq != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(modeReq->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));

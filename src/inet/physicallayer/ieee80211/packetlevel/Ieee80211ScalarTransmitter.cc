@@ -40,7 +40,6 @@ std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, in
 
 const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
-    const TransmissionRequest *transmissionRequest = dynamic_cast<TransmissionRequest *>(macFrame->getControlInfo());
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(macFrame);
     W transmissionPower = computeTransmissionPower(macFrame);

@@ -52,13 +52,6 @@ class ConfigureRadioCommand
 }
 
 //
-// Control info attached to a mac frame that is sent down to the ~Radio.
-//
-class TransmissionRequest
-{
-}
-
-//
 // Control info attached to a mac frame that is sent up from the ~Radio.
 //
 class ReceptionIndication
