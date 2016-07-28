@@ -66,8 +66,6 @@ class TransmissionRequest
 //
 class ReceptionIndication
 {
-    int bitErrorCount = -1;       // number of erroneous bits in the range [0, +infinity) or -1 if unknown.
-    int symbolErrorCount = -1;    // number of erroneous symbols in the range [0, +infinity) or -1 if unknown.
     double packetErrorRate = NaN; // packet error rate (probability) in the range [0, 1] or NaN if unknown.
     double bitErrorRate = NaN;    // bit error rate (probability) in the range [0, 1] or NaN if unknown.
     double symbolErrorRate = NaN; // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
