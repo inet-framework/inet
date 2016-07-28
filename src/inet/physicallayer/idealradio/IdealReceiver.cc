@@ -21,6 +21,7 @@
 #include "inet/physicallayer/idealradio/IdealNoise.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -88,12 +89,6 @@ bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, co
 const ReceptionIndication *IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
 {
     auto indication = new ReceptionIndication();
-    auto reception = check_and_cast<const IdealReception *>(snir->getReception());
-    auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
-    double errorRate = reception->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
-    indication->setSymbolErrorRate(errorRate);
-    indication->setBitErrorRate(errorRate);
-    indication->setPacketErrorRate(errorRate);
     return indication;
 }
 
@@ -111,6 +106,18 @@ const IListeningDecision *IdealReceiver::computeListeningDecision(const IListeni
             return new ListeningDecision(listening, true);
     }
     return new ListeningDecision(listening, false);
+}
+
+const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+{
+    auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
+    double errorRate = check_and_cast<const IdealReception *>(reception)->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
+    auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir);
+    auto errorRateInd = const_cast<cPacket *>(receptionResult->getMacFrame())->ensureTag<ErrorRateInd>();
+    errorRateInd->setSymbolErrorRate(errorRate);
+    errorRateInd->setBitErrorRate(errorRate);
+    errorRateInd->setPacketErrorRate(errorRate);
+    return receptionResult;
 }
 
 } // namespace physicallayer

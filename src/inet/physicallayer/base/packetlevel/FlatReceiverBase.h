@@ -48,6 +48,7 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
     virtual W getMinReceptionPower() const override { return sensitivity; }
 
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
 
     virtual const IErrorModel *getErrorModel() const { return errorModel; }
 

@@ -56,7 +56,4 @@ class ConfigureRadioCommand
 //
 class ReceptionIndication
 {
-    double packetErrorRate = NaN; // packet error rate (probability) in the range [0, 1] or NaN if unknown.
-    double bitErrorRate = NaN;    // bit error rate (probability) in the range [0, 1] or NaN if unknown.
-    double symbolErrorRate = NaN; // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
 }

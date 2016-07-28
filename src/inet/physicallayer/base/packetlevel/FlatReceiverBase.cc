@@ -23,6 +23,7 @@
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -104,10 +105,17 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
 const ReceptionIndication *FlatReceiverBase::computeReceptionIndication(const ISNIR *snir) const
 {
     ReceptionIndication *indication = const_cast<ReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
-    indication->setPacketErrorRate(errorModel ? errorModel->computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
-    indication->setBitErrorRate(errorModel ? errorModel->computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
-    indication->setSymbolErrorRate(errorModel ? errorModel->computeSymbolErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
     return indication;
+}
+
+const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+{
+    auto receptionResult = NarrowbandReceiverBase::computeReceptionResult(listening, reception, interference, snir);
+    auto errorRateInd = const_cast<cPacket *>(receptionResult->getMacFrame())->ensureTag<ErrorRateInd>();
+    errorRateInd->setPacketErrorRate(errorModel ? errorModel->computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    errorRateInd->setBitErrorRate(errorModel ? errorModel->computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    errorRateInd->setSymbolErrorRate(errorModel ? errorModel->computeSymbolErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
+    return receptionResult;
 }
 
 } // namespace physicallayer

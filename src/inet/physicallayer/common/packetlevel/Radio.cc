@@ -500,14 +500,14 @@ void Radio::captureReception(cMessage *timer)
 
 void Radio::sendUp(cPacket *macFrame)
 {
-    auto indication = check_and_cast<const ReceptionIndication *>(macFrame->getControlInfo());
     emit(minSNIRSignal, macFrame->getMandatoryTag<SnirInd>()->getMinimumSnir());
-    if (!std::isnan(indication->getPacketErrorRate()))
-        emit(packetErrorRateSignal, indication->getPacketErrorRate());
-    if (!std::isnan(indication->getBitErrorRate()))
-        emit(bitErrorRateSignal, indication->getBitErrorRate());
-    if (!std::isnan(indication->getSymbolErrorRate()))
-        emit(symbolErrorRateSignal, indication->getSymbolErrorRate());
+    auto errorRateInd = macFrame->getMandatoryTag<ErrorRateInd>();
+    if (!std::isnan(errorRateInd->getPacketErrorRate()))
+        emit(packetErrorRateSignal, errorRateInd->getPacketErrorRate());
+    if (!std::isnan(errorRateInd->getBitErrorRate()))
+        emit(bitErrorRateSignal, errorRateInd->getBitErrorRate());
+    if (!std::isnan(errorRateInd->getSymbolErrorRate()))
+        emit(symbolErrorRateSignal, errorRateInd->getSymbolErrorRate());
     EV_INFO << "Sending up " << macFrame << endl;
     send(macFrame, upperLayerOut);
 }

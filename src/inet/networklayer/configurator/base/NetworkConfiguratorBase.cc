@@ -31,6 +31,7 @@
 #include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #endif
 
 namespace inet {
@@ -394,9 +395,11 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
             const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
             const IReceiver *receiver = receiverRadio->getReceiver();
+            const IReceptionResult *result = receiver->computeReceptionResult(listening, reception, interference, snir);
             const ReceptionIndication *receptionIndication = receiver->computeReceptionIndication(snir);
+            cPacket *phyFrame = const_cast<cPacket *>(result->getPhyFrame());
             bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
-            double packetErrorRate = isReceptionPossible ? receptionIndication->getPacketErrorRate() : 1;
+            double packetErrorRate = isReceptionPossible ? phyFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate() : 1;
             delete receptionIndication;
             delete snir;
             delete interference;
