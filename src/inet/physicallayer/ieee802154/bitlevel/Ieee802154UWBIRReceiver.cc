@@ -86,11 +86,6 @@ const IReceptionDecision *Ieee802154UWBIRReceiver::computeReceptionDecision(cons
     return new ReceptionDecision(reception, part, true, true, isReceptionSuccessful);
 }
 
-const ReceptionIndication *Ieee802154UWBIRReceiver::computeReceptionIndication(const ISNIR *snir) const
-{
-    return new ReceptionIndication();
-}
-
 std::vector<bool> *Ieee802154UWBIRReceiver::decode(const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
 {
     simtime_t now, offset;

@@ -51,8 +51,6 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
      * This function called from computeReceptionIndication().
      */
     virtual ReceptionIndication *createReceptionIndication() const;
-
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
 };
 
 } // namespace physicallayer

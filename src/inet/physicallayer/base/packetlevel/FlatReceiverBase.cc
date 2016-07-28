@@ -102,12 +102,6 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
     }
 }
 
-const ReceptionIndication *FlatReceiverBase::computeReceptionIndication(const ISNIR *snir) const
-{
-    ReceptionIndication *indication = const_cast<ReceptionIndication *>(SNIRReceiverBase::computeReceptionIndication(snir));
-    return indication;
-}
-
 const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
 {
     auto receptionResult = NarrowbandReceiverBase::computeReceptionResult(listening, reception, interference, snir);

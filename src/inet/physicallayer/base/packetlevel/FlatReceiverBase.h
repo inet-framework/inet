@@ -38,8 +38,6 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
 
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
-
   public:
     FlatReceiverBase();
 

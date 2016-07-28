@@ -35,8 +35,6 @@ class INET_API IdealReceiver : public ReceiverBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
-
   public:
     IdealReceiver();
 

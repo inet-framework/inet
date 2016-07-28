@@ -33,14 +33,6 @@ class INET_API SNIRReceiverBase : public ReceiverBase
   protected:
     virtual void initialize(int stage) override;
 
-    /**
-     * Returns the physical properties of the reception including noise and
-     * signal related measures, error probabilities, actual error counts, etc.
-     * This function must be purely functional and support optimistic parallel
-     * computation.
-     */
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
-
   public:
     SNIRReceiverBase();
 

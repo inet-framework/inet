@@ -86,12 +86,6 @@ bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, co
         return false;
 }
 
-const ReceptionIndication *IdealReceiver::computeReceptionIndication(const ISNIR *snir) const
-{
-    auto indication = new ReceptionIndication();
-    return indication;
-}
-
 const IListening *IdealReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
 {
     return new IdealListening(radio, startTime, endTime, startPosition, endPosition);

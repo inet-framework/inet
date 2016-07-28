@@ -68,11 +68,6 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
     }
 }
 
-const ReceptionIndication *ReceiverBase::computeReceptionIndication(const ISNIR *snir) const
-{
-    return createReceptionIndication();
-}
-
 ReceptionIndication *ReceiverBase::createReceptionIndication() const
 {
     return new ReceptionIndication();
@@ -91,7 +86,6 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto radio = reception->getReceiver();
     auto radioMedium = radio->getMedium();
     auto transmission = reception->getTransmission();
-    auto indication = computeReceptionIndication(snir);
     // TODO: add all cached decisions?
     auto decisions = new std::vector<const IReceptionDecision *>();
     decisions->push_back(radioMedium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE));
@@ -101,7 +95,7 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     for (auto decision : *decisions)
         isReceptionSuccessful &= decision->isReceptionSuccessful();
     macFrame->setBitError(!isReceptionSuccessful);
-    return new ReceptionResult(reception, decisions, indication, macFrame);
+    return new ReceptionResult(reception, decisions, createReceptionIndication(), macFrame);
 }
 
 } // namespace physicallayer
