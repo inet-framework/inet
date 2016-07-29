@@ -29,6 +29,7 @@
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -382,13 +383,10 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, c
             return;
         if (frame->getType() != ST_BEACON)
             return;
-        Ieee80211ReceptionIndication *ctl = dynamic_cast<Ieee80211ReceptionIndication *>(frame->getControlInfo());
-        if (ctl == nullptr)
-            return;
         Ieee80211BeaconFrame *beacon = (check_and_cast<Ieee80211BeaconFrame *>(frame));
         APInfo *ap = lookupAP(beacon->getTransmitterAddress());
         if (ap)
-            ap->rxPower = ctl->getRecPow();
+            ap->rxPower = frame->getMandatoryTag<SignalPowerInd>()->getPower().get();
     }
 }
 

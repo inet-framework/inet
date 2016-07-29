@@ -150,10 +150,8 @@ void BasicStatistics::frameReceived(Ieee80211Frame *frame)
             numReceivedUnicast++;
     }
 
-    if (rateControl) {
-        auto receptionIndication = check_and_cast<Ieee80211ReceptionIndication*>(frame->getControlInfo());
-        rateControl->frameReceived(frame, receptionIndication);
-    }
+    if (rateControl)
+        rateControl->frameReceived(frame);
 }
 
 void BasicStatistics::erroneousFrameReceived()

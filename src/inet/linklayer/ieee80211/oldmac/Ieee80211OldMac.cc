@@ -688,21 +688,21 @@ void Ieee80211OldMac::handleLowerPacket(cPacket *msg)
 {
     EV_TRACE << "->Enter handleLowerMsg...\n";
     EV_DEBUG << "received message from lower layer: " << msg << endl;
-    Ieee80211ReceptionIndication *cinfo = dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo());
-    if (cinfo && cinfo->getAirtimeMetric()) {
-        double rtsTime = 0;
-        if (rtsThreshold * 8 < cinfo->getTestFrameSize())
-             rtsTime = controlFrameTxTime(LENGTH_CTS) + controlFrameTxTime(LENGTH_RTS);
-        double frameDuration = cinfo->getTestFrameDuration() + controlFrameTxTime(LENGTH_ACK) + rtsTime;
-        cinfo->setTestFrameDuration(frameDuration);
-    }
+//    Ieee80211ReceptionIndication *cinfo = dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo());
+//    if (cinfo && cinfo->getAirtimeMetric()) {
+//        double rtsTime = 0;
+//        if (rtsThreshold * 8 < cinfo->getTestFrameSize())
+//             rtsTime = controlFrameTxTime(LENGTH_CTS) + controlFrameTxTime(LENGTH_RTS);
+//        double frameDuration = cinfo->getTestFrameDuration() + controlFrameTxTime(LENGTH_ACK) + rtsTime;
+//        cinfo->setTestFrameDuration(frameDuration);
+//    }
     emit(NF_LINK_FULL_PROMISCUOUS, msg);
     validRecMode = false;
-    if (cinfo && cinfo->getMode()) {
-        recFrameModulation = cinfo->getMode();
-        if (!std::isnan(recFrameModulation->getDataMode()->getNetBitrate().get()))
-            validRecMode = true;
-    }
+//    if (cinfo && cinfo->getMode()) {
+//        recFrameModulation = cinfo->getMode();
+//        if (!std::isnan(recFrameModulation->getDataMode()->getNetBitrate().get()))
+//            validRecMode = true;
+//    }
 
     if (rateControlMode == RATE_CR) {
         if (msg->getControlInfo())
@@ -711,18 +711,18 @@ void Ieee80211OldMac::handleLowerPacket(cPacket *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame *>(msg);
 
-    if (msg->getControlInfo() && dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo())) {
-        Ieee80211ReceptionIndication *cinfo = (Ieee80211ReceptionIndication *)msg->removeControlInfo();
-        if (contJ % 10 == 0) {
-            snr = _snr;
-            contJ = 0;
-            _snr = 0;
-        }
-        contJ++;
-        _snr += cinfo->getSnr() / 10;
-        lossRate = cinfo->getLossRate();
-        delete cinfo;
-    }
+//    if (msg->getControlInfo() && dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo())) {
+//        Ieee80211ReceptionIndication *cinfo = (Ieee80211ReceptionIndication *)msg->removeControlInfo();
+//        if (contJ % 10 == 0) {
+//            snr = _snr;
+//            contJ = 0;
+//            _snr = 0;
+//        }
+//        contJ++;
+//        _snr += cinfo->getSnr() / 10;
+//        lossRate = cinfo->getLossRate();
+//        delete cinfo;
+//    }
 
     if (contI % samplingCoeff == 0) {
         contI = 0;

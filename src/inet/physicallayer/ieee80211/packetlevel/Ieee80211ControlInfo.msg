@@ -35,8 +35,6 @@ class noncobject IIeee80211ModePtr;
 class noncobject IIeee80211BandPtr;
 class noncobject Ieee80211ChannelPtr;
 class noncobject ConfigureRadioCommand;
-class noncobject TransmissionRequest;
-class noncobject ReceptionIndication;
 //
 // Control info attached to a configure command that is sent to the ~Radio.
 //
@@ -48,21 +46,4 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
     IIeee80211BandPtr band = nullptr;      // new default band or nullptr if not set.
     Ieee80211ChannelPtr channel = nullptr; // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
-}
-
-//
-// Control info attached to a mac frame that is sent up from the ~Ieee80211Radio.
-//
-class Ieee80211ReceptionIndication extends ReceptionIndication
-{
-    IIeee80211ModePtr mode = nullptr;      // specifies reception mode.
-    Ieee80211ChannelPtr channel = nullptr; // specifies reception band and channel
-    // TODO: remove already inherited fields
-    double snr;
-    double lossRate;
-    double recPow;
-    bool airtimeMetric;
-    double testFrameDuration;
-    double testFrameError;
-    int    testFrameSize;
 }

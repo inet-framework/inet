@@ -36,7 +36,6 @@ class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual ReceptionIndication *createReceptionIndication() const override;
 
   public:
     Ieee80211ReceiverBase();

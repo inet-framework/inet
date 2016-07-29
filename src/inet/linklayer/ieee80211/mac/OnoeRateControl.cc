@@ -72,7 +72,7 @@ void OnoeRateControl::computeModeIfTimerIsExpired()
     }
 }
 
-void OnoeRateControl::frameReceived(const Ieee80211Frame* frame, const Ieee80211ReceptionIndication* receptionIndication)
+void OnoeRateControl::frameReceived(const Ieee80211Frame* frame)
 {
 }
 

@@ -113,7 +113,7 @@ void AARFRateControl::increaseRateIfTimerIsExpired()
     }
 }
 
-void AARFRateControl::frameReceived(const Ieee80211Frame* frame, const Ieee80211ReceptionIndication* receptionIndication)
+void AARFRateControl::frameReceived(const Ieee80211Frame* frame)
 {
 }
 
