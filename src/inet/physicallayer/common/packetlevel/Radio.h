@@ -32,12 +32,10 @@ namespace physicallayer {
  * This class is the default implementation of the IRadio interface.
  *
  * The transmission process starts when the radio module receives a packet
- * from the higher layer. The received packet can have a TransmissionRequest
- * attached as a control info object. The radio must be in transmitter or
- * transceiver mode before receiving a packet, otherwise it throws an exception.
- * The radio changes its transmitter state to transmitting, and emits a
- * transmitter state changed signal. Finally, it schedules a timer to the end of
- * the transmission.
+ * from the higher layer. The radio must be in transmitter or transceiver mode
+ * before receiving a packet, otherwise it throws an exception. The radio changes
+ * its transmitter state to transmitting, and emits a transmitter state changed
+ * signal. Finally, it schedules a timer to the end of the transmission.
  *
  * The transmission process ends when the above timer expires. The radio changes
  * its transmitter state back to idle, and emits a transmitter state changed
@@ -52,8 +50,7 @@ namespace physicallayer {
  * The reception process ends when one of the above timer expires. If the timer
  * corresponds to an attempted reception, then the radio determines the
  * reception decision. Independently of whether the reception is successful or
- * not, the encapsulated packet is sent up to the higher layer. The radio also
- * attaches a ReceptionIndication as a control info object. Finally, the radio
+ * not, the encapsulated packet is sent up to the higher layer. Finally, the radio
  * changes its receiver state to the appropriate value, and emits a receiver
  * state changed signal.
  */
