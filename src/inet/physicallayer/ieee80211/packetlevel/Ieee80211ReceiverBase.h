@@ -41,6 +41,8 @@ class INET_API Ieee80211ReceiverBase : public FlatReceiverBase
     Ieee80211ReceiverBase();
     virtual ~Ieee80211ReceiverBase();
 
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
+
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);

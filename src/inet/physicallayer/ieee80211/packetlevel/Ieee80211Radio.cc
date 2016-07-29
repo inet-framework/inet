@@ -58,10 +58,10 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             const IIeee80211Mode *mode = configureCommand->getMode();
             if (mode != nullptr)
                 setMode(mode);
-            IIeee80211Band *band = configureCommand->getBand();
+            const IIeee80211Band *band = configureCommand->getBand();
             if (band != nullptr)
                 setBand(band);
-            Ieee80211Channel *channel = configureCommand->getChannel();
+            const Ieee80211Channel *channel = configureCommand->getChannel();
             if (channel != nullptr)
                 setChannel(channel);
             int newChannelNumber = configureCommand->getChannelNumber();

@@ -29,7 +29,7 @@ namespace inet::physicallayer;
 
 cplusplus {{
 typedef const IIeee80211Mode * IIeee80211ModePtr;
-typedef Ieee80211Channel * Ieee80211ChannelPtr;
+typedef const Ieee80211Channel * Ieee80211ChannelPtr;
 }}
 
 class noncobject IIeee80211ModePtr;
