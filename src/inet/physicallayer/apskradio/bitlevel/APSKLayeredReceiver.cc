@@ -174,7 +174,9 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(phyFrame, new BitVector(*packetModel->getSerializedPacket()), bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
     auto macFrame = const_cast<cPacket *>(receptionPacketModel->getPacket()->getEncapsulatedPacket());
-    macFrame->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
+    auto snirInd = macFrame->ensureTag<SnirInd>();
+    snirInd->setMinimumSnir(snir->getMin());
+    snirInd->setMaximumSnir(snir->getMax());
     macFrame->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, receptionPacketModel->isPacketErrorless()
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);

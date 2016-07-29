@@ -32,6 +32,7 @@ class INET_API IdealSNIR : public SNIRBase
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double getMin() const override;
+    virtual double getMax() const override;
 };
 
 } // namespace physicallayer

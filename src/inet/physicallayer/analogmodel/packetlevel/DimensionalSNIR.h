@@ -30,9 +30,11 @@ class INET_API DimensionalSNIR : public SNIRBase
 {
   protected:
     mutable double minSNIR;
+    mutable double maxSNIR;
 
   protected:
     virtual double computeMin() const;
+    virtual double computeMax() const;
 
   public:
     DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise);
@@ -40,6 +42,7 @@ class INET_API DimensionalSNIR : public SNIRBase
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual double getMin() const override;
+    virtual double getMax() const override;
 };
 
 } // namespace physicallayer

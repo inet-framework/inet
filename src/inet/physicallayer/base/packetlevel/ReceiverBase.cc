@@ -85,7 +85,9 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto decisions = new std::vector<const IReceptionDecision *>();
     decisions->push_back(radioMedium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE));
     auto macFrame = reception->getTransmission()->getMacFrame()->dup();
-    macFrame->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
+    auto snirInd = macFrame->ensureTag<SnirInd>();
+    snirInd->setMinimumSnir(snir->getMin());
+    snirInd->setMaximumSnir(snir->getMax());
     bool isReceptionSuccessful = true;
     for (auto decision : *decisions)
         isReceptionSuccessful &= decision->isReceptionSuccessful();

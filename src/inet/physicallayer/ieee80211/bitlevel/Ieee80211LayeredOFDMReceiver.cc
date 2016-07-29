@@ -406,7 +406,9 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     delete dataFieldPacketModel;
 
     auto macFrame = const_cast<cPacket *>(packetModel->getPacket()->getEncapsulatedPacket());
-    macFrame->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
+    auto snirInd = macFrame->ensureTag<SnirInd>();
+    snirInd->setMinimumSnir(snir->getMin());
+    snirInd->setMaximumSnir(snir->getMax());
     macFrame->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, packetModel->isPacketErrorless()
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), packetModel, bitModel, symbolModel, sampleModel, analogModel);

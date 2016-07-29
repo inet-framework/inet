@@ -23,7 +23,8 @@ namespace physicallayer {
 
 DimensionalSNIR::DimensionalSNIR(const DimensionalReception *reception, const DimensionalNoise *noise) :
     SNIRBase(reception, noise),
-    minSNIR(NaN)
+    minSNIR(NaN),
+    maxSNIR(NaN)
 {
 }
 
@@ -37,6 +38,7 @@ std::ostream& DimensionalSNIR::printToStream(std::ostream& stream, int level) co
 
 double DimensionalSNIR::computeMin() const
 {
+    // TODO: factor out common part
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_DEBUG << "Reception power begin " << endl;
@@ -70,11 +72,54 @@ double DimensionalSNIR::computeMin() const
     return minSNIR;
 }
 
+double DimensionalSNIR::computeMax() const
+{
+    // TODO: factor out common part
+    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+    const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    EV_DEBUG << "Reception power begin " << endl;
+    dimensionalReception->getPower()->print(EVSTREAM);
+    EV_DEBUG << "Reception power end" << endl;
+    const ConstMapping *noisePower = dimensionalNoise->getPower();
+    const ConstMapping *receptionPower = dimensionalReception->getPower();
+    const ConstMapping *snirMapping = MappingUtils::divide(*receptionPower, *noisePower);
+    const simtime_t startTime = reception->getStartTime();
+    const simtime_t endTime = reception->getEndTime();
+    Hz carrierFrequency = dimensionalReception->getCarrierFrequency();
+    Hz bandwidth = dimensionalReception->getBandwidth();
+    const DimensionSet& dimensions = receptionPower->getDimensionSet();
+    Argument startArgument(dimensions);
+    Argument endArgument(dimensions);
+    if (dimensions.hasDimension(Dimension::time)) {
+        startArgument.setTime(startTime);
+        // NOTE: to exclude the moment where the reception power starts to be 0 again
+        endArgument.setTime(MappingUtils::pre(endTime));
+    }
+    if (dimensions.hasDimension(Dimension::frequency)) {
+        startArgument.setArgValue(Dimension::frequency, (carrierFrequency - bandwidth / 2).get());
+        endArgument.setArgValue(Dimension::frequency, nexttoward((carrierFrequency + bandwidth / 2).get(), 0));
+    }
+    EV_DEBUG << "SNIR begin " << endl;
+    snirMapping->print(EVSTREAM);
+    EV_DEBUG << "SNIR end" << endl;
+    double maxSNIR = MappingUtils::findMax(*snirMapping, startArgument, endArgument);
+    EV_DEBUG << "Computing maximum SNIR: start = " << startArgument << ", end = " << endArgument << " -> maximum SNIR = " << maxSNIR << endl;
+    delete snirMapping;
+    return maxSNIR;
+}
+
 double DimensionalSNIR::getMin() const
 {
     if (std::isnan(minSNIR))
         minSNIR = computeMin();
     return minSNIR;
+}
+
+double DimensionalSNIR::getMax() const
+{
+    if (std::isnan(maxSNIR))
+        maxSNIR = computeMax();
+    return maxSNIR;
 }
 
 } // namespace physicallayer

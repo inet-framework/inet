@@ -37,6 +37,11 @@ double IdealSNIR::getMin() const
     return NaN;
 }
 
+double IdealSNIR::getMax() const
+{
+    return NaN;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

@@ -33,6 +33,7 @@ class INET_API ISNIR : public IPrintableObject
     virtual const INoise *getNoise() const = 0;
 
     virtual double getMin() const = 0;
+    virtual double getMax() const = 0;
 };
 
 } // namespace physicallayer
