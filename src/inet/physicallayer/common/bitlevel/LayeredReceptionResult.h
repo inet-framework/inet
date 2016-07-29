@@ -40,7 +40,7 @@ class INET_API LayeredReceptionResult : public ReceptionResult
     const IReceptionAnalogModel *analogModel;
 
   public:
-    LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel);
+    LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel);
     virtual ~LayeredReceptionResult();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

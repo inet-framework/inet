@@ -50,10 +50,3 @@ class ConfigureRadioCommand
     Hz carrierFrequency = Hz(NaN);       // new default carrier frequency in the range (0, +infinity) or NaN if not set.
     Hz bandwidth = Hz(NaN);              // new default bandwidth in the rage (0, +infinity) or NaN if not set.
 }
-
-//
-// Control info attached to a mac frame that is sent up from the ~Radio.
-//
-class ReceptionIndication
-{
-}

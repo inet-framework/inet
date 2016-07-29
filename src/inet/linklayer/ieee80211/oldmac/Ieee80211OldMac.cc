@@ -688,8 +688,7 @@ void Ieee80211OldMac::handleLowerPacket(cPacket *msg)
 {
     EV_TRACE << "->Enter handleLowerMsg...\n";
     EV_DEBUG << "received message from lower layer: " << msg << endl;
-//    Ieee80211ReceptionIndication *cinfo = dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo());
-//    if (cinfo && cinfo->getAirtimeMetric()) {
+//    if (cinfo) {
 //        double rtsTime = 0;
 //        if (rtsThreshold * 8 < cinfo->getTestFrameSize())
 //             rtsTime = controlFrameTxTime(LENGTH_CTS) + controlFrameTxTime(LENGTH_RTS);
@@ -711,8 +710,7 @@ void Ieee80211OldMac::handleLowerPacket(cPacket *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame *>(msg);
 
-//    if (msg->getControlInfo() && dynamic_cast<Ieee80211ReceptionIndication *>(msg->getControlInfo())) {
-//        Ieee80211ReceptionIndication *cinfo = (Ieee80211ReceptionIndication *)msg->removeControlInfo();
+//    if (cinfo) {
 //        if (contJ % 10 == 0) {
 //            snr = _snr;
 //            contJ = 0;

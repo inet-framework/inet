@@ -171,18 +171,13 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
     const APSKPhyFrame *phyFrame = createPhyFrame(packetModel);
-    ReceptionIndication *receptionIndication = new ReceptionIndication();
-//    receptionIndication->setMinRSSI(analogModel->getMinRSSI());
-//    receptionIndication->setSymbolErrorRate(bitModel->getBitErrorRate());
-//    receptionIndication->setBitErrorRate(symbolModel->getSymbolErrorRate());
-//    receptionIndication->setPacketErrorRate(packetModel->getPacketErrorRate());
     const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(phyFrame, new BitVector(*packetModel->getSerializedPacket()), bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
     auto macFrame = const_cast<cPacket *>(receptionPacketModel->getPacket()->getEncapsulatedPacket());
     macFrame->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
     macFrame->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, receptionPacketModel->isPacketErrorless()
-    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionIndication, receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
+    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionPacketModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
 const IListening *APSKLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

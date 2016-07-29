@@ -405,12 +405,11 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     delete signalFieldPacketModel;
     delete dataFieldPacketModel;
 
-    ReceptionIndication *receptionIndication = new ReceptionIndication();
     auto macFrame = const_cast<cPacket *>(packetModel->getPacket()->getEncapsulatedPacket());
     macFrame->ensureTag<SnirInd>()->setMinimumSnir(snir->getMin());
     macFrame->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, packetModel->isPacketErrorless()
-    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), receptionIndication, packetModel, bitModel, symbolModel, sampleModel, analogModel);
+    return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
 const IListening *Ieee80211LayeredOFDMReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

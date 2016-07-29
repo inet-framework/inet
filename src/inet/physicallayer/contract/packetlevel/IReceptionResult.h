@@ -47,12 +47,6 @@ class INET_API IReceptionResult : public IPrintableObject
     virtual const std::vector<const IReceptionDecision *> *getDecisions() const = 0;
 
     /**
-     * Returns the physical properties of the reception. This function never
-     * returns nullptr.
-     */
-    virtual const ReceptionIndication *getIndication() const = 0;
-
-    /**
      * Returns the PHY frame corresponding to the reception. This function
      * may return nullptr.
      */

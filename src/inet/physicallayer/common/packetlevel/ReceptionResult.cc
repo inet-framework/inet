@@ -21,10 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const cPacket *macFrame) :
+ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const cPacket *macFrame) :
     reception(reception),
     decisions(decisions),
-    indication(indication),
     macFrame(macFrame)
 {
 }
@@ -38,8 +37,6 @@ ReceptionResult::~ReceptionResult()
 std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionResult";
-    if (level >= PRINT_LEVEL_DETAIL)
-        stream << ", indication = " << indication;
     return stream;
 }
 

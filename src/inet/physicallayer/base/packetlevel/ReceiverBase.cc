@@ -68,11 +68,6 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
     }
 }
 
-ReceptionIndication *ReceiverBase::createReceptionIndication() const
-{
-    return new ReceptionIndication();
-}
-
 const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
 {
     auto isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
@@ -95,7 +90,7 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     for (auto decision : *decisions)
         isReceptionSuccessful &= decision->isReceptionSuccessful();
     macFrame->setBitError(!isReceptionSuccessful);
-    return new ReceptionResult(reception, decisions, createReceptionIndication(), macFrame);
+    return new ReceptionResult(reception, decisions, macFrame);
 }
 
 } // namespace physicallayer
