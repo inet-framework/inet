@@ -162,7 +162,7 @@ const APSKPhyFrame *APSKLayeredReceiver::createPhyFrame(const IReceptionPacketMo
         return check_and_cast<const APSKPhyFrame *>(packetModel->getPacket()->dup());
 }
 
-const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);

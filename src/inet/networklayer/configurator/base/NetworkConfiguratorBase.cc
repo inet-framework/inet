@@ -385,9 +385,9 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
-            cPacket *macFrame = new cPacket();
-            macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
-            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
+            cPacket *transmittedFrame = new cPacket();
+            transmittedFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
+            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
@@ -395,18 +395,20 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
             const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
             const IReceiver *receiver = receiverRadio->getReceiver();
-            const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir);
-            cPacket *phyFrame = const_cast<cPacket *>(receptionResult->getPhyFrame());
-            bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
-            double packetErrorRate = isReceptionPossible ? phyFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate() : 1;
+            const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE, interference, snir);
+            const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+            const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
+            cPacket *receivedFrame = const_cast<cPacket *>(receptionResult->getMacFrame());
+            double packetErrorRate = receptionDecision->isReceptionPossible() ? receivedFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate() : 1;
             delete receptionResult;
+            delete receptionDecision;
             delete snir;
             delete interference;
             delete reception;
             delete listening;
             delete arrival;
             delete transmission;
-            delete macFrame;
+            delete transmittedFrame;
             // we want to have a maximum PER product along the path,
             // but still minimize the hop count if the PER is negligible
             return minLinkWeight - log(1 - packetErrorRate);

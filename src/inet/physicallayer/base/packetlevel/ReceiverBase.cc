@@ -76,14 +76,8 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
     return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 
-const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    auto radio = reception->getReceiver();
-    auto radioMedium = radio->getMedium();
-    auto transmission = reception->getTransmission();
-    // TODO: add all cached decisions?
-    auto decisions = new std::vector<const IReceptionDecision *>();
-    decisions->push_back(radioMedium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE));
     auto macFrame = reception->getTransmission()->getMacFrame()->dup();
     auto snirInd = macFrame->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());

@@ -317,7 +317,9 @@ const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio,
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
     const ISNIR *snir = getSNIR(radio, transmission);
-    return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir);
+    const IReceptionDecision *receptionDecision = getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
+    const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+    return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
 }
 
 const IListeningDecision *RadioMedium::computeListeningDecision(const IRadio *radio, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const

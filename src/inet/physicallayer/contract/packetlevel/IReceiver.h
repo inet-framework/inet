@@ -139,7 +139,7 @@ class INET_API IReceiver : public IPrintableObject
      * receiver, thus it must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const = 0;
 };
 
 } // namespace physicallayer

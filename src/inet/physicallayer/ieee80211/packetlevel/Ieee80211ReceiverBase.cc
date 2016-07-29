@@ -89,10 +89,10 @@ void Ieee80211ReceiverBase::setChannelNumber(int channelNumber)
         setChannel(new Ieee80211Channel(band, channelNumber));
 }
 
-const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
-    auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir);
+    auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto modeInd = const_cast<cPacket *>(receptionResult->getMacFrame())->ensureTag<Ieee80211ModeInd>();
     modeInd->setMode(transmission->getMode());
     auto channelInd = const_cast<cPacket *>(receptionResult->getMacFrame())->ensureTag<Ieee80211ChannelInd>();

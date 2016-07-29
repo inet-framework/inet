@@ -102,11 +102,11 @@ const IListeningDecision *IdealReceiver::computeListeningDecision(const IListeni
     return new ListeningDecision(listening, false);
 }
 
-const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
     double errorRate = check_and_cast<const IdealReception *>(reception)->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
-    auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir);
+    auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto errorRateInd = const_cast<cPacket *>(receptionResult->getMacFrame())->ensureTag<ErrorRateInd>();
     errorRateInd->setSymbolErrorRate(errorRate);
     errorRateInd->setBitErrorRate(errorRate);

@@ -366,7 +366,7 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth)
     return new Ieee80211OFDMMode("", new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
