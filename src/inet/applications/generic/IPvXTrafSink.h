@@ -44,6 +44,8 @@ class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
+    virtual void refreshDisplay() const override;
+
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 };
 

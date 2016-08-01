@@ -57,6 +57,7 @@ class INET_API UDPSink : public ApplicationBase
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
 
     virtual void processStart();
     virtual void processStop();

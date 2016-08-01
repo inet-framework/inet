@@ -71,7 +71,7 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     virtual void stop();
 
     // utility function
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
   public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

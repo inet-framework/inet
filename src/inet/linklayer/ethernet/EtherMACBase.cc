@@ -615,7 +615,7 @@ void EtherMACBase::finish()
     }
 }
 
-void EtherMACBase::updateDisplayString()
+void EtherMACBase::refreshDisplay() const
 {
     // icon coloring
     const char *color;
@@ -706,7 +706,7 @@ void EtherMACBase::updateDisplayString()
 #endif // if 0
 }
 
-void EtherMACBase::updateConnectionColor(int txState)
+void EtherMACBase::updateConnectionColor(int txState) const
 {
     const char *color;
 

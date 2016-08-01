@@ -144,7 +144,7 @@ void IPv6::handleMessage(cMessage *msg)
         QueueBase::handleMessage(msg);
 }
 
-void IPv6::updateDisplayString()
+void IPv6::refreshDisplay() const
 {
     char buf[80] = "";
     if (numForwarded > 0)
@@ -237,9 +237,6 @@ void IPv6::endService(cPacket *msg)
                 preroutingFinish(datagram, fromIE, destIE, nextHop.toIPv6());
         }
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)

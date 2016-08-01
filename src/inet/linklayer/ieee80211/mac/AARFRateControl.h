@@ -47,7 +47,7 @@ class INET_API AARFRateControl : public RateControlBase, public cSimpleModule
         void resetIncreaseThreshdold();
         void resetTimer();
         void increaseRateIfTimerIsExpired();
-        void updateDisplayString();
+        virtual void refreshDisplay() const override;
 
     public:
         void initialize(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *initialMode) override;

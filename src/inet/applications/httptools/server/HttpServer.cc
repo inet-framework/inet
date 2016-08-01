@@ -82,7 +82,6 @@ void HttpServer::handleMessage(cMessage *msg)
         EV_DEBUG << "Process the message " << msg->getName() << endl;
         socket->processMessage(msg);
     }
-    updateDisplay();
 }
 
 void HttpServer::socketEstablished(int connId, void *yourPtr)

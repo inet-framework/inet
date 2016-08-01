@@ -75,17 +75,18 @@ void SingleRateThreeColorMeter::handleMessage(cMessage *msg)
             send(packet, "redOut");
             break;
     }
+}
 
-    if (hasGUI()) {
-        char buf[80] = "";
-        if (numRcvd > 0)
-            sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
-        if (numYellow > 0)
-            sprintf(buf + strlen(buf), "yellow:%d ", numYellow);
-        if (numRed > 0)
-            sprintf(buf + strlen(buf), "red:%d ", numRed);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void SingleRateThreeColorMeter::refreshDisplay() const
+{
+    char buf[80] = "";
+    if (numRcvd > 0)
+        sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
+    if (numYellow > 0)
+        sprintf(buf + strlen(buf), "yellow:%d ", numYellow);
+    if (numRed > 0)
+        sprintf(buf + strlen(buf), "red:%d ", numRed);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 int SingleRateThreeColorMeter::meterPacket(cPacket *packet)

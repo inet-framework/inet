@@ -74,13 +74,14 @@ void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
         send(packet, "outs", clazz);
     else
         send(packet, "defaultOut");
+}
 
-    if (hasGUI()) {
-        char buf[20] = "";
-        if (numRcvd > 0)
-            sprintf(buf + strlen(buf), "rcvd:%d ", numRcvd);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void BehaviorAggregateClassifier::refreshDisplay() const
+{
+    char buf[20] = "";
+    if (numRcvd > 0)
+        sprintf(buf + strlen(buf), "rcvd:%d ", numRcvd);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)

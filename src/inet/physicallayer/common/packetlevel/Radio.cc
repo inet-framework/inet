@@ -75,7 +75,6 @@ void Radio::initialize(int stage)
         parseRadioModeSwitchingTimes();
     }
     else if (stage == INITSTAGE_LAST) {
-        updateDisplayString();
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
     }
 }
@@ -595,7 +594,7 @@ void Radio::updateTransceiverPart()
     }
 }
 
-void Radio::updateDisplayString()
+void Radio::refreshDisplay() const
 {
     // draw the interference area and sensitivity area
     // according pathloss propagation only
@@ -603,7 +602,7 @@ void Radio::updateDisplayString()
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
     if (hasGUI() && (displayInterferenceRange || displayCommunicationRange)) {
-        cModule *host = findContainingNode(this);
+        cModule *host = findContainingNode(const_cast<Radio*>(this));
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {
             m maxInterferenceRage = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxInterferenceRange(this);

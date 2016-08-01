@@ -131,9 +131,6 @@ void GlobalARP::handleMessage(cMessage *msg)
         processSelfMessage(msg);
     else
         processARPPacket(check_and_cast<ARPPacket *>(msg));
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void GlobalARP::processSelfMessage(cMessage *msg)
@@ -185,10 +182,6 @@ bool GlobalARP::isNodeUp()
 {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
-void GlobalARP::updateDisplayString()
-{
 }
 
 void GlobalARP::processARPPacket(ARPPacket *arp)

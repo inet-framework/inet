@@ -48,7 +48,7 @@ class INET_API TCPEchoApp : public TCPSrvHostApp
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
-    virtual void updateDisplay() override;
+    virtual void refreshDisplay() const override;
 
   public:
     TCPEchoApp();

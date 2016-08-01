@@ -52,12 +52,12 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
 
     /* Utility functions */
     virtual void connect();
     virtual void close();
     virtual void sendPacket(cPacket *pkt);
-    virtual void setStatusString(const char *s);
 
     /* TCPSocket::CallbackInterface callback methods */
     virtual void handleTimer(cMessage *msg) = 0;

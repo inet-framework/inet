@@ -81,9 +81,6 @@ void EtherMACFullDuplex::handleMessage(cMessage *msg)
         processMsgFromNetwork(PK(msg));
     else
         throw cRuntimeError("Message received from unknown gate!");
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void EtherMACFullDuplex::handleSelfMessage(cMessage *msg)

@@ -70,7 +70,7 @@ class INET_API ScenarioManager : public cSimpleModule
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

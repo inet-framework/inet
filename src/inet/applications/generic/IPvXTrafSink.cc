@@ -55,12 +55,13 @@ void IPvXTrafSink::handleMessage(cMessage *msg)
         return;
     }
     processPacket(check_and_cast<cPacket *>(msg));
+}
 
-    if (hasGUI()) {
-        char buf[32];
-        sprintf(buf, "rcvd: %d pks", numReceived);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void IPvXTrafSink::refreshDisplay() const
+{
+    char buf[32];
+    sprintf(buf, "rcvd: %d pks", numReceived);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool IPvXTrafSink::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

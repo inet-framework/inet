@@ -88,7 +88,7 @@ class INET_API Contention : public cSimpleModule, public IContention, protected 
         virtual void reportChannelAccessGranted();
         virtual void reportInternalCollision();
         virtual void revokeBackoffOptimization();
-        virtual void updateDisplayString();
+        virtual void refreshDisplay() const override;
         const char *getEventName(EventType event);
 
     public:

@@ -76,9 +76,6 @@ void ThruputMeteringChannel::processMessage(cMessage *msg, simtime_t t, result_t
     intvlNumPackets++;
     intvlNumBits += pkt->getBitLength();
     intvlLastPkTime = t;
-
-    // update display string
-    updateDisplay();
 }
 
 void ThruputMeteringChannel::beginNewInterval(simtime_t now)
@@ -94,7 +91,7 @@ void ThruputMeteringChannel::beginNewInterval(simtime_t now)
     intvlNumPackets = intvlNumBits = 0;
 }
 
-void ThruputMeteringChannel::updateDisplay()
+void ThruputMeteringChannel::refreshDisplay() const
 {
     // produce label, based on format string
     char buf[200];

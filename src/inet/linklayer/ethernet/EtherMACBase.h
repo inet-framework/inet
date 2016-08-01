@@ -241,8 +241,8 @@ class INET_API EtherMACBase : public MACBase
     virtual bool isUpperMsg(cMessage *msg) override { return msg->getArrivalGate() == upperLayerInGate; }
 
     // display
-    virtual void updateDisplayString();
-    virtual void updateConnectionColor(int txState);
+    virtual void refreshDisplay() const override;
+    virtual void updateConnectionColor(int txState) const;
 
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj DETAILS_ARG) override;

@@ -246,7 +246,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
         case INIT:
             if (msg->getKind() == BMAC_START_BMAC) {
                 EV_DETAIL << "State INIT, message BMAC_START, new state SLEEP" << endl;
-                changeDisplayColor(BLACK);
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 macState = SLEEP;
                 scheduleAt(simTime() + dblrand() * slotDuration, wakeup);
@@ -259,7 +258,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State SLEEP, message BMAC_WAKEUP, new state CCA" << endl;
                 scheduleAt(simTime() + checkInterval, cca_timeout);
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-                changeDisplayColor(GREEN);
                 macState = CCA;
                 return;
             }
@@ -274,7 +272,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                                  " SEND_PREAMBLE" << endl;
                     macState = SEND_PREAMBLE;
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    changeDisplayColor(YELLOW);
                     scheduleAt(simTime() + slotDuration, stop_preambles);
                     return;
                 }
@@ -285,7 +282,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     scheduleAt(simTime() + slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                    changeDisplayColor(BLACK);
                     return;
                 }
             }
@@ -362,7 +358,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                                  " new state WAIT_ACK" << endl;
                     macState = WAIT_ACK;
                     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-                    changeDisplayColor(GREEN);
                     scheduleAt(simTime() + checkInterval, ack_timeout);
                 }
                 else {
@@ -377,7 +372,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                         scheduleAt(simTime() + slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                    changeDisplayColor(BLACK);
                 }
                 return;
             }
@@ -393,7 +387,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     macState = SEND_PREAMBLE;
                     scheduleAt(simTime() + slotDuration, stop_preambles);
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    changeDisplayColor(YELLOW);
                 }
                 else {
                     EV_DETAIL << "State WAIT_ACK, message BMAC_ACK_TIMEOUT, new state"
@@ -411,7 +404,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                         scheduleAt(simTime() + slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                    changeDisplayColor(BLACK);
                     nbMissedAcks++;
                 }
                 return;
@@ -444,7 +436,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                         scheduleAt(simTime() + slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                    changeDisplayColor(BLACK);
                     lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
                 }
                 delete msg;
@@ -491,7 +482,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     macState = SEND_ACK;
                     lastDataPktSrcAddr = src;
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                    changeDisplayColor(YELLOW);
                 }
                 else {
                     EV_DETAIL << "State WAIT_DATA, message BMAC_DATA, new state SLEEP"
@@ -503,7 +493,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                         scheduleAt(simTime() + slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                    changeDisplayColor(BLACK);
                 }
                 return;
             }
@@ -517,7 +506,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     scheduleAt(simTime() + slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                changeDisplayColor(BLACK);
                 return;
             }
             break;
@@ -545,7 +533,6 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
                     scheduleAt(simTime() + slotDuration, wakeup);
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-                changeDisplayColor(BLACK);
                 lastDataPktSrcAddr = MACAddress::BROADCAST_ADDRESS;
                 return;
             }
@@ -656,28 +643,39 @@ void BMacLayer::attachSignal(BMacFrame *macPkt)
 /**
  * Change the color of the node for animation purposes.
  */
-
-void BMacLayer::changeDisplayColor(BMAC_COLORS color)
+void BMacLayer::refreshDisplay() const
 {
     if (!animation)
         return;
-    cDisplayString& dispStr = findContainingNode(this)->getDisplayString();
-    //b=40,40,rect,black,black,2"
-    if (color == GREEN)
-        dispStr.setTagArg("b", 3, "green");
-    //dispStr.parse("b=40,40,rect,green,green,2");
-    if (color == BLUE)
-        dispStr.setTagArg("b", 3, "blue");
-    //dispStr.parse("b=40,40,rect,blue,blue,2");
-    if (color == RED)
-        dispStr.setTagArg("b", 3, "red");
-    //dispStr.parse("b=40,40,rect,red,red,2");
-    if (color == BLACK)
-        dispStr.setTagArg("b", 3, "black");
-    //dispStr.parse("b=40,40,rect,black,black,2");
-    if (color == YELLOW)
-        dispStr.setTagArg("b", 3, "yellow");
-    //dispStr.parse("b=40,40,rect,yellow,yellow,2");
+    cDisplayString& dispStr = findContainingNode(const_cast<BMacLayer *>(this))->getDisplayString();
+
+    switch (macState) {
+        case INIT:
+        case SLEEP:
+            dispStr.setTagArg("b", 3, "black");
+            break;
+
+        case CCA:
+            dispStr.setTagArg("b", 3, "green");
+            break;
+
+        case SEND_ACK:
+        case SEND_PREAMBLE:
+        case SEND_DATA:
+            dispStr.setTagArg("b", 3, "blue");
+            break;
+
+        case WAIT_ACK:
+        case WAIT_DATA:
+        case WAIT_TX_DATA_OVER:
+        case WAIT_ACK_TX:
+            dispStr.setTagArg("b", 3, "yellow");
+            break;
+
+        default:
+            dispStr.setTagArg("b", 3, "");
+            break;
+    }
 }
 
 /*void BMacLayer::changeMacState(States newState)

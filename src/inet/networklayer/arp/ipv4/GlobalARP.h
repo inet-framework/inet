@@ -100,8 +100,6 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
     virtual void start();
 
     virtual void processARPPacket(ARPPacket *arp);
-
-    virtual void updateDisplayString();
 };
 
 } // namespace inet

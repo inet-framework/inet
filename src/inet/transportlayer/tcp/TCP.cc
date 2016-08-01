@@ -190,9 +190,6 @@ void TCP::handleMessage(cMessage *msg)
         if (!ret)
             removeConnection(conn);
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 TCPConnection *TCP::createConnection(int socketId)
@@ -208,7 +205,7 @@ void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcAddr, L3Add
     delete tcpseg;
 }
 
-void TCP::updateDisplayString()
+void TCP::refreshDisplay() const
 {
     if (getEnvir()->isExpressMode()) {
         // in express mode, we don't bother to update the display
@@ -530,7 +527,6 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             //FIXME implementation
             isOperational = true;
-            updateDisplayString();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
@@ -538,7 +534,6 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
             //FIXME close connections???
             reset();
             isOperational = false;
-            updateDisplayString();
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
@@ -546,7 +541,6 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
             //FIXME implementation
             reset();
             isOperational = false;
-            updateDisplayString();
         }
     }
     else {

@@ -64,7 +64,7 @@ void TCPSrvHostApp::crash()
         removeThread(*threadSet.begin());
 }
 
-void TCPSrvHostApp::updateDisplay()
+void TCPSrvHostApp::refreshDisplay() const
 {
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
@@ -105,8 +105,6 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
 
         socket->processMessage(msg);
     }
-    if (hasGUI())
-        updateDisplay();
 }
 
 void TCPSrvHostApp::finish()
@@ -122,9 +120,6 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     // remove thread object
     delete thread;
-
-    if (hasGUI())
-        updateDisplay();
 }
 
 bool TCPSrvHostApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

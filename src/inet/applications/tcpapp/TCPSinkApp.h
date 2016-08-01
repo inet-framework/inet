@@ -41,6 +41,8 @@ class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
+
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };

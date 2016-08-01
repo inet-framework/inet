@@ -184,7 +184,7 @@ const char *DHCPClient::getAndCheckMessageTypeName(DHCPMessageType type)
     }
 }
 
-void DHCPClient::updateDisplayString()
+void DHCPClient::refreshDisplay() const
 {
     getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
@@ -209,9 +209,6 @@ void DHCPClient::handleMessage(cMessage *msg)
     }
     else
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void DHCPClient::handleTimer(cMessage *msg)

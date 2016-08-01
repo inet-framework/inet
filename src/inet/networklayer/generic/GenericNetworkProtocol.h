@@ -100,7 +100,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
 
     // utility: show current statistics above the icon
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     /**
      * Handle GenericDatagram messages arriving from lower layer.

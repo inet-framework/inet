@@ -108,7 +108,7 @@ void IPv4::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
     mapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), gate->getIndex());
 }
 
-void IPv4::updateDisplayString()
+void IPv4::refreshDisplay() const
 {
     char buf[80] = "";
     if (numForwarded > 0)
@@ -173,9 +173,6 @@ void IPv4::endService(cPacket *packet)
         else
             throw cRuntimeError(packet, "Unexpected packet type: %s", packet->getClassName());
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 const InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *packet)

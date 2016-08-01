@@ -105,12 +105,9 @@ void EtherLLC::handleMessage(cMessage *msg)
                     msg->getName(), msg->getKind());
         }
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
-void EtherLLC::updateDisplayString()
+void EtherLLC::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalPassedUp, totalFromHigherLayer);

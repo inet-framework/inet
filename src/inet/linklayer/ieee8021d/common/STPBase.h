@@ -64,13 +64,13 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
      * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
      * and the port to which the link is connected to is also forwarding, otherwise colors the link gray.
      */
-    virtual void colorLink(unsigned int i, bool forwarding);
+    virtual void colorLink(unsigned int i, bool forwarding) const;
 
     /**
      * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.
      * Shows port role, state. Marks root switch.
      */
-    virtual void updateDisplay();
+    virtual void refreshDisplay() const override;
 
     /**
      * @brief Obtains the root gate index.
@@ -83,6 +83,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
      * @return The port's Ieee8021dInterfaceData, or nullptr if it doesn't exist.
      */
     Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
+    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum) const { return const_cast<STPBase *>(this)->getPortInterfaceData(portNum); }
 
     /**
      * @brief Gets InterfaceEntry for port number.

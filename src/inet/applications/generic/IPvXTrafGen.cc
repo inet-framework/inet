@@ -108,12 +108,13 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
     }
     else
         processPacket(PK(msg));
+}
 
-    if (hasGUI()) {
-        char buf[40];
-        sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void IPvXTrafGen::refreshDisplay() const
+{
+    char buf[40];
+    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool IPvXTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

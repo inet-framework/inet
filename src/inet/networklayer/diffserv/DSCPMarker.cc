@@ -67,15 +67,15 @@ void DSCPMarker::handleMessage(cMessage *msg)
     }
     else
         throw cRuntimeError("DSCPMarker expects cPackets");
-
-    if (hasGUI()) {
-        char buf[50] = "";
-        if (numRcvd > 0)
-            sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
-        if (numMarked > 0)
-            sprintf(buf + strlen(buf), "mark:%d ", numMarked);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+}
+void DSCPMarker::refreshDisplay() const
+{
+    char buf[50] = "";
+    if (numRcvd > 0)
+        sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
+    if (numMarked > 0)
+        sprintf(buf + strlen(buf), "mark:%d ", numMarked);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool DSCPMarker::markPacket(cPacket *packet, int dscp)

@@ -153,12 +153,13 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         EV_WARN << "drop msg: " << msg->getName() << ", kind:" << msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
         delete msg;
     }
+}
 
-    if (hasGUI()) {
-        char buf[64];
-        sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void TCPGenericSrvApp::refreshDisplay() const
+{
+    char buf[64];
+    sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void TCPGenericSrvApp::finish()

@@ -49,7 +49,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void updateDisplay();
+    virtual void refreshDisplay() const override;
 
     bool isNodeUp() { return !nodeStatus || nodeStatus->getState() == NodeStatus::UP; }
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

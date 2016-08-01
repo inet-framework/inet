@@ -34,10 +34,6 @@ void UDPEchoApp::initialize(int stage)
         numEchoed = 0;
         WATCH(numEchoed);
     }
-    else if (stage == INITSTAGE_LAST) {
-        if (hasGUI())
-            updateDisplay();
-    }
 }
 
 void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
@@ -60,16 +56,13 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
 
         // send back
         socket.sendTo(pk, srcAddress, srcPort);
-
-        if (hasGUI())
-            updateDisplay();
     }
     else {
         throw cRuntimeError("Message received with unexpected message kind = %d", msg->getKind());
     }
 }
 
-void UDPEchoApp::updateDisplay()
+void UDPEchoApp::refreshDisplay() const
 {
     char buf[40];
     sprintf(buf, "echoed: %d pks", numEchoed);

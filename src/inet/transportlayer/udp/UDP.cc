@@ -164,12 +164,9 @@ void UDP::handleMessage(cMessage *msg)
         else
             processCommandFromApp(msg);
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
-void UDP::updateDisplayString()
+void UDP::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "passed up: %d pks\nsent: %d pks", numPassedUp, numSent);

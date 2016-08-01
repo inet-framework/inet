@@ -452,12 +452,9 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
         if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
             scheduleAt(roundTime(simTime() + 0.250, 4), pLwipFastTimerM);
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
-void TCP_lwIP::updateDisplayString()
+void TCP_lwIP::refreshDisplay() const
 {
     if (getEnvir()->isExpressMode()) {
         // in express mode, we don't bother to update the display

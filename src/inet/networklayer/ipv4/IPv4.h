@@ -116,7 +116,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual const InterfaceEntry *getShortestPathInterfaceToSource(IPv4Datagram *datagram);
 
     // utility: show current statistics above the icon
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     // utility: processing requested ARP resolution completed
     void arpResolutionCompleted(IARP::Notification *entry);

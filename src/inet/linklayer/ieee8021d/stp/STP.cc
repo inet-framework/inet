@@ -41,9 +41,6 @@ void STP::initialize(int stage)
         tick = new cMessage("STP_TICK", 0);
         WATCH(bridgeAddress);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
-        updateDisplay();
-    }
 }
 
 STP::~STP()
@@ -84,7 +81,6 @@ void STP::handleMessage(cMessage *msg)
     else {
         if (msg == tick) {
             handleTick();
-            updateDisplay();
             scheduleAt(simTime() + 1, tick);
         }
         else

@@ -65,7 +65,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
     virtual void configureRouterId();
 
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     virtual void configureInterface(InterfaceEntry *ie);
 

@@ -67,12 +67,13 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
         else
             notifyListeners();
     }
+}
 
-    if (hasGUI()) {
-        char buf[40];
-        sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void PassiveQueueBase::refreshDisplay() const
+{
+    char buf[100];
+    sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void PassiveQueueBase::requestPacket()

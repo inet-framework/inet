@@ -59,6 +59,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
 
     virtual void notifyListeners();
 

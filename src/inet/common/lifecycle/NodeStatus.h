@@ -53,7 +53,7 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("This module doesn't handle messages"); }
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void setState(State state);
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
     static State getStateByName(const char *name);
 };
 

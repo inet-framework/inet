@@ -224,7 +224,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual void updateTransceiverState();
     virtual void updateTransceiverPart();
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
   public:
     Radio() { }

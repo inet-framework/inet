@@ -256,12 +256,13 @@ void PingApp::handleMessage(cMessage *msg)
             throw cRuntimeError("Unaccepted msg: %s(%s)", msg->getName(), msg->getClassName());
         }
     }
+}
 
-    if (hasGUI()) {
-        char buf[40];
-        sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void PingApp::refreshDisplay() const
+{
+    char buf[40];
+    sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

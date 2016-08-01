@@ -82,7 +82,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
 
   protected:
     // displays summary above the icon
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     // displays the interface IPv4/IPv6 address on the outgoing link that corresponds to the interface
     virtual void updateLinkDisplayString(InterfaceEntry *entry);

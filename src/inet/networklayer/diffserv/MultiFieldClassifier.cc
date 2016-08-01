@@ -155,13 +155,14 @@ void MultiFieldClassifier::handleMessage(cMessage *msg)
         send(packet, "outs", gateIndex);
     else
         send(packet, "defaultOut");
+}
 
-    if (hasGUI()) {
-        char buf[20] = "";
-        if (numRcvd > 0)
-            sprintf(buf + strlen(buf), "rcvd:%d ", numRcvd);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void MultiFieldClassifier::refreshDisplay() const
+{
+    char buf[20] = "";
+    if (numRcvd > 0)
+        sprintf(buf + strlen(buf), "rcvd:%d ", numRcvd);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 int MultiFieldClassifier::classifyPacket(cPacket *packet)

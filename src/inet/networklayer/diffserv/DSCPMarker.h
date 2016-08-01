@@ -40,8 +40,8 @@ class INET_API DSCPMarker : public cSimpleModule
 
   protected:
     virtual void initialize() override;
-
     virtual void handleMessage(cMessage *msg) override;
+    virtual void refreshDisplay() const override;
 
     virtual bool markPacket(cPacket *msg, int dscp);
 };

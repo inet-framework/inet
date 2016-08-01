@@ -63,7 +63,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
     send(msg, "socketOut");
 }
 
-void TCPEchoApp::updateDisplay()
+void TCPEchoApp::refreshDisplay() const
 {
     char buf[160];
     sprintf(buf, "threads: %d\nrcvd: %ld bytes\nsent: %ld bytes", socketMap.size(), bytesRcvd, bytesSent);

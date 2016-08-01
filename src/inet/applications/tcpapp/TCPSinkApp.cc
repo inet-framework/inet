@@ -65,12 +65,6 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         bytesRcvd += packetLength;
         emit(rcvdPkSignal, pk);
         delete msg;
-
-        if (hasGUI()) {
-            char buf[32];
-            sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
-            getDisplayString().setTagArg("t", 0, buf);
-        }
     }
     else if (msg->getKind() == TCP_I_AVAILABLE)
         socket.processMessage(msg);
@@ -82,6 +76,13 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 
 void TCPSinkApp::finish()
 {
+}
+
+void TCPSinkApp::refreshDisplay() const
+{
+    std::ostringstream os;
+    os << TCPSocket::stateName(socket.getState()) << "\nrcvd: " << bytesRcvd << " bytes";
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 } // namespace inet

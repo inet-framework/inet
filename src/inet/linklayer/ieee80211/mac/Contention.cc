@@ -88,7 +88,6 @@ void Contention::initialize(int stage)
         WATCH(backoffOptimizationDelta);
         WATCH(mediumFree);
         WATCH(backoffOptimization);
-        updateDisplayString();
     }
     else if (stage == INITSTAGE_LAST) {
         if (!par("initialChannelBusy") && simTime() == 0)
@@ -216,8 +215,6 @@ void Contention::handleWithFSM(EventType event, cMessage *msg)
         reportChannelAccessGranted();
     if (finallyReportInternalCollision)
         reportInternalCollision();
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Contention::mediumStateChanged(bool mediumFree)
@@ -352,7 +349,7 @@ const char *Contention::getEventName(EventType event)
 #undef CASE
 }
 
-void Contention::updateDisplayString()
+void Contention::refreshDisplay() const
 {
     const char *stateName = fsm.getStateName();
     if (strcmp(stateName, "IFS_AND_BACKOFF") == 0)

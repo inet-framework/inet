@@ -54,7 +54,7 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void processFrameFromMAC(EtherFrame *msg);
     virtual void handleSendPause(cMessage *msg);
 
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet
