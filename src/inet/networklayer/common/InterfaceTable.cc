@@ -104,10 +104,9 @@ void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cOb
 
 //---
 
-cModule *InterfaceTable::getHostModule()
+cModule *InterfaceTable::getHostModule() const
 {
-    if (!host)
-        host = getContainingNode(this);
+    ASSERT(host != nullptr);
     return host;
 }
 
@@ -215,7 +214,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
     return false;
 }
 
-int InterfaceTable::getNumInterfaces()
+int InterfaceTable::getNumInterfaces() const
 {
     if (tmpNumInterfaces == -1) {
         // count non-nullptr elements
@@ -231,7 +230,7 @@ int InterfaceTable::getNumInterfaces()
     return tmpNumInterfaces;
 }
 
-InterfaceEntry *InterfaceTable::getInterface(int pos)
+InterfaceEntry *InterfaceTable::getInterface(int pos) const
 {
     int n = getNumInterfaces();    // also fills tmpInterfaceList
     if (pos < 0 || pos >= n)
@@ -251,13 +250,13 @@ InterfaceEntry *InterfaceTable::getInterface(int pos)
     return tmpInterfaceList[pos];
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceById(int id)
+InterfaceEntry *InterfaceTable::getInterfaceById(int id) const
 {
     id -= INTERFACEIDS_START;
     return (id < 0 || id >= (int)idToInterface.size()) ? nullptr : idToInterface[id];
 }
 
-int InterfaceTable::getBiggestInterfaceId()
+int InterfaceTable::getBiggestInterfaceId() const
 {
     return INTERFACEIDS_START + idToInterface.size() - 1;
 }
@@ -398,7 +397,7 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)
     }
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
+InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -410,7 +409,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id)
+InterfaceEntry *InterfaceTable::getInterfaceByNodeInputGateId(int id) const
 {
     // linear search is OK because normally we have don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -434,7 +433,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
+InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod) const
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
     ASSERT(host != nullptr);
@@ -467,7 +466,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
     return ie;
 }
 
-InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name)
+InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name) const
 {
     Enter_Method_Silent();
     if (!name)
@@ -480,7 +479,7 @@ InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name)
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
+InterfaceEntry *InterfaceTable::getFirstLoopbackInterface() const
 {
     Enter_Method_Silent();
     int n = idToInterface.size();
@@ -491,7 +490,7 @@ InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
     return nullptr;
 }
 
-InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
+InterfaceEntry *InterfaceTable::getFirstMulticastInterface() const
 {
     Enter_Method_Silent();
     int n = idToInterface.size();
@@ -527,7 +526,7 @@ void InterfaceTable::resetInterfaces()
 
 }
 
-MulticastGroupList InterfaceTable::collectMulticastGroups()
+MulticastGroupList InterfaceTable::collectMulticastGroups() const
 {
     MulticastGroupList mglist;
     for (int i = 0; i < getNumInterfaces(); ++i) {

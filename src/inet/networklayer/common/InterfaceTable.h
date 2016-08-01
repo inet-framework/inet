@@ -77,8 +77,8 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     InterfaceVector idToInterface;
 
     // fields to support getNumInterfaces() and getInterface(pos)
-    int tmpNumInterfaces;    // caches number of non-nullptr elements of idToInterface; -1 if invalid
-    InterfaceEntry **tmpInterfaceList;    // caches non-nullptr elements of idToInterface; nullptr if invalid
+    mutable int tmpNumInterfaces;    // caches number of non-nullptr elements of idToInterface; -1 if invalid
+    mutable InterfaceEntry **tmpInterfaceList;    // caches non-nullptr elements of idToInterface; nullptr if invalid
 
   protected:
     // displays summary above the icon
@@ -122,7 +122,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     /**
      * Returns the host or router this interface table lives in.
      */
-    virtual cModule *getHostModule() override;
+    virtual cModule *getHostModule() const override;
 
     /**
      * Checks if the address is a local one, i.e. one of the host's.
@@ -158,7 +158,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     /**
      * Returns the number of interfaces.
      */
-    virtual int getNumInterfaces() override;
+    virtual int getNumInterfaces() const override;
 
     /**
      * Returns the InterfaceEntry specified by an index 0..numInterfaces-1.
@@ -169,31 +169,31 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * so cannot be used to reliably identify the interface. Use interfaceId
      * to refer to interfaces from other modules or from messages/packets.
      */
-    virtual InterfaceEntry *getInterface(int pos) override;
+    virtual InterfaceEntry *getInterface(int pos) const override;
 
     /**
      * Returns an interface by its Id. Ids are guaranteed to be invariant
      * to interface deletions/additions. Returns nullptr if there is no such
      * interface (This allows detecting stale IDs without raising an error.)
      */
-    virtual InterfaceEntry *getInterfaceById(int id) override;
+    virtual InterfaceEntry *getInterfaceById(int id) const override;
 
     /**
      * Returns the biggest interface Id.
      */
-    virtual int getBiggestInterfaceId() override;
+    virtual int getBiggestInterfaceId() const override;
 
     /**
      * Returns an interface given by its getNodeOutputGateId().
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByNodeOutputGateId(int id) override;
+    virtual InterfaceEntry *getInterfaceByNodeOutputGateId(int id) const override;
 
     /**
      * Returns an interface given by its getNodeInputGateId().
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) override;
+    virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) const override;
 
     /**
      * Returns an interface given by its getNetworkLayerGateIndex().
@@ -205,12 +205,12 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * Returns an interface by one of its component module (e.g. PPP).
      * Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod) override;
+    virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod) const override;
 
     /**
      * Returns an interface given by its name. Returns nullptr if not found.
      */
-    virtual InterfaceEntry *getInterfaceByName(const char *name) override;
+    virtual InterfaceEntry *getInterfaceByName(const char *name) const override;
 
     /**
      * Returns the first interface with the isLoopback flag set.
@@ -218,13 +218,13 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * should never happen because InterfaceTable itself registers a
      * loopback interface on startup.)
      */
-    virtual InterfaceEntry *getFirstLoopbackInterface() override;
+    virtual InterfaceEntry *getFirstLoopbackInterface() const override;
 
     /**
      * Returns the first multicast capable interface.
      * If there is no such interface, then returns nullptr.
      */
-    virtual InterfaceEntry *getFirstMulticastInterface() override;
+    virtual InterfaceEntry *getFirstMulticastInterface() const override;
 
     /**
      * ILifecycle method
@@ -234,7 +234,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     /**
      * Returns all multicast group address, with it's interfaceId
      */
-    virtual MulticastGroupList collectMulticastGroups() override;
+    virtual MulticastGroupList collectMulticastGroups() const override;
 };
 
 } // namespace inet
