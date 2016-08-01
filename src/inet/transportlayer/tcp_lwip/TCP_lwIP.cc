@@ -43,7 +43,6 @@
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -149,7 +148,6 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     if (!ctrl)
         throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
 
-    INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
     srcAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
     destAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
     interfaceId = (tcpsegP->getMandatoryTag<InterfaceInd>())->getInterfaceId();
@@ -596,8 +594,8 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
              << " from " << srcP << " to " << destP << "\n";
 
     IL3AddressType *addressType = destP.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    cObject *controlInfo = addressType->createNetworkProtocolControlInfo();
+    tcpseg->setControlInfo(controlInfo);
 
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);

@@ -33,7 +33,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
@@ -337,7 +336,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     if (!ctrl)
         throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
 
-    INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
     inetSockPair.remoteM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
     inetSockPair.localM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
     //int interfaceId = controlInfo->getInterfaceId();
@@ -905,8 +903,8 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    cObject *controlInfo = addressType->createNetworkProtocolControlInfo();
+    tcpseg->setControlInfo(controlInfo);
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
