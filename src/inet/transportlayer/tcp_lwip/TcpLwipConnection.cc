@@ -18,6 +18,8 @@
 
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/headers/defs.h"    // for endian macros
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
@@ -133,7 +135,6 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
     TCPAvailableInfo *ind = new TCPAvailableInfo();
-    ind->setSocketId(listenConnId);
     ind->setNewSocketId(connIdM);
     ind->setLocalAddr(localAddr);
     ind->setRemoteAddr(remoteAddr);
@@ -141,6 +142,8 @@ void TcpLwipConnection::sendAvailableIndicationToApp(int listenConnId)
     ind->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(ind);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<SocketInd>()->setSocketId(listenConnId);
     tcpLwipM.send(msg, "appOut");
     //TODO shouldn't read from lwip until accept arrived
 }
@@ -154,13 +157,14 @@ void TcpLwipConnection::sendEstablishedMsg()
 
     L3Address localAddr(pcbM->local_ip.addr), remoteAddr(pcbM->remote_ip.addr);
 
-    tcpConnectInfo->setSocketId(connIdM);
     tcpConnectInfo->setLocalAddr(localAddr);
     tcpConnectInfo->setRemoteAddr(remoteAddr);
     tcpConnectInfo->setLocalPort(pcbM->local_port);
     tcpConnectInfo->setRemotePort(pcbM->remote_port);
 
     msg->setControlInfo(tcpConnectInfo);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+    msg->ensureTag<SocketInd>()->setSocketId(connIdM);
 
     tcpLwipM.send(msg, "appOut");
     sendUpEnabled = true;
@@ -199,8 +203,9 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     cMessage *msg = new cMessage(nameOfIndication);
     msg->setKind(code);
     TCPCommand *ind = new TCPCommand();
-    ind->setSocketId(connIdM);
     msg->setControlInfo(ind);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<SocketInd>()->setSocketId(connIdM);
     tcpLwipM.send(msg, "appOut");
 }
 
@@ -379,12 +384,13 @@ void TcpLwipConnection::sendUpData()
     if (sendUpEnabled) {
         while (cPacket *dataMsg = receiveQueueM->extractBytesUpTo()) {
             TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-            tcpConnectInfo->setSocketId(connIdM);
             tcpConnectInfo->setLocalAddr(pcbM->local_ip.addr);
             tcpConnectInfo->setRemoteAddr(pcbM->remote_ip.addr);
             tcpConnectInfo->setLocalPort(pcbM->local_port);
             tcpConnectInfo->setRemotePort(pcbM->remote_port);
             dataMsg->setControlInfo(tcpConnectInfo);
+            dataMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+            dataMsg->ensureTag<SocketInd>()->setSocketId(connIdM);
 //            int64_t len = dataMsg->getByteLength();
             // send Msg to Application layer:
             tcpLwipM.send(dataMsg, "appOut");

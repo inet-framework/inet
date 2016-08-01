@@ -31,6 +31,7 @@
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -382,7 +383,7 @@ struct netif *TCP_lwIP::ip_route(L3Address const& ipAddr)
 void TCP_lwIP::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
-    int connId = controlInfo->getSocketId();
+    int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);
 

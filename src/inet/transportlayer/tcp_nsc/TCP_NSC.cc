@@ -27,6 +27,7 @@
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -272,12 +273,13 @@ void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
     cMessage *msg = new cMessage("TCP_I_ESTABLISHED");
     msg->setKind(TCP_I_ESTABLISHED);
     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-    tcpConnectInfo->setSocketId(connP.connIdM);
     tcpConnectInfo->setLocalAddr(connP.inetSockPairM.localM.ipAddrM);
     tcpConnectInfo->setRemoteAddr(connP.inetSockPairM.remoteM.ipAddrM);
     tcpConnectInfo->setLocalPort(connP.inetSockPairM.localM.portM);
     tcpConnectInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     msg->setControlInfo(tcpConnectInfo);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<SocketInd>()->setSocketId(connP.connIdM);
     send(msg, "appOut");
     connP.sentEstablishedM = true;
 }
@@ -290,7 +292,6 @@ void TCP_NSC::sendAvailableIndicationMsg(TCP_NSC_Connection& c)
     TCPAvailableInfo *tcpConnectInfo = new TCPAvailableInfo();
 
     ASSERT(c.forkedConnId != -1);
-    tcpConnectInfo->setSocketId(c.forkedConnId);
     tcpConnectInfo->setNewSocketId(c.connIdM);
     tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
     tcpConnectInfo->setRemoteAddr(c.inetSockPairM.remoteM.ipAddrM);
@@ -298,6 +299,8 @@ void TCP_NSC::sendAvailableIndicationMsg(TCP_NSC_Connection& c)
     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
 
     msg->setControlInfo(tcpConnectInfo);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<SocketInd>()->setSocketId(c.forkedConnId);
     send(msg, "appOut");
     c.sentEstablishedM = true;
 }
@@ -542,12 +545,13 @@ void TCP_NSC::sendDataToApp(TCP_NSC_Connection& c)
 
     while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
         TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-        tcpConnectInfo->setSocketId(c.connIdM);
         tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
         tcpConnectInfo->setRemoteAddr(c.inetSockPairM.remoteM.ipAddrM);
         tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
         tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
         dataMsg->setControlInfo(tcpConnectInfo);
+        dataMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+        dataMsg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
         // send Msg to Application layer:
         send(dataMsg, "appOut");
     }
@@ -591,8 +595,9 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
         cMessage *msg = new cMessage(name);
         msg->setKind(code);
         TCPCommand *ind = new TCPCommand();
-        ind->setSocketId(c.connIdM);
         msg->setControlInfo(ind);
+        msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+        msg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
         send(msg, "appOut");
     }
 }
@@ -630,7 +635,7 @@ TCP_NSC_ReceiveQueue *TCP_NSC::createReceiveQueue(TCPDataTransferMode transferMo
 void TCP_NSC::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
-    int connId = controlInfo->getSocketId();
+    int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
 
     TCP_NSC_Connection *conn = findAppConn(connId);
 

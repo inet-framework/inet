@@ -20,6 +20,8 @@
 #include "inet/transportlayer/tcp_nsc/TCP_NSC_Connection.h"
 
 #include <sim_interface.h>    // NSC header
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/transportlayer/tcp_nsc/TCP_NSC.h"
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
@@ -183,8 +185,9 @@ void TCP_NSC_Connection::do_SEND()
             cMessage *msg = new cMessage("CLOSED");
             msg->setKind(TCP_I_CLOSED);
             TCPCommand *ind = new TCPCommand();
-            ind->setSocketId(connIdM);
             msg->setControlInfo(ind);
+            msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+            msg->ensureTag<SocketInd>()->setSocketId(connIdM);
             tcpNscM->send(msg, "appOut");
             //FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!
         }
