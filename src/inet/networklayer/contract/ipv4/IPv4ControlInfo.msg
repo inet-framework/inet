@@ -17,15 +17,12 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;
 
 enum IPProtocolId;
-
-class noncobject IPv4Address;
 
 //
 // Control information for sending/receiving packets over IPv4.
