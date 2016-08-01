@@ -17,8 +17,10 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
@@ -309,8 +311,9 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
 {
     UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->getControlInfo());
 
-    L3Address srcAddr = ctrl->getSrcAddr();
-    L3Address destAddr = ctrl->getDestAddr();
+    auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
+    L3Address srcAddr = l3Addresses->getSource();
+    L3Address destAddr = l3Addresses->getDestination();
     int srcPort = ctrl->getSrcPort();
     int destPort = ctrl->getDestPort();
     int interfaceID = ctrl->getInterfaceId();

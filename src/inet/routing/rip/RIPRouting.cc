@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/NotifierConsts.h"
@@ -598,10 +599,11 @@ void RIPRouting::processRequest(RIPPacket *packet)
     }
 
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    L3Address srcAddr = ctrlInfo->getSrcAddr();
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
     int srcPort = ctrlInfo->getSrcPort();
     int interfaceId = ctrlInfo->getInterfaceId();
     delete ctrlInfo;
+    packet->clearTags();
 
     EV_INFO << "received request from " << srcAddr << "\n";
 
@@ -751,9 +753,10 @@ void RIPRouting::processResponse(RIPPacket *packet)
     }
 
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    L3Address srcAddr = ctrlInfo->getSrcAddr();
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
     int interfaceId = ctrlInfo->getInterfaceId();
     delete ctrlInfo;
+    packet->clearTags();
 
     RIPInterfaceEntry *incomingIe = findInterfaceById(interfaceId);
     if (!incomingIe) {
@@ -802,15 +805,17 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
         return false;
     }
 
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
+
     // check that it is not our response (received own multicast message)
-    if (rt->isLocalAddress(ctrlInfo->getSrcAddr())) {
+    if (rt->isLocalAddress(srcAddr)) {
         EV_WARN << "received own response\n";
         return false;
     }
 
     if (mode == RIPng) {
-        if (!ctrlInfo->getSrcAddr().isLinkLocal()) {
-            EV_WARN << "source address is not link-local: " << ctrlInfo->getSrcAddr() << "\n";
+        if (!srcAddr.isLinkLocal()) {
+            EV_WARN << "source address is not link-local: " << srcAddr << "\n";
             return false;
         }
         if (ctrlInfo->getTtl() != 255) {
@@ -820,8 +825,8 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
     }
     else {
         // check that source is on a directly connected network
-        if (!ift->isNeighborAddress(ctrlInfo->getSrcAddr())) {
-            EV_WARN << "source is not directly connected " << ctrlInfo->getSrcAddr() << "\n";
+        if (!ift->isNeighborAddress(srcAddr)) {
+            EV_WARN << "source is not directly connected " << srcAddr << "\n";
             return false;
         }
     }

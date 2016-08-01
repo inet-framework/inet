@@ -16,7 +16,9 @@
 //
 
 #include "inet/applications/udpapp/UDPEchoApp.h"
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
@@ -50,12 +52,14 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
 
         // determine its source address/port
         UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->removeControlInfo());
-        L3Address srcAddress = ctrl->getSrcAddr();
+        L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSource();
+        pk->clearTags();
+
         int srcPort = ctrl->getSrcPort();
         delete ctrl;
 
         // send back
-        socket.sendTo(pk, srcAddress, srcPort);
+        socket.sendTo(pk, remoteAddress, srcPort);
     }
     else {
         throw cRuntimeError("Message received with unexpected message kind = %d", msg->getKind());

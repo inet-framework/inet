@@ -137,8 +137,6 @@ class UDPCloseCommand extends UDPControlInfo
 //
 class UDPDataIndication extends UDPControlInfo
 {
-    L3Address srcAddr;   // source IPv4 or IPv6 address of the received packet
-    L3Address destAddr;  // destination IPv4 or IPv6 address of the received packet
     int srcPort;           // source port of the received packet
     int destPort;          // destination port of the received packet
     int ttl;               // TTL field of the received packet

@@ -21,6 +21,7 @@
 #include "inet/common/INETEndians.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
 
@@ -143,10 +144,13 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     ASSERT(curConn.offline);
 
     UDPDataIndication *udpCtrl = check_and_cast<UDPDataIndication *>(vp->getControlInfo());
+    auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
+    L3Address srcAddr = l3Addresses->getSource();
+    L3Address destAddr = l3Addresses->getDestination();
 
-    curConn.srcAddr = udpCtrl->getSrcAddr();
+    curConn.srcAddr = l3Addresses->getSource();
     curConn.srcPort = udpCtrl->getSrcPort();
-    curConn.destAddr = udpCtrl->getDestAddr();
+    curConn.destAddr = l3Addresses->getDestination();
     curConn.destPort = udpCtrl->getDestPort();
     curConn.seqNo = vp->getSeqNo() - 1;
     curConn.timeStamp = vp->getTimeStamp();
@@ -182,9 +186,13 @@ void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
     ASSERT(!curConn.offline);
 
     UDPDataIndication *udpCtrl = check_and_cast<UDPDataIndication *>(vp->getControlInfo());
-    if (curConn.srcAddr != udpCtrl->getSrcAddr()
+    auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
+    L3Address srcAddr = l3Addresses->getSource();
+    L3Address destAddr = l3Addresses->getDestination();
+
+    if (curConn.srcAddr != srcAddr
         || curConn.srcPort != udpCtrl->getSrcPort()
-        || curConn.destAddr != udpCtrl->getDestAddr()
+        || curConn.destAddr != destAddr
         || curConn.destPort != udpCtrl->getDestPort()
         || vp->getSsrc() != curConn.ssrc)
         throw cRuntimeError("Voice packet received from third party during a voice session (concurrent voice sessions not supported)");

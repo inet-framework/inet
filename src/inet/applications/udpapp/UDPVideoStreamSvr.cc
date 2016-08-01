@@ -18,6 +18,7 @@
 
 #include "inet/applications/udpapp/UDPVideoStreamSvr.h"
 
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
@@ -89,7 +90,7 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
     cMessage *timer = new cMessage("VideoStreamTmr");
     VideoStreamData *d = &streams[timer->getId()];
     d->timer = timer;
-    d->clientAddr = ctrl->getSrcAddr();
+    d->clientAddr = msg->getMandatoryTag<L3AddressInd>()->getSource();
     d->clientPort = ctrl->getSrcPort();
     d->videoSize = (*videoSize);
     d->bytesLeft = d->videoSize;
