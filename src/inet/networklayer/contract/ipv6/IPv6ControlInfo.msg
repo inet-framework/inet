@@ -17,7 +17,6 @@
 
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
@@ -25,7 +24,6 @@ namespace inet;
 
 enum IPProtocolId;
 
-class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
 
 cplusplus {{
