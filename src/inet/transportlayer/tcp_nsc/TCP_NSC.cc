@@ -596,7 +596,7 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
         msg->setKind(code);
         TCPCommand *ind = new TCPCommand();
         msg->setControlInfo(ind);
-        msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+        msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
         msg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
         send(msg, "appOut");
     }
@@ -907,7 +907,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
-    tcpseg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();

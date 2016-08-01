@@ -599,7 +599,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
 
-    tcpseg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
