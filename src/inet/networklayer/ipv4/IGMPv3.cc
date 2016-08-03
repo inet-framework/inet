@@ -659,11 +659,11 @@ void IGMPv3::sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address d
     ASSERT(ie->isMulticast());
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setProtocol(IP_PROT_IGMP);
     controlInfo->setTimeToLive(1);
     msg->setControlInfo(controlInfo);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
 
@@ -675,11 +675,11 @@ void IGMPv3::sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address des
     ASSERT(ie->isMulticast());
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setProtocol(IP_PROT_IGMP);
     controlInfo->setTimeToLive(1);
     msg->setControlInfo(controlInfo);
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::igmp);
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
     send(msg, "ipOut");

@@ -80,8 +80,7 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
             errorOut(icmpv6msg);
         }
         else {
-            check_and_cast<IPv6ControlInfo *>(icmpv6msg->getControlInfo())->setTransportProtocol(transportProtocol);
-            icmpv6msg->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+            icmpv6msg->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
             send(icmpv6msg, "transportOut");
         }
     }
@@ -147,7 +146,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
-    replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
+    reply->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setDestination(addressInd->getSource());
 
@@ -217,7 +216,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     if (origDatagram->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
-        ctrlInfo->setProtocol(IP_PROT_ICMP);
+        errorMsg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
         errorMsg->setControlInfo(ctrlInfo);
         errorMsg->ensureTag<L3AddressInd>()->setSource(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
@@ -244,9 +243,9 @@ void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, I
 void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
 {
     IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
-    ctrlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     msg->setControlInfo(ctrlInfo);
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
 
     send(msg, "ipv6Out");
 }

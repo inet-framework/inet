@@ -67,7 +67,6 @@ inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {re
 class IPv6ControlInfo
 {
     @customize(true);
-    short protocol @enum(IPProtocolId);  // transport layer protocol
     unsigned char trafficClass;  // Traffic Class byte (low 6 bits: DSCP; highest 2 bits: ECN)
     abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass

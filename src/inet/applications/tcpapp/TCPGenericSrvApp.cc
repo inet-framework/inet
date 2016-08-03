@@ -89,7 +89,7 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
 
     int socketId = msg->getMandatoryTag<SocketInd>()->getSocketId();
     msg->clearTags();
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketReq>()->setSocketId(socketId);
     send(msg, "socketOut");
 }

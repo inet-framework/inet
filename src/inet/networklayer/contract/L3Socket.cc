@@ -39,7 +39,7 @@ void L3Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)
         throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
-    message->ensureTag<ProtocolReq>()->setProtocol(Protocol::getProtocol(controlInfoProtocolId));
+    message->ensureTag<DispatchProtocolReq>()->setProtocol(Protocol::getProtocol(controlInfoProtocolId));
     message->ensureTag<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }

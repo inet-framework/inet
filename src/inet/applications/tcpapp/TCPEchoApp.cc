@@ -62,7 +62,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
         emit(sentPkSignal, (cPacket *)msg);
     }
 
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getMandatoryTag<SocketReq>();
     send(msg, "socketOut");
 }

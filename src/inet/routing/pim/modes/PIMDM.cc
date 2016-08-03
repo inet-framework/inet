@@ -215,7 +215,6 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
 
     emit(rcvdJoinPrunePkSignal, pkt);
 
-    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     auto ifTag = pkt->getMandatoryTag<InterfaceInd>();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(ifTag->getInterfaceId());
 
@@ -1654,11 +1653,11 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
 void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
 {
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setProtocol(IP_PROT_PIM);
     ctrl->setTimeToLive(1);
     packet->setControlInfo(ctrl);
-    packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::pim);
-    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::pim);
+    packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSource(srcAddr);

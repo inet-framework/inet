@@ -309,8 +309,8 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
 void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int outputIfIndex, short ttl)
 {
     IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
-    ipControlInfo->setProtocol(IP_PROT_OSPF);
     ipControlInfo->setTimeToLive(ttl);
+    packet->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
     packet->ensureTag<L3AddressReq>()->setDestination(destination);
 
@@ -365,7 +365,7 @@ void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int
             break;
     }
 
-    packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     ospfModule->send(packet, "ipOut");
 }
 

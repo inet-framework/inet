@@ -1867,13 +1867,11 @@ void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender
 void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
 {
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setProtocol(IP_PROT_RSVP);
     msg->setControlInfo(controlInfo);
-
     msg->addPar("color") = RSVP_TRAFFIC;
-
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::rsvp);
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::rsvp);
+    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::rsvp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<L3AddressReq>()->setDestination(destAddr);
     send(msg, "ipOut");
 }

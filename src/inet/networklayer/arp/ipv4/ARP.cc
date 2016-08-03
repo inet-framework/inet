@@ -211,9 +211,9 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setEtherType(etherType);
     msg->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
-    msg->removeTag<ProtocolReq>();         // send to NIC
+    msg->removeTag<DispatchProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::arp);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::arp);
     msg->setControlInfo(controlInfo);
 
     // send out

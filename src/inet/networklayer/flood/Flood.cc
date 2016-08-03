@@ -251,10 +251,10 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
 cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
 {
     GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
-    controlInfo->setProtocol(floodDatagram->getTransportProtocol());
     cPacket *transportPacket = floodDatagram->decapsulate();
     transportPacket->setControlInfo(controlInfo);
-    transportPacket->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
+    transportPacket->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
+    transportPacket->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     auto addressInd = transportPacket->ensureTag<L3AddressInd>();
     addressInd->setSource(floodDatagram->getSourceAddress());
     addressInd->setDestination(floodDatagram->getDestinationAddress());
@@ -283,7 +283,7 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
         netwAddr = netwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        pkt->setTransportProtocol(cInfo->getTransportProtocol());
+        pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(appPkt->getMandatoryTag<ProtocolTag>()->getProtocol()));
         netwAddr = addressReq->getDestination();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;
@@ -312,7 +312,7 @@ cObject *Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDest
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
     cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
-    pMsg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

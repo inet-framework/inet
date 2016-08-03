@@ -24,6 +24,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/sctp/SCTPSerializer.h"
 
 #ifdef WITH_IPv4
@@ -345,8 +346,8 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
     }
     else {
         INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
-        controlInfo->setTransportProtocol(IP_PROT_SCTP);
         msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         auto addresses = msg->ensureTag<L3AddressReq>();
         addresses->setSource(fromAddr);
         addresses->setDestination(toAddr);
@@ -375,7 +376,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
     msg->addChunk(scChunk);
 
     INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
-    controlInfo->setTransportProtocol(IP_PROT_SCTP);
+    msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
     msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     auto addresses = msg->ensureTag<L3AddressReq>();
     addresses->setSource(fromAddr);

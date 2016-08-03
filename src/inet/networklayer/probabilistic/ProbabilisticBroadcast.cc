@@ -285,7 +285,7 @@ cPacket *ProbabilisticBroadcast::encapsulate(cPacket *msg)
     pkt->setFinalDestAddr(broadcastAddress);
     pkt->setAppTtl(timeToLive);
     pkt->setId(getNextID());
-    pkt->setTransportProtocol(networkControlInfo->getTransportProtocol());
+    pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<ProtocolTag>()->getProtocol()));
     // clean-up
     delete controlInfo;
 
@@ -336,9 +336,9 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
 {
     cPacket *m = msg->decapsulate();
     GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
-    controlInfo->setProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
-    m->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    m->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<L3AddressInd>()->setSource(msg->getSrcAddr());
     delete msg;
     return m;

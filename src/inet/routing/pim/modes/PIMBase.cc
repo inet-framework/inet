@@ -176,13 +176,13 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     }
 
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setProtocol(IP_PROT_PIM);
     ctrl->setTimeToLive(1);
     msg->setControlInfo(ctrl);
     msg->setByteLength(byteLength);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::pim);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::pim);
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<L3AddressReq>()->setDestination(ALL_PIM_ROUTERS_MCAST);
 
     emit(sentHelloPkSignal, msg);
@@ -192,7 +192,6 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
 
 void PIMBase::processHelloPacket(PIMHello *packet)
 {
-    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     IPv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();

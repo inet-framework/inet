@@ -53,7 +53,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
     if (cPacket *packet = dynamic_cast<cPacket *>(message)) {
         INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(packet->getControlInfo());
 
-        int protocol = controlInfo->getTransportProtocol();
+        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getMandatoryTag<ProtocolTag>()->getProtocol());
         auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;
@@ -87,7 +87,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
-        message->removeTag<ProtocolReq>();         // send to NIC
+        message->removeTag<DispatchProtocolReq>();         // send to NIC
         message->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
         send(message, "queueOut");
     }
@@ -96,7 +96,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry && !interfaceEntry->isLoopback()) {
                 cMessage* duplicate = utils::dupPacketAndControlInfo(message);
-                duplicate->removeTag<ProtocolReq>();         // send to NIC
+                duplicate->removeTag<DispatchProtocolReq>();         // send to NIC
                 duplicate->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 send(duplicate, "queueOut");
             }

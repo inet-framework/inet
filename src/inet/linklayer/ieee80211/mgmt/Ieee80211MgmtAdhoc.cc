@@ -85,7 +85,7 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
     if (frameWithSNAP) {
         ctrl->setEtherType(frameWithSNAP->getEtherType());
         if (frameWithSNAP->getEtherType() != -1)
-            payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+            payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
     }
     payload->setControlInfo(ctrl);
 

@@ -42,6 +42,7 @@
 
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -345,9 +346,9 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
     else {
         IL3AddressType *addressType = dest.getAddressType();
         INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-        controlInfo->setTransportProtocol(IP_PROT_SCTP);
         //controlInfo->setSourceAddress();
         sctpmsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        sctpmsg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         sctpmsg->ensureTag<L3AddressReq>()->setDestination(dest);
         sctpMain->send_to_ip(sctpmsg);
 

@@ -49,7 +49,7 @@ void UDPSocket::sendToUDP(cMessage *msg)
         EV_TRACE << "  control info: (" << ctrl->getClassName() << ")" << ctrl->getFullName();
     EV_TRACE << endl;
 
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::udp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
     msg->ensureTag<SocketReq>()->setSocketId(sockId);
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }

@@ -104,7 +104,7 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP) {
         ctrl->setEtherType(frameWithSNAP->getEtherType());
-        payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+        payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
     }
     payload->setControlInfo(ctrl);
 

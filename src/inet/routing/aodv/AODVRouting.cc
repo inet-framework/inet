@@ -732,20 +732,18 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     ASSERT(timeToLive != 0);
 
     INetworkProtocolControlInfo *networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
-
     networkProtocolControlInfo->setHopLimit(timeToLive);
-
-    networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
 
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
 
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
+    udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->setSourcePort(aodvUDPPort);
     udpPacket->setDestinationPort(aodvUDPPort);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
-    udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSource(getSelfIPAddress());

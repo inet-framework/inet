@@ -683,7 +683,6 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 
     // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-    controlInfo->setProtocol(datagram->getTransportProtocol());
     controlInfo->setTrafficClass(datagram->getTrafficClass());
     controlInfo->setHopLimit(datagram->getHopLimit());
 
@@ -692,8 +691,9 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 
     // attach control info
     packet->setControlInfo(controlInfo);
-    packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
+    packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
     packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
     packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
@@ -732,7 +732,7 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     // set other fields
     datagram->setTrafficClass(controlInfo->getTrafficClass());
     datagram->setHopLimit(controlInfo->getHopLimit() > 0 ? controlInfo->getHopLimit() : 32);    //FIXME use iface hop limit instead of 32?
-    datagram->setTransportProtocol(controlInfo->getProtocol());
+    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
     while (0 < controlInfo->getExtensionHeaderArraySize()) {
@@ -834,9 +834,11 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setEtherType(ETHERTYPE_IPv6);
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
-    datagram->removeTag<ProtocolReq>();         // send to NIC
+    datagram->removeTag<DispatchProtocolReq>();         // send to NIC
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
-    datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv6);
+    datagram->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv6);
+    datagram->ensureTag<NetworkProtocolTag>()->setProtocol(&Protocol::ipv6);
+    datagram->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     datagram->setControlInfo(controlInfo);
     send(datagram, "queueOut");
 }

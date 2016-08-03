@@ -390,7 +390,6 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 
     // create and fill in control info
     GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
-    controlInfo->setProtocol(datagram->getTransportProtocol());
     if (fromIE) {
         auto ifTag = packet->ensureTag<InterfaceInd>();
         ifTag->setInterfaceId(fromIE->getInterfaceId());
@@ -400,7 +399,7 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 
     // attach control info
     packet->setControlInfo(controlInfo);
-    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSourceAddress());
     l3AddressInd->setDestination(datagram->getDestinationAddress());
@@ -419,6 +418,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     L3Address dest = l3AddressReq->getDestination();
     delete l3AddressReq;
 
+    datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<ProtocolTag>()->getProtocol()));
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
@@ -449,7 +449,6 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
         ttl = defaultHopLimit;
 
     datagram->setHopLimit(ttl);
-    datagram->setTransportProtocol(controlInfo->getProtocol());
 
     // setting GenericNetworkProtocol options is currently not supported
 
@@ -504,9 +503,9 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
         //Peer to peer interface, no broadcast, no MACAddress. // packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
-        datagram->removeTag<ProtocolReq>();         // send to NIC
+        datagram->removeTag<DispatchProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-        datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
+        datagram->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
         datagram->setControlInfo(controlInfo);
         send(datagram, "queueOut");
         return;
@@ -528,9 +527,9 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
         datagram->ensureTag<MACAddressReq>()->setDestinationAddress(nextHopMAC);
-        datagram->removeTag<ProtocolReq>();         // send to NIC
+        datagram->removeTag<DispatchProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-        datagram->ensureTag<ProtocolInd>()->setProtocol(&Protocol::gnp);
+        datagram->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
         datagram->setControlInfo(controlInfo);
 
         // send out

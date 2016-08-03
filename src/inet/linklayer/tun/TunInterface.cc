@@ -53,7 +53,7 @@ void TunInterface::handleMessage(cMessage *message)
                 delete message->removeControlInfo();
                 // TODO: should we determine the network protocol by looking at the packet?!
                 message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                message->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+                message->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
                 emit(packetSentToUpperSignal, message);
                 send(message, "upperLayerOut");
             }

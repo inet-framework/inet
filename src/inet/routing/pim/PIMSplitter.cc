@@ -70,7 +70,7 @@ void PIMSplitter::handleMessage(cMessage *msg)
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn) {
         // Send other packets to the network layer
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
-        msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+        msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         send(msg, ipOut);
     }
     else

@@ -73,8 +73,6 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     virtual IPv4Datagram *getOrigDatagram() const { return dgram; }
     virtual IPv4Datagram *removeOrigDatagram();
 
-    virtual short getTransportProtocol() const override { return IPv4ControlInfo_Base::getProtocol(); }
-    virtual void setTransportProtocol(short protocol) override { IPv4ControlInfo_Base::setProtocol(protocol); }
     virtual short getHopLimit() const override { return getTimeToLive(); }
     virtual void setHopLimit(short hopLimit) override { setTimeToLive(hopLimit); }
 };

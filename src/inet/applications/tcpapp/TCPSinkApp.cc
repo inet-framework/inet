@@ -61,7 +61,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
         msg->clearTags();
-        msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+        msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
         msg->ensureTag<SocketReq>()->setSocketId(socketId);
         send(msg, "socketOut");
     }

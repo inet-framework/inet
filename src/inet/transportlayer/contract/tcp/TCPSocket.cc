@@ -104,7 +104,7 @@ void TCPSocket::sendToTCP(cMessage *msg, int connId)
     if (!gateToTcp)
         throw cRuntimeError("TCPSocket: setOutputGate() must be invoked before socket can be used");
 
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::tcp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->ensureTag<SocketReq>()->setSocketId(connId == -1 ? this->connId : connId);
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }

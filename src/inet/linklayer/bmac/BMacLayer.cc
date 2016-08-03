@@ -722,7 +722,7 @@ cPacket *BMacLayer::decapsulate(BMacFrame *msg)
     cPacket *packet = msg->decapsulate();
     packet->ensureTag<MACAddressInd>()->setSourceAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
     EV_DETAIL << " message decapsulated " << endl;
     delete msg;
     return packet;
@@ -737,7 +737,7 @@ BMacFrame *BMacLayer::encapsulate(cPacket *netwPkt)
     // message by the network layer
     auto dest = netwPkt->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<ProtocolInd>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<ProtocolTag>()->getProtocol()));
     pkt->setDestAddr(dest);
 
     //delete the control info

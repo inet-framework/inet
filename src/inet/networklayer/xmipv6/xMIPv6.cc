@@ -644,9 +644,9 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
 {
     EV_INFO << "Appending ControlInfo to mobility message\n";
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-    controlInfo->setProtocol(IP_PROT_IPv6EXT_MOB);    // specifies the next header value for the Mobility Header (=135)
     controlInfo->setHopLimit(255);
-    msg->removeTag<ProtocolReq>();         // send to NIC
+    msg->removeTag<DispatchProtocolReq>();         // send to NIC
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv6);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     msg->ensureTag<L3AddressReq>()->setSource(srcAddr);
     msg->ensureTag<L3AddressReq>()->setDestination(destAddr);

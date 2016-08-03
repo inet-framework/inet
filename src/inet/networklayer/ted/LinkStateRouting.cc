@@ -217,7 +217,6 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 {
     // attach control info to packet
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setProtocol(IP_PROT_OSPF);
     msg->setControlInfo(controlInfo);
 
     int length = msg->getLinkInfoArraySize() * 72;
@@ -225,8 +224,9 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 
     msg->addPar("color") = TED_TRAFFIC;
 
-    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ospf);
-    msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ospf);
+    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ospf);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<L3AddressReq>()->setDestination(destAddr);
     msg->ensureTag<L3AddressReq>()->setSource(routerId);
     send(msg, "ipOut");

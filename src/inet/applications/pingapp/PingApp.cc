@@ -29,6 +29,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -362,13 +363,13 @@ void PingApp::sendPingRequest()
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
-            controlInfo->setTransportProtocol(IP_PROT_ICMP);
             auto *request = new ICMPMessage(msg->getName());
             outPacket = request;
             request->setByteLength(4);
             request->setType(ICMP_ECHO_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+            request->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without IPv4");
@@ -376,13 +377,13 @@ void PingApp::sendPingRequest()
         }
         case L3Address::IPv6: {
 #ifdef WITH_IPv6
-            controlInfo->setTransportProtocol(IP_PROT_IPv6_ICMP);
             auto *request = new ICMPv6EchoRequestMsg(msg->getName());
             outPacket = request;
             request->setByteLength(4);
             request->setType(ICMPv6_ECHO_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+            request->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
             throw cRuntimeError("INET compiled without IPv6");
@@ -391,13 +392,13 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEID:
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
-            controlInfo->setTransportProtocol(IP_PROT_ICMP);       //FIXME ???
             auto *request = new EchoPacket(msg->getName());
             outPacket = request;
             request->setByteLength(4);
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->encapsulate(msg);
             request->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+            request->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without Generic Network");

@@ -86,9 +86,9 @@ void Loopback::handleMessage(cMessage *msg)
     numRcvdOK++;
     emit(packetSentToUpperSignal, msg);
     numSent++;
-    auto protocol = msg->getMandatoryTag<ProtocolInd>()->getProtocol();
+    auto protocol = msg->getMandatoryTag<DispatchProtocolInd>()->getProtocol();
     msg->clearTags();
-    msg->ensureTag<ProtocolReq>()->setProtocol(protocol);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
     msg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     send(msg, "upperLayerOut");
 }

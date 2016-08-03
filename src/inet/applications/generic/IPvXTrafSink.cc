@@ -24,6 +24,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
@@ -87,7 +88,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
 
     if (ctrl != nullptr) {
-        protocol = ctrl->getTransportProtocol();
+        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<ProtocolTag>()->getProtocol());
     }
     L3AddressTag *addresses = msg->getTag<L3AddressReq>();
     if (addresses == nullptr)

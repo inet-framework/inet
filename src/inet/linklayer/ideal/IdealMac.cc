@@ -297,7 +297,7 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     macAddressReq->setSourceAddress(frame->getSrc());
     macAddressReq->setDestinationAddress(frame->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
     packet->setControlInfo(etherctrl);
 
     delete frame;

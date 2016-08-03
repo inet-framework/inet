@@ -69,7 +69,8 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(reply->getControlInfo());
     auto addressInd = reply->removeMandatoryTag<L3AddressInd>();
     reply->clearTags();
-    reply->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
+    reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
+    reply->ensureTag<ProtocolTag>()->setProtocol(&Protocol::icmpv4);
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setSource(addressInd->getDestination());
     addressReq->setDestination(addressInd->getSource());

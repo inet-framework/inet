@@ -32,7 +32,6 @@ class noncobject L3Address;
 class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 {
     @customize(true);
-    short protocol @enum(IPProtocolId);  // encapsulated protocol
     short hopLimit;     // maximum hop count
 }
 

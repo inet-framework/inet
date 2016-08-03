@@ -260,10 +260,10 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    controlInfo->setTransportProtocol(IP_PROT_TCP);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
-    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    tcpseg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
     addresses->setSource(localAddr);
     addresses->setDestination(remoteAddr);
@@ -277,11 +277,11 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
 
     IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    controlInfo->setTransportProtocol(IP_PROT_TCP);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
-    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    tcpseg->ensureTag<ProtocolTag>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
     addresses->setSource(src);
     addresses->setDestination(dest);

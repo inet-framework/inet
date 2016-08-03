@@ -736,6 +736,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
+    payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
 
     emit(passedUpPkSignal, payload);
     send(payload, "appOut");
@@ -776,13 +777,13 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         // send to IPv4
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
-        ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTimeToLive(ttl);
         ipControlInfo->setTypeOfService(tos);
         udpPacket->setControlInfo(ipControlInfo);
-        udpPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+        udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
         addresses->setSource(srcAddr.toIPv4());
         addresses->setDestination(destAddr.toIPv4());
@@ -794,13 +795,13 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         // send to IPv6
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
-        ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(ipControlInfo);
-        udpPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv6);
+        udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
         addresses->setSource(srcAddr.toIPv6());
         addresses->setDestination(destAddr.toIPv6());
@@ -813,13 +814,13 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << endl;
         IL3AddressType *addressType = destAddr.getAddressType();
         INetworkProtocolControlInfo *ipControlInfo = addressType->createNetworkProtocolControlInfo();
-        ipControlInfo->setTransportProtocol(IP_PROT_UDP);
         //ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         //ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
-        udpPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
+        udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
         addresses->setSource(srcAddr);
         addresses->setDestination(destAddr);

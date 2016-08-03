@@ -43,6 +43,7 @@
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -412,10 +413,10 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 
         // and now construct the new control info for the packet
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setProtocol(dgram->getTransportProtocol());
 
         // get rid of the encapsulation of the IPv6 module
         cMessage *packet = dgram->decapsulate();
+        packet->ensureTag<ProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(dgram->getTransportProtocol()));
         delete dgram;
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
@@ -465,9 +466,9 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
           // datagram back to IPv6 module for encapsulation
 
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-    controlInfo->setProtocol(IP_PROT_IPv6);
 
     dgram->setControlInfo(controlInfo);
+    dgram->ensureTag<ProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto addresses = dgram->ensureTag<L3AddressInd>();
     addresses->setSource(tunnels[vIfIndex].entry);
     addresses->setDestination(tunnels[vIfIndex].exit);

@@ -355,7 +355,7 @@ void PPP::refreshDisplay() const
 PPPFrame *PPP::encapsulate(cPacket *msg)
 {
     PPPFrame *pppFrame = new PPPFrame(msg->getName());
-    pppFrame->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<ProtocolInd>()->getProtocol()));
+    pppFrame->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<ProtocolTag>()->getProtocol()));
     pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
     pppFrame->encapsulate(msg);
     return pppFrame;
@@ -365,7 +365,7 @@ cPacket *PPP::decapsulate(PPPFrame *pppFrame)
 {
     cPacket *payload = pppFrame->decapsulate();
     payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    payload->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppFrame->getProtocol()));
+    payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppFrame->getProtocol()));
     delete pppFrame;
     return payload;
 }

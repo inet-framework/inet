@@ -420,16 +420,16 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     INetworkProtocolControlInfo *networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
-    networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
-    // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
-    networkProtocolControlInfo->setHopLimit(255);
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
+    udpPacket->ensureTag<ProtocolTag>()->setProtocol(&Protocol::manet);
+    // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
+    networkProtocolControlInfo->setHopLimit(255);
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.
     udpPacket->setSourcePort(DYMO_UDP_PORT);
     udpPacket->setDestinationPort(DYMO_UDP_PORT);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
-    udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     if (interfaceEntry)
         udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto addresses = udpPacket->ensureTag<L3AddressReq>();

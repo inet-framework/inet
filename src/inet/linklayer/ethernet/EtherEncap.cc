@@ -152,7 +152,7 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)
         etherctrl->setEtherType(((EtherFrameWithSNAP *)frame)->getLocalcode());
     if (etherctrl->getEtherType() != -1)
-        higherlayermsg->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherctrl->getEtherType()));
+        higherlayermsg->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherctrl->getEtherType()));
     higherlayermsg->setControlInfo(etherctrl);
 
     EV_DETAIL << "Decapsulating frame `" << frame->getName() << "', passing up contained packet `"
