@@ -25,17 +25,17 @@ Register_Class(Sack);
 
 bool Sack::empty() const
 {
-    return start_var == 0 && end_var == 0;
+    return start == 0 && end == 0;
 }
 
 bool Sack::contains(const Sack& other) const
 {
-    return seqLE(start_var, other.start_var) && seqLE(other.end_var, end_var);
+    return seqLE(start, other.start) && seqLE(other.end, end);
 }
 
 void Sack::clear()
 {
-    start_var = end_var = 0;
+    start = end = 0;
 }
 
 void Sack::setSegment(unsigned int start_par, unsigned int end_par)
@@ -48,7 +48,7 @@ std::string Sack::str() const
 {
     std::stringstream out;
 
-    out << "[" << start_var << ".." << end_var << ")";
+    out << "[" << start << ".." << end << ")";
     return out.str();
 }
 
@@ -56,30 +56,30 @@ Register_Class(TCPSegment);
 
 uint32_t TCPSegment::getSegLen()
 {
-    return payloadLength_var + (finBit_var ? 1 : 0) + (synBit_var ? 1 : 0);
+    return payloadLength + (finBit ? 1 : 0) + (synBit ? 1 : 0);
 }
 
 void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
 {
-    ASSERT(payloadLength_var > 0);
+    ASSERT(payloadLength > 0);
 
     // must have common part:
 #ifndef NDEBUG
-    if (!(seqLess(sequenceNo_var, endSeqNo) && seqLess(firstSeqNo, sequenceNo_var + payloadLength_var))) {
+    if (!(seqLess(sequenceNo, endSeqNo) && seqLess(firstSeqNo, sequenceNo + payloadLength))) {
         throw cRuntimeError(this, "truncateSegment(%u,%u) called on [%u, %u) segment\n",
-                firstSeqNo, endSeqNo, sequenceNo_var, sequenceNo_var + payloadLength_var);
+                firstSeqNo, endSeqNo, sequenceNo, sequenceNo + payloadLength);
     }
 #endif // ifndef NDEBUG
 
     unsigned int truncleft = 0;
     unsigned int truncright = 0;
 
-    if (seqLess(sequenceNo_var, firstSeqNo)) {
-        truncleft = firstSeqNo - sequenceNo_var;
+    if (seqLess(sequenceNo, firstSeqNo)) {
+        truncleft = firstSeqNo - sequenceNo;
     }
 
-    if (seqGreater(sequenceNo_var + payloadLength_var, endSeqNo)) {
-        truncright = sequenceNo_var + payloadLength_var - endSeqNo;
+    if (seqGreater(sequenceNo + payloadLength, endSeqNo)) {
+        truncright = sequenceNo + payloadLength - endSeqNo;
     }
 
     truncateData(truncleft, truncright);
@@ -131,22 +131,22 @@ void TCPSegment::clean()
 
 void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
 {
-    ASSERT(payloadLength_var >= truncleft + truncright);
+    ASSERT(payloadLength >= truncleft + truncright);
 
-    if (0 != byteArray_var.getDataArraySize())
-        byteArray_var.truncateData(truncleft, truncright);
+    if (0 != byteArray.getDataArraySize())
+        byteArray.truncateData(truncleft, truncright);
 
-    while (!payloadList.empty() && (payloadList.front().endSequenceNo - sequenceNo_var) <= truncleft) {
+    while (!payloadList.empty() && (payloadList.front().endSequenceNo - sequenceNo) <= truncleft) {
         cPacket *msg = payloadList.front().msg;
         payloadList.pop_front();
         dropAndDelete(msg);
     }
 
-    sequenceNo_var += truncleft;
-    payloadLength_var -= truncleft + truncright;
+    sequenceNo += truncleft;
+    payloadLength -= truncleft + truncright;
 
     // truncate payload data correctly
-    while (!payloadList.empty() && (payloadList.back().endSequenceNo - sequenceNo_var) > payloadLength_var) {
+    while (!payloadList.empty() && (payloadList.back().endSequenceNo - sequenceNo) > payloadLength) {
         cPacket *msg = payloadList.back().msg;
         payloadList.pop_back();
         dropAndDelete(msg);

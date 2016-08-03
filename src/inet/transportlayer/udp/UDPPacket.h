@@ -39,7 +39,7 @@ class INET_API UDPPacket : public UDPPacket_Base, public ITransportPacket
      * getter/setter for totalLength field of UDP packet
      * if set to -1, then getter returns getByteLength()
      */
-    int getTotalLengthField() const override { return totalLengthField_var == -1 ? getByteLength() : totalLengthField_var; }
+    int getTotalLengthField() const override { return totalLengthField == -1 ? getByteLength() : totalLengthField; }
 
     virtual unsigned int getSourcePort() const override { return UDPPacket_Base::getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { UDPPacket_Base::setSrcPort(port); }

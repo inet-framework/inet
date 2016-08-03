@@ -63,7 +63,6 @@ packet IGMPv1Report extends IGMPMessage
 
 packet IGMPv2Query extends IGMPQuery
 {
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     type = IGMP_MEMBERSHIP_QUERY;
     unsigned char maxRespTime;
 }
@@ -90,7 +89,6 @@ packet IGMPv2Leave extends IGMPMessage
 packet IGMPv3Query extends IGMPv2Query
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     bool suppressRouterProc;
     unsigned char robustnessVariable;
     unsigned char queryIntervalCode;

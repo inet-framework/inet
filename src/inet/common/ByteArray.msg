@@ -26,7 +26,6 @@ namespace inet;
 class ByteArray
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     char data[];
 }
 

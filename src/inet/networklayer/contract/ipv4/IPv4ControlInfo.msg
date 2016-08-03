@@ -62,7 +62,6 @@ class noncobject MACAddress;
 class IPv4ControlInfo
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     IPv4Address destAddr;   // destination IPv4 address
     IPv4Address srcAddr;    // source IPv4 address
     int interfaceId = -1; // interface on which the datagram was received, or

@@ -18,22 +18,22 @@ namespace inet {
 
 void RawPacket::setDataFromBuffer(const void *ptr, unsigned int length)
 {
-    byteArray_var.setDataFromBuffer(ptr, (unsigned int)length);
+    byteArray.setDataFromBuffer(ptr, (unsigned int)length);
 }
 
 void RawPacket::addDataFromBuffer(const void *ptr, unsigned int length)
 {
-    byteArray_var.addDataFromBuffer(ptr, length);
+    byteArray.addDataFromBuffer(ptr, length);
 }
 
 unsigned int RawPacket::copyDataToBuffer(void *ptr, unsigned int length) const
 {
-    return byteArray_var.copyDataToBuffer(ptr, length);
+    return byteArray.copyDataToBuffer(ptr, length);
 }
 
 void RawPacket::removePrefix(unsigned int length)
 {
-    byteArray_var.truncateData(length, 0);
+    byteArray.truncateData(length, 0);
 }
 
 } // namespace inet

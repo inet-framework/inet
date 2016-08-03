@@ -114,7 +114,6 @@ enum TCPOptionNumbers
 //
 class SackItem
 {
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     unsigned int start;     // start seq no. of sack block
     unsigned int end;       // end seq no. of sack block
 }
@@ -202,7 +201,6 @@ class TCPOptionUnknown extends TCPOption
 packet TCPSegment
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
 
     // Source Port
     unsigned short srcPort;

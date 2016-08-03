@@ -72,10 +72,10 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
 
     virtual short getTransportProtocol() const override { return IPv4ControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) override { IPv4ControlInfo_Base::setProtocol(protocol); }
-    virtual L3Address getSourceAddress() const override { return L3Address(srcAddr_var); }
-    virtual void setSourceAddress(const L3Address& address) override { srcAddr_var = address.toIPv4(); }
-    virtual L3Address getDestinationAddress() const override { return L3Address(destAddr_var); }
-    virtual void setDestinationAddress(const L3Address& address) override { destAddr_var = address.toIPv4(); }
+    virtual L3Address getSourceAddress() const override { return L3Address(srcAddr); }
+    virtual void setSourceAddress(const L3Address& address) override { srcAddr = address.toIPv4(); }
+    virtual L3Address getDestinationAddress() const override { return L3Address(destAddr); }
+    virtual void setDestinationAddress(const L3Address& address) override { destAddr = address.toIPv4(); }
     virtual int getInterfaceId() const override { return IPv4ControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) override { IPv4ControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const override { return getTimeToLive(); }

@@ -29,7 +29,6 @@ packet RTCPReceiverReportPacket extends RTCPPacket
 {
     packetType = RTCP_PT_RR;
     @customize(true);  // see the generated C++ header for more info
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     uint32 ssrc = 0;
     cArray receptionReports;
 }
@@ -38,7 +37,6 @@ packet RTCPSDESPacket extends RTCPPacket
 {
     packetType = RTCP_PT_SDES;
     @customize(true);  // see the generated C++ header for more info
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     cArray sdesChunks;
 }
 

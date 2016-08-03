@@ -173,7 +173,6 @@ class IPv4OptionUnknown extends IPv4Option
 packet IPv4Datagram
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
 
     short version = 4;
     short headerLength = IP_HEADER_BYTES;

@@ -33,8 +33,8 @@ class INET_API IGMPv3Query : public IGMPv3Query_Base
 
 //        virtual unsigned char getMaxRespTime() const;
 //        virtual void setMaxRespTime(unsigned char maxRespTime);
-    virtual unsigned char getMaxRespCode() const override { return maxRespTime_var; }
-    virtual void setMaxRespCode(unsigned char maxRespCode) override { this->maxRespTime_var = maxRespCode; }
+    virtual unsigned char getMaxRespCode() const override { return maxRespTime; }
+    virtual void setMaxRespCode(unsigned char maxRespCode) override { this->maxRespTime = maxRespCode; }
 };
 
 }    // namespace inet
