@@ -17,12 +17,14 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETUtils.h"
 
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/ipv6/IPv6.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 
@@ -624,9 +626,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     bool hasSocket = lowerBound != upperBound;
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
-        IPv6ControlInfo *controlInfoCopy = controlInfo->dup();
-        cPacket *packetCopy = packet->dup();
-        packetCopy->setControlInfo(controlInfoCopy);
+        cPacket *packetCopy = utils::dupPacketAndControlInfo(packet);
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }

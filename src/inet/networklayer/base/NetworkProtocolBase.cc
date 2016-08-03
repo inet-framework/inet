@@ -55,8 +55,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
         auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
         bool hasSocket = lowerBound != upperBound;
         for (auto it = lowerBound; it != upperBound; it++) {
-            cPacket *packetCopy = packet->dup();
-            packetCopy->setControlInfo(new cObject());
+            cPacket *packetCopy = utils::dupPacketAndControlInfo(packet);
             packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
             emit(packetSentToUpperSignal, packetCopy);
             send(packetCopy, "transportOut");

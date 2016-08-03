@@ -22,6 +22,7 @@
 #include "inet/networklayer/ipv4/IPv4.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -587,9 +588,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
     bool hasSocket = lowerBound != upperBound;
     IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
-        IPv4ControlInfo *controlInfoCopy = controlInfo->dup();
-        cPacket *packetCopy = packet->dup();
-        packetCopy->setControlInfo(controlInfoCopy);
+        cPacket *packetCopy = utils::dupPacketAndControlInfo(packet);
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
