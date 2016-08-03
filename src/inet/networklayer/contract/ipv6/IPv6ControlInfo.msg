@@ -66,5 +66,5 @@ class IPv6ControlInfo
 {
     @customize(true);
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
+    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader   //TODO IPv6ExtensionHeadersTag
 }

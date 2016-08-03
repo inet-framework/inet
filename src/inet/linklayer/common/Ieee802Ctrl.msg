@@ -70,8 +70,8 @@ class Ieee802Ctrl
 {
     @customize(true);
 
-    int etherType @enum(EtherType) = -1;   // used with ~EthernetIIFrame
-    int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
-    int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
+    int etherType @enum(EtherType) = -1;   // used with ~EthernetIIFrame    TODO EtherTypeTag
+    int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
+    int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE          TODO Ieee802PauseCommand
 }
