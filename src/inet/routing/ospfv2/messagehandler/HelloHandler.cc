@@ -17,6 +17,7 @@
 
 #include "inet/routing/ospfv2/messagehandler/HelloHandler.h"
 
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/routing/ospfv2/router/OSPFArea.h"
 #include "inet/routing/ospfv2/interface/OSPFInterface.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
@@ -61,7 +62,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
                 INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(helloPacket->getControlInfo());
-                IPv4Address srcAddress = controlInfo->getSourceAddress().toIPv4();
+                IPv4Address srcAddress = helloPacket->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;
@@ -91,7 +92,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                     IPv4Address designatedAddress = neighbor->getDesignatedRouter().ipInterfaceAddress;
                     IPv4Address backupAddress = neighbor->getBackupDesignatedRouter().ipInterfaceAddress;
                     char newPriority = helloPacket->getRouterPriority();
-                    IPv4Address source = controlInfo->getSourceAddress().toIPv4();
+                    IPv4Address source = srcAddress;
                     IPv4Address newDesignatedRouter = helloPacket->getDesignatedRouter();
                     IPv4Address newBackupRouter = helloPacket->getBackupDesignatedRouter();
                     DesignatedRouterID dRouterID;

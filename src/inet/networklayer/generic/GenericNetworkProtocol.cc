@@ -24,6 +24,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
@@ -390,8 +391,6 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     // create and fill in control info
     GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
     controlInfo->setProtocol(datagram->getTransportProtocol());
-    controlInfo->setSourceAddress(datagram->getSourceAddress());
-    controlInfo->setDestinationAddress(datagram->getDestinationAddress());
     if (fromIE) {
         auto ifTag = packet->ensureTag<InterfaceInd>();
         ifTag->setInterfaceId(fromIE->getInterfaceId());
@@ -402,6 +401,9 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     // attach control info
     packet->setControlInfo(controlInfo);
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    auto l3AddressInd = packet->ensureTag<L3AddressInd>();
+    l3AddressInd->setSource(datagram->getSourceAddress());
+    l3AddressInd->setDestination(datagram->getDestinationAddress());
     delete datagram;
 
     return packet;
@@ -412,17 +414,20 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo *>(transportPacket->removeControlInfo());
     GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
 //    datagram->setByteLength(HEADER_BYTES); //TODO parameter
+    auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
+    L3Address src = l3AddressReq->getSource();
+    L3Address dest = l3AddressReq->getDestination();
+    delete l3AddressReq;
+
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
-    L3Address dest = controlInfo->getDestinationAddress();
     datagram->setDestinationAddress(dest);
 
     // Generic_MULTICAST_IF option, but allow interface selection for unicast packets as well
     auto ifTag = transportPacket->getTag<InterfaceReq>();
     destIE = ifTag ? interfaceTable->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
 
-    L3Address src = controlInfo->getSourceAddress();
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing

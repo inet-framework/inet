@@ -17,6 +17,7 @@
 #include "inet/networklayer/rsvp_te/RSVP.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/rsvp_te/Utils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -1295,7 +1296,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg *msg)
     //print(msg);
 
     IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(msg->getControlInfo());
-    IPv4Address sender = controlInfo->getSrcAddr();
+    IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     IPv4Address peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();
@@ -1866,13 +1867,14 @@ void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender
 void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
 {
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setDestAddr(destAddr);
     controlInfo->setProtocol(IP_PROT_RSVP);
     msg->setControlInfo(controlInfo);
 
     msg->addPar("color") = RSVP_TRAFFIC;
 
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::rsvp);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<L3AddressReq>()->setDestination(destAddr);
     send(msg, "ipOut");
 }
 

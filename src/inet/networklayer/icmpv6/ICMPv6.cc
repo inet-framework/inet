@@ -26,6 +26,7 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
@@ -144,20 +145,22 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     reply->encapsulate(request->decapsulate());
 
     IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
+    auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
-    replyCtrl->setDestAddr(ctrl->getSrcAddr());
+    auto addressReq = reply->ensureTag<L3AddressReq>();
+    addressReq->setDestination(addressInd->getSource());
 
-    if (ctrl->getDestAddr().isMulticast()    /*TODO check for anycast too*/) {
+    if (addressInd->getDestination().isMulticast()    /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         IPv6InterfaceData *ipv6Data = it->getInterfaceById(request->getMandatoryTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
-        replyCtrl->setSrcAddr(ipv6Data->getPreferredAddress());
+        addressReq->setSource(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.
         //      According to RFC 3484, the source address to be used
         //      depends on the destination address
     }
     else
-        replyCtrl->setSrcAddr(ctrl->getDestAddr());
+        addressReq->setSource(addressInd->getDestination());
 
     reply->setControlInfo(replyCtrl);
 
@@ -214,9 +217,9 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     if (origDatagram->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
-        ctrlInfo->setSrcAddr(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
         ctrlInfo->setProtocol(IP_PROT_ICMP);
         errorMsg->setControlInfo(ctrlInfo);
+        errorMsg->ensureTag<L3AddressInd>()->setSource(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -241,9 +244,9 @@ void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, I
 void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
 {
     IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
-    ctrlInfo->setDestAddr(dest);
     ctrlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     msg->setControlInfo(ctrlInfo);
+    msg->ensureTag<L3AddressReq>()->setDestination(dest);
 
     send(msg, "ipv6Out");
 }

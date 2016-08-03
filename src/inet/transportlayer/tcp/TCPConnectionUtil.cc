@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"
 #include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
 #include "inet/transportlayer/tcp/TCPReceiveQueue.h"
@@ -260,10 +261,12 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     IL3AddressType *addressType = remoteAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
-    controlInfo->setSourceAddress(localAddr);
-    controlInfo->setDestinationAddress(remoteAddr);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    addresses->setSource(localAddr);
+    addresses->setDestination(remoteAddr);
     tcpMain->send(tcpseg, "ipOut");
 }
 
@@ -275,11 +278,13 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
-    controlInfo->setSourceAddress(src);
-    controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
+    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    addresses->setSource(src);
+    addresses->setDestination(dest);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
 }
 

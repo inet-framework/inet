@@ -24,6 +24,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
@@ -187,14 +188,14 @@ void IPvXTrafGen::sendPacket()
     IL3AddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     //controlInfo->setSourceAddress();
-    controlInfo->setDestinationAddress(destAddr);
     controlInfo->setTransportProtocol(protocol);
     payload->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    payload->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    payload->ensureTag<L3AddressReq>()->setDestination(destAddr);
 
     EV_INFO << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
-    payload->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     send(payload, "ipOut");
     numSent++;
 }
@@ -206,9 +207,14 @@ void IPvXTrafGen::printPacket(cPacket *msg)
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
     if (ctrl != nullptr) {
-        src = ctrl->getSourceAddress();
-        dest = ctrl->getDestinationAddress();
         protocol = ctrl->getTransportProtocol();
+    }
+    L3AddressTag *addresses = msg->getTag<L3AddressReq>();
+    if (addresses == nullptr)
+        addresses = msg->getTag<L3AddressInd>();
+    if (addresses != nullptr) {
+        src = addresses->getSource();
+        dest = addresses->getDestination();
     }
 
     EV_INFO << msg << endl;

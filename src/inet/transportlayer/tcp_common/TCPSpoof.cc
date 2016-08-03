@@ -13,9 +13,11 @@
 
 #include "inet/transportlayer/tcp_common/TCPSpoof.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
 
@@ -71,9 +73,12 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
-    controlInfo->setSourceAddress(src);
-    controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    addresses->setSource(src);
+    addresses->setDestination(dest);
 
     emit(sentPkSignal, tcpseg);
     send(tcpseg, "ipOut");

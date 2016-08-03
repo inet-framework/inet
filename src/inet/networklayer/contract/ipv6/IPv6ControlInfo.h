@@ -103,10 +103,6 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
 
     virtual short getTransportProtocol() const override { return IPv6ControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) override { IPv6ControlInfo_Base::setProtocol(protocol); }
-    virtual L3Address getSourceAddress() const override { return L3Address(srcAddr); }
-    virtual void setSourceAddress(const L3Address& address) override { srcAddr = address.toIPv6(); }
-    virtual L3Address getDestinationAddress() const override { return L3Address(destAddr); }
-    virtual void setDestinationAddress(const L3Address& address) override { destAddr = address.toIPv6(); }
     virtual short getHopLimit() const override { return IPv6ControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) override { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };

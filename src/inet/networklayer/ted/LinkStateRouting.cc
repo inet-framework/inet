@@ -14,17 +14,17 @@
 
 #include <algorithm>
 
-#include "inet/common/INETDefs.h"
+#include "inet/networklayer/ted/LinkStateRouting.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/networklayer/ted/LinkStateRouting.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/common/NotifierConsts.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NotifierConsts.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ted/TED.h"
 
 namespace inet {
@@ -81,7 +81,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
         EV_INFO << "Processing message from IPv4: " << msg << endl;
         IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(msg->getControlInfo());
-        IPv4Address sender = controlInfo->getSrcAddr();
+        IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
         processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg *>(msg), sender);
     }
     else
@@ -217,8 +217,6 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 {
     // attach control info to packet
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setDestAddr(destAddr);
-    controlInfo->setSrcAddr(routerId);
     controlInfo->setProtocol(IP_PROT_OSPF);
     msg->setControlInfo(controlInfo);
 
@@ -227,7 +225,10 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 
     msg->addPar("color") = TED_TRAFFIC;
 
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ospf);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<L3AddressReq>()->setDestination(destAddr);
+    msg->ensureTag<L3AddressReq>()->setSource(routerId);
     send(msg, "ipOut");
 }
 

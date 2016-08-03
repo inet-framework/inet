@@ -10,10 +10,11 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
-#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
@@ -336,10 +337,10 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
 {
     cPacket *m = msg->decapsulate();
     GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
-    controlInfo->setSourceAddress(msg->getSrcAddr());
     controlInfo->setProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
     m->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    m->ensureTag<L3AddressInd>()->setSource(msg->getSrcAddr());
     delete msg;
     return m;
 }

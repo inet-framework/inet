@@ -20,6 +20,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/EchoProtocol.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
 
@@ -66,12 +67,13 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(reply->getControlInfo());
-    L3Address src = ctrl->getSourceAddress();
-    L3Address dest = ctrl->getDestinationAddress();
-    ctrl->setSourceAddress(dest);
-    ctrl->setDestinationAddress(src);
+    auto addressInd = reply->removeMandatoryTag<L3AddressInd>();
     reply->clearTags();
     reply->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
+    auto addressReq = reply->ensureTag<L3AddressReq>();
+    addressReq->setSource(addressInd->getDestination());
+    addressReq->setDestination(addressInd->getSource());
+    delete addressInd;
     send(reply, "ipOut");
 }
 

@@ -63,8 +63,6 @@ class noncobject IPv4Address;
 class IPv4ControlInfo
 {
     @customize(true);
-    IPv4Address destAddr;   // destination IPv4 address
-    IPv4Address srcAddr;    // source IPv4 address
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     short protocol @enum(IPProtocolId);  // encapsulated protocol
     unsigned char typeOfService;  // Type of Service byte (low 6 bits: DSCP)

@@ -20,14 +20,16 @@
  * @date 12.5.2013
  */
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/IGMPv3.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 
 #include <algorithm>
 #include <bitset>
@@ -659,10 +661,11 @@ void IGMPv3::sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address d
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_IGMP);
     controlInfo->setTimeToLive(1);
-    controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->ensureTag<L3AddressReq>()->setDestination(dest);
 
     send(msg, "ipOut");
 }
@@ -674,10 +677,11 @@ void IGMPv3::sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address des
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_IGMP);
     controlInfo->setTimeToLive(1);
-    controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->ensureTag<L3AddressReq>()->setDestination(dest);
     send(msg, "ipOut");
 }
 
@@ -941,7 +945,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     if (rt->isMulticastForwardingEnabled()) {
         //Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-        if (controlInfo->getSrcAddr() < ie->ipv4Data()->getIPAddress()) {
+        if (msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4() < ie->ipv4Data()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
         }

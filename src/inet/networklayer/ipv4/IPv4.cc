@@ -25,6 +25,7 @@
 #include "inet/linklayer/common/SimpleLinkLayerControlInfo.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -612,18 +613,19 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
     // create and fill in control info
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(datagram->getTransportProtocol());
-    controlInfo->setSrcAddr(datagram->getSrcAddress());
-    controlInfo->setDestAddr(datagram->getDestAddress());
     controlInfo->setTypeOfService(datagram->getTypeOfService());
     controlInfo->setTimeToLive(datagram->getTimeToLive());
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
 
+    packet->setControlInfo(controlInfo);
     packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
-    packet->setControlInfo(controlInfo);
+    auto l3AddressInd = packet->ensureTag<L3AddressInd>();
+    l3AddressInd->setSource(datagram->getSrcAddress());
+    l3AddressInd->setDestination(datagram->getDestAddress());
 
     return packet;
 }
@@ -713,13 +715,16 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
 {
     IPv4Datagram *datagram = createIPv4Datagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
+
+    auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
+    IPv4Address src = l3AddressReq->getSource().toIPv4();
+    IPv4Address dest = l3AddressReq->getDestination().toIPv4();
+    delete l3AddressReq;
+
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
-    IPv4Address dest = controlInfo->getDestAddr();
     datagram->setDestAddress(dest);
-
-    IPv4Address src = controlInfo->getSrcAddr();
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing

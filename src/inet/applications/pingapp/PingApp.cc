@@ -22,6 +22,7 @@
 
 #include "inet/networklayer/common/EchoPacket_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 
 #include "inet/applications/pingapp/PingPayload_m.h"
@@ -355,8 +356,6 @@ void PingApp::sendPingRequest()
     sentCount++;
     IL3AddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
-    controlInfo->setSourceAddress(srcAddr);
-    controlInfo->setDestinationAddress(destAddr);
     controlInfo->setHopLimit(hopLimit);
 
     cPacket *outPacket = nullptr;
@@ -408,6 +407,9 @@ void PingApp::sendPingRequest()
             throw cRuntimeError("Unaccepted destination address type: %d (address: %s)", (int)destAddr.getType(), destAddr.str().c_str());
     }
 
+    auto addressReq = outPacket->ensureTag<L3AddressReq>();
+    addressReq->setSource(srcAddr);
+    addressReq->setDestination(destAddr);
     EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
     l3Socket->send(outPacket);
 }
@@ -422,8 +424,8 @@ void PingApp::processPingResponse(PingPayload *msg)
 
     // get src, hopCount etc from packet, and print them
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-    L3Address src = ctrl->getSourceAddress();
-    //L3Address dest = ctrl->getDestinationAddress();
+    L3Address src = msg->getMandatoryTag<L3AddressInd>()->getSource();
+    //L3Address dest = msg->getMandatoryTag<L3AddressInd>()->getDestination();
     int msgHopCount = ctrl->getHopLimit();
 
     // calculate the RTT time by looking up the the send time of the packet

@@ -38,10 +38,6 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
 
     virtual short getTransportProtocol() const override { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) override { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
-    virtual L3Address getSourceAddress() const override { return GenericNetworkProtocolControlInfo_Base::_getSourceAddress(); }
-    virtual void setSourceAddress(const L3Address& address) override { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
-    virtual L3Address getDestinationAddress() const override { return GenericNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
-    virtual void setDestinationAddress(const L3Address& address) override { GenericNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
     virtual short getHopLimit() const override { return GenericNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) override { GenericNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };

@@ -19,6 +19,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/routing/ospfv2/router/OSPFRouter.h"
 
@@ -226,7 +227,8 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                 }
             }
             if (intf != nullptr) {
-                IPv4Address destinationAddress = controlInfo->getDestAddr();
+                IPv4Address sourceAddress = packet->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+                IPv4Address destinationAddress = packet->getMandatoryTag<L3AddressInd>()->getDestination().toIPv4();
                 IPv4Address allDRouters = IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
 
@@ -252,7 +254,7 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                                 case Interface::BROADCAST:
                                 case Interface::NBMA:
                                 case Interface::POINTTOMULTIPOINT:
-                                    neighbor = intf->getNeighborByAddress(controlInfo->getSrcAddr());
+                                    neighbor = intf->getNeighborByAddress(sourceAddress);
                                     break;
 
                                 case Interface::POINTTOPOINT:
@@ -308,9 +310,9 @@ void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int
 {
     IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
     ipControlInfo->setProtocol(IP_PROT_OSPF);
-    ipControlInfo->setDestAddr(destination);
     ipControlInfo->setTimeToLive(ttl);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
+    packet->ensureTag<L3AddressReq>()->setDestination(destination);
 
     packet->setControlInfo(ipControlInfo);
     switch (packet->getType()) {

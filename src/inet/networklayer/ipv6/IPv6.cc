@@ -24,6 +24,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
@@ -683,8 +684,6 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     // create and fill in control info
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     controlInfo->setProtocol(datagram->getTransportProtocol());
-    controlInfo->setSrcAddr(datagram->getSrcAddress());
-    controlInfo->setDestAddr(datagram->getDestAddress());
     controlInfo->setTrafficClass(datagram->getTrafficClass());
     controlInfo->setHopLimit(datagram->getHopLimit());
 
@@ -693,8 +692,11 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
 
     // attach control info
     packet->setControlInfo(controlInfo);
+    packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<InterfaceInd>()->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
+    packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
+    packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
 
     return packet;
 }
@@ -703,11 +705,13 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
 {
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
 
-    // set source and destination address
-    IPv6Address dest = controlInfo->getDestAddr();
-    datagram->setDestAddress(dest);
+    L3AddressReq *addresses = transportPacket->removeMandatoryTag<L3AddressReq>();
+    IPv6Address src = addresses->getSource().toIPv6();
+    IPv6Address dest = addresses->getDestination().toIPv6();
+    delete addresses;
 
-    IPv6Address src = controlInfo->getSrcAddr();
+    // set source and destination address
+    datagram->setDestAddress(dest);
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing

@@ -22,6 +22,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
 
@@ -88,12 +89,12 @@ Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
 {
-    if (dynamic_cast<cMessage *>(object)) {
-        cMessage *msg = (cMessage *)object;
-
-        INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-        if (ctrl != nullptr) {
-            fire(this, t, ctrl->getSourceAddress().str().c_str() DETAILS_ARG_NAME);
+    if (cMessage *msg = dynamic_cast<cMessage *>(object)) {
+        L3AddressTag *addresses = msg->getTag<L3AddressReq>();
+        if (!addresses)
+            addresses = msg->getTag<L3AddressInd>();
+        if (addresses != nullptr) {
+            fire(this, t, addresses->getSource().str().c_str() DETAILS_ARG_NAME);
         }
     }
 }

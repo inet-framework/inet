@@ -26,6 +26,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -422,8 +423,6 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
     // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
     networkProtocolControlInfo->setHopLimit(255);
-    networkProtocolControlInfo->setDestinationAddress(nextHop);
-    networkProtocolControlInfo->setSourceAddress(getSelfAddress());
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.
@@ -433,6 +432,9 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     if (interfaceEntry)
         udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    auto addresses = udpPacket->ensureTag<L3AddressReq>();
+    addresses->setSource(getSelfAddress());
+    addresses->setDestination(nextHop);
     sendUDPPacket(udpPacket, delay);
 }
 
@@ -952,6 +954,7 @@ void DYMO::processRERR(RERR *rerrIncoming)
         return;
     else {
         INetworkProtocolControlInfo *networkProtocolControlInfo = check_and_cast<INetworkProtocolControlInfo *>(rerrIncoming->getControlInfo());
+        L3Address srcAddr = rerrIncoming->getMandatoryTag<L3AddressInd>()->getSource();
         auto incomingIfTag = rerrIncoming->getMandatoryTag<InterfaceInd>();
         // Otherwise, for each UnreachableNode.Address, HandlingRtr searches its
         // route table for a route using longest prefix matching.  If no such
@@ -973,7 +976,7 @@ void DYMO::processRERR(RERR *rerrIncoming)
                     //    UnreachableNode.SeqNum (using signed 16-bit arithmetic).
                     if (unreachableAddress.isUnicast() &&
                         unreachableAddress == route->getDestinationAsGeneric() &&
-                        route->getNextHopAsGeneric() == networkProtocolControlInfo->getSourceAddress() &&
+                        route->getNextHopAsGeneric() == srcAddr &&
                         route->getInterface()->getInterfaceId() == incomingIfTag->getInterfaceId() &&
                         (!addressBlock.getHasSequenceNumber() || routeData->getSequenceNumber() <= addressBlock.getSequenceNumber()))
                     {
@@ -1148,7 +1151,8 @@ void DYMO::updateRoute(RteMsg *rteMsg, AddressBlock& addressBlock, IRoute *route
     targetAddressToSequenceNumber[address] = sequenceNumber;
     // Route.NextHopAddress := IP.SourceAddress (i.e., an address of the node from which the RteMsg was received)
     // note that DYMO packets are not routed on the IP level, so we can use the source address here
-    route->setNextHop(networkProtocolControlInfo->getSourceAddress());
+    L3Address srcAddr = rteMsg->getMandatoryTag<L3AddressInd>()->getSource();
+    route->setNextHop(srcAddr);
     // Route.NextHopInterface is set to the interface on which RteMsg was received
     InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById((rteMsg->getMandatoryTag<InterfaceInd>())->getInterfaceId());
     if (interfaceEntry)

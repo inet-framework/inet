@@ -20,6 +20,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -154,9 +155,9 @@ void AODVRouting::handleMessage(cMessage *msg)
     }
     else {
         UDPPacket *udpPacket = check_and_cast<UDPPacket *>(msg);
+        L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
         INetworkProtocolControlInfo *udpProtocolCtrlInfo = check_and_cast<INetworkProtocolControlInfo *>(udpPacket->getControlInfo());
-        L3Address sourceAddr = udpProtocolCtrlInfo->getSourceAddress();
         unsigned int arrivalPacketTTL = udpProtocolCtrlInfo->getHopLimit();
 
         switch (ctrlPacket->getPacketType()) {
@@ -735,8 +736,6 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     networkProtocolControlInfo->setHopLimit(timeToLive);
 
     networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
-    networkProtocolControlInfo->setDestinationAddress(destAddr);
-    networkProtocolControlInfo->setSourceAddress(getSelfIPAddress());
 
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
@@ -748,6 +747,9 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
     udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
+    auto addresses = udpPacket->ensureTag<L3AddressReq>();
+    addresses->setSource(getSelfIPAddress());
+    addresses->setDestination(destAddr);
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();

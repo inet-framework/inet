@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -614,10 +615,11 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_IGMP);
     controlInfo->setTimeToLive(1);
-    controlInfo->setDestAddr(dest);
+    msg->setControlInfo(controlInfo);
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->setControlInfo(controlInfo);
+    msg->ensureTag<L3AddressReq>()->setDestination(dest);
 
     send(msg, "ipOut");
 }
@@ -628,7 +630,7 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
     InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
-            processQuery(ie, controlInfo->getSrcAddr(), check_and_cast<IGMPQuery *>(msg));
+            processQuery(ie, msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4(), check_and_cast<IGMPQuery *>(msg));
             break;
 
         //case IGMPV1_MEMBERSHIP_REPORT:

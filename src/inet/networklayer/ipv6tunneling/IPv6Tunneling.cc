@@ -36,6 +36,7 @@
 
 #include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
 
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
@@ -449,12 +450,13 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
             EV_INFO << "Added Home Address Option header." << endl;
         }
 
-        // new src is tunnel entry (either CoA or CN)
-        controlInfo->setSrcAddr(src);
-        // copy old dest addr
-        controlInfo->setDestAddr(dest);
-
         packet->setControlInfo(controlInfo);
+        auto addresses = packet->ensureTag<L3AddressInd>();
+        // new src is tunnel entry (either CoA or CN)
+        addresses->setSource(src);
+        // copy old dest addr
+        addresses->setDestination(dest);
+
         send(packet, "upperLayerOut");
     }
     else {
@@ -464,10 +466,12 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     controlInfo->setProtocol(IP_PROT_IPv6);
-    controlInfo->setSrcAddr(tunnels[vIfIndex].entry);
-    controlInfo->setDestAddr(tunnels[vIfIndex].exit);
 
     dgram->setControlInfo(controlInfo);
+    auto addresses = dgram->ensureTag<L3AddressInd>();
+    addresses->setSource(tunnels[vIfIndex].entry);
+    addresses->setDestination(tunnels[vIfIndex].exit);
+
     send(dgram, "upperLayerOut");
 #ifdef WITH_xMIPv6
 }
@@ -480,12 +484,13 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
     // decapsulation is performed in IPv6 module
     // just update controlInfo
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(dgram->removeControlInfo());
+    IPv6Address srcAddr = dgram->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
 
 #ifdef WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel
     // where the exit point is equal to the packets source
     // 11.9.07 - CB
-    if (rt->isHomeAgent() && !isTunnelExit(controlInfo->getSrcAddr())) {
+    if (rt->isHomeAgent() && !isTunnelExit(srcAddr)) {
         /*RFC 3775, 10.4.5
            Otherwise, when a home agent decapsulates a tunneled packet from
            the mobile node, the home agent MUST verify that the Source
@@ -515,7 +520,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
     InterfaceEntry *ie = ift->getInterfaceById(dgram->getMandatoryTag<InterfaceInd>()->getInterfaceId());
-    if (rt->isMobileNode() && (controlInfo->getSrcAddr() == ie->ipv6Data()->getHomeAgentAddress())
+    if (rt->isMobileNode() && (srcAddr == ie->ipv6Data()->getHomeAgentAddress())
         && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
     {
         EV_INFO << "Checking Route Optimization for: " << dgram->getSrcAddress() << endl;

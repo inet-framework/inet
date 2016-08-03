@@ -19,6 +19,7 @@
 #include "inet/applications/generic/IPvXTrafGen.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -86,9 +87,14 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
 
     if (ctrl != nullptr) {
-        src = ctrl->getSourceAddress();
-        dest = ctrl->getDestinationAddress();
         protocol = ctrl->getTransportProtocol();
+    }
+    L3AddressTag *addresses = msg->getTag<L3AddressReq>();
+    if (addresses == nullptr)
+        addresses = msg->getTag<L3AddressInd>();
+    if (addresses != nullptr) {
+        src = addresses->getSource();
+        dest = addresses->getDestination();
     }
 
     EV_INFO << msg << endl;

@@ -31,6 +31,7 @@
 #include "inet/networklayer/wiseroute/WiseRoute.h"
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -230,8 +231,9 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
         finalDestAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        EV << "WiseRoute: CInfo removed, netw addr=" << cInfo->getDestinationAddress() << endl;
-        finalDestAddr = cInfo->getDestinationAddress();
+        L3Address destAddr = msg->getMandatoryTag<L3AddressReq>()->getDestination();
+        EV << "WiseRoute: CInfo removed, netw addr=" << destAddr << endl;
+        finalDestAddr = destAddr;
     }
 
     pkt->setFinalDestAddr(finalDestAddr);
@@ -328,10 +330,10 @@ cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
 {
     cMessage *m = msg->decapsulate();
     GenericNetworkProtocolControlInfo *const controlInfo = new GenericNetworkProtocolControlInfo();
-    controlInfo->setSourceAddress(msg->getInitialSrcAddr());
     controlInfo->setTransportProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
     m->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    m->ensureTag<L3AddressInd>()->setSource(msg->getInitialSrcAddr());
     nbHops = nbHops + msg->getNbHops();
     // delete the netw packet
     delete msg;

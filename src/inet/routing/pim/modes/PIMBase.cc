@@ -24,6 +24,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
@@ -175,13 +176,14 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     }
 
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
     ctrl->setProtocol(IP_PROT_PIM);
     ctrl->setTimeToLive(1);
     msg->setControlInfo(ctrl);
     msg->setByteLength(byteLength);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
+    msg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::pim);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<L3AddressReq>()->setDestination(ALL_PIM_ROUTERS_MCAST);
 
     emit(sentHelloPkSignal, msg);
 
@@ -193,7 +195,7 @@ void PIMBase::processHelloPacket(PIMHello *packet)
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
-    IPv4Address address = ctrl->getSrcAddr();
+    IPv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     int version = packet->getVersion();
 
     emit(rcvdHelloPkSignal, packet);

@@ -31,6 +31,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
@@ -337,8 +338,8 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
         throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
 
     INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
-    inetSockPair.remoteM.ipAddrM = controlInfo->getSourceAddress();
-    inetSockPair.localM.ipAddrM = controlInfo->getDestinationAddress();
+    inetSockPair.remoteM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
+    inetSockPair.localM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
     //int interfaceId = controlInfo->getInterfaceId();
 
     if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
@@ -907,9 +908,11 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
-    controlInfo->setSourceAddress(src);
-    controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    addresses->setSource(src);
+    addresses->setDestination(dest);
 
     if (conn) {
         conn->receiveQueueM->notifyAboutSending(tcpseg);
@@ -939,7 +942,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     send(tcpseg, "ipOut");
 }
 

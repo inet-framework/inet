@@ -22,6 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 
 namespace inet {
@@ -386,7 +387,7 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
     emit(rcvdGraftPkSignal, pkt);
 
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
-    IPv4Address sender = ctrlInfo->getSrcAddr();
+    IPv4Address sender = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
@@ -540,7 +541,7 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
     emit(rcvdGraftAckPkSignal, pkt);
 
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
-    IPv4Address destAddress = ctrlInfo->getDestAddr();
+    IPv4Address destAddress = pkt->getMandatoryTag<L3AddressInd>()->getDestination().toIPv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
@@ -597,8 +598,9 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
     // check if State Refresh msg has came from RPF neighbor
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     auto ifTag = pkt->getMandatoryTag<InterfaceInd>();
+    IPv4Address srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     UpstreamInterface *upstream = route->upstreamInterface;
-    if (ifTag->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != ctrlInfo->getSrcAddr()) {
+    if (ifTag->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != srcAddr) {
         delete pkt;
         return;
     }
@@ -674,7 +676,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
     //
     // Assert State Machine; event: Receive State Refresh
     //
-    AssertMetric receivedMetric(pkt->getMetricPreference(), pkt->getMetric(), ctrlInfo->getSrcAddr());
+    AssertMetric receivedMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddr);
     processAssert(upstream, receivedMetric, pkt->getInterval());
 
     delete pkt;
@@ -684,9 +686,10 @@ void PIMDM::processAssertPacket(PIMAssert *pkt)
 {
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
     int incomingInterfaceId = pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    IPv4Address srcAddrFromTag = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
     IPv4Address source = pkt->getSourceAddress();
     IPv4Address group = pkt->getGroupAddress();
-    AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), ctrlInfo->getSrcAddr());
+    AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
     Route *route = findRoute(source, group);
     ASSERT(route);    // XXX create S,G state?
     Interface *incomingInterface = route->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
@@ -1585,8 +1588,9 @@ void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
 
     IPv4ControlInfo *oldCtrl = check_and_cast<IPv4ControlInfo *>(graftPacket->removeControlInfo());
     auto ifTag = graftPacket->removeMandatoryTag<InterfaceInd>();
-    IPv4Address destAddr = oldCtrl->getSrcAddr();
-    IPv4Address srcAddr = oldCtrl->getDestAddr();
+    auto addressInd = graftPacket->removeMandatoryTag<L3AddressInd>();
+    IPv4Address destAddr = addressInd->getSource().toIPv4();
+    IPv4Address srcAddr = addressInd->getDestination().toIPv4();
     int outInterfaceId = ifTag->getInterfaceId();
     delete oldCtrl;
     delete ifTag;
@@ -1650,13 +1654,15 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
 void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
 {
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setSrcAddr(srcAddr);
-    ctrl->setDestAddr(destAddr);
     ctrl->setProtocol(IP_PROT_PIM);
     ctrl->setTimeToLive(1);
     packet->setControlInfo(ctrl);
+    packet->ensureTag<ProtocolInd>()->setProtocol(&Protocol::pim);
     packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    auto addresses = packet->ensureTag<L3AddressReq>();
+    addresses->setSource(srcAddr);
+    addresses->setDestination(destAddr);
     send(packet, "ipOut");
 }
 

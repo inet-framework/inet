@@ -32,8 +32,7 @@ class noncobject L3Address;
 class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 {
     @customize(true);
-    L3Address destinationAddress @getter(_getDestinationAddress);   // destination address
-    L3Address sourceAddress @getter(_getSourceAddress);    // source address
     short protocol @enum(IPProtocolId);  // encapsulated protocol
     short hopLimit;     // maximum hop count
 }
+

@@ -282,7 +282,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Validates a Binding Acknowledgement for a mobile node.
      */
-    bool validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInfo *ctrlInfo);    // update 12.9.07
+    bool validateBAck(BindingAcknowledgement& ba, const IPv6ControlInfo *ctrlInfo);    // update 12.9.07
 
     /**
      * Creates and sends Binding Error message.
@@ -375,7 +375,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Verifies a HoT according to the RFC, Section 11.6.2
      */
-    bool validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
+    bool validateHoTMessage(HomeTest& HoT, const IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
 
     /**
      * Like processHoTMessage(), but related to CoT.
@@ -385,7 +385,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Like validateHoTMessage(), but related to CoT.
      */
-    bool validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
+    bool validateCoTMessage(CareOfTest& CoT, const IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
 
     /**
      * Send a BU depending on current status of:
@@ -412,7 +412,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Perform validity checks according to RFC 3775 - Section 6.4
      */
-    bool validateType2RH(const IPv6Datagram& datagram, const IPv6RoutingHeader& rh);
+    bool validateType2RH(IPv6Datagram& datagram, const IPv6RoutingHeader& rh);
 
     /**
      * Process the Home Address Option which belongs to the provided datagram.

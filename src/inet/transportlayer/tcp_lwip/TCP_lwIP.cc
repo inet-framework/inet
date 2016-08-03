@@ -46,6 +46,7 @@
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
@@ -149,8 +150,8 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
         throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
 
     INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
-    srcAddr = controlInfo->getSourceAddress();
-    destAddr = controlInfo->getDestinationAddress();
+    srcAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
+    destAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
     interfaceId = (tcpsegP->getMandatoryTag<InterfaceInd>())->getInterfaceId();
     delete ctrl;
 
@@ -597,10 +598,13 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
     IL3AddressType *addressType = destP.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
-    controlInfo->setSourceAddress(srcP);
-    controlInfo->setDestinationAddress(destP);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
 
+    tcpseg->ensureTag<ProtocolInd>()->setProtocol(&Protocol::tcp);
+    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    addresses->setSource(srcP);
+    addresses->setDestination(destP);
     if (conn) {
         conn->notifyAboutSending(*tcpseg);
     }
@@ -621,7 +625,6 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
-    tcpseg->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     send(tcpseg, "ipOut");
 }
 

@@ -20,6 +20,7 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -153,8 +154,8 @@ void TCP::handleMessage(cMessage *msg)
                 throw cRuntimeError("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
 
             INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
-            srcAddr = controlInfo->getSourceAddress();
-            destAddr = controlInfo->getDestinationAddress();
+            srcAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getSource();
+            destAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getDestination();
             //interfaceId = controlInfo->getInterfaceId();
             delete ctrl;
 

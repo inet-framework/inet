@@ -29,6 +29,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
@@ -334,32 +335,28 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     unsigned char tos;
 
     int interfaceId = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
+    destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestination();
     cObject *ctrl = udpPacket->removeControlInfo();
     if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
-        srcAddr = ctrl4->getSrcAddr();
-        destAddr = ctrl4->getDestAddr();
         ttl = ctrl4->getTimeToLive();
         tos = ctrl4->getTypeOfService();
-        isMulticast = ctrl4->getDestAddr().isMulticast();
-        isBroadcast = ctrl4->getDestAddr().isLimitedBroadcastAddress();    // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
+        isMulticast = destAddr.toIPv4().isMulticast();
+        isBroadcast = destAddr.toIPv4().isLimitedBroadcastAddress();    // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
     else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-        srcAddr = ctrl6->getSrcAddr();
-        destAddr = ctrl6->getDestAddr();
         ttl = ctrl6->getHopLimit();
         tos = ctrl6->getTrafficClass();
-        isMulticast = ctrl6->getDestAddr().isMulticast();
+        isMulticast = destAddr.toIPv6().isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
     else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != nullptr) {
         GenericNetworkProtocolControlInfo *ctrlGeneric = (GenericNetworkProtocolControlInfo *)ctrl;
-        srcAddr = ctrlGeneric->getSourceAddress();
-        destAddr = ctrlGeneric->getDestinationAddress();
         ttl = ctrlGeneric->getHopLimit();
         tos = 0;    // TODO: ctrlGeneric->getTrafficClass();
-        isMulticast = ctrlGeneric->getDestinationAddress().isMulticast();
+        isMulticast = destAddr.isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
     else if (ctrl == nullptr) {
@@ -780,13 +777,15 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(srcAddr.toIPv4());
-        ipControlInfo->setDestAddr(destAddr.toIPv4());
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTimeToLive(ttl);
         ipControlInfo->setTypeOfService(tos);
-        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
         udpPacket->setControlInfo(ipControlInfo);
+        udpPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+        auto addresses = udpPacket->ensureTag<L3AddressReq>();
+        addresses->setSource(srcAddr.toIPv4());
+        addresses->setDestination(destAddr.toIPv4());
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
@@ -796,13 +795,15 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setSrcAddr(srcAddr.toIPv6());
-        ipControlInfo->setDestAddr(destAddr.toIPv6());
         ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         ipControlInfo->setTrafficClass(tos);
-        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv6);
         udpPacket->setControlInfo(ipControlInfo);
+        udpPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv6);
+        auto addresses = udpPacket->ensureTag<L3AddressReq>();
+        addresses->setSource(srcAddr.toIPv6());
+        addresses->setDestination(destAddr.toIPv6());
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
@@ -813,13 +814,15 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         IL3AddressType *addressType = destAddr.getAddressType();
         INetworkProtocolControlInfo *ipControlInfo = addressType->createNetworkProtocolControlInfo();
         ipControlInfo->setTransportProtocol(IP_PROT_UDP);
-        ipControlInfo->setSourceAddress(srcAddr);
-        ipControlInfo->setDestinationAddress(destAddr);
         //ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         //ipControlInfo->setTrafficClass(tos);
-        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
+        udpPacket->ensureTag<ProtocolInd>()->setProtocol(&Protocol::udp);
+        udpPacket->ensureTag<ProtocolReq>()->setProtocol(&Protocol::gnp);
+        auto addresses = udpPacket->ensureTag<L3AddressReq>();
+        addresses->setSource(srcAddr);
+        addresses->setDestination(destAddr);
 
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");

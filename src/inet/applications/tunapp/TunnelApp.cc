@@ -20,6 +20,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/applications/tunapp/TunnelApp.h"
 
@@ -87,9 +88,9 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
             delete message->removeControlInfo();
             if (protocol == &Protocol::ipv4) {
                 IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-                controlInfo->setDestinationAddress(L3AddressResolver().resolve(destinationAddress));
                 controlInfo->setTransportProtocol(IP_PROT_IP);
                 message->setControlInfo(controlInfo);
+                message->ensureTag<L3AddressReq>()->setDestination(L3AddressResolver().resolve(destinationAddress));
                 l3Socket.send(PK(message));
             }
             else if (protocol == &Protocol::udp)

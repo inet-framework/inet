@@ -30,6 +30,7 @@
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -346,8 +347,8 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
         INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
         controlInfo->setTransportProtocol(IP_PROT_SCTP);
         //controlInfo->setSourceAddress();
-        controlInfo->setDestinationAddress(dest);
         sctpmsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        sctpmsg->ensureTag<L3AddressReq>()->setDestination(dest);
         sctpMain->send_to_ip(sctpmsg);
 
         if (chunkType == HEARTBEAT) {

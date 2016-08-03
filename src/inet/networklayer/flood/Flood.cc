@@ -23,6 +23,7 @@
 #include "inet/networklayer/flood/Flood.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/contract/generic/GenericNetworkProtocolControlInfo.h"
@@ -251,11 +252,13 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
 cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
 {
     GenericNetworkProtocolControlInfo *controlInfo = new GenericNetworkProtocolControlInfo();
-    controlInfo->setSourceAddress(floodDatagram->getSourceAddress());
     controlInfo->setProtocol(floodDatagram->getTransportProtocol());
     cPacket *transportPacket = floodDatagram->decapsulate();
     transportPacket->setControlInfo(controlInfo);
     transportPacket->ensureTag<ProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
+    auto addressInd = transportPacket->ensureTag<L3AddressInd>();
+    addressInd->setSource(floodDatagram->getSourceAddress());
+    addressInd->setDestination(floodDatagram->getDestinationAddress());
     delete floodDatagram;
     return transportPacket;
 }
@@ -274,14 +277,15 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
     FloodDatagram *pkt = new FloodDatagram(appPkt->getName(), appPkt->getKind());
     pkt->setBitLength(headerLength);
 
-    if (cInfo == nullptr) {
+    auto addressReq = appPkt->getTag<L3AddressReq>();
+    if (addressReq == nullptr) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
         netwAddr = netwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
         pkt->setTransportProtocol(cInfo->getTransportProtocol());
-        netwAddr = cInfo->getDestinationAddress();
+        netwAddr = addressReq->getDestination();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;
     }

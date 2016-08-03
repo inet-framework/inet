@@ -20,6 +20,7 @@
 #include "inet/transportlayer/sctp/SCTP.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/common/ModuleAccess.h"
@@ -181,8 +182,8 @@ void SCTP::handleMessage(cMessage *msg)
             EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
         } else {
             INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
-            srcAddr = controlInfo->getSourceAddress();
-            destAddr = controlInfo->getDestinationAddress();
+            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSource();
+            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestination();
             delete controlInfo;
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
         }
@@ -345,9 +346,11 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
     else {
         INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
         controlInfo->setTransportProtocol(IP_PROT_SCTP);
-        controlInfo->setSourceAddress(fromAddr);
-        controlInfo->setDestinationAddress(toAddr);
         msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        auto addresses = msg->ensureTag<L3AddressReq>();
+        addresses->setSource(fromAddr);
+        addresses->setDestination(toAddr);
+
         send_to_ip(msg);
     }
 }
@@ -373,9 +376,10 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
 
     INetworkProtocolControlInfo *controlInfo = toAddr.getAddressType()->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_SCTP);
-    controlInfo->setSourceAddress(fromAddr);
-    controlInfo->setDestinationAddress(toAddr);
     msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    auto addresses = msg->ensureTag<L3AddressReq>();
+    addresses->setSource(fromAddr);
+    addresses->setDestination(toAddr);
     send_to_ip(msg);
 }
 

@@ -26,6 +26,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
@@ -124,7 +125,7 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the IPv4 layer
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setSrcAddr(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMessage->ensureTag<L3AddressInd>()->setDestination(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
         controlInfo->setProtocol(IP_PROT_ICMP);
         errorMessage->setControlInfo(controlInfo);
 
@@ -238,18 +239,20 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 {
     // turn request into a reply
     ICMPMessage *reply = request;
+    auto addressInd = request->getMandatoryTag<L3AddressInd>();
+    IPv4Address src = addressInd->getSource().toIPv4();
+    IPv4Address dest = addressInd->getDestination().toIPv4();
     reply->clearTags();
     reply->setName((std::string(request->getName()) + "-reply").c_str());
     reply->setType(ICMP_ECHO_REPLY);
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(reply->getControlInfo());
-    IPv4Address src = ctrl->getSrcAddr();
-    IPv4Address dest = ctrl->getDestAddr();
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(request->getControlInfo());
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the IPv4 layer
-    ctrl->setSrcAddr(dest);
-    ctrl->setDestAddr(src);
+    auto addressReq = request->ensureTag<L3AddressReq>();
+    addressReq->setSource(dest);
+    addressReq->setDestination(src);
 
     sendToIP(reply);
 }
@@ -257,9 +260,9 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 void ICMP::sendToIP(ICMPMessage *msg, const IPv4Address& dest)
 {
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setDestAddr(dest);
     controlInfo->setProtocol(IP_PROT_ICMP);
     msg->setControlInfo(controlInfo);
+    msg->ensureTag<L3AddressReq>()->setDestination(dest);
     sendToIP(msg);
 }
 
