@@ -585,9 +585,9 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
     IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
         IPv4ControlInfo *controlInfoCopy = controlInfo->dup();
-        controlInfoCopy->setSocketId(it->second->socketId);
         cPacket *packetCopy = packet->dup();
         packetCopy->setControlInfo(controlInfoCopy);
+        packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {

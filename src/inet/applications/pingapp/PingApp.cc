@@ -358,7 +358,6 @@ void PingApp::sendPingRequest()
     controlInfo->setSourceAddress(srcAddr);
     controlInfo->setDestinationAddress(destAddr);
     controlInfo->setHopLimit(hopLimit);
-    controlInfo->setSocketId(l3Socket->getSocketId());
 
     cPacket *outPacket = nullptr;
     switch (destAddr.getType()) {

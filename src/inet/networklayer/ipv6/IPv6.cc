@@ -621,9 +621,9 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
         IPv6ControlInfo *controlInfoCopy = controlInfo->dup();
-        controlInfoCopy->setSocketId(it->second->socketId);
         cPacket *packetCopy = packet->dup();
         packetCopy->setControlInfo(controlInfoCopy);
+        packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
 

@@ -463,9 +463,9 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
     GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
         GenericNetworkProtocolControlInfo *controlInfoCopy = controlInfo->dup();
-        controlInfoCopy->setSocketId(it->second->socketId);
         cPacket *packetCopy = packet->dup();
         packetCopy->setControlInfo(controlInfoCopy);
+        packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {

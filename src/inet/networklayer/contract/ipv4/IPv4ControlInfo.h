@@ -49,9 +49,6 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     IPv4ControlInfo& operator=(const IPv4ControlInfo& other);
     virtual IPv4ControlInfo *dup() const override { return new IPv4ControlInfo(*this); }
 
-    virtual int getSocketId() const override { return IPv4ControlInfo_Base::getSocketId(); }
-    virtual void setSocketId(int id) override { return IPv4ControlInfo_Base::setSocketId(id); }
-
     /**
      * Returns bits 0-5 of the Type of Service field, a value in the 0..63 range
      */

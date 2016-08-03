@@ -107,8 +107,6 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     virtual void setSourceAddress(const L3Address& address) override { srcAddr = address.toIPv6(); }
     virtual L3Address getDestinationAddress() const override { return L3Address(destAddr); }
     virtual void setDestinationAddress(const L3Address& address) override { destAddr = address.toIPv6(); }
-    virtual int getSocketId() const override { return IPv6ControlInfo_Base::getSocketId(); }
-    virtual void setSocketId(int socketId) override { IPv6ControlInfo_Base::setSocketId(socketId); }
     virtual short getHopLimit() const override { return IPv6ControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) override { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };
