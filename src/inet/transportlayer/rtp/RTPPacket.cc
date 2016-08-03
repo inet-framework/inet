@@ -26,7 +26,7 @@ Register_Class(RTPPacket);
 std::string RTPPacket::info() const
 {
     std::stringstream out;
-    out << "RTPPacket: payloadType=" << payloadType_var
+    out << "RTPPacket: payloadType=" << payloadType
         << " payloadLength=" << getPayloadLength();
     return out.str();
 }
@@ -34,9 +34,9 @@ std::string RTPPacket::info() const
 void RTPPacket::dump() const
 {
     EV_INFO << "RTPPacket:" << endl;
-    EV_INFO << "  payloadType = " << payloadType_var << endl;
-    EV_INFO << "  sequenceNumber = " << sequenceNumber_var << endl;
-    EV_INFO << "  timeStamp = " << timeStamp_var << endl;
+    EV_INFO << "  payloadType = " << payloadType << endl;
+    EV_INFO << "  sequenceNumber = " << sequenceNumber << endl;
+    EV_INFO << "  timeStamp = " << timeStamp << endl;
     EV_INFO << "  payloadLength = " << getPayloadLength() << endl;
 }
 

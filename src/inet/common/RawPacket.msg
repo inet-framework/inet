@@ -30,7 +30,6 @@ class noncobject ByteArray;
 packet RawPacket
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     ByteArray byteArray;
 }
 

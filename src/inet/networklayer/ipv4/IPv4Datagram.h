@@ -70,12 +70,12 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     /**
      * Returns the number of extension headers in this datagram
      */
-    virtual unsigned int getOptionArraySize() const { return options_var.size(); }
+    virtual unsigned int getOptionArraySize() const { return options.size(); }
 
     /**
      * Returns the kth extension header in this datagram
      */
-    virtual TLVOptionBase& getOption(unsigned int k) { return *check_and_cast<TLVOptionBase *>(&(options_var.at(k))); }
+    virtual TLVOptionBase& getOption(unsigned int k) { return *check_and_cast<TLVOptionBase *>(&(options.at(k))); }
     virtual const TLVOptionBase& getOption(unsigned int k) const { return const_cast<IPv4Datagram*>(this)->getOption(k); }
 
     /**

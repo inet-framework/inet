@@ -25,23 +25,23 @@ Register_Class(IPv4Datagram);
 
 int IPv4Datagram::getTotalLengthField() const
 {
-    return totalLengthField_var == -1 ? getByteLength() : totalLengthField_var;
+    return totalLengthField == -1 ? getByteLength() : totalLengthField;
 }
 
 TLVOptionBase *IPv4Datagram::findOptionByType(short int optionType, int index)
 {
-    int i = options_var.findByType(optionType, index);
+    int i = options.findByType(optionType, index);
     return i >= 0 ? &getOption(i) : nullptr;
 }
 
 void IPv4Datagram::addOption(TLVOptionBase *opt, int atPos)
 {
-    options_var.add(opt, atPos);
+    options.add(opt, atPos);
 }
 
 int IPv4Datagram::calculateHeaderByteLength() const
 {
-    int length = utils::roundUp(20 + options_var.getLength(), 4);
+    int length = utils::roundUp(20 + options.getLength(), 4);
     ASSERT(length >= 20 && length <= 60 && (length % 4 == 0));
 
     return length;

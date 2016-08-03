@@ -81,7 +81,6 @@ class BGPUpdatePathAttributeList
 packet BGPUpdateMessage extends BGPHeader
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     type = BGP_UPDATE;
     byteLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
 

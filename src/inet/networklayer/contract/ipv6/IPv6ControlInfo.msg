@@ -67,7 +67,6 @@ inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {re
 class IPv6ControlInfo
 {
     @customize(true);
-    @fieldNameSuffix("_var"); //TODO remove when OMNeT++ 4.x compatibility is no longer required
     short protocol @enum(IPProtocolId);  // transport layer protocol
     IPv6Address destAddr; // destination IPv6 address
     IPv6Address srcAddr;  // source IPv6 address
