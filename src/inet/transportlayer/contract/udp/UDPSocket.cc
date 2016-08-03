@@ -19,6 +19,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -322,12 +323,12 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     int destPort = ctrl->getDestPort();
     int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     int ttl = pk->getMandatoryTag<HopLimitInd>()->getHopLimit();
-    int tos = ctrl->getTypeOfService();
+    int dscp = pk->getMandatoryTag<DscpInd>()->getDifferentiatedServicesCodePoint();
 
     std::stringstream os;
     os << pk << " (" << pk->getByteLength() << " bytes) ";
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
-    os << " TTL=" << ttl << " ToS=" << tos << " on ifID=" << interfaceID;
+    os << " TTL=" << ttl << " DSCP =" << dscp << " on ifID=" << interfaceID;
     return os.str();
 }
 

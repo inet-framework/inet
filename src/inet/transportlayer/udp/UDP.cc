@@ -31,6 +31,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
@@ -342,7 +343,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int srcPort = udpPacket->getSourcePort();
     int destPort = udpPacket->getDestinationPort();
     int ttl;
-    unsigned char tos;
 
     int interfaceId = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
@@ -350,19 +350,14 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     ttl = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
     cObject *ctrl = udpPacket->removeControlInfo();
     if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
-        IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
-        tos = ctrl4->getTypeOfService();
         isMulticast = destAddr.toIPv4().isMulticast();
         isBroadcast = destAddr.toIPv4().isLimitedBroadcastAddress();    // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
     else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
-        IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-        tos = ctrl6->getTrafficClass();
         isMulticast = destAddr.toIPv6().isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
     else if (ctrl != nullptr) {
-        tos = 0;    // TODO: ctrl->getTrafficClass();
         isMulticast = destAddr.isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
@@ -385,7 +380,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         }
         else {
             cPacket *payload = udpPacket->decapsulate();
-            sendUp(payload, sd, srcAddr, srcPort, destAddr, destPort, interfaceId, ttl, tos);
+            sendUp(payload, sd, srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);
             delete udpPacket;
             delete ctrl;
         }
@@ -402,8 +397,8 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             cPacket *payload = udpPacket->decapsulate();
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
-                sendUp(payload->dup(), sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl, tos); // dup() to all but the last one
-            sendUp(payload, sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl, tos);    // send original to last socket
+                sendUp(payload->dup(), sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl); // dup() to all but the last one
+            sendUp(payload, sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);    // send original to last socket
             delete udpPacket;
             delete ctrl;
         }
@@ -727,7 +722,7 @@ std::vector<UDP::SockDesc *> UDP::findSocketsForMcastBcastPacket(const L3Address
     return result;
 }
 
-void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos)
+void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort, int interfaceId, int ttl)
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
@@ -735,7 +730,6 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     UDPDataIndication *udpCtrl = new UDPDataIndication();
     udpCtrl->setSrcPort(srcPort);
     udpCtrl->setDestPort(destPort);
-    udpCtrl->setTypeOfService(tos);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
     delete payload->removeTag<DispatchProtocolReq>();
@@ -767,7 +761,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 }
 
 void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort,
-        int interfaceId, bool multicastLoop, int ttl, unsigned char tos)
+        int interfaceId, bool multicastLoop, int ttl, unsigned char dscp)
 {
     if (destAddr.isUnspecified())
         throw cRuntimeError("send: unspecified destination address");
@@ -788,8 +782,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
         ipControlInfo->setMulticastLoop(multicastLoop);
-        ipControlInfo->setTypeOfService(tos);
         udpPacket->setControlInfo(ipControlInfo);
+        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
@@ -806,8 +800,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         ipControlInfo->setMulticastLoop(multicastLoop);
-        ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(ipControlInfo);
+        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
@@ -825,8 +819,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << endl;
         IL3AddressType *addressType = destAddr.getAddressType();
         //ipControlInfo->setMulticastLoop(multicastLoop);
-        //ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(addressType->createNetworkProtocolControlInfo());
+        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);

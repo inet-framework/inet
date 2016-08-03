@@ -26,6 +26,7 @@
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -612,7 +613,7 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
 
     // create and fill in control info
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setTypeOfService(datagram->getTypeOfService());
+    packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(datagram->getDiffServCodePoint());
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
     controlInfo->setOrigDatagram(datagram);
@@ -742,7 +743,9 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     }
 
     // set other fields
-    datagram->setTypeOfService(controlInfo->getTypeOfService());
+    auto dscpReq = transportPacket->getTag<DscpReq>();
+    if (dscpReq != nullptr)
+        datagram->setDiffServCodePoint(dscpReq->getDifferentiatedServicesCodePoint());
 
     datagram->setIdentification(curFragmentId++);
     datagram->setMoreFragments(false);

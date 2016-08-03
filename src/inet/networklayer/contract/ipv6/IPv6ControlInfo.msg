@@ -67,9 +67,6 @@ inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {re
 class IPv6ControlInfo
 {
     @customize(true);
-    unsigned char trafficClass;  // Traffic Class byte (low 6 bits: DSCP; highest 2 bits: ECN)
-    abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
-    abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }
