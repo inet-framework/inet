@@ -86,7 +86,7 @@ module EtherSwitch
         for i=0..sizeof(ethg)-1 {
             eth[i].upperLayerIn <-- relayUnit.ifOut++;
             eth[i].upperLayerOut --> relayUnit.ifIn++;
-            eth[i].phys <--> ethg[i];
+            eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 
         if spanningTreeProtocol != "" {

@@ -17,6 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfacePortTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
@@ -183,7 +184,7 @@ void Ieee8021dRelay::learn(EtherFrame *frame)
 void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
 {
     Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(bpdu->removeControlInfo());
-    unsigned int portNum = controlInfo->getSwitchPort();
+    unsigned int portNum = bpdu->getMandatoryTag<InterfacePortReq>()->getInterfacePort();
     MACAddress address = bpdu->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     delete controlInfo;
 
@@ -213,9 +214,9 @@ void Ieee8021dRelay::deliverBPDU(EtherFrame *frame)
     BPDU *bpdu = check_and_cast<BPDU *>(frame->decapsulate());
 
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setSwitchPort(frame->getArrivalGate()->getIndex());
 
     bpdu->setControlInfo(controlInfo);
+    bpdu->ensureTag<InterfacePortInd>()->setInterfacePort(frame->getArrivalGate()->getIndex());
     auto macAddressTag = bpdu->ensureTag<MACAddressInd>();
     macAddressTag->setSourceAddress(frame->getSrc());
     macAddressTag->setDestinationAddress(frame->getDest());
