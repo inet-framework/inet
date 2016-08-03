@@ -739,7 +739,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->setSourcePort(aodvUDPPort);
     udpPacket->setDestinationPort(aodvUDPPort);
-    udpPacket->setControlInfo(dynamic_cast<cObject *>(addressType->createNetworkProtocolControlInfo()));
+    udpPacket->setControlInfo(addressType->createNetworkProtocolControlInfo());
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
