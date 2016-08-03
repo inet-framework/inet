@@ -23,6 +23,7 @@
 
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -790,6 +791,9 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numFramesReceivedOK++;
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, frame);
+
+    if (interfaceEntry)
+        frame->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
