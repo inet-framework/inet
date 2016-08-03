@@ -68,7 +68,6 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(reply->getControlInfo());
     L3Address src = ctrl->getSourceAddress();
     L3Address dest = ctrl->getDestinationAddress();
-    ctrl->setInterfaceId(-1);
     ctrl->setSourceAddress(dest);
     ctrl->setDestinationAddress(src);
     reply->clearTags();

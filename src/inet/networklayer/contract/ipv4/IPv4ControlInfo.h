@@ -82,8 +82,6 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     virtual void setSourceAddress(const L3Address& address) override { srcAddr = address.toIPv4(); }
     virtual L3Address getDestinationAddress() const override { return L3Address(destAddr); }
     virtual void setDestinationAddress(const L3Address& address) override { destAddr = address.toIPv4(); }
-    virtual int getInterfaceId() const override { return IPv4ControlInfo_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) override { IPv4ControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const override { return getTimeToLive(); }
     virtual void setHopLimit(short hopLimit) override { setTimeToLive(hopLimit); }
 };

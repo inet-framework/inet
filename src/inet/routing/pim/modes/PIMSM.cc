@@ -17,13 +17,15 @@
 // Authors: Tomas Prochazka (xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz)
 //          Tamas Borbely (tomi@omnetpp.org)
 
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/routing/pim/modes/PIMSM.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/routing/pim/modes/PIMSM.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 Define_Module(PIMSM);
@@ -344,7 +346,8 @@ void PIMSM::processJoinPrunePacket(PIMJoinPrune *pkt)
     emit(rcvdJoinPrunePkSignal, pkt);
 
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
-    InterfaceEntry *inInterface = ift->getInterfaceById(ctrl->getInterfaceId());
+    InterfaceEntry *inInterface = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+
     int holdTime = pkt->getHoldTime();
     IPv4Address upstreamNeighbor = pkt->getUpstreamNeighborAddress();
 
@@ -674,7 +677,7 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
 void PIMSM::processAssertPacket(PIMAssert *pkt)
 {
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
-    int incomingInterfaceId = ctrlInfo->getInterfaceId();
+    int incomingInterfaceId = pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     IPv4Address source = pkt->getSourceAddress();
     IPv4Address group = pkt->getGroupAddress();
     AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), ctrlInfo->getSrcAddr());
@@ -1542,9 +1545,9 @@ void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
     ctrl->setDestAddr(destAddr);
     ctrl->setProtocol(IP_PROT_PIM);
     ctrl->setTimeToLive(ttl);
-    ctrl->setInterfaceId(outInterfaceId);
     packet->setControlInfo(ctrl);
     packet->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     send(packet, "ipOut");
 }
 
@@ -1566,10 +1569,10 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     ctrl->setDestAddr(datagram->getDestAddress());
     // XXX ctrl->setSrcAddr(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
-    ctrl->setInterfaceId(outInterfaceId);
     ctrl->setTimeToLive(MAX_TTL - 2);    //one minus for source DR router and one for RP router // XXX specification???
     ctrl->setProtocol(datagram->getTransportProtocol());
     data->setControlInfo(ctrl);
+    data->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     send(data, "ipOut");
 }
 

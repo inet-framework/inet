@@ -17,15 +17,17 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
+#include "inet/routing/pim/modes/PIMBase.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/routing/pim/modes/PIMBase.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 namespace inet {
 
@@ -176,9 +178,9 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
     ctrl->setProtocol(IP_PROT_PIM);
     ctrl->setTimeToLive(1);
-    ctrl->setInterfaceId(pimInterface->getInterfaceId());
     msg->setControlInfo(ctrl);
     msg->setByteLength(byteLength);
+    msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
 
     emit(sentHelloPkSignal, msg);
@@ -189,7 +191,8 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
 void PIMBase::processHelloPacket(PIMHello *packet)
 {
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
-    int interfaceId = ctrl->getInterfaceId();
+    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+
     IPv4Address address = ctrl->getSrcAddr();
     int version = packet->getVersion();
 

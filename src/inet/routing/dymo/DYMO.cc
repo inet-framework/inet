@@ -17,11 +17,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include "inet/routing/dymo/DYMO.h"
+
 #include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/routing/dymo/DYMO.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 
 #ifdef WITH_IDEALWIRELESS
 #include "inet/linklayer/ideal/IdealMacFrame_m.h"
@@ -31,12 +39,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
@@ -422,8 +424,6 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     networkProtocolControlInfo->setHopLimit(255);
     networkProtocolControlInfo->setDestinationAddress(nextHop);
     networkProtocolControlInfo->setSourceAddress(getSelfAddress());
-    if (interfaceEntry)
-        networkProtocolControlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.
@@ -431,6 +431,8 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     udpPacket->setDestinationPort(DYMO_UDP_PORT);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
     udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    if (interfaceEntry)
+        udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
     sendUDPPacket(udpPacket, delay);
 }
 
@@ -950,6 +952,7 @@ void DYMO::processRERR(RERR *rerrIncoming)
         return;
     else {
         INetworkProtocolControlInfo *networkProtocolControlInfo = check_and_cast<INetworkProtocolControlInfo *>(rerrIncoming->getControlInfo());
+        auto incomingIfTag = rerrIncoming->getMandatoryTag<InterfaceInd>();
         // Otherwise, for each UnreachableNode.Address, HandlingRtr searches its
         // route table for a route using longest prefix matching.  If no such
         // Route is found, processing is complete for that UnreachableNode.Address.
@@ -971,7 +974,7 @@ void DYMO::processRERR(RERR *rerrIncoming)
                     if (unreachableAddress.isUnicast() &&
                         unreachableAddress == route->getDestinationAsGeneric() &&
                         route->getNextHopAsGeneric() == networkProtocolControlInfo->getSourceAddress() &&
-                        route->getInterface()->getInterfaceId() == networkProtocolControlInfo->getInterfaceId() &&
+                        route->getInterface()->getInterfaceId() == incomingIfTag->getInterfaceId() &&
                         (!addressBlock.getHasSequenceNumber() || routeData->getSequenceNumber() <= addressBlock.getSequenceNumber()))
                     {
                         // If the route satisfies all of the above conditions, HandlingRtr sets
@@ -1147,7 +1150,7 @@ void DYMO::updateRoute(RteMsg *rteMsg, AddressBlock& addressBlock, IRoute *route
     // note that DYMO packets are not routed on the IP level, so we can use the source address here
     route->setNextHop(networkProtocolControlInfo->getSourceAddress());
     // Route.NextHopInterface is set to the interface on which RteMsg was received
-    InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById(networkProtocolControlInfo->getInterfaceId());
+    InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById((rteMsg->getMandatoryTag<InterfaceInd>())->getInterfaceId());
     if (interfaceEntry)
         route->setInterface(interfaceEntry);
     // Route.Broken flag := FALSE

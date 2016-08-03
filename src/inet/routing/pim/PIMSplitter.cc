@@ -17,14 +17,16 @@
 // Authors: Veronika Rybova, Vladimir Vesely (ivesely@fit.vutbr.cz),
 //          Tamas Borbely (tomi@omnetpp.org)
 
+#include "inet/routing/pim/PIMSplitter.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/routing/pim/PIMSplitter.h"
 
 namespace inet {
 using namespace std;
@@ -78,7 +80,7 @@ void PIMSplitter::handleMessage(cMessage *msg)
 void PIMSplitter::processPIMPacket(PIMPacket *pkt)
 {
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(pkt->getControlInfo());
-    InterfaceEntry *ie = ift->getInterfaceById(ctrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 
     EV_INFO << "Received packet on interface '" << ie->getName() << "'" << endl;

@@ -389,7 +389,11 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     controlInfo->setProtocol(datagram->getTransportProtocol());
     controlInfo->setSourceAddress(datagram->getSourceAddress());
     controlInfo->setDestinationAddress(datagram->getDestinationAddress());
-    controlInfo->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
+    if (fromIE) {
+        auto ifTag = packet->ensureTag<InterfaceInd>();
+        ifTag->setInterfaceId(fromIE->getInterfaceId());
+    }
+
     controlInfo->setHopLimit(datagram->getHopLimit());
 
     // attach control info
@@ -412,7 +416,8 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     datagram->setDestinationAddress(dest);
 
     // Generic_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = interfaceTable->getInterfaceById(controlInfo->getInterfaceId());
+    auto ifTag = transportPacket->getTag<InterfaceReq>();
+    destIE = ifTag ? interfaceTable->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
 
     L3Address src = controlInfo->getSourceAddress();
 

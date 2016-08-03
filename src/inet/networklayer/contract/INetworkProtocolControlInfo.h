@@ -33,8 +33,6 @@ class INET_API INetworkProtocolControlInfo
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const L3Address& address) = 0;
-    virtual int getInterfaceId() const = 0;
-    virtual void setInterfaceId(int interfaceId) = 0;
     virtual int getSocketId() const = 0;
     virtual void setSocketId(int socketId) = 0;
     virtual short getHopLimit() const = 0;

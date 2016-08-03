@@ -34,8 +34,6 @@ class GenericNetworkProtocolControlInfo  //TODO rename!!!!
     @customize(true);
     L3Address destinationAddress @getter(_getDestinationAddress);   // destination address
     L3Address sourceAddress @getter(_getSourceAddress);    // source address
-    int interfaceId = -1; // interface on which the datagram was received, or
-                          // should be sent (see ~InterfaceTable)
     int socketId = -1;
     short protocol @enum(IPProtocolId);  // encapsulated protocol
     short hopLimit;     // maximum hop count

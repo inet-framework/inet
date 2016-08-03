@@ -74,8 +74,6 @@ class IPv6ControlInfo
     abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     short hopLimit;       // hop limit
-    int interfaceId = -1; // interface on which the datagram was received, or
-                          // should be sent (see ~InterfaceTable)
     int socketId = -1;
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader

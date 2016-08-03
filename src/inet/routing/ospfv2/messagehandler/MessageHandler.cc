@@ -17,9 +17,10 @@
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/routing/ospfv2/router/OSPFRouter.h"
-#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -191,7 +192,7 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
         IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
-        int interfaceId = controlInfo->getInterfaceId();
+        int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
         AreaID areaID = packet->getAreaID();
         Area *area = router->getAreaByID(areaID);
 
@@ -309,7 +310,7 @@ void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int
     ipControlInfo->setProtocol(IP_PROT_OSPF);
     ipControlInfo->setDestAddr(destination);
     ipControlInfo->setTimeToLive(ttl);
-    ipControlInfo->setInterfaceId(outputIfIndex);
+    packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
 
     packet->setControlInfo(ipControlInfo);
     switch (packet->getType()) {

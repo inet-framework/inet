@@ -20,16 +20,17 @@
 
 #include <string.h>
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
 
@@ -140,7 +141,7 @@ void ICMP::sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICM
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
     IPv4Datagram *datagram = ctrl->removeOrigDatagram();
-    int inputInterfaceId = ctrl->getInterfaceId();
+    int inputInterfaceId = transportPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete ctrl;
     take(transportPacket);
     take(datagram);
@@ -247,7 +248,6 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     IPv4Address src = ctrl->getSrcAddr();
     IPv4Address dest = ctrl->getDestAddr();
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the IPv4 layer
-    ctrl->setInterfaceId(-1);
     ctrl->setSrcAddr(dest);
     ctrl->setDestAddr(src);
 

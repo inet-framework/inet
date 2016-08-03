@@ -18,14 +18,15 @@
 
 #include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
 
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 
 #ifdef WITH_xMIPv6
 #include "inet/networklayer/xmipv6/xMIPv6.h"
@@ -757,8 +758,8 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
     controlInfo->setDestAddr(destAddr);
     controlInfo->setSrcAddr(srcAddr);
     controlInfo->setHopLimit(255);
-    controlInfo->setInterfaceId(interfaceId);
     msg->setControlInfo(controlInfo);
+    msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
     send(msg, "ipv6Out");
 }
@@ -1082,7 +1083,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
     }
 
     //Find out which interface the RS message arrived on.
-    InterfaceEntry *ie = ift->getInterfaceById(rsCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(rs->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);    //fetch advertising interface entry.
 
     //RFC 2461: Section 6.2.6
@@ -1299,8 +1300,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv
 void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         IPv6ControlInfo *raCtrlInfo)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
-
+    InterfaceEntry *ie = ift->getInterfaceById(ra->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "Interface is an advertising interface, dropping RA message.\n";
         delete raCtrlInfo;
@@ -1371,7 +1371,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
     //On receipt of a valid Router Advertisement, a host extracts the source
     //address of the packet and does the following:
     IPv6Address raSrcAddr = raCtrlInfo->getSrcAddr();
-    InterfaceEntry *ie = ift->getInterfaceById(raCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(ra->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     int ifID = ie->getInterfaceId();
 
     /*- If the address is not already present in the host's Default Router List,
@@ -1848,7 +1848,7 @@ void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns,
         IPv6ControlInfo *nsCtrlInfo)
 {
     //Control Information
-    InterfaceEntry *ie = ift->getInterfaceById(nsCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(ns->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     IPv6Address nsTargetAddr = ns->getTargetAddress();
 
@@ -2185,7 +2185,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
 
     //First, we check if the target address in NA is found in the interface it
     //was received on is tentative.
-    InterfaceEntry *ie = ift->getInterfaceById(naCtrlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(na->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (ie->ipv6Data()->isTentativeAddress(naTargetAddr)) {
         throw cRuntimeError("Duplicate Address Detected! Manual attention needed!");
     }

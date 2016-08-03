@@ -16,11 +16,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/routing/aodv/AODVRouting.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/routing/aodv/AODVRouting.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #ifdef WITH_IDEALWIRELESS
 #include "inet/linklayer/ideal/IdealMacFrame_m.h"
@@ -738,7 +740,6 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
 
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
-    networkProtocolControlInfo->setInterfaceId(ifEntry->getInterfaceId());
 
     UDPPacket *udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
@@ -746,6 +747,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     udpPacket->setDestinationPort(aodvUDPPort);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
     udpPacket->ensureTag<ProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
 
     if (destAddr.isBroadcast())
         lastBroadcastTime = simTime();

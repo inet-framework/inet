@@ -21,6 +21,7 @@
 //#include "headers/defs.h"   // for endian macros
 //#include "headers/in_systm.h"
 #include "lwip/lwip_ip.h"
+#include "lwip/lwip_tcp.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -31,26 +32,25 @@
 #endif // ifdef WITH_IPv6
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/common/serializer/tcp/TCPSerializer.h"
+#include "inet/common/serializer/tcp/headers/tcphdr.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
-
-#include "inet/common/serializer/tcp/headers/tcphdr.h"
-#include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipByteStreamQueues.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipMsgBasedQueues.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipVirtualDataQueues.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/common/serializer/tcp/TCPSerializer.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
@@ -150,7 +150,7 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
     srcAddr = controlInfo->getSourceAddress();
     destAddr = controlInfo->getDestinationAddress();
-    interfaceId = controlInfo->getInterfaceId();
+    interfaceId = (tcpsegP->getMandatoryTag<InterfaceInd>())->getInterfaceId();
     delete ctrl;
 
     // process segment

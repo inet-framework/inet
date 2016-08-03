@@ -16,23 +16,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/INETDefs.h"
-#include "inet/common/ProtocolTag_m.h"
-
 #include "inet/networklayer/icmpv6/ICMPv6.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
-
-#include "inet/networklayer/contract/IInterfaceTable.h"
-
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 #include "inet/applications/pingapp/PingPayload_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+
+#include "inet/linklayer/common/InterfaceTag_m.h"
+
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+
 
 namespace inet {
 
@@ -151,7 +150,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 
     if (ctrl->getDestAddr().isMulticast()    /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        IPv6InterfaceData *ipv6Data = it->getInterfaceById(ctrl->getInterfaceId())->ipv6Data();
+        IPv6InterfaceData *ipv6Data = it->getInterfaceById(request->getMandatoryTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
         replyCtrl->setSrcAddr(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.
         //      According to RFC 3484, the source address to be used

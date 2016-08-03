@@ -271,7 +271,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Constructs and send a BA to the IPv6 module. Only applicable to HAs and CNs.
      */
     void createAndSendBAMessage(const IPv6Address& src,
-            const IPv6Address& dest, IPv6ControlInfo *ctrlInfo, const BAStatus& baStatus, const uint baSeq,
+            const IPv6Address& dest, int interfaceId, IPv6ControlInfo *ctrlInfo, const BAStatus& baStatus, const uint baSeq,
             const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0);    // 14.9.07 - CB
 
     /**

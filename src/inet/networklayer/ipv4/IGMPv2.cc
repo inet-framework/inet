@@ -16,15 +16,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/networklayer/ipv4/IGMPv2.h"
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/ipv4/IGMPv2.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include <algorithm>
 
@@ -611,10 +613,10 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_IGMP);
-    controlInfo->setInterfaceId(ie->getInterfaceId());
     controlInfo->setTimeToLive(1);
     controlInfo->setDestAddr(dest);
     msg->ensureTag<ProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->setControlInfo(controlInfo);
 
     send(msg, "ipOut");
@@ -623,7 +625,7 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
 void IGMPv2::processIgmpMessage(IGMPMessage *msg)
 {
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
-    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
             processQuery(ie, controlInfo->getSrcAddr(), check_and_cast<IGMPQuery *>(msg));
