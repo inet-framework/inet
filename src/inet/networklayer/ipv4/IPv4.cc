@@ -742,12 +742,14 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     }
 
     // set other fields
-    auto dscpReq = transportPacket->getTag<DscpReq>();
-    if (dscpReq != nullptr)
+    if (DscpReq *dscpReq = transportPacket->removeTag<DscpReq>()) {
         datagram->setDiffServCodePoint(dscpReq->getDifferentiatedServicesCodePoint());
-    auto ecnReq = transportPacket->getTag<EcnReq>();
-    if (ecnReq != nullptr)
+        delete dscpReq;
+    }
+    if (EcnReq *ecnReq = transportPacket->removeTag<EcnReq>()) {
         datagram->setExplicitCongestionNotification(ecnReq->getExplicitCongestionNotification());
+        delete ecnReq;
+    }
 
     datagram->setIdentification(curFragmentId++);
     datagram->setMoreFragments(false);

@@ -737,12 +737,14 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     }
 
     // set other fields
-    auto dscpReq = transportPacket->getTag<DscpReq>();
-    if (dscpReq != nullptr)
-        datagram->setDiffServCodePoint(transportPacket->getTag<DscpReq>()->getDifferentiatedServicesCodePoint());
-    auto ecnReq = transportPacket->getTag<EcnReq>();
-    if (ecnReq != nullptr)
+    if (DscpReq *dscpReq = transportPacket->removeTag<DscpReq>()) {
+        datagram->setDiffServCodePoint(dscpReq->getDifferentiatedServicesCodePoint());
+        delete dscpReq;
+    }
+    if (EcnReq *ecnReq = transportPacket->removeTag<EcnReq>()) {
         datagram->setExplicitCongestionNotification(ecnReq->getExplicitCongestionNotification());
+        delete ecnReq;
+    }
 
     datagram->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
     ASSERT(datagram->getHopLimit() > 0);
