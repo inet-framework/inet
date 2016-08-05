@@ -33,6 +33,7 @@
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
@@ -750,8 +751,9 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
     // #### Move extension headers from ctrlInfo to datagram if present
-    while (0 < controlInfo->getExtensionHeaderArraySize()) {
-        IPv6ExtensionHeader *extHeader = controlInfo->removeFirstExtensionHeader();
+    auto extHeadersTag = transportPacket->removeTag<IPv6ExtHeaderReq>();
+    while (extHeadersTag && 0 < extHeadersTag->getExtensionHeaderArraySize()) {
+        IPv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
         datagram->addExtensionHeader(extHeader);
         // EV << "Move extension header to datagram." << endl;
     }

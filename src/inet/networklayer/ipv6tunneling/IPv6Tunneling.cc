@@ -38,6 +38,7 @@
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
+#include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
@@ -433,7 +434,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
             t2RH->setAddress(0, rh2);
 
             // append T2RH to routing headers
-            controlInfo->addExtensionHeader(t2RH);
+            packet->ensureTag<IPv6ExtHeaderReq>()->addExtensionHeader(t2RH);
 
             EV_INFO << "Added Type 2 Routing Header." << endl;
         }
@@ -446,7 +447,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
             haOpt->setHomeAddress(rh2);
 
             // append HA option to routing headers
-            controlInfo->addExtensionHeader(haOpt);
+            packet->ensureTag<IPv6ExtHeaderReq>()->addExtensionHeader(haOpt);
 
             EV_INFO << "Added Home Address Option header." << endl;
         }

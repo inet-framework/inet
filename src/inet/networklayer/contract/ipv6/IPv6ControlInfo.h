@@ -33,10 +33,6 @@ class IPv6ExtensionHeader;
  */
 class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
 {
-  protected:
-    typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;
-    ExtensionHeaders extensionHeaders;
-
   private:
     void copy(const IPv6ControlInfo& other);
     void clean();
@@ -47,34 +43,6 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     IPv6ControlInfo(const IPv6ControlInfo& other) : IPv6ControlInfo_Base(other) { copy(other); }
     IPv6ControlInfo& operator=(const IPv6ControlInfo& other);
     virtual IPv6ControlInfo *dup() const override { return new IPv6ControlInfo(*this); }
-
-    /**
-     * Returns the number of extension headers in this datagram
-     */
-    virtual unsigned int getExtensionHeaderArraySize() const override;
-
-    /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeaderArraySize(unsigned int size) override;
-
-    /**
-     * Returns the kth extension header in this datagram
-     */
-    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
-
-    /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var) override;
-
-    /**
-     * Adds an extension header to the datagram, at the given position.
-     * The default (atPos==-1) is to add the header at the end.
-     */
-    virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos = -1);
-
-    /**
-     * Remove the first extension header and return it.
-     */
-    IPv6ExtensionHeader *removeFirstExtensionHeader();
-
 };
 
 } // namespace inet

@@ -25,10 +25,6 @@ namespace inet {
 
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
-#ifdef WITH_IPv6
-    for (const auto & elem : other.extensionHeaders)
-        extensionHeaders.push_back((elem)->dup());
-#endif // ifdef WITH_IPv6
 }
 
 IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
@@ -43,70 +39,11 @@ IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
 
 void IPv6ControlInfo::clean()
 {
-#ifdef WITH_IPv6
-    while (!extensionHeaders.empty()) {
-        IPv6ExtensionHeader *eh = extensionHeaders.back();
-        extensionHeaders.pop_back();
-        delete eh;
-    }
-#endif // ifdef WITH_IPv6
 }
 
 IPv6ControlInfo::~IPv6ControlInfo()
 {
     clean();
-}
-
-unsigned int IPv6ControlInfo::getExtensionHeaderArraySize() const
-{
-    return extensionHeaders.size();
-}
-
-void IPv6ControlInfo::setExtensionHeaderArraySize(unsigned int size)
-{
-    throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
-}
-
-IPv6ExtensionHeaderPtr& IPv6ControlInfo::getExtensionHeader(unsigned int k)
-{
-    ASSERT(k < extensionHeaders.size());
-    return extensionHeaders[k];
-}
-
-void IPv6ControlInfo::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
-{
-    throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
-}
-
-void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
-{
-#ifdef WITH_IPv6
-    ASSERT(eh);
-    if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size()) {
-        extensionHeaders.push_back(eh);
-        return;
-    }
-
-    // insert at position atPos, shift up the rest of the array
-    extensionHeaders.insert(extensionHeaders.begin() + atPos, eh);
-#else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
-}
-
-IPv6ExtensionHeader *IPv6ControlInfo::removeFirstExtensionHeader()
-{
-    if (extensionHeaders.empty())
-        return nullptr;
-
-#ifdef WITH_IPv6
-    auto first = extensionHeaders.begin();
-    IPv6ExtensionHeader *ret = *first;
-    extensionHeaders.erase(first);
-    return ret;
-#else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
 }
 
 } // namespace inet
