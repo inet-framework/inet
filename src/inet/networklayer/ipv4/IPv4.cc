@@ -727,8 +727,6 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
 
-    datagram->encapsulate(transportPacket);
-
     // set source and destination address
     datagram->setDestAddress(dest);
 
@@ -766,6 +764,8 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     else
         ttl = defaultTimeToLive;
     datagram->setTimeToLive(ttl);
+
+    datagram->encapsulate(transportPacket);
 
     // setting IPv4 options is currently not supported
 
