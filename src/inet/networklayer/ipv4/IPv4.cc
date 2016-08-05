@@ -31,6 +31,7 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/MulticastLoopTag_m.h"
+#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -621,11 +622,11 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(datagram->getExplicitCongestionNotification());
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
-    controlInfo->setOrigDatagram(datagram);
 
     packet->setControlInfo(controlInfo);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSrcAddress());
     l3AddressInd->setDestination(datagram->getDestAddress());

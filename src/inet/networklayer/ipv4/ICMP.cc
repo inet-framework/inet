@@ -27,6 +27,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
@@ -140,7 +141,9 @@ void ICMP::sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICM
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
-    IPv4Datagram *datagram = ctrl->removeOrigDatagram();
+    auto dgramTag = transportPacket->removeMandatoryTag<OrigNetworkDatagramInd>();
+    IPv4Datagram *datagram = check_and_cast<IPv4Datagram*>(dgramTag->removeOrigDatagram());
+    delete dgramTag;
     int inputInterfaceId = transportPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete ctrl;
     take(transportPacket);

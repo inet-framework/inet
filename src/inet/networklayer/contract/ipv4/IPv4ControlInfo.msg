@@ -59,6 +59,5 @@ enum IPProtocolId;
 //
 class IPv4ControlInfo
 {
-    @customize(true);
 }
 

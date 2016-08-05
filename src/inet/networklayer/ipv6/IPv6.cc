@@ -30,6 +30,7 @@
 
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
@@ -689,14 +690,12 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(datagram->getDiffServCodePoint());
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(datagram->getExplicitCongestionNotification());
 
-    // original IP datagram might be needed in upper layers to send back ICMP error message
-    controlInfo->setOrigDatagram(datagram);
-
     // attach control info
     packet->setControlInfo(controlInfo);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);    // original IP datagram might be needed in upper layers to send back ICMP error message
     packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
     packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());

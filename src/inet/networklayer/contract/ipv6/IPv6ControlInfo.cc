@@ -26,12 +26,6 @@ namespace inet {
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
 #ifdef WITH_IPv6
-    dgram = other.dgram;
-    if (dgram) {
-        dgram = dgram->dup();
-        take(dgram);
-    }
-
     for (const auto & elem : other.extensionHeaders)
         extensionHeaders.push_back((elem)->dup());
 #endif // ifdef WITH_IPv6
@@ -50,8 +44,6 @@ IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
 void IPv6ControlInfo::clean()
 {
 #ifdef WITH_IPv6
-    dropAndDelete(dgram);
-
     while (!extensionHeaders.empty()) {
         IPv6ExtensionHeader *eh = extensionHeaders.back();
         extensionHeaders.pop_back();
@@ -63,36 +55,6 @@ void IPv6ControlInfo::clean()
 IPv6ControlInfo::~IPv6ControlInfo()
 {
     clean();
-}
-
-void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
-{
-#ifdef WITH_IPv6
-    if (dgram)
-        throw cRuntimeError(this, "IPv6ControlInfo::setOrigDatagram(): a datagram is already attached");
-
-    dgram = d;
-    take(dgram);
-#else // ifdef WITH_IPv6
-    throw cRuntimeError("INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
-}
-
-IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
-{
-#ifdef WITH_IPv6
-    if (!dgram)
-        throw cRuntimeError(this, "IPv6ControlInfo::removeOrigDatagram(): no datagram attached "
-                                  "(already removed, or maybe this IPv6ControlInfo does not come "
-                                  "from the IPv6 module?)");
-
-    IPv6Datagram *ret = dgram;
-    drop(dgram);
-    dgram = nullptr;
-    return ret;
-#else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
 }
 
 unsigned int IPv6ControlInfo::getExtensionHeaderArraySize() const

@@ -21,6 +21,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"

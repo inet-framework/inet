@@ -27,6 +27,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
@@ -231,7 +232,9 @@ void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, I
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
-    IPv6Datagram *datagram = ctrl->removeOrigDatagram();
+    auto dgramTag = transportPacket->removeMandatoryTag<OrigNetworkDatagramInd>();
+    IPv6Datagram *datagram = check_and_cast<IPv6Datagram*>(dgramTag->removeOrigDatagram());
+    delete dgramTag;
     delete ctrl;
     take(transportPacket);
     take(datagram);
