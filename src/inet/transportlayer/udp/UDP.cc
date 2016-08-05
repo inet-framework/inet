@@ -32,6 +32,7 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/MulticastLoopTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
@@ -781,8 +782,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         // send to IPv4
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
-        ipControlInfo->setMulticastLoop(multicastLoop);
         udpPacket->setControlInfo(ipControlInfo);
+        udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(multicastLoop);
         udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
@@ -799,8 +800,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         // send to IPv6
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
-        ipControlInfo->setMulticastLoop(multicastLoop);
         udpPacket->setControlInfo(ipControlInfo);
+        udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(multicastLoop);
         udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);

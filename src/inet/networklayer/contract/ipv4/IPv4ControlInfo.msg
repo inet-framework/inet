@@ -60,7 +60,6 @@ enum IPProtocolId;
 class IPv4ControlInfo
 {
     @customize(true);
-    bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     bool dontFragment;    // "don't fragment" bit  TODO DontFragmentReq
 }
 

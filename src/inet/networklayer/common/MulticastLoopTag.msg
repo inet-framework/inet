@@ -1,0 +1,20 @@
+//
+// This program is property of its copyright holder. All rights reserved.
+//
+
+cplusplus{{
+#include "inet/common/TagBase_m.h"
+}}
+
+namespace inet;
+
+class TagBase extends cObject;
+
+//
+// Determines the multicast loop mode
+//
+class MulticastLoopReq extends TagBase
+{
+    bool multicastLoop = false;   // if true, sent multicast datagrams will be looped back
+}
+

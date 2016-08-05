@@ -29,6 +29,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/networklayer/common/MulticastLoopTag_m.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -310,10 +311,12 @@ void IPv4::handlePacketFromHL(cPacket *packet)
 void IPv4::datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
 {
     IPv4ControlInfo *controlInfo = check_and_cast_nullable<IPv4ControlInfo *>(datagram->removeControlInfo());
-    bool multicastLoop = true;
-    if (controlInfo != nullptr) {
-        multicastLoop = controlInfo->getMulticastLoop();
-        delete controlInfo;
+    delete controlInfo;
+
+    bool multicastLoop = false;
+    MulticastLoopReq *mcr = datagram->getTag<MulticastLoopReq>();
+    if (mcr != nullptr) {
+        multicastLoop = mcr->getMulticastLoop();
     }
 
     // send
