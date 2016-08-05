@@ -25,6 +25,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
+#include "inet/networklayer/common/DontFragmentTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
@@ -729,6 +730,11 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
+    bool dontFragment = false;
+    if (auto dontFragmentReq = transportPacket->removeTag<DontFragmentReq>()) {
+        dontFragment = dontFragmentReq->getDontFragment();
+        delete dontFragmentReq;
+    }
 
     // set source and destination address
     datagram->setDestAddress(dest);
@@ -756,7 +762,7 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
 
     datagram->setIdentification(curFragmentId++);
     datagram->setMoreFragments(false);
-    datagram->setDontFragment(controlInfo->getDontFragment());
+    datagram->setDontFragment(dontFragment);
     datagram->setFragmentOffset(0);
 
     if (ttl != -1) {

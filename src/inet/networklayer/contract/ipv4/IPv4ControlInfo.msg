@@ -60,6 +60,5 @@ enum IPProtocolId;
 class IPv4ControlInfo
 {
     @customize(true);
-    bool dontFragment;    // "don't fragment" bit  TODO DontFragmentReq
 }
 
