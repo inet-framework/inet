@@ -308,13 +308,11 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
 
 void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int outputIfIndex, short ttl)
 {
-    IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
     packet->ensureTag<L3AddressReq>()->setDestination(destination);
     packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
 
-    packet->setControlInfo(ipControlInfo);
     switch (packet->getType()) {
         case HELLO_PACKET: {
             packet->setKind(HELLO_PACKET);

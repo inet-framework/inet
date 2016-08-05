@@ -258,7 +258,6 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    tcpseg->setControlInfo(addressType->createNetworkProtocolControlInfo());
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
@@ -274,7 +273,6 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     printSegmentBrief(tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
-    tcpseg->setControlInfo(addressType->createNetworkProtocolControlInfo());
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);

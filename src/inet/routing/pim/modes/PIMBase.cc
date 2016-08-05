@@ -27,7 +27,6 @@
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
@@ -176,8 +175,6 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
         byteLength += 8;
     }
 
-    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    msg->setControlInfo(ctrl);
     msg->setByteLength(byteLength);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());

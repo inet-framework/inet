@@ -25,7 +25,6 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 
 namespace inet {

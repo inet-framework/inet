@@ -220,17 +220,17 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
     L3Address nextHopAddr;
     MACAddress nextHopMacAddr;
     WiseRouteDatagram *pkt = new WiseRouteDatagram(msg->getName(), DATA);
-    auto cInfo = msg->removeControlInfo();
 
     pkt->setByteLength(headerLength);
 
-    if (cInfo == nullptr) {
+    auto addrTag = msg->getTag<L3AddressReq>();
+    if (addrTag == nullptr) {
         EV << "WiseRoute warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
         finalDestAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        L3Address destAddr = msg->getMandatoryTag<L3AddressReq>()->getDestination();
+        L3Address destAddr = addrTag->getDestination();
         EV << "WiseRoute: CInfo removed, netw addr=" << destAddr << endl;
         finalDestAddr = destAddr;
     }
@@ -240,7 +240,6 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
     pkt->setSrcAddr(myNetwAddr);
     pkt->setNbHops(0);
     pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-    delete cInfo;
 
     if (finalDestAddr.isBroadcast())
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
@@ -331,6 +330,7 @@ cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
     m->setControlInfo(new cObject());
     m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    m->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     m->ensureTag<L3AddressInd>()->setSource(msg->getInitialSrcAddr());
     nbHops = nbHops + msg->getNbHops();
     // delete the netw packet

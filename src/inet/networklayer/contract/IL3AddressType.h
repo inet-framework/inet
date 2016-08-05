@@ -42,7 +42,6 @@ class INET_API IL3AddressType
     virtual L3Address getBroadcastAddress() const = 0;
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const = 0;
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
-    virtual cObject *createNetworkProtocolControlInfo() const = 0;    // TODO: move, where?
     virtual const Protocol *getNetworkProtocol() const = 0;    // TODO: move, where?
 
     /**

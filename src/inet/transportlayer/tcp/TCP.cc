@@ -148,14 +148,9 @@ void TCP::handleMessage(cMessage *msg)
             // get src/dest addresses
             L3Address srcAddr, destAddr;
 
-            cObject *ctrl = tcpseg->removeControlInfo();
-            if (!ctrl)
-                throw cRuntimeError("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
-
             srcAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getSource();
             destAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getDestination();
             //interfaceId = controlInfo->getInterfaceId();
-            delete ctrl;
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);

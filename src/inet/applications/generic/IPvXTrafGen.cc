@@ -185,7 +185,6 @@ void IPvXTrafGen::sendPacket()
     L3Address destAddr = chooseDestAddr();
 
     IL3AddressType *addressType = destAddr.getAddressType();
-    payload->setControlInfo(addressType->createNetworkProtocolControlInfo());
     payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
     payload->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     payload->ensureTag<L3AddressReq>()->setDestination(destAddr);

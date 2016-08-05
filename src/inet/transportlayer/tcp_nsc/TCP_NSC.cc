@@ -33,7 +33,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
@@ -332,15 +331,11 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-    cObject *ctrl = tcpsegP->removeControlInfo();
-    if (!ctrl)
-        throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
-
     inetSockPair.remoteM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
     inetSockPair.localM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
     //int interfaceId = controlInfo->getInterfaceId();
 
-    if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
+    if (tcpsegP->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
         {
             // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
             //       with IP header size difference
@@ -358,7 +353,6 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
             }
         }
     }
-    delete ctrl;
 
     // statistics:
     if (rcvSeqVector)
@@ -903,8 +897,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    cObject *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(controlInfo);
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());

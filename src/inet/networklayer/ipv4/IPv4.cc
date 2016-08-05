@@ -37,7 +37,6 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -294,15 +293,11 @@ void IPv4::handlePacketFromHL(cPacket *packet)
     }
 
     // encapsulate
-    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->removeControlInfo());
-    IPv4Datagram *datagram = encapsulate(packet, controlInfo);
+    IPv4Datagram *datagram = encapsulate(packet);
 
     // extract requested interface and next hop
     auto ifTag = datagram->getTag<InterfaceReq>();
     const InterfaceEntry *destIE = ifTag ? const_cast<const InterfaceEntry *>(ift->getInterfaceById(ifTag->getInterfaceId())) : nullptr;
-
-    if (controlInfo)
-        datagram->setControlInfo(controlInfo); //FIXME ne rakjuk bele a cntrInfot!!!!! de kell :( kulonben a hook queue-ban elveszik a multicastloop flag
 
     // TODO:
     L3Address nextHopAddr(IPv4Address::UNSPECIFIED_ADDRESS);
@@ -312,9 +307,6 @@ void IPv4::handlePacketFromHL(cPacket *packet)
 
 void IPv4::datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
 {
-    IPv4ControlInfo *controlInfo = check_and_cast_nullable<IPv4ControlInfo *>(datagram->removeControlInfo());
-    delete controlInfo;
-
     bool multicastLoop = false;
     MulticastLoopReq *mcr = datagram->getTag<MulticastLoopReq>();
     if (mcr != nullptr) {
@@ -591,7 +583,6 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
-    IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
         cPacket *packetCopy = utils::dupPacketAndControlInfo(packet);
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
@@ -606,8 +597,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
     }
     else {
         EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
-        IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo *>(packet->removeControlInfo());
-        sendIcmpError(packet, ctrlInfo, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        sendIcmpError(packet, NULL, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 
@@ -617,15 +607,14 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
     cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
-    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(datagram->getDiffServCodePoint());
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(datagram->getExplicitCongestionNotification());
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
 
-    packet->setControlInfo(controlInfo);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSrcAddress());
@@ -716,7 +705,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     delete datagram;
 }
 
-IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *controlInfo)
+IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket)
 {
     IPv4Datagram *datagram = createIPv4Datagram(transportPacket->getName());
     datagram->setByteLength(IP_HEADER_BYTES);
@@ -1172,7 +1161,7 @@ void IPv4::sendIcmpError(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPT
     icmp->sendErrorMessage(origDatagram, inputInterfaceId, type, code);
 }
 
-void IPv4::sendIcmpError(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code)
+void IPv4::sendIcmpError(cPacket *transportPacket, void *ctrl, ICMPType type, ICMPCode code)
 {
     icmp->sendErrorMessage(transportPacket, ctrl, type, code);
 }

@@ -26,7 +26,6 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/routing/pim/tables/PIMNeighborTable.h"
 #include "inet/routing/pim/tables/PIMInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/routing/pim/modes/PIMBase.h"

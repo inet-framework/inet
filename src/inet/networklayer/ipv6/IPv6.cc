@@ -32,7 +32,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -279,13 +278,11 @@ void IPv6::handleMessageFromHL(cPacket *msg)
         return;
     }
 
-    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(msg->removeControlInfo());
     // encapsulate upper-layer packet into IPv6Datagram
     // IPV6_MULTICAST_IF option, but allow interface selection for unicast packets as well
     auto ifTag = msg->getTag<InterfaceReq>();
     const InterfaceEntry *destIE = ifTag ? ift->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
-    IPv6Datagram *datagram = encapsulate(msg, controlInfo);
-    delete controlInfo;
+    IPv6Datagram *datagram = encapsulate(msg);
 
 #ifdef WITH_xMIPv6
     if (datagram == nullptr) {
@@ -626,7 +623,6 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
     bool hasSocket = lowerBound != upperBound;
-    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(packet->getControlInfo());
     for (auto it = lowerBound; it != upperBound; it++) {
         cPacket *packetCopy = utils::dupPacketAndControlInfo(packet);
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
@@ -651,8 +647,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
                Any node that does not recognize the Mobility header will return an
                ICMP Parameter Problem, Code 1, message to the sender of the packet*/
             EV_INFO << "No MIPv6 support on this node!\n";
-            IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
-            sendIcmpError(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+            sendIcmpError(packet, NULL, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
         }
     }
 #endif /* WITH_xMIPv6 */
@@ -670,8 +665,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE)
     else if (!hasSocket) {
         // TODO send ICMP Destination Unreacheable error
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
-        IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(packet->removeControlInfo());
-        sendIcmpError(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+        sendIcmpError(packet, NULL, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
     }
 }
 
@@ -687,15 +681,12 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
-    IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(datagram->getDiffServCodePoint());
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(datagram->getExplicitCongestionNotification());
-
-    // attach control info
-    packet->setControlInfo(controlInfo);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);    // original IP datagram might be needed in upper layers to send back ICMP error message
     packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
     packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
@@ -704,7 +695,7 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     return packet;
 }
 
-IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *controlInfo)
+IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket)
 {
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
 
@@ -1160,7 +1151,7 @@ void IPv6::sendIcmpError(IPv6Datagram *origDatagram, ICMPv6Type type, int code)
     icmp->sendErrorMessage(origDatagram, type, code);
 }
 
-void IPv6::sendIcmpError(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
+void IPv6::sendIcmpError(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code)
 {
     icmp->sendErrorMessage(transportPacket, ctrl, type, code);
 }

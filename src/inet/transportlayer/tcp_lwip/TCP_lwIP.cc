@@ -144,14 +144,9 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    cObject *ctrl = tcpsegP->removeControlInfo();
-    if (!ctrl)
-        throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
-
     srcAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
     destAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
     interfaceId = (tcpsegP->getMandatoryTag<InterfaceInd>())->getInterfaceId();
-    delete ctrl;
 
     // process segment
     size_t ipHdrLen = sizeof(ip_hdr);
@@ -594,8 +589,6 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
              << " from " << srcP << " to " << destP << "\n";
 
     IL3AddressType *addressType = destP.getAddressType();
-    cObject *controlInfo = addressType->createNetworkProtocolControlInfo();
-    tcpseg->setControlInfo(controlInfo);
 
     tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);

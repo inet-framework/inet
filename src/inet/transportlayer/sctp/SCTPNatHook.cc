@@ -1,4 +1,3 @@
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/transportlayer/sctp/SCTPNatHook.h"

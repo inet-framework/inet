@@ -344,7 +344,6 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
         udpSocket.sendTo(msg, toAddr, SCTP_UDP_PORT);
     }
     else {
-        msg->setControlInfo(toAddr.getAddressType()->createNetworkProtocolControlInfo());
         msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         auto addresses = msg->ensureTag<L3AddressReq>();
         addresses->setSource(fromAddr);
@@ -374,7 +373,6 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
     msg->addChunk(scChunk);
 
     msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
-    msg->setControlInfo(toAddr.getAddressType()->createNetworkProtocolControlInfo());
     auto addresses = msg->ensureTag<L3AddressReq>();
     addresses->setSource(fromAddr);
     addresses->setDestination(toAddr);

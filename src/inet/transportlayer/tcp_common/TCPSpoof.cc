@@ -70,7 +70,6 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     //printSegmentBrief(tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
-    tcpseg->setControlInfo(addressType->createNetworkProtocolControlInfo());
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();

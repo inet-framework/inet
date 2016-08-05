@@ -30,7 +30,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/IPv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
@@ -181,9 +180,8 @@ void xMIPv6::handleMessage(cMessage *msg)
     // if its a MIPv6 related mobility message
     else if (dynamic_cast<MobilityHeader *>(msg)) {
         EV_INFO << " Received MIPv6 related message" << endl;
-        IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo *>(msg->removeControlInfo());
         MobilityHeader *mipv6Msg = (MobilityHeader *)(msg);
-        processMobilityMessage(mipv6Msg, ctrlInfo);
+        processMobilityMessage(mipv6Msg);
     }
     // CB on 29.08.07
     // normal datagram with an extension header
@@ -201,44 +199,43 @@ void xMIPv6::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown message type received.");
 }
 
-void xMIPv6::processMobilityMessage(MobilityHeader *mipv6Msg, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processMobilityMessage(MobilityHeader *mipv6Msg)
 {
     EV_INFO << "Processing of MIPv6 related mobility message" << endl;
 
     if (BindingUpdate *bu = dynamic_cast<BindingUpdate *>(mipv6Msg)) {
         EV_INFO << "Message recognised as BINDING UPDATE (BU)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBUMessage()>>>>>>>\n";
-        processBUMessage(bu, ctrlInfo);
+        processBUMessage(bu);
     }
     else if (BindingAcknowledgement *ba = dynamic_cast<BindingAcknowledgement *>(mipv6Msg)) {
         EV_INFO << "Message recognised as BINDING ACKNOWLEDGEMENT (BA)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBAMessage()>>>>>>>\n";
-        processBAMessage(ba, ctrlInfo);
+        processBAMessage(ba);
     }
     // 28.08.07 - CB
     else if (HomeTestInit *hoti = dynamic_cast<HomeTestInit *>(mipv6Msg)) {
         EV_INFO << "Message recognised as HOME TEST INIT (HoTI)" << endl;
-        processHoTIMessage(hoti, ctrlInfo);
+        processHoTIMessage(hoti);
     }
     else if (CareOfTestInit *coti = dynamic_cast<CareOfTestInit *>(mipv6Msg)) {
         EV_INFO << "Message recognised as CARE-OF TEST INIT (CoTI)" << endl;
-        processCoTIMessage(coti, ctrlInfo);
+        processCoTIMessage(coti);
     }
     else if (HomeTest *ht = dynamic_cast<HomeTest *>(mipv6Msg)) {
         EV_INFO << "Message recognised as HOME TEST (HoT)" << endl;
-        processHoTMessage(ht, ctrlInfo);
+        processHoTMessage(ht);
     }
     else if (CareOfTest *cot = dynamic_cast<CareOfTest *>(mipv6Msg)) {
         EV_INFO << "Message recognised as CARE-OF TEST (CoT)" << endl;
-        processCoTMessage(cot, ctrlInfo);
+        processCoTMessage(cot);
     }
     else if (BindingRefreshRequest *brr = dynamic_cast<BindingRefreshRequest *>(mipv6Msg)) {
         EV_INFO << "Message recognised as Binding Refresh Request" << endl;
-        processBRRMessage(brr, ctrlInfo);
+        processBRRMessage(brr);
     }
     else {
         EV_WARN << "Unrecognised mobility message... Dropping" << endl;
-        delete ctrlInfo;
         delete mipv6Msg;
     }
 }
@@ -699,7 +696,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
    }
  */
 
-void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processBUMessage(BindingUpdate *bu)
 {
     EV_INFO << "Entered BU processing method" << endl;
 
@@ -715,13 +712,12 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
             bubble("Wrong Node: not HA or CN");
 
         delete bu;
-        delete ctrlInfo;
         return;
     }
 
     BAStatus status;
     bool validBUMessage;
-    validBUMessage = validateBUMessage(bu, ctrlInfo);
+    validBUMessage = validateBUMessage(bu);
 
     if (validBUMessage) {
         auto ifTag = bu->getMandatoryTag<InterfaceInd>();
@@ -748,7 +744,7 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
             // Check home registration flag -> not much difference in Section 10.3.2 and 9.5.3 for our purpose
 
             // de-register binding
-            if (rt6->isHomeAgent() && !validateBUderegisterMessage(bu, ctrlInfo)) {    // HAs have to validate the BU
+            if (rt6->isHomeAgent() && !validateBUderegisterMessage(bu)) {    // HAs have to validate the BU
                 /* If the receiving node has no entry marked as a home registration
                    in its Binding Cache for this mobile node, then this node MUST
                    reject the Binding Update and SHOULD return a Binding
@@ -756,11 +752,10 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                    set to 133 (not home agent for this mobile node).*/
                 status = NOT_HA_FOR_THIS_MN;    //enum defined in MobilityHeader.msg file
                 uint baSeqNumber = bu->getSequence();    //the sequence number from Rxed BU is copied into BA.
-                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), ctrlInfo, status,
+                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status,
                         bu->getBindingAuthorizationData(), baSeqNumber, buLifetime);    // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
                 EV_ERROR << "Not HA for this MN. Responding with appropirate BA...\n";
                 delete bu;
-                delete ctrlInfo;
                 return;
             }
             /*9.5.3
@@ -803,7 +798,7 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                     new care-of address for the purposes of moving the key management
                     connection to a new endpoint.
                    o  The Binding Refresh Advice mobility option MUST be omitted.*/
-                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), ctrlInfo, status, baSeqNumber,
+                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status, baSeqNumber,
                         bu->getBindingAuthorizationData(), lifeTime);    // swapped src and dest, 4.9.07 - CB
             }
 
@@ -840,11 +835,10 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                     status = HOME_REGISTRATION_NOT_SUPPORTED;    //enum defined in MobilityHeader.msg file
                     uint baSeqNumber = bu->getSequence();
                     uint lifeTime = 0;
-                    createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), ctrlInfo, status, baSeqNumber,
+                    createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status, baSeqNumber,
                             bu->getBindingAuthorizationData(), lifeTime);
 
                     delete bu;
-                    delete ctrlInfo;
                     return;
                 }
                 else if (!rt6->isOnLinkAddress(HoA)) {    // update 11.9.07 - CB
@@ -857,11 +851,10 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                     status = NOT_HOME_SUBNET;    //enum defined in MobilityHeader.msg file
                     uint baSeqNumber = bu->getSequence();
                     uint lifeTime = 0;
-                    createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), ctrlInfo, status, baSeqNumber,
+                    createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status, baSeqNumber,
                             bu->getBindingAuthorizationData(), lifeTime);
 
                     delete bu;
-                    delete ctrlInfo;
                     return;
                 }
             }
@@ -910,7 +903,7 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                 else
                     sendTime = 0;
 
-                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), ctrlInfo, status, baSeqNumber,
+                createAndSendBAMessage(destAddress, CoA, ifTag->getInterfaceId(), status, baSeqNumber,
                         //bu->getBindingAuthorizationData(), 15, sendTime); // swapped src and dest, 4.9.07 - CB
                         bu->getBindingAuthorizationData(), lifeTime, sendTime);    // swapped src and dest, 4.9.07 - CB // corrected lifetime value 18.06.08 - CB
 
@@ -967,10 +960,9 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     }
 
     delete bu;
-    delete ctrlInfo;
 }
 
-bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
+bool xMIPv6::validateBUMessage(BindingUpdate *bu)
 {
     auto ifTag = bu->getMandatoryTag<InterfaceInd>();
     // Performs BU Validation according to RFC3775 Sec 9.5.1
@@ -1019,7 +1011,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
            Acknowledgement with status code 135, and the last accepted sequence
            number in the Sequence Number field of the Binding Acknowledgement.*/
         IPv6Address destAddress = bu->getMandatoryTag<L3AddressInd>()->getDestination().toIPv6();
-        createAndSendBAMessage(destAddress, homeAddress, ifTag->getInterfaceId(), ctrlInfo, REGISTRATION_TYPE_CHANGE_DISALLOWED,
+        createAndSendBAMessage(destAddress, homeAddress, ifTag->getInterfaceId(), REGISTRATION_TYPE_CHANGE_DISALLOWED,
                 bu->getBindingAuthorizationData(), bcSeqNumber, 0);
 
         return false;
@@ -1036,7 +1028,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                  change disallowed).  The home registration flag stored in the Binding
                  Cache entry MUST NOT be changed.*/
             EV_WARN << "BU Validation Failed: home registration flag in binding cache has different value than in the binding update" << endl;
-            createAndSendBAMessage(src, homeAddress, ifTag->getInterfaceId(), ctrlInfo, REGISTRATION_TYPE_CHANGE_DISALLOWED,
+            createAndSendBAMessage(src, homeAddress, ifTag->getInterfaceId(), REGISTRATION_TYPE_CHANGE_DISALLOWED,
                     bu->getBindingAuthorizationData(), bcSeqNumber, 0);
 
             return false;
@@ -1076,7 +1068,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     return true;    //result;
 }
 
-bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
+bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu)
 {
     /*To begin processing the Binding Update, the home agent MUST perform
        the following test:
@@ -1091,7 +1083,7 @@ bool xMIPv6::validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctr
 }
 
 void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& dest,
-        int interfaceId, IPv6ControlInfo *ctrlInfo, const BAStatus& baStatus, const uint baSeq,
+        int interfaceId, const BAStatus& baStatus, const uint baSeq,
         const int bindingAuthorizationData, const uint lifeTime, const simtime_t sendTime)
 {
     EV_TRACE << "Entered createAndSendBAMessage() method" << endl;
@@ -1157,7 +1149,7 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
         statVectorBAtoMN.record(2);*/
 }
 
-void xMIPv6::processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processBAMessage(BindingAcknowledgement *ba)
 {
     EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
     //bool retransmitBU = false; // update 11.6.08 - CB
@@ -1166,9 +1158,8 @@ void xMIPv6::processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlI
     InterfaceEntry *ie = ift->getInterfaceById(ifTag->getInterfaceId());    //the interface on which the BAck was received
 
     if (rt6->isMobileNode()) {
-        if (!validateBAck(*ba, ctrlInfo)) {
+        if (!validateBAck(*ba)) {
             EV_INFO << "Discarding invalid BAck...\n";
-            delete ctrlInfo;
             delete ba;
 
             // statistic collection
@@ -1346,11 +1337,10 @@ void xMIPv6::processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlI
         cancelTransmitIfEntry(baSource, interfaceID, KEY_BU);
      */
 
-    delete ctrlInfo;
     delete ba;
 }
 
-bool xMIPv6::validateBAck(BindingAcknowledgement& ba, const IPv6ControlInfo *ctrlInfo)
+bool xMIPv6::validateBAck(BindingAcknowledgement& ba)
 {
     /*11.7.3
        Upon receiving a packet carrying a Binding Acknowledgement, a mobile
@@ -1744,7 +1734,7 @@ void xMIPv6::createAndSendCoTIMessage(const IPv6Address& cnDest, InterfaceEntry 
     createTestInitTimer(CoTI, cnDest, ie);
 }
 
-void xMIPv6::processHoTIMessage(HomeTestInit *HoTI, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processHoTIMessage(HomeTestInit *HoTI)
 {
     // 9.4.1 & 9.4.3
     IPv6Address srcAddr = HoTI->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
@@ -1764,10 +1754,9 @@ void xMIPv6::processHoTIMessage(HomeTestInit *HoTI, IPv6ControlInfo *ctrlInfo)
     /*statVectorHoTtoMN.record(1);*/
 
     delete HoTI;
-    delete ctrlInfo;
 }
 
-void xMIPv6::processCoTIMessage(CareOfTestInit *CoTI, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processCoTIMessage(CareOfTestInit *CoTI)
 {
     // 9.4.2 & 9.4.4
     IPv6Address srcAddr = CoTI->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
@@ -1787,12 +1776,11 @@ void xMIPv6::processCoTIMessage(CareOfTestInit *CoTI, IPv6ControlInfo *ctrlInfo)
     /*statVectorCoTtoMN.record(1);*/
 
     delete CoTI;
-    delete ctrlInfo;
 }
 
-void xMIPv6::processHoTMessage(HomeTest *HoT, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processHoTMessage(HomeTest *HoT)
 {
-    if (!validateHoTMessage(*HoT, ctrlInfo))
+    if (!validateHoTMessage(*HoT))
         EV_WARN << "HoT validation not passed: dropping message" << endl;
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
@@ -1826,10 +1814,9 @@ void xMIPv6::processHoTMessage(HomeTest *HoT, IPv6ControlInfo *ctrlInfo)
     }
 
     delete HoT;
-    delete ctrlInfo;
 }
 
-bool xMIPv6::validateHoTMessage(HomeTest& HoT, const IPv6ControlInfo *ctrlInfo)
+bool xMIPv6::validateHoTMessage(HomeTest& HoT)
 {
     // RFC - 11.6.2
     IPv6Address srcAddr = HoT.getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
@@ -1876,9 +1863,9 @@ bool xMIPv6::validateHoTMessage(HomeTest& HoT, const IPv6ControlInfo *ctrlInfo)
     return true;
 }
 
-void xMIPv6::processCoTMessage(CareOfTest *CoT, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processCoTMessage(CareOfTest *CoT)
 {
-    if (!validateCoTMessage(*CoT, ctrlInfo))
+    if (!validateCoTMessage(*CoT))
         EV_WARN << "CoT validation not passed: dropping message" << endl;
     else {
         EV_INFO << "CoT validation passed: updating BUL" << endl;
@@ -1921,10 +1908,9 @@ void xMIPv6::processCoTMessage(CareOfTest *CoT, IPv6ControlInfo *ctrlInfo)
     }
 
     delete CoT;
-    delete ctrlInfo;
 }
 
-bool xMIPv6::validateCoTMessage(CareOfTest& CoT, const IPv6ControlInfo *ctrlInfo)
+bool xMIPv6::validateCoTMessage(CareOfTest& CoT)
 {
     // RFC - 11.6.2
     IPv6Address srcAddr = CoT.getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
@@ -2497,7 +2483,7 @@ void xMIPv6::createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry *ie
     sendMobilityMessageToIPv6Module(brr, dest, CoA, ie->getInterfaceId());
 }
 
-void xMIPv6::processBRRMessage(BindingRefreshRequest *brr, IPv6ControlInfo *ctrlInfo)
+void xMIPv6::processBRRMessage(BindingRefreshRequest *brr)
 {
     /*11.7.4
        When a mobile node receives a packet containing a Binding Refresh
@@ -2518,7 +2504,6 @@ void xMIPv6::processBRRMessage(BindingRefreshRequest *brr, IPv6ControlInfo *ctrl
     }
 
     delete brr;
-    delete ctrlInfo;
 }
 
 void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry *entry, InterfaceEntry *ie, simtime_t scheduledTime)

@@ -25,7 +25,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -1541,8 +1540,6 @@ void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric me
 
 void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId, short ttl)
 {
-    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    packet->setControlInfo(ctrl);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
@@ -1568,8 +1565,6 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
     cPacket *data = datagram->decapsulate();
 
     // set control info
-    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    data->setControlInfo(ctrl);
     data->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     data->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     // XXX data->ensureTag<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local

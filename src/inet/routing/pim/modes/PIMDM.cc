@@ -1582,13 +1582,11 @@ void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
 {
     EV_INFO << "Sending GraftAck message.\n";
 
-    IPv4ControlInfo *oldCtrl = check_and_cast<IPv4ControlInfo *>(graftPacket->removeControlInfo());
     auto ifTag = graftPacket->removeMandatoryTag<InterfaceInd>();
     auto addressInd = graftPacket->removeMandatoryTag<L3AddressInd>();
     IPv4Address destAddr = addressInd->getSource().toIPv4();
     IPv4Address srcAddr = addressInd->getDestination().toIPv4();
     int outInterfaceId = ifTag->getInterfaceId();
-    delete oldCtrl;
     delete ifTag;
 
     PIMGraftAck *msg = new PIMGraftAck();
@@ -1649,8 +1647,6 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
 
 void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
 {
-    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    packet->setControlInfo(ctrl);
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);

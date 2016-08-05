@@ -35,8 +35,6 @@
 #include "inet/networklayer/common/MulticastLoopTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 
 #ifdef WITH_IPv4
@@ -350,17 +348,18 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestination();
     ttl = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
     cObject *ctrl = udpPacket->removeControlInfo();
-    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
+    const Protocol *protocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
+    if (protocol->getId() == Protocol::ipv4.getId()) {
         isMulticast = destAddr.toIPv4().isMulticast();
         isBroadcast = destAddr.toIPv4().isLimitedBroadcastAddress();    // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
+    else if (protocol->getId() == Protocol::ipv6.getId()) {
         isMulticast = destAddr.toIPv6().isMulticast();
         isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
     }
-    else if (ctrl != nullptr) {
+    else if (protocol->getId() == Protocol::gnp.getId()) {
         isMulticast = destAddr.isMulticast();
-        isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
+        isBroadcast = false;    // GNP has no broadcast, just various multicasts
     }
     else if (ctrl == nullptr) {
         throw cRuntimeError("(%s)%s arrived from lower layer without control info",
@@ -383,7 +382,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
             cPacket *payload = udpPacket->decapsulate();
             sendUp(payload, sd, srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);
             delete udpPacket;
-            delete ctrl;
         }
     }
     else {
@@ -401,7 +399,6 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
                 sendUp(payload->dup(), sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl); // dup() to all but the last one
             sendUp(payload, sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);    // send original to last socket
             delete udpPacket;
-            delete ctrl;
         }
     }
 }
@@ -493,39 +490,36 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     char buff[80];
     snprintf(buff, sizeof(buff), "Port %d unreachable", udpPacket->getDestinationPort());
     udpPacket->setName(buff);
-    if (dynamic_cast<IPv4ControlInfo *>(ctrl) != nullptr) {
-#ifdef WITH_IPv4
-        IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
-        if (!icmp)
-            icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
-        icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-#else // ifdef WITH_IPv4
-        delete udpPacket;
-        delete ctrl;
-#endif // ifdef WITH_IPv4
-    }
-    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != nullptr) {
-#ifdef WITH_IPv6
-        IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-        if (!icmpv6)
-            icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
-        icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-#else // ifdef WITH_IPv6
-        delete udpPacket;
-        delete ctrl;
-#endif // ifdef WITH_IPv6
-    }
-    else if (ctrl != nullptr) {
-        delete udpPacket;
-        delete ctrl;
-    }
-    else if (ctrl == nullptr) {
-        throw cRuntimeError("(%s)%s arrived from lower layer without control info",
+    const Protocol *protocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
+
+    if (protocol == nullptr) {
+        throw cRuntimeError("(%s)%s arrived from lower layer without NetworkProtocolInd",
                 udpPacket->getClassName(), udpPacket->getName());
     }
+    if (protocol->getId() == Protocol::ipv4.getId()) {
+#ifdef WITH_IPv4
+        if (!icmp)
+            icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
+        icmp->sendErrorMessage(udpPacket, NULL, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+#else // ifdef WITH_IPv4
+        delete udpPacket;
+#endif // ifdef WITH_IPv4
+    }
+    else if (protocol->getId() == Protocol::ipv6.getId()) {
+#ifdef WITH_IPv6
+        if (!icmpv6)
+            icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
+        icmpv6->sendErrorMessage(udpPacket, NULL, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+#else // ifdef WITH_IPv6
+        delete udpPacket;
+#endif // ifdef WITH_IPv6
+    }
+    else if (protocol->getId() == Protocol::gnp.getId()) {
+        delete udpPacket;
+    }
     else {
-        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized control info %s",
-                udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
+        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized NetworkProtocolInd %s",
+                udpPacket->getClassName(), udpPacket->getName(), protocol->getName());
     }
 }
 
@@ -781,8 +775,6 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
     if (destAddr.getType() == L3Address::IPv4) {
         // send to IPv4
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";
-        IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
-        udpPacket->setControlInfo(ipControlInfo);
         udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(multicastLoop);
         udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
@@ -799,8 +791,6 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
     else if (destAddr.getType() == L3Address::IPv6) {
         // send to IPv6
         EV_INFO << "Sending app packet " << appData->getName() << " over IPv6.\n";
-        IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
-        udpPacket->setControlInfo(ipControlInfo);
         udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(multicastLoop);
         udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
@@ -820,7 +810,6 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         EV_INFO << "Sending app packet " << appData->getName() << endl;
         IL3AddressType *addressType = destAddr.getAddressType();
         //ipControlInfo->setMulticastLoop(multicastLoop);
-        udpPacket->setControlInfo(addressType->createNetworkProtocolControlInfo());
         udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
         udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);

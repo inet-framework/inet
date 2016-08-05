@@ -37,7 +37,6 @@
 #include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
@@ -412,9 +411,6 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
             rh2 = tunnels[vIfIndex].exit;    // HoA
         }
 
-        // and now construct the new control info for the packet
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-
         // get rid of the encapsulation of the IPv6 module
         cMessage *packet = dgram->decapsulate();
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(dgram->getTransportProtocol()));
@@ -452,7 +448,6 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
             EV_INFO << "Added Home Address Option header." << endl;
         }
 
-        packet->setControlInfo(controlInfo);
         auto addresses = packet->ensureTag<L3AddressInd>();
         // new src is tunnel entry (either CoA or CN)
         addresses->setSource(src);
@@ -466,9 +461,6 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
           // normal tunnel - just modify controlInfo and send
           // datagram back to IPv6 module for encapsulation
 
-    IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-
-    dgram->setControlInfo(controlInfo);
     dgram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto addresses = dgram->ensureTag<L3AddressInd>();
     addresses->setSource(tunnels[vIfIndex].entry);
@@ -484,8 +476,6 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
 {
     // decapsulation is performed in IPv6 module
-    // just update controlInfo
-    IPv6ControlInfo *controlInfo = check_and_cast<IPv6ControlInfo *>(dgram->removeControlInfo());
     IPv6Address srcAddr = dgram->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
 
 #ifdef WITH_xMIPv6
@@ -504,7 +494,6 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
            ingress filtering. This check is not necessary if the reverse-
            tunneled packet is protected by ESP in tunnel mode.*/
         EV_INFO << "Dropping packet: source address of tunnel IP header different from tunnel exit points!" << endl;
-        delete controlInfo;
         delete dgram;
         return;
     }
@@ -514,7 +503,6 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
     // that later processing knowns from which interface the datagram came from
     // (important if several interfaces are available)
     //controlInfo->setInterfaceId(-1);
-    dgram->setControlInfo(controlInfo);
 
     send(dgram, "linkLayerOut");
 

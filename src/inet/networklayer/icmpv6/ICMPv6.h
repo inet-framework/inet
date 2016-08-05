@@ -28,7 +28,6 @@ namespace inet {
 
 //foreign declarations:
 class IPv6Address;
-class IPv6ControlInfo;
 class IPv6Datagram;
 class PingPayload;
 
@@ -60,7 +59,7 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
      * so this function will wrap back the transport packet into the IP datagram
      * based on its IPv4ControlInfo.
      */
-    virtual void sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
+    virtual void sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code);
 
   protected:
     // internal helper functions

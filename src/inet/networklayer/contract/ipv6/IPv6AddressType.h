@@ -23,7 +23,6 @@
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 
 namespace inet {
 
@@ -43,7 +42,6 @@ class INET_API IPv6AddressType : public IL3AddressType
     virtual L3Address getBroadcastAddress() const override { return IPv6Address::ALL_NODES_1; }
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return IPv6Address::LL_MANET_ROUTERS; }
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ALL_RIP_ROUTERS_MCAST; };
-    virtual cObject *createNetworkProtocolControlInfo() const override { return new IPv6ControlInfo(); }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::ipv6; }
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override;
 };

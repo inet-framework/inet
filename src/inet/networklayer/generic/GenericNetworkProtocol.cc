@@ -26,6 +26,7 @@
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
@@ -396,12 +397,14 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 
     // attach control info
     packet->setControlInfo(new cObject());
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSource(datagram->getSourceAddress());
     l3AddressInd->setDestination(datagram->getDestinationAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
-    delete datagram;
 
     return packet;
 }

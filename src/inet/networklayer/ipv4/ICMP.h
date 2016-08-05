@@ -30,7 +30,6 @@
 namespace inet {
 
 class IPv4Datagram;
-class IPv4ControlInfo;
 
 /**
  * ICMP module.
@@ -66,7 +65,7 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
      * so this function will wrap back the transport packet into the IPv4 datagram
      * based on its IPv4ControlInfo.
      */
-    virtual void sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPType type, ICMPCode code);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

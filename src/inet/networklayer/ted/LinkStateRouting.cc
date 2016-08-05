@@ -22,7 +22,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ted/TED.h"
@@ -214,10 +213,6 @@ void LinkStateRouting::sendToPeer(IPv4Address peer, const std::vector<TELinkStat
 
 void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 {
-    // attach control info to packet
-    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    msg->setControlInfo(controlInfo);
-
     int length = msg->getLinkInfoArraySize() * 72;
     msg->setByteLength(length);
 

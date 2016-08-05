@@ -260,6 +260,7 @@ cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
     transportPacket->setControlInfo(new cObject());
     transportPacket->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
+    transportPacket->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     auto addressInd = transportPacket->ensureTag<L3AddressInd>();
     addressInd->setSource(floodDatagram->getSourceAddress());
     addressInd->setDestination(floodDatagram->getDestinationAddress());

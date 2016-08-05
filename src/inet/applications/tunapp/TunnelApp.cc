@@ -19,7 +19,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
@@ -77,7 +76,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
 {
     if (message->arrivedOn("socketIn")) {
         cObject *controlInfo = message->getControlInfo();
-        if (dynamic_cast<IPv4ControlInfo *>(controlInfo)) {
+        if (dynamic_cast<TunnelApp *>(controlInfo)) {     //KLUDGE dynamic_cast<TunnelApp> was dynamic_cast<IPv4ControlInfo>
             delete message->removeControlInfo();
             message->clearTags();
             tunSocket.send(PK(message));
@@ -90,8 +89,6 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
         else if (dynamic_cast<TunControlInfo *>(controlInfo)) {
             delete message->removeControlInfo();
             if (protocol == &Protocol::ipv4) {
-                IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-                message->setControlInfo(controlInfo);
                 message->clearTags();
                 message->ensureTag<L3AddressReq>()->setDestination(L3AddressResolver().resolve(destinationAddress));
                 message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);

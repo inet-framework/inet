@@ -129,7 +129,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
-    virtual IPv4Datagram *encapsulate(cPacket *transportPacket, IPv4ControlInfo *controlInfo);
+    virtual IPv4Datagram *encapsulate(cPacket *transportPacket);
 
     /**
      * Creates a blank IPv4 datagram. Override when subclassing IPv4Datagram is needed
@@ -219,7 +219,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie);
 
     virtual void sendIcmpError(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code);
-    virtual void sendIcmpError(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code);
+    virtual void sendIcmpError(cPacket *transportPacket, void *ctrl, ICMPType type, ICMPCode code);
 
   public:
     IPv4();

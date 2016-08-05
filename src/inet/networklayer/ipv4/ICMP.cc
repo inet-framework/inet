@@ -29,7 +29,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -125,8 +124,6 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the IPv4 layer
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        errorMessage->setControlInfo(controlInfo);
         errorMessage->ensureTag<L3AddressInd>()->setDestination(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
@@ -137,7 +134,7 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     }
 }
 
-void ICMP::sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICMPType type, ICMPCode code)
+void ICMP::sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPType type, ICMPCode code)
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
@@ -145,7 +142,6 @@ void ICMP::sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICM
     IPv4Datagram *datagram = check_and_cast<IPv4Datagram*>(dgramTag->removeOrigDatagram());
     delete dgramTag;
     int inputInterfaceId = transportPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    delete ctrl;
     take(transportPacket);
     take(datagram);
     datagram->encapsulate(transportPacket);
@@ -259,8 +255,6 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 
 void ICMP::sendToIP(ICMPMessage *msg, const IPv4Address& dest)
 {
-    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    msg->setControlInfo(controlInfo);
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
     sendToIP(msg);
 }

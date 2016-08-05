@@ -127,7 +127,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram
      */
-    virtual IPv6Datagram *encapsulate(cPacket *transportPacket, IPv6ControlInfo *ctrlInfo);
+    virtual IPv6Datagram *encapsulate(cPacket *transportPacket);
 
     virtual void preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr);
 
@@ -181,7 +181,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr);
 
     void sendIcmpError(IPv6Datagram *origDatagram, ICMPv6Type type, int code);
-    void sendIcmpError(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code);
+    void sendIcmpError(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code);
 
     // NetFilter functions:
 

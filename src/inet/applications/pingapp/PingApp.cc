@@ -214,7 +214,6 @@ void PingApp::handleMessage(cMessage *msg)
         if (ICMPMessage *icmpMessage = dynamic_cast<ICMPMessage *>(msg)) {
             if (icmpMessage->getType() == ICMP_ECHO_REPLY) {
                 PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                pingPayload->setControlInfo(icmpMessage->removeControlInfo());
                 processPingResponse(pingPayload);
             }
             else {
@@ -229,7 +228,6 @@ void PingApp::handleMessage(cMessage *msg)
             if (icmpMessage->getType() == ICMPv6_ECHO_REPLY) {
                 check_and_cast<ICMPv6EchoReplyMsg *>(msg);
                 PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                pingPayload->setControlInfo(icmpMessage->removeControlInfo());
                 processPingResponse(pingPayload);
             }
             else {
@@ -243,7 +241,6 @@ void PingApp::handleMessage(cMessage *msg)
         if (EchoPacket *icmpMessage = dynamic_cast<EchoPacket *>(msg)) {
             if (icmpMessage->getType() == ECHO_PROTOCOL_REPLY) {
                 PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                pingPayload->setControlInfo(icmpMessage->removeControlInfo());
                 processPingResponse(pingPayload);
             }
             else {
@@ -355,7 +352,6 @@ void PingApp::sendPingRequest()
     sendSeqNo++;
     sentCount++;
     IL3AddressType *addressType = destAddr.getAddressType();
-    auto controlInfo = addressType->createNetworkProtocolControlInfo();
 
     cPacket *outPacket = nullptr;
     switch (destAddr.getType()) {
@@ -366,7 +362,6 @@ void PingApp::sendPingRequest()
             request->setByteLength(4);
             request->setType(ICMP_ECHO_REQUEST);
             request->encapsulate(msg);
-            request->setControlInfo(controlInfo);
             request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
@@ -380,7 +375,6 @@ void PingApp::sendPingRequest()
             request->setByteLength(4);
             request->setType(ICMPv6_ECHO_REQUEST);
             request->encapsulate(msg);
-            request->setControlInfo(controlInfo);
             request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
@@ -395,7 +389,6 @@ void PingApp::sendPingRequest()
             request->setByteLength(4);
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->encapsulate(msg);
-            request->setControlInfo(controlInfo);
             request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else

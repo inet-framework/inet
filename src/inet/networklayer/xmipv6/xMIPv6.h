@@ -39,7 +39,6 @@ namespace inet {
 class BindingCache;
 class BindingUpdate;
 class InterfaceEntry;
-class IPv6ControlInfo;
 class IPv6Datagram;
 class IPv6NeighbourDiscovery;
 class IPv6Tunneling;
@@ -200,7 +199,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * This is where all the mobility messages are sifted through and sent to appropriate functions
      * for processing.
      */
-    void processMobilityMessage(MobilityHeader *mipv6Msg, IPv6ControlInfo *ctrlInfo);
+    void processMobilityMessage(MobilityHeader *mipv6Msg);
 
     /**
      * This method finally creates the timer structure and schedules the message for sending.
@@ -255,34 +254,34 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Process a BU - only applicable to HAs and CNs.
      */
-    void processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo);
+    void processBUMessage(BindingUpdate *bu);
 
     /**
      * Validate a BU - only applicable to HAs and CNs
      */
-    bool validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo);
+    bool validateBUMessage(BindingUpdate *bu);
 
     /**
      * Similiar to validateBUMessage(). However, this one is used only by HA to verify deregistration BU.
      */
-    bool validateBUderegisterMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo);    // 4.9.07 - CB
+    bool validateBUderegisterMessage(BindingUpdate *bu);    // 4.9.07 - CB
 
     /**
      * Constructs and send a BA to the IPv6 module. Only applicable to HAs and CNs.
      */
     void createAndSendBAMessage(const IPv6Address& src,
-            const IPv6Address& dest, int interfaceId, IPv6ControlInfo *ctrlInfo, const BAStatus& baStatus, const uint baSeq,
+            const IPv6Address& dest, int interfaceId, const BAStatus& baStatus, const uint baSeq,
             const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0);    // 14.9.07 - CB
 
     /**
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.
      */
-    void processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlInfo);
+    void processBAMessage(BindingAcknowledgement *ba);
 
     /**
      * Validates a Binding Acknowledgement for a mobile node.
      */
-    bool validateBAck(BindingAcknowledgement& ba, const IPv6ControlInfo *ctrlInfo);    // update 12.9.07
+    bool validateBAck(BindingAcknowledgement& ba);    // update 12.9.07
 
     /**
      * Creates and sends Binding Error message.
@@ -359,33 +358,33 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Create and send a HoT message.
      */
-    void processHoTIMessage(HomeTestInit *HoTI, IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
+    void processHoTIMessage(HomeTestInit *HoTI);    // 27.08.07 - CB
 
     /**
      * Create and send a CoT message.
      */
-    void processCoTIMessage(CareOfTestInit *CoTI, IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
+    void processCoTIMessage(CareOfTestInit *CoTI);    // 27.08.07 - CB
 
     /**
      * First verifies a received HoT message and sends a BU to the CN if the care-of keygen token
      * is available as well. Retransmission of HoTI message is rescheduled.
      */
-    void processHoTMessage(HomeTest *HoT, IPv6ControlInfo *ctrlInfo);    // 28.07.07 - CB
+    void processHoTMessage(HomeTest *HoT);    // 28.07.07 - CB
 
     /**
      * Verifies a HoT according to the RFC, Section 11.6.2
      */
-    bool validateHoTMessage(HomeTest& HoT, const IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
+    bool validateHoTMessage(HomeTest& HoT);    // 27.08.07 - CB
 
     /**
      * Like processHoTMessage(), but related to CoT.
      */
-    void processCoTMessage(CareOfTest *CoT, IPv6ControlInfo *ctrlInfo);    // 28.07.07 - CB
+    void processCoTMessage(CareOfTest *CoT);    // 28.07.07 - CB
 
     /**
      * Like validateHoTMessage(), but related to CoT.
      */
-    bool validateCoTMessage(CareOfTest& CoT, const IPv6ControlInfo *ctrlInfo);    // 27.08.07 - CB
+    bool validateCoTMessage(CareOfTest& CoT);    // 27.08.07 - CB
 
     /**
      * Send a BU depending on current status of:
@@ -446,7 +445,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Processes the Binding Refresh Message.
      */
-    void processBRRMessage(BindingRefreshRequest *brr, IPv6ControlInfo *ctrlInfo);    // 18.9.07 - CB
+    void processBRRMessage(BindingRefreshRequest *brr);    // 18.9.07 - CB
 
   protected:
 //

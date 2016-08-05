@@ -25,7 +25,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/ipv4/IPv4RoutingTable.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -613,8 +612,6 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
 {
     ASSERT(ie->isMulticast());
 
-    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    msg->setControlInfo(controlInfo);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);

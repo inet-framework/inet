@@ -29,7 +29,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
@@ -145,7 +144,6 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     reply->encapsulate(request->decapsulate());
 
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
-    IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setDestination(addressInd->getSource());
@@ -160,8 +158,6 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     }
     else
         addressReq->setSource(addressInd->getDestination());
-
-    reply->setControlInfo(replyCtrl);
 
     delete request;
     sendToIP(reply);
@@ -215,9 +211,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     // process the ICMP message locally, right away
     if (origDatagram->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
-        IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
         errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->setControlInfo(ctrlInfo);
         errorMsg->ensureTag<L3AddressInd>()->setSource(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
@@ -228,14 +222,13 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     }
 }
 
-void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, ICMPv6Type type, int code)
+void ICMPv6::sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code)
 {
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
     auto dgramTag = transportPacket->removeMandatoryTag<OrigNetworkDatagramInd>();
     IPv6Datagram *datagram = check_and_cast<IPv6Datagram*>(dgramTag->removeOrigDatagram());
     delete dgramTag;
-    delete ctrl;
     take(transportPacket);
     take(datagram);
     datagram->encapsulate(transportPacket);
@@ -244,8 +237,6 @@ void ICMPv6::sendErrorMessage(cPacket *transportPacket, IPv6ControlInfo *ctrl, I
 
 void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
 {
-    IPv6ControlInfo *ctrlInfo = new IPv6ControlInfo();
-    msg->setControlInfo(ctrlInfo);
     msg->ensureTag<L3AddressReq>()->setDestination(dest);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
 
