@@ -19,7 +19,7 @@
 #include "inet/linklayer/ieee8021d/rstp/RSTP.h"
 
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/common/InterfacePortTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
@@ -272,7 +272,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
     // incoming BPDU handling
     // checking message age
     Ieee802Ctrl *etherctrl = check_and_cast<Ieee802Ctrl *>(frame->removeControlInfo());
-    int arrivalPortNum = frame->getMandatoryTag<InterfacePortInd>()->getInterfacePort();
+    int arrivalPortNum = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     MACAddress src = frame->getMandatoryTag<MACAddressInd>()->getSourceAddress();
     delete etherctrl;
     EV_INFO << "BPDU received at port " << arrivalPortNum << "." << endl;
@@ -595,7 +595,7 @@ void RSTP::sendTCNtoRoot()
                 auto macAddressReq = frame->ensureTag<MACAddressReq>();
                 macAddressReq->setSourceAddress(bridgeAddress);
                 macAddressReq->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
-                frame->ensureTag<InterfacePortReq>()->setInterfacePort(r);
+                frame->ensureTag<InterfaceReq>()->setInterfaceId(r);
                 frame->setControlInfo(etherctrl);
                 send(frame, "relayOut");
             }
@@ -657,7 +657,7 @@ void RSTP::sendBPDU(int port)
         auto macAddressReq = frame->ensureTag<MACAddressReq>();
         macAddressReq->setSourceAddress(bridgeAddress);
         macAddressReq->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
-        frame->ensureTag<InterfacePortReq>()->setInterfacePort(port);
+        frame->ensureTag<InterfaceReq>()->setInterfaceId(port);
         frame->setControlInfo(etherctrl);
         send(frame, "relayOut");
     }

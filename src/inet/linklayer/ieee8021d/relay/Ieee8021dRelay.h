@@ -44,7 +44,6 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     InterfaceEntry *ie = nullptr;
     bool isOperational = false;
     bool isStpAware = false;
-    unsigned int portCount = 0;    // number of ports in the switch
 
     // statistics: see finish() for details.
     int numReceivedNetworkFrames = 0;
@@ -68,7 +67,7 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      *
      */
     void handleAndDispatchFrame(EtherFrame *frame);
-    void dispatch(EtherFrame *frame, unsigned int portNum);
+    void dispatch(EtherFrame *frame, InterfaceEntry *ie);
     void learn(EtherFrame *frame);
     void broadcast(EtherFrame *frame);
 
@@ -93,6 +92,8 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      * Gets port data from the InterfaceTable
      */
     Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
+
+    bool isForwardingInterface(InterfaceEntry *ie);
 
     /*
      * Returns the first non-loopback interface.

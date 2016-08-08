@@ -20,6 +20,7 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -30,6 +31,7 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
   protected:
     IMACAddressTable *addressTable = nullptr;
     int numPorts = 0;
+    IInterfaceTable *ift = nullptr;
 
     // Parameters for statistics collection
     long numProcessedFrames = 0;

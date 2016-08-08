@@ -18,12 +18,13 @@
 
 package inet.node.ethernet;
 
+import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
+import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IMACAddressTable;
 import inet.linklayer.contract.IMACRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.contract.IWiredNic;
-import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -41,7 +42,7 @@ module EtherSwitch
     parameters:
         @networkNode();
         @labels(node,ethernet-node);
-        @display("i=device/switch");
+        @display("i=device/switch;bgb=406,271");
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
@@ -68,24 +69,26 @@ module EtherSwitch
             @display("p=73,19;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit {
-            parameters:
-                @display("p=263,50;is=m");
-            gates:
-                ifIn[sizeof(ethg)];
-                ifOut[sizeof(ethg)];
+            @display("p=263,50;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
             @display("p=168,50");
         }
+        nl: MessageDispatcher {
+            parameters:
+                @display("p=263,124;b=200,5,,,,1");
+        }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 mac.promiscuous = true;
-                @display("p=263,150,row;q=txQueue");
+                @display("p=263,208,row;q=txQueue");
         }
     connections:
+        relayUnit.ifOut --> nl.upperLayerIn++;
+        relayUnit.ifIn <-- nl.upperLayerOut++;
         for i=0..sizeof(ethg)-1 {
-            eth[i].upperLayerIn <-- relayUnit.ifOut++;
-            eth[i].upperLayerOut --> relayUnit.ifIn++;
+            nl.lowerLayerOut++ --> eth[i].upperLayerIn;
+            nl.lowerLayerIn++ <-- eth[i].upperLayerOut;
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 

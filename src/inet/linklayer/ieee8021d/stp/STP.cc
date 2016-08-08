@@ -21,8 +21,8 @@
 #include "inet/linklayer/ieee8021d/stp/STP.h"
 
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/common/InterfacePortTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
@@ -94,7 +94,7 @@ void STP::handleMessage(cMessage *msg)
 void STP::handleBPDU(BPDU *bpdu)
 {
     Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(bpdu->getControlInfo());
-    int arrivalGate = bpdu->getMandatoryTag<InterfacePortInd>()->getInterfacePort();
+    int arrivalGate = bpdu->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
     if (bpdu->getTcaFlag()) {
@@ -142,7 +142,7 @@ void STP::handleTCN(BPDU *tcn)
     topologyChangeNotification = true;
 
     Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(tcn->getControlInfo());
-    int arrivalGate = tcn->getMandatoryTag<InterfacePortInd>()->getInterfacePort();
+    int arrivalGate = tcn->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     MACAddressInd *addressInd = tcn->removeMandatoryTag<MACAddressInd>();
     MACAddress srcAddress = addressInd->getSourceAddress();
     MACAddress destAddress = addressInd->getDestinationAddress();
@@ -154,7 +154,7 @@ void STP::handleTCN(BPDU *tcn)
 
     if (!isRoot) {
         tcn->clearTags();
-        tcn->ensureTag<InterfacePortReq>()->setInterfacePort(rootPort);
+        tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootPort);
         tcn->ensureTag<MACAddressReq>()->setSourceAddress(srcAddress);
         tcn->ensureTag<MACAddressReq>()->setDestinationAddress(destAddress);
         send(tcn, "relayOut");
@@ -168,7 +168,7 @@ void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tc
     BPDU *bpdu = new BPDU();
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     bpdu->ensureTag<MACAddressReq>()->setDestinationAddress(address);
-    bpdu->ensureTag<InterfacePortReq>()->setInterfacePort(port);
+    bpdu->ensureTag<InterfaceReq>()->setInterfaceId(port);
 
     bpdu->setName("BPDU");
     bpdu->setProtocolIdentifier(0);
@@ -220,7 +220,7 @@ void STP::generateTCN()
 
             Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
             tcn->ensureTag<MACAddressReq>()->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
-            tcn->ensureTag<InterfacePortReq>()->setInterfacePort(rootPort);
+            tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootPort);
             tcn->setControlInfo(controlInfo);
 
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;

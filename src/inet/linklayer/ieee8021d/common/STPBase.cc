@@ -152,10 +152,7 @@ Ieee8021dInterfaceData *STPBase::getPortInterfaceData(unsigned int portNum)
 
 InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int portNum)
 {
-    cGate *gate = switchModule->gate("ethg$o", portNum);
-    if (!gate)
-        throw cRuntimeError("gate is nullptr");
-    InterfaceEntry *gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+    InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(portNum);
     if (!gateIfEntry)
         throw cRuntimeError("gate's Interface is nullptr");
 

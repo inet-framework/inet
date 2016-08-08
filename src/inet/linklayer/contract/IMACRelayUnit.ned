@@ -47,8 +47,8 @@ moduleinterface IMACRelayUnit
     parameters:
         @display("i=block/switch");
     gates:
-        input ifIn[] @labels(EtherFrame);
-        output ifOut[] @labels(EtherFrame);
+        input ifIn @labels(EtherFrame);
+        output ifOut @labels(EtherFrame);
         input stpIn @loose;
         output stpOut @loose;
 }

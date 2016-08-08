@@ -14,6 +14,8 @@
 //
 
 #include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
+
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
@@ -27,14 +29,10 @@ Define_Module(MACRelayUnit);
 void MACRelayUnit::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        // number of ports
-        numPorts = gate("ifOut", 0)->size();
-        if (gate("ifIn", 0)->size() != numPorts)
-            throw cRuntimeError("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
-
         numProcessedFrames = numDiscardedFrames = 0;
 
         addressTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         WATCH(numProcessedFrames);
         WATCH(numDiscardedFrames);
@@ -59,26 +57,26 @@ void MACRelayUnit::handleMessage(cMessage *msg)
 
 void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
 {
-    int inputport = frame->getArrivalGate()->getIndex();
+    int inputInterfacceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     numProcessedFrames++;
 
     // update address table
-    addressTable->updateTableWithAddress(inputport, frame->getSrc());
+    addressTable->updateTableWithAddress(inputInterfacceId, frame->getSrc());
 
     // handle broadcast frames first
     if (frame->getDest().isBroadcast()) {
         EV << "Broadcasting broadcast frame " << frame << endl;
-        broadcastFrame(frame, inputport);
+        broadcastFrame(frame, inputInterfacceId);
         return;
     }
 
     // Finds output port of destination address and sends to output port
     // if not found then broadcasts to all other ports instead
-    int outputport = addressTable->getPortForAddress(frame->getDest());
+    int outputInterfaceId = addressTable->getPortForAddress(frame->getDest());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
-    if (inputport == outputport) {
+    if (inputInterfacceId == outputInterfaceId) {
         EV << "Output port is same as input port, " << frame->getFullName()
            << " dest " << frame->getDest() << ", discarding frame\n";
         numDiscardedFrames++;
@@ -86,22 +84,31 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
         return;
     }
 
-    if (outputport >= 0) {
-        EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
-        send(frame, "ifOut", outputport);
+    if (outputInterfaceId >= 0) {
+        EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
+        frame->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
+        send(frame, "ifOut");
     }
     else {
         EV << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
-        broadcastFrame(frame, inputport);
+        broadcastFrame(frame, inputInterfacceId);
     }
 }
 
-void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputport)
+void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputInterfaceId)
 {
-    for (int i = 0; i < numPorts; ++i)
-        if (i != inputport)
-            send((EtherFrame *)frame->dup(), "ifOut", i);
-
+    int numPorts = ift->getNumInterfaces();
+    for (int i = 0; i < numPorts; ++i) {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (ie->isLoopback() || !ie->isBroadcast())
+            continue;
+        int ifId = ie->getInterfaceId();
+        if (inputInterfaceId != ifId) {
+            EtherFrame *dupFrame = frame->dup();
+            dupFrame->ensureTag<InterfaceReq>()->setInterfaceId(ifId);
+            send(dupFrame, "ifOut");
+        }
+    }
     delete frame;
 }
 

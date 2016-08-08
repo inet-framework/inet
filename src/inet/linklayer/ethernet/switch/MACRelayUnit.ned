@@ -23,8 +23,9 @@ simple MACRelayUnit like IMACRelayUnit
         @display("i=block/switch");
         string macTablePath = default("^.macTable"); // The path to the MACAddressTable module
     gates:
-        input ifIn[] @labels(EtherFrame);
-        output ifOut[] @labels(EtherFrame);
+        input ifIn @labels(EtherFrame);
+        output ifOut @labels(EtherFrame);
         input stpIn @loose;
         output stpOut @loose;
 }
+
