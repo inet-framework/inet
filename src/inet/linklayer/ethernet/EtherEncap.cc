@@ -47,11 +47,6 @@ void EtherEncap::initialize(int stage)
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
-        IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *myIface = ift != nullptr ? ift->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str()) : nullptr;
-        interfaceId = (myIface != nullptr) ? myIface->getInterfaceId() : -1;
-    }
 }
 
 void EtherEncap::handleMessage(cMessage *msg)
@@ -146,7 +141,6 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     auto macAddressInd = higherlayermsg->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getSrc());
     macAddressInd->setDestinationAddress(frame->getDest());
-    higherlayermsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
         etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
     else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)
