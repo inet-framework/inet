@@ -119,7 +119,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(EtherFrame *frame)
     learn(frame);
 
     // BPDU Handling
-    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED) {
+    if (isStpAware && (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED) {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(frame);    // deliver to the STP/RSTP module
     }
