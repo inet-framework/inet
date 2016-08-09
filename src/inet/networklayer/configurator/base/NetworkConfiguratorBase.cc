@@ -32,6 +32,7 @@
 #include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #endif
 
 namespace inet {
@@ -395,13 +396,19 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
             const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
             const IReceiver *receiver = receiverRadio->getReceiver();
-            const IReceptionDecision *receptionDecision = receiver->computeReceptionDecision(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE, interference, snir);
-            const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
-            const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
-            cPacket *receivedFrame = const_cast<cPacket *>(receptionResult->getMacFrame());
-            double packetErrorRate = receptionDecision->isReceptionPossible() ? receivedFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate() : 1;
-            delete receptionResult;
-            delete receptionDecision;
+            bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
+            double packetErrorRate;
+            if (!isReceptionPossible)
+                packetErrorRate = 1;
+            else {
+                const IReceptionDecision *receptionDecision = new ReceptionDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE, isReceptionPossible, true, true);
+                const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+                const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
+                cPacket *receivedFrame = const_cast<cPacket *>(receptionResult->getMacFrame());
+                packetErrorRate = receivedFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate();
+                delete receptionResult;
+                delete receptionDecision;
+            }
             delete snir;
             delete interference;
             delete reception;
