@@ -46,10 +46,10 @@ void STPBase::initialize(int stage)
         switchModule = findContainingNode(this);
         if (!switchModule)
             throw cRuntimeError("Containing @networkNode module not found");
-        numPorts = switchModule->gate("ethg$o", 0)->getVectorSize();
     }
 
     if (stage == INITSTAGE_LINK_LAYER_2) {    // "auto" MAC addresses assignment takes place in stage 0
+        numPorts = ifTable->getNumInterfaces();
         cModule *m = findContainingNode(this);
         if (m)
             m->subscribe(NF_INTERFACE_STATE_CHANGED, this);
@@ -119,13 +119,14 @@ void STPBase::refreshDisplay() const
 {
     if (hasGUI() && visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
-            const Ieee8021dInterfaceData *port = getPortInterfaceData(i);
+            InterfaceEntry *ie = ifTable->getInterface(i);
+            const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
 
             // color link
             colorLink(i, port->getState() == Ieee8021dInterfaceData::FORWARDING);
 
             // label ethernet interface with port status and role
-            cModule *nicModule = switchModule->getSubmodule("eth", i);
+            cModule *nicModule = ie->getInterfaceModule();
             if (nicModule != nullptr) {
                 char buf[32];
                 sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
@@ -141,18 +142,18 @@ void STPBase::refreshDisplay() const
     }
 }
 
-Ieee8021dInterfaceData *STPBase::getPortInterfaceData(unsigned int portNum)
+Ieee8021dInterfaceData *STPBase::getPortInterfaceData(unsigned int interfaceId)
 {
-    Ieee8021dInterfaceData *portData = getPortInterfaceEntry(portNum)->ieee8021dData();
+    Ieee8021dInterfaceData *portData = getPortInterfaceEntry(interfaceId)->ieee8021dData();
     if (!portData)
         throw cRuntimeError("Ieee8021dInterfaceData not found!");
 
     return portData;
 }
 
-InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int portNum)
+InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int interfaceId)
 {
-    InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(portNum);
+    InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
     if (!gateIfEntry)
         throw cRuntimeError("gate's Interface is nullptr");
 
@@ -161,9 +162,11 @@ InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int portNum)
 
 int STPBase::getRootIndex()
 {
-    for (unsigned int i = 0; i < numPorts; i++)
-        if (getPortInterfaceData(i)->getRole() == Ieee8021dInterfaceData::ROOT)
-            return i;
+    for (unsigned int i = 0; i < numPorts; i++) {
+        InterfaceEntry *ie = ifTable->getInterface(i);
+        if (ie->ieee8021dData()->getRole() == Ieee8021dInterfaceData::ROOT)
+            return ie->getInterfaceId();
+    }
 
     return -1;
 }

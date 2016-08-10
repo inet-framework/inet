@@ -46,9 +46,9 @@ void STPTester::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         depthFirstSearch();
         if (isLoopFreeGraph())
-            EV_DEBUG << "The netwotrk is loop-free" << endl;
+            EV_DEBUG << "The network is loop-free" << endl;
         else
-            EV_DEBUG << "The netwotrk is not loop-free" << endl;
+            EV_DEBUG << "The network is not loop-free" << endl;
         if (isConnectedGraph())
             EV_DEBUG << "All nodes are connected with each other" << endl;
         else

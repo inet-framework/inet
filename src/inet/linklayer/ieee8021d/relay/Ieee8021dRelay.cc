@@ -80,14 +80,14 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
 
     if (!msg->isSelfMessage()) {
         // messages from STP process
-        if (strcmp(msg->getArrivalGate()->getName(), "stpIn") == 0) {
+        if (msg->arrivedOn("stpIn")) {
             numReceivedBPDUsFromSTP++;
             EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
             BPDU *bpdu = check_and_cast<BPDU *>(msg);
             dispatchBPDU(bpdu);
         }
         // messages from network
-        else if (strcmp(msg->getArrivalGate()->getName(), "ifIn") == 0) {
+        else if (msg->arrivedOn("ifIn")) {
             numReceivedNetworkFrames++;
             EV_INFO << "Received " << msg << " from network." << endl;
             EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
@@ -135,7 +135,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(EtherFrame *frame)
     Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->ieee8021dData();
     if (isStpAware && arrivalPortData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
-    learn(frame);
+    learn(frame, arrivalInterfaceId);
 
     // BPDU Handling
     if (isStpAware && (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED) {
@@ -186,13 +186,12 @@ void Ieee8021dRelay::dispatch(EtherFrame *frame, InterfaceEntry *ie)
     send(frame, "ifOut");
 }
 
-void Ieee8021dRelay::learn(EtherFrame *frame)
+void Ieee8021dRelay::learn(EtherFrame *frame, int arrivalInterfaceId)
 {
-    int arrivalGate = frame->getArrivalGate()->getIndex();
-    Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
+    Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
 
     if (!isStpAware || port->isLearning())
-        macTable->updateTableWithAddress(arrivalGate, frame->getSrc());
+        macTable->updateTableWithAddress(arrivalInterfaceId, frame->getSrc());
 }
 
 void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
@@ -241,15 +240,14 @@ void Ieee8021dRelay::deliverBPDU(EtherFrame *frame)
     send(bpdu, "stpOut");
 }
 
-Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int portNum)
+Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interfaceId)
 {
     if (isStpAware) {
-        cGate *gate = getContainingNode(this)->gate("ethg$o", portNum);
-        InterfaceEntry *gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+        InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
         Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->ieee8021dData() : nullptr;
 
         if (!portData)
-            throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d", portNum);
+            throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d", interfaceId);
 
         return portData;
     }

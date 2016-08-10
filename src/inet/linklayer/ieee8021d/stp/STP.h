@@ -44,7 +44,7 @@ class INET_API STP : public STPBase
   protected:
     static const double tickInterval;    // interval between two ticks
     bool isRoot = false;
-    unsigned int rootPort = 0;
+    unsigned int rootInterfaceId = 0;
     std::vector<unsigned int> desPorts;    // set of designated ports
 
     // Discovered values
@@ -238,7 +238,7 @@ inline std::ostream& operator<<(std::ostream& os, STP i)
         os << "  This bridge is the Root. \n";
     else {
         os << "  Cost: " << i.rootPathCost << " \n";
-        os << "  Port: " << i.rootPort << " \n";
+        os << "  Port: " << i.rootInterfaceId << " \n";
     }
     os << "  Hello Time: " << i.currentHelloTime << " \n";
     os << "  Max Age: " << i.currentMaxAge << " \n";
