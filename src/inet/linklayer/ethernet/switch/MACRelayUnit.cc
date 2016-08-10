@@ -34,7 +34,7 @@ void MACRelayUnit::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         numProcessedFrames = numDiscardedFrames = 0;
 
-        addressTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
+        addressTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         WATCH(numProcessedFrames);

@@ -47,8 +47,8 @@ void Ieee8021dRelay::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
-        ifTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
+        macTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         if (isOperational) {
             ie = chooseInterface();
@@ -282,10 +282,8 @@ InterfaceEntry *Ieee8021dRelay::chooseInterface()
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since relays work on EtherSwitches.
     //       NOTE that, we don't check if the returning interface is an Ethernet interface!
-    IInterfaceTable *ift = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
-
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *current = ift->getInterface(i);
+    for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
+        InterfaceEntry *current = ifTable->getInterface(i);
         if (!current->isLoopback())
             return current;
     }

@@ -35,8 +35,8 @@ simple Ieee8021dRelay like IMACRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");
-        string interfaceTablePath = default("^.interfaceTable"); // The path to the InterfaceTable module
-        string macTablePath = default("^.macTable");             // The path to the MACAddressTable module
+        string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
+        string macTableModule = default("^.macTable");             // The path to the MACAddressTable module
     gates:
         input ifIn;
         output ifOut;

@@ -41,8 +41,8 @@ void STPBase::initialize(int stage)
         helloTime = par("helloTime");
         forwardDelay = par("forwardDelay");
 
-        macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
-        ifTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
+        macTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         switchModule = findContainingNode(this);
         if (!switchModule)
             throw cRuntimeError("Containing @networkNode module not found");
@@ -173,10 +173,8 @@ InterfaceEntry *STPBase::chooseInterface()
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since STP and RSTP work on EtherSwitches.
     //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
-    IInterfaceTable *ift = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
-
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *current = ift->getInterface(i);
+    for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
+        InterfaceEntry *current = ifTable->getInterface(i);
         if (!current->isLoopback())
             return current;
     }

@@ -53,6 +53,7 @@ module EtherSwitch
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.macTableModule = default(absPath(".macTable"));
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
