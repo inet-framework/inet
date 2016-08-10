@@ -19,7 +19,10 @@
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
@@ -40,6 +43,7 @@ void MACRelayUnit::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        registerProtocol(Protocol::ethernet, gate("ifOut"));
     }
 }
 
@@ -51,6 +55,7 @@ void MACRelayUnit::handleMessage(cMessage *msg)
         return;
     }
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
+    delete frame->removeTag<DispatchProtocolReq>();
     // Frame received from MAC unit
     handleAndDispatchFrame(frame);
 }

@@ -15,11 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include <string.h>
 
 #ifdef WITH_ETHERNET
@@ -92,8 +93,10 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
             if (tid < 8)
                 payload->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
             Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
-            if (frameWithSNAP)
+            if (frameWithSNAP) {
                 ctrl->setEtherType(frameWithSNAP->getEtherType());
+                payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+            }
             payload->setControlInfo(ctrl);
             delete frame;
             outFrame = payload;
@@ -108,7 +111,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
             throw cRuntimeError("Unknown encapDecap value: %d", encapDecap);
             break;
     }
-    send(outFrame, "upperLayerOut");
+    sendUp(outFrame);
 }
 
 EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
@@ -130,6 +133,8 @@ EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
     ethframe->encapsulate(payload);
     if (ethframe->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
         ethframe->setByteLength(MIN_ETHERNET_FRAME_BYTES);
+
+    ethframe->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
 
     // done
     return ethframe;

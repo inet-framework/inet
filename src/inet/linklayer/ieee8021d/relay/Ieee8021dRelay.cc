@@ -16,6 +16,8 @@
 // Author: Benjamin Martin Seregi
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -37,6 +39,9 @@ void Ieee8021dRelay::initialize(int stage)
         // statistics
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        registerProtocol(Protocol::ethernet, gate("ifOut"));
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -86,6 +91,7 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
             numReceivedNetworkFrames++;
             EV_INFO << "Received " << msg << " from network." << endl;
             EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
+            delete frame->removeTag<DispatchProtocolReq>();
             handleAndDispatchFrame(frame);
         }
     }

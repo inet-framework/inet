@@ -21,6 +21,8 @@
 
 #include "inet/linklayer/ethernet/EtherMAC.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -792,6 +794,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, frame);
 
+    frame->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     if (interfaceEntry)
         frame->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 

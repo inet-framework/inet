@@ -68,7 +68,7 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      */
     void handleAndDispatchFrame(EtherFrame *frame);
     void dispatch(EtherFrame *frame, InterfaceEntry *ie);
-    void learn(EtherFrame *frame);
+    void learn(EtherFrame *frame, int arrivalInterfaceId);
     void broadcast(EtherFrame *frame);
 
     /**

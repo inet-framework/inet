@@ -20,6 +20,7 @@
 
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -326,6 +327,7 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, frame);
 
+    frame->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
     if (interfaceEntry)
         frame->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
