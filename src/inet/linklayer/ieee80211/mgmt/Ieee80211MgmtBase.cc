@@ -46,8 +46,8 @@ void Ieee80211MgmtBase::initialize(int stage)
         // obtain our address from MAC
         cModule *mac = getModuleFromPar<cModule>(par("macModule"), this);
         myAddress.setAddress(mac->par("address").stringValue());
-        interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        myIface = interfaceTable != nullptr ? interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str()) : nullptr;
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        myIface = interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
     }
 }
 

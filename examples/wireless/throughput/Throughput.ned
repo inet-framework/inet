@@ -21,6 +21,7 @@ package inet.examples.wireless.throughput;
 import inet.applications.ethernet.EtherAppCli;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
+import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -29,7 +30,7 @@ module ThroughputClient
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = "^.interfaceTable";
     gates:
         input radioIn @directIn;
 
@@ -44,9 +45,13 @@ module ThroughputClient
                 @display("p=112,134;q=queue");
                 mgmtType = default("Ieee80211MgmtSTASimplified");
         }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=50,50;is=s");
+        }
         mobility: StationaryMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=50,141;is=s");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;

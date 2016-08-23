@@ -37,7 +37,10 @@ module ThroughputClient
         input radioIn @directIn;
 
     submodules:
-        interfaceTable: InterfaceTable;
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=50,50;is=s");
+        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
@@ -51,7 +54,7 @@ module ThroughputClient
         }
         mobility: CircleMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=50,141;is=s");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
@@ -68,7 +71,10 @@ module ThroughputServer
         input radioIn @directIn;
 
     submodules:
-        interfaceTable: InterfaceTable;
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=50,50;is=s");
+        }
         sink: Sink {
             parameters:
                 @display("p=210,68,col");
@@ -80,7 +86,7 @@ module ThroughputServer
         }
         mobility: StationaryMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=50,141;is=s");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
