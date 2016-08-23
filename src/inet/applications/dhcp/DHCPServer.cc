@@ -450,9 +450,8 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr,
 {
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;
-    UDPSocket::SendOptions options;
-    options.outInterfaceId = ie->getInterfaceId();
-    socket.sendTo(msg, destAddr, destPort, &options);
+    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    socket.sendTo(msg, destAddr, destPort);
 }
 
 void DHCPServer::startApp()

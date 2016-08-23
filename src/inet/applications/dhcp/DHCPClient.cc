@@ -19,6 +19,7 @@
 
 #include "inet/applications/dhcp/DHCPClient.h"
 
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/NotifierConsts.h"
@@ -657,9 +658,8 @@ void DHCPClient::scheduleTimerT2()
 void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
-    UDPSocket::SendOptions options;
-    options.outInterfaceId = ie->getInterfaceId();
-    socket.sendTo(msg, destAddr, destPort, &options);
+    msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    socket.sendTo(msg, destAddr, destPort);
 }
 
 void DHCPClient::openSocket()

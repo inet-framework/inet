@@ -104,14 +104,13 @@ class UDPConnectCommand extends UDPControlInfo
 // the ~UDP module with kind=UDP_C_SEND and an ~UDPSendCommand attached.
 //
 // UDP_C_SEND/~UDPSendCommand models both the Unix send() and sendto() calls.
-// If the socket is connected, destAddr/destPort may be left blank (send()),
+// If the socket is connected, tags not required, or destAddr/destPort may be left blank (send()),
 // otherwise it must contain the destination for the packet (sendto()).
 //
-// @see ~UDPCommandCode, ~L3AddressReq, ~InterfaceReq
+// @see ~UDPCommandCode, ~PortsReq, ~L3AddressReq, ~InterfaceReq
 //
 class UDPSendCommand extends UDPControlInfo
 {
-    int destPort = -1;     // destination port
 }
 
 
@@ -130,12 +129,10 @@ class UDPCloseCommand extends UDPControlInfo
 // Control info that is attached to received data packets, sent up from the
 // ~UDP module to the application with UDP_I_DATA as message kind.
 //
-// @see ~UDPCommandCode
+// @see ~UDPCommandCode, ~L3AddressInd, ~PortsInd
 //
 class UDPDataIndication extends UDPControlInfo
 {
-    int srcPort;           // source port of the received packet
-    int destPort;          // destination port of the received packet
 }
 
 //
@@ -147,8 +144,6 @@ class UDPDataIndication extends UDPControlInfo
 //
 class UDPErrorIndication extends UDPControlInfo
 {
-    int srcPort;           // source port of the undeliverable packet
-    int destPort;          // destination port of the undeliverable packet
 }
 
 //

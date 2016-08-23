@@ -32,6 +32,7 @@
 
 #include "inet/routing/rip/RIPPacket_m.h"
 #include "inet/routing/rip/RIPRouting.h"
+#include "inet/transportlayer/common/PortsTag_m.h"
 
 namespace inet {
 
@@ -601,10 +602,10 @@ void RIPRouting::processRequest(RIPPacket *packet)
     }
 
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
-    int srcPort = ctrlInfo->getSrcPort();
-    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete ctrlInfo;
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
+    int srcPort = packet->getMandatoryTag<PortsInd>()->getSrcPort();
+    int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     packet->clearTags();
 
     EV_INFO << "received request from " << srcAddr << "\n";
@@ -802,7 +803,7 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->getControlInfo());
 
     // check that received from ripUdpPort
-    if (ctrlInfo->getSrcPort() != ripUdpPort) {
+    if (packet->getMandatoryTag<PortsInd>()->getSrcPort() != ripUdpPort) {
         EV_WARN << "source port is not " << ripUdpPort << "\n";
         return false;
     }
@@ -1047,16 +1048,13 @@ void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int de
     packet->setByteLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
 
     if (destAddr.isMulticast()) {
-        UDPSocket::SendOptions options;
-        options.outInterfaceId = destInterface->getInterfaceId();
+        packet->ensureTag<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
         if (mode == RIPng) {
             socket.setTimeToLive(255);
-            options.srcAddr = addressType->getLinkLocalAddress(destInterface);
+            packet->ensureTag<L3AddressReq>()->setSource(addressType->getLinkLocalAddress(destInterface));
         }
-        socket.sendTo(packet, destAddr, destPort, &options);
     }
-    else
-        socket.sendTo(packet, destAddr, destPort);
+    socket.sendTo(packet, destAddr, destPort);
 }
 
 /*----------------------------------------

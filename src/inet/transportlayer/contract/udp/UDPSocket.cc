@@ -17,12 +17,13 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/common/DscpTag_m.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/common/PortsTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -92,18 +93,14 @@ void UDPSocket::connect(L3Address addr, int port)
     sendToUDP(msg);
 }
 
-void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort, const SendOptions *options)
+void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
     UDPSendCommand *ctrl = new UDPSendCommand();
     auto addressReq = pk->ensureTag<L3AddressReq>();
     addressReq->setDestination(destAddr);
-    ctrl->setDestPort(destPort);
-    if (options) {
-        addressReq->setSource(options->srcAddr);
-        if (options->outInterfaceId != -1)
-            pk->ensureTag<InterfaceReq>()->setInterfaceId(options->outInterfaceId);
-    }
+    if (destPort != -1)
+        pk->ensureTag<PortsReq>()->setDestPort(destPort);
     pk->setControlInfo(ctrl);
     sendToUDP(pk);
 }
@@ -317,10 +314,11 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->getControlInfo());
 
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
+    auto ports = pk->getMandatoryTag<PortsInd>();
     L3Address srcAddr = l3Addresses->getSource();
     L3Address destAddr = l3Addresses->getDestination();
-    int srcPort = ctrl->getSrcPort();
-    int destPort = ctrl->getDestPort();
+    int srcPort = ports->getSrcPort();
+    int destPort = ports->getDestPort();
     int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     int ttl = pk->getMandatoryTag<HopLimitInd>()->getHopLimit();
     int dscp = pk->getMandatoryTag<DscpInd>()->getDifferentiatedServicesCodePoint();

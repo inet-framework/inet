@@ -35,6 +35,7 @@
 #include "inet/networklayer/common/MulticastLoopTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/transportlayer/common/PortsTag_m.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 
 #ifdef WITH_IPv4
@@ -303,7 +304,10 @@ void UDP::processPacketFromApp(cPacket *appData)
     }
     if (destAddr.isUnspecified())
         destAddr = sd->remoteAddr;
-    int destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
+    int destPort = sd->remotePort;
+    auto portsReq = appData->getTag<PortsReq>();
+    if (portsReq)
+        destPort = portsReq->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
         throw cRuntimeError("send: missing destination address or port when sending over unconnected port");
     if (srcAddr.isUnspecified())
@@ -723,8 +727,6 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
 
     // send payload with UDPControlInfo up to the application
     UDPDataIndication *udpCtrl = new UDPDataIndication();
-    udpCtrl->setSrcPort(srcPort);
-    udpCtrl->setDestPort(destPort);
     payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
     delete payload->removeTag<DispatchProtocolReq>();
@@ -733,6 +735,8 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->ensureTag<L3AddressInd>()->setSource(srcAddr);
     payload->ensureTag<L3AddressInd>()->setDestination(destAddr);
+    payload->ensureTag<PortsInd>()->setSrcPort(srcPort);
+    payload->ensureTag<PortsInd>()->setDestPort(destPort);
     payload->ensureTag<HopLimitInd>()->setHopLimit(ttl);
 
     emit(passedUpPkSignal, payload);
@@ -744,13 +748,13 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 {
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
     UDPErrorIndication *udpCtrl = new UDPErrorIndication();
-    udpCtrl->setSrcPort(sd->localPort);
-    udpCtrl->setDestPort(remotePort);
-    notifyMsg->setControlInfo(udpCtrl);
+   notifyMsg->setControlInfo(udpCtrl);
     //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     notifyMsg->ensureTag<L3AddressInd>()->setSource(localAddr);
     notifyMsg->ensureTag<L3AddressInd>()->setDestination(remoteAddr);
+    notifyMsg->ensureTag<PortsInd>()->setSrcPort(sd->localPort);
+    notifyMsg->ensureTag<PortsInd>()->setDestPort(remotePort);
 
     send(notifyMsg, "appOut");
 }

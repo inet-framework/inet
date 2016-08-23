@@ -19,6 +19,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/PortsTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
@@ -53,9 +54,8 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         // determine its source address/port
         UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->removeControlInfo());
         L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSource();
+        int srcPort = pk->getMandatoryTag<PortsInd>()->getSrcPort();
         pk->clearTags();
-
-        int srcPort = ctrl->getSrcPort();
         delete ctrl;
 
         // send back
