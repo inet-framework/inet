@@ -22,6 +22,7 @@
 #include "inet/common/serializer/headers/in.h"
 #include "inet/common/serializer/headers/in_systm.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 
 namespace inet {

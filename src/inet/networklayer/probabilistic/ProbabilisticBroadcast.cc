@@ -10,6 +10,7 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -348,7 +349,7 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
 cObject *ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
-    cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;

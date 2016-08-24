@@ -18,37 +18,34 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
-
-#include "inet/networklayer/common/EcnTag_m.h"
-#include "inet/networklayer/common/DscpTag_m.h"
-#include "inet/networklayer/ipv6/IPv6.h"
-
-#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
+#include "inet/networklayer/ipv6/IPv6.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 
 #ifdef WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader.h"
 #endif /* WITH_xMIPv6 */
 
-#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
-
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
 
 namespace inet {
 
@@ -840,7 +837,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setEtherType(ETHERTYPE_IPv6);
+    datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_IPv6);
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
     datagram->removeTag<DispatchProtocolReq>();         // send to NIC
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());

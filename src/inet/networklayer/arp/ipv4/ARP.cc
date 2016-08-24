@@ -21,13 +21,14 @@
 #include "inet/networklayer/arp/ipv4/ARP.h"
 
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -208,7 +209,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
 {
     // add control info with MAC address
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setEtherType(etherType);
+    msg->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     msg->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     msg->removeTag<DispatchProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

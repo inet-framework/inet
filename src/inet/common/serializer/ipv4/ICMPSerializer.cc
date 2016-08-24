@@ -26,6 +26,7 @@
 #include "inet/common/serializer/ipv4/headers/ip_icmp.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"

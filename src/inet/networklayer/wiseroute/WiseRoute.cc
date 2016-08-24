@@ -27,17 +27,19 @@
 #include <limits>
 #include <algorithm>
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/wiseroute/WiseRoute.h"
+
+#include "inet/common/FindModule.h"
 #include "inet/common/INETMath.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/FindModule.h"
-#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
@@ -378,7 +380,7 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 cObject *WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
-    cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->setControlInfo(cCtrlInfo);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     return cCtrlInfo;

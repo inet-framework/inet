@@ -26,6 +26,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
@@ -317,7 +318,7 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
 cObject *Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
-    cCtrlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+    pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
     pMsg->setControlInfo(cCtrlInfo);

@@ -21,6 +21,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -504,7 +505,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-        controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+        datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
         //Peer to peer interface, no broadcast, no MACAddress. // packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
         datagram->removeTag<DispatchProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
@@ -528,7 +529,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     else {
         // add control info with MAC address
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-        controlInfo->setEtherType(ETHERTYPE_INET_GENERIC);
+        datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
         datagram->ensureTag<MACAddressReq>()->setDestinationAddress(nextHopMAC);
         datagram->removeTag<DispatchProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

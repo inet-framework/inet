@@ -23,6 +23,7 @@
 
 #include "inet/linklayer/ext/cSocketRTScheduler.h"
 
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 

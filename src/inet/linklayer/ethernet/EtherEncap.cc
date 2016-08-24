@@ -24,6 +24,7 @@
 
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -98,6 +99,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 
     auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+    auto etherTypeTag = msg->getTag<EtherTypeReq>();
     EtherFrame *frame = nullptr;
 
     if (useSNAP) {
@@ -106,8 +108,8 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         snapFrame->setSrc(macAddressReq->getSourceAddress());    // if blank, will be filled in by MAC
         snapFrame->setDest(macAddressReq->getDestinationAddress());
         snapFrame->setOrgCode(0);
-        if (etherctrl)
-            snapFrame->setLocalcode(etherctrl->getEtherType());
+        if (etherTypeTag)
+            snapFrame->setLocalcode(etherTypeTag->getEtherType());
         frame = snapFrame;
     }
     else {
@@ -115,8 +117,8 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 
         eth2Frame->setSrc(macAddressReq->getSourceAddress());    // if blank, will be filled in by MAC
         eth2Frame->setDest(macAddressReq->getDestinationAddress());
-        if (etherctrl)
-            eth2Frame->setEtherType(etherctrl->getEtherType());
+        if (etherTypeTag)
+            eth2Frame->setEtherType(etherTypeTag->getEtherType());
         frame = eth2Frame;
     }
     delete etherctrl;
@@ -141,12 +143,17 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     auto macAddressInd = higherlayermsg->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getSrc());
     macAddressInd->setDestinationAddress(frame->getDest());
-    if (dynamic_cast<EthernetIIFrame *>(frame) != nullptr)
-        etherctrl->setEtherType(((EthernetIIFrame *)frame)->getEtherType());
-    else if (dynamic_cast<EtherFrameWithSNAP *>(frame) != nullptr)
-        etherctrl->setEtherType(((EtherFrameWithSNAP *)frame)->getLocalcode());
-    if (etherctrl->getEtherType() != -1)
-        higherlayermsg->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherctrl->getEtherType()));
+    int etherType = -1;
+    if (auto eth2frame = dynamic_cast<EthernetIIFrame *>(frame)) {
+        etherType = eth2frame->getEtherType();
+    }
+    else if (auto snapframe = dynamic_cast<EtherFrameWithSNAP *>(frame)) {
+        etherType = snapframe->getLocalcode();
+    }
+    if (etherType != -1) {
+        higherlayermsg->ensureTag<EtherTypeInd>()->setEtherType(etherType);
+        higherlayermsg->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
+    }
     higherlayermsg->setControlInfo(etherctrl);
 
     EV_DETAIL << "Decapsulating frame `" << frame->getName() << "', passing up contained packet `"

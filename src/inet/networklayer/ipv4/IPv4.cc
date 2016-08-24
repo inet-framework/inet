@@ -23,27 +23,28 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
-#include "inet/networklayer/contract/L3SocketCommand_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/common/DontFragmentTag_m.h"
-#include "inet/networklayer/common/HopLimitTag_m.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/MulticastLoopTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IARP.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
@@ -872,7 +873,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
 
     // add control info with MAC address
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setEtherType(etherType);
+    packet->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     packet->removeTag<DispatchProtocolReq>();         // send to NIC
     packet->setControlInfo(controlInfo);

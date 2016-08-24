@@ -23,6 +23,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
@@ -184,8 +185,8 @@ void EtherTrafGen::sendBurstPackets()
         datapacket->setByteLength(len);
 
         Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-        etherctrl->setEtherType(etherType);
         datapacket->setControlInfo(etherctrl);
+        datapacket->ensureTag<EtherTypeReq>()->setEtherType(etherType);
         datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B type=" << etherType << "\n";

@@ -32,6 +32,7 @@
 #include "inet/common/serializer/ipv4/ICMPSerializer.h"
 #include "inet/common/serializer/ipv4/IGMPSerializer.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 

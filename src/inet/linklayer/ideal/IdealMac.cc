@@ -23,13 +23,14 @@
 #include "inet/linklayer/ideal/IdealMac.h"
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ideal/IdealMacFrame_m.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -255,9 +256,10 @@ IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
     auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
     frame->setSrc(macAddressReq->getSourceAddress());
     frame->setDest(macAddressReq->getDestinationAddress());
-    frame->encapsulate(msg);
     frame->setSrcModuleId(getId());
-    frame->setNetworkProtocol(ctrl->getNetworkProtocol());
+    auto ethTypeTag = msg->getTag<EtherTypeReq>();
+    frame->setNetworkProtocol(ethTypeTag ? ethTypeTag->getEtherType() : -1);
+    frame->encapsulate(msg);
     delete ctrl;
     return frame;
 }
@@ -291,11 +293,11 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     // decapsulate and attach control info
     cPacket *packet = frame->decapsulate();
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setEtherType(frame->getNetworkProtocol());
     auto macAddressInd = packet->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getSrc());
     macAddressInd->setDestinationAddress(frame->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<EtherTypeInd>()->setEtherType(frame->getNetworkProtocol());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
     packet->setControlInfo(etherctrl);
 

@@ -47,30 +47,10 @@ enum SAPCode
 
 
 //
-// Some EtherType values (Ethernet II).
-//
-enum EtherType
-{
-    ETHERTYPE_IPv4 = 0x0800;
-    ETHERTYPE_ARP = 0x0806;
-    ETHERTYPE_TRILL = 0x22F3;
-    ETHERTYPE_L2_ISIS = 0x22F4;
-    ETHERTYPE_RARP = 0x8035;
-    ETHERTYPE_IPv6 = 0x86DD;
-    ETHERTYPE_INET_GENERIC = 0x86FF;    // not in standard, INET spceific value for @GenericNetworkProtocol
-    ETHERTYPE_MPLS_UNICAST = 0x8847;
-    ETHERTYPE_MPLS_MULTICAST = 0x8848;
-}
-
-
-//
 // Control structure for communication between LLC and higher layers
 //
 class Ieee802Ctrl
 {
-    @customize(true);
-
-    int etherType @enum(EtherType) = -1;   // used with ~EthernetIIFrame    TODO EtherTypeTag
     int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
     int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE          TODO Ieee802PauseCommand

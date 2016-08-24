@@ -19,6 +19,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTASimplified.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -75,7 +76,8 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
     MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     ASSERT(!dest.isUnspecified());
     frame->setAddress3(dest);
-    frame->setEtherType(ctrl->getEtherType());
+    auto ethTypeTag = msg->getTag<EtherTypeReq>();
+    frame->setEtherType(ethTypeTag ? ethTypeTag->getEtherType() : -1);
     auto userPriorityReq = msg->getTag<UserPriorityReq>();
     if (userPriorityReq != nullptr) {
         // make it a QoS frame, and set TID
@@ -104,7 +106,7 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
     payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP) {
-        ctrl->setEtherType(frameWithSNAP->getEtherType());
+        payload->ensureTag<EtherTypeInd>()->setEtherType(frameWithSNAP->getEtherType());
         payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
     }
     payload->setControlInfo(ctrl);
