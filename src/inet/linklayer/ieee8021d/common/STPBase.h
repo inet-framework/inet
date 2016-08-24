@@ -64,7 +64,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
      * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
      * and the port to which the link is connected to is also forwarding, otherwise colors the link gray.
      */
-    virtual void colorLink(unsigned int i, bool forwarding) const;
+    virtual void colorLink(InterfaceEntry *ie, bool forwarding) const;
 
     /**
      * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.

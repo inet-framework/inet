@@ -74,16 +74,16 @@ void STPBase::stop()
     isOperational = false;
     // colors all connected link gray
     for (unsigned int i = 0; i < numPorts; i++)
-        colorLink(i, false);
+        colorLink(ifTable->getInterface(i), false);
     switchModule->getDisplayString().setTagArg("i", 1, "");
     ie = nullptr;
 }
 
-void STPBase::colorLink(unsigned int i, bool forwarding) const
+void STPBase::colorLink(InterfaceEntry *ie, bool forwarding) const
 {
     if (hasGUI() && visualize) {
-        cGate *inGate = switchModule->gate("ethg$i", i);
-        cGate *outGate = switchModule->gate("ethg$o", i);
+        cGate *inGate = switchModule->gate(ie->getNodeInputGateId());
+        cGate *outGate = switchModule->gate(ie->getNodeOutputGateId());
         cGate *outGateNext = outGate ? outGate->getNextGate() : nullptr;
         cGate *outGatePrev = outGate ? outGate->getPreviousGate() : nullptr;
         cGate *inGatePrev = inGate ? inGate->getPreviousGate() : nullptr;
@@ -119,7 +119,7 @@ void STPBase::refreshDisplay() const
             const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
 
             // color link
-            colorLink(i, port->getState() == Ieee8021dInterfaceData::FORWARDING);
+            colorLink(ie, port->getState() == Ieee8021dInterfaceData::FORWARDING);
 
             // label ethernet interface with port status and role
             cModule *nicModule = ie->getInterfaceModule();
