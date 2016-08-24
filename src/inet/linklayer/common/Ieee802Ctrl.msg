@@ -15,7 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+cplusplus{{
+#include "inet/linklayer/common/MACAddress.h"
+}}
+
 namespace inet;
+
+class noncobject MACAddress;
 
 //
 // Message kind values used with in communication between L3 and IEEE 802 L2
@@ -54,4 +60,11 @@ class Ieee802Ctrl
     int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
     int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE          TODO Ieee802PauseCommand
+}
+
+// used with IEEE802CTRL_SENDPAUSE
+class Ieee802PauseCommand
+{
+    MACAddress destinationAddress;
+    int pauseUnits;
 }

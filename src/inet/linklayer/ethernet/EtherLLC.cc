@@ -239,10 +239,11 @@ void EtherLLC::handleDeregisterSAP(cMessage *msg)
 
 void EtherLLC::handleSendPause(cMessage *msg)
 {
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
+    Ieee802PauseCommand *etherctrl = dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
 
+    MACAddress dest = etherctrl->getDestinationAddress();
     int pauseUnits = etherctrl->getPauseUnits();
     EV << "Creating and sending PAUSE frame, with duration=" << pauseUnits << " units\n";
 
@@ -251,7 +252,6 @@ void EtherLLC::handleSendPause(cMessage *msg)
     sprintf(framename, "pause-%d-%d", getId(), seqNum++);
     EtherPauseFrame *frame = new EtherPauseFrame(framename);
     frame->setPauseTime(pauseUnits);
-    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     if (dest.isUnspecified())
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
     frame->setDest(dest);
