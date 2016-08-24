@@ -87,9 +87,9 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
     virtual std::string info() const override;
     virtual std::string detailedInfo() const override;
 
-    bool isLearning() { return portData.state == LEARNING || portData.state == FORWARDING; }
+    bool isLearning() const { return portData.state == LEARNING || portData.state == FORWARDING; }
 
-    bool isForwarding() { return portData.state == FORWARDING; }
+    bool isForwarding() const { return portData.state == FORWARDING; }
 
     simtime_t getAge() const { return portData.age; }
 
