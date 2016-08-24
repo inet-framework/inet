@@ -131,7 +131,7 @@ void STPBase::refreshDisplay() const
         }
 
         // mark root switch
-        if (const_cast<STPBase*>(this)->getRootIndex() == -1)
+        if (const_cast<STPBase*>(this)->getRootInterfaceId() == -1)
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");
@@ -156,7 +156,7 @@ InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int interfaceId)
     return gateIfEntry;
 }
 
-int STPBase::getRootIndex()
+int STPBase::getRootInterfaceId()
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);

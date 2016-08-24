@@ -74,7 +74,7 @@ class INET_API STP : public STPBase
      * Bridge Protocol Data Unit handling
      */
     void handleBPDU(BPDU *bpdu);
-    virtual void initInterfacedata(unsigned int portNum);
+    virtual void initInterfacedata(unsigned int interfaceId);
 
     /**
      * Topology change handling
@@ -87,7 +87,7 @@ class INET_API STP : public STPBase
     /*
      * Send BPDU with specified parameters (portNum, TCA flag, etc.)
      */
-    void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
+    void generateBPDU(int interfaceId, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
 
     /*
      * Send hello BDPUs on all ports (only for root switches)
@@ -105,14 +105,14 @@ class INET_API STP : public STPBase
      * Invokes: superiorID(), superiorPort()
      */
     int comparePorts(Ieee8021dInterfaceData *portA, Ieee8021dInterfaceData *portB);
-    int compareBridgeIDs(unsigned int, MACAddress, unsigned int, MACAddress);
-    int comparePortIDs(unsigned int, unsigned int, unsigned int, unsigned int);
+    int compareBridgeIDs(unsigned int aPriority, MACAddress aAddress, unsigned int bPriority, MACAddress bAddress);
+    int comparePortIDs(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum);
 
     /*
      * Check of the received BPDU is superior to port information from InterfaceTable
      */
-    bool isSuperiorBPDU(int portNum, BPDU *bpdu);
-    void setSuperiorBPDU(int portNum, BPDU *bpdu);
+    bool isSuperiorBPDU(int interfaceId, BPDU *bpdu);
+    void setSuperiorBPDU(int interfaceId, BPDU *bpdu);
 
     void handleTick();
 

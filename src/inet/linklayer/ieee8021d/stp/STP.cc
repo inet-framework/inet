@@ -163,12 +163,12 @@ void STP::handleTCN(BPDU *tcn)
         delete tcn;
 }
 
-void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tcaFlag)
+void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, bool tcaFlag)
 {
     BPDU *bpdu = new BPDU();
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     bpdu->ensureTag<MACAddressReq>()->setDestinationAddress(address);
-    bpdu->ensureTag<InterfaceReq>()->setInterfaceId(port);
+    bpdu->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
     bpdu->setName("BPDU");
     bpdu->setProtocolIdentifier(0);
@@ -180,8 +180,8 @@ void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tc
     bpdu->setRootPathCost(rootPathCost);
     bpdu->setRootAddress(rootAddress);
     bpdu->setRootPriority(rootPriority);
-    bpdu->setPortNum(port);
-    bpdu->setPortPriority(getPortInterfaceData(port)->getPriority());
+    bpdu->setPortNum(interfaceId);
+    bpdu->setPortPriority(getPortInterfaceData(interfaceId)->getPriority());
     bpdu->setMessageAge(0);
     bpdu->setMaxAge(currentMaxAge);
     bpdu->setHelloTime(currentHelloTime);
@@ -229,9 +229,9 @@ void STP::generateTCN()
     }
 }
 
-bool STP::isSuperiorBPDU(int portNum, BPDU *bpdu)
+bool STP::isSuperiorBPDU(int interfaceId, BPDU *bpdu)
 {
-    Ieee8021dInterfaceData *port = getPortInterfaceData(portNum);
+    Ieee8021dInterfaceData *port = getPortInterfaceData(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
 
     int result;
@@ -256,23 +256,23 @@ bool STP::isSuperiorBPDU(int portNum, BPDU *bpdu)
         // BPDU is superior
         port->setFdWhile(0);    // renew info
         port->setState(Ieee8021dInterfaceData::DISCARDING);
-        setSuperiorBPDU(portNum, bpdu);    // renew information
+        setSuperiorBPDU(interfaceId, bpdu);    // renew information
         delete xBpdu;
         return true;
     }
 
-    setSuperiorBPDU(portNum, bpdu);    // renew information
+    setSuperiorBPDU(interfaceId, bpdu);    // renew information
     delete xBpdu;
     return true;
 }
 
-void STP::setSuperiorBPDU(int portNum, BPDU *bpdu)
+void STP::setSuperiorBPDU(int interfaceId, BPDU *bpdu)
 {
     // BDPU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())
         return;
 
-    Ieee8021dInterfaceData *portData = getPortInterfaceData(portNum);
+    Ieee8021dInterfaceData *portData = getPortInterfaceData(interfaceId);
 
     portData->setRootPriority(bpdu->getRootPriority());
     portData->setRootAddress(bpdu->getRootAddress());

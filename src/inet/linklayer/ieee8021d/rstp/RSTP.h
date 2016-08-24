@@ -86,7 +86,7 @@ class INET_API RSTP : public STPBase
     /**
      * @brief Sends BPDU through a port
      */
-    virtual void sendBPDU(int port);
+    virtual void sendBPDU(int interfaceId);
 
     /**
      * @brief General processing
@@ -98,9 +98,9 @@ class INET_API RSTP : public STPBase
      * Updates port information. Handles port role changes.
      */
     virtual void handleIncomingFrame(BPDU *frame);
-    virtual void processBPDU(BPDU *frame, unsigned int arrival);
-    virtual bool processBetterSource(BPDU *frame, unsigned int arrival);
-    virtual bool processSameSource(BPDU *frame, unsigned int arrival);
+    virtual void processBPDU(BPDU *frame, unsigned int arrivalInterfaceId);
+    virtual bool processBetterSource(BPDU *frame, unsigned int arrivalInterfaceId);
+    virtual bool processSameSource(BPDU *frame, unsigned int arrivalInterfaceId);
 
     /**
      * @brief Prints current data base info
@@ -110,25 +110,25 @@ class INET_API RSTP : public STPBase
     /**
      * @brief Update Interfacedata with the content of the BDPU frame
      */
-    virtual void updateInterfacedata(BPDU *frame, unsigned int portNum);
+    virtual void updateInterfacedata(BPDU *frame, unsigned int interfaceId);
 
     /**
      * @brief Compares the BPDU frame with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than BPDU)
      */
-    virtual CompareResult contestInterfacedata(BPDU *msg, unsigned int portNum);
+    virtual CompareResult contestInterfacedata(BPDU *msg, unsigned int interfaceId);
 
     /**
      * @brief Compares the port's best BPDU with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than port's best BPDU)
      */
-    virtual CompareResult contestInterfacedata(unsigned int portNum);
+    virtual CompareResult contestInterfacedata(unsigned int interfaceId);
 
     /**
      * @brief Compares a port's best BPDU with a BPDU frame
      * @return (<0 if vector better than frame)
      */
-    virtual CompareResult compareInterfacedata(unsigned int portNum, BPDU *msg, int linkCost);
+    virtual CompareResult compareInterfacedata(unsigned int interfaceId, BPDU *msg, int linkCost);
 
     /**
      * @brief Compares two RSTP data
@@ -161,12 +161,12 @@ class INET_API RSTP : public STPBase
      * @brief Checks the frame TC flag.
      * Sets TCWhile if the port was forwarding and the flag is true.
      */
-    virtual void checkTC(BPDU *frame, int arrival);
+    virtual void checkTC(BPDU *frame, int arrivalInterfaceId);
 
     /**
      * @brief Handles the switch to backup in one of the ports
      */
-    virtual void handleBackup(BPDU *frame, unsigned int arrival);
+    virtual void handleBackup(BPDU *frame, unsigned int arrivalInterfaceId);
 
     /**
      * @brief schedule next upgrade self-message
@@ -176,7 +176,7 @@ class INET_API RSTP : public STPBase
     /**
      * @brief flush all port expect one
      */
-    virtual void flushOtherPorts(unsigned int portNum);
+    virtual void flushOtherPorts(unsigned int interfaceId);
 };
 
 } // namespace inet

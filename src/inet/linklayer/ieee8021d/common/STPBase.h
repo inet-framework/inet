@@ -73,23 +73,23 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
     virtual void refreshDisplay() const override;
 
     /**
-     * @brief Obtains the root gate index.
-     * @return The root gate index or -1 if there is no root gate.
+     * @brief Obtains the root interface ID.
+     * @return The root gate interface ID or -1 if there is no root interface.
      */
-    virtual int getRootIndex();
+    virtual int getRootInterfaceId();
 
     /**
-     * @brief Gets Ieee8021dInterfaceData for port number.
-     * @return The port's Ieee8021dInterfaceData, or nullptr if it doesn't exist.
+     * @brief Gets Ieee8021dInterfaceData for interface ID.
+     * @return The port's Ieee8021dInterfaceData, or throws error if it doesn't exist.
      */
-    Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
-    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum) const { return const_cast<STPBase *>(this)->getPortInterfaceData(portNum); }
+    Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId);
+    const Ieee8021dInterfaceData *getPortInterfaceData(unsigned int interfaceId) const { return const_cast<STPBase *>(this)->getPortInterfaceData(interfaceId); }
 
     /**
-     * @brief Gets InterfaceEntry for port number.
-     * @return The port's InterfaceEntry, or nullptr if it doesn't exist.
+     * @brief Gets InterfaceEntry for interface ID.
+     * @return The port's InterfaceEntry, throws error if it doesn't exist.
      */
-    InterfaceEntry *getPortInterfaceEntry(unsigned int portNum);
+    InterfaceEntry *getPortInterfaceEntry(unsigned int interfaceId);
 
     /*
      * Returns the first non-loopback interface.
