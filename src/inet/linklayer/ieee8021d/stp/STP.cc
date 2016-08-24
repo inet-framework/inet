@@ -357,7 +357,7 @@ void STP::checkTimers()
             }
             else {
                 initInterfacedata(interfaceId);
-                lostAlternate(interfaceId);
+                lostAlternate();
             }
         }
     }
@@ -627,7 +627,7 @@ void STP::lostRoot()
     tryRoot();
 }
 
-void STP::lostAlternate(int port)
+void STP::lostAlternate()
 {
     selectDesignatedPorts();
     topologyChangeNotification = true;

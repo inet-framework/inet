@@ -138,7 +138,7 @@ class INET_API STP : public STPBase
      * Helper functions to handle state changes
      */
     void lostRoot();
-    void lostAlternate(int port);
+    void lostAlternate();
     void reset();
 
     /*
