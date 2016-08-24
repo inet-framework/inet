@@ -43,16 +43,12 @@ void STPBase::initialize(int stage)
 
         macTable = getModuleFromPar<IMACAddressTable>(par("macTableModule"), this);
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        switchModule = findContainingNode(this);
-        if (!switchModule)
-            throw cRuntimeError("Containing @networkNode module not found");
+        switchModule = getContainingNode(this);
     }
 
     if (stage == INITSTAGE_LINK_LAYER_2) {    // "auto" MAC addresses assignment takes place in stage 0
         numPorts = ifTable->getNumInterfaces();
-        cModule *m = findContainingNode(this);
-        if (m)
-            m->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+        switchModule->subscribe(NF_INTERFACE_STATE_CHANGED, this);
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(switchModule->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
