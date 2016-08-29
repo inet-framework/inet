@@ -23,6 +23,7 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
@@ -174,7 +175,7 @@ void EtherAppCli::registerDSAP(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
+    Ieee802RegisterDsapCommand *etherctrl = new Ieee802RegisterDsapCommand();
     etherctrl->setDsap(dsap);
     cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
     msg->setControlInfo(etherctrl);
@@ -201,10 +202,11 @@ void EtherAppCli::sendPacket()
     datapacket->setResponseBytes(respLen);
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setSsap(localSAP);
-    etherctrl->setDsap(remoteSAP);
     datapacket->setControlInfo(etherctrl);
     datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
+    auto ieee802SapReq = datapacket->ensureTag<Ieee802SapReq>();
+    ieee802SapReq->setSsap(localSAP);
+    ieee802SapReq->setDsap(remoteSAP);
 
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");

@@ -36,30 +36,20 @@ enum Ieee802MessageKind
 
 
 //
-// Some 8-bit SAP values for IEEE 802.x LLC headers.
-//
-enum SAPCode
-{
-    SAP_IBM_SNA = 0x04;
-    SAP_IP = 0x06;
-    SAP_3COM = 0x80;
-    SAP_SNAP = 0xAA;
-    SAP_BANYAN = 0xBC;
-    SAP_NOVELL_IPX = 0xE0;
-    SAP_LAN_MANAGER = 0xF4;
-    SAP_CLNS = 0xFE;
-    SAP_STP = 0x42;
-}
-
-
-//
 // Control structure for communication between LLC and higher layers
 //
 class Ieee802Ctrl
 {
-    int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)     TODO Ieee802SapTag
-    int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE          TODO Ieee802PauseCommand
+}
+
+class Ieee802RegisterDsapCommand
+{
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
+}
+
+class Ieee802DeregisterDsapCommand
+{
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
 }
 
 // used with IEEE802CTRL_SENDPAUSE

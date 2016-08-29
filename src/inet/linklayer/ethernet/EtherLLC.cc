@@ -20,6 +20,7 @@
 #include "inet/linklayer/ethernet/EtherFrame.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -138,12 +139,13 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
         throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
+    auto ieee802SapReq = msg->getMandatoryTag<Ieee802SapReq>();
 
     EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->getName());
 
     frame->setControl(0);
-    frame->setSsap(etherctrl->getSsap());
-    frame->setDsap(etherctrl->getDsap());
+    frame->setSsap(ieee802SapReq->getSsap());
+    frame->setDsap(ieee802SapReq->getDsap());
     frame->setDest(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());    // src address is filled in by MAC
     frame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH);
     delete etherctrl;
@@ -172,12 +174,13 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     cPacket *higherlayermsg = frame->decapsulate();
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setSsap(frame->getSsap());
-    etherctrl->setDsap(frame->getDsap());
     higherlayermsg->setControlInfo(etherctrl);
     auto macaddressInd = higherlayermsg->ensureTag<MACAddressInd>();
     macaddressInd->setSourceAddress(frame->getSrc());
     macaddressInd->setDestinationAddress(frame->getDest());
+    auto ieee802SapInd = higherlayermsg->ensureTag<Ieee802SapInd>();
+    ieee802SapInd->setSsap(frame->getSsap());
+    ieee802SapInd->setDsap(frame->getDsap());
 
     EV << "Decapsulating frame `" << frame->getName() << "', "
                                                          "passing up contained packet `" << higherlayermsg->getName() << "' "
@@ -202,7 +205,7 @@ int EtherLLC::findPortForSAP(int dsap)
 void EtherLLC::handleRegisterSAP(cMessage *msg)
 {
     int port = msg->getArrivalGate()->getIndex();
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
+    Ieee802RegisterDsapCommand *etherctrl = dynamic_cast<Ieee802RegisterDsapCommand *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int dsap = etherctrl->getDsap();
@@ -220,7 +223,7 @@ void EtherLLC::handleRegisterSAP(cMessage *msg)
 
 void EtherLLC::handleDeregisterSAP(cMessage *msg)
 {
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
+    Ieee802DeregisterDsapCommand *etherctrl = dynamic_cast<Ieee802DeregisterDsapCommand *>(msg->getControlInfo());
     if (!etherctrl)
         throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int dsap = etherctrl->getDsap();
