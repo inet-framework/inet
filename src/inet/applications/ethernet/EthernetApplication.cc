@@ -101,8 +101,6 @@ void EthernetApplication::sendPacket()
     long respLen = respLength->longValue();
     datapacket->setResponseBytes(respLen);
 
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    datapacket->setControlInfo(etherctrl);
     datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
 
     send(datapacket, "out");
@@ -119,11 +117,9 @@ void EthernetApplication::receivePacket(cMessage *msg)
     if (dynamic_cast<EtherAppReq *>(msg)) {
         EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
         emit(rcvdPkSignal, req);
-        Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
         MACAddress srcAddr = req->getMandatoryTag<MACAddressInd>()->getSourceAddress();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
-        delete ctrl;
 
         // send back packets asked by EthernetApplication Client side
         for (int k = 0; replyBytes > 0; k++) {
@@ -148,8 +144,6 @@ void EthernetApplication::receivePacket(cMessage *msg)
 
 void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
 {
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    datapacket->setControlInfo(etherctrl);
     datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destAddr);
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");

@@ -86,7 +86,6 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
 
         case ENCAP_DECAP_TRUE: {
             cPacket *payload = frame->decapsulate();
-            Ieee802Ctrl *ctrl = new Ieee802Ctrl();
             auto macAddressInd = payload->ensureTag<MACAddressInd>();
             macAddressInd->setSourceAddress(frame->getTransmitterAddress());
             macAddressInd->setDestinationAddress(frame->getAddress3());
@@ -99,7 +98,6 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
                 payload->ensureTag<EtherTypeInd>()->setEtherType(etherType);
                 payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
             }
-            payload->setControlInfo(ctrl);
             delete frame;
             outFrame = payload;
         }
@@ -190,7 +188,6 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
             break;
 
         case ENCAP_DECAP_TRUE: {
-            Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
             Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
             frame->setFromDS(true);
 
@@ -205,7 +202,6 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
                 frame->addBitLength(QOSCONTROL_BITS);
                 frame->setTid(userPriorityReq->getUserPriority());
             }
-            delete ctrl;
 
             // encapsulate payload
             frame->encapsulate(msg);

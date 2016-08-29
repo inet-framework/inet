@@ -221,7 +221,6 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     frame->setReceiverAddress(assocAP.address);
 
     // destination address is in address3
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setAddress3(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
     frame->setEtherType(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
     auto userPriorityReq = msg->getTag<UserPriorityReq>();
@@ -231,7 +230,6 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
         frame->addBitLength(QOSCONTROL_BITS);
         frame->setTid(userPriorityReq->getUserPriority());
     }
-    delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
@@ -241,7 +239,6 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     auto macAddressInd = payload->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getAddress3());
     macAddressInd->setDestinationAddress(frame->getReceiverAddress());
@@ -257,7 +254,6 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
         payload->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
     }
-    payload->setControlInfo(ctrl);
 
     delete frame;
     return payload;

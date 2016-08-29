@@ -315,14 +315,11 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-cObject *Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
+void Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
     pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
     pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
     pMsg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
 }
 
 } // namespace inet

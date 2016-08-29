@@ -93,7 +93,6 @@ void STP::handleMessage(cMessage *msg)
 
 void STP::handleBPDU(BPDU *bpdu)
 {
-    Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(bpdu->getControlInfo());
     int arrivalGate = bpdu->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
@@ -141,7 +140,6 @@ void STP::handleTCN(BPDU *tcn)
     EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
 
-    Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl *>(tcn->getControlInfo());
     int arrivalGate = tcn->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     MACAddressInd *addressInd = tcn->removeMandatoryTag<MACAddressInd>();
     MACAddress srcAddress = addressInd->getSourceAddress();
@@ -166,7 +164,6 @@ void STP::handleTCN(BPDU *tcn)
 void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, bool tcaFlag)
 {
     BPDU *bpdu = new BPDU();
-    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     bpdu->ensureTag<MACAddressReq>()->setDestinationAddress(address);
     bpdu->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
@@ -198,8 +195,6 @@ void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, 
         }
     }
 
-    bpdu->setControlInfo(controlInfo);
-
     send(bpdu, "relayOut");
 }
 
@@ -218,10 +213,8 @@ void STP::generateTCN()
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
 
-            Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
             tcn->ensureTag<MACAddressReq>()->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
             tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-            tcn->setControlInfo(controlInfo);
 
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(tcn, "relayOut");

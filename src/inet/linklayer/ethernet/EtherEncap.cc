@@ -98,7 +98,6 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     EV_DETAIL << "Encapsulating higher layer packet `" << msg->getName() << "' for MAC\n";
 
     auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     auto etherTypeTag = msg->getTag<EtherTypeReq>();
     EtherFrame *frame = nullptr;
 
@@ -121,7 +120,6 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
             eth2Frame->setEtherType(etherTypeTag->getEtherType());
         frame = eth2Frame;
     }
-    delete etherctrl;
 
     ASSERT(frame->getByteLength() > 0); // length comes from msg file
 
@@ -139,7 +137,6 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     cPacket *higherlayermsg = frame->decapsulate();
 
     // add Ieee802Ctrl to packet
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     auto macAddressInd = higherlayermsg->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getSrc());
     macAddressInd->setDestinationAddress(frame->getDest());
@@ -154,7 +151,6 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
         higherlayermsg->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         higherlayermsg->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
     }
-    higherlayermsg->setControlInfo(etherctrl);
 
     EV_DETAIL << "Decapsulating frame `" << frame->getName() << "', passing up contained packet `"
               << higherlayermsg->getName() << "' to higher layer\n";

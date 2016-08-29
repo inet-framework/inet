@@ -250,7 +250,6 @@ void IdealMac::acked(IdealMacFrame *frame)
 
 IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
 {
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     IdealMacFrame *frame = new IdealMacFrame(msg->getName());
     frame->setByteLength(headerLength);
     auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
@@ -260,7 +259,6 @@ IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
     auto ethTypeTag = msg->getTag<EtherTypeReq>();
     frame->setNetworkProtocol(ethTypeTag ? ethTypeTag->getEtherType() : -1);
     frame->encapsulate(msg);
-    delete ctrl;
     return frame;
 }
 
@@ -292,14 +290,12 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
 {
     // decapsulate and attach control info
     cPacket *packet = frame->decapsulate();
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     auto macAddressInd = packet->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getSrc());
     macAddressInd->setDestinationAddress(frame->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<EtherTypeInd>()->setEtherType(frame->getNetworkProtocol());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
-    packet->setControlInfo(etherctrl);
 
     delete frame;
     return packet;

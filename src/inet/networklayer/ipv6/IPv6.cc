@@ -836,7 +836,6 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
 
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
-    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_IPv6);
     datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
     datagram->removeTag<DispatchProtocolReq>();         // send to NIC
@@ -844,7 +843,6 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     datagram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     datagram->ensureTag<NetworkProtocolTag>()->setProtocol(&Protocol::ipv6);
     datagram->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    datagram->setControlInfo(controlInfo);
     send(datagram, "queueOut");
 }
 

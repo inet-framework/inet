@@ -72,7 +72,6 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
     frame->setReceiverAddress(accessPointAddress);
 
     // destination address is in address3
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
     ASSERT(!dest.isUnspecified());
     frame->setAddress3(dest);
@@ -85,7 +84,6 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
         frame->addBitLength(QOSCONTROL_BITS);
         frame->setTid(userPriorityReq->getUserPriority());
     }
-    delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
@@ -95,7 +93,6 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
     auto macAddressInd = payload->ensureTag<MACAddressInd>();
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     macAddressInd->setSourceAddress(frame->getAddress3());
     macAddressInd->setDestinationAddress(frame->getReceiverAddress());
     if (frame->getType() == ST_DATA_WITH_QOS) {
@@ -109,7 +106,6 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
         payload->ensureTag<EtherTypeInd>()->setEtherType(frameWithSNAP->getEtherType());
         payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
     }
-    payload->setControlInfo(ctrl);
 
     delete frame;
     return payload;

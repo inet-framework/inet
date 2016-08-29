@@ -84,8 +84,6 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     packetsReceived++;
     emit(rcvdPkSignal, req);
 
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
-    delete ctrl;
     MACAddress srcAddr = req->getMandatoryTag<MACAddressInd>()->getSourceAddress();
     int srcSap = req->getMandatoryTag<Ieee802SapInd>()->getSsap();
     long requestId = req->getRequestId();
@@ -113,8 +111,6 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
 void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap)
 {
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    datapacket->setControlInfo(etherctrl);
     datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destAddr);
     auto ieee802SapReq = datapacket->ensureTag<Ieee802SapReq>();
     ieee802SapReq->setSsap(localSAP);

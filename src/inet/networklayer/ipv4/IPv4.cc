@@ -872,11 +872,9 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
     delete packet->removeControlInfo();
 
     // add control info with MAC address
-    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     packet->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     packet->removeTag<DispatchProtocolReq>();         // send to NIC
-    packet->setControlInfo(controlInfo);
 
     sendPacketToNIC(packet, ie);
 }

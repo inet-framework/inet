@@ -55,7 +55,6 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // copy receiver address from the control info (sender address will be set in MAC)
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setReceiverAddress(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
     auto ethTypeTag = msg->getTag<EtherTypeReq>();
     frame->setEtherType(ethTypeTag ? ethTypeTag->getEtherType() : -1);
@@ -66,7 +65,6 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
         frame->addBitLength(QOSCONTROL_BITS);
         frame->setTid(userPriorityReq->getUserPriority());
     }
-    delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
@@ -76,7 +74,6 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
     auto macAddressInd = payload->ensureTag<MACAddressInd>();
     macAddressInd->setSourceAddress(frame->getTransmitterAddress());
     macAddressInd->setDestinationAddress(frame->getReceiverAddress());
@@ -92,7 +89,6 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
             payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         }
     }
-    payload->setControlInfo(ctrl);
 
     delete frame;
     return payload;

@@ -275,10 +275,8 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 {
     // incoming BPDU handling
     // checking message age
-    Ieee802Ctrl *etherctrl = check_and_cast<Ieee802Ctrl *>(frame->removeControlInfo());
     int arrivalInterfaceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     MACAddress src = frame->getMandatoryTag<MACAddressInd>()->getSourceAddress();
-    delete etherctrl;
     EV_INFO << "BPDU received at port " << arrivalInterfaceId << "." << endl;
     if (frame->getMessageAge() < maxAge) {
         // checking TC
@@ -582,8 +580,6 @@ void RSTP::sendTCNtoRoot()
         if (rootPort->getRole() != Ieee8021dInterfaceData::DISABLED) {
             if (simTime() < rootPort->getTCWhile()) {
                 BPDU *frame = new BPDU();
-                Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-
                 frame->setRootPriority(rootPort->getRootPriority());
                 frame->setRootAddress(rootPort->getRootAddress());
                 frame->setMessageAge(rootPort->getAge());
@@ -603,7 +599,6 @@ void RSTP::sendTCNtoRoot()
                 macAddressReq->setSourceAddress(bridgeAddress);
                 macAddressReq->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
                 frame->ensureTag<InterfaceReq>()->setInterfaceId(r);
-                frame->setControlInfo(etherctrl);
                 send(frame, "relayOut");
             }
         }
@@ -635,7 +630,6 @@ void RSTP::sendBPDU(int interfaceId)
         rootPort = getPortInterfaceData(r);
     if (iport->getRole() != Ieee8021dInterfaceData::DISABLED) {
         BPDU *frame = new BPDU();
-        Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
         if (r != -1) {
             frame->setRootPriority(rootPort->getRootPriority());
             frame->setRootAddress(rootPort->getRootAddress());
@@ -666,7 +660,6 @@ void RSTP::sendBPDU(int interfaceId)
         macAddressReq->setSourceAddress(bridgeAddress);
         macAddressReq->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
         frame->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
-        frame->setControlInfo(etherctrl);
         send(frame, "relayOut");
     }
 }

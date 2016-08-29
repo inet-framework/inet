@@ -208,13 +208,11 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
 void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
 {
     // add control info with MAC address
-    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     msg->ensureTag<EtherTypeReq>()->setEtherType(etherType);
     msg->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
     msg->removeTag<DispatchProtocolReq>();         // send to NIC
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
-    msg->setControlInfo(controlInfo);
 
     // send out
     EV_INFO << "Sending " << msg << " to network protocol.\n";

@@ -136,9 +136,6 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     EV << "Encapsulating higher layer packet `" << msg->getName() << "' for MAC\n";
     EV << "Sent from " << getSimulation()->getModule(msg->getSenderModuleId())->getFullPath() << " at " << msg->getSendingTime() << " and was created " << msg->getCreationTime() << "\n";
 
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    if (!etherctrl)
-        throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     auto ieee802SapReq = msg->getMandatoryTag<Ieee802SapReq>();
 
     EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->getName());
@@ -148,7 +145,6 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     frame->setDsap(ieee802SapReq->getDsap());
     frame->setDest(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());    // src address is filled in by MAC
     frame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH);
-    delete etherctrl;
 
     frame->encapsulate(msg);
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
@@ -173,8 +169,6 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     // decapsulate it and pass up to higher layer
     cPacket *higherlayermsg = frame->decapsulate();
 
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    higherlayermsg->setControlInfo(etherctrl);
     auto macaddressInd = higherlayermsg->ensureTag<MACAddressInd>();
     macaddressInd->setSourceAddress(frame->getSrc());
     macaddressInd->setDestinationAddress(frame->getDest());

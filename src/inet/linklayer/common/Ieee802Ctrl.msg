@@ -35,13 +35,6 @@ enum Ieee802MessageKind
 }
 
 
-//
-// Control structure for communication between LLC and higher layers
-//
-class Ieee802Ctrl
-{
-}
-
 class Ieee802RegisterDsapCommand
 {
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
