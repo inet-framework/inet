@@ -259,8 +259,7 @@ void IndexedImageFigure::setValue(int series, simtime_t timestamp, double newVal
 
 void IndexedImageFigure::refresh()
 {
-    if(std::isnan(value))
-    {
+    if (std::isnan(value)) {
         image->setVisible(false);
         return;
     }

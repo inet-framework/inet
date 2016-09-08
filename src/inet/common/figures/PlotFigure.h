@@ -95,8 +95,8 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     double getMaxValue() const;
     void setMaxValue(double value);
 
-    const char* getLabel() const;
-    void setLabel(const char* text);
+    const char *getLabel() const;
+    void setLabel(const char *text);
 
     const Font& getLabelFont() const;
     void setLabelFont(const Font& font);

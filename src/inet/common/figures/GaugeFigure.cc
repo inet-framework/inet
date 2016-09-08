@@ -306,7 +306,7 @@ void GaugeFigure::setTickGeometry(cLineFigure *tick, int index)
     tick->setLineWidth(zeroToOne(getBounds().width * TICK_LINE_WIDTH_PERCENT));
 
     Transform trans;
-    trans.rotate((M_PI + M_PI / 2)*(index * tickSize + shifting)/(max-min), getBounds().getCenter()).
+    trans.rotate((M_PI + M_PI / 2) * (index * tickSize + shifting) / (max - min), getBounds().getCenter()).
             rotate(-M_PI / 4, getBounds().getCenter());
     tick->setTransform(trans);
 }
@@ -321,9 +321,9 @@ void GaugeFigure::setNumberGeometry(cTextFigure *number, int index)
     number->setPosition(textPos);
 
     Transform trans;
-    trans.rotate(-(M_PI + M_PI / 2)*(index * tickSize + shifting)/(max-min), textPos).
+    trans.rotate(-(M_PI + M_PI / 2) * (index * tickSize + shifting) / (max - min), textPos).
             rotate(M_PI / 4, textPos).
-            rotate((M_PI + M_PI / 2)*(index * tickSize + shifting)/(max-min), getBounds().getCenter()).
+            rotate((M_PI + M_PI / 2) * (index * tickSize + shifting) / (max - min), getBounds().getCenter()).
             rotate(-M_PI / 4, getBounds().getCenter());
     number->setTransform(trans);
 }
@@ -356,8 +356,7 @@ void GaugeFigure::setNeedleTransform()
         angle = -offset;
     else if (value > max)
         angle = (END_ANGLE - START_ANGLE) + offset;
-    else if (std::isnan(value))
-    {
+    else if (std::isnan(value)) {
         needle->setVisible(false);
         return;
     }
@@ -374,9 +373,9 @@ void GaugeFigure::redrawTicks()
     ASSERT(tickFigures.size() == numberFigures.size());
 
     double fraction = std::abs(fmod(min / tickSize, 1));
-    shifting = tickSize*(min < 0 ? fraction : 1 - fraction);
+    shifting = tickSize * (min < 0 ? fraction : 1 - fraction);
     // if fraction == 0 then shifting == tickSize therefore don't have to shift the ticks
-    if(shifting == tickSize)
+    if (shifting == tickSize)
         shifting = 0;
 
     int prevNumTicks = numTicks;
@@ -410,7 +409,7 @@ void GaugeFigure::redrawTicks()
         char buf[32];
 
         double number = min + i * tickSize + shifting;
-        if(std::abs(number) < tickSize / 2)
+        if (std::abs(number) < tickSize / 2)
             number = 0;
 
         sprintf(buf, "%g", number);
@@ -433,8 +432,7 @@ void GaugeFigure::redrawCurves()
         const char *token = signalTokenizer.nextToken();
         newStop = atof(token);
         if (newStop > lastStop) {
-            if (index == curveFigures.size())
-            {
+            if (index == curveFigures.size()) {
                 cArcFigure *arc = new cArcFigure("colorStrip");
                 arc->setZoomLineWidth(true);
                 curveFigures.push_back(arc);
@@ -449,8 +447,7 @@ void GaugeFigure::redrawCurves()
             color = Color(token);
     }
     if (lastStop < 1.0) {
-        if (index == curveFigures.size())
-        {
+        if (index == curveFigures.size()) {
             cArcFigure *arc = new cArcFigure("colorStrip");
             arc->setZoomLineWidth(true);
             curveFigures.push_back(arc);

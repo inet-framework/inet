@@ -278,20 +278,19 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
     getContainerGeometry(x, y, width, height, offset);
 
     containerFigure->addMoveTo(x, y);
-    containerFigure->addLineRel(0, height + 2*offset);
+    containerFigure->addLineRel(0, height + 2 * offset);
     //TODO this does not work with Qtenv:
     //containerFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
     containerFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
-    containerFigure->addLineRel(0, -height - 2*offset);
+    containerFigure->addLineRel(0, -height - 2 * offset);
     containerFigure->addArcRel(width / 2, width / 2, 0, true, false, -width, 0);
 
     double mercuryLevel;
     double overflow = 0;
-    if(std::isnan(value))
+    if (std::isnan(value))
         return;
-    else if (value < min)
-    {
-        mercuryFigure->addMoveTo(x, y + 2*offset + height);
+    else if (value < min) {
+        mercuryFigure->addMoveTo(x, y + 2 * offset + height);
         mercuryFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
         mercuryFigure->addClosePath();
         return;
@@ -299,7 +298,7 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
     else if (value > max) {
         mercuryLevel = 1;
         // value < max so the mercury will be overflow
-        overflow = 2*offset;
+        overflow = 2 * offset;
         offset = 0;
     }
     else
@@ -321,9 +320,9 @@ void ThermometerFigure::redrawTicks()
     ASSERT(tickFigures.size() == numberFigures.size());
 
     double fraction = std::abs(fmod(min / tickSize, 1));
-    shifting = tickSize*(min < 0 ? fraction : 1 - fraction);
+    shifting = tickSize * (min < 0 ? fraction : 1 - fraction);
     // if fraction == 0 then shifting == tickSize therefore don't have to shift the ticks
-    if(shifting == tickSize)
+    if (shifting == tickSize)
         shifting = 0;
 
     int prevNumTicks = numTicks;
@@ -356,7 +355,7 @@ void ThermometerFigure::redrawTicks()
         setTickGeometry(tickFigures[i], i);
 
         double number = min + i * tickSize + shifting;
-        if(std::abs(number) < tickSize / 2)
+        if (std::abs(number) < tickSize / 2)
             number = 0;
 
         char buf[32];

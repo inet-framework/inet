@@ -26,7 +26,7 @@ Register_Class(PlotFigure);
 
 #if OMNETPP_VERSION >= 0x500
 
-#define M_PI 3.14159265358979323846
+#define M_PI    3.14159265358979323846
 static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
 static const double TICK_LENGTH = 5;
@@ -42,7 +42,7 @@ static const char *PKEY_VALUE_TICK_SIZE = "valueTickSize";
 static const char *PKEY_TIME_WINDOW = "timeWindow";
 static const char *PKEY_TIME_TICK_SIZE = "timeTickSize";
 static const char *PKEY_LINE_COLOR = "lineColor";
-static const char *PKEY_MIN_VALUE= "minValue";
+static const char *PKEY_MIN_VALUE = "minValue";
 static const char *PKEY_MAX_VALUE = "maxValue";
 static const char *PKEY_POS = "pos";
 static const char *PKEY_SIZE = "size";
@@ -61,12 +61,11 @@ const cFigure::Rectangle& PlotFigure::getBounds() const
 
 void PlotFigure::setBounds(const Rectangle& rect)
 {
-    if(backgroundFigure->getBounds() == rect)
+    if (backgroundFigure->getBounds() == rect)
         return;
 
     backgroundFigure->setBounds(rect);
     layout();
-
 }
 
 const cFigure::Color& PlotFigure::getBackgrouncColor() const
@@ -86,7 +85,7 @@ double PlotFigure::getValueTickSize() const
 
 void PlotFigure::setValueTickSize(double size)
 {
-    if(valueTickSize == size)
+    if (valueTickSize == size)
         return;
 
     valueTickSize = size;
@@ -100,7 +99,7 @@ simtime_t PlotFigure::getTimeWindow() const
 
 void PlotFigure::setTimeWindow(simtime_t timeWindow)
 {
-    if(this->timeWindow == timeWindow)
+    if (this->timeWindow == timeWindow)
         return;
 
     this->timeWindow = timeWindow;
@@ -114,7 +113,7 @@ simtime_t PlotFigure::getTimeTickSize() const
 
 void PlotFigure::setTimeTickSize(simtime_t size)
 {
-    if(timeTickSize == size)
+    if (timeTickSize == size)
         return;
 
     timeTickSize = size;
@@ -138,7 +137,7 @@ double PlotFigure::getMinValue() const
 
 void PlotFigure::setMinValue(double value)
 {
-    if(min == value)
+    if (min == value)
         return;
 
     min = value;
@@ -152,19 +151,19 @@ double PlotFigure::getMaxValue() const
 
 void PlotFigure::setMaxValue(double value)
 {
-    if(max == value)
+    if (max == value)
         return;
 
     max = value;
     layout();
 }
 
-const char* PlotFigure::getLabel() const
+const char *PlotFigure::getLabel() const
 {
     return labelFigure->getText();
 }
 
-void PlotFigure::setLabel(const char* text)
+void PlotFigure::setLabel(const char *text)
 {
     labelFigure->setText(text);
 }
@@ -189,7 +188,8 @@ void PlotFigure::setLabelColor(const Color& color)
     labelFigure->setColor(color);
 }
 
-void PlotFigure::parse(cProperty *property) {
+void PlotFigure::parse(cProperty *property)
+{
     cGroupFigure::parse(property);
 
     setBounds(parseBounds(property));
@@ -202,11 +202,11 @@ void PlotFigure::parse(cProperty *property) {
     if ((s = property->getValue(PKEY_TIME_WINDOW)) != nullptr)
         setTimeWindow(atoi(s));
     if ((s = property->getValue(PKEY_LINE_COLOR)) != nullptr)
-       setLineColor(parseColor(s));
+        setLineColor(parseColor(s));
     if ((s = property->getValue(PKEY_MIN_VALUE)) != nullptr)
-       setMinValue(atof(s));
+        setMinValue(atof(s));
     if ((s = property->getValue(PKEY_MAX_VALUE)) != nullptr)
-       setMaxValue(atof(s));
+        setMaxValue(atof(s));
     if ((s = property->getValue(PKEY_LABEL)) != nullptr)
         setLabel(s);
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)
@@ -223,10 +223,12 @@ const char **PlotFigure::getAllowedPropertyKeys() const
 {
     static const char *keys[32];
     if (!keys[0]) {
-        const char *localKeys[] = {PKEY_VALUE_TICK_SIZE, PKEY_TIME_WINDOW, PKEY_TIME_TICK_SIZE,
-                                   PKEY_LINE_COLOR, PKEY_MIN_VALUE, PKEY_MAX_VALUE, PKEY_BACKGROUND_COLOR,
-                                   PKEY_LABEL, PKEY_LABEL_COLOR, PKEY_LABEL_FONT, PKEY_POS, PKEY_SIZE,
-                                   PKEY_ANCHOR, PKEY_BOUNDS, nullptr};
+        const char *localKeys[] = {
+            PKEY_VALUE_TICK_SIZE, PKEY_TIME_WINDOW, PKEY_TIME_TICK_SIZE,
+            PKEY_LINE_COLOR, PKEY_MIN_VALUE, PKEY_MAX_VALUE, PKEY_BACKGROUND_COLOR,
+            PKEY_LABEL, PKEY_LABEL_COLOR, PKEY_LABEL_FONT, PKEY_POS, PKEY_SIZE,
+            PKEY_ANCHOR, PKEY_BOUNDS, nullptr
+        };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
     }
     return keys;
@@ -262,7 +264,7 @@ void PlotFigure::layout()
 
     Rectangle b = getBounds();
     double fontSize = timeTicks.size() > 0 && timeTicks[0].number ? timeTicks[0].number->getFont().pointSize : 12;
-    labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize*LABEL_Y_DISTANCE_FACTOR));
+    labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR));
 }
 
 void PlotFigure::redrawValueTicks()
@@ -271,9 +273,8 @@ void PlotFigure::redrawValueTicks()
     int numTicks = std::abs(max - min) / valueTickSize + 1;
 
     // Allocate ticks and numbers if needed
-    if(numTicks > valueTicks.size())
-        while(numTicks > valueTicks.size())
-        {
+    if (numTicks > valueTicks.size())
+        while (numTicks > valueTicks.size()) {
             cLineFigure *tick = new cLineFigure("valueTick");
             cLineFigure *dashLine = new cLineFigure("valueDashLine");
             cTextFigure *number = new cTextFigure("valueNumber");
@@ -290,20 +291,17 @@ void PlotFigure::redrawValueTicks()
         }
     else
         // Add or remove figures from canvas according to previous number of ticks
-        for(int i = valueTicks.size() - 1; i >= numTicks; --i)
-        {
+        for (int i = valueTicks.size() - 1; i >= numTicks; --i) {
             delete removeFigure(valueTicks[i].number);
             delete removeFigure(valueTicks[i].dashLine);
             delete removeFigure(valueTicks[i].tick);
             valueTicks.pop_back();
         }
 
-    for(int i = 0; i < valueTicks.size(); ++i)
-    {
+    for (int i = 0; i < valueTicks.size(); ++i) {
         double x = bounds.x + bounds.width;
-        double y = bounds.y + bounds.height - bounds.height*(i*valueTickSize)/std::abs(max-min);
-        if(y > bounds.y && y < bounds.y + bounds.height)
-        {
+        double y = bounds.y + bounds.height - bounds.height * (i * valueTickSize) / std::abs(max - min);
+        if (y > bounds.y && y < bounds.y + bounds.height) {
             valueTicks[i].tick->setVisible(true);
             valueTicks[i].tick->setStart(Point(x, y));
             valueTicks[i].tick->setEnd(Point(x - TICK_LENGTH, y));
@@ -312,17 +310,16 @@ void PlotFigure::redrawValueTicks()
             valueTicks[i].dashLine->setStart(Point(x - TICK_LENGTH, y));
             valueTicks[i].dashLine->setEnd(Point(bounds.x, y));
         }
-        else
-        {
+        else {
             valueTicks[i].tick->setVisible(false);
             valueTicks[i].dashLine->setVisible(false);
         }
 
         char buf[32];
-        sprintf(buf, "%g", min + i*valueTickSize);
+        sprintf(buf, "%g", min + i * valueTickSize);
         valueTicks[i].number->setText(buf);
         valueTicks[i].number->setPosition(Point(x + bounds.height * NUMBER_DISTANCE_FROM_TICK, y));
-     }
+    }
 }
 
 void PlotFigure::refreshDisplay()
@@ -336,17 +333,16 @@ void PlotFigure::redrawTimeTicks()
     simtime_t minX = simTime() - timeWindow;
 
     double fraction = std::abs(fmod((minX / timeTickSize), 1));
-    simtime_t shifting = timeTickSize*(minX < 0 ? fraction : 1 - fraction);
+    simtime_t shifting = timeTickSize * (minX < 0 ? fraction : 1 - fraction);
     // if fraction == 0 then shifting == timeTickSize therefore don't have to shift the time ticks
-    if(shifting == timeTickSize)
+    if (shifting == timeTickSize)
         shifting = 0;
 
     int numTimeTicks = (timeWindow - shifting) / timeTickSize + 1;
 
     // Allocate ticks and numbers if needed
-    if(numTimeTicks > timeTicks.size())
-        while(numTimeTicks > timeTicks.size())
-        {
+    if (numTimeTicks > timeTicks.size())
+        while (numTimeTicks > timeTicks.size()) {
             cLineFigure *tick = new cLineFigure("timeTick");
             cLineFigure *dashLine = new cLineFigure("timeDashLine");
             cTextFigure *number = new cTextFigure("timeNumber");
@@ -363,20 +359,17 @@ void PlotFigure::redrawTimeTicks()
         }
     else
         // Add or remove figures from canvas according to previous number of ticks
-        for(int i = timeTicks.size() - 1; i >= numTimeTicks; --i)
-        {
+        for (int i = timeTicks.size() - 1; i >= numTimeTicks; --i) {
             delete removeFigure(timeTicks[i].number);
             delete removeFigure(timeTicks[i].dashLine);
             delete removeFigure(timeTicks[i].tick);
             timeTicks.pop_back();
         }
 
-    for(int i = 0; i < timeTicks.size(); ++i)
-    {
-        double x = bounds.x + bounds.width*(i*timeTickSize + shifting)/timeWindow;
+    for (int i = 0; i < timeTicks.size(); ++i) {
+        double x = bounds.x + bounds.width * (i * timeTickSize + shifting) / timeWindow;
         double y = bounds.y + bounds.height;
-        if(x > bounds.x && x < bounds.x + bounds.width)
-        {
+        if (x > bounds.x && x < bounds.x + bounds.width) {
             timeTicks[i].tick->setVisible(true);
             timeTicks[i].tick->setStart(Point(x, y));
             timeTicks[i].tick->setEnd(Point(x, y - TICK_LENGTH));
@@ -385,19 +378,18 @@ void PlotFigure::redrawTimeTicks()
             timeTicks[i].dashLine->setStart(Point(x, y - TICK_LENGTH));
             timeTicks[i].dashLine->setEnd(Point(x, bounds.y));
         }
-        else
-        {
+        else {
             timeTicks[i].tick->setVisible(false);
             timeTicks[i].dashLine->setVisible(false);
         }
 
         char buf[32];
-        simtime_t number = minX.dbl() + i*timeTickSize + shifting;
+        simtime_t number = minX.dbl() + i * timeTickSize + shifting;
 
         sprintf(buf, "%g", number.dbl());
         timeTicks[i].number->setText(buf);
         timeTicks[i].number->setPosition(Point(x, y + bounds.height * NUMBER_DISTANCE_FROM_TICK));
-     }
+    }
 }
 
 void PlotFigure::refresh()
@@ -411,10 +403,9 @@ void PlotFigure::refresh()
 
     plotFigure->clearPath();
 
-    if(values.size() < 2)
+    if (values.size() < 2)
         return;
-    if(minX > values.front().first)
-    {
+    if (minX > values.front().first) {
         values.clear();
         return;
     }
@@ -434,24 +425,23 @@ void PlotFigure::refresh()
         double originalStartY = startY;
         double originalEndX = endX;
         double originalEndY = endY;
-        if(InstrumentUtil::CohenSutherlandLineClip(startX, startY, endX, endY, r.x, r.x + r.width, r.y, r.y + r.height))
-        {
-            if(originalStartX != startX || originalStartY != startY)
+        if (InstrumentUtil::CohenSutherlandLineClip(startX, startY, endX, endY, r.x, r.x + r.width, r.y, r.y + r.height)) {
+            if (originalStartX != startX || originalStartY != startY)
                 plotFigure->addMoveTo(startX, startY);
 
             plotFigure->addLineTo(endX, endY);
         }
 
-        if(minX > it->first)
+        if (minX > it->first)
             break;
 
         startX = originalEndX;
         startY = originalEndY;
         ++it;
-    } while(it != values.end());
+    } while (it != values.end());
 
     // Delete old elements
-    if(it != values.end())
+    if (it != values.end())
         values.erase(++it, values.end());
 }
 

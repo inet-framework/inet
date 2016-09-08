@@ -420,7 +420,7 @@ void CounterFigure::refresh()
 {
     // update displayed number
     int max = std::pow(10, digits.size());
-    if(std::isnan(value))
+    if (std::isnan(value))
         for (Digit digit : digits)
             digit.text->setText("");
 

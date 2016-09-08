@@ -260,7 +260,7 @@ void LinearGaugeFigure::setTickGeometry(cLineFigure *tick, int index)
 {
     double axisWidth = axisFigure->getEnd().x - axisFigure->getStart().x - axisFigure->getLineWidth();
     double x = axisFigure->getStart().x + axisFigure->getLineWidth() / 2
-            + axisWidth * (index * tickSize + shifting) / (max - min);
+        + axisWidth * (index * tickSize + shifting) / (max - min);
     tick->setStart(Point(x, getBounds().getCenter().y));
 
     Point endPos = tick->getStart();
@@ -274,7 +274,7 @@ void LinearGaugeFigure::setNumberGeometry(cTextFigure *number, int index)
 {
     double axisWidth = axisFigure->getEnd().x - axisFigure->getStart().x - axisFigure->getLineWidth() / 2;
     double x = axisFigure->getStart().x + axisFigure->getLineWidth() / 2
-            + axisWidth * (index * tickSize + shifting) / (max - min);
+        + axisWidth * (index * tickSize + shifting) / (max - min);
     Point textPos = Point(x, axisFigure->getStart().y + getBounds().height * NUMBER_Y_PERCENT);
     number->setPosition(textPos);
     number->setFont(cFigure::Font("", getBounds().height * NUMBER_FONTSIZE_PERCENT, 0));
@@ -288,15 +288,14 @@ void LinearGaugeFigure::setNeedleGeometry()
     double axisWidth = axisFigure->getEnd().x - axisFigure->getStart().x - axisFigure->getLineWidth();
 
     needle->setVisible(true);
-    if(std::isnan(value))
-    {
+    if (std::isnan(value)) {
         needle->setVisible(false);
         return;
     }
     else if (value < min)
-        x -= getBounds().width*NEEDLE_OFFSET_PERCENT;
+        x -= getBounds().width * NEEDLE_OFFSET_PERCENT;
     else if (value > max)
-        x = axisFigure->getEnd().x + getBounds().width*NEEDLE_OFFSET_PERCENT;
+        x = axisFigure->getEnd().x + getBounds().width * NEEDLE_OFFSET_PERCENT;
     else
         x += (value - min) * axisWidth / (max - min);
 
@@ -309,9 +308,9 @@ void LinearGaugeFigure::redrawTicks()
     ASSERT(tickFigures.size() == numberFigures.size());
 
     double fraction = std::abs(fmod(min / tickSize, 1));
-    shifting = tickSize*(min < 0 ? fraction : 1 - fraction);
+    shifting = tickSize * (min < 0 ? fraction : 1 - fraction);
     // if fraction == 0 then shifting == tickSize therefore don't have to shift the ticks
-    if(shifting == tickSize)
+    if (shifting == tickSize)
         shifting = 0;
 
     int prevNumTicks = numTicks;
@@ -343,7 +342,7 @@ void LinearGaugeFigure::redrawTicks()
         setTickGeometry(tickFigures[i], i);
 
         double number = min + i * tickSize + shifting;
-        if(std::abs(number) < tickSize / 2)
+        if (std::abs(number) < tickSize / 2)
             number = 0;
 
         char buf[32];
