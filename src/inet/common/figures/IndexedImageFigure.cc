@@ -46,12 +46,12 @@ IndexedImageFigure::IndexedImageFigure(const char *name) : cGroupFigure(name)
     addChildren();
 }
 
-const std::vector<const char *>& IndexedImageFigure::getImages() const
+const std::vector<std::string>& IndexedImageFigure::getImages() const
 {
     return images;
 }
 
-void IndexedImageFigure::setImages(const std::vector<const char *>& images)
+void IndexedImageFigure::setImages(const std::vector<std::string>& images)
 {
     ASSERT(images.size());
     this->images = images;
@@ -128,7 +128,7 @@ void IndexedImageFigure::setLabelColor(const Color& color)
     labelFigure->setColor(color);
 }
 
-const cFigure::Point& IndexedImageFigure::getLabelOffset() const
+const cFigure::Point IndexedImageFigure::getLabelOffset() const
 {
     return labelFigure->getPosition() - image->getPosition();
 }
@@ -138,7 +138,7 @@ void IndexedImageFigure::setLabelOffset(const Point& offset)
     labelFigure->setPosition(image->getPosition() + offset);
 }
 
-const cFigure::Point& IndexedImageFigure::getSize() const
+const cFigure::Point IndexedImageFigure::getSize() const
 {
     return Point(image->getWidth(), image->getHeight());
 }
@@ -178,7 +178,7 @@ void IndexedImageFigure::parse(cProperty *property)
 
     const char *s;
 
-    std::vector<const char *> names;
+    std::vector<std::string> names;
     for (int i = 0; i < property->getNumValues(PKEY_IMAGES); ++i)
         names.push_back(property->getValue(PKEY_IMAGES, i));
     setImages(names);
@@ -266,7 +266,7 @@ void IndexedImageFigure::refresh()
 
     image->setVisible(true);
     int newValue = (int)value % images.size();
-    image->setImageName(images[newValue]);
+    image->setImageName(images[newValue].c_str());
 }
 
 #endif    // omnetpp 5

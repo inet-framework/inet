@@ -29,7 +29,7 @@ using namespace inet;
 
 class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
-    std::vector<const char*> images;
+    std::vector<std::string> images;
     cImageFigure *image;
     cTextFigure *labelFigure;
 
@@ -48,8 +48,8 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
     // getters and setters
-    const std::vector<const char *>& getImages() const;
-    void setImages(const std::vector<const char *>& images);
+    const std::vector<std::string>& getImages() const;
+    void setImages(const std::vector<std::string>& images);
 
     double getTintAmount() const;
     void setTintAmount(double tintAmount);
@@ -72,10 +72,10 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
     const Color& getLabelColor() const;
     void setLabelColor(const Color& color);
 
-    const Point& getLabelOffset() const;
+    const Point getLabelOffset() const;
     void setLabelOffset(const Point& offset);
 
-    const Point& getSize() const;
+    const Point getSize() const;
     void setSize(const Point& bounds);
 
     const Point& getPos() const;
