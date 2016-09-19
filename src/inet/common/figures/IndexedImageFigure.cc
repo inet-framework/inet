@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(IndexedImageFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 static const char *PKEY_IMAGES = "images";
 static const char *PKEY_TINT_AMOUNT = "tintAmount";
 static const char *PKEY_TINT_COLOR = "tintColor";
@@ -268,8 +266,6 @@ void IndexedImageFigure::refresh()
     int newValue = (int)value % images.size();
     image->setImageName(images[newValue].c_str());
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

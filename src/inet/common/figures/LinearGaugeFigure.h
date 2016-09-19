@@ -25,8 +25,6 @@
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     cLineFigure *needle;
@@ -91,15 +89,6 @@ class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorF
     double getCornerRadius() const;
     void setCornerRadius(double radius);
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API LinearGaugeFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

@@ -25,8 +25,6 @@
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     cPathFigure *needle;
@@ -100,15 +98,6 @@ class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
     const char *getColorStrip() const;
     void setColorStrip(const char *colorStrip);
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API GaugeFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

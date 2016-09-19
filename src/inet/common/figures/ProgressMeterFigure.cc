@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(ProgressMeterFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_STRIP_COLOR = "stripColor";
 static const char *PKEY_CORNER_RADIUS = "cornerRadius";
@@ -306,8 +304,6 @@ void ProgressMeterFigure::refresh()
         valueFigure->setText(buf);
     }
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

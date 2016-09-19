@@ -25,8 +25,6 @@
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     struct Tick
@@ -104,15 +102,6 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     const Color& getLabelColor() const;
     void setLabelColor(const Color& color);
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API PlotFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

@@ -25,8 +25,6 @@
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
   protected:
@@ -87,15 +85,6 @@ class INET_API ThermometerFigure : public cGroupFigure, public inet::IIndicatorF
     double getTickSize() const;
     void setTickSize(double value);
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API ThermometerFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

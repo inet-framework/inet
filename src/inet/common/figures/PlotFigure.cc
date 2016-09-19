@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(PlotFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 #define M_PI    3.14159265358979323846
 static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
@@ -444,7 +442,5 @@ void PlotFigure::refresh()
     if (it != values.end())
         values.erase(++it, values.end());
 }
-
-#endif // omnetpp 5
 
 // } // namespace inet

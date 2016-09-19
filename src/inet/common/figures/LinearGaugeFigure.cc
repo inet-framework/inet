@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(LinearGaugeFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 static const double BORDER_WIDTH_PERCENT = 0.05;
 static const double AXIS_WIDTH_PERCENT = 0.03;
 static const double FRAME_PERCENT = 0.1;
@@ -374,8 +372,6 @@ void LinearGaugeFigure::refresh()
 {
     setNeedleGeometry();
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

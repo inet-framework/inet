@@ -413,11 +413,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 lineColor.blue = atoi(tok);
             }
             else
-#if OMNETPP_VERSION >= 0x500
                 lineColor = cFigure::Color(lineColorAttribute);
-#else
-                lineColor = cFigure::Color::byName(lineColorAttribute);
-#endif
         }
         // fill color
         cFigure::Color fillColor = cFigure::WHITE;
@@ -438,11 +434,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 fillColor.blue = atoi(tok);
             }
             else
-#if OMNETPP_VERSION >= 0x500
                 fillColor = cFigure::Color(fillColorAttribute);
-#else
-                fillColor = cFigure::Color::byName(fillColorAttribute);
-#endif
         }
         // opacity
         double opacity = 1;

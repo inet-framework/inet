@@ -25,8 +25,6 @@
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     cRectangleFigure *borderFigure;
@@ -93,15 +91,6 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
     double getMaxValue() const;
     void setMaxValue(double value);
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API ProgressMeterFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

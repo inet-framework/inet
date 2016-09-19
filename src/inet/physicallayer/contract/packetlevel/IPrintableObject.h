@@ -62,20 +62,12 @@ class INET_API IPrintableObject
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
-#if OMNETPP_VERSION >= 0x0500
     return object->printToStream(stream, cLog::logLevel);
-#else
-    return object->printToStream(stream, IPrintableObject::PRINT_LEVEL_DETAIL);
-#endif
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
-#if OMNETPP_VERSION >= 0x0500
     return object.printToStream(stream, cLog::logLevel);
-#else
-    return object.printToStream(stream, IPrintableObject::PRINT_LEVEL_DETAIL);
-#endif
 };
 
 inline std::string printObjectToString(const IPrintableObject *object, int level)

@@ -39,6 +39,12 @@ using namespace omnetpp;
 #  error At least OMNeT++/OMNEST version 5.0 required
 #endif // if OMNETPP_VERSION < 0x0500
 
+// OMNETPP_BUILDNUM was introduced around OMNeT++ 5.0beta2, with the initial value of 1001.
+// The following lines fake a build number for earlier versions.
+#ifndef OMNETPP_BUILDNUM
+#  define OMNETPP_BUILDNUM 1000
+#endif
+
 #define INET_VERSION  0x0304
 #define INET_PATCH_LEVEL 0x00
 

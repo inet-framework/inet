@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(CounterFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 static const int PADDING = 4;
 static const int DIGIT_PADDING = 2;
 static const double DIGIT_WIDTH_PERCENT = 0.9;
@@ -439,8 +437,6 @@ void CounterFigure::refresh()
         }
     }
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

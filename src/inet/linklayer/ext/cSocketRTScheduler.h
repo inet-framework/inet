@@ -24,11 +24,7 @@
 #include <platdep/sockets.h>
 #include "inet/common/INETDefs.h"
 
-#if OMNETPP_VERSION < 0x500
-#include <platdep/timeutil.h>
-#else // OMNETPP_VERSION < 0x500
 #include <omnetpp/platdep/timeutil.h>
-#endif // OMNETPP_VERSION < 0x500
 
 // prevent pcap.h to redefine int8_t,... types on Windows
 #include "inet/common/serializer/headers/bsdint.h"
@@ -88,7 +84,6 @@ class INET_API cSocketRTScheduler : public cScheduler
      */
     void setInterfaceModule(cModule *mod, const char *dev, const char *filter);
 
-#if OMNETPP_VERSION >= 0x0500
     /**
      * Returns the first event in the Future Event Set.
      */
@@ -103,12 +98,6 @@ class INET_API cSocketRTScheduler : public cScheduler
      * Scheduler function -- it comes from the cScheduler interface.
      */
     virtual void putBackEvent(cEvent *event) override;
-#else // if OMNETPP_VERSION >= 0x0500
-      /**
-       * Scheduler function -- it comes from cScheduler interface.
-       */
-    virtual cMessage *getNextEvent() override;
-#endif // if OMNETPP_VERSION >= 0x0500
 
     /**
      * Send on the currently open connection

@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(GaugeFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 static const double BORDER_WIDTH_PERCENT = 0.015;
 static const double CURVE_WIDTH_PERCENT = 0.02;
 static const double TICK_BIG_LENGTH_PERCENT = 0.44;
@@ -499,8 +497,6 @@ void GaugeFigure::refresh()
         valueFigure->setText(buf);
     }
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

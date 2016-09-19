@@ -75,9 +75,6 @@ class RIPPacket;
 namespace inet { namespace physicallayer { class RadioFrame; } }
 #endif // ifdef WITH_RADIO
 
-//TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
-#if OMNETPP_VERSION >= 0x0405
-
 namespace inet {
 
 using namespace physicallayer;
@@ -513,6 +510,4 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
 }
 
 } // namespace inet
-
-#endif    // Register_MessagePrinter
 

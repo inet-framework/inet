@@ -25,8 +25,6 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-#if OMNETPP_VERSION >= 0x500
-
 class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     std::vector<std::string> images;
@@ -85,15 +83,6 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
     void setAnchor(Anchor anchor);
 
 };
-
-#else
-
-// dummy figure for OMNeT++ 4.x
-class INET_API IndexedImageFigure : public cGroupFigure {
-
-};
-
-#endif // omnetpp 5
 
 // } // namespace inet
 

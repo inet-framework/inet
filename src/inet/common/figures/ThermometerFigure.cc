@@ -24,8 +24,6 @@ using namespace inet;
 
 Register_Class(ThermometerFigure);
 
-#if OMNETPP_VERSION >= 0x500
-
 static const double CONTAINER_LINE_WIDTH_PERCENT = 0.05;
 static const double TICK_LINE_WIDTH_PERCENT = 0.01;
 static const double TICK_LENGTH_PERCENT = 0.2;
@@ -381,8 +379,6 @@ void ThermometerFigure::refresh()
 {
     setMercuryAndContainerGeometry();
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 
