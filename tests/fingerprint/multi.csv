@@ -1,5 +1,5 @@
 # Failures:
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             2678-6e1c 3d43-e162/tplx
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             80ba-daae bc0d-9e54/tplx    # unstable fingerprint?
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             2a63-2ffe 8661-8adb/tplx    # unstable fingerprint?
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             4f98-d087 4f5d-76b3/tplx    # unstable fingerprint?
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             3d43-e162/tplx
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             bc0d-9e54/tplx    # unstable fingerprint?
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             8661-8adb/tplx    # unstable fingerprint?
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             4f5d-76b3/tplx    # unstable fingerprint?
