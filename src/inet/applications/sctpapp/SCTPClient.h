@@ -84,13 +84,13 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void initialize(int stage) override;
-    void handleMessage(cMessage *msg) override;
-    void finish() override;
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void finish() override;
+    virtual void refreshDisplay() const override;
 
     void connect();
     void close();
-    void setStatusString(const char *s);
     void handleTimer(cMessage *msg);
 
     /* SCTPSocket::CallbackInterface callback methods */
