@@ -54,12 +54,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    virtual void finish() override;
    virtual void handleMessage(cMessage *msg) override;
 
-   inline void setStatusString(const char* status) {
-      if(hasGUI()) {
-         getDisplayString().setTagArg("t", 0, status);
-      }
-   }
-   void showIOStatus();
+   virtual void refreshDisplay() const override;
 
    void establishConnection();
    void successfullyEstablishedConnection(cMessage*          msg,
