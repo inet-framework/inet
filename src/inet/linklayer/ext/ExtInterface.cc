@@ -67,13 +67,6 @@ void ExtInterface::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
     }
-    else if (stage == INITSTAGE_LAST) {
-        // if not connected, make it gray
-        if (hasGUI() && !connected) {
-            getDisplayString().setTagArg("i", 1, "#707070");
-            getDisplayString().setTagArg("i", 2, "100");
-        }
-    }
 }
 
 InterfaceEntry *ExtInterface::createInterfaceEntry()
@@ -176,15 +169,18 @@ void ExtInterface::displayIdle()
 void ExtInterface::refreshDisplay() const
 {
     const char *str;
-    char buf[80];
 
     if (connected) {
+        char buf[80];
         sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
         str = buf;
+        getDisplayString().setTagArg("t", 0, buf);
     }
-    else
-        str = "not connected";
-    getDisplayString().setTagArg("t", 0, str);
+    else {
+        getDisplayString().setTagArg("i", 1, "#707070");
+        getDisplayString().setTagArg("i", 2, "100");
+        getDisplayString().setTagArg("t", 0, "not connected");
+    }
 }
 
 void ExtInterface::finish()
