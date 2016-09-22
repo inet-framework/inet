@@ -145,7 +145,7 @@ class INET_API SCTPSocket
      * CONNECTED, etc. Messages received from SCTP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState() { return sockstate; }
+    int getState() const { return sockstate; }
 
     /**
      * Returns name of socket state code returned by state().
@@ -154,11 +154,11 @@ class INET_API SCTPSocket
 
     /** @name Getter functions */
     //@{
-    AddressVector getLocalAddresses() { return localAddresses; }
-    int getLocalPort() { return localPrt; }
-    AddressVector getRemoteAddresses() { return remoteAddresses; }
-    int getRemotePort() { return remotePrt; }
-    L3Address getRemoteAddr() { return remoteAddr; }
+    AddressVector getLocalAddresses() const { return localAddresses; }
+    int getLocalPort() const { return localPrt; }
+    AddressVector getRemoteAddresses() const { return remoteAddresses; }
+    int getRemotePort() const { return remotePrt; }
+    L3Address getRemoteAddr() const { return remoteAddr; }
     //@}
 
     /** @name Opening and closing connections, sending data */
