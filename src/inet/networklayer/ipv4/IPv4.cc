@@ -102,7 +102,7 @@ void IPv4::initialize(int stage)
     }
 }
 
-void IPv4::updateDisplayString()
+void IPv4::refreshDisplay() const
 {
     char buf[80] = "";
     if (numForwarded > 0)
@@ -154,9 +154,6 @@ void IPv4::endService(cPacket *packet)
         else
             throw cRuntimeError(packet, "Unexpected packet type");
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 const InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *packet)

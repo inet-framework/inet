@@ -300,8 +300,6 @@ void SCTP::handleMessage(cMessage *msg)
             delete msg;
         }
     }
-    if (hasGUI())
-        updateDisplayString();
 }
 
 SocketOptions* SCTP::collectSocketOptions()
@@ -398,7 +396,7 @@ void SCTP::send_to_ip(SCTPMessage *msg)
     send(msg, "to_ip");
 }
 
-void SCTP::updateDisplayString()
+void SCTP::refreshDisplay() const
 {
 #if 0
     if (getEnvir()->disable_tracing) {

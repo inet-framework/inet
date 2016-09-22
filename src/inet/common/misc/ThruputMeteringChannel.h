@@ -71,7 +71,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
 
   protected:
     virtual void beginNewInterval(simtime_t now);
-    virtual void updateDisplay();
+    virtual void refreshDisplay() const override;
 
   public:
     /**

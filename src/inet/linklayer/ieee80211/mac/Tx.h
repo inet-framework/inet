@@ -49,7 +49,7 @@ class INET_API Tx : public cSimpleModule, public ITx
     protected:
         virtual void initialize() override;
         virtual void handleMessage(cMessage *msg) override;
-        virtual void updateDisplayString();
+        virtual void refreshDisplay() const override;
 
     public:
         Tx() {}

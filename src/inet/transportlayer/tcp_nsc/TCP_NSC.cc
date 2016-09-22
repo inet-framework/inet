@@ -688,12 +688,9 @@ void TCP_NSC::handleMessage(cMessage *msgP)
         EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
         handleAppMessage(msgP);
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
-void TCP_NSC::updateDisplayString()
+void TCP_NSC::refreshDisplay() const
 {
     //...
 }

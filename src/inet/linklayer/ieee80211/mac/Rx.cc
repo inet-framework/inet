@@ -109,7 +109,6 @@ void Rx::recomputeMediumFree()
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
     mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
-    updateDisplayString();
     if (mediumFree != oldMediumFree) {
         for (int i = 0; contention[i]; i++)
             contention[i]->mediumStateChanged(mediumFree);
@@ -154,7 +153,7 @@ void Rx::setOrExtendNav(simtime_t navInterval)
     }
 }
 
-void Rx::updateDisplayString()
+void Rx::refreshDisplay() const
 {
     if (mediumFree)
         getDisplayString().setTagArg("t", 0, "FREE");

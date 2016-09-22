@@ -100,21 +100,6 @@ void PPP::initialize(int stage)
             queueModule->requestPacket();
         }
     }
-    // update display string when addresses have been autoconfigured etc.
-    else if (stage == INITSTAGE_LAST) {
-        // display string stuff
-        if (hasGUI()) {
-            if (datarateChannel) {    // not nullptr if connected
-                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
-            }
-            else {
-                // we are not connected: gray out our icon
-                getDisplayString().setTagArg("i", 1, "#707070");
-                getDisplayString().setTagArg("i", 2, "100");
-            }
-        }
-        updateDisplayString();
-    }
 }
 
 InterfaceEntry *PPP::createInterfaceEntry()
@@ -207,18 +192,6 @@ void PPP::refreshOutGateConnection(bool connected)
     if (datarateChannel && !oldChannel)
         datarateChannel->subscribe(POST_MODEL_CHANGE, this);
 
-    if (hasGUI()) {
-        if (connected) {
-            if (!oldChannel)
-                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
-        }
-        else {
-            // we are not connected: gray out our icon
-            getDisplayString().setTagArg("i", 1, "#707070");
-            getDisplayString().setTagArg("i", 2, "100");
-        }
-    }
-
     // update interface state if it is in use
     if (interfaceEntry) {
         interfaceEntry->setCarrier(connected);
@@ -227,8 +200,6 @@ void PPP::refreshOutGateConnection(bool connected)
 
     if (queueModule && 0 == queueModule->getNumPendingRequests())
         queueModule->requestPacket();
-
-    updateDisplayString();
 }
 
 void PPP::startTransmitting(cPacket *msg)
@@ -236,9 +207,6 @@ void PPP::startTransmitting(cPacket *msg)
     // if there's any control info, remove it; then encapsulate the packet
     delete msg->removeControlInfo();
     PPPFrame *pppFrame = encapsulate(msg);
-
-    if (hasGUI())
-        displayBusy();
 
     // fire notification
     notifDetails.setPacket(pppFrame);
@@ -269,9 +237,6 @@ void PPP::handleMessage(cMessage *msg)
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(txStateSignal, 0L);
-
-        if (hasGUI())
-            displayIdle();
 
         // fire notification
         notifDetails.setPacket(nullptr);
@@ -332,9 +297,6 @@ void PPP::handleMessage(cMessage *msg)
                 // We are currently busy, so just queue up the packet.
                 EV_DETAIL << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
 
-                if (hasGUI() && txQueue.getLength() >= 3)
-                    getDisplayString().setTagArg("i", 1, "red");
-
                 if (txQueueLimit && txQueue.getLength() > txQueueLimit)
                     throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
                                         "a bogus app model generating excessive traffic "
@@ -349,30 +311,13 @@ void PPP::handleMessage(cMessage *msg)
             }
         }
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
-void PPP::displayBusy()
+void PPP::refreshDisplay() const
 {
-    getDisplayString().setTagArg("i", 1, txQueue.getLength() >= 3 ? "red" : "yellow");
-    datarateChannel->getDisplayString().setTagArg("ls", 0, "yellow");
-    datarateChannel->getDisplayString().setTagArg("ls", 1, "3");
-}
+    std::ostringstream buf;
+    const char *color = "";
 
-void PPP::displayIdle()
-{
-    getDisplayString().setTagArg("i", 1, "");
-
-    if (datarateChannel) {
-        datarateChannel->getDisplayString().setTagArg("ls", 0, oldConnColor.c_str());
-        datarateChannel->getDisplayString().setTagArg("ls", 1, "1");
-    }
-}
-
-void PPP::updateDisplayString()
-{
     if (datarateChannel != nullptr) {
         char datarateText[40];
 
@@ -386,24 +331,21 @@ void PPP::updateDisplayString()
         else
             sprintf(datarateText, "%gbps", datarate);
 
-/* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
-        IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
-        sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
- */
-
-        char buf[80];
-        sprintf(buf, "%s\nrcv:%ld snt:%ld", datarateText, numRcvdOK, numSent);
+        buf << datarateText << "\nrcv:" << numRcvdOK << " snt:" << numSent;
 
         if (numBitErr > 0)
-            sprintf(buf + strlen(buf), "\nerr:%ld", numBitErr);
+            buf << "\nerr:" << numBitErr;
 
-        getDisplayString().setTagArg("t", 0, buf);
+        if (endTransmissionEvent->isScheduled()) {
+            color = txQueue.getLength() >= 3 ? "red" : "yellow";
+        }
     }
     else {
-        char buf[80];
-        sprintf(buf, "not connected\ndropped:%ld", numDroppedIfaceDown);
-        getDisplayString().setTagArg("t", 0, buf);
+        buf << "not connected\ndropped:" << numDroppedIfaceDown;
+        color = "#707070";
     }
+    getDisplayString().setTagArg("t", 0, buf.str().c_str());
+    getDisplayString().setTagArg("i", 1, color);
 }
 
 PPPFrame *PPP::encapsulate(cPacket *msg)

@@ -113,7 +113,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     virtual InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
 
     // utility: show current statistics above the icon
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram

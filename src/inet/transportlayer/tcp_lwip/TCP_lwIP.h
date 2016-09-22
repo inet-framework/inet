@@ -101,7 +101,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     // find a TcpLwipConnection by Lwip pcb
     TcpLwipConnection *findConnByPcb(LwipTcpLayer::tcp_pcb *pcb);
 
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     void removeConnection(TcpLwipConnection& conn);
     void printConnBrief(TcpLwipConnection& connP);

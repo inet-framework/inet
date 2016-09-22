@@ -83,7 +83,7 @@ void STPBase::stop()
     ie = nullptr;
 }
 
-void STPBase::colorLink(unsigned int i, bool forwarding)
+void STPBase::colorLink(unsigned int i, bool forwarding) const
 {
     if (hasGUI() && visualize) {
         cGate *inGate = switchModule->gate("ethg$i", i);
@@ -115,11 +115,11 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
     }
 }
 
-void STPBase::updateDisplay()
+void STPBase::refreshDisplay() const
 {
     if (hasGUI() && visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
-            Ieee8021dInterfaceData *port = getPortInterfaceData(i);
+            const Ieee8021dInterfaceData *port = getPortInterfaceData(i);
 
             // color link
             colorLink(i, port->getState() == Ieee8021dInterfaceData::FORWARDING);
@@ -134,7 +134,7 @@ void STPBase::updateDisplay()
         }
 
         // mark root switch
-        if (getRootIndex() == -1)
+        if (const_cast<STPBase*>(this)->getRootIndex() == -1)
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");

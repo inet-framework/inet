@@ -257,5 +257,12 @@ void TCPSessionApp::finish()
     recordScalar("bytesSent", bytesSent);
 }
 
+void TCPSessionApp::refreshDisplay() const
+{
+    std::ostringstream os;
+    os << TCPSocket::stateName(socket.getState()) << "\nsent: " << bytesSent << " bytes\nrcvd: " << bytesRcvd << " bytes";
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
+}
+
 } // namespace inet
 

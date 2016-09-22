@@ -159,9 +159,6 @@ void HttpServerBase::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    else if (stage == INITSTAGE_LAST) {
-        updateDisplay();
-    }
 }
 
 void HttpServerBase::finish()
@@ -177,29 +174,27 @@ void HttpServerBase::finish()
     recordScalar("bad.requests", badRequests);
 }
 
-void HttpServerBase::updateDisplay()
-{
-    if (hasGUI()) {
-        char buf[1024];
-        sprintf(buf, "%ld", htmlDocsServed);
-        cDisplayString& ds = host->getDisplayString();
-        ds.setTagArg("t", 0, buf);
+void HttpServerBase::refreshDisplay() const
 
-        if (activationTime <= simTime()) {
-            ds.setTagArg("i2", 0, "status/up");
-            ds.setTagArg("i2", 1, "green");
-        }
-        else {
-            ds.setTagArg("i2", 0, "status/down");
-            ds.setTagArg("i2", 1, "red");
-        }
+{
+    char buf[1024];
+    sprintf(buf, "%ld", htmlDocsServed);
+    cDisplayString& ds = host->getDisplayString();
+    ds.setTagArg("t", 0, buf);
+
+    if (activationTime <= simTime()) {
+        ds.setTagArg("i2", 0, "status/up");
+        ds.setTagArg("i2", 1, "green");
+    }
+    else {
+        ds.setTagArg("i2", 0, "status/down");
+        ds.setTagArg("i2", 1, "red");
     }
 }
 
 void HttpServerBase::handleMessage(cMessage *msg)
 {
     // Override in derived classes
-    updateDisplay();
 }
 
 cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)

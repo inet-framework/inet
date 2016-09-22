@@ -77,12 +77,13 @@ void UDPSink::handleMessageWhenUp(cMessage *msg)
     else {
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
+}
 
-    if (hasGUI()) {
-        char buf[32];
-        sprintf(buf, "rcvd: %d pks", numReceived);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void UDPSink::refreshDisplay() const
+{
+    char buf[50];
+    sprintf(buf, "rcvd: %d pks", numReceived);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void UDPSink::finish()

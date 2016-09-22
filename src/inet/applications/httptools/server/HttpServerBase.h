@@ -87,7 +87,7 @@ class INET_API HttpServerBase : public HttpNodeBase
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override = 0;
 
-    void updateDisplay();
+    virtual void refreshDisplay() const override;
     HttpReplyMessage *generateDocument(HttpRequestMessage *request, const char *resource, int size = 0);
     HttpReplyMessage *generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
     HttpReplyMessage *handleGetRequest(HttpRequestMessage *request, std::string resource);

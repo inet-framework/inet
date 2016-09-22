@@ -63,7 +63,6 @@ void HttpServerDirect::handleMessage(cMessage *msg)
             sendDirectToModule(senderModule, reply, 0.0, rdReplyDelay);
         delete msg;
     }
-    updateDisplay();
 }
 
 } // namespace httptools

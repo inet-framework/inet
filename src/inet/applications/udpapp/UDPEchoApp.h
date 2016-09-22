@@ -40,7 +40,7 @@ class INET_API UDPEchoApp : public ApplicationBase
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
-    virtual void updateDisplay();
+    virtual void refreshDisplay() const override;
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;

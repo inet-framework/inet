@@ -39,6 +39,7 @@ class INET_API ErrorHandling : public cSimpleModule
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

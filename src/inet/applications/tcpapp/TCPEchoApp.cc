@@ -144,12 +144,13 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         // some indication -- ignore
         delete msg;
     }
+}
 
-    if (hasGUI()) {
-        char buf[80];
-        sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void TCPEchoApp::refreshDisplay() const
+{
+    char buf[80];
+    sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 bool TCPEchoApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

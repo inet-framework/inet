@@ -52,10 +52,6 @@ void Loopback::initialize(int stage)
         // register our interface entry in IInterfaceTable
         registerInterface();
     }
-    // update display string when addresses have been autoconfigured etc.
-    else if (stage == INITSTAGE_LAST) {
-        updateDisplayString();
-    }
 }
 
 InterfaceEntry *Loopback::createInterfaceEntry()
@@ -89,9 +85,6 @@ void Loopback::handleMessage(cMessage *msg)
     emit(packetSentToUpperSignal, msg);
     numSent++;
     send(msg, "netwOut");
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Loopback::flushQueue()
@@ -109,7 +102,7 @@ bool Loopback::isUpperMsg(cMessage *msg)
     return true;
 }
 
-void Loopback::updateDisplayString()
+void Loopback::refreshDisplay() const
 {
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
             IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();

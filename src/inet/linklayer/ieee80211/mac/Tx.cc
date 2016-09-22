@@ -45,7 +45,6 @@ void Tx::initialize()
     endIfsTimer = new cMessage("endIFS");
 
     WATCH(transmitting);
-    updateDisplayString();
 }
 
 void Tx::transmitFrame(Ieee80211Frame *frame, ITxCallback *txCallback)
@@ -62,8 +61,6 @@ void Tx::transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITxCallback *txCall
 
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Tx::radioTransmissionFinished()
@@ -75,8 +72,6 @@ void Tx::radioTransmissionFinished()
         transmitting = false;
         frame = nullptr;
         rx->frameTransmitted(durationField);
-        if (hasGUI())
-            updateDisplayString();
     }
 }
 
@@ -87,14 +82,12 @@ void Tx::handleMessage(cMessage *msg)
         transmitting = true;
         durationField = frame->getDuration();
         mac->sendFrame(frame);
-        if (hasGUI())
-            updateDisplayString();
     }
     else
         ASSERT(false);
 }
 
-void Tx::updateDisplayString()
+void Tx::refreshDisplay() const
 {
     const char *stateName = endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE";
     // faster version is just to display the state: getDisplayString().setTagArg("t", 0, stateName);

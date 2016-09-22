@@ -63,15 +63,16 @@ void TokenBucketMeter::handleMessage(cMessage *msg)
         numRed++;
         send(packet, "redOut");
     }
+}
 
-    if (hasGUI()) {
-        char buf[50] = "";
-        if (numRcvd > 0)
-            sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
-        if (numRed > 0)
-            sprintf(buf + strlen(buf), "red:%d ", numRed);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
+void TokenBucketMeter::refreshDisplay() const
+{
+    char buf[50] = "";
+    if (numRcvd > 0)
+        sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
+    if (numRed > 0)
+        sprintf(buf + strlen(buf), "red:%d ", numRed);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 int TokenBucketMeter::meterPacket(cPacket *packet)

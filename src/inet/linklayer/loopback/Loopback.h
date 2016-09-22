@@ -57,7 +57,7 @@ class INET_API Loopback : public MACBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

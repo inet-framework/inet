@@ -68,12 +68,9 @@ void EtherEncap::handleMessage(cMessage *msg)
                 throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
         }
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
-void EtherEncap::updateDisplayString()
+void EtherEncap::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);

@@ -196,7 +196,7 @@ class INET_API SCTP : public cSimpleModule
     int32 findAssocForFd(int32 fd);
     void sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
-    void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
   public:
     void printInfoAssocMap();

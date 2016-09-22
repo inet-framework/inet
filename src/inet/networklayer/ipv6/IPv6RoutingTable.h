@@ -118,7 +118,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
   protected:
     // displays summary above the icon
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
   public:
     IPv6RoutingTable();

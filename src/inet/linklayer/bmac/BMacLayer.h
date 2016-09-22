@@ -72,6 +72,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
+    virtual void refreshDisplay() const override;
 
     /** @brief Delete all dynamically allocated objects of the module*/
     virtual void finish() override;
@@ -216,22 +217,10 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     /** @brief Gather stats at the end of the simulation */
     bool stats = false;
 
-    /** @brief Possible colors of the node for animation */
-    enum BMAC_COLORS {
-        GREEN = 1,
-        BLUE = 2,
-        RED = 3,
-        BLACK = 4,
-        YELLOW = 5
-    };
-
     /** @brief Generate new interface address*/
     virtual void initializeMACAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
-
-    /** @brief Internal function to change the color of the node */
-    void changeDisplayColor(BMAC_COLORS color);
 
     /** @brief Internal function to send the first packet in the queue */
     void sendDataPacket();

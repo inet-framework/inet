@@ -46,7 +46,7 @@ class INET_API OnoeRateControl : public RateControlBase, public cSimpleModule
         void computeMode();
         void resetStatisticalVariables();
         void computeModeIfTimerIsExpired();
-        void updateDisplayString();
+        virtual void refreshDisplay() const override;
 
     public:
         void initialize(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *initialMode) override;

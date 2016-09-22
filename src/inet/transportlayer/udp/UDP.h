@@ -122,7 +122,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
   protected:
     // utility: show current statistics above the icon
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
     // socket handling
     virtual SockDesc *getSocketById(int sockId);

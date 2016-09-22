@@ -140,11 +140,8 @@ void IPv4RoutingTable::configureRouterId()
     }
 }
 
-void IPv4RoutingTable::updateDisplayString()
+void IPv4RoutingTable::refreshDisplay() const
 {
-    if (!hasGUI())
-        return;
-
     char buf[80];
     if (routerId.isUnspecified())
         sprintf(buf, "%d+%d routes", (int)routes.size(), (int)multicastRoutes.size());
@@ -235,7 +232,6 @@ void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 
     if (changed) {
         invalidateCache();
-        updateDisplayString();
     }
 }
 
@@ -446,7 +442,6 @@ void IPv4RoutingTable::purge()
 
     if (deleted) {
         invalidateCache();
-        updateDisplayString();
     }
 }
 
@@ -598,7 +593,6 @@ void IPv4RoutingTable::addRoute(IPv4Route *entry)
     internalAddRoute(entry);
 
     invalidateCache();
-    updateDisplayString();
 
     emit(NF_ROUTE_ADDED, entry);
 }
@@ -621,7 +615,6 @@ IPv4Route *IPv4RoutingTable::removeRoute(IPv4Route *entry)
 
     if (entry != nullptr) {
         invalidateCache();
-        updateDisplayString();
         ASSERT(entry->getRoutingTable() == this);    // still filled in, for the listeners' benefit
         emit(NF_ROUTE_DELETED, entry);
         entry->setRoutingTable(nullptr);
@@ -637,7 +630,6 @@ bool IPv4RoutingTable::deleteRoute(IPv4Route *entry)    //TODO this is almost du
 
     if (entry != nullptr) {
         invalidateCache();
-        updateDisplayString();
         ASSERT(entry->getRoutingTable() == this);    // still filled in, for the listeners' benefit
         emit(NF_ROUTE_DELETED, entry);
         delete entry;
@@ -707,7 +699,6 @@ void IPv4RoutingTable::addMulticastRoute(IPv4MulticastRoute *entry)
     internalAddMulticastRoute(entry);
 
     invalidateCache();
-    updateDisplayString();
 
     emit(NF_MROUTE_ADDED, entry);
 }
@@ -730,7 +721,6 @@ IPv4MulticastRoute *IPv4RoutingTable::removeMulticastRoute(IPv4MulticastRoute *e
 
     if (entry != nullptr) {
         invalidateCache();
-        updateDisplayString();
         ASSERT(entry->getRoutingTable() == this);    // still filled in, for the listeners' benefit
         emit(NF_MROUTE_DELETED, entry);
         entry->setRoutingTable(nullptr);
@@ -746,7 +736,6 @@ bool IPv4RoutingTable::deleteMulticastRoute(IPv4MulticastRoute *entry)
 
     if (entry != nullptr) {
         invalidateCache();
-        updateDisplayString();
         ASSERT(entry->getRoutingTable() == this);    // still filled in, for the listeners' benefit
         emit(NF_MROUTE_DELETED, entry);
         delete entry;
@@ -762,7 +751,6 @@ void IPv4RoutingTable::routeChanged(IPv4Route *entry, int fieldCode)
         internalAddRoute(entry);
 
         invalidateCache();
-        updateDisplayString();
     }
     emit(NF_ROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
 }
@@ -777,7 +765,6 @@ void IPv4RoutingTable::multicastRouteChanged(IPv4MulticastRoute *entry, int fiel
         internalAddMulticastRoute(entry);
 
         invalidateCache();
-        updateDisplayString();
     }
     emit(NF_MROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
 }
@@ -821,7 +808,6 @@ void IPv4RoutingTable::updateNetmaskRoutes()
     }
 
     invalidateCache();
-    updateDisplayString();
 }
 
 bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

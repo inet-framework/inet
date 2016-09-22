@@ -84,7 +84,8 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     virtual void scheduleTimerT2();
     static const char *getStateName(ClientState state);
     const char *getAndCheckMessageTypeName(DHCPMessageType type);
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
+
 
     /*
      * Opens a UDP socket for client-server communication.

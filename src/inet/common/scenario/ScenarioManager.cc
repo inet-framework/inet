@@ -44,8 +44,6 @@ void ScenarioManager::initialize()
         // count it
         numChanges++;
     }
-
-    updateDisplayString();
 }
 
 void ScenarioManager::handleMessage(cMessage *msg)
@@ -56,7 +54,6 @@ void ScenarioManager::handleMessage(cMessage *msg)
     processCommand(node);
 
     numDone++;
-    updateDisplayString();
 }
 
 void ScenarioManager::processCommand(cXMLElement *node)
@@ -334,7 +331,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
     }
 }
 
-void ScenarioManager::updateDisplayString()
+void ScenarioManager::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "total %d changes, %d left", numChanges, numChanges - numDone);

@@ -146,7 +146,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual TCPConnection *findConnForApp(int appGateIndex, int connId);
     virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address src, L3Address dest);
     virtual void removeConnection(TCPConnection *conn);
-    virtual void updateDisplayString();
+    virtual void refreshDisplay() const override;
 
   public:
     static bool testing;    // switches between tcpEV and testingEV

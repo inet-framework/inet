@@ -109,9 +109,6 @@ void ARP::handleMessage(cMessage *msg)
         ARPPacket *arp = check_and_cast<ARPPacket *>(msg);
         processARPPacket(arp);
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void ARP::handleMessageWhenDown(cMessage *msg)
@@ -174,7 +171,7 @@ bool ARP::isNodeUp()
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void ARP::updateDisplayString()
+void ARP::refreshDisplay() const
 {
     std::stringstream os;
 

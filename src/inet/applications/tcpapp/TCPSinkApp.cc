@@ -20,7 +20,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
 
@@ -45,7 +44,6 @@ void TCPSinkApp::initialize(int stage)
 
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
-        TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.readDataTransferModePar(*this);
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
@@ -67,12 +65,6 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         bytesRcvd += packetLength;
         emit(rcvdPkSignal, pk);
         delete msg;
-
-        if (hasGUI()) {
-            char buf[32];
-            sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
-            getDisplayString().setTagArg("t", 0, buf);
-        }
     }
     else {
         // must be data or some kind of indication -- can be dropped
@@ -82,6 +74,13 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 
 void TCPSinkApp::finish()
 {
+}
+
+void TCPSinkApp::refreshDisplay() const
+{
+    std::ostringstream os;
+    os << TCPSocket::stateName(socket.getState()) << "\nrcvd: " << bytesRcvd << " bytes";
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 } // namespace inet

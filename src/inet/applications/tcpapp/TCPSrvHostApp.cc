@@ -47,11 +47,8 @@ void TCPSrvHostApp::initialize(int stage)
     }
 }
 
-void TCPSrvHostApp::updateDisplay()
+void TCPSrvHostApp::refreshDisplay() const
 {
-    if (!hasGUI())
-        return;
-
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
     getDisplayString().setTagArg("t", 0, buf);
@@ -79,8 +76,6 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
             proc->init(this, socket);
 
             socketMap.addSocket(socket);
-
-            updateDisplay();
         }
 
         socket->processMessage(msg);
@@ -98,8 +93,6 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     // remove thread object
     delete thread;
-
-    updateDisplay();
 }
 
 } // namespace inet

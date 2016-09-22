@@ -195,9 +195,6 @@ void EtherMAC::handleMessage(cMessage *msg)
     else
         throw cRuntimeError("Message received from unknown gate");
 
-    if (hasGUI())
-        updateDisplayString();
-
     printState();
 }
 
@@ -486,9 +483,6 @@ void EtherMAC::startFrameTransmission()
     // add preamble and SFD (Starting Frame Delimiter), then send out
     EtherPhyFrame *phyFrame = encapsulate(frame);
 
-    if (hasGUI())
-        updateConnectionColor(TRANSMITTING_STATE);
-
     currentSendPkTreeID = phyFrame->getTreeId();
     int64_t sentFrameByteLength = phyFrame->getByteLength();
     send(phyFrame, physOutGate);
@@ -660,9 +654,6 @@ void EtherMAC::sendJamSignal()
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endJammingMsg);
     transmitState = JAMMING_STATE;
     emit(transmitStateSignal, JAMMING_STATE);
-
-    if (hasGUI())
-        updateConnectionColor(JAMMING_STATE);
 }
 
 void EtherMAC::handleEndJammingPeriod()

@@ -70,7 +70,7 @@ void GenericNetworkProtocol::initialize()
     WATCH(numForwarded);
 }
 
-void GenericNetworkProtocol::updateDisplayString()
+void GenericNetworkProtocol::refreshDisplay() const
 {
     char buf[80] = "";
     if (numForwarded > 0)
@@ -103,9 +103,6 @@ void GenericNetworkProtocol::endService(cPacket *pk)
         GenericDatagram *dgram = check_and_cast<GenericDatagram *>(pk);
         handlePacketFromNetwork(dgram);
     }
-
-    if (hasGUI())
-        updateDisplayString();
 }
 
 const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(cPacket *msg)

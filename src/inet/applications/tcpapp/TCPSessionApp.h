@@ -60,6 +60,7 @@ class INET_API TCPSessionApp : public TCPAppBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
 
     virtual void parseScript(const char *script);
     virtual cPacket *createDataPacket(long sendBytes);

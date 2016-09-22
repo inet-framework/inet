@@ -70,7 +70,7 @@ class INET_API TCPSocketMap
     /**
      * Returns the number of sockets stored.
      */
-    unsigned int size() { return socketMap.size(); }
+    unsigned int size() const { return socketMap.size(); }
 
     /**
      * Deletes the socket objects.

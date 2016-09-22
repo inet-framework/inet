@@ -83,6 +83,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
 
     virtual void parseDestAddressesPar();
     virtual void startSendingPingRequests();
