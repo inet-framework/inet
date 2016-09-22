@@ -117,8 +117,6 @@ void SCTPClient::initialize(int stage)
 
         socket.setCallbackObject(this);
 
-        setStatusString("waiting");
-
         simtime_t stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO) {
             stopTimer = new cMessage("StopTimer");
@@ -154,7 +152,6 @@ void SCTPClient::connect()
     outStreams = par("outboundStreams");
     socket.setInboundStreams(inStreams);
     socket.setOutboundStreams(outStreams);
-    setStatusString("connecting");
     EV_INFO << "issuing OPEN command, connect to address " << connectAddress << "\n";
     bool streamReset = par("streamReset");
     L3Address destination;
@@ -193,21 +190,18 @@ void SCTPClient::connect()
 
 void SCTPClient::close()
 {
-    setStatusString("closing");
     socket.close();
 }
 
-void SCTPClient::setStatusString(const char *s)
+void SCTPClient::refreshDisplay() const
 {
-    if (hasGUI())
-        getDisplayString().setTagArg("t", 0, s);
+    getDisplayString().setTagArg("t", 0, SCTPSocket::stateName(socket.getState()));
 }
 
 void SCTPClient::socketEstablished(int, void *, unsigned long int buffer)
 {
     int count = 0;
     EV_INFO << "SCTPClient: connected\n";
-    setStatusString("connected");
     bufferSize = buffer;
     // determine number of requests in this session
     numRequestsToSend = par("numRequestsPerSession");
@@ -522,7 +516,6 @@ void SCTPClient::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
-    setStatusString("closed");
 
     if (primaryChangeTimer) {
         cancelEvent(primaryChangeTimer);
@@ -535,7 +528,6 @@ void SCTPClient::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
-    setStatusString("broken");
     numBroken++;
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
