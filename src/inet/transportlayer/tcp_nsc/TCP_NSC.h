@@ -115,7 +115,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     void process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCommandP, cMessage *msgP);
-    void process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cPacket *msgP);
+    void process_SEND(TCP_NSC_Connection& connP, cPacket *msgP);
     void process_CLOSE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_ABORT(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);

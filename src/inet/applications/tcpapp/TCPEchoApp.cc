@@ -97,13 +97,9 @@ void TCPEchoAppThread::dataArrived(cMessage *msg, bool urgent)
     else {
         // reverse direction, modify length, and send it back
         pkt->setKind(TCP_C_SEND);
-        TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
-        TCPSendCommand *cmd = new TCPSendCommand();
         int socketId = pkt->getMandatoryTag<SocketInd>()->getSocketId();
         pkt->clearTags();
         pkt->ensureTag<SocketReq>()->setSocketId(socketId);
-        pkt->setControlInfo(cmd);
-        delete ind;
 
         long byteLen = pkt->getByteLength() * echoAppModule->echoFactor;
 

@@ -121,8 +121,6 @@ void TCPConnection::process_ACCEPT(TCPEventCode& event, TCPCommand *tcpCommand, 
 
 void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
-    TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommand);
-
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
     switch (fsm.getState()) {
@@ -165,8 +163,6 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
     if ((state->sendQueueLimit > 0) && (sendQueue->getBytesAvailable(state->snd_una) > state->sendQueueLimit))
         state->queueUpdate = false;
-
-    delete sendCommand;    // msg itself has been taken by the sendQueue
 }
 
 void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
@@ -174,13 +170,11 @@ void TCPConnection::process_READ_REQUEST(TCPEventCode& event, TCPCommand *tcpCom
     if (isToBeAccepted())
         throw cRuntimeError("READ without ACCEPT");
     delete msg;
-    cMessage *dataMsg;
+    cPacket *dataMsg;
     while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
     {
         dataMsg->setKind(TCP_I_DATA);
-        TCPCommand *cmd = new TCPCommand();
         dataMsg->ensureTag<SocketInd>()->setSocketId(socketId);
-        dataMsg->setControlInfo(cmd);
         sendToApp(dataMsg);
     }
 }

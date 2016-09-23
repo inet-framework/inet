@@ -293,7 +293,6 @@ void UDP::processPacketFromApp(cPacket *appData)
 {
     L3Address srcAddr, destAddr;
 
-    UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
     int socketId = appData->getMandatoryTag<SocketReq>()->getSocketId();
     SockDesc *sd = getOrCreateSocket(socketId);
 
@@ -320,8 +319,6 @@ void UDP::processPacketFromApp(cPacket *appData)
         interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
     }
     sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
-
-    delete ctrl;    // cannot be deleted earlier, due to destAddr
 }
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
@@ -726,8 +723,6 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
     // send payload with UDPControlInfo up to the application
-    UDPDataIndication *udpCtrl = new UDPDataIndication();
-    payload->setControlInfo(udpCtrl);
     payload->setKind(UDP_I_DATA);
     delete payload->removeTag<DispatchProtocolReq>();
     payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);

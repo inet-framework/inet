@@ -52,11 +52,9 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         emit(pkSignal, pk);
 
         // determine its source address/port
-        UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->removeControlInfo());
         L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSource();
         int srcPort = pk->getMandatoryTag<PortsInd>()->getSrcPort();
         pk->clearTags();
-        delete ctrl;
 
         // send back
         socket.sendTo(pk, remoteAddress, srcPort);

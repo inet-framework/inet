@@ -96,20 +96,16 @@ void UDPSocket::connect(L3Address addr, int port)
 void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
-    UDPSendCommand *ctrl = new UDPSendCommand();
     auto addressReq = pk->ensureTag<L3AddressReq>();
     addressReq->setDestination(destAddr);
     if (destPort != -1)
         pk->ensureTag<PortsReq>()->setDestPort(destPort);
-    pk->setControlInfo(ctrl);
     sendToUDP(pk);
 }
 
 void UDPSocket::send(cPacket *pk)
 {
     pk->setKind(UDP_C_DATA);
-    UDPSendCommand *ctrl = new UDPSendCommand();
-    pk->setControlInfo(ctrl);
     sendToUDP(pk);
 }
 
@@ -311,8 +307,6 @@ bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
 
 std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
 {
-    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->getControlInfo());
-
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
     auto ports = pk->getMandatoryTag<PortsInd>();
     L3Address srcAddr = l3Addresses->getSource();

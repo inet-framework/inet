@@ -258,7 +258,6 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
 cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
 {
     cPacket *transportPacket = floodDatagram->decapsulate();
-    transportPacket->setControlInfo(new cObject());
     transportPacket->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     transportPacket->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);

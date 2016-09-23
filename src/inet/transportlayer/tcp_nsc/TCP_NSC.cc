@@ -537,12 +537,7 @@ void TCP_NSC::sendDataToApp(TCP_NSC_Connection& c)
     cPacket *dataMsg;
 
     while (nullptr != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
-        TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-        tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
-        tcpConnectInfo->setRemoteAddr(c.inetSockPairM.remoteM.ipAddrM);
-        tcpConnectInfo->setLocalPort(c.inetSockPairM.localM.portM);
-        tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
-        dataMsg->setControlInfo(tcpConnectInfo);
+        dataMsg->setKind(TCP_I_DATA);
         dataMsg->ensureTag<SocketInd>()->setSocketId(c.connIdM);
         // send Msg to Application layer:
         send(dataMsg, "appOut");
@@ -626,13 +621,12 @@ TCP_NSC_ReceiveQueue *TCP_NSC::createReceiveQueue(TCPDataTransferMode transferMo
 
 void TCP_NSC::handleAppMessage(cMessage *msgP)
 {
-    TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
     int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
 
     TCP_NSC_Connection *conn = findAppConn(connId);
 
     if (!conn) {
-        TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
+        TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(msgP->getControlInfo());
 
         // add into appConnMap
         conn = &tcpAppConnMapM[connId];
@@ -940,7 +934,7 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
     printConnBrief(connP);
 
     // first do actions
-    TCPCommand *tcpCommand = (TCPCommand *)(msgP->removeControlInfo());
+    TCPCommand *tcpCommand = check_and_cast_nullable<TCPCommand *>(msgP->removeControlInfo());
 
     switch (msgP->getKind()) {
         case TCP_C_OPEN_ACTIVE:
@@ -956,7 +950,7 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
             break;
 
         case TCP_C_SEND:
-            process_SEND(connP, tcpCommand, check_and_cast<cPacket *>(msgP));
+            process_SEND(connP, check_and_cast<cPacket *>(msgP));
             break;
 
         case TCP_C_CLOSE:
@@ -1098,11 +1092,8 @@ void TCP_NSC::process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCom
     sendErrorNotificationToApp(connP, err);
 }
 
-void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cPacket *msgP)
+void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, cPacket *msgP)
 {
-    TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommandP);
-    delete sendCommand;
-
     connP.send(msgP);
 
     connP.do_SEND();

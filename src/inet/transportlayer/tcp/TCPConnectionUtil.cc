@@ -359,9 +359,7 @@ void TCPConnection::sendAvailableDataToApp()
         } else {
             while ((msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
-                TCPCommand *cmd = new TCPCommand();
                 msg->ensureTag<SocketInd>()->setSocketId(socketId);
-                msg->setControlInfo(cmd);
                 sendToApp(msg);
             }
         }

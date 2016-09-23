@@ -24,10 +24,6 @@ namespace inet {
 
 TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
 {
-    TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
-    if (!ind)
-        throw cRuntimeError("TCPSocketMap: findSocketFor(): no TCPCommand control info in message (not from TCP?)");
-
     int connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
     auto i = socketMap.find(connId);
     ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());

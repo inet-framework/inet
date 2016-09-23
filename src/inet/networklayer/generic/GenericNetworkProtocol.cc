@@ -397,7 +397,6 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     }
 
     // attach control info
-    packet->setControlInfo(new cObject());
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
@@ -472,7 +471,6 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
         cPacket *packetCopy = packet->dup();
-        packetCopy->setControlInfo(new cObject());
         packetCopy->ensureTag<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }

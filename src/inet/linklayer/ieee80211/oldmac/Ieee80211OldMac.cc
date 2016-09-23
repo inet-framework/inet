@@ -1808,15 +1808,6 @@ Ieee80211CTSFrame *Ieee80211OldMac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 Ieee80211DataOrMgmtFrame *Ieee80211OldMac::buildMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
-
-    auto oldCtrl = frameToSend->getControlInfo();
-    if (oldCtrl) {
-        EV_DEBUG << "Per frame1 params" << endl;
-        auto newCtrl = new cObject();
-        *newCtrl = *oldCtrl;
-        frame->setControlInfo(newCtrl);
-    }
-
     frame->setDuration(0);
     return frame;
 }
@@ -1824,7 +1815,6 @@ Ieee80211DataOrMgmtFrame *Ieee80211OldMac::buildMulticastFrame(Ieee80211DataOrMg
 Ieee80211Frame *Ieee80211OldMac::setBasicBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo() == nullptr);
-    frame->setControlInfo(new cObject());
     frame->ensureTag<SignalBitrateReq>()->setDataBitrate(basicFrameMode->getDataMode()->getNetBitrate());
     return frame;
 }
@@ -1832,7 +1822,6 @@ Ieee80211Frame *Ieee80211OldMac::setBasicBitrate(Ieee80211Frame *frame)
 Ieee80211Frame *Ieee80211OldMac::setControlBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo()==nullptr);
-    frame->setControlInfo(new cObject());
     frame->ensureTag<SignalBitrateReq>()->setDataBitrate(controlFrameMode->getDataMode()->getNetBitrate());
     return frame;
 }
@@ -1844,15 +1833,7 @@ Ieee80211Frame *Ieee80211OldMac::setBitrateFrame(Ieee80211Frame *frame)
             delete frame->removeControlInfo();
         return frame;
     }
-    cObject *ctrl = nullptr;
-    if (frame->getControlInfo() == nullptr) {
-        ctrl = new cObject();
-        frame->setControlInfo(ctrl);
-    }
-    else
-        ctrl = frame->getControlInfo();
-    if (ctrl)
-        frame->ensureTag<SignalBitrateReq>()->setDataBitrate(bps(getBitrate()));
+    frame->ensureTag<SignalBitrateReq>()->setDataBitrate(bps(getBitrate()));
     return frame;
 }
 

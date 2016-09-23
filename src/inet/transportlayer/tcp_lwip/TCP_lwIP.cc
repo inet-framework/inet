@@ -376,14 +376,12 @@ struct netif *TCP_lwIP::ip_route(L3Address const& ipAddr)
 
 void TCP_lwIP::handleAppMessage(cMessage *msgP)
 {
-    TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
     int connId = msgP->getMandatoryTag<SocketReq>()->getSocketId();
 
     TcpLwipConnection *conn = findAppConn(connId);
 
     if (!conn) {
-        TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
-
+        TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(msgP->getControlInfo());
         TCPDataTransferMode dataTransferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
 
         // add into appConnMap
@@ -624,7 +622,7 @@ void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
     printConnBrief(connP);
 
     // first do actions
-    TCPCommand *tcpCommand = check_and_cast<TCPCommand *>(msgP->removeControlInfo());
+    TCPCommand *tcpCommand = check_and_cast_nullable<TCPCommand *>(msgP->removeControlInfo());
 
     switch (msgP->getKind()) {
         case TCP_C_OPEN_ACTIVE:
@@ -640,19 +638,21 @@ void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
             break;
 
         case TCP_C_SEND:
-            process_SEND(connP, check_and_cast<TCPSendCommand *>(tcpCommand),
-                check_and_cast<cPacket *>(msgP));
+            process_SEND(connP, check_and_cast<cPacket *>(msgP));
             break;
 
         case TCP_C_CLOSE:
+            ASSERT(tcpCommand);
             process_CLOSE(connP, tcpCommand, msgP);
             break;
 
         case TCP_C_ABORT:
+            ASSERT(tcpCommand);
             process_ABORT(connP, tcpCommand, msgP);
             break;
 
         case TCP_C_STATUS:
+            ASSERT(tcpCommand);
             process_STATUS(connP, tcpCommand, msgP);
             break;
 
@@ -713,11 +713,9 @@ void TCP_lwIP::process_ACCEPT(TcpLwipConnection& connP, TCPAcceptCommand *tcpCom
     delete msg;
 }
 
-void TCP_lwIP::process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommandP, cPacket *msgP)
+void TCP_lwIP::process_SEND(TcpLwipConnection& connP, cPacket *msgP)
 {
     EV_INFO << this << ": processing SEND command, len=" << msgP->getByteLength() << endl;
-
-    delete tcpCommandP;
 
     connP.send(msgP);
 }

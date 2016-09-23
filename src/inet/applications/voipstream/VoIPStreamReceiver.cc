@@ -144,7 +144,6 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
 {
     ASSERT(curConn.offline);
 
-    UDPDataIndication *udpCtrl = check_and_cast<UDPDataIndication *>(vp->getControlInfo());
     auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
     auto ports = vp->getMandatoryTag<PortsInd>();
 
@@ -185,7 +184,6 @@ void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
 {
     ASSERT(!curConn.offline);
 
-    UDPDataIndication *udpCtrl = check_and_cast<UDPDataIndication *>(vp->getControlInfo());
     auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
     auto ports = vp->getMandatoryTag<PortsInd>();
     L3Address srcAddr = l3Addresses->getSource();

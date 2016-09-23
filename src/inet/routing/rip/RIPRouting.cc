@@ -601,8 +601,6 @@ void RIPRouting::processRequest(RIPPacket *packet)
         return;
     }
 
-    UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    delete ctrlInfo;
     L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
     int srcPort = packet->getMandatoryTag<PortsInd>()->getSrcPort();
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
@@ -755,10 +753,8 @@ void RIPRouting::processResponse(RIPPacket *packet)
         return;
     }
 
-    UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
     L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    delete ctrlInfo;
     packet->clearTags();
 
     RIPInterfaceEntry *incomingIe = findInterfaceById(interfaceId);
@@ -800,8 +796,6 @@ void RIPRouting::processResponse(RIPPacket *packet)
 
 bool RIPRouting::isValidResponse(RIPPacket *packet)
 {
-    UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->getControlInfo());
-
     // check that received from ripUdpPort
     if (packet->getMandatoryTag<PortsInd>()->getSrcPort() != ripUdpPort) {
         EV_WARN << "source port is not " << ripUdpPort << "\n";

@@ -26,8 +26,6 @@
 
 namespace inet {
 
-class UDPDataIndication;
-
 /**
  * UDPSocket is a convenience class, to make it easier to send and receive
  * UDP packets from your application models. You'd have one (or more)

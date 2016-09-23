@@ -447,7 +447,7 @@ void IPv6::resolveMACAddressAndSendPacket(IPv6Datagram *datagram, int interfaceI
             ctrl->setFromHL(fromHL);
             ctrl->setNextHop(nextHop);
             ctrl->setInterfaceId(interfaceId);
-            datagram->setControlInfo(ctrl);
+            datagram->cMessage::setControlInfo(ctrl);
             send(datagram, "ndOut");
             return;
         }

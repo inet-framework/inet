@@ -177,9 +177,6 @@ class TCPAcceptCommand extends TCPCommand
 //
 // @see ~TcpCommandCode, ~ITCP
 //
-class TCPSendCommand extends TCPCommand
-{
-}
 
 
 //

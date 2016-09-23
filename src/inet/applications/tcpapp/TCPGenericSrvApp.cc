@@ -133,9 +133,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         }
         else {
             delete appmsg->removeControlInfo();
-            TCPSendCommand *cmd = new TCPSendCommand();
             appmsg->ensureTag<SocketReq>()->setSocketId(connId);
-            appmsg->setControlInfo(cmd);
 
             // set length and send it back
             appmsg->setKind(TCP_C_SEND);

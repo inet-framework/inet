@@ -161,9 +161,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
     ASSERT(isOperational && ie != nullptr);
 
     // check that the packet arrived on the interface we are supposed to serve
-    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
     int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    delete ctrl;
 
     if (inputInterfaceId != ie->getInterfaceId()) {
         EV_WARN << "DHCP message arrived on a different interface, dropping\n";

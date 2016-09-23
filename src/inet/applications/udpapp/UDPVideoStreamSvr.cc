@@ -86,8 +86,6 @@ void UDPVideoStreamSvr::handleMessageWhenUp(cMessage *msg)
 void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
 {
     // register video stream...
-    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->getControlInfo());
-
     cMessage *timer = new cMessage("VideoStreamTmr");
     VideoStreamData *d = &streams[timer->getId()];
     d->timer = timer;

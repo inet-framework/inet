@@ -383,12 +383,7 @@ void TcpLwipConnection::sendUpData()
 {
     if (sendUpEnabled) {
         while (cPacket *dataMsg = receiveQueueM->extractBytesUpTo()) {
-            TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
-            tcpConnectInfo->setLocalAddr(pcbM->local_ip.addr);
-            tcpConnectInfo->setRemoteAddr(pcbM->remote_ip.addr);
-            tcpConnectInfo->setLocalPort(pcbM->local_port);
-            tcpConnectInfo->setRemotePort(pcbM->remote_port);
-            dataMsg->setControlInfo(tcpConnectInfo);
+            dataMsg->setKind(TCP_I_DATA);
             dataMsg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
             dataMsg->ensureTag<SocketInd>()->setSocketId(connIdM);
 //            int64_t len = dataMsg->getByteLength();

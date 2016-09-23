@@ -174,8 +174,6 @@ void SCTP::handleMessage(cMessage *msg)
 
         if (par("udpEncapsEnabled")) {
             EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
-            UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
-            delete ctrl;
             srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSource();
             destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestination();
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";

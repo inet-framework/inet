@@ -109,9 +109,6 @@ class UDPConnectCommand extends UDPControlInfo
 //
 // @see ~UDPCommandCode, ~PortsReq, ~L3AddressReq, ~InterfaceReq
 //
-class UDPSendCommand extends UDPControlInfo
-{
-}
 
 
 //
@@ -131,9 +128,6 @@ class UDPCloseCommand extends UDPControlInfo
 //
 // @see ~UDPCommandCode, ~L3AddressInd, ~PortsInd
 //
-class UDPDataIndication extends UDPControlInfo
-{
-}
 
 //
 // Control info that is sent up from the ~UDP module to the application with

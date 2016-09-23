@@ -195,8 +195,6 @@ void TCPSocket::send(cMessage *msg)
         throw cRuntimeError("TCPSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
 
     msg->setKind(TCP_C_SEND);
-    TCPSendCommand *cmd = new TCPSendCommand();
-    msg->setControlInfo(cmd);
     sendToTCP(msg);
 }
 
@@ -246,7 +244,7 @@ void TCPSocket::renewSocket()
 
 bool TCPSocket::belongsToSocket(cMessage *msg)
 {
-    return dynamic_cast<TCPCommand *>(msg->getControlInfo()) && msg->getMandatoryTag<SocketInd>()->getSocketId() == connId;
+    return msg->getMandatoryTag<SocketInd>()->getSocketId() == connId;
 }
 
 bool TCPSocket::belongsToAnyTCPSocket(cMessage *msg)
