@@ -94,15 +94,14 @@ void SomeUDPApp::handleMessage(cMessage *msg)
         // process incoming packet
         processPacket(msg);
     }
-
-    if (hasGUI())
-    {
-        char buf[40];
-        sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        displayString().setTagArg("t",0,buf);
-    }
 }
 
+void SomeUDPApp::refreshDisplay() const
+{
+    char buf[40];
+    sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+    displayString().setTagArg("t",0,buf);
+}
 
 void SomeUDPApp::processPacket(cMessage *msg)
 {
