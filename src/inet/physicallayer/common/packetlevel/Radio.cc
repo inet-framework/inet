@@ -609,7 +609,7 @@ void Radio::refreshDisplay() const
     // we use the radio channel method to calculate interference distance
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
-    if (hasGUI() && (displayInterferenceRange || displayCommunicationRange)) {
+    if (displayInterferenceRange || displayCommunicationRange) {
         cModule *host = findContainingNode(const_cast<Radio*>(this));
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {
