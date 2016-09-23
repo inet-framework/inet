@@ -178,6 +178,8 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
     /** @brief To be called at the end of simulation run. */
     virtual void finish() override;
 
+    virtual void refreshDisplay() const override;
+
     /** @brief Function to select the next posture considering the current posture and the Markov model. */
     void selectPosture();
 
