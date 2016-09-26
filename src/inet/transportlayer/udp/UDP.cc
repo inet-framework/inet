@@ -35,7 +35,7 @@
 #include "inet/networklayer/common/MulticastLoopTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/transportlayer/common/PortsTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 
 #ifdef WITH_IPv4
@@ -304,7 +304,7 @@ void UDP::processPacketFromApp(cPacket *appData)
     if (destAddr.isUnspecified())
         destAddr = sd->remoteAddr;
     int destPort = sd->remotePort;
-    auto portsReq = appData->getTag<PortsReq>();
+    auto portsReq = appData->getTag<L4PortReq>();
     if (portsReq)
         destPort = portsReq->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
@@ -730,8 +730,8 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
     payload->ensureTag<L3AddressInd>()->setSource(srcAddr);
     payload->ensureTag<L3AddressInd>()->setDestination(destAddr);
-    payload->ensureTag<PortsInd>()->setSrcPort(srcPort);
-    payload->ensureTag<PortsInd>()->setDestPort(destPort);
+    payload->ensureTag<L4PortInd>()->setSrcPort(srcPort);
+    payload->ensureTag<L4PortInd>()->setDestPort(destPort);
     payload->ensureTag<HopLimitInd>()->setHopLimit(ttl);
 
     emit(passedUpPkSignal, payload);
@@ -748,8 +748,8 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     notifyMsg->ensureTag<L3AddressInd>()->setSource(localAddr);
     notifyMsg->ensureTag<L3AddressInd>()->setDestination(remoteAddr);
-    notifyMsg->ensureTag<PortsInd>()->setSrcPort(sd->localPort);
-    notifyMsg->ensureTag<PortsInd>()->setDestPort(remotePort);
+    notifyMsg->ensureTag<L4PortInd>()->setSrcPort(sd->localPort);
+    notifyMsg->ensureTag<L4PortInd>()->setDestPort(remotePort);
 
     send(notifyMsg, "appOut");
 }

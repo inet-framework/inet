@@ -21,7 +21,7 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/transportlayer/common/PortsTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
@@ -99,7 +99,7 @@ void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort)
     auto addressReq = pk->ensureTag<L3AddressReq>();
     addressReq->setDestination(destAddr);
     if (destPort != -1)
-        pk->ensureTag<PortsReq>()->setDestPort(destPort);
+        pk->ensureTag<L4PortReq>()->setDestPort(destPort);
     sendToUDP(pk);
 }
 
@@ -308,7 +308,7 @@ bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
 std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
 {
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
-    auto ports = pk->getMandatoryTag<PortsInd>();
+    auto ports = pk->getMandatoryTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSource();
     L3Address destAddr = l3Addresses->getDestination();
     int srcPort = ports->getSrcPort();

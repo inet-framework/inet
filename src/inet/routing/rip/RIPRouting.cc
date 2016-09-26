@@ -32,7 +32,7 @@
 
 #include "inet/routing/rip/RIPPacket_m.h"
 #include "inet/routing/rip/RIPRouting.h"
-#include "inet/transportlayer/common/PortsTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 
 namespace inet {
 
@@ -602,7 +602,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
     }
 
     L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
-    int srcPort = packet->getMandatoryTag<PortsInd>()->getSrcPort();
+    int srcPort = packet->getMandatoryTag<L4PortInd>()->getSrcPort();
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     packet->clearTags();
 
@@ -797,7 +797,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
 bool RIPRouting::isValidResponse(RIPPacket *packet)
 {
     // check that received from ripUdpPort
-    if (packet->getMandatoryTag<PortsInd>()->getSrcPort() != ripUdpPort) {
+    if (packet->getMandatoryTag<L4PortInd>()->getSrcPort() != ripUdpPort) {
         EV_WARN << "source port is not " << ripUdpPort << "\n";
         return false;
     }

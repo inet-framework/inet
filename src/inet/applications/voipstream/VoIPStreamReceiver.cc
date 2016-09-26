@@ -22,7 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/transportlayer/common/PortsTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 
 namespace inet {
 
@@ -145,7 +145,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     ASSERT(curConn.offline);
 
     auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
-    auto ports = vp->getMandatoryTag<PortsInd>();
+    auto ports = vp->getMandatoryTag<L4PortInd>();
 
     curConn.srcAddr = l3Addresses->getSource();
     curConn.srcPort = ports->getSrcPort();
@@ -185,7 +185,7 @@ void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
     ASSERT(!curConn.offline);
 
     auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
-    auto ports = vp->getMandatoryTag<PortsInd>();
+    auto ports = vp->getMandatoryTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSource();
     L3Address destAddr = l3Addresses->getDestination();
 

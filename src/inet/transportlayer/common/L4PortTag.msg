@@ -10,22 +10,22 @@ namespace inet;
 
 class TagBase extends cObject;
 
-class PortsTagBase extends TagBase
+class L4PortTagBase extends TagBase
 {
     int srcPort;      // may be unspecified
     int destPort;     // may be unspecified
 }
 
 //
-// Determines the source and destination network addresses for an outgoing packet.
+// Determines the source and destination L4 ports for an outgoing packet.
 //
-class PortsReq extends PortsTagBase
+class L4PortReq extends L4PortTagBase
 {
 }
 
 //
-// Specifies the source and destination network addresses for an incoming packet.
+// Specifies the source and destination L4 ports for an incoming packet.
 //
-class PortsInd extends PortsTagBase
+class L4PortInd extends L4PortTagBase
 {
 }
