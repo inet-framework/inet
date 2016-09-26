@@ -15,13 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
+
 #include "inet/applications/tunapp/TunnelApp.h"
 
 namespace inet {
@@ -75,19 +77,12 @@ void TunnelApp::initialize(int stage)
 void TunnelApp::handleMessageWhenUp(cMessage *message)
 {
     if (message->arrivedOn("socketIn")) {
-        cObject *controlInfo = message->getControlInfo();
-        if (dynamic_cast<TunnelApp *>(controlInfo)) {     //KLUDGE dynamic_cast<TunnelApp> was dynamic_cast<IPv4ControlInfo>
-            delete message->removeControlInfo();
-            message->clearTags();
-            tunSocket.send(PK(message));
-        }
-        else if (dynamic_cast<UDPControlInfo *>(controlInfo)) {
-            delete message->removeControlInfo();
-            message->clearTags();
-            tunSocket.send(PK(message));
-        }
-        else if (dynamic_cast<TunControlInfo *>(controlInfo)) {
-            delete message->removeControlInfo();
+        ASSERT(message->getControlInfo() == nullptr);
+
+        auto sockInd = message->getTag<SocketInd>();
+        int sockId = (sockInd != nullptr) ? sockInd->getSocketId() : -1;
+        if (sockInd != nullptr && sockId == tunSocket.getSocketId()) {
+            // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
             if (protocol == &Protocol::ipv4) {
                 message->clearTags();
                 message->ensureTag<L3AddressReq>()->setDestination(L3AddressResolver().resolve(destinationAddress));
@@ -101,11 +96,19 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
             else
                 throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
         }
-        else
-            throw cRuntimeError("Unknown message: %s", message->getName());
+        else {
+            auto packetProtocol = message->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+            if (packetProtocol == protocol) {
+                delete message->removeControlInfo();
+                message->clearTags();
+                tunSocket.send(PK(message));
+            }
+            else
+                throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;
+        }
     }
     else
-        throw cRuntimeError("Unknown message: %s", message->getName());
+        throw cRuntimeError("Message arrived on unknown gate %s", message->getArrivalGate()->getFullName());
 }
 
 } // namespace inet

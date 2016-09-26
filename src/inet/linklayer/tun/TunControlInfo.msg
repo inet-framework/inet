@@ -26,10 +26,6 @@ class TunOpenCommand extends TunControlInfo
 {
 }
 
-class TunSendCommand extends TunControlInfo
-{
-}
-
 class TunCloseCommand extends TunControlInfo
 {
 }

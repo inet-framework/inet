@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/tun/TunControlInfo_m.h"
@@ -49,8 +50,11 @@ void TunInterface::handleMessage(cMessage *message)
 {
     if (message->arrivedOn("upperLayerIn")) {
         if (message->isPacket()) {
-            if (dynamic_cast<TunSendCommand *>(message->getControlInfo())) {
-                delete message->removeControlInfo();
+            auto socketReq = message->getTag<SocketReq>();
+            // check if packet is from app by finding SocketReq with sockedId that is in socketIds
+            auto sId = socketReq != nullptr ? socketReq->getSocketId() : -1;
+            if (socketReq != nullptr && contains(socketIds, sId)) {
+                ASSERT(message->getControlInfo() == nullptr);
                 // TODO: should we determine the network protocol by looking at the packet?!
                 message->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
                 message->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
@@ -59,13 +63,11 @@ void TunInterface::handleMessage(cMessage *message)
             }
             else {
                 emit(packetReceivedFromUpperSignal, message);
-                delete message->removeControlInfo();
+                ASSERT(message->getControlInfo() == nullptr);
                 for (int socketId : socketIds) {
                     cMessage *copy = message->dup();
                     copy->ensureTag<SocketInd>()->setSocketId(socketId);
                     copy->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                    TunControlInfo *controlInfo = new TunControlInfo();
-                    copy->setControlInfo(controlInfo);
                     send(copy, "upperLayerOut");
                 }
                 delete message;

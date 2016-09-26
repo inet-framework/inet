@@ -41,6 +41,11 @@ class INET_API TunSocket
     void open(int interfaceId);
     void send(cPacket *packet);
     void close();
+
+    /**
+     * Returns the internal socket Id.
+     */
+    int getSocketId() const { return socketId; }
 };
 
 } // namespace inet

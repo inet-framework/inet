@@ -49,8 +49,8 @@ void TunSocket::send(cPacket *packet)
 {
     if (interfaceId == -1)
         throw cRuntimeError("Socket is closed");
-    TunSendCommand *command = new TunSendCommand();
-    packet->setControlInfo(command);
+//    TunSendCommand *command = new TunSendCommand();
+//    packet->setControlInfo(command);
     sendToTun(packet);
 }
 
