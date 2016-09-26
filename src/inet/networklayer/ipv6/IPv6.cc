@@ -869,7 +869,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
                 ctrl->setFromHL(fromHL);
                 ctrl->setNextHop(nextHop);
                 ctrl->setInterfaceId(interfaceId);
-                datagram->setControlInfo(ctrl);
+                datagram->cMessage::setControlInfo(ctrl);
                 send(datagram, "ndOut");
             }
             return false;
