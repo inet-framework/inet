@@ -79,7 +79,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
         EV_INFO << "Processing message from IPv4: " << msg << endl;
-        IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+        IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
         processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg *>(msg), sender);
     }
     else
@@ -221,8 +221,8 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ospf);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<L3AddressReq>()->setDestination(destAddr);
-    msg->ensureTag<L3AddressReq>()->setSource(routerId);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
+    msg->ensureTag<L3AddressReq>()->setSrcAddress(routerId);
     send(msg, "ipOut");
 }
 

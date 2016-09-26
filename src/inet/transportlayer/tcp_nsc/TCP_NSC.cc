@@ -331,8 +331,8 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-    inetSockPair.remoteM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
-    inetSockPair.localM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
+    inetSockPair.remoteM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    inetSockPair.localM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestAddress();
     //int interfaceId = controlInfo->getInterfaceId();
 
     if (tcpsegP->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
@@ -895,8 +895,8 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
-    addresses->setSource(src);
-    addresses->setDestination(dest);
+    addresses->setSrcAddress(src);
+    addresses->setDestAddress(dest);
 
     if (conn) {
         conn->receiveQueueM->notifyAboutSending(tcpseg);

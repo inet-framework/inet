@@ -73,8 +73,8 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
-    addresses->setSource(src);
-    addresses->setDestination(dest);
+    addresses->setSrcAddress(src);
+    addresses->setDestAddress(dest);
 
     emit(sentPkSignal, tcpseg);
     send(tcpseg, "ipOut");

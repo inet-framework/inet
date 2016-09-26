@@ -52,7 +52,7 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         emit(pkSignal, pk);
 
         // determine its source address/port
-        L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSource();
+        L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         int srcPort = pk->getMandatoryTag<L4PortInd>()->getSrcPort();
         pk->clearTags();
 

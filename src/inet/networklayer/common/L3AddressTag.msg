@@ -14,8 +14,8 @@ class TagBase extends cObject;
 
 class L3AddressTagBase extends TagBase
 {
-    L3Address source;      // may be unspecified
-    L3Address destination; // always specified
+    L3Address srcAddress;      // may be unspecified
+    L3Address destAddress; // always specified
 }
 
 //

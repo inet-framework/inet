@@ -91,8 +91,8 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     if (addresses == nullptr)
         addresses = msg->getTag<L3AddressInd>();
     if (addresses != nullptr) {
-        src = addresses->getSource();
-        dest = addresses->getDestination();
+        src = addresses->getSrcAddress();
+        dest = addresses->getDestAddress();
     }
 
     EV_INFO << msg << endl;

@@ -428,8 +428,8 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     if (interfaceEntry)
         udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
-    addresses->setSource(getSelfAddress());
-    addresses->setDestination(nextHop);
+    addresses->setSrcAddress(getSelfAddress());
+    addresses->setDestAddress(nextHop);
     // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
     udpPacket->ensureTag<HopLimitReq>()->setHopLimit(255);
     sendUDPPacket(udpPacket, delay);
@@ -949,7 +949,7 @@ void DYMO::processRERR(RERR *rerrIncoming)
     if (rerrIncoming->getHopLimit() == 0 || rerrIncoming->getUnreachableNodeArraySize() == 0)
         return;
     else {
-        L3Address srcAddr = rerrIncoming->getMandatoryTag<L3AddressInd>()->getSource();
+        L3Address srcAddr = rerrIncoming->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         auto incomingIfTag = rerrIncoming->getMandatoryTag<InterfaceInd>();
         // Otherwise, for each UnreachableNode.Address, HandlingRtr searches its
         // route table for a route using longest prefix matching.  If no such
@@ -1145,7 +1145,7 @@ void DYMO::updateRoute(RteMsg *rteMsg, AddressBlock& addressBlock, IRoute *route
     targetAddressToSequenceNumber[address] = sequenceNumber;
     // Route.NextHopAddress := IP.SourceAddress (i.e., an address of the node from which the RteMsg was received)
     // note that DYMO packets are not routed on the IP level, so we can use the source address here
-    L3Address srcAddr = rteMsg->getMandatoryTag<L3AddressInd>()->getSource();
+    L3Address srcAddr = rteMsg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     route->setNextHop(srcAddr);
     // Route.NextHopInterface is set to the interface on which RteMsg was received
     InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById((rteMsg->getMandatoryTag<InterfaceInd>())->getInterfaceId());

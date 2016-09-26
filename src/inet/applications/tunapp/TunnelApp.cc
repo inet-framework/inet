@@ -85,7 +85,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
             // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
             if (protocol == &Protocol::ipv4) {
                 message->clearTags();
-                message->ensureTag<L3AddressReq>()->setDestination(L3AddressResolver().resolve(destinationAddress));
+                message->ensureTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
                 message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
                 l3Socket.send(PK(message));
             }

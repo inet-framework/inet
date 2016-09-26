@@ -262,8 +262,8 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
-    addresses->setSource(localAddr);
-    addresses->setDestination(remoteAddr);
+    addresses->setSrcAddress(localAddr);
+    addresses->setDestAddress(remoteAddr);
     tcpMain->send(tcpseg, "ipOut");
 }
 
@@ -278,8 +278,8 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
-    addresses->setSource(src);
-    addresses->setDestination(dest);
+    addresses->setSrcAddress(src);
+    addresses->setDestAddress(dest);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
 }
 

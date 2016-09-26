@@ -337,7 +337,7 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
     cPacket *m = msg->decapsulate();
     m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
-    m->ensureTag<L3AddressInd>()->setSource(msg->getSrcAddr());
+    m->ensureTag<L3AddressInd>()->setSrcAddress(msg->getSrcAddr());
     delete msg;
     return m;
 }

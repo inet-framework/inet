@@ -386,7 +386,7 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
 
     emit(rcvdGraftPkSignal, pkt);
 
-    IPv4Address sender = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+    IPv4Address sender = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
@@ -539,7 +539,7 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
 
     emit(rcvdGraftAckPkSignal, pkt);
 
-    IPv4Address destAddress = pkt->getMandatoryTag<L3AddressInd>()->getDestination().toIPv4();
+    IPv4Address destAddress = pkt->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
@@ -595,7 +595,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 
     // check if State Refresh msg has came from RPF neighbor
     auto ifTag = pkt->getMandatoryTag<InterfaceInd>();
-    IPv4Address srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+    IPv4Address srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     UpstreamInterface *upstream = route->upstreamInterface;
     if (ifTag->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != srcAddr) {
         delete pkt;
@@ -682,7 +682,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 void PIMDM::processAssertPacket(PIMAssert *pkt)
 {
     int incomingInterfaceId = pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    IPv4Address srcAddrFromTag = pkt->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+    IPv4Address srcAddrFromTag = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address source = pkt->getSourceAddress();
     IPv4Address group = pkt->getGroupAddress();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
@@ -1584,8 +1584,8 @@ void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
 
     auto ifTag = graftPacket->removeMandatoryTag<InterfaceInd>();
     auto addressInd = graftPacket->removeMandatoryTag<L3AddressInd>();
-    IPv4Address destAddr = addressInd->getSource().toIPv4();
-    IPv4Address srcAddr = addressInd->getDestination().toIPv4();
+    IPv4Address destAddr = addressInd->getSrcAddress().toIPv4();
+    IPv4Address srcAddr = addressInd->getDestAddress().toIPv4();
     int outInterfaceId = ifTag->getInterfaceId();
     delete ifTag;
 
@@ -1652,8 +1652,8 @@ void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outInterfaceId);
     auto addresses = packet->ensureTag<L3AddressReq>();
-    addresses->setSource(srcAddr);
-    addresses->setDestination(destAddr);
+    addresses->setSrcAddress(srcAddr);
+    addresses->setDestAddress(destAddr);
     packet->ensureTag<HopLimitReq>()->setHopLimit(1);
     send(packet, "ipOut");
 }

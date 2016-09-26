@@ -144,8 +144,8 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    srcAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getSource();
-    destAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestination();
+    srcAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    destAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestAddress();
     interfaceId = (tcpsegP->getMandatoryTag<InterfaceInd>())->getInterfaceId();
 
     // process segment
@@ -592,8 +592,8 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
     tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = tcpseg->ensureTag<L3AddressReq>();
-    addresses->setSource(srcP);
-    addresses->setDestination(destP);
+    addresses->setSrcAddress(srcP);
+    addresses->setDestAddress(destP);
     if (conn) {
         conn->notifyAboutSending(*tcpseg);
     }

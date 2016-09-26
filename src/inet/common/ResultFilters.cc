@@ -93,7 +93,7 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
         if (!addresses)
             addresses = msg->getTag<L3AddressInd>();
         if (addresses != nullptr) {
-            fire(this, t, addresses->getSource().str().c_str() DETAILS_ARG_NAME);
+            fire(this, t, addresses->getSrcAddress().str().c_str() DETAILS_ARG_NAME);
         }
     }
 }

@@ -400,8 +400,8 @@ void PingApp::sendPingRequest()
     }
 
     auto addressReq = outPacket->ensureTag<L3AddressReq>();
-    addressReq->setSource(srcAddr);
-    addressReq->setDestination(destAddr);
+    addressReq->setSrcAddress(srcAddr);
+    addressReq->setDestAddress(destAddr);
     outPacket->ensureTag<HopLimitReq>()->setHopLimit(hopLimit);
     EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
     l3Socket->send(outPacket);
@@ -416,7 +416,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     }
 
     // get src, hopCount etc from packet, and print them
-    L3Address src = msg->getMandatoryTag<L3AddressInd>()->getSource();
+    L3Address src = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     //L3Address dest = msg->getMandatoryTag<L3AddressInd>()->getDestination();
     auto msgHopCountTag = msg->getTag<HopLimitInd>();
     int msgHopCount = msgHopCountTag ? msgHopCountTag->getHopLimit() : -1;

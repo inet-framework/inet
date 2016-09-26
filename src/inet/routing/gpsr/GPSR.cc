@@ -236,8 +236,8 @@ void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
     udpPacket->setSourcePort(GPSR_UDP_PORT);
     udpPacket->setDestinationPort(GPSR_UDP_PORT);
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
-    addresses->setSource(getSelfAddress());
-    addresses->setDestination(addressType->getLinkLocalManetRoutersMulticastAddress());
+    addresses->setSrcAddress(getSelfAddress());
+    addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
     udpPacket->ensureTag<HopLimitReq>()->setHopLimit(255);
     sendUDPPacket(udpPacket, delay);
 }

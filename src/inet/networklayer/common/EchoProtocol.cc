@@ -70,8 +70,8 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
     reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
     auto addressReq = reply->ensureTag<L3AddressReq>();
-    addressReq->setSource(addressInd->getDestination());
-    addressReq->setDestination(addressInd->getSource());
+    addressReq->setSrcAddress(addressInd->getDestAddress());
+    addressReq->setDestAddress(addressInd->getSrcAddress());
     delete addressInd;
     send(reply, "ipOut");
 }

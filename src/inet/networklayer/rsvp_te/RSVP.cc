@@ -1294,7 +1294,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg *msg)
     EV_INFO << "Received RSVP_HELLO" << endl;
     //print(msg);
 
-    IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+    IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();
@@ -1868,7 +1868,7 @@ void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::rsvp);
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::rsvp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<L3AddressReq>()->setDestination(destAddr);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
     send(msg, "ipOut");
 }
 

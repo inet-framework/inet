@@ -232,7 +232,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
         finalDestAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        L3Address destAddr = addrTag->getDestination();
+        L3Address destAddr = addrTag->getDestAddress();
         EV << "WiseRoute: CInfo removed, netw addr=" << destAddr << endl;
         finalDestAddr = destAddr;
     }
@@ -332,7 +332,7 @@ cMessage *WiseRoute::decapsulate(WiseRouteDatagram *msg)
     m->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     m->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    m->ensureTag<L3AddressInd>()->setSource(msg->getInitialSrcAddr());
+    m->ensureTag<L3AddressInd>()->setSrcAddress(msg->getInitialSrcAddr());
     nbHops = nbHops + msg->getNbHops();
     // delete the netw packet
     delete msg;

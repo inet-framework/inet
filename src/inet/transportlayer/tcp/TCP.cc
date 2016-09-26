@@ -148,8 +148,8 @@ void TCP::handleMessage(cMessage *msg)
             // get src/dest addresses
             L3Address srcAddr, destAddr;
 
-            srcAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getSource();
-            destAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getDestination();
+            srcAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            destAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getDestAddress();
             //interfaceId = controlInfo->getInterfaceId();
 
             // process segment

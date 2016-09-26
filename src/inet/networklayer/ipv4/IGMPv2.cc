@@ -616,7 +616,7 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     msg->ensureTag<HopLimitReq>()->setHopLimit(1);
 
     send(msg, "ipOut");
@@ -627,7 +627,7 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
     InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
-            processQuery(ie, msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4(), check_and_cast<IGMPQuery *>(msg));
+            processQuery(ie, msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4(), check_and_cast<IGMPQuery *>(msg));
             break;
 
         //case IGMPV1_MEMBERSHIP_REPORT:

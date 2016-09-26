@@ -124,7 +124,7 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     // process the ICMP message locally, right away
     if (origSrcAddr.isUnspecified()) {
         // pretend it came from the IPv4 layer
-        errorMessage->ensureTag<L3AddressInd>()->setDestination(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMessage->ensureTag<L3AddressInd>()->setDestAddress(IPv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPMessage(errorMessage);
@@ -237,8 +237,8 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     // turn request into a reply
     ICMPMessage *reply = request;
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
-    IPv4Address src = addressInd->getSource().toIPv4();
-    IPv4Address dest = addressInd->getDestination().toIPv4();
+    IPv4Address src = addressInd->getSrcAddress().toIPv4();
+    IPv4Address dest = addressInd->getDestAddress().toIPv4();
     reply->clearTags();
     reply->setName((std::string(request->getName()) + "-reply").c_str());
     reply->setType(ICMP_ECHO_REPLY);
@@ -247,15 +247,15 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     // TBD check what to do if dest was multicast etc?
     // A. Ariza Modification 5/1/2011 clean the interface id, this forces the use of routing table in the IPv4 layer
     auto addressReq = request->ensureTag<L3AddressReq>();
-    addressReq->setSource(dest);
-    addressReq->setDestination(src);
+    addressReq->setSrcAddress(dest);
+    addressReq->setDestAddress(src);
 
     sendToIP(reply);
 }
 
 void ICMP::sendToIP(ICMPMessage *msg, const IPv4Address& dest)
 {
-    msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     sendToIP(msg);
 }
 

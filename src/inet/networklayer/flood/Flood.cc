@@ -262,8 +262,8 @@ cMessage *Flood::decapsulate(FloodDatagram *floodDatagram)
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodDatagram->getTransportProtocol()));
     transportPacket->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     auto addressInd = transportPacket->ensureTag<L3AddressInd>();
-    addressInd->setSource(floodDatagram->getSourceAddress());
-    addressInd->setDestination(floodDatagram->getDestinationAddress());
+    addressInd->setSrcAddress(floodDatagram->getSourceAddress());
+    addressInd->setDestAddress(floodDatagram->getDestinationAddress());
     transportPacket->ensureTag<HopLimitInd>()->setHopLimit(floodDatagram->getTtl());
     delete floodDatagram;
     return transportPacket;
@@ -291,7 +291,7 @@ FloodDatagram *Flood::encapsulate(cPacket *appPkt)
     }
     else {
         pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(appPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-        netwAddr = addressReq->getDestination();
+        netwAddr = addressReq->getDestAddress();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;
     }

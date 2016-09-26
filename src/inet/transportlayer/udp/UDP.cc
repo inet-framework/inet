@@ -298,8 +298,8 @@ void UDP::processPacketFromApp(cPacket *appData)
 
     auto addressReq = appData->getTag<L3AddressReq>();
     if (addressReq) {
-        srcAddr = addressReq->getSource();
-        destAddr = addressReq->getDestination();
+        srcAddr = addressReq->getSrcAddress();
+        destAddr = addressReq->getDestAddress();
     }
     if (destAddr.isUnspecified())
         destAddr = sd->remoteAddr;
@@ -345,8 +345,8 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int ttl;
 
     int interfaceId = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
-    destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestination();
+    srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestAddress();
     ttl = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
     cObject *ctrl = udpPacket->removeControlInfo();
     const Protocol *protocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
@@ -728,8 +728,8 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-    payload->ensureTag<L3AddressInd>()->setSource(srcAddr);
-    payload->ensureTag<L3AddressInd>()->setDestination(destAddr);
+    payload->ensureTag<L3AddressInd>()->setSrcAddress(srcAddr);
+    payload->ensureTag<L3AddressInd>()->setDestAddress(destAddr);
     payload->ensureTag<L4PortInd>()->setSrcPort(srcPort);
     payload->ensureTag<L4PortInd>()->setDestPort(destPort);
     payload->ensureTag<HopLimitInd>()->setHopLimit(ttl);
@@ -746,8 +746,8 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
    notifyMsg->setControlInfo(udpCtrl);
     //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
-    notifyMsg->ensureTag<L3AddressInd>()->setSource(localAddr);
-    notifyMsg->ensureTag<L3AddressInd>()->setDestination(remoteAddr);
+    notifyMsg->ensureTag<L3AddressInd>()->setSrcAddress(localAddr);
+    notifyMsg->ensureTag<L3AddressInd>()->setDestAddress(remoteAddr);
     notifyMsg->ensureTag<L4PortInd>()->setSrcPort(sd->localPort);
     notifyMsg->ensureTag<L4PortInd>()->setDestPort(remotePort);
 
@@ -780,8 +780,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
-        addresses->setSource(srcAddr.toIPv4());
-        addresses->setDestination(destAddr.toIPv4());
+        addresses->setSrcAddress(srcAddr.toIPv4());
+        addresses->setDestAddress(destAddr.toIPv4());
         udpPacket->ensureTag<HopLimitReq>()->setHopLimit(ttl);
 
         emit(sentPkSignal, udpPacket);
@@ -796,8 +796,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
-        addresses->setSource(srcAddr.toIPv6());
-        addresses->setDestination(destAddr.toIPv6());
+        addresses->setSrcAddress(srcAddr.toIPv6());
+        addresses->setDestAddress(destAddr.toIPv6());
         if (ttl != -1)
             udpPacket->ensureTag<HopLimitReq>()->setHopLimit(ttl);
 
@@ -814,8 +814,8 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
         udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
         auto addresses = udpPacket->ensureTag<L3AddressReq>();
-        addresses->setSource(srcAddr);
-        addresses->setDestination(destAddr);
+        addresses->setSrcAddress(srcAddr);
+        addresses->setDestAddress(destAddr);
         udpPacket->ensureTag<HopLimitReq>()->setHopLimit(ttl);
 
         emit(sentPkSignal, udpPacket);

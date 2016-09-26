@@ -146,18 +146,18 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = reply->ensureTag<L3AddressReq>();
-    addressReq->setDestination(addressInd->getSource());
+    addressReq->setDestAddress(addressInd->getSrcAddress());
 
-    if (addressInd->getDestination().isMulticast()    /*TODO check for anycast too*/) {
+    if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         IPv6InterfaceData *ipv6Data = it->getInterfaceById(request->getMandatoryTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
-        addressReq->setSource(ipv6Data->getPreferredAddress());
+        addressReq->setSrcAddress(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.
         //      According to RFC 3484, the source address to be used
         //      depends on the destination address
     }
     else
-        addressReq->setSource(addressInd->getDestination());
+        addressReq->setSrcAddress(addressInd->getDestAddress());
 
     delete request;
     sendToIP(reply);
@@ -212,7 +212,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
     if (origDatagram->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-        errorMsg->ensureTag<L3AddressInd>()->setSource(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
+        errorMsg->ensureTag<L3AddressInd>()->setSrcAddress(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
         processICMPv6Message(errorMsg);
@@ -237,7 +237,7 @@ void ICMPv6::sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPv6Type t
 
 void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
 {
-    msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
 
     send(msg, "ipv6Out");

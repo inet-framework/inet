@@ -180,7 +180,7 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<L3AddressReq>()->setDestination(ALL_PIM_ROUTERS_MCAST);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
     msg->ensureTag<HopLimitReq>()->setHopLimit(1);
 
     emit(sentHelloPkSignal, msg);
@@ -192,7 +192,7 @@ void PIMBase::processHelloPacket(PIMHello *packet)
 {
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
-    IPv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+    IPv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     int version = packet->getVersion();
 
     emit(rcvdHelloPkSignal, packet);

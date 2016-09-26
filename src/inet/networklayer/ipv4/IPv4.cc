@@ -618,8 +618,8 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
-    l3AddressInd->setSource(datagram->getSrcAddress());
-    l3AddressInd->setDestination(datagram->getDestAddress());
+    l3AddressInd->setSrcAddress(datagram->getSrcAddress());
+    l3AddressInd->setDestAddress(datagram->getDestAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getTimeToLive());
 
     return packet;
@@ -712,8 +712,8 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket)
     datagram->setByteLength(IP_HEADER_BYTES);
 
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
-    IPv4Address src = l3AddressReq->getSource().toIPv4();
-    IPv4Address dest = l3AddressReq->getDestination().toIPv4();
+    IPv4Address src = l3AddressReq->getSrcAddress().toIPv4();
+    IPv4Address dest = l3AddressReq->getDestAddress().toIPv4();
     delete l3AddressReq;
 
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));

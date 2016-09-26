@@ -227,8 +227,8 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                 }
             }
             if (intf != nullptr) {
-                IPv4Address sourceAddress = packet->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
-                IPv4Address destinationAddress = packet->getMandatoryTag<L3AddressInd>()->getDestination().toIPv4();
+                IPv4Address sourceAddress = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+                IPv4Address destinationAddress = packet->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
                 IPv4Address allDRouters = IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
 
@@ -310,7 +310,7 @@ void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int
 {
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
-    packet->ensureTag<L3AddressReq>()->setDestination(destination);
+    packet->ensureTag<L3AddressReq>()->setDestAddress(destination);
     packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
 
     switch (packet->getType()) {

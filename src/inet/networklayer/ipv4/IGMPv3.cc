@@ -662,7 +662,7 @@ void IGMPv3::sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address d
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     msg->ensureTag<HopLimitReq>()->setHopLimit(1);
 
     send(msg, "ipOut");
@@ -676,7 +676,7 @@ void IGMPv3::sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address des
     msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressReq>()->setDestination(dest);
+    msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
     msg->ensureTag<HopLimitReq>()->setHopLimit(1);
     send(msg, "ipOut");
 }
@@ -940,7 +940,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     if (rt->isMulticastForwardingEnabled()) {
         //Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-        if (msg->getMandatoryTag<L3AddressInd>()->getSource().toIPv4() < ie->ipv4Data()->getIPAddress()) {
+        if (msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4() < ie->ipv4Data()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
         }

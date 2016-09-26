@@ -187,7 +187,7 @@ void IPvXTrafGen::sendPacket()
     IL3AddressType *addressType = destAddr.getAddressType();
     payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
     payload->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    payload->ensureTag<L3AddressReq>()->setDestination(destAddr);
+    payload->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
 
     EV_INFO << "Sending packet: ";
     printPacket(payload);
@@ -208,8 +208,8 @@ void IPvXTrafGen::printPacket(cPacket *msg)
     if (addresses == nullptr)
         addresses = msg->getTag<L3AddressInd>();
     if (addresses != nullptr) {
-        src = addresses->getSource();
-        dest = addresses->getDestination();
+        src = addresses->getSrcAddress();
+        dest = addresses->getDestAddress();
     }
 
     EV_INFO << msg << endl;

@@ -601,7 +601,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
         return;
     }
 
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     int srcPort = packet->getMandatoryTag<L4PortInd>()->getSrcPort();
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     packet->clearTags();
@@ -753,7 +753,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
         return;
     }
 
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     packet->clearTags();
 
@@ -802,7 +802,7 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
         return false;
     }
 
-    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSource();
+    L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
 
     // check that it is not our response (received own multicast message)
     if (rt->isLocalAddress(srcAddr)) {
@@ -1045,7 +1045,7 @@ void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int de
         packet->ensureTag<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
         if (mode == RIPng) {
             socket.setTimeToLive(255);
-            packet->ensureTag<L3AddressReq>()->setSource(addressType->getLinkLocalAddress(destInterface));
+            packet->ensureTag<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
     }
     socket.sendTo(packet, destAddr, destPort);

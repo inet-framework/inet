@@ -156,7 +156,7 @@ void AODVRouting::handleMessage(cMessage *msg)
     }
     else {
         UDPPacket *udpPacket = check_and_cast<UDPPacket *>(msg);
-        L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSource();
+        L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
 
@@ -742,8 +742,8 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
-    addresses->setSource(getSelfIPAddress());
-    addresses->setDestination(destAddr);
+    addresses->setSrcAddress(getSelfIPAddress());
+    addresses->setDestAddress(destAddr);
     udpPacket->ensureTag<HopLimitReq>()->setHopLimit(timeToLive);
 
     if (destAddr.isBroadcast())

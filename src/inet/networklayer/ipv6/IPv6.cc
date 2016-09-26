@@ -685,8 +685,8 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);    // original IP datagram might be needed in upper layers to send back ICMP error message
-    packet->ensureTag<L3AddressInd>()->setSource(datagram->getSrcAddress());
-    packet->ensureTag<L3AddressInd>()->setDestination(datagram->getDestAddress());
+    packet->ensureTag<L3AddressInd>()->setSrcAddress(datagram->getSrcAddress());
+    packet->ensureTag<L3AddressInd>()->setDestAddress(datagram->getDestAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
 
     return packet;
@@ -697,8 +697,8 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket)
     IPv6Datagram *datagram = new IPv6Datagram(transportPacket->getName());
 
     L3AddressReq *addresses = transportPacket->removeMandatoryTag<L3AddressReq>();
-    IPv6Address src = addresses->getSource().toIPv6();
-    IPv6Address dest = addresses->getDestination().toIPv6();
+    IPv6Address src = addresses->getSrcAddress().toIPv6();
+    IPv6Address dest = addresses->getDestAddress().toIPv6();
     delete addresses;
 
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();

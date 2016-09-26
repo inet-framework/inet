@@ -61,7 +61,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                ExternalRoutingCapability.
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
-                IPv4Address srcAddress = helloPacket->getMandatoryTag<L3AddressInd>()->getSource().toIPv4();
+                IPv4Address srcAddress = helloPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;

@@ -402,8 +402,8 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
-    l3AddressInd->setSource(datagram->getSourceAddress());
-    l3AddressInd->setDestination(datagram->getDestinationAddress());
+    l3AddressInd->setSrcAddress(datagram->getSourceAddress());
+    l3AddressInd->setDestAddress(datagram->getDestinationAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
 
     return packet;
@@ -414,8 +414,8 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
 //    datagram->setByteLength(HEADER_BYTES); //TODO parameter
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
-    L3Address src = l3AddressReq->getSource();
-    L3Address dest = l3AddressReq->getDestination();
+    L3Address src = l3AddressReq->getSrcAddress();
+    L3Address dest = l3AddressReq->getDestAddress();
     delete l3AddressReq;
 
     datagram->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getMandatoryTag<PacketProtocolTag>()->getProtocol()));

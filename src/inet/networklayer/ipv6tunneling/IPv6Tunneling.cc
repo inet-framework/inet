@@ -450,9 +450,9 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 
         auto addresses = packet->ensureTag<L3AddressInd>();
         // new src is tunnel entry (either CoA or CN)
-        addresses->setSource(src);
+        addresses->setSrcAddress(src);
         // copy old dest addr
-        addresses->setDestination(dest);
+        addresses->setDestAddress(dest);
 
         send(packet, "upperLayerOut");
     }
@@ -463,8 +463,8 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 
     dgram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     auto addresses = dgram->ensureTag<L3AddressInd>();
-    addresses->setSource(tunnels[vIfIndex].entry);
-    addresses->setDestination(tunnels[vIfIndex].exit);
+    addresses->setSrcAddress(tunnels[vIfIndex].entry);
+    addresses->setDestAddress(tunnels[vIfIndex].exit);
 
     send(dgram, "upperLayerOut");
 #ifdef WITH_xMIPv6
@@ -476,7 +476,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
 void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
 {
     // decapsulation is performed in IPv6 module
-    IPv6Address srcAddr = dgram->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
+    IPv6Address srcAddr = dgram->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
 #ifdef WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel

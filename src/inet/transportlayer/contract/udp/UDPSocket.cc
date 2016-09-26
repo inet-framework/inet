@@ -97,7 +97,7 @@ void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
     auto addressReq = pk->ensureTag<L3AddressReq>();
-    addressReq->setDestination(destAddr);
+    addressReq->setDestAddress(destAddr);
     if (destPort != -1)
         pk->ensureTag<L4PortReq>()->setDestPort(destPort);
     sendToUDP(pk);
@@ -309,8 +309,8 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
 {
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
     auto ports = pk->getMandatoryTag<L4PortInd>();
-    L3Address srcAddr = l3Addresses->getSource();
-    L3Address destAddr = l3Addresses->getDestination();
+    L3Address srcAddr = l3Addresses->getSrcAddress();
+    L3Address destAddr = l3Addresses->getDestAddress();
     int srcPort = ports->getSrcPort();
     int destPort = ports->getDestPort();
     int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();

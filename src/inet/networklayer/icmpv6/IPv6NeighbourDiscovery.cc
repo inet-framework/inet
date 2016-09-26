@@ -758,8 +758,8 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
     msg->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = msg->ensureTag<L3AddressReq>();
-    addressReq->setSource(srcAddr);
-    addressReq->setDestination(destAddr);
+    addressReq->setSrcAddress(srcAddr);
+    addressReq->setDestAddress(destAddr);
     msg->ensureTag<HopLimitReq>()->setHopLimit(255);
 
     send(msg, "ipv6Out");
@@ -1175,7 +1175,7 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs)
 
     //- If the IP source address is the unspecified address, there is no
     //source link-layer address option in the message.
-    if (rs->getMandatoryTag<L3AddressInd>()->getSource().toIPv6().isUnspecified()) {
+    if (rs->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         EV_WARN << "IP source address is unspecified\n";
 
         if (rs->getSourceLinkLayerAddress().isUnspecified() == false) {
@@ -1340,7 +1340,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra)
                 // homeNetworkInfo now carries HoA, global unicast HA address and the home network prefix
                 // update 4.9.07 - CB
                 IPv6Address HoA = ie->ipv6Data()->getGlobalAddress();    //MN's home address
-                IPv6Address HA = ra->getMandatoryTag<L3AddressInd>()->getSource().toIPv6().setPrefix(prefixInfo.getPrefix(), prefixInfo.getPrefixLength());
+                IPv6Address HA = ra->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().setPrefix(prefixInfo.getPrefix(), prefixInfo.getPrefixLength());
                 EV_DETAIL << "The HoA of MN is: " << HoA << ", MN's HA Address is: " << HA
                           << " and the home prefix is " << prefixInfo.getPrefix() << endl;
                 ie->ipv6Data()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength());    //populate the HoA of MN, the HA global scope address and the home network prefix
@@ -1359,7 +1359,7 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
 
     //On receipt of a valid Router Advertisement, a host extracts the source
     //address of the packet and does the following:
-    IPv6Address raSrcAddr = ra->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
+    IPv6Address raSrcAddr = ra->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
     InterfaceEntry *ie = ift->getInterfaceById(ra->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     int ifID = ie->getInterfaceId();
 
@@ -1765,7 +1765,7 @@ bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra)
     //RFC 2461: Section 6.1.2 Validation of Router Advertisement Messages
     /*A node MUST silently discard any received Router Advertisement
        messages that do not satisfy all of the following validity checks:*/
-    IPv6Address srcAddr = ra->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
+    IPv6Address srcAddr = ra->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
     //- IP Source Address is a link-local address.  Routers must use
     //  their link-local address as the source for Router Advertisement
@@ -1888,11 +1888,11 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns)
     }
 
     //- If the IP source address is the unspecified address,
-    if (ns->getMandatoryTag<L3AddressInd>()->getSource().toIPv6().isUnspecified()) {
+    if (ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         EV_WARN << "Source Address is unspecified\n";
 
         //the IP destination address is a solicited-node multicast address.
-        if (ns->getMandatoryTag<L3AddressInd>()->getDestination().toIPv6().matches(IPv6Address::SOLICITED_NODE_PREFIX, 104) == false) {
+        if (ns->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6().matches(IPv6Address::SOLICITED_NODE_PREFIX, 104) == false) {
             EV_WARN << " but IP dest address is not a solicited-node multicast address! NS validation failed!\n";
             result = false;
         }
@@ -1911,7 +1911,7 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns)
 void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitation *ns)
 {
     //Control Information
-    IPv6Address nsSrcAddr = ns->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
+    IPv6Address nsSrcAddr = ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
     //IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
 
     ASSERT(nsSrcAddr.isUnicast() || nsSrcAddr.isUnspecified());
@@ -1942,7 +1942,7 @@ void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolici
 
     //target addr is not tentative addr
     //solicitation processed as described in RFC2461:section 7.2.3
-    if (ns->getMandatoryTag<L3AddressInd>()->getSource().toIPv6().isUnspecified()) {
+    if (ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         EV_INFO << "Address is duplicate! Inform Sender of duplicate address!\n";
         sendSolicitedNA(ns, ie);
     }
@@ -1961,7 +1961,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicita
 
     //Neighbour Solicitation Information
     MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
-    IPv6Address nsL3SrcAddr = ns->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
+    IPv6Address nsL3SrcAddr = ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
     int ifID = ie->getInterfaceId();
 
@@ -2032,7 +2032,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, Inte
 
     IPv6Address naDestAddr;
     //If the source of the solicitation is the unspecified address,
-    if (ns->getMandatoryTag<L3AddressInd>()->getSource().toIPv6().isUnspecified()) {
+    if (ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         /*the node MUST set the Solicited flag to zero and multicast the advertisement
            to the all-nodes address.*/
         na->setSolicitedFlag(false);
@@ -2042,7 +2042,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, Inte
         /*Otherwise, the node MUST set the Solicited flag to one and unicast
            the advertisement to the Source Address of the solicitation.*/
         na->setSolicitedFlag(true);
-        naDestAddr = ns->getMandatoryTag<L3AddressInd>()->getSource().toIPv6();
+        naDestAddr = ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
     }
 
     /*If the Target Address is an anycast address the sender SHOULD delay sending
@@ -2212,7 +2212,7 @@ bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na)
 
     //- If the IP Destination Address is a multicast address the Solicited flag
     //  is zero.
-    if (na->getMandatoryTag<L3AddressInd>()->getDestination().toIPv6().isMulticast()) {
+    if (na->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6().isMulticast()) {
         if (na->getSolicitedFlag() == true) {
             EV_WARN << "Dest Address is multicast address but solicited flag is 0!\n";
             result = false;

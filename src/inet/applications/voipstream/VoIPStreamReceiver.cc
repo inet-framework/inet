@@ -147,9 +147,9 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
     auto ports = vp->getMandatoryTag<L4PortInd>();
 
-    curConn.srcAddr = l3Addresses->getSource();
+    curConn.srcAddr = l3Addresses->getSrcAddress();
     curConn.srcPort = ports->getSrcPort();
-    curConn.destAddr = l3Addresses->getDestination();
+    curConn.destAddr = l3Addresses->getDestAddress();
     curConn.destPort = ports->getDestPort();
     curConn.seqNo = vp->getSeqNo() - 1;
     curConn.timeStamp = vp->getTimeStamp();
@@ -186,8 +186,8 @@ void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
 
     auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
     auto ports = vp->getMandatoryTag<L4PortInd>();
-    L3Address srcAddr = l3Addresses->getSource();
-    L3Address destAddr = l3Addresses->getDestination();
+    L3Address srcAddr = l3Addresses->getSrcAddress();
+    L3Address destAddr = l3Addresses->getDestAddress();
 
     if (curConn.srcAddr != srcAddr
         || curConn.srcPort != ports->getSrcPort()

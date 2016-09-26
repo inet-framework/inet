@@ -174,14 +174,14 @@ void SCTP::handleMessage(cMessage *msg)
 
         if (par("udpEncapsEnabled")) {
             EV_DETAIL << "Size of SCTPMSG=" << sctpmsg->getByteLength() << "\n";
-            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSource();
-            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestination();
+            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestAddress();
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
             EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
         } else {
             auto controlInfo = msg->removeControlInfo();
-            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSource();
-            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestination();
+            srcAddr = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            destAddr = msg->getMandatoryTag<L3AddressInd>()->getDestAddress();
             delete controlInfo;
             EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
         }
@@ -344,8 +344,8 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address
     else {
         msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         auto addresses = msg->ensureTag<L3AddressReq>();
-        addresses->setSource(fromAddr);
-        addresses->setDestination(toAddr);
+        addresses->setSrcAddress(fromAddr);
+        addresses->setDestAddress(toAddr);
 
         send_to_ip(msg);
     }
@@ -372,8 +372,8 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr
 
     msg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
     auto addresses = msg->ensureTag<L3AddressReq>();
-    addresses->setSource(fromAddr);
-    addresses->setDestination(toAddr);
+    addresses->setSrcAddress(fromAddr);
+    addresses->setDestAddress(toAddr);
     send_to_ip(msg);
 }
 
