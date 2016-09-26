@@ -339,49 +339,28 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
 
     L3Address srcAddr;
     L3Address destAddr;
-    bool isMulticast, isBroadcast;
     int srcPort = udpPacket->getSourcePort();
     int destPort = udpPacket->getDestinationPort();
-    int ttl;
 
     int interfaceId = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestAddress();
-    ttl = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
-    cObject *ctrl = udpPacket->removeControlInfo();
+    ASSERT(udpPacket->getControlInfo() == nullptr);
     const Protocol *protocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
-    if (protocol->getId() == Protocol::ipv4.getId()) {
-        isMulticast = destAddr.toIPv4().isMulticast();
-        isBroadcast = destAddr.toIPv4().isLimitedBroadcastAddress();    // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
-    }
-    else if (protocol->getId() == Protocol::ipv6.getId()) {
-        isMulticast = destAddr.toIPv6().isMulticast();
-        isBroadcast = false;    // IPv6 has no broadcast, just various multicasts
-    }
-    else if (protocol->getId() == Protocol::gnp.getId()) {
-        isMulticast = destAddr.isMulticast();
-        isBroadcast = false;    // GNP has no broadcast, just various multicasts
-    }
-    else if (ctrl == nullptr) {
-        throw cRuntimeError("(%s)%s arrived from lower layer without control info",
-                udpPacket->getClassName(), udpPacket->getName());
-    }
-    else {
-        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized control info %s",
-                udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
-    }
+    bool isMulticast = destAddr.isMulticast();
+    bool isBroadcast = destAddr.isBroadcast();
 
     if (!isMulticast && !isBroadcast) {
         // unicast packet, there must be only one socket listening
         SockDesc *sd = findSocketForUnicastPacket(destAddr, destPort, srcAddr, srcPort);
         if (!sd) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            processUndeliverablePacket(udpPacket, ctrl);
+            processUndeliverablePacket(udpPacket);
             return;
         }
         else {
             cPacket *payload = udpPacket->decapsulate();
-            sendUp(payload, sd, srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);
+            sendUp(payload, sd, srcPort, destPort);
             delete udpPacket;
         }
     }
@@ -390,15 +369,15 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         std::vector<SockDesc *> sds = findSocketsForMcastBcastPacket(destAddr, destPort, srcAddr, srcPort, isMulticast, isBroadcast);
         if (sds.empty()) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            processUndeliverablePacket(udpPacket, ctrl);
+            processUndeliverablePacket(udpPacket);
             return;
         }
         else {
             cPacket *payload = udpPacket->decapsulate();
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
-                sendUp(payload->dup(), sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl); // dup() to all but the last one
-            sendUp(payload, sds[i], srcAddr, srcPort, destAddr, destPort, interfaceId, ttl);    // send original to last socket
+                sendUp(payload->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
+            sendUp(payload, sds[i], srcPort, destPort);    // send original to last socket
             delete udpPacket;
         }
     }
@@ -482,7 +461,7 @@ void UDP::processICMPError(cPacket *pk)
     delete pk;
 }
 
-void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
+void UDP::processUndeliverablePacket(UDPPacket *udpPacket)
 {
     emit(droppedPkWrongPortSignal, udpPacket);
     numDroppedWrongPort++;
@@ -718,21 +697,17 @@ std::vector<UDP::SockDesc *> UDP::findSocketsForMcastBcastPacket(const L3Address
     return result;
 }
 
-void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort, int interfaceId, int ttl)
+void UDP::sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
     // send payload with UDPControlInfo up to the application
     payload->setKind(UDP_I_DATA);
     delete payload->removeTag<DispatchProtocolReq>();
-    payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     payload->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     payload->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::udp);
-    payload->ensureTag<L3AddressInd>()->setSrcAddress(srcAddr);
-    payload->ensureTag<L3AddressInd>()->setDestAddress(destAddr);
     payload->ensureTag<L4PortInd>()->setSrcPort(srcPort);
     payload->ensureTag<L4PortInd>()->setDestPort(destPort);
-    payload->ensureTag<HopLimitInd>()->setHopLimit(ttl);
 
     emit(passedUpPkSignal, payload);
     send(payload, "appOut");
@@ -743,7 +718,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 {
     cMessage *notifyMsg = new cMessage("ERROR", UDP_I_ERROR);
     UDPErrorIndication *udpCtrl = new UDPErrorIndication();
-   notifyMsg->setControlInfo(udpCtrl);
+    notifyMsg->setControlInfo(udpCtrl);
     //FIXME notifyMsg->ensureTag<InterfaceInd>()->setInterfaceId(interfaceId);
     notifyMsg->ensureTag<SocketInd>()->setSocketId(sd->sockId);
     notifyMsg->ensureTag<L3AddressInd>()->setSrcAddress(localAddr);
