@@ -26,13 +26,13 @@
 namespace inet {
 
 template<typename T>
-typename std::vector<T>::iterator find(std::vector<T>& v, T& a) { return std::find(v.begin(), v.end(), a); }
+typename std::vector<T>::iterator find(std::vector<T>& v, const T& a) { return std::find(v.begin(), v.end(), a); }
 
 template<typename T>
-typename std::vector<T>::const_iterator find(const std::vector<T>& v, T& a) { return std::find(v.begin(), v.end(), a); }
+typename std::vector<T>::const_iterator find(const std::vector<T>& v, const T& a) { return std::find(v.begin(), v.end(), a); }
 
 template<typename T>
-inline bool contains(const std::vector<T>& v, T& a) { return find(v, a) != v.end(); }
+inline bool contains(const std::vector<T>& v, const T& a) { return find(v, a) != v.end(); }
 
 } // namespace inet
 
