@@ -29,7 +29,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/networklayer/common/DontFragmentTag_m.h"
+#include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -722,7 +722,7 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket)
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
     bool dontFragment = false;
-    if (auto dontFragmentReq = transportPacket->removeTag<DontFragmentReq>()) {
+    if (auto dontFragmentReq = transportPacket->removeTag<FragmentationReq>()) {
         dontFragment = dontFragmentReq->getDontFragment();
         delete dontFragmentReq;
     }

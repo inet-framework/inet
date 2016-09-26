@@ -13,7 +13,7 @@ class TagBase extends cObject;
 //
 // Determines the fragmentation
 //
-class DontFragmentReq extends TagBase
+class FragmentationReq extends TagBase
 {
     bool dontFragment = false;   // "don't fragment" bit
 }
