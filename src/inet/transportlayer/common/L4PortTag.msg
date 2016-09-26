@@ -12,8 +12,8 @@ class TagBase extends cObject;
 
 class L4PortTagBase extends TagBase
 {
-    int srcPort;      // may be unspecified
-    int destPort;     // may be unspecified
+    int srcPort = -1;      // may be unspecified
+    int destPort = -1;     // may be unspecified
 }
 
 //
