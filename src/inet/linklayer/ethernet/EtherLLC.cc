@@ -143,7 +143,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     frame->setControl(0);
     frame->setSsap(ieee802SapReq->getSsap());
     frame->setDsap(ieee802SapReq->getDsap());
-    frame->setDest(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());    // src address is filled in by MAC
+    frame->setDest(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());    // src address is filled in by MAC
     frame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH);
 
     frame->encapsulate(msg);
@@ -169,9 +169,9 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     // decapsulate it and pass up to higher layer
     cPacket *higherlayermsg = frame->decapsulate();
 
-    auto macaddressInd = higherlayermsg->ensureTag<MACAddressInd>();
-    macaddressInd->setSourceAddress(frame->getSrc());
-    macaddressInd->setDestinationAddress(frame->getDest());
+    auto macaddressInd = higherlayermsg->ensureTag<MacAddressInd>();
+    macaddressInd->setSrcAddress(frame->getSrc());
+    macaddressInd->setDestAddress(frame->getDest());
     auto ieee802SapInd = higherlayermsg->ensureTag<Ieee802SapInd>();
     ieee802SapInd->setSsap(frame->getSsap());
     ieee802SapInd->setDsap(frame->getDsap());

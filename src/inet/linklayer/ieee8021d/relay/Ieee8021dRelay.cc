@@ -197,7 +197,7 @@ void Ieee8021dRelay::learn(EtherFrame *frame, int arrivalInterfaceId)
 void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
 {
     unsigned int portNum = bpdu->getMandatoryTag<InterfaceReq>()->getInterfaceId();
-    MACAddress address = bpdu->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
+    MACAddress address = bpdu->getMandatoryTag<MacAddressReq>()->getDestAddress();
 
     if (ifTable->getInterfaceById(portNum) == nullptr)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
@@ -224,9 +224,9 @@ void Ieee8021dRelay::deliverBPDU(EtherFrame *frame)
 {
     BPDU *bpdu = check_and_cast<BPDU *>(frame->decapsulate());
 
-    auto macAddressTag = bpdu->ensureTag<MACAddressInd>();
-    macAddressTag->setSourceAddress(frame->getSrc());
-    macAddressTag->setDestinationAddress(frame->getDest());
+    auto macAddressTag = bpdu->ensureTag<MacAddressInd>();
+    macAddressTag->setSrcAddress(frame->getSrc());
+    macAddressTag->setDestAddress(frame->getDest());
 
     delete frame;    // we have the BPDU packet, so delete the frame
 

@@ -141,9 +141,9 @@ void STP::handleTCN(BPDU *tcn)
     topologyChangeNotification = true;
 
     int arrivalGate = tcn->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    MACAddressInd *addressInd = tcn->removeMandatoryTag<MACAddressInd>();
-    MACAddress srcAddress = addressInd->getSourceAddress();
-    MACAddress destAddress = addressInd->getDestinationAddress();
+    MacAddressInd *addressInd = tcn->removeMandatoryTag<MacAddressInd>();
+    MACAddress srcAddress = addressInd->getSrcAddress();
+    MACAddress destAddress = addressInd->getDestAddress();
     delete addressInd;
 
     // send ACK to the sender
@@ -153,8 +153,8 @@ void STP::handleTCN(BPDU *tcn)
     if (!isRoot) {
         tcn->clearTags();
         tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-        tcn->ensureTag<MACAddressReq>()->setSourceAddress(srcAddress);
-        tcn->ensureTag<MACAddressReq>()->setDestinationAddress(destAddress);
+        tcn->ensureTag<MacAddressReq>()->setSrcAddress(srcAddress);
+        tcn->ensureTag<MacAddressReq>()->setDestAddress(destAddress);
         send(tcn, "relayOut");
     }
     else
@@ -164,7 +164,7 @@ void STP::handleTCN(BPDU *tcn)
 void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, bool tcaFlag)
 {
     BPDU *bpdu = new BPDU();
-    bpdu->ensureTag<MACAddressReq>()->setDestinationAddress(address);
+    bpdu->ensureTag<MacAddressReq>()->setDestAddress(address);
     bpdu->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
     bpdu->setName("BPDU");
@@ -213,7 +213,7 @@ void STP::generateTCN()
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
 
-            tcn->ensureTag<MACAddressReq>()->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
+            tcn->ensureTag<MacAddressReq>()->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
             tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
 
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;

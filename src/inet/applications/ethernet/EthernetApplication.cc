@@ -101,7 +101,7 @@ void EthernetApplication::sendPacket()
     long respLen = respLength->longValue();
     datapacket->setResponseBytes(respLen);
 
-    datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
+    datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
 
     send(datapacket, "out");
     packetsSent++;
@@ -117,7 +117,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     if (dynamic_cast<EtherAppReq *>(msg)) {
         EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
         emit(rcvdPkSignal, req);
-        MACAddress srcAddr = req->getMandatoryTag<MACAddressInd>()->getSourceAddress();
+        MACAddress srcAddr = req->getMandatoryTag<MacAddressInd>()->getSrcAddress();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
 
@@ -144,7 +144,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
 
 void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& destAddr)
 {
-    datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destAddr);
+    datapacket->ensureTag<MacAddressReq>()->setDestAddress(destAddr);
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");
 }

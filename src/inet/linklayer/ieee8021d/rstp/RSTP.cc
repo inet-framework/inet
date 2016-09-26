@@ -276,7 +276,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
     // incoming BPDU handling
     // checking message age
     int arrivalInterfaceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    MACAddress src = frame->getMandatoryTag<MACAddressInd>()->getSourceAddress();
+    MACAddress src = frame->getMandatoryTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "BPDU received at port " << arrivalInterfaceId << "." << endl;
     if (frame->getMessageAge() < maxAge) {
         // checking TC
@@ -595,9 +595,9 @@ void RSTP::sendTCNtoRoot()
                 frame->setForwardDelay(forwardDelay);
                 if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
                     frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-                auto macAddressReq = frame->ensureTag<MACAddressReq>();
-                macAddressReq->setSourceAddress(bridgeAddress);
-                macAddressReq->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
+                auto macAddressReq = frame->ensureTag<MacAddressReq>();
+                macAddressReq->setSrcAddress(bridgeAddress);
+                macAddressReq->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
                 frame->ensureTag<InterfaceReq>()->setInterfaceId(r);
                 send(frame, "relayOut");
             }
@@ -656,9 +656,9 @@ void RSTP::sendBPDU(int interfaceId)
         frame->setForwardDelay(forwardDelay);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-        auto macAddressReq = frame->ensureTag<MACAddressReq>();
-        macAddressReq->setSourceAddress(bridgeAddress);
-        macAddressReq->setDestinationAddress(MACAddress::STP_MULTICAST_ADDRESS);
+        auto macAddressReq = frame->ensureTag<MacAddressReq>();
+        macAddressReq->setSrcAddress(bridgeAddress);
+        macAddressReq->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
         frame->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
         send(frame, "relayOut");
     }

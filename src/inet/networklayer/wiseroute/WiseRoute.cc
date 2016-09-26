@@ -379,7 +379,7 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 void WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
-    pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
+    pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
 }
 
 } // namespace inet

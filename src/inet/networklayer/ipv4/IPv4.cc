@@ -873,7 +873,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
 
     // add control info with MAC address
     packet->ensureTag<EtherTypeReq>()->setEtherType(etherType);
-    packet->ensureTag<MACAddressReq>()->setDestinationAddress(macAddress);
+    packet->ensureTag<MacAddressReq>()->setDestAddress(macAddress);
     packet->removeTag<DispatchProtocolReq>();         // send to NIC
 
     sendPacketToNIC(packet, ie);

@@ -185,7 +185,7 @@ void EtherTrafGen::sendBurstPackets()
         datapacket->setByteLength(len);
 
         datapacket->ensureTag<EtherTypeReq>()->setEtherType(etherType);
-        datapacket->ensureTag<MACAddressReq>()->setDestinationAddress(destMACAddress);
+        datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B type=" << etherType << "\n";
         emit(sentPkSignal, datapacket);

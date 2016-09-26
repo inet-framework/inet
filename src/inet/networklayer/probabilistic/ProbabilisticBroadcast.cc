@@ -66,9 +66,9 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
 {
     MACAddress macSrcAddr;
     ProbabilisticBroadcastDatagram *m = check_and_cast<ProbabilisticBroadcastDatagram *>(msg);
-    auto macAddressInd = m->getMandatoryTag<MACAddressInd>();
+    auto macAddressInd = m->getMandatoryTag<MacAddressInd>();
     m->setNbHops(m->getNbHops() + 1);
-    macSrcAddr = macAddressInd->getSourceAddress();
+    macSrcAddr = macAddressInd->getSrcAddress();
     delete m->removeControlInfo();
     ++nbDataPacketsReceived;
     nbHops = nbHops + m->getNbHops();
@@ -348,7 +348,7 @@ cPacket *ProbabilisticBroadcast::decapsulate(ProbabilisticBroadcastDatagram *msg
 void ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
     pMsg->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
-    pMsg->ensureTag<MACAddressReq>()->setDestinationAddress(pDestAddr);
+    pMsg->ensureTag<MacAddressReq>()->setDestAddress(pDestAddr);
 }
 
 } // namespace inet

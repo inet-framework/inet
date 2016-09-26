@@ -525,7 +525,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     else {
         // add control info with MAC address
         datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_INET_GENERIC);
-        datagram->ensureTag<MACAddressReq>()->setDestinationAddress(nextHopMAC);
+        datagram->ensureTag<MacAddressReq>()->setDestAddress(nextHopMAC);
         datagram->removeTag<DispatchProtocolReq>();         // send to NIC
         datagram->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);

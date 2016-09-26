@@ -635,7 +635,7 @@ void LMacLayer::findNewSlot()
 cPacket *LMacLayer::decapsulate(LMacFrame *msg)
 {
     cPacket *packet = msg->decapsulate();
-    packet->ensureTag<MACAddressInd>()->setSourceAddress(msg->getSrcAddr());
+    packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
     EV_DETAIL << " message decapsulated " << endl;
@@ -655,7 +655,7 @@ LMacFrame *LMacLayer::encapsulate(cPacket *netwPkt)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    auto dest = netwPkt->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
+    auto dest = netwPkt->getMandatoryTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
     pkt->setDestAddr(dest);
     pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));

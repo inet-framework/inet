@@ -837,7 +837,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *ie, con
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
 {
     datagram->ensureTag<EtherTypeReq>()->setEtherType(ETHERTYPE_IPv6);
-    datagram->ensureTag<MACAddressReq>()->setDestinationAddress(macAddr);
+    datagram->ensureTag<MacAddressReq>()->setDestAddress(macAddr);
     datagram->removeTag<DispatchProtocolReq>();         // send to NIC
     datagram->ensureTag<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     datagram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);

@@ -97,15 +97,15 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV_DETAIL << "Encapsulating higher layer packet `" << msg->getName() << "' for MAC\n";
 
-    auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
+    auto macAddressReq = msg->getMandatoryTag<MacAddressReq>();
     auto etherTypeTag = msg->getTag<EtherTypeReq>();
     EtherFrame *frame = nullptr;
 
     if (useSNAP) {
         EtherFrameWithSNAP *snapFrame = new EtherFrameWithSNAP(msg->getName());
 
-        snapFrame->setSrc(macAddressReq->getSourceAddress());    // if blank, will be filled in by MAC
-        snapFrame->setDest(macAddressReq->getDestinationAddress());
+        snapFrame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
+        snapFrame->setDest(macAddressReq->getDestAddress());
         snapFrame->setOrgCode(0);
         if (etherTypeTag)
             snapFrame->setLocalcode(etherTypeTag->getEtherType());
@@ -114,8 +114,8 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     else {
         EthernetIIFrame *eth2Frame = new EthernetIIFrame(msg->getName());
 
-        eth2Frame->setSrc(macAddressReq->getSourceAddress());    // if blank, will be filled in by MAC
-        eth2Frame->setDest(macAddressReq->getDestinationAddress());
+        eth2Frame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
+        eth2Frame->setDest(macAddressReq->getDestAddress());
         if (etherTypeTag)
             eth2Frame->setEtherType(etherTypeTag->getEtherType());
         frame = eth2Frame;
@@ -137,9 +137,9 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     cPacket *higherlayermsg = frame->decapsulate();
 
     // add Ieee802Ctrl to packet
-    auto macAddressInd = higherlayermsg->ensureTag<MACAddressInd>();
-    macAddressInd->setSourceAddress(frame->getSrc());
-    macAddressInd->setDestinationAddress(frame->getDest());
+    auto macAddressInd = higherlayermsg->ensureTag<MacAddressInd>();
+    macAddressInd->setSrcAddress(frame->getSrc());
+    macAddressInd->setDestAddress(frame->getDest());
     int etherType = -1;
     if (auto eth2frame = dynamic_cast<EthernetIIFrame *>(frame)) {
         etherType = eth2frame->getEtherType();

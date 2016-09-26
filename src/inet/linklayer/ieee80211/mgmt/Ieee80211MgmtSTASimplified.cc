@@ -72,7 +72,7 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
     frame->setReceiverAddress(accessPointAddress);
 
     // destination address is in address3
-    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
+    MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
     ASSERT(!dest.isUnspecified());
     frame->setAddress3(dest);
     auto ethTypeTag = msg->getTag<EtherTypeReq>();
@@ -92,9 +92,9 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
 cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
-    auto macAddressInd = payload->ensureTag<MACAddressInd>();
-    macAddressInd->setSourceAddress(frame->getAddress3());
-    macAddressInd->setDestinationAddress(frame->getReceiverAddress());
+    auto macAddressInd = payload->ensureTag<MacAddressInd>();
+    macAddressInd->setSrcAddress(frame->getAddress3());
+    macAddressInd->setDestAddress(frame->getReceiverAddress());
     if (frame->getType() == ST_DATA_WITH_QOS) {
         int tid = frame->getTid();
         if (tid < 8)

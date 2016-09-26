@@ -155,7 +155,7 @@ void IdealMac::startTransmitting(cPacket *msg)
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
-    MACAddress dest = msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress();
+    MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
     IdealMacFrame *frame = encapsulate(msg);
 
     if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
@@ -252,9 +252,9 @@ IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
 {
     IdealMacFrame *frame = new IdealMacFrame(msg->getName());
     frame->setByteLength(headerLength);
-    auto macAddressReq = msg->getMandatoryTag<MACAddressReq>();
-    frame->setSrc(macAddressReq->getSourceAddress());
-    frame->setDest(macAddressReq->getDestinationAddress());
+    auto macAddressReq = msg->getMandatoryTag<MacAddressReq>();
+    frame->setSrc(macAddressReq->getSrcAddress());
+    frame->setDest(macAddressReq->getDestAddress());
     frame->setSrcModuleId(getId());
     auto ethTypeTag = msg->getTag<EtherTypeReq>();
     frame->setNetworkProtocol(ethTypeTag ? ethTypeTag->getEtherType() : -1);
@@ -290,9 +290,9 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
 {
     // decapsulate and attach control info
     cPacket *packet = frame->decapsulate();
-    auto macAddressInd = packet->ensureTag<MACAddressInd>();
-    macAddressInd->setSourceAddress(frame->getSrc());
-    macAddressInd->setDestinationAddress(frame->getDest());
+    auto macAddressInd = packet->ensureTag<MacAddressInd>();
+    macAddressInd->setSrcAddress(frame->getSrc());
+    macAddressInd->setDestAddress(frame->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<EtherTypeInd>()->setEtherType(frame->getNetworkProtocol());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));

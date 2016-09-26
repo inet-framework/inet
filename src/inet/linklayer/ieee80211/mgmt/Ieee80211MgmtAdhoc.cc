@@ -55,7 +55,7 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // copy receiver address from the control info (sender address will be set in MAC)
-    frame->setReceiverAddress(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
+    frame->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
     auto ethTypeTag = msg->getTag<EtherTypeReq>();
     frame->setEtherType(ethTypeTag ? ethTypeTag->getEtherType() : -1);
     auto userPriorityReq = msg->getTag<UserPriorityReq>();
@@ -74,9 +74,9 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
-    auto macAddressInd = payload->ensureTag<MACAddressInd>();
-    macAddressInd->setSourceAddress(frame->getTransmitterAddress());
-    macAddressInd->setDestinationAddress(frame->getReceiverAddress());
+    auto macAddressInd = payload->ensureTag<MacAddressInd>();
+    macAddressInd->setSrcAddress(frame->getTransmitterAddress());
+    macAddressInd->setDestAddress(frame->getReceiverAddress());
     int tid = frame->getTid();
     if (tid < 8)
         payload->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP

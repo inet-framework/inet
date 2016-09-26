@@ -86,9 +86,9 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
 
         case ENCAP_DECAP_TRUE: {
             cPacket *payload = frame->decapsulate();
-            auto macAddressInd = payload->ensureTag<MACAddressInd>();
-            macAddressInd->setSourceAddress(frame->getTransmitterAddress());
-            macAddressInd->setDestinationAddress(frame->getAddress3());
+            auto macAddressInd = payload->ensureTag<MacAddressInd>();
+            macAddressInd->setSrcAddress(frame->getTransmitterAddress());
+            macAddressInd->setDestAddress(frame->getAddress3());
             int tid = frame->getTid();
             if (tid < 8)
                 payload->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
@@ -192,8 +192,8 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
             frame->setFromDS(true);
 
             // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
-            frame->setAddress3(msg->getMandatoryTag<MACAddressReq>()->getSourceAddress());
-            frame->setReceiverAddress(msg->getMandatoryTag<MACAddressReq>()->getDestinationAddress());
+            frame->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getSrcAddress());
+            frame->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
             frame->setEtherType(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
             auto userPriorityReq = msg->getTag<UserPriorityReq>();
             if (userPriorityReq != nullptr) {
