@@ -48,11 +48,8 @@ std::ostream& FreeSpacePathLoss::printToStream(std::ostream& stream, int level) 
 
 double FreeSpacePathLoss::computeFreeSpacePathLoss(m waveLength, m distance, double alpha, double systemLoss) const
 {
-    // factor = (waveLength / distance) ^ alpha / (16 * pi ^ 2 * systemLoss)
-    double ratio = (waveLength / distance).get();
-    // this check allows to get the same result from the GPU and the CPU when the alpha is exactly 2
-    double raisedRatio = alpha == 2.0 ? ratio * ratio : pow(ratio, alpha);
-    return distance.get() == 0.0 ? 1.0 : raisedRatio / (16.0 * M_PI * M_PI * systemLoss);
+    // factor = waveLength ^ 2 / (16 * PI ^ 2 * systemLoss * distance ^ alpha)
+    return distance.get() == 0.0 ? 1.0 : (waveLength * waveLength).get() / (16 * M_PI * M_PI * systemLoss * pow(distance.get(), alpha));
 }
 
 double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
@@ -63,8 +60,9 @@ double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m 
 
 m FreeSpacePathLoss::computeRange(mps propagationSpeed, Hz frequency, double loss) const
 {
+    // distance = (waveLength ^ 2 / (16 * PI ^ 2 * systemLoss * loss)) ^ (1 / alpha)
     m waveLength = propagationSpeed / frequency;
-    return waveLength / pow(loss * 16.0 * M_PI * M_PI * systemLoss, 1.0 / alpha);
+    return m(pow((waveLength * waveLength).get() / (16.0 * M_PI * M_PI * systemLoss * loss), 1.0 / alpha));
 }
 
 } // namespace physicallayer
