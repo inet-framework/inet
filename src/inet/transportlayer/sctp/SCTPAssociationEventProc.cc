@@ -144,7 +144,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((PK(msg)->decapsulate()));
     auto iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.sentBytes += smsg->getBitLength() / 8;
+    iter->second.sentBytes += smsg->getByteLength();
 
     // ------ Prepare SCTPDataMsg -----------------------------------------
     const uint32 streamId = sendCommand->getSid();
@@ -249,7 +249,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
         datMsg->setBooksize(smsg->getByteLength() + state->header);
     }
 
-    qCounter.roomSumSendStreams += ADD_PADDING(smsg->getBitLength() / 8 + SCTP_DATA_CHUNK_LENGTH);
+    qCounter.roomSumSendStreams += ADD_PADDING(smsg->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
     qCounter.bookedSumSendStreams += datMsg->getBooksize();
     // Add chunk size to sender buffer size
     state->sendBuffer += smsg->getByteLength();

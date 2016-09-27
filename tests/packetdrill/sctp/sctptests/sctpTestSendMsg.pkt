@@ -1,0 +1,30 @@
+
++0.0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0.0 fcntl(3, F_GETFL) = 0x02 (flags O_RDWR)
++0.0 fcntl(3, F_SETFL, O_RDWR | O_NONBLOCK) = 0
+//+0.0 setsockopt(3, IPPROTO_SCTP, SCTP_FRAGMENT_INTERLEAVE, [2], 4) = 0
+//+0.0 setsockopt(3, IPPROTO_SCTP, SCTP_INTERLEAVING_SUPPORTED, {assoc_value=1}, 8) = 0
++0.0 setsockopt(3, IPPROTO_SCTP, SCTP_INITMSG, {sinit_num_ostreams=1,
+                                                sinit_max_instreams=1,
+                                                sinit_max_attempts=0,
+                                                sinit_max_init_timeo=0}, 8) = 0
++0.0 bind(3, ..., ...) = 0
++0.0 listen(3, 1) = 0
+// Establish an association supporting I-DATA.
++0.0 < sctp: INIT[flgs=0, tag=1, a_rwnd=1500, os=1, is=1, tsn=1]
++0.0 > sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=..., os=1, is=1, tsn=1, ...]
++0.1 < sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
++0.0 > sctp: COOKIE_ACK[flgs=0]
++0.0 accept(3, ..., ...) = 4
++0.0 close(3) = 0
+// Send a complete unordered user message.
++0.0 sctp_sendmsg(4, ..., 1000, ..., ..., 1234, SCTP_UNORDERED, 0, 0, 0) = 1000
+//+0       write(4, ..., 1000) = 1000
++0     > sctp: DATA[flgs=UBE, len=1016, tsn=1, sid=0, ssn=0, ppid=1234]
+//+0.0 > sctp: I-DATA[flgs=UBE, len=1020, tsn=1, sid=0, mid=0, ppid=1234]
++0.0 < sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=1500, gaps=[], dups=[]]
+// Tear down the association.
++0.1 < sctp: SHUTDOWN[flgs=0, cum_tsn=1]
++0.0 > sctp: SHUTDOWN_ACK[flgs=0]
++0.1 < sctp: SHUTDOWN_COMPLETE[flgs=0]
++0.0 close(4) = 0

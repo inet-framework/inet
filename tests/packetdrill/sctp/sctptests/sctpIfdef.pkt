@@ -36,7 +36,7 @@
 +0.0 bind(3, ..., ...) = 0
 +0.0 listen(3, 1) = 0
 // Establish an association.
-+0.0 < sctp: INIT[flgs=0, tag=1, a_rwnd=1500, os=1, is=1, tsn=1, ...]
++0.0 < sctp: INIT[flgs=0, tag=1, a_rwnd=1500, os=1, is=1, tsn=1]
 +0.0 > sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=..., os=1, is=1, tsn=1, ...]
 +0.1 < sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
 +0.0 > sctp: COOKIE_ACK[flgs=0]

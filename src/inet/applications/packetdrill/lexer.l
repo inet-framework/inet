@@ -247,6 +247,8 @@ sack                return TCPSACK;
 sackOK              return SACKOK;
 TS                  return TIMESTAMP;
 val                 return VAL;
+htons               return _HTONS_;
+htonl               return _HTONL_;
 win                 return WIN;
 wscale              return WSCALE;
 sctp                return MYSCTP;

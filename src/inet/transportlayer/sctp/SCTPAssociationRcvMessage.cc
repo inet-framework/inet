@@ -248,7 +248,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 if (!(fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED || fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)) {
                     SCTPDataChunk *dataChunk;
                     dataChunk = check_and_cast<SCTPDataChunk *>(header);
-                    if ((dataChunk->getByteLength() - 16) > 0) {
+                    if ((dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH) > 0) {
                         dacPacketsRcvd++;
                         const SCTPEventCode event = processDataArrived(dataChunk);
                         if (event == SCTP_E_DELIVERED) {
@@ -774,10 +774,12 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
                 for (uint32 i = 0; i < initAckChunk->getSepChunksArraySize(); i++) {
                     if (initAckChunk->getSepChunks(i) == STREAM_RESET) {
                         state->peerStreamReset = true;
+                        EV_DETAIL << "peer supports STREAM_RESET" << endl;
                         continue;
                     }
                     if (initAckChunk->getSepChunks(i) == PKTDROP) {
                         state->peerPktDrop = true;
+                        EV_DETAIL << "peer supports PKTDROP" << endl;
                         continue;
                     }
                 }
@@ -2115,7 +2117,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
     calculateRcvBuffer();
 
     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(dataChunk->decapsulate());
-    dataChunk->setBitLength(SCTP_DATA_CHUNK_LENGTH * 8);
+    dataChunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
     dataChunk->encapsulate(smsg);
     const uint32 payloadLength = dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH;
     EV_DETAIL << "state->bytesRcvd=" << state->bytesRcvd << endl;

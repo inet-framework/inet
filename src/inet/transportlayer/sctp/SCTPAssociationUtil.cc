@@ -2606,8 +2606,8 @@ void SCTPAssociation::pmStartPathManagement()
         if (path->pmtu < state->assocPmtu) {
             state->assocPmtu = path->pmtu;
         }
-        if (state->fragPoint > state->assocPmtu) {
-            state->fragPoint = state->assocPmtu;
+        if (state->fragPoint > path->pmtu - IP_HEADER_LENGTH - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH) {
+            state->fragPoint = path->pmtu - IP_HEADER_LENGTH - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH;
         }
         initCCParameters(path);
         path->pathRto = (double)sctpMain->getRtoInitial();

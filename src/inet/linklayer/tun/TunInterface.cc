@@ -31,13 +31,15 @@ simsignal_t TunInterface::packetReceivedFromUpperSignal = registerSignal("packet
 void TunInterface::initialize(int stage)
 {
     MACBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LINK_LAYER)
         registerInterface();
 }
 
 InterfaceEntry *TunInterface::createInterfaceEntry()
 {
-    return new InterfaceEntry(this);
+    InterfaceEntry *e = new InterfaceEntry(this);
+    e->setMtu(par("mtu").longValue());
+    return e;
 }
 
 void TunInterface::handleMessage(cMessage *msg)

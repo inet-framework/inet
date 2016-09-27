@@ -571,6 +571,8 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
         syscallAccept(syscall, args, &error);
     } else if (!strcmp(name, "setsockopt")) {
         syscallSetsockopt(syscall, args, &error);
+    } else if (!strcmp(name, "sctp_sendmsg")) {
+        syscallSctpSendmsg(syscall, args, &error);
     } else {
         EV_INFO << "System call %s not known (yet)." << name;
     }
@@ -953,6 +955,74 @@ int PacketDrillApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, ch
     return STATUS_OK;
 }
 
+int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *args, char **error)
+{
+    int script_fd, count;
+    PacketDrillExpression *exp;
+    uint32 flags, ppid, ttl, context;
+    uint16 stream_no;
+
+    if (args->getLength() != 10)
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(0);
+    if (!exp || exp->getS32(&script_fd, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(1);
+    if (!exp || (exp->getType() != EXPR_ELLIPSIS))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(2);
+    if (!exp || exp->getS32(&count, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(3);
+    /*ToDo: handle address parameter */
+    if (!exp || (exp->getType() != EXPR_ELLIPSIS))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(4);
+    /*ToDo: handle tolen parameter */
+    if (!exp || (exp->getType() != EXPR_ELLIPSIS))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(5);
+    if (!exp || exp->getU32(&ppid, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(6);
+    if (!exp || exp->getU32(&flags, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(7);
+    if (!exp || exp->getU16(&stream_no, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(8);
+    if (!exp || exp->getU32(&ttl, error))
+        return STATUS_ERR;
+    exp = (PacketDrillExpression *)args->get(9);
+    if (!exp || exp->getU32(&context, error))
+        return STATUS_ERR;
+
+    cPacket* cmsg = new cPacket("AppData");
+    SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
+    uint32 sendBytes = syscall->result->getNum();
+    msg->setDataArraySize(sendBytes);
+    for (uint32 i = 0; i < sendBytes; i++)
+        msg->setData(i, 'a');
+
+    msg->setDataLen(sendBytes);
+    msg->setEncaps(false);
+    msg->setByteLength(sendBytes);
+    cmsg->encapsulate(msg);
+
+    SCTPSendInfo* sendCommand = new SCTPSendInfo;
+    sendCommand->setLast(true);
+    sendCommand->setAssocId(sctpAssocId);
+    sendCommand->setSid(stream_no);
+    sendCommand->setPpid(ppid);
+    if (flags == SCTP_UNORDERED) {
+        sendCommand->setSendUnordered(true);
+    }
+    cmsg->setControlInfo(sendCommand);
+
+    sctpSocket.sendMsg(cmsg);
+    return STATUS_OK;
+}
+
 int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error)
 {
     int script_fd, count;
@@ -1218,6 +1288,7 @@ bool PacketDrillApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram 
             SCTPMessage *storedSctp = check_and_cast<SCTPMessage *>(storedDatagram->decapsulate());
             SCTPMessage *liveSctp = check_and_cast<SCTPMessage *>(liveDatagram->decapsulate());
             if (!(compareSctpPacket(storedSctp, liveSctp))) {
+                EV_DETAIL << "SCTP packets are not the same" << endl;
                 return false;
             }
             delete storedSctp;
@@ -1492,13 +1563,11 @@ bool PacketDrillApp::compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitC
     peerCumTsn = initLocalTsn - 1;
 
     if (!(flags & FLAG_INIT_CHUNK_TSN_NOCHECK))
-        if (!(storedInitChunk->getInitTSN() + localDiffTsn == liveInitChunk->getInitTSN())) {
+        if (!(storedInitChunk->getInitTSN() + localDiffTsn == liveInitChunk->getInitTSN()))
             return false;
-        }
     if (!(flags & FLAG_INIT_CHUNK_TAG_NOCHECK))
-        if (!(storedInitChunk->getInitTag() == liveInitChunk->getInitTag())) {
+        if (!(storedInitChunk->getInitTag() == liveInitChunk->getInitTag()))
             return false;
-        }
 
     if (!(flags & FLAG_INIT_CHUNK_A_RWND_NOCHECK))
         if (!(storedInitChunk->getA_rwnd() == liveInitChunk->getA_rwnd()))
@@ -1523,12 +1592,9 @@ bool PacketDrillApp::compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, 
     initPeerTsn = liveInitAckChunk->getInitTSN();
     localCumTsn = initPeerTsn - 1;
     peerCumTsn = initLocalTsn - 1;
-
-    if (!(flags & FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK)) {
+    if (!(flags & FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK))
         if (!(storedInitAckChunk->getA_rwnd() == liveInitAckChunk->getA_rwnd()))
             return false;
-    }
-
     if (!(flags & FLAG_INIT_ACK_CHUNK_OS_NOCHECK))
         if (!(min(storedInitAckChunk->getNoOutStreams(), peerInStreams) == liveInitAckChunk->getNoOutStreams()))
             return false;
@@ -1536,9 +1602,8 @@ bool PacketDrillApp::compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, 
         if (!(min(storedInitAckChunk->getNoInStreams(), peerOutStreams) == liveInitAckChunk->getNoInStreams()))
             return false;
     if (!(flags & FLAG_INIT_ACK_CHUNK_TSN_NOCHECK))
-        if (!(storedInitAckChunk->getInitTSN() + localDiffTsn == liveInitAckChunk->getInitTSN())) {
+        if (!(storedInitAckChunk->getInitTSN() + localDiffTsn == liveInitAckChunk->getInitTSN()))
             return false;
-        }
     peerCookie = check_and_cast<SCTPCookie*>(liveInitAckChunk->getStateCookie());
     peerCookieLength = peerCookie->getByteLength();
     return true;
