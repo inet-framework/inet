@@ -32,7 +32,7 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
-#include "inet/networklayer/common/MulticastLoopTag_m.h"
+#include "inet/networklayer/common/MulticastTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -334,8 +334,8 @@ void UDP::processPacketFromApp(cPacket *appData)
     udpPacket->setByteLength(UDP_HEADER_BYTES);
     udpPacket->encapsulate(appData);
 
-    if (udpPacket->getTag<MulticastLoopReq>() == nullptr)
-        udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(sd->multicastLoop);
+    if (udpPacket->getTag<MulticastReq>() == nullptr)
+        udpPacket->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
     if (sd->ttl != -1 && udpPacket->getTag<HopLimitReq>() == nullptr)
         udpPacket->ensureTag<HopLimitReq>()->setHopLimit(sd->ttl);
     if (udpPacket->getTag<DscpReq>() == nullptr)

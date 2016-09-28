@@ -13,7 +13,7 @@ class TagBase extends cObject;
 //
 // Determines the multicast loop mode
 //
-class MulticastLoopReq extends TagBase
+class MulticastReq extends TagBase
 {
     bool multicastLoop = false;   // if true, sent multicast datagrams will be looped back
 }

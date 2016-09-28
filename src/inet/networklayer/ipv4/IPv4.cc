@@ -34,7 +34,7 @@
 #include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/common/MulticastLoopTag_m.h"
+#include "inet/networklayer/common/MulticastTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -309,7 +309,7 @@ void IPv4::handlePacketFromHL(cPacket *packet)
 void IPv4::datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
 {
     bool multicastLoop = false;
-    MulticastLoopReq *mcr = datagram->getTag<MulticastLoopReq>();
+    MulticastReq *mcr = datagram->getTag<MulticastReq>();
     if (mcr != nullptr) {
         multicastLoop = mcr->getMulticastLoop();
     }
