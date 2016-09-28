@@ -292,33 +292,80 @@ void UDP::processCommandFromApp(cMessage *msg)
 void UDP::processPacketFromApp(cPacket *appData)
 {
     L3Address srcAddr, destAddr;
+    int srcPort = -1, destPort = -1;
 
     int socketId = appData->getMandatoryTag<SocketReq>()->getSocketId();
     SockDesc *sd = getOrCreateSocket(socketId);
 
-    auto addressReq = appData->getTag<L3AddressReq>();
-    if (addressReq) {
-        srcAddr = addressReq->getSrcAddress();
-        destAddr = addressReq->getDestAddress();
-    }
-    if (destAddr.isUnspecified())
-        destAddr = sd->remoteAddr;
-    int destPort = sd->remotePort;
-    auto portsReq = appData->getTag<L4PortReq>();
-    if (portsReq)
-        destPort = portsReq->getDestPort();
-    if (destAddr.isUnspecified() || destPort == -1)
-        throw cRuntimeError("send: missing destination address or port when sending over unconnected port");
+    auto addressReq = appData->ensureTag<L3AddressReq>();
+    srcAddr = addressReq->getSrcAddress();
+    destAddr = addressReq->getDestAddress();
+
     if (srcAddr.isUnspecified())
-        srcAddr = sd->localAddr;
+        addressReq->setSrcAddress(srcAddr = sd->localAddr);
+    if (destAddr.isUnspecified())
+        addressReq->setDestAddress(destAddr = sd->remoteAddr);
+    if (auto portsReq = appData->removeTag<L4PortReq>()) {
+        srcPort = portsReq->getSrcPort();
+        destPort = portsReq->getDestPort();
+        delete portsReq;
+    }
+    if (srcPort == -1)
+        srcPort = sd->localPort;
+    if (destPort == -1)
+        destPort = sd->remotePort;
 
     auto interfaceReq = appData->getTag<InterfaceReq>();
-    int interfaceId = interfaceReq ? interfaceReq->getInterfaceId() : -1;
-    if (interfaceId == -1 && destAddr.isMulticast()) {
+    ASSERT(interfaceReq == nullptr || interfaceReq->getInterfaceId() != -1);
+
+    if (interfaceReq == nullptr && destAddr.isMulticast()) {
         auto membership = sd->findFirstMulticastMembership(destAddr);
-        interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
+        int interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
+        if (interfaceId != -1)
+            appData->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     }
-    sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
+
+    if (addressReq->getDestAddress().isUnspecified())
+        throw cRuntimeError("send: unspecified destination address");
+    if (destPort <= 0 || destPort > 65535)
+        throw cRuntimeError("send invalid remote port number %d", destPort);
+
+    UDPPacket *udpPacket = createUDPPacket(appData->getName());
+    udpPacket->setByteLength(UDP_HEADER_BYTES);
+    udpPacket->encapsulate(appData);
+
+    if (udpPacket->getTag<MulticastLoopReq>() == nullptr)
+        udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(sd->multicastLoop);
+    if (sd->ttl != -1 && udpPacket->getTag<HopLimitReq>() == nullptr)
+        udpPacket->ensureTag<HopLimitReq>()->setHopLimit(sd->ttl);
+    if (udpPacket->getTag<DscpReq>() == nullptr)
+        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
+
+    // set source and destination port
+    udpPacket->setSourcePort(srcPort);
+    udpPacket->setDestinationPort(destPort);
+    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
+    udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+
+    const Protocol *l3Protocol = nullptr;
+    if (destAddr.getType() == L3Address::IPv4) {
+        // send to IPv4
+        l3Protocol = &Protocol::ipv4;
+    }
+    else if (destAddr.getType() == L3Address::IPv6) {
+        // send to IPv6
+        l3Protocol = &Protocol::ipv6;
+    }
+    else {
+        // send to generic
+        l3Protocol = &Protocol::gnp;
+    }
+    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
+
+    EV_INFO << "Sending app packet " << appData->getName() << " over " << l3Protocol->getName() << ".\n";
+    emit(sentPkSignal, udpPacket);
+    send(udpPacket, "ipOut");
+    numSent++;
 }
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
@@ -342,11 +389,9 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     int srcPort = udpPacket->getSourcePort();
     int destPort = udpPacket->getDestinationPort();
 
-    int interfaceId = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestAddress();
     ASSERT(udpPacket->getControlInfo() == nullptr);
-    const Protocol *protocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
     bool isMulticast = destAddr.isMulticast();
     bool isBroadcast = destAddr.isBroadcast();
 
@@ -727,76 +772,6 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     notifyMsg->ensureTag<L4PortInd>()->setDestPort(remotePort);
 
     send(notifyMsg, "appOut");
-}
-
-void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, const L3Address& destAddr, ushort destPort,
-        int interfaceId, bool multicastLoop, int ttl, unsigned char dscp)
-{
-    if (destAddr.isUnspecified())
-        throw cRuntimeError("send: unspecified destination address");
-    if (destPort <= 0 || destPort > 65535)
-        throw cRuntimeError("send invalid remote port number %d", destPort);
-
-    UDPPacket *udpPacket = createUDPPacket(appData->getName());
-    udpPacket->setByteLength(UDP_HEADER_BYTES);
-    udpPacket->encapsulate(appData);
-
-    // set source and destination port
-    udpPacket->setSourcePort(srcPort);
-    udpPacket->setDestinationPort(destPort);
-    if (interfaceId != -1)
-        udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
-    if (destAddr.getType() == L3Address::IPv4) {
-        // send to IPv4
-        EV_INFO << "Sending app packet " << appData->getName() << " over IPv4.\n";
-        udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(multicastLoop);
-        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
-        udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-        auto addresses = udpPacket->ensureTag<L3AddressReq>();
-        addresses->setSrcAddress(srcAddr.toIPv4());
-        addresses->setDestAddress(destAddr.toIPv4());
-        udpPacket->ensureTag<HopLimitReq>()->setHopLimit(ttl);
-
-        emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
-    }
-    else if (destAddr.getType() == L3Address::IPv6) {
-        // send to IPv6
-        EV_INFO << "Sending app packet " << appData->getName() << " over IPv6.\n";
-        udpPacket->ensureTag<MulticastLoopReq>()->setMulticastLoop(multicastLoop);
-        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
-        udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-        auto addresses = udpPacket->ensureTag<L3AddressReq>();
-        addresses->setSrcAddress(srcAddr.toIPv6());
-        addresses->setDestAddress(destAddr.toIPv6());
-        if (ttl != -1)
-            udpPacket->ensureTag<HopLimitReq>()->setHopLimit(ttl);
-
-        emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
-    }
-    else {
-        // send to generic
-        EV_INFO << "Sending app packet " << appData->getName() << endl;
-        IL3AddressType *addressType = destAddr.getAddressType();
-        //ipControlInfo->setMulticastLoop(multicastLoop);
-        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(dscp);
-        udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
-        udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
-        auto addresses = udpPacket->ensureTag<L3AddressReq>();
-        addresses->setSrcAddress(srcAddr);
-        addresses->setDestAddress(destAddr);
-        udpPacket->ensureTag<HopLimitReq>()->setHopLimit(ttl);
-
-        emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
-    }
-    numSent++;
 }
 
 UDPPacket *UDP::createUDPPacket(const char *name)
