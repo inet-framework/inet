@@ -685,8 +685,9 @@ cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);    // original IP datagram might be needed in upper layers to send back ICMP error message
-    packet->ensureTag<L3AddressInd>()->setSrcAddress(datagram->getSrcAddress());
-    packet->ensureTag<L3AddressInd>()->setDestAddress(datagram->getDestAddress());
+    auto l3AddressInd = packet->ensureTag<L3AddressInd>();
+    l3AddressInd->setSrcAddress(datagram->getSrcAddress());
+    l3AddressInd->setDestAddress(datagram->getDestAddress());
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
 
     return packet;

@@ -613,8 +613,9 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
 
     // original IPv4 datagram might be needed in upper layers to send back ICMP error message
 
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol());
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(transportProtocol);
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(datagram);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
