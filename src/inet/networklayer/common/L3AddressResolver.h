@@ -34,7 +34,7 @@ class IIPv4RoutingTable;
 class IPv6RoutingTable;
 class GenericRoutingTable;
 
-#define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
+#define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MODULEPATH | ADDR_MODULEID)
 
 /**
  * Utility class for finding IPv4 or IPv6 address of a host or router.

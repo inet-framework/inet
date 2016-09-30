@@ -401,7 +401,7 @@ bool L3AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *
 
 bool L3AddressResolver::getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
-    if (!ie->getMacAddress().isUnspecified() && false) {
+    if (!ie->getMacAddress().isUnspecified()) {
         ret = ie->getMacAddress();
         return true;
     }
