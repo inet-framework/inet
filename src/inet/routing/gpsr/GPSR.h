@@ -98,8 +98,8 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processPurgeNeighborsTimer();
 
     // handling UDP packets
-    void sendUDPPacket(UDPPacket *packet, double delay);
-    void processUDPPacket(UDPPacket *packet);
+    void sendUDPPacket(UDPHeader *packet, double delay);
+    void processUDPPacket(UDPHeader *packet);
 
     // handling beacons
     GPSRBeacon *createBeacon();

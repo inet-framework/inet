@@ -23,28 +23,28 @@
 
 namespace inet {
 
-class INET_API UDPPacket : public UDPPacket_Base, public ITransportPacket
+class INET_API UDPHeader : public UDPHeader_Base, public ITransportPacket
 {
   private:
-    void copy(const UDPPacket& other) {}
+    void copy(const UDPHeader& other) {}
 
   public:
-    UDPPacket(const char *name=NULL, int kind=0) : UDPPacket_Base(name,kind) {}
-    UDPPacket(const UDPPacket& other) : UDPPacket_Base(other) {copy(other);}
-    UDPPacket& operator=(const UDPPacket& other) {if (this==&other) return *this; UDPPacket_Base::operator=(other); copy(other); return *this;}
+    UDPHeader(const char *name=NULL) : UDPHeader_Base(name) {}
+    UDPHeader(const UDPHeader& other) : UDPHeader_Base(other) {copy(other);}
+    UDPHeader& operator=(const UDPHeader& other) {if (this==&other) return *this; UDPHeader_Base::operator=(other); copy(other); return *this;}
 
-    virtual UDPPacket *dup() const override { return new UDPPacket(*this); }
+    virtual UDPHeader *dup() const override { return new UDPHeader(*this); }
 
     /**
      * getter/setter for totalLength field of UDP packet
      * if set to -1, then getter returns getByteLength()
      */
-    int getTotalLengthField() const override { return totalLengthField == -1 ? getByteLength() : totalLengthField; }
+    int getTotalLengthField() const override { if (totalLengthField == -1) throw cRuntimeError("invalid totalLength field value=-1 in UDP header"); return totalLengthField; }
 
-    virtual unsigned int getSourcePort() const override { return UDPPacket_Base::getSrcPort(); }
-    virtual void setSourcePort(unsigned int port) override { UDPPacket_Base::setSrcPort(port); }
-    virtual unsigned int getDestinationPort() const override { return UDPPacket_Base::getDestPort(); }
-    virtual void setDestinationPort(unsigned int port) override { UDPPacket_Base::setDestPort(port); }
+    virtual unsigned int getSourcePort() const override { return UDPHeader_Base::getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { UDPHeader_Base::setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return UDPHeader_Base::getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { UDPHeader_Base::setDestPort(port); }
 };
 
 } // namespace inet

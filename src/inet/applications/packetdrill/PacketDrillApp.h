@@ -163,7 +163,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         bool compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram);
 
-        bool compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp);
+        bool compareUdpPacket(UDPHeader *storedUdp, UDPHeader *liveUdp);
 
         bool compareTcpPacket(tcp::TCPSegment *storedTcp, tcp::TCPSegment *liveTcp);
 

@@ -58,7 +58,7 @@ bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
         int srcPort = -1, destPort = -1;
         cPacket *packet = datagram->getEncapsulatedPacket();
 #ifdef WITH_UDP
-        UDPPacket *udpPacket = dynamic_cast<UDPPacket *>(packet);
+        UDPHeader *udpPacket = dynamic_cast<UDPHeader *>(packet);
         if (udpPacket) {
             srcPort = udpPacket->getSourcePort();
             destPort = udpPacket->getDestinationPort();
@@ -98,7 +98,7 @@ bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
         int srcPort = -1, destPort = -1;
         cPacket *packet = datagram->getEncapsulatedPacket();
 #ifdef WITH_UDP
-        UDPPacket *udpPacket = dynamic_cast<UDPPacket *>(packet);
+        UDPHeader *udpPacket = dynamic_cast<UDPHeader *>(packet);
         if (udpPacket) {
             srcPort = udpPacket->getSourcePort();
             destPort = udpPacket->getDestinationPort();

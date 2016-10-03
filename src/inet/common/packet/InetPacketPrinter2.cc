@@ -50,7 +50,7 @@ namespace inet { namespace tcp { class TCPSegment; } }
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UDPPacket.h"
 #else // ifdef WITH_UDP
-namespace inet { class UDPPacket; }
+namespace inet { class UDPHeader; }
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IEEE80211
@@ -94,7 +94,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
     std::string formatRIPPacket(RIPPacket *packet) const;
     std::string formatRadioFrame(RadioFrame *packet) const;
     std::string formatTCPPacket(tcp::TCPSegment *tcpSeg) const;
-    std::string formatUDPPacket(UDPPacket *udpPacket) const;
+    std::string formatUDPPacket(UDPHeader *udpPacket) const;
 
   public:
     InetPacketPrinter2() { showEncapsulatedPackets = true; }
@@ -152,8 +152,8 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-        else if (dynamic_cast<UDPPacket *>(pk)) {
-            out << formatUDPPacket(static_cast<UDPPacket *>(pk));
+        else if (dynamic_cast<UDPHeader *>(pk)) {
+            out << formatUDPPacket(static_cast<UDPHeader *>(pk));
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
@@ -392,7 +392,7 @@ std::string InetPacketPrinter2::formatTCPPacket(tcp::TCPSegment *tcpSeg) const
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatUDPPacket(UDPPacket *udpPacket) const
+std::string InetPacketPrinter2::formatUDPPacket(UDPHeader *udpPacket) const
 {
     std::ostringstream os;
 #ifdef WITH_UDP

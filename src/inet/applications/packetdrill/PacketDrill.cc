@@ -78,7 +78,7 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
                                      uint16 udp_payload_bytes, char **error)
 {
     PacketDrillApp *app = PacketDrill::pdapp;
-    UDPPacket *udpPacket = new UDPPacket("UDPInject");
+    UDPHeader *udpPacket = new UDPHeader("UDPInject");
     udpPacket->setByteLength(8);
     cPacket *payload = new cPacket("payload");
     payload->setByteLength(udp_payload_bytes);

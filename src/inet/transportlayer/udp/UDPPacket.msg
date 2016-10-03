@@ -19,6 +19,7 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/FlatPacket.h"
 }}
 
 namespace inet;
@@ -26,15 +27,18 @@ namespace inet;
 enum UdpConstants{
     UDP_HEADER_BYTES = 8;
 };
+
+class Chunk extends cOwnedObject;
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //
-packet UDPPacket
+class UDPHeader extends Chunk
 {
     @customize(true);
     unsigned short srcPort;
     unsigned short destPort;
-    byteLength = UDP_HEADER_BYTES;
-    int totalLengthField = -1;   // -1 means: getTotalLengthField() uses getByteLength()
+    chunkLength = UDP_HEADER_BYTES;
+    int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
+    bool isChecksumCorrect = true;
 }
 

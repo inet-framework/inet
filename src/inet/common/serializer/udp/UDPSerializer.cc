@@ -38,7 +38,7 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(UDPPacket, IP_PROT, IP_PROT_UDP, UDPSerializer);
+Register_Serializer(UDPHeader, IP_PROT, IP_PROT_UDP, UDPSerializer);
 
 /*
  * Udp protocol header.
@@ -57,8 +57,8 @@ struct udphdr
 void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
-    const UDPPacket *pkt = check_and_cast<const UDPPacket *>(_pkt);
-    int packetLength = pkt->getByteLength();
+    const UDPHeader *pkt = check_and_cast<const UDPHeader *>(_pkt);
+    int packetLength = pkt->getTotalLengthField();
     b.writeUint16(pkt->getSourcePort());
     b.writeUint16(pkt->getDestinationPort());
     b.writeUint16(pkt->getTotalLengthField());
@@ -78,7 +78,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
-    UDPPacket *pkt = new UDPPacket("parsed-udp");
+    UDPHeader *pkt = new UDPHeader("parsed-udp");
     pkt->setSourcePort(b.readUint16());
     pkt->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();

@@ -183,8 +183,8 @@ void DYMO::processSelfMessage(cMessage *message)
 
 void DYMO::processMessage(cMessage *message)
 {
-    if (dynamic_cast<UDPPacket *>(message))
-        processUDPPacket((UDPPacket *)message);
+    if (dynamic_cast<UDPHeader *>(message))
+        processUDPPacket((UDPHeader *)message);
     else
         throw cRuntimeError("Unknown message");
 }
@@ -391,7 +391,7 @@ void DYMO::processRREQHolddownTimer(RREQHolddownTimer *message)
 // handling UDP packets
 //
 
-void DYMO::sendUDPPacket(UDPPacket *packet, double delay)
+void DYMO::sendUDPPacket(UDPHeader *packet, double delay)
 {
     if (delay == 0)
         send(packet, "ipOut");
@@ -399,7 +399,7 @@ void DYMO::sendUDPPacket(UDPPacket *packet, double delay)
         sendDelayed(packet, delay, "ipOut");
 }
 
-void DYMO::processUDPPacket(UDPPacket *packet)
+void DYMO::processUDPPacket(UDPHeader *packet)
 {
     cPacket *encapsulatedPacket = packet->decapsulate();
     if (DYMOPacket *dymoPacket = dynamic_cast<DYMOPacket *>(encapsulatedPacket)) {
@@ -418,7 +418,7 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
 {
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
-    UDPPacket *udpPacket = new UDPPacket(packet->getName());
+    UDPHeader *udpPacket = new UDPHeader(packet->getName());
     udpPacket->encapsulate(packet);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     // In its default mode of operation, AODVv2 uses the UDP port 269 [RFC5498] to carry protocol packets.

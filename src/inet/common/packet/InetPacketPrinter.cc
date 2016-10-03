@@ -40,7 +40,7 @@ namespace inet { namespace tcp { class TCPSegment; } }
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UDPPacket.h"
 #else // ifdef WITH_UDP
-namespace inet { class UDPPacket; }
+namespace inet { class UDPHeader; }
 #endif // ifdef WITH_UDP
 
 namespace inet {
@@ -49,7 +49,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
     void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TCPSegment *tcpSeg) const;
-    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPPacket *udpPacket) const;
+    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpPacket) const;
     void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
 
   public:
@@ -91,8 +91,8 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-        else if (dynamic_cast<UDPPacket *>(pk)) {
-            printUDPPacket(os, srcAddr, destAddr, static_cast<UDPPacket *>(pk));
+        else if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(pk)) {
+            printUDPPacket(os, srcAddr, destAddr, udpHeader);
             return;
         }
 #endif // ifdef WITH_UDP
@@ -161,11 +161,12 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Ad
 #endif // ifdef WITH_TCP_COMMON
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPPacket *udpPacket) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpPacket) const
 {
 #ifdef WITH_UDP
+
     os << " UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
-       << ": (" << udpPacket->getByteLength() << ")";
+       << ": (" << udpPacket->getChunkByteLength() + udpPacket->get << ")";      //FIXME
 #else // ifdef WITH_UDP
     os << " UDP: " << srcAddr << ".? > " << destAddr << ".?";
 #endif // ifdef WITH_UDP

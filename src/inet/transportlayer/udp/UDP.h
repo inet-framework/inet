@@ -32,7 +32,7 @@ class IPv4ControlInfo;
 class IPv6ControlInfo;
 class ICMP;
 class ICMPv6;
-class UDPPacket;
+class UDPHeader;
 class InterfaceEntry;
 
 const bool DEFAULT_MULTICAST_LOOP = true;
@@ -154,14 +154,14 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual std::vector<SockDesc *> findSocketsForMcastBcastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
     virtual SockDesc *findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort);
     virtual void sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort);
-    virtual void processUndeliverablePacket(UDPPacket *udpPacket);
+    virtual void processUndeliverablePacket(UDPHeader *udpPacket);
     virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet
     virtual void processICMPError(cPacket *icmpErrorMsg);    // TODO use ICMPMessage
 
     // process UDP packets coming from IP
-    virtual void processUDPPacket(UDPPacket *udpPacket);
+    virtual void processUDPPacket(UDPHeader *udpPacket);
 
     // process packets from application
     virtual void processPacketFromApp(cPacket *appData);
@@ -170,7 +170,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void processCommandFromApp(cMessage *msg);
 
     // create a blank UDP packet; override to subclass UDPPacket
-    virtual UDPPacket *createUDPPacket(const char *name);
+    virtual UDPHeader *createUDPPacket(const char *name);
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

@@ -159,7 +159,7 @@ void AODVRouting::handleMessage(cMessage *msg)
         delete icmpPacket;
     }
     else {
-        UDPPacket *udpPacket = check_and_cast<UDPPacket *>(msg);
+        UDPHeader *udpPacket = check_and_cast<UDPHeader *>(msg);
         L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
         AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
@@ -738,7 +738,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
 
-    UDPPacket *udpPacket = new UDPPacket(packet->getName());
+    UDPHeader *udpPacket = new UDPHeader(packet->getName());
     udpPacket->encapsulate(packet);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->setSourcePort(aodvUDPPort);

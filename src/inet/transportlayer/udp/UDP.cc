@@ -22,6 +22,7 @@
 #include "inet/transportlayer/udp/UDP.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/packet/FlatPacket.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -158,8 +159,10 @@ void UDP::handleMessage(cMessage *msg)
 
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
-        if (dynamic_cast<UDPPacket *>(msg) != nullptr)
-            processUDPPacket((UDPPacket *)msg);
+        FlatPacket *packet = check_and_cast<FlatPacket *>(msg);
+        Chunk *header = packet->peekHeader();
+        if (dynamic_cast<UDPHeader *>(header) != nullptr)
+            processUDPPacket((UDPHeader *)header);
         else
             processICMPError(PK(msg)); // assume it's an ICMP error
     }
@@ -330,9 +333,11 @@ void UDP::processPacketFromApp(cPacket *appData)
     if (destPort <= 0 || destPort > 65535)
         throw cRuntimeError("send invalid remote port number %d", destPort);
 
-    UDPPacket *udpPacket = createUDPPacket(appData->getName());
-    udpPacket->setByteLength(UDP_HEADER_BYTES);
-    udpPacket->encapsulate(appData);
+    UDPHeader *udpHeader = new UDPHeader();
+    FlatPacket * udpPacket = new FlatPacket(appData->getName());
+    PacketChunk *dataChunk = new PacketChunk(appData);
+    udpPacket->pushHeader(udpHeader);
+    udpPacket->pushTrailer(dataChunk); //TODO
 
     if (udpPacket->getTag<MulticastReq>() == nullptr)
         udpPacket->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
@@ -342,8 +347,8 @@ void UDP::processPacketFromApp(cPacket *appData)
         udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
 
     // set source and destination port
-    udpPacket->setSourcePort(srcPort);
-    udpPacket->setDestinationPort(destPort);
+    udpHeader->setSourcePort(srcPort);
+    udpHeader->setDestinationPort(destPort);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
     udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
 
@@ -368,14 +373,15 @@ void UDP::processPacketFromApp(cPacket *appData)
     numSent++;
 }
 
-void UDP::processUDPPacket(UDPPacket *udpPacket)
+void UDP::processUDPPacket(UDPHeader *udpHeader)
 {
+    FlatPacket *udpPacket = udpHeader->getOwnerPacket();
     emit(rcvdPkSignal, udpPacket);
 
     // simulate checksum: discard packet if it has bit error
-    EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpPacket->getDestinationPort() << "\n";
+    EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
 
-    if (udpPacket->hasBitError()) {
+    if (udpHeader->getIsChecksumCorrect()) {
         EV_WARN << "Packet has bit error, discarding\n";
         emit(droppedPkBadChecksumSignal, udpPacket);
         numDroppedBadChecksum++;
@@ -386,8 +392,8 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
 
     L3Address srcAddr;
     L3Address destAddr;
-    int srcPort = udpPacket->getSourcePort();
-    int destPort = udpPacket->getDestinationPort();
+    int srcPort = udpHeader->getSourcePort();
+    int destPort = udpHeader->getDestinationPort();
 
     srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestAddress();
@@ -400,7 +406,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         SockDesc *sd = findSocketForUnicastPacket(destAddr, destPort, srcAddr, srcPort);
         if (!sd) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            processUndeliverablePacket(udpPacket);
+            processUndeliverablePacket(udpHeader);
             return;
         }
         else {
@@ -414,7 +420,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         std::vector<SockDesc *> sds = findSocketsForMcastBcastPacket(destAddr, destPort, srcAddr, srcPort, isMulticast, isBroadcast);
         if (sds.empty()) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            processUndeliverablePacket(udpPacket);
+            processUndeliverablePacket(udpHeader);
             return;
         }
         else {
@@ -448,7 +454,7 @@ void UDP::processICMPError(cPacket *pk)
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
         IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
         if (datagram->getDontFragment() || datagram->getFragmentOffset() == 0) {
-            UDPPacket *packet = dynamic_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
+            UDPHeader *packet = dynamic_cast<UDPHeader *>(datagram->getEncapsulatedPacket());
             if (packet) {
                 localAddr = datagram->getSrcAddress();
                 remoteAddr = datagram->getDestAddress();
@@ -468,7 +474,7 @@ void UDP::processICMPError(cPacket *pk)
         IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
         IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
         if (!fh || fh->getFragmentOffset() == 0) {
-            UDPPacket *packet = dynamic_cast<UDPPacket *>(datagram->getEncapsulatedPacket());
+            UDPHeader *packet = dynamic_cast<UDPHeader *>(datagram->getEncapsulatedPacket());
             if (packet) {
                 localAddr = datagram->getSrcAddress();
                 remoteAddr = datagram->getDestAddress();
@@ -506,14 +512,15 @@ void UDP::processICMPError(cPacket *pk)
     delete pk;
 }
 
-void UDP::processUndeliverablePacket(UDPPacket *udpPacket)
+void UDP::processUndeliverablePacket(UDPHeader *udpHeader)
 {
+    FlatPacket *udpPacket = udpHeader->getOwnerPacket();
     emit(droppedPkWrongPortSignal, udpPacket);
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
     char buff[80];
-    snprintf(buff, sizeof(buff), "Port %d unreachable", udpPacket->getDestinationPort());
+    snprintf(buff, sizeof(buff), "Port %d unreachable", udpHeader->getDestinationPort());
     udpPacket->setName(buff);
     const Protocol *protocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
 
@@ -774,9 +781,9 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     send(notifyMsg, "appOut");
 }
 
-UDPPacket *UDP::createUDPPacket(const char *name)
+UDPHeader *UDP::createUDPPacket(const char *name)
 {
-    return new UDPPacket(name);
+    return new UDPHeader(name);
 }
 
 UDP::SockDesc *UDP::getSocketById(int sockId)

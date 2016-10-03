@@ -426,7 +426,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     }
 }
 
-void PacketDump::udpDump(bool l2r, const char *label, UDPPacket *udppkt,
+void PacketDump::udpDump(bool l2r, const char *label, UDPHeader *udppkt,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     std::ostream& out = *outp;
@@ -500,8 +500,8 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
     else
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-    if (dynamic_cast<UDPPacket *>(encapmsg)) {
-        udpDump(l2r, label, (UDPPacket *)encapmsg, dgram->getSrcAddress().str(),
+    if (dynamic_cast<UDPHeader *>(encapmsg)) {
+        udpDump(l2r, label, (UDPHeader *)encapmsg, dgram->getSrcAddress().str(),
                 dgram->getDestAddress().str(), comment);
     }
     else

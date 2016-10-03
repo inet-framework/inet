@@ -132,8 +132,8 @@ void GPSR::processSelfMessage(cMessage *message)
 
 void GPSR::processMessage(cMessage *message)
 {
-    if (dynamic_cast<UDPPacket *>(message))
-        processUDPPacket(static_cast<UDPPacket *>(message));
+    if (dynamic_cast<UDPHeader *>(message))
+        processUDPPacket(static_cast<UDPHeader *>(message));
     else
         throw cRuntimeError("Unknown message");
 }
@@ -196,7 +196,7 @@ void GPSR::processPurgeNeighborsTimer()
 // handling UDP packets
 //
 
-void GPSR::sendUDPPacket(UDPPacket *packet, double delay)
+void GPSR::sendUDPPacket(UDPHeader *packet, double delay)
 {
     if (delay == 0)
         send(packet, "ipOut");
@@ -204,7 +204,7 @@ void GPSR::sendUDPPacket(UDPPacket *packet, double delay)
         sendDelayed(packet, delay, "ipOut");
 }
 
-void GPSR::processUDPPacket(UDPPacket *packet)
+void GPSR::processUDPPacket(UDPHeader *packet)
 {
     cPacket *encapsulatedPacket = packet->decapsulate();
     if (dynamic_cast<GPSRBeacon *>(encapsulatedPacket))
@@ -230,7 +230,7 @@ GPSRBeacon *GPSR::createBeacon()
 void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
-    UDPPacket *udpPacket = new UDPPacket(beacon->getName());
+    UDPHeader *udpPacket = new UDPHeader(beacon->getName());
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->encapsulate(beacon);
     udpPacket->setSourcePort(GPSR_UDP_PORT);

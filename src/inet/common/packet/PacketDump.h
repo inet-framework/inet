@@ -29,7 +29,7 @@ namespace inet {
 class IPv4Datagram;
 class IPv6Datagram;
 namespace tcp { class TCPSegment; }
-class UDPPacket;
+class UDPHeader;
 class ARPPacket;
 namespace sctp { class SCTPMessage; }
 
@@ -116,7 +116,7 @@ class INET_API PacketDump
     /**
      * Dumps info about the given UDP packet.
      */
-    void udpDump(bool l2r, const char *label, UDPPacket *udppkt, const std::string& srcAddr,
+    void udpDump(bool l2r, const char *label, UDPHeader *udppkt, const std::string& srcAddr,
             const std::string& destAddr, const char *comment);
 };
 
