@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,11 +23,11 @@ package inet.power.contract;
 // signals, or a CPU consumes energy when the network layer processes packets,
 // or a display consumes energy when it's turned on, etc.
 //
+// @see ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement
 // @author Levente Meszaros
 //
 moduleinterface IEnergyConsumer
 {
     parameters:
         @display("i=block/plug");
-        @signal[powerConsumptionChanged](type=double);
 }

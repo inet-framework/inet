@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,11 +20,11 @@ package inet.power.contract;
 //
 // The energy sink models absorb energy from multiple energy generators.
 //
+// @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergyStorage, ~IEnergyManagement
 // @author Levente Meszaros
 //
 moduleinterface IEnergySink
 {
     parameters:
         @display("i=block/plug");
-        @signal[powerGenerationChanged](type=double);
 }

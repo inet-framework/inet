@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,11 +24,13 @@ namespace inet {
 
 namespace power {
 
+class IEnergySource;
+
 /**
- * This is an interface that should be implemented by energy consumer models to
- * integrate with other parts of the power model. Energy consumers should connect
- * to an energy source that will provide the consumed energy. They should also
- * notify the energy source when the power consumption changes.
+ * This class is a base interface that must be implemented by energy consumer
+ * models to integrate with other parts of the power model. This interface is
+ * extended by various energy consumer interfaces. Actual energy consumer
+ * implementations should implement one of the derived interfaces.
  *
  * See the corresponding NED file for more details.
  *
@@ -40,9 +42,10 @@ class INET_API IEnergyConsumer
     virtual ~IEnergyConsumer() {}
 
     /**
-     * Returns the current power consumption in the range [0, +infinity).
+     * Returns the energy source that provides energy for this energy consumer.
+     * This function never returns nullptr.
      */
-    virtual W getPowerConsumption() const = 0;
+    virtual IEnergySource *getEnergySource() const = 0;
 };
 
 } // namespace power

@@ -15,45 +15,40 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IENERGYGENERATOR_H
-#define __INET_IENERGYGENERATOR_H
+#ifndef __INET_IENERGYMANAGEMENT_H
+#define __INET_IENERGYMANAGEMENT_H
 
-#include "inet/power/base/PowerDefs.h"
+#include "inet/power/contract/IEnergyStorage.h"
 
 namespace inet {
 
 namespace power {
 
-class IEnergySink;
-
 /**
- * This class is a base interface that must be implemented by energy generator
- * models to integrate with other parts of the power model. Energy generators
- * connect to an energy sink that absorbs the generated energy. Energy
- * generators are required to notify their energy sink when their energy
- * generation changes. This interface is extended by various energy generator
- * interfaces. Actual energy generator implementations should implement one of
- * the derived interfaces.
+ * This class is a base interface that must be implemented by energy management
+ * models to integrate with other parts of the power model. This interface is
+ * extended by various energy storage interfaces. Actual energy storage
+ * implementations should implement one of the derived interfaces.
  *
  * See the corresponding NED file for more details.
  *
  * @author Levente Meszaros
  */
-class INET_API IEnergyGenerator
+class INET_API IEnergyManagement
 {
   public:
-    virtual ~IEnergyGenerator() {}
+    virtual ~IEnergyManagement() {}
 
     /**
-     * Returns the energy sink that absorbs energy from this energy generator.
+     * Returns the energy storage that is managed by this energy management.
      * This function never returns nullptr.
      */
-    virtual IEnergySink *getEnergySink() const = 0;
+    virtual IEnergyStorage *getEnergyStorage() const = 0;
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_IENERGYGENERATOR_H
+#endif // ifndef __INET_IENERGYMANAGEMENT_H
 

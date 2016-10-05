@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,15 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/power/contract/IEnergyStorage.h"
+package inet.power.contract;
 
-namespace inet {
-
-namespace power {
-
-simsignal_t IEnergyStorage::residualCapacityChangedSignal = cComponent::registerSignal("residualCapacityChanged");
-
-} // namespace power
-
-} // namespace inet
-
+//
+// The energy management models monitors an energy storage, estimates its state,
+// and controls the consumers and generators to protect the energy storage from
+// operating outside its safe operating area.
+//
+// @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage
+// @author Levente Meszaros
+//
+moduleinterface IEnergyManagement
+{
+    parameters:
+        @display("i=block/plug");
+}
