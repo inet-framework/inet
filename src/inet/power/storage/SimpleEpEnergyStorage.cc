@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,61 +15,44 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/power/storage/SimpleEnergyStorage.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/power/storage/SimpleEpEnergyStorage.h"
 
 namespace inet {
 
 namespace power {
 
-Define_Module(SimpleEnergyStorage);
+Define_Module(SimpleEpEnergyStorage);
 
-SimpleEnergyStorage::SimpleEnergyStorage() :
-    nominalCapacity(J(NaN)),
-    residualCapacity(J(NaN)),
-    printCapacityStep(J(NaN)),
-    lastResidualCapacityUpdate(-1),
-    timer(nullptr),
-    nodeShutdownCapacity(J(NaN)),
-    nodeStartCapacity(J(NaN)),
-    lifecycleController(nullptr),
-    node(nullptr),
-    nodeStatus(nullptr)
-{
-}
-
-SimpleEnergyStorage::~SimpleEnergyStorage()
+SimpleEpEnergyStorage::~SimpleEpEnergyStorage()
 {
     cancelAndDelete(timer);
 }
 
-void SimpleEnergyStorage::initialize(int stage)
+void SimpleEpEnergyStorage::initialize(int stage)
 {
+    EpEnergyStorageBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         nominalCapacity = J(par("nominalCapacity"));
-        residualCapacity = J(par("initialCapacity"));
         printCapacityStep = J(par("printCapacityStep"));
-        nodeShutdownCapacity = J(par("nodeShutdownCapacity"));
-        nodeStartCapacity = J(par("nodeStartCapacity"));
-        lastResidualCapacityUpdate = simTime();
-        emit(residualCapacityChangedSignal, residualCapacity.get());
         timer = new cMessage("timer");
-        if (!std::isnan(nodeStartCapacity.get()) || !std::isnan(nodeShutdownCapacity.get())) {
-            node = findContainingNode(this);
-            nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
+        networkNode = findContainingNode(this);
+        if (networkNode != nullptr) {
+            nodeStatus = dynamic_cast<NodeStatus *>(networkNode->getSubmodule("status"));
             if (!nodeStatus)
                 throw cRuntimeError("Cannot find node status");
             lifecycleController = dynamic_cast<LifecycleController *>(getModuleByPath("lifecycleController"));
             if (!lifecycleController)
                 throw cRuntimeError("Cannot find lifecycle controller");
         }
+        setResidualCapacity(J(par("initialCapacity")));
         scheduleTimer();
         WATCH(residualCapacity);
     }
 }
 
-void SimpleEnergyStorage::handleMessage(cMessage *message)
+void SimpleEpEnergyStorage::handleMessage(cMessage *message)
 {
     if (message == timer) {
         setResidualCapacity(targetCapacity);
@@ -80,57 +63,55 @@ void SimpleEnergyStorage::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void SimpleEnergyStorage::setPowerConsumption(int energyConsumerId, W consumedPower)
+void SimpleEpEnergyStorage::updateTotalPowerConsumption()
 {
-    Enter_Method_Silent();
     updateResidualCapacity();
-    EnergySourceBase::setPowerConsumption(energyConsumerId, consumedPower);
+    EpEnergyStorageBase::updateTotalPowerConsumption();
     scheduleTimer();
 }
 
-void SimpleEnergyStorage::setPowerGeneration(int energyGeneratorId, W generatedPower)
+void SimpleEpEnergyStorage::updateTotalPowerGeneration()
 {
-    Enter_Method_Silent();
     updateResidualCapacity();
-    EnergySinkBase::setPowerGeneration(energyGeneratorId, generatedPower);
+    EpEnergyStorageBase::updateTotalPowerGeneration();
     scheduleTimer();
 }
 
-void SimpleEnergyStorage::executeNodeOperation(J newResidualCapacity)
+void SimpleEpEnergyStorage::executeNodeOperation(J newResidualCapacity)
 {
-    if (!std::isnan(nodeShutdownCapacity.get()) && newResidualCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {
-        EV_WARN << "Capacity reached node shutdown threshold" << endl;
+    if (newResidualCapacity <= J(0) && nodeStatus->getState() == NodeStatus::UP) {
+        EV_WARN << "Energy storage failed" << endl;
         LifecycleOperation::StringMap params;
-        NodeShutdownOperation *operation = new NodeShutdownOperation();
-        operation->initialize(node, params);
-        lifecycleController->initiateOperation(operation);
-    }
-    else if (!std::isnan(nodeStartCapacity.get()) && newResidualCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
-        EV_INFO << "Capacity reached node start threshold" << endl;
-        LifecycleOperation::StringMap params;
-        NodeStartOperation *operation = new NodeStartOperation();
-        operation->initialize(node, params);
+        NodeCrashOperation *operation = new NodeCrashOperation();
+        operation->initialize(networkNode, params);
         lifecycleController->initiateOperation(operation);
     }
 }
 
-void SimpleEnergyStorage::setResidualCapacity(J newResidualCapacity)
+J SimpleEpEnergyStorage::getResidualEnergyCapacity() const
+{
+    const_cast<SimpleEpEnergyStorage *>(this)->updateResidualCapacity();
+    return residualCapacity;
+}
+
+void SimpleEpEnergyStorage::setResidualCapacity(J newResidualCapacity)
 {
     residualCapacity = newResidualCapacity;
     lastResidualCapacityUpdate = simTime();
-    executeNodeOperation(newResidualCapacity);
     if (residualCapacity == J(0))
         EV_WARN << "Energy storage depleted" << endl;
     else if (residualCapacity == nominalCapacity)
         EV_INFO << "Energy storage charged" << endl;
-    emit(residualCapacityChangedSignal, residualCapacity.get());
+    if (networkNode != nullptr)
+        executeNodeOperation(newResidualCapacity);
+    emit(residualEnergyCapacityChangedSignal, residualCapacity.get());
 }
 
-void SimpleEnergyStorage::updateResidualCapacity()
+void SimpleEpEnergyStorage::updateResidualCapacity()
 {
-    simtime_t now = simTime();
-    if (now != lastResidualCapacityUpdate) {
-        J newResidualCapacity = residualCapacity + s((now - lastResidualCapacityUpdate).dbl()) * (totalGeneratedPower - totalConsumedPower);
+    simtime_t currentSimulationTime = simTime();
+    if (currentSimulationTime != lastResidualCapacityUpdate) {
+        J newResidualCapacity = residualCapacity + s((currentSimulationTime - lastResidualCapacityUpdate).dbl()) * (totalPowerGeneration - totalPowerConsumption);
         if (newResidualCapacity < J(0))
             newResidualCapacity = J(0);
         else if (newResidualCapacity > nominalCapacity)
@@ -139,9 +120,9 @@ void SimpleEnergyStorage::updateResidualCapacity()
     }
 }
 
-void SimpleEnergyStorage::scheduleTimer()
+void SimpleEpEnergyStorage::scheduleTimer()
 {
-    W totalPower = totalGeneratedPower - totalConsumedPower;
+    W totalPower = totalPowerGeneration - totalPowerConsumption;
     targetCapacity = residualCapacity;
     if (totalPower > W(0)) {
         targetCapacity = std::isnan(printCapacityStep.get()) ? nominalCapacity : ceil(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
@@ -149,9 +130,6 @@ void SimpleEnergyStorage::scheduleTimer()
         simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
         if (remainingTime == 0)
             targetCapacity += printCapacityStep;
-        // override target capacity if start is needed
-        if (!std::isnan(nodeStartCapacity.get()) && nodeStatus->getState() == NodeStatus::DOWN && residualCapacity < nodeStartCapacity && nodeStartCapacity < targetCapacity)
-            targetCapacity = nodeStartCapacity;
     }
     else if (totalPower < W(0)) {
         targetCapacity = std::isnan(printCapacityStep.get()) ? J(0) : floor(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
@@ -159,9 +137,6 @@ void SimpleEnergyStorage::scheduleTimer()
         simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
         if (remainingTime == 0)
             targetCapacity -= printCapacityStep;
-        // override target capacity if shutdown is needed
-        if (!std::isnan(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && residualCapacity > nodeShutdownCapacity && nodeShutdownCapacity > targetCapacity)
-            targetCapacity = nodeShutdownCapacity;
     }
     // enforce target capacity to be in range
     if (targetCapacity < J(0))

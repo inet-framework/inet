@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALENERGYSTORAGE_H
-#define __INET_IDEALENERGYSTORAGE_H
+#ifndef __INET_IDEALEPENERGYSTORAGE_H
+#define __INET_IDEALEPENERGYSTORAGE_H
 
-#include "inet/power/base/EnergyStorageBase.h"
+#include "inet/power/base/EpEnergyStorageBase.h"
 
 namespace inet {
 
@@ -31,28 +31,27 @@ namespace power {
  *
  * @author Levente Meszaros
  */
-class INET_API IdealEnergyStorage : public EnergyStorageBase
+class INET_API IdealEpEnergyStorage : public EpEnergyStorageBase
 {
   protected:
-    J energyBalance = J(0);
-    simtime_t lastResidualCapacityUpdate;
+    J energyBalance = J(NaN);
+    simtime_t lastEnergyBalanceUpdate = -1;
 
   protected:
     virtual void initialize(int stage) override;
 
-    void updateResidualCapacity();
+    virtual void updateTotalPowerConsumption() override;
+    virtual void updateTotalPowerGeneration() override;
+    virtual void updateEnergyBalance();
 
   public:
-    virtual J getNominalCapacity() override { return J(INFINITY); }
-    virtual J getResidualCapacity() override { return J(INFINITY); }
-
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
+    virtual J getNominalEnergyCapacity() const override { return J(INFINITY); }
+    virtual J getResidualEnergyCapacity() const override { return J(INFINITY); }
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALENERGYSTORAGE_H
+#endif // ifndef __INET_IDEALEPENERGYSTORAGE_H
 

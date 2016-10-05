@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SIMPLEENERGYSTORAGE_H
-#define __INET_SIMPLEENERGYSTORAGE_H
+#ifndef __INET_SIMPLEEPENERGYSTORAGE_H
+#define __INET_SIMPLEEPENERGYSTORAGE_H
 
-#include "inet/power/base/EnergyStorageBase.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/power/base/EpEnergyStorageBase.h"
 
 namespace inet {
 
@@ -35,103 +35,81 @@ namespace power {
  * is done. Besides, it immediately updates the capacity when the total absorbed
  * or provided power changes, and it also reschedules the timer.
  *
- * Node shutdown and node start is done by executing the appropriate operation
- * using the lifecycle controller.
- *
  * See the corresponding NED file for more details.
  *
  * @author Levente Meszaros
  */
-class INET_API SimpleEnergyStorage : public EnergyStorageBase
+class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
 {
   protected:
     /**
      * The nominal capacity is in the range [0, +infinity).
      */
-    J nominalCapacity;
+    J nominalCapacity = J(NaN);
 
     /**
      * The residual capacity is in the range [0, nominalCapacity].
      */
-    J residualCapacity;
+    J residualCapacity = J(NaN);
 
     /**
      * Specifies the amount of capacity change which will be reported.
      */
-    J printCapacityStep;
+    J printCapacityStep = J(NaN);
 
     /**
      * The simulation time when the residual capacity was last updated.
      */
-    simtime_t lastResidualCapacityUpdate;
+    simtime_t lastResidualCapacityUpdate = -1;
 
     /**
      * The timer that is scheduled to the earliest time when the energy storage
-     * will be depleted, the energy storage will be charged, the node will shut
-     * down, or the node will start.
+     * will be depleted, the energy storage will be charged.
      */
-    cMessage *timer;
+    cMessage *timer = nullptr;
 
     /**
      * The capacity that will be set when the timer expires.
      */
-    J targetCapacity;
-
-    /**
-     * When the residual capacity becomes less than this limit the node shuts down.
-     */
-    J nodeShutdownCapacity;
-
-    /**
-     * When the residual capacity becomes more than this limit the node starts.
-     */
-    J nodeStartCapacity;
+    J targetCapacity = J(NaN);
 
     /**
      * The lifecycle controller used to shutdown and start the node.
      */
-    LifecycleController *lifecycleController;
+    LifecycleController *lifecycleController = nullptr;
 
     /**
      * The containing node module.
      */
-    cModule *node;
+    cModule *networkNode = nullptr;
 
     /**
      * The status of the node.
      */
-    NodeStatus *nodeStatus;
-
-  public:
-    SimpleEnergyStorage();
-
-    virtual ~SimpleEnergyStorage();
-
-    virtual J getNominalCapacity() override { return nominalCapacity; }
-
-    virtual J getResidualCapacity() override { updateResidualCapacity(); return residualCapacity; }
-
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
-
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
+    NodeStatus *nodeStatus = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
-
     virtual void handleMessage(cMessage *message) override;
 
+    virtual void updateTotalPowerConsumption() override;
+    virtual void updateTotalPowerGeneration() override;
+
     virtual void executeNodeOperation(J newResidualCapacity);
-
     virtual void setResidualCapacity(J newResidualCapacity);
-
     virtual void updateResidualCapacity();
-
     virtual void scheduleTimer();
+
+  public:
+    virtual ~SimpleEpEnergyStorage();
+
+    virtual J getNominalEnergyCapacity() const override { return nominalCapacity; }
+    virtual J getResidualEnergyCapacity() const override;
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_SIMPLEENERGYSTORAGE_H
+#endif // ifndef __INET_SIMPLEEPENERGYSTORAGE_H
 

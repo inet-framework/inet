@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,19 +17,19 @@
 
 package inet.power.storage;
 
-import inet.power.base.EnergyStorageBase;
+import inet.power.base.EpEnergyStorageBase;
 
 //
 // This energy storage model stores an infinite amount of energy. It can provide
 // energy for any number of consumers, and it can absorb energy from any number
 // of generators. The ideal energy storage never gets completely charged or
 // depleted. This module is primarily useful for testing energy consumer and
-// energy generator models.
+// energy generator models. See the base module for signals and statistics.
 //
 // @author Levente Meszaros
 //
-simple IdealEnergyStorage extends EnergyStorageBase
+simple IdealEpEnergyStorage extends EpEnergyStorageBase
 {
     parameters:
-        @class(IdealEnergyStorage);
+        @class(IdealEpEnergyStorage);
 }
