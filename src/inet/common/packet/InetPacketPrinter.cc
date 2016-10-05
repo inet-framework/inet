@@ -49,7 +49,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
     void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TCPSegment *tcpSeg) const;
-    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpPacket) const;
+    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpHeader) const;
     void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
 
   public:
@@ -161,12 +161,12 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Ad
 #endif // ifdef WITH_TCP_COMMON
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpPacket) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpHeader) const
 {
 #ifdef WITH_UDP
 
-    os << " UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
-       << ": (" << udpPacket->getChunkByteLength() + udpPacket->get << ")";      //FIXME
+    os << " UDP: " << srcAddr << '.' << udpHeader->getSourcePort() << " > " << destAddr << '.' << udpHeader->getDestinationPort()
+       << ": (" << udpHeader->getTotalLengthField() << ")";
 #else // ifdef WITH_UDP
     os << " UDP: " << srcAddr << ".? > " << destAddr << ".?";
 #endif // ifdef WITH_UDP

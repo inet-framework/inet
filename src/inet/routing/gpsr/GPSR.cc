@@ -132,8 +132,8 @@ void GPSR::processSelfMessage(cMessage *message)
 
 void GPSR::processMessage(cMessage *message)
 {
-    if (dynamic_cast<UDPHeader *>(message))
-        processUDPPacket(static_cast<UDPHeader *>(message));
+    if (auto pk = dynamic_cast<FlatPacket *>(message))
+        processUDPPacket(pk);
     else
         throw cRuntimeError("Unknown message");
 }
@@ -196,7 +196,7 @@ void GPSR::processPurgeNeighborsTimer()
 // handling UDP packets
 //
 
-void GPSR::sendUDPPacket(UDPHeader *packet, double delay)
+void GPSR::sendUDPPacket(FlatPacket *packet, double delay)
 {
     if (delay == 0)
         send(packet, "ipOut");
@@ -204,11 +204,13 @@ void GPSR::sendUDPPacket(UDPHeader *packet, double delay)
         sendDelayed(packet, delay, "ipOut");
 }
 
-void GPSR::processUDPPacket(UDPHeader *packet)
+void GPSR::processUDPPacket(FlatPacket *packet)
 {
-    cPacket *encapsulatedPacket = packet->decapsulate();
-    if (dynamic_cast<GPSRBeacon *>(encapsulatedPacket))
-        processBeacon(static_cast<GPSRBeacon *>(encapsulatedPacket));
+    UDPHeader *udpHeader = check_and_cast<UDPHeader *>(packet->popHeader());
+    PacketChunk *pk = check_and_cast<PacketChunk *>(packet->popHeader());
+    cPacket *encapsulatedPacket = pk->getPacket();
+    if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket))
+        processBeacon(beacon);
     else
         throw cRuntimeError("Unknown UDP packet");
     delete packet;
@@ -230,11 +232,13 @@ GPSRBeacon *GPSR::createBeacon()
 void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
-    UDPHeader *udpPacket = new UDPHeader(beacon->getName());
+    FlatPacket *udpPacket = new FlatPacket(beacon->getName());
+    UDPHeader *udpHeader = new UDPHeader(beacon->getName());
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->encapsulate(beacon);
-    udpPacket->setSourcePort(GPSR_UDP_PORT);
-    udpPacket->setDestinationPort(GPSR_UDP_PORT);
+    udpHeader->setSourcePort(GPSR_UDP_PORT);
+    udpHeader->setDestinationPort(GPSR_UDP_PORT);
+    udpPacket->pushHeader(udpHeader);
+    udpPacket->pushTrailer(new PacketChunk(beacon));
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());

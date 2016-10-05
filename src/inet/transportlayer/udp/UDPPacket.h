@@ -39,7 +39,7 @@ class INET_API UDPHeader : public UDPHeader_Base, public ITransportPacket
      * getter/setter for totalLength field of UDP packet
      * if set to -1, then getter returns getByteLength()
      */
-    int getTotalLengthField() const override { if (totalLengthField == -1) throw cRuntimeError("invalid totalLength field value=-1 in UDP header"); return totalLengthField; }
+    //int getTotalLengthField() const override { if (totalLengthField == -1) throw cRuntimeError("invalid totalLength field value=-1 in UDP header"); return totalLengthField; }
 
     virtual unsigned int getSourcePort() const override { return UDPHeader_Base::getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { UDPHeader_Base::setSrcPort(port); }

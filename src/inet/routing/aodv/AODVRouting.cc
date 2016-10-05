@@ -159,10 +159,12 @@ void AODVRouting::handleMessage(cMessage *msg)
         delete icmpPacket;
     }
     else {
-        UDPHeader *udpPacket = check_and_cast<UDPHeader *>(msg);
+        FlatPacket *udpPacket = check_and_cast<FlatPacket *>(msg);
+        UDPHeader *udpHeader = check_and_cast<UDPHeader *>(udpPacket->popHeader());
         L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
-        AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(udpPacket->decapsulate());
+        PacketChunk *payload = check_and_cast<PacketChunk *>(udpPacket->peekHeader());
+        AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(payload->getPacket());
 
         switch (ctrlPacket->getPacketType()) {
             case RREQ:
@@ -185,6 +187,7 @@ void AODVRouting::handleMessage(cMessage *msg)
                 throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacket->getPacketType());
         }
         delete udpPacket;
+        delete udpHeader;
     }
 }
 
@@ -738,11 +741,13 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
 
-    UDPHeader *udpPacket = new UDPHeader(packet->getName());
-    udpPacket->encapsulate(packet);
+    FlatPacket *udpPacket = new FlatPacket(packet->getName());
+    UDPHeader *udpHeader = new UDPHeader(packet->getName());
+    udpHeader->setSourcePort(aodvUDPPort);
+    udpHeader->setDestinationPort(aodvUDPPort);
+    udpPacket->pushHeader(udpHeader);
+    udpPacket->pushTrailer(new PacketChunk(packet));
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
-    udpPacket->setSourcePort(aodvUDPPort);
-    udpPacket->setDestinationPort(aodvUDPPort);
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());
     auto addresses = udpPacket->ensureTag<L3AddressReq>();

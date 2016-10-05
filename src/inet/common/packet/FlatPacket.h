@@ -12,25 +12,38 @@ class FlatPacket;
 class Chunk : public cOwnedObject
 {
     int64_t chunkBitLength = -1; //KLUDGE need for MSG: byteLength = x;
-protected:
-    void setChunkBitLength(int64_t x) const;     //TODO error when owned by FlatPacket?
-    void setChunkByteLength(int64_t x) const { setChunkBitLength(x<<3); }
-public:
-    virtual int64_t getChunkBitLength() const;
-    int64_t getChunkByteLength() const { return (getChunkBitLength() +7)>>3; }
+    void copy(const Chunk& other);
+  protected:
+    void setChunkBitLength(int64_t x);     //TODO error when owned by FlatPacket?
+    void setChunkByteLength(int64_t x) { setChunkBitLength(x<<3); }
+  public:
+    explicit Chunk(const char *name=nullptr, bool namepooling=true);
+    Chunk(const Chunk& other);
+    virtual ~Chunk();
+    virtual Chunk *dup() const override { return new Chunk(*this); }
+
+    virtual int64_t getChunkBitLength() const { return chunkBitLength; }
+    int64_t getChunkByteLength() const { return (getChunkBitLength()+7)>>3; }
     FlatPacket *getOwnerPacket() const;
 };
 
 class PacketChunk : public Chunk
 {
-    cPacket *packet = nullptr;        // shared ptr, counted
+    cPacket *packet = nullptr;
+    void copy(const PacketChunk& other);
   public:
     PacketChunk(cPacket *);
-    cPacket * getPacket();
-    void setPacket(cPacket *);
+    PacketChunk(const PacketChunk& other);
+    virtual ~PacketChunk();
+    virtual PacketChunk *dup() const override { return new PacketChunk(*this); }
+    cPacket *getPacket() { return packet; }
+    const cPacket *getPacket() const  { return packet; }
+    cPacket *removePacket();           // throw error when PacketChunk owned by a FlatPacket
+    void setPacket(cPacket *);           // throw error when PacketChunk owned by a FlatPacket or chunk already own another packet
     int64_t getChunkBitLength() const override;
 };
 
+#if 0   //FIXME
 class PacketSliceChunk : public Chunk
 {
     cPacket *packet;        // shared ptr, counted
@@ -43,27 +56,36 @@ class PacketSliceChunk : public Chunk
     int64_t getChunkBitLength() const override;
     bool isComplete();
 };
+#endif
 
 class FlatPacket : public cPacket       //TODO rename to Packet?
 {
     std::vector <Chunk *> chunks;
+    void copy(const FlatPacket& other);
   public:
+    explicit FlatPacket(const char *name=nullptr, short kind=0, int64_t bitLength=0);
+    FlatPacket(const FlatPacket& other);
+    virtual ~FlatPacket();
+    virtual FlatPacket *dup() const override { return new FlatPacket(*this); }
     void pushHeader(Chunk *);
     void pushTrailer(Chunk *);
     Chunk *peekHeader();
     Chunk *peekTrailer();
+    const Chunk *peekHeader() const;
+    const Chunk *peekTrailer() const;
     Chunk *popHeader();
     Chunk *popTrailer();
     int getNumChunks() const;
     Chunk *getChunk(int i);
-    int getChunkIndex(const Chunk *) const;     // -1
+    const Chunk *getChunk(int i) const;
+    int getChunkIndex(const Chunk *) const;     // -1 means: chunk not in
 
 
 
     // overrides
   private:
     virtual void encapsulate(cPacket *) override { throw 1; }
-    virtual cPacket *getEncapsulatedPacket() const override { throw 1; }
+    virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
     virtual cPacket *decapsulate() override { throw 1; }
     void setByteLength(int64_t) { throw 1; }
     virtual void setBitLength(int64_t) override { throw 1; }

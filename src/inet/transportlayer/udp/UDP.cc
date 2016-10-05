@@ -335,9 +335,9 @@ void UDP::processPacketFromApp(cPacket *appData)
 
     UDPHeader *udpHeader = new UDPHeader();
     FlatPacket * udpPacket = new FlatPacket(appData->getName());
-    PacketChunk *dataChunk = new PacketChunk(appData);
     udpPacket->pushHeader(udpHeader);
-    udpPacket->pushTrailer(dataChunk); //TODO
+    udpPacket->pushTrailer(new PacketChunk(appData)); //TODO
+    udpPacket->transferTagsFrom(appData);
 
     if (udpPacket->getTag<MulticastReq>() == nullptr)
         udpPacket->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
@@ -349,6 +349,7 @@ void UDP::processPacketFromApp(cPacket *appData)
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
+    udpHeader->setTotalLengthField(udpPacket->getByteLength());
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
     udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
 
@@ -410,7 +411,9 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
             return;
         }
         else {
-            cPacket *payload = udpPacket->decapsulate();
+            PacketChunk *pc = check_and_cast<PacketChunk*>(udpPacket->popTrailer());
+            cPacket *payload = pc->removePacket();
+            delete pc;
             sendUp(payload, sd, srcPort, destPort);
             delete udpPacket;
         }
@@ -424,7 +427,9 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
             return;
         }
         else {
-            cPacket *payload = udpPacket->decapsulate();
+            PacketChunk *pc = check_and_cast<PacketChunk*>(udpPacket->popTrailer());
+            cPacket *payload = pc->removePacket();
+            delete pc;
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
                 sendUp(payload->dup(), sds[i], srcPort, destPort); // dup() to all but the last one

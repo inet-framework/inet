@@ -78,19 +78,20 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
                                      uint16 udp_payload_bytes, char **error)
 {
     PacketDrillApp *app = PacketDrill::pdapp;
-    UDPHeader *udpPacket = new UDPHeader("UDPInject");
-    udpPacket->setByteLength(8);
+    FlatPacket *udpPacket = new FlatPacket("UDPInject");
     cPacket *payload = new cPacket("payload");
     payload->setByteLength(udp_payload_bytes);
-    udpPacket->encapsulate(payload);
+    UDPHeader *udpHeader = new UDPHeader("UDPInject");
+    udpPacket->pushHeader(udpHeader);
+    udpPacket->pushTrailer(new PacketChunk(payload));
     IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
     if (direction == DIRECTION_INBOUND) {
-        udpPacket->setSourcePort(app->getRemotePort());
-        udpPacket->setDestinationPort(app->getLocalPort());
+        udpHeader->setSourcePort(app->getRemotePort());
+        udpHeader->setDestinationPort(app->getLocalPort());
         udpPacket->setName("UDPInbound");
     } else if (direction == DIRECTION_OUTBOUND) {
-        udpPacket->setSourcePort(app->getLocalPort());
-        udpPacket->setDestinationPort(app->getRemotePort());
+        udpHeader->setSourcePort(app->getLocalPort());
+        udpHeader->setDestinationPort(app->getRemotePort());
         udpPacket->setName("UDPOutbound");
     } else
         throw cRuntimeError("Unknown direction");

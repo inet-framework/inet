@@ -57,20 +57,26 @@ struct udphdr
 void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
-    const UDPHeader *pkt = check_and_cast<const UDPHeader *>(_pkt);
-    int packetLength = pkt->getTotalLengthField();
-    b.writeUint16(pkt->getSourcePort());
-    b.writeUint16(pkt->getDestinationPort());
-    b.writeUint16(pkt->getTotalLengthField());
+    const FlatPacket *pkt = check_and_cast<const FlatPacket *>(_pkt);
+    const UDPHeader *header = check_and_cast<const UDPHeader *>(pkt->peekHeader());
+    int packetLength = header->getTotalLengthField();
+
+    ASSERT(packetLength == pkt->getByteLength());       //FIXME error occured when serialize a corrupt packet
+
+    b.writeUint16(header->getSourcePort());
+    b.writeUint16(header->getDestinationPort());
+    b.writeUint16(packetLength);
     unsigned int chksumPos = b.getPos();
     b.writeUint16(0);  // place for checksum
-    const cPacket *encapPkt = pkt->getEncapsulatedPacket();
-    if (encapPkt) {
-        SerializerBase::lookupAndSerialize(encapPkt, b, c, UNKNOWN, 0);
+
+    int payloadLength = 0;
+    for (int i=1; i<pkt->getNumChunks(); i++) {
+        const Chunk *chunk = pkt->getChunk(i);
+        SerializerBase::lookupAndSerialize(check_and_cast<const PacketChunk *>(chunk)->getPacket(), b, c, UNKNOWN, 0);
+        payloadLength += chunk->getChunkByteLength();
     }
-    else {
-        b.fillNBytes(packetLength - UDP_HEADER_BYTES, 0);   // payload place
-    }
+    b.fillNBytes(packetLength - UDP_HEADER_BYTES - payloadLength, 0);   // remained payload place
+
     unsigned int endPos = b.getPos();
     b.writeUint16To(chksumPos, TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), endPos, c.l3AddressesPtr, c.l3AddressesLength));
 }
@@ -78,24 +84,25 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
-    UDPHeader *pkt = new UDPHeader("parsed-udp");
-    pkt->setSourcePort(b.readUint16());
-    pkt->setDestinationPort(b.readUint16());
+    FlatPacket *pkt = new FlatPacket("parsed-udp");
+    UDPHeader *header = new UDPHeader("parsed-udp");
+    header->setSourcePort(b.readUint16());
+    header->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();
-    pkt->setTotalLengthField(length);
+    header->setTotalLengthField(length);
     uint16_t chksum = b.readUint16();
+    pkt->pushHeader(header);
     if (length > UDP_HEADER_BYTES) {
         unsigned int payloadLength = length - UDP_HEADER_BYTES;
         Buffer subBuffer(b, payloadLength);
         cPacket *encapPacket = serializers.byteArraySerializer.deserializePacket(subBuffer, c);
         b.accessNBytes(payloadLength);
-        pkt->encapsulate(encapPacket);
+        pkt->pushTrailer(new PacketChunk(encapPacket));
     }
     if (chksum != 0 && c.l3AddressesPtr && c.l3AddressesLength)
         chksum = TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), b.getPos(), c.l3AddressesPtr, c.l3AddressesLength);
     else chksum = 0;
-    if (length < UDP_HEADER_BYTES || chksum != 0 || pkt->getByteLength() != length)
-        pkt->setBitError(true);
+    header->setIsChecksumCorrect(length >= UDP_HEADER_BYTES && chksum == 0 && pkt->getByteLength() == length);
     return pkt;
 }
 

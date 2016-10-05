@@ -453,7 +453,7 @@ void PacketDump::udpDump(bool l2r, const char *label, UDPHeader *udppkt,
     }
 
     //out << endl;
-    out << "UDP: Payload length=" << udppkt->getByteLength() - 8 << endl;
+    out << "UDP: Payload length=" << udppkt->getTotalLengthField() - UDP_HEADER_BYTES << endl;
 
 #ifdef WITH_SCTP
     if (udppkt->getSourcePort() == 9899 || udppkt->getDestinationPort() == 9899) {

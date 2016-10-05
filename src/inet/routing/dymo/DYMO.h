@@ -144,8 +144,8 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void processRREQHolddownTimer(RREQHolddownTimer *message);
 
     // handling UDP packets
-    void sendUDPPacket(UDPHeader *packet, double delay);
-    void processUDPPacket(UDPHeader *packet);
+    void sendUDPPacket(cPacket *packet, double delay);
+    void processUDPPacket(FlatPacket *packet);
 
     // handling DYMO packets
     void sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);

@@ -152,8 +152,8 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-        else if (dynamic_cast<UDPHeader *>(pk)) {
-            out << formatUDPPacket(static_cast<UDPHeader *>(pk));
+        else if (FlatPacket *fp = dynamic_cast<FlatPacket *>(pk)) {
+            out << formatUDPPacket(check_and_cast<UDPHeader *>(fp->peekHeader()));
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
@@ -397,7 +397,7 @@ std::string InetPacketPrinter2::formatUDPPacket(UDPHeader *udpPacket) const
     std::ostringstream os;
 #ifdef WITH_UDP
     os << "UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
-       << ": (" << udpPacket->getByteLength() << ")";
+       << ": (" << udpPacket->getTotalLengthField() << ")";
 #endif // ifdef WITH_UDP
     return os.str();
 }
