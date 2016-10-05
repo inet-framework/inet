@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,43 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/power/generator/AlternatingEnergyGenerator.h"
+#include "inet/power/generator/AlternatingEpEnergyGenerator.h"
 
 namespace inet {
 
 namespace power {
 
-Define_Module(AlternatingEnergyGenerator);
+Define_Module(AlternatingEpEnergyGenerator);
 
-AlternatingEnergyGenerator::AlternatingEnergyGenerator() :
-    isSleeping(false),
-    energyGeneratorId(-1),
-    energySink(nullptr),
-    powerGeneration(W(NaN)),
-    timer(nullptr)
-{
-}
-
-AlternatingEnergyGenerator::~AlternatingEnergyGenerator()
+AlternatingEpEnergyGenerator::~AlternatingEpEnergyGenerator()
 {
     cancelAndDelete(timer);
 }
 
-void AlternatingEnergyGenerator::initialize(int stage)
+void AlternatingEpEnergyGenerator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        timer = new cMessage("timer");
         const char *energySinkModule = par("energySinkModule");
-        energySink = dynamic_cast<IEnergySink *>(getModuleByPath(energySinkModule));
+        energySink = dynamic_cast<IEpEnergySink *>(getModuleByPath(energySinkModule));
         if (!energySink)
             throw cRuntimeError("Energy sink module '%s' not found", energySinkModule);
-        energyGeneratorId = energySink->addEnergyGenerator(this);
+        timer = new cMessage("timer");
         updatePowerGeneration();
         scheduleIntervalTimer();
+        energySink->addEnergyGenerator(this);
+        WATCH(isSleeping);
+        WATCH(powerGeneration);
     }
 }
 
-void AlternatingEnergyGenerator::handleMessage(cMessage *message)
+void AlternatingEpEnergyGenerator::handleMessage(cMessage *message)
 {
     if (message == timer) {
         isSleeping = !isSleeping;
@@ -62,14 +55,13 @@ void AlternatingEnergyGenerator::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void AlternatingEnergyGenerator::updatePowerGeneration()
+void AlternatingEpEnergyGenerator::updatePowerGeneration()
 {
     powerGeneration = isSleeping ? W(0) : W(par("powerGeneration"));
-    energySink->setPowerGeneration(energyGeneratorId, powerGeneration);
-    emit(IEnergySink::powerGenerationChangedSignal, powerGeneration.get());
+    emit(IEpEnergySink::powerGenerationChangedSignal, powerGeneration.get());
 }
 
-void AlternatingEnergyGenerator::scheduleIntervalTimer()
+void AlternatingEpEnergyGenerator::scheduleIntervalTimer()
 {
     scheduleAt(simTime() + (isSleeping ? par("sleepInterval") : par("generationInterval")), timer);
 }

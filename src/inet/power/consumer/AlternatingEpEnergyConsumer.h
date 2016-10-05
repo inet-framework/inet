@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,51 +15,51 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ALTERNATINGENERGYGENERATOR_H
-#define __INET_ALTERNATINGENERGYGENERATOR_H
+#ifndef __INET_ALTERNATINGEPENERGYCONSUMER_H
+#define __INET_ALTERNATINGEPENERGYCONSUMER_H
 
-#include "inet/power/contract/IEnergyGenerator.h"
-#include "inet/power/contract/IEnergySink.h"
+#include "inet/power/contract/IEpEnergyConsumer.h"
+#include "inet/power/contract/IEpEnergySource.h"
 
 namespace inet {
 
 namespace power {
 
 /**
- * This class implements a simple alternating energy generator.
+ * This class implements a simple power based alternating energy consumer.
  *
  * See the corresponding NED file for more details.
  *
  * @author Levente Meszaros
  */
-class INET_API AlternatingEnergyGenerator : public cSimpleModule, public IEnergyGenerator
+class INET_API AlternatingEpEnergyConsumer : public cSimpleModule, public IEpEnergyConsumer
 {
   protected:
-    bool isSleeping;
-    int energyGeneratorId;
-    IEnergySink *energySink;
-    W powerGeneration;
-    cMessage *timer;
+    // parameters
+    IEpEnergySource *energySource = nullptr;
+    cMessage *timer = nullptr;
+
+    // state
+    bool isSleeping = false;
+    W powerConsumption = W(NaN);
 
   protected:
     virtual void initialize(int stage) override;
-
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void updatePowerGeneration();
-
+    virtual void updatePowerConsumption();
     virtual void scheduleIntervalTimer();
 
   public:
-    AlternatingEnergyGenerator();
-    virtual ~AlternatingEnergyGenerator();
+    virtual ~AlternatingEpEnergyConsumer();
 
-    virtual W getPowerGeneration() const override { return powerGeneration; }
+    virtual IEnergySource *getEnergySource() const override { return energySource; }
+    virtual W getPowerConsumption() const override { return powerConsumption; }
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_ALTERNATINGENERGYGENERATOR_H
+#endif // ifndef __INET_ALTERNATINGEPENERGYCONSUMER_H
 

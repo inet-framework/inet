@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 
 package inet.power.consumer;
 
-import inet.power.base.EnergyConsumerBase;
+import inet.power.base.EpEnergyConsumerBase;
 
 //
 // This energy consumer model alternates between two modes called consumption
@@ -25,14 +25,15 @@ import inet.power.base.EnergyConsumerBase;
 // power for a random time interval. In sleep mode it doesn't consume energy for
 // another random time interval.
 //
+// @see ~AlternatingEpEnergyGenerator
 // @author Levente Meszaros
 //
-simple AlternatingEnergyConsumer extends EnergyConsumerBase
+simple AlternatingEpEnergyConsumer extends EpEnergyConsumerBase
 {
     parameters:
-        string energySourceModule = default("^.energyStorage");
-        volatile double powerConsumption @unit(W);
-        volatile double consumptionInterval @unit(s);
-        volatile double sleepInterval @unit(s);
-        @class(AlternatingEnergyConsumer);
+        string energySourceModule = default("^.energyStorage"); // module path of energy source
+        volatile double powerConsumption @unit(W); // amount of power consumed in consumption mode
+        volatile double consumptionInterval @unit(s); // time interval for consumption mode
+        volatile double sleepInterval @unit(s); // time interval for sleep mode
+        @class(AlternatingEpEnergyConsumer);
 }

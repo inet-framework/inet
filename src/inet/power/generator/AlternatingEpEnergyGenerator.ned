@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 
 package inet.power.generator;
 
-import inet.power.base.EnergyGeneratorBase;
+import inet.power.base.EpEnergyGeneratorBase;
 
 //
 // This energy generator model alternates between two modes called generation
@@ -25,14 +25,15 @@ import inet.power.base.EnergyGeneratorBase;
 // power for a random time interval. In sleep mode it doesn't generate energy
 // for another random time interval.
 //
+// @see ~AlternatingEpEnergyConsumer
 // @author Levente Meszaros
 //
-simple AlternatingEnergyGenerator extends EnergyGeneratorBase
+simple AlternatingEpEnergyGenerator extends EpEnergyGeneratorBase
 {
     parameters:
-        string energySinkModule = default("^.energyStorage");
-        volatile double powerGeneration @unit(W);
-        volatile double generationInterval @unit(s);
-        volatile double sleepInterval @unit(s);
-        @class(AlternatingEnergyGenerator);
+        string energySinkModule = default("^.energyStorage"); // module path of energy sink
+        volatile double powerGeneration @unit(W); // amount of power generated in generation mode
+        volatile double generationInterval @unit(s); // time interval for generation mode
+        volatile double sleepInterval @unit(s); // time interval for sleep mode
+        @class(AlternatingEpEnergyGenerator);
 }

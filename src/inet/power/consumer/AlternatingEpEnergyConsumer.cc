@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,43 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/power/consumer/AlternatingEnergyConsumer.h"
+#include "inet/power/consumer/AlternatingEpEnergyConsumer.h"
 
 namespace inet {
 
 namespace power {
 
-Define_Module(AlternatingEnergyConsumer);
+Define_Module(AlternatingEpEnergyConsumer);
 
-AlternatingEnergyConsumer::AlternatingEnergyConsumer() :
-    isSleeping(false),
-    energyConsumerId(-1),
-    energySource(nullptr),
-    powerConsumption(W(NaN)),
-    timer(nullptr)
-{
-}
-
-AlternatingEnergyConsumer::~AlternatingEnergyConsumer()
+AlternatingEpEnergyConsumer::~AlternatingEpEnergyConsumer()
 {
     cancelAndDelete(timer);
 }
 
-void AlternatingEnergyConsumer::initialize(int stage)
+void AlternatingEpEnergyConsumer::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        timer = new cMessage("timer");
         const char *energySourceModule = par("energySourceModule");
-        energySource = dynamic_cast<IEnergySource *>(getModuleByPath(energySourceModule));
+        energySource = dynamic_cast<IEpEnergySource *>(getModuleByPath(energySourceModule));
         if (!energySource)
             throw cRuntimeError("Energy source module '%s' not found", energySourceModule);
-        energyConsumerId = energySource->addEnergyConsumer(this);
+        timer = new cMessage("timer");
         updatePowerConsumption();
         scheduleIntervalTimer();
+        energySource->addEnergyConsumer(this);
+        WATCH(isSleeping);
+        WATCH(powerConsumption);
     }
 }
 
-void AlternatingEnergyConsumer::handleMessage(cMessage *message)
+void AlternatingEpEnergyConsumer::handleMessage(cMessage *message)
 {
     if (message == timer) {
         isSleeping = !isSleeping;
@@ -62,14 +55,13 @@ void AlternatingEnergyConsumer::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void AlternatingEnergyConsumer::updatePowerConsumption()
+void AlternatingEpEnergyConsumer::updatePowerConsumption()
 {
     powerConsumption = isSleeping ? W(0) : W(par("powerConsumption"));
-    energySource->setPowerConsumption(energyConsumerId, powerConsumption);
-    emit(IEnergySource::powerConsumptionChangedSignal, powerConsumption.get());
+    emit(IEpEnergySource::powerConsumptionChangedSignal, powerConsumption.get());
 }
 
-void AlternatingEnergyConsumer::scheduleIntervalTimer()
+void AlternatingEpEnergyConsumer::scheduleIntervalTimer()
 {
     scheduleAt(simTime() + (isSleeping ? par("sleepInterval") : par("consumptionInterval")), timer);
 }
