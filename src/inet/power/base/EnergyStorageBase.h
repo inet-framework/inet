@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -26,29 +26,13 @@ namespace inet {
 
 namespace power {
 
-/**
- * TODO
- *
- * @author Levente Meszaros
- */
 class INET_API EnergyStorageBase : public cSimpleModule, public EnergySourceBase, public EnergySinkBase, public virtual IEnergyStorage
 {
-  protected:
-    virtual void initialize(int stage) override;
-
-  public:
-    virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
-    virtual void removeEnergyConsumer(int energyConsumerId) override;
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
-
-    virtual int addEnergyGenerator(const IEnergyGenerator *energyGenerator) override;
-    virtual void removeEnergyGenerator(int energyGeneratorId) override;
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_ENERGYSINKBASE_H
+#endif // ifndef __INET_ENERGYSTORAGEBASE_H
 
