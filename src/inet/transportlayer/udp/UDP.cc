@@ -379,6 +379,8 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
     FlatPacket *udpPacket = udpHeader->getOwnerPacket();
     emit(rcvdPkSignal, udpPacket);
 
+    ASSERT(udpPacket->peekHeader() == udpHeader);
+
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
 
@@ -411,11 +413,17 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
             return;
         }
         else {
-            PacketChunk *pc = check_and_cast<PacketChunk*>(udpPacket->popTrailer());
-            cPacket *payload = pc->removePacket();
-            delete pc;
+            udpPacket->popHeader();     // drop the UDP header
+            cPacket *payload = udpPacket;
+            if (udpPacket->getNumChunks() == 1) {
+                if (PacketChunk *pc = dynamic_cast<PacketChunk*>(udpPacket->popTrailer())) {
+                    payload = pc->removePacket();
+                    payload->transferTagsFrom(udpPacket);
+                    delete pc;
+                    delete udpPacket;
+                }
+            }
             sendUp(payload, sd, srcPort, destPort);
-            delete udpPacket;
         }
     }
     else {
@@ -427,14 +435,20 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
             return;
         }
         else {
-            PacketChunk *pc = check_and_cast<PacketChunk*>(udpPacket->popTrailer());
-            cPacket *payload = pc->removePacket();
-            delete pc;
+            udpPacket->popHeader();     // drop the UDP header
+            cPacket *payload = udpPacket;
+            if (udpPacket->getNumChunks() == 1) {
+                if (PacketChunk *pc = dynamic_cast<PacketChunk*>(udpPacket->popTrailer())) {
+                    payload = pc->removePacket();
+                    payload->transferTagsFrom(udpPacket);
+                    delete pc;
+                    delete udpPacket;
+                }
+            }
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
                 sendUp(payload->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
             sendUp(payload, sds[i], srcPort, destPort);    // send original to last socket
-            delete udpPacket;
         }
     }
 }
