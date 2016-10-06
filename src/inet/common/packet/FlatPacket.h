@@ -87,7 +87,6 @@ class FlatPacket : public cPacket       //TODO rename to Packet?
     virtual void encapsulate(cPacket *) override { throw 1; }
     virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
     virtual cPacket *decapsulate() override { throw 1; }
-    void setByteLength(int64_t) { throw 1; }
     virtual void setBitLength(int64_t) override { throw 1; }
     virtual void addBitLength(int64_t delta) override { throw 1; }
   public:
