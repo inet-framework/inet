@@ -159,10 +159,13 @@ void UDP::handleMessage(cMessage *msg)
 
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
-        FlatPacket *packet = check_and_cast<FlatPacket *>(msg);
-        Chunk *header = packet->peekHeader();
-        if (dynamic_cast<UDPHeader *>(header) != nullptr)
-            processUDPPacket((UDPHeader *)header);
+        if (FlatPacket *packet = dynamic_cast<FlatPacket *>(msg)) {
+            Chunk *header = packet->peekHeader();
+            if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(header))
+                processUDPPacket(udpHeader);
+            else
+                processICMPError(PK(msg)); // assume it's an ICMP error
+        }
         else
             processICMPError(PK(msg)); // assume it's an ICMP error
     }
@@ -384,7 +387,7 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
 
-    if (udpHeader->getIsChecksumCorrect()) {
+    if (!udpHeader->getIsChecksumCorrect()) {
         EV_WARN << "Packet has bit error, discarding\n";
         emit(droppedPkBadChecksumSignal, udpPacket);
         numDroppedBadChecksum++;
@@ -473,13 +476,14 @@ void UDP::processICMPError(cPacket *pk)
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
         IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
         if (datagram->getDontFragment() || datagram->getFragmentOffset() == 0) {
-            UDPHeader *packet = dynamic_cast<UDPHeader *>(datagram->getEncapsulatedPacket());
-            if (packet) {
-                localAddr = datagram->getSrcAddress();
-                remoteAddr = datagram->getDestAddress();
-                localPort = packet->getSourcePort();
-                remotePort = packet->getDestinationPort();
-                udpHeaderAvailable = true;
+            if (FlatPacket *packet = dynamic_cast<FlatPacket *>(datagram->getEncapsulatedPacket())) {
+                if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(packet->peekHeader())) {
+                    localAddr = datagram->getSrcAddress();
+                    remoteAddr = datagram->getDestAddress();
+                    localPort = udpHeader->getSourcePort();
+                    remotePort = udpHeader->getDestinationPort();
+                    udpHeaderAvailable = true;
+                }
             }
         }
     }
@@ -493,13 +497,14 @@ void UDP::processICMPError(cPacket *pk)
         IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
         IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
         if (!fh || fh->getFragmentOffset() == 0) {
-            UDPHeader *packet = dynamic_cast<UDPHeader *>(datagram->getEncapsulatedPacket());
-            if (packet) {
-                localAddr = datagram->getSrcAddress();
-                remoteAddr = datagram->getDestAddress();
-                localPort = packet->getSourcePort();
-                remotePort = packet->getDestinationPort();
-                udpHeaderAvailable = true;
+            if (FlatPacket *packet = dynamic_cast<FlatPacket *>(datagram->getEncapsulatedPacket())) {
+                if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(packet->peekHeader())) {
+                    localAddr = datagram->getSrcAddress();
+                    remoteAddr = datagram->getDestAddress();
+                    localPort = udpHeader->getSourcePort();
+                    remotePort = udpHeader->getDestinationPort();
+                    udpHeaderAvailable = true;
+                }
             }
         }
     }
