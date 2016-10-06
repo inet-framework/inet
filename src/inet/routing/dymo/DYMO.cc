@@ -402,8 +402,10 @@ void DYMO::sendUDPPacket(cPacket *packet, double delay)
 void DYMO::processUDPPacket(FlatPacket *packet)
 {
     UDPHeader *udpHeader = check_and_cast<UDPHeader *>(packet->popHeader());
-    PacketChunk *encapsulatedPacket = check_and_cast<PacketChunk *>(packet->peekHeader());
+    PacketChunk *encapsulatedPacket = check_and_cast<PacketChunk *>(packet->popHeader());
     if (DYMOPacket *dymoPacket = dynamic_cast<DYMOPacket *>(encapsulatedPacket->getPacket())) {
+        encapsulatedPacket->removePacket();
+        dymoPacket->transferTagsFrom(packet);
         processDYMOPacket(dymoPacket);
     }
     else
@@ -421,6 +423,7 @@ void DYMO::sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEnt
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
     FlatPacket *udpPacket = new FlatPacket(packet->getName());
+    udpPacket->transferTagsFrom(packet);
     UDPHeader *udpHeader = new UDPHeader(packet->getName());
     udpPacket->pushHeader(udpHeader);
     udpPacket->pushTrailer(new PacketChunk(packet));

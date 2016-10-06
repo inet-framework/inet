@@ -163,8 +163,10 @@ void AODVRouting::handleMessage(cMessage *msg)
         UDPHeader *udpHeader = check_and_cast<UDPHeader *>(udpPacket->popHeader());
         L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
-        PacketChunk *payload = check_and_cast<PacketChunk *>(udpPacket->peekHeader());
-        AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(payload->getPacket());
+        PacketChunk *payload = check_and_cast<PacketChunk *>(udpPacket->popHeader());
+        AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(payload->removePacket());
+        delete payload;
+        ctrlPacket->transferTagsFrom(msg);
 
         switch (ctrlPacket->getPacketType()) {
             case RREQ:
@@ -746,6 +748,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
     udpPacket->pushHeader(udpHeader);
+    udpPacket->transferTagsFrom(packet);
     udpPacket->pushTrailer(new PacketChunk(packet));
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());

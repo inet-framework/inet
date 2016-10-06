@@ -1186,8 +1186,12 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
         return false;
 
     // LDP traffic (both discovery...
-    if (protocol == IP_PROT_UDP && check_and_cast<UDPHeader *>(ipdatagram->getEncapsulatedPacket())->getDestinationPort() == LDP_PORT)
-        return false;
+    if (protocol == IP_PROT_UDP) {
+        FlatPacket *udpPacket = check_and_cast<FlatPacket *>(ipdatagram->getEncapsulatedPacket());
+        UDPHeader *udpHeader = check_and_cast<UDPHeader *>(udpPacket->peekHeader());
+        if (udpHeader->getDestinationPort() == LDP_PORT)
+            return false;
+    }
 
     // ...and session)
     if (protocol == IP_PROT_TCP && check_and_cast<tcp::TCPSegment *>(ipdatagram->getEncapsulatedPacket())->getDestPort() == LDP_PORT)

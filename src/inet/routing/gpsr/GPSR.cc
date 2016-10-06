@@ -209,8 +209,10 @@ void GPSR::processUDPPacket(FlatPacket *packet)
     UDPHeader *udpHeader = check_and_cast<UDPHeader *>(packet->popHeader());
     PacketChunk *pk = check_and_cast<PacketChunk *>(packet->popHeader());
     cPacket *encapsulatedPacket = pk->getPacket();
-    if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket))
+    if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket)) {
+        beacon->transferTagsFrom(packet);
         processBeacon(beacon);
+    }
     else
         throw cRuntimeError("Unknown UDP packet");
     delete packet;
@@ -238,6 +240,7 @@ void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
     udpPacket->pushHeader(udpHeader);
+    udpPacket->transferTagsFrom(beacon);
     udpPacket->pushTrailer(new PacketChunk(beacon));
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
