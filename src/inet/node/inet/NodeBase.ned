@@ -25,11 +25,12 @@ import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.contract.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.contract.IMobility;
-import inet.networklayer.contract.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
-import inet.power.contract.IEnergyStorage;
+import inet.networklayer.contract.IRoutingTable;
 import inet.power.contract.IEnergyGenerator;
+import inet.power.contract.IEnergyManagement;
+import inet.power.contract.IEnergyStorage;
 
 //
 // Contains the common lower layers (linklayer and networklayer)
@@ -59,6 +60,7 @@ module NodeBase like INetworkNode
         bool forwarding = default(true);
         bool multicastForwarding = default(false);
         string energyStorageType = default("");
+        string energyManagementType = default("");
         string energyGeneratorType = default("");
         routingTable.forwarding = forwarding;
         routingTable.multicastForwarding = multicastForwarding;   // for IPv4, IPv6, Generic
@@ -77,6 +79,10 @@ module NodeBase like INetworkNode
         energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
             parameters:
                 @display("p=50,100;i=block/plug;is=s");
+        }
+        energyManagement: <energyManagementType> like IEnergyManagement if energyManagementType != "" {
+            parameters:
+                @display("p=50,125;i=block/plug;is=s");
         }
         energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
             parameters:
