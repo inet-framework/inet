@@ -416,7 +416,7 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
             return;
         }
         else {
-            udpPacket->popHeader();     // drop the UDP header
+            delete udpPacket->popHeader();     // drop the UDP header
             cPacket *payload = udpPacket;
             if (udpPacket->getNumChunks() == 1) {
                 if (PacketChunk *pc = dynamic_cast<PacketChunk*>(udpPacket->popTrailer())) {
@@ -438,7 +438,7 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
             return;
         }
         else {
-            udpPacket->popHeader();     // drop the UDP header
+            delete udpPacket->popHeader();     // drop the UDP header
             cPacket *payload = udpPacket;
             if (udpPacket->getNumChunks() == 1) {
                 if (PacketChunk *pc = dynamic_cast<PacketChunk*>(udpPacket->popTrailer())) {
