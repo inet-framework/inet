@@ -246,6 +246,8 @@ packet TCPSegment
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
     abstract TCPOptionPtr headerOption[];
 
+    //TODO: next fields represents the body content, should be removed from TCP Header
+
     // Payload length in octets (not an actual TCP header field).
     // This may not always be the same as encapsulatedPacket()->getByteLength();
     // e.g. when simulating a virtual data stream there's no encapsulated
