@@ -50,7 +50,7 @@ class PacketSliceChunk : public Chunk
     int64_t bitOffset;         // [bits]
     int64_t bitLength;         // [bits]
   public:
-    cPacket * getPacket();
+    cPacket *getPacket();
     void setSlice(cPacket *, int64_t byteOffset, int64_t byteLength);
     void setSliceBits(cPacket *, int64_t bitOffset, int64_t bitLength);
     int64_t getChunkBitLength() const override;
