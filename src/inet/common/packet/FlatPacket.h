@@ -60,7 +60,7 @@ class PacketSliceChunk : public Chunk
 
 class FlatPacket : public cPacket       //TODO rename to Packet?
 {
-    std::vector <Chunk *> chunks;
+    std::vector <Chunk *> chunks;       //FIXME: std::shared_ptr
     void copy(const FlatPacket& other);
   public:
     explicit FlatPacket(const char *name=nullptr, short kind=0, int64_t bitLength=0);
@@ -94,7 +94,7 @@ class FlatPacket : public cPacket       //TODO rename to Packet?
 };
 
 
-//class IPv4Header : public Chunk ...
+//usage: class IPv4Header : public Chunk ...
 
 }
 

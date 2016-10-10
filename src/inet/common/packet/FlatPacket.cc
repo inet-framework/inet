@@ -32,6 +32,7 @@ void Chunk::setChunkBitLength(int64_t x)
 
 FlatPacket *Chunk::getOwnerPacket() const
 {
+    //FIXME use typeinfo() comparison and static_cast
     return dynamic_cast<FlatPacket *>(getOwner());
 }
 
@@ -183,6 +184,7 @@ const Chunk *FlatPacket::getChunk(int i) const
 
 int FlatPacket::getChunkIndex(const Chunk *chunk) const
 {
+    //FIXME use std::find
     for (int i=0; i<chunks.size(); i++) {
         if (chunks.at(i) == chunk)
             return i;
@@ -192,6 +194,7 @@ int FlatPacket::getChunkIndex(const Chunk *chunk) const
 
 int64_t FlatPacket::getBitLength() const
 {
+    //FIXME use cache: should be stored length in cPacket::length field
     int64_t length = 0;
     for (auto chunk: chunks)
         length += chunk->getChunkBitLength();
