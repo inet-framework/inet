@@ -32,8 +32,10 @@ void Chunk::setChunkBitLength(int64_t x)
 
 FlatPacket *Chunk::getOwnerPacket() const
 {
-    //FIXME use typeinfo() comparison and static_cast
-    return dynamic_cast<FlatPacket *>(getOwner());
+    cObject *owner = getOwner();
+    if (typeid(*owner) == typeid(FlatPacket))
+        return static_cast<FlatPacket *>(owner);
+    return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////
