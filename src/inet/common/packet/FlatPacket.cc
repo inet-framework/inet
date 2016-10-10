@@ -42,6 +42,7 @@ PacketChunk::PacketChunk(cPacket *pk)
     : packet(pk)
 {
     take(packet);
+    setChunkBitLength(pk->getBitLength());
 }
 
 PacketChunk::PacketChunk(const PacketChunk& other) : Chunk(other)
@@ -77,6 +78,7 @@ void PacketChunk::setPacket(cPacket *pk)
     if (getOwnerPacket() != nullptr)           // throw error when PacketChunk owned by a FlatPacket
         throw cRuntimeError("setPacket(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modifying content");
     packet = pk;
+    setChunkBitLength(pk->getBitLength());
     take(packet);
 }
 
@@ -117,12 +119,14 @@ void FlatPacket::pushHeader(Chunk *chunk)
 {
     take(chunk);
     chunks.insert(chunks.begin(), chunk);
+    cPacket::addBitLength(chunk->getChunkBitLength());
 }
 
 void FlatPacket::pushTrailer(Chunk *chunk)
 {
     take(chunk);
     chunks.push_back(chunk);
+    cPacket::addBitLength(chunk->getChunkBitLength());
 }
 
 Chunk *FlatPacket::peekHeader()
@@ -152,6 +156,7 @@ Chunk *FlatPacket::popHeader()
     Chunk *chunk = chunks.front();
     chunks.erase(chunks.begin());
     drop(chunk);
+    cPacket::addBitLength(-chunk->getChunkBitLength());
     return chunk;
 }
 
@@ -162,6 +167,7 @@ Chunk *FlatPacket::popTrailer()
     Chunk *chunk = chunks.back();
     chunks.pop_back();
     drop(chunk);
+    cPacket::addBitLength(-chunk->getChunkBitLength());
     return chunk;
 }
 
@@ -195,10 +201,15 @@ int FlatPacket::getChunkIndex(const Chunk *chunk) const
 int64_t FlatPacket::getBitLength() const
 {
     //FIXME use cache: should be stored length in cPacket::length field
+#if 1
     int64_t length = 0;
     for (auto chunk: chunks)
         length += chunk->getChunkBitLength();
+    ASSERT(length == cPacket::getBitLength());
     return length;
+#else
+    return cPacket::getBitLength();
+#endif
 }
 
 }   //namespace inet
