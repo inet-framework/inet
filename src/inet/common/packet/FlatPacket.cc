@@ -60,9 +60,9 @@ void PacketChunk::copy(const PacketChunk& other)
     take(packet);
 }
 
-cPacket *PacketChunk::removePacket()           // throw error when PacketChunk owned by a FlatPacket
+cPacket *PacketChunk::removePacket()
 {
-    if (getOwnerPacket() != nullptr)
+    if (getOwnerPacket() != nullptr)           // throw error when PacketChunk owned by a FlatPacket
         throw cRuntimeError("removePacket(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modifying content");
     cPacket *pk = packet;
     packet = nullptr;
@@ -70,11 +70,11 @@ cPacket *PacketChunk::removePacket()           // throw error when PacketChunk o
     return pk;
 }
 
-void PacketChunk::setPacket(cPacket *pk)           // throw error when PacketChunk owned by a FlatPacket
+void PacketChunk::setPacket(cPacket *pk)
 {
-    if (packet != nullptr)
+    if (packet != nullptr)           // throw error when PacketChunk already contains a packet
         throw cRuntimeError("setPacket(): PacketChunk already own another packet.");
-    if (getOwnerPacket() != nullptr)
+    if (getOwnerPacket() != nullptr)           // throw error when PacketChunk owned by a FlatPacket
         throw cRuntimeError("setPacket(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modifying content");
     packet = pk;
     take(packet);
