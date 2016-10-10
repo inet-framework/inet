@@ -1,5 +1,7 @@
 //TODO header
 
+#include <algorithm>
+
 #include "inet/common/packet/FlatPacket.h"
 
 namespace inet {
@@ -193,11 +195,8 @@ const Chunk *FlatPacket::getChunk(int i) const
 int FlatPacket::getChunkIndex(const Chunk *chunk) const
 {
     //FIXME use std::find
-    for (int i=0; i<chunks.size(); i++) {
-        if (chunks.at(i) == chunk)
-            return i;
-    }
-    return -1;
+    auto it = std::find(chunks.begin(), chunks.end(), chunk);
+    return it == chunks.end() ? -1 : std::distance(chunks.begin(), it);
 }
 
 int64_t FlatPacket::getBitLength() const
