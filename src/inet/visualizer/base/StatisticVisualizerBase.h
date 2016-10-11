@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -41,13 +41,15 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         double getLastValue() const { return lastValue; }
     };
 
-    class CacheEntry {
+    class StatisticVisualization {
       public:
         LastValueRecorder *recorder = nullptr;
+        int moduleId = -1;
+        simsignal_t signal = -1;
         const char *unit = nullptr;
 
       public:
-        CacheEntry(const char *unit);
+        StatisticVisualization(int moduleId, simsignal_t signal, const char *unit);
     };
 
   protected:
@@ -59,30 +61,29 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     const char *statisticName = nullptr;
     const char *unit = nullptr;
     const char *prefix = nullptr;
-    cFigure::Color color;
+    cFigure::Color fontColor;
+    cFigure::Color backgroundColor;
+    double opacity = NaN;
     double minValue = NaN;
     double maxValue = NaN;
     //@}
 
-    /**
-     * Maps module and signal pair to statistic.
-     */
-    std::map<std::pair<int, int>, CacheEntry *> cacheEntries;
+    std::map<std::pair<int, simsignal_t>, StatisticVisualization *> statisticVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
 
     virtual cResultFilter *findResultFilter(cComponent *source, simsignal_t signal);
     virtual cResultFilter *findResultFilter(cResultFilter *parentResultFilter, cResultListener *resultListener);
-    virtual std::string getText(CacheEntry *cacheEntry);
+    virtual std::string getText(StatisticVisualization *statisticVisualization);
     virtual const char *getUnit(cComponent *source);
 
-    virtual CacheEntry *createCacheEntry(cComponent *source, simsignal_t signal) = 0;
-    virtual CacheEntry *getCacheEntry(std::pair<int, int> moduleAndSignal);
-    virtual void addCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry);
-    virtual void removeCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry);
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) = 0;
+    virtual StatisticVisualization *getStatisticVisualization(cComponent *source, simsignal_t signal);
+    virtual void addStatisticVisualization(StatisticVisualization *statisticVisualization);
+    virtual void removeStatisticVisualization(StatisticVisualization *statisticVisualization);
 
-    virtual void refreshStatistic(CacheEntry *cacheEntry) = 0;
+    virtual void refreshStatisticVisualization(StatisticVisualization *statisticVisualization) = 0;
     virtual void processSignal(cComponent *source, simsignal_t signal, double value);
 
   public:

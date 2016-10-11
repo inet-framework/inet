@@ -42,6 +42,9 @@ class INET_API BoxedLabelFigure : public cGroupFigure
 
     const char *getText() const;
     void setText(const char *text);
+
+    double getOpacity() const;
+    void setOpacity(double opacity);
 };
 
 } // namespace inet

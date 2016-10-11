@@ -22,7 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays transmitting nodes,
 // receiving nodes, and propagating radio signals.
 //
-// @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, and ~MediumVisualizerBase
+// @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~MediumVisualizerBase
 //
 moduleinterface IMediumVisualizer
 {

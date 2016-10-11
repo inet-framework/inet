@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,7 +24,7 @@ namespace inet {
 
 namespace visualizer {
 
-PathVisualizerBase::Path::Path(const std::vector<int>& path) :
+PathVisualizerBase::PathVisualization::PathVisualization(const std::vector<int>& path) :
     moduleIds(path)
 {
 }
@@ -43,17 +43,29 @@ void PathVisualizerBase::initialize(int stage)
         if (*par("lineColor").stringValue() != '\0')
             lineColor = cFigure::Color(par("lineColor"));
         lineWidth = par("lineWidth");
-        opacityHalfLife = par("opacityHalfLife");
+        fadeOutMode = par("fadeOutMode");
+        fadeOutHalfLife = par("fadeOutHalfLife");
     }
 }
 
 void PathVisualizerBase::refreshDisplay() const
 {
-    auto now = simTime();
-    std::vector<const Path *> removedPaths;
-    for (auto it : paths) {
+    auto currentSimulationTime = simTime();
+    double currentAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
+    double currentRealTime = getRealTime();
+    std::vector<const PathVisualization *> removedPaths;
+    for (auto it : pathVisualizations) {
         auto path = it.second;
-        auto alpha = std::min(1.0, std::pow(2.0, -(now - path->lastUsage).dbl() / opacityHalfLife));
+        double delta;
+        if (!strcmp(fadeOutMode, "simulationTime"))
+            delta = (currentSimulationTime - path->lastUsageSimulationTime).dbl();
+        else if (!strcmp(fadeOutMode, "animationTime"))
+            delta = currentAnimationTime - path->lastUsageAnimationTime;
+        else if (!strcmp(fadeOutMode, "realTime"))
+            delta = currentRealTime - path->lastUsageRealTime;
+        else
+            throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
+        auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));
         if (alpha < 0.01)
             removedPaths.push_back(path);
         else
@@ -61,35 +73,41 @@ void PathVisualizerBase::refreshDisplay() const
     }
     for (auto path : removedPaths) {
         auto sourceAndDestination = std::pair<int, int>(path->moduleIds.front(), path->moduleIds.back());
-        const_cast<PathVisualizerBase *>(this)->removePath(sourceAndDestination, path);
+        const_cast<PathVisualizerBase *>(this)->removePathVisualization(sourceAndDestination, path);
         delete path;
     }
 }
 
-const PathVisualizerBase::Path *PathVisualizerBase::createPath(const std::vector<int>& path) const
+const PathVisualizerBase::PathVisualization *PathVisualizerBase::createPathVisualization(const std::vector<int>& path) const
 {
-    return new Path(path);
+    return new PathVisualization(path);
 }
 
-const PathVisualizerBase::Path *PathVisualizerBase::getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path)
+const PathVisualizerBase::PathVisualization *PathVisualizerBase::getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path)
 {
-    auto range = paths.equal_range(sourceAndDestination);
+    auto range = pathVisualizations.equal_range(sourceAndDestination);
     for (auto it = range.first; it != range.second; it++)
         if (it->second->moduleIds == path)
             return it->second;
     return nullptr;
 }
 
-void PathVisualizerBase::addPath(std::pair<int, int> sourceAndDestination, const Path *path)
+void PathVisualizerBase::addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *path)
 {
-    paths.insert(std::pair<std::pair<int, int>, const Path *>(sourceAndDestination, path));
+    pathVisualizations.insert(std::pair<std::pair<int, int>, const PathVisualization *>(sourceAndDestination, path));
     updateOffsets();
     updatePositions();
 }
 
-void PathVisualizerBase::removePath(std::pair<int, int> sourceAndDestination, const Path *path)
+void PathVisualizerBase::removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *path)
 {
-    paths.erase(paths.find(sourceAndDestination));
+    auto range = pathVisualizations.equal_range(sourceAndDestination);
+    for (auto it = range.first; it != range.second; it++) {
+        if (it->second == path) {
+            pathVisualizations.erase(it);
+            break;
+        }
+    }
     updateOffsets();
     updatePositions();
 }
@@ -116,7 +134,7 @@ void PathVisualizerBase::removeIncompletePath(int treeId)
 void PathVisualizerBase::updateOffsets()
 {
     numPaths.clear();
-    for (auto it : paths) {
+    for (auto it : pathVisualizations) {
         auto path = it.second;
         int count = 0;
         int maxNumPath = 0;
@@ -146,13 +164,16 @@ void PathVisualizerBase::updatePositions()
 void PathVisualizerBase::updatePath(const std::vector<int>& moduleIds)
 {
     auto key = std::pair<int, int>(moduleIds.front(), moduleIds.back());
-    const Path *path = getPath(key, moduleIds);
+    const PathVisualization *path = getPath(key, moduleIds);
     if (path == nullptr) {
-        path = createPath(moduleIds);
-        addPath(key, path);
+        path = createPathVisualization(moduleIds);
+        addPathVisualization(key, path);
     }
-    else
-        path->lastUsage = simTime();
+    else {
+        path->lastUsageSimulationTime = getSimulation()->getSimTime();
+        path->lastUsageAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
+        path->lastUsageRealTime = getRealTime();
+    }
 }
 
 void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)

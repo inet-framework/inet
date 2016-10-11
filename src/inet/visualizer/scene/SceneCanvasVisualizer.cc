@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,11 +29,13 @@ void SceneCanvasVisualizer::initialize(int stage)
     SceneVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
+        zIndex = par("zIndex");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
         canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
         axisLayer = new cGroupFigure("axisLayer");
+        axisLayer->setZIndex(zIndex);
         canvas->addFigureBelow(axisLayer, canvas->getSubmodulesLayer());
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))

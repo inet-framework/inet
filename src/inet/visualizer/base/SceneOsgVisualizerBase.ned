@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,7 +21,7 @@ package inet.visualizer.base;
 // This is a base module for scene visualizer simple modules on a 3D osg scene.
 // It displays the playground either as a filled rectangle or as an image.
 //
-// @see ~SceneOsgVisualizer, ~SceneOsgEarthVisualizer, and ~SceneVisualizerBase
+// @see ~SceneOsgVisualizer, ~SceneOsgEarthVisualizer, ~SceneVisualizerBase
 //
 simple SceneOsgVisualizerBase extends SceneVisualizerBase
 {

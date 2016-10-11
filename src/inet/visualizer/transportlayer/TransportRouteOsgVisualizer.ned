@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,8 +27,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 // over time until the route becomes inactive unless it is reinforced by another
 // packet. The polyline automatically follows the movement of mobile nodes.
 //
-// @see ~TransportRouteCanvasVisualizer, ~TransportRouteVisualizer, ~RouteVisualizerBase, and
-// ~ITransportRouteVisualizer
+// @see ~TransportRouteCanvasVisualizer, ~TransportRouteVisualizer, ~RouteVisualizerBase, ~ITransportRouteVisualizer
 //
 simple TransportRouteOsgVisualizer extends RouteVisualizerBase like ITransportRouteVisualizer
 {

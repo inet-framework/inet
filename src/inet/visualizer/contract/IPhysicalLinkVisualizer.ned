@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays the active physical
 // links in a network.
 //
-// @see ~PhysicaLinkCanvasVisualizer, ~PhysicaLinkOsgVisualizer, and
-// ~LinkVisualizerBase
+// @see ~PhysicaLinkCanvasVisualizer, ~PhysicaLinkOsgVisualizer, ~LinkVisualizerBase
 //
 moduleinterface IPhysicalLinkVisualizer
 {

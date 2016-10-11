@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,11 +28,13 @@ void NetworkConnectionCanvasVisualizer::initialize(int stage)
 {
     NetworkConnectionVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        zIndex = par("zIndex");
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+    }
 }
 
-void NetworkConnectionCanvasVisualizer::createConnection(cModule *startNetworkNode, cModule *endNetworkNode)
+void NetworkConnectionCanvasVisualizer::createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode)
 {
     auto lineFigure = new cLineFigure("connection");
     lineFigure->setLineColor(lineColor);
@@ -40,6 +42,7 @@ void NetworkConnectionCanvasVisualizer::createConnection(cModule *startNetworkNo
     lineFigure->setStart(canvasProjection->computeCanvasPoint(getPosition(startNetworkNode)));
     lineFigure->setEnd(canvasProjection->computeCanvasPoint(getPosition(endNetworkNode)));
     lineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
+    lineFigure->setZIndex(zIndex);
     visualizerTargetModule->getCanvas()->addFigure(lineFigure);
 }
 

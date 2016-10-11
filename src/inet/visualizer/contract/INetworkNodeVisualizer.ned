@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer creates the visual
 // representations of network nodes.
 //
-// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, and
-// ~NetworkNodeVisualizerBase
+// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, ~NetworkNodeVisualizerBase
 //
 moduleinterface INetworkNodeVisualizer
 {

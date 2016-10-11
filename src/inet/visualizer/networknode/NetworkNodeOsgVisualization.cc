@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,6 +23,7 @@
 #include <osg/AutoTransform>
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
+#include <osgText/Font>
 #include <osgText/Text>
 #endif // ifdef WITH_OSG
 
@@ -44,6 +45,7 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
     double spacing = 4;
     osgText::Text *label = nullptr;
     if (displayModuleName) {
+        auto font = osgText::Font::getDefaultFont();
         label = new osgText::Text();
         label->setCharacterSize(18);
         label->setBoundingBoxColor(osg::Vec4(1.0, 1.0, 1.0, 0.5));
@@ -52,6 +54,10 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
         label->setAlignment(osgText::Text::CENTER_BOTTOM);
         label->setText(networkNode->getFullName());
         label->setDrawMode(osgText::Text::FILLEDBOUNDINGBOX | osgText::Text::TEXT);
+        for (auto texture : font->getGlyphTextureList()) {
+            texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+            texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        }
     }
     osg::Node *osgNode = nullptr;
     cDisplayString& displayString = networkNode->getDisplayString();

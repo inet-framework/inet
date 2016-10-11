@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,14 +23,25 @@ package inet.visualizer.base;
 // subscriptionModule parameter. The actual visualization of mobility is done in
 // derived modules.
 //
-// @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~IMobilityVisualizer,
-// and ~MobilityVisualizerBase
+// @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~IMobilityVisualizer, ~MobilityVisualizerBase
 //
 simple MobilityVisualizerBase extends VisualizerBase
 {
     parameters:
         string subscriptionModule = default(""); // module path where the visualizer subscribes for mobility signals, root module by default
+        // orientation
+        bool displayOrientation = default(false); // display an arc indicating the current orientation, disabled by default
+        string orientationLineColor = default("black"); // orientation line color, black by default
+        double orientationLineWidth = default(1); // orientation line width
+        // velocity
+        bool displayVelocity = default(false); // display an arrow indicating the current velocity, disabled by default
+        string velocityLineColor = default("black"); // velocity line color, black by default
+        double velocityLineWidth = default(1); // velocity line width
+        string velocityLineStyle = default("solid"); // velocity line style (solid, dashed, dotted)
+        // movement trail
         bool displayMovementTrail = default(false); // display a line along the recent path of mobilities, disabled by default
+        string movementTrailLineColor = default("auto"); // movement trail line color
+        double movementTrailLineWidth = default(1); // movement trail line width
         int trailLength = default(100); // number of sections in the trail
         @class(MobilityVisualizerBase);
 }

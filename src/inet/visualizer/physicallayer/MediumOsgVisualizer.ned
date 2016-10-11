@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -30,8 +30,7 @@ import inet.visualizer.contract.IMediumVisualizer;
 // images can be displayed in 4 different planes: camera, xy, xz and yz. It's
 // also possible to use animated images.
 //
-// @see ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase,
-// and ~IMediumVisualizer
+// @see ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer
 //
 simple MediumOsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
 {

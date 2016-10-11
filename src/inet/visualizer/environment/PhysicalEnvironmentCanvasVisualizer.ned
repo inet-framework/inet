@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,11 +28,11 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 // the visualizer considers all object properties that affect the appearance
 // such as position, orientation, shape, colors, opacity, etc.
 //
-// @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer,
-// ~PhysicalEnvironmentVisualizerBase, and ~IPhysicalEnvironmentVisualizer
+// @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
 //
 simple PhysicalEnvironmentCanvasVisualizer extends PhysicalEnvironmentVisualizerBase like IPhysicalEnvironmentVisualizer
 {
     parameters:
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
         @class(PhysicalEnvironmentCanvasVisualizer);
 }

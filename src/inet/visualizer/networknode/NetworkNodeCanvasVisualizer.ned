@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,11 +25,11 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 // NetworkNodeCanvasVisualization figure for each node in the network which can
 // be annotated by other visualizers.
 //
-// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeVisualizer,
-// ~NetworkNodeVisualizerBase, and ~INetworkNodeVisualizer
+// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeVisualizer, ~NetworkNodeVisualizerBase, ~INetworkNodeVisualizer
 //
 simple NetworkNodeCanvasVisualizer extends NetworkNodeVisualizerBase like INetworkNodeVisualizer
 {
     parameters:
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
         @class(NetworkNodeCanvasVisualizer);
 }

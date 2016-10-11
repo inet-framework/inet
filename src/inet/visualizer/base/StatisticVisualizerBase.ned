@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,8 +27,7 @@ package inet.visualizer.base;
 // passes the check it determines the last value of the statistic specified by
 // the statisticName parameter.
 //
-// @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer,
-// ~IStatisticVisualizer, and ~StatisticVisualizerBase
+// @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~IStatisticVisualizer, ~StatisticVisualizerBase
 //
 simple StatisticVisualizerBase extends VisualizerBase
 {
@@ -39,7 +38,9 @@ simple StatisticVisualizerBase extends VisualizerBase
         string statisticName = default(signalName); // statistic name to get the value, signal name by default
         string prefix = default(statisticName); // display this string as the prefix of the value, statistic name by default
         string unit = default(""); // display the value in this unit, statistic unit by default
-        string color = default("white"); // background color of the value, white by default
+        string fontColor = default("black"); // statistic value font color, black by default
+        string backgroundColor = default("white"); // statistic value background color, white by default
+        double opacity = default(0.5); // opacity of the visualization
         double minValue = default(-1/0); // minimum value of the statistic, negative infinity by default
         double maxValue = default(1/0); // maximum value of the statistic, positive infinity by default
         @class(StatisticVisualizerBase);

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,15 +29,17 @@ namespace visualizer {
 class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API Link {
+    class INET_API LinkVisualization {
       public:
-        mutable simtime_t lastUsage = simTime();
+        mutable simtime_t lastUsageSimulationTime = simTime();
+        mutable double lastUsageAnimationTime;
+        mutable double lastUsageRealTime;
         const int sourceModuleId;
         const int destinationModuleId;
 
       public:
-        Link(int sourceModuleId, int destinationModuleId);
-        virtual ~Link() {}
+        LinkVisualization(int sourceModuleId, int destinationModuleId);
+        virtual ~LinkVisualization() {}
     };
 
   protected:
@@ -48,7 +50,8 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color lineColor;
     double lineWidth = NaN;
     cFigure::LineStyle lineStyle;
-    double opacityHalfLife = NaN;
+    const char *fadeOutMode = nullptr;
+    double fadeOutHalfLife = NaN;
     //@}
 
     /**
@@ -56,9 +59,9 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
      */
     std::map<int, int> lastModules;
     /**
-     * Maps source/destination module to link.
+     * Maps source/destination module ids to link visualizations.
      */
-    std::map<std::pair<int, int>, const Link *> links;
+    std::map<std::pair<int, int>, const LinkVisualization *> linkVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
@@ -66,19 +69,19 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 
     virtual bool isLinkEnd(cModule *module) const = 0;
 
-    virtual const Link *createLink(cModule *source, cModule *destination) const = 0;
-    virtual void setAlpha(const Link *link, double alpha) const = 0;
+    virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const = 0;
     virtual void setPosition(cModule *node, const Coord& position) const = 0;
 
-    virtual const Link *getLink(std::pair<int, int> link);
-    virtual void addLink(std::pair<int, int> sourceAndDestination, const Link *link);
-    virtual void removeLink(const Link *link);
+    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination) const = 0;
+    virtual const LinkVisualization *getLinkVisualization(std::pair<int, int> linkVisualization);
+    virtual void addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization);
+    virtual void removeLinkVisualization(const LinkVisualization *linkVisualization);
 
     virtual cModule *getLastModule(int treeId);
     virtual void setLastModule(int treeId, cModule *lastModule);
     virtual void removeLastModule(int treeId);
 
-    virtual void updateLink(cModule *source, cModule *destination);
+    virtual void updateLinkVisualization(cModule *source, cModule *destination);
 
   public:
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;

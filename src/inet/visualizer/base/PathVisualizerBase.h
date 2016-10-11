@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,15 +29,17 @@ namespace visualizer {
 class INET_API PathVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    class INET_API Path {
+    class INET_API PathVisualization {
       public:
         mutable double offset = NaN;
-        mutable simtime_t lastUsage = simTime();
+        mutable simtime_t lastUsageSimulationTime = simTime();
+        mutable double lastUsageAnimationTime;
+        mutable double lastUsageRealTime;
         const std::vector<int> moduleIds;
 
       public:
-        Path(const std::vector<int>& path);
-        virtual ~Path() {}
+        PathVisualization(const std::vector<int>& path);
+        virtual ~PathVisualization() {}
     };
 
   protected:
@@ -47,7 +49,8 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     inet::PatternMatcher packetNameMatcher;
     cFigure::Color lineColor;
     double lineWidth = NaN;
-    double opacityHalfLife = NaN;
+    const char *fadeOutMode = nullptr;
+    double fadeOutHalfLife = NaN;
     //@}
 
     /**
@@ -57,7 +60,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     /**
      * Maps source/destination modules to multiple paths between them.
      */
-    std::multimap<std::pair<int, int>, const Path *> paths;
+    std::multimap<std::pair<int, int>, const PathVisualization *> pathVisualizations;
     /**
      * Maps nodes to the number of paths that go through it.
      */
@@ -70,13 +73,13 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual bool isPathEnd(cModule *module) const = 0;
     virtual bool isPathElement(cModule *module) const = 0;
 
-    virtual const Path *createPath(const std::vector<int>& path) const = 0;
-    virtual void setAlpha(const Path *path, double alpha) const = 0;
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const = 0;
+    virtual void setAlpha(const PathVisualization *path, double alpha) const = 0;
     virtual void setPosition(cModule *node, const Coord& position) const = 0;
 
-    virtual const Path *getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path);
-    virtual void addPath(std::pair<int, int> sourceAndDestination, const Path *path);
-    virtual void removePath(std::pair<int, int> sourceAndDestination, const Path *path);
+    virtual const PathVisualization *getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path);
+    virtual void addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *path);
+    virtual void removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *path);
 
     virtual const std::vector<int> *getIncompletePath(int treeId);
     virtual void addToIncompletePath(int treeId, cModule *module);

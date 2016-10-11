@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays the active data links
 // in a network.
 //
-// @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, and
-// ~LinkVisualizerBase
+// @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~LinkVisualizerBase
 //
 moduleinterface IDataLinkVisualizer
 {

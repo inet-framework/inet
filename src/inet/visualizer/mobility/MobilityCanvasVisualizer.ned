@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,12 +25,12 @@ import inet.visualizer.contract.IMobilityVisualizer;
 // representations according to their mobility model and it can also display
 // recent movement as a polyline.
 //
-// @see ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase,
-// and ~IMobilityVisualizer
+// @see ~MobilityOsgVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~MobilityVisualizer
 //
 simple MobilityCanvasVisualizer extends MobilityVisualizerBase like IMobilityVisualizer
 {
     parameters:
-        @class(MobilityCanvasVisualizer);
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer");
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
+        @class(MobilityCanvasVisualizer);
 }

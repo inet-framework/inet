@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // IPhysicalEnvironmentVisualizer submodules from INI files. Such a visualizer
 // displays the physical objects present in the physical environment.
 //
-// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer,
-// and ~PhysicalEnvironmentVisualizerBase
+// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizerBase
 //
 moduleinterface IPhysicalEnvironmentVisualizer
 {

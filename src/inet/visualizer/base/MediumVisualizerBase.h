@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -43,16 +43,12 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     IRadioMedium *radioMedium = nullptr;
     bool displaySignals = false;
     simtime_t signalPropagationUpdateInterval = NaN;
-
     bool displayTransmissions = false;
     bool displayReceptions = false;
-
     bool displayRadioFrames = false;
     cFigure::Color radioFrameLineColor;
-
     bool displayCommunicationRanges = false;
     cFigure::Color communicationRangeColor;
-
     bool displayInterferenceRanges = false;
     cFigure::Color interferenceRangeColor;
     //@}

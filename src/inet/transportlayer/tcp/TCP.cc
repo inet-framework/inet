@@ -49,6 +49,9 @@ namespace tcp {
 
 Define_Module(TCP);
 
+simsignal_t TCP::tcpConnectionAddedSignal = registerSignal("tcpConnectionAdded");
+simsignal_t TCP::tcpConnectionRemovedSignal = registerSignal("tcpConnectionRemoved");
+
 #define EPHEMERAL_PORTRANGE_START    1024
 #define EPHEMERAL_PORTRANGE_END      5000
 
@@ -482,6 +485,7 @@ void TCP::removeConnection(TCPConnection *conn)
     if (it != usedEphemeralPorts.end())
         usedEphemeralPorts.erase(it);
 
+    emit(tcpConnectionRemovedSignal, conn);
     delete conn;
 }
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,8 +23,7 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 //
 // This module visualizes multiple network connections on a 3D osg scene.
 //
-// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionVisualizer,
-// ~NetworkConnectionVisualizerBase, and ~INetworkConnectionVisualizer
+// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionVisualizer, ~NetworkConnectionVisualizerBase, ~INetworkConnectionVisualizer
 //
 simple NetworkConnectionOsgVisualizer extends NetworkConnectionVisualizerBase like INetworkConnectionVisualizer
 {

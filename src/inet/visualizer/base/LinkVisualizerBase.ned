@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -36,8 +36,7 @@ package inet.visualizer.base;
 // subscribes for mobilityStateChangedSignal to be able to follow the movement
 // of mobile nodes.
 //
-// @see ~LinkCanvasVisualizer, ~LinkOsgVisualizer, 
-// ~ILinkVisualizer, and ~LinkVisualizerBase
+// @see ~LinkCanvasVisualizer, ~LinkOsgVisualizer, ~ILinkVisualizer, and ~LinkVisualizerBase
 //
 simple LinkVisualizerBase extends VisualizerBase
 {
@@ -47,6 +46,7 @@ simple LinkVisualizerBase extends VisualizerBase
         string lineColor = default("black"); // link line color, black by default
         double lineWidth = default(3); // link line width
         string lineStyle = default("solid"); // link line style (solid, dashed, dotted)
-        double opacityHalfLife @unit(s) = default(1s); // how quickly inactive links fade away, opacity halves every second by default
+        string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime");
+        double fadeOutHalfLife @unit(s) = default(1s); // how quickly inactive links fade away, opacity halves every second by default
         @class(LinkVisualizerBase);
 }

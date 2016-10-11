@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,6 +20,7 @@
 
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 #include "inet/visualizer/networknode/NetworkNodeOsgVisualization.h"
+#include "inet/visualizer/networknode/NetworkNodeOsgVisualizer.h"
 
 #ifdef WITH_OSG
 #include <osg/Node>
@@ -34,28 +35,33 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class OsgCacheEntry : public CacheEntry {
+    class StatisticOsgVisualization : public StatisticVisualization {
       public:
-        NetworkNodeOsgVisualization *visualization = nullptr;
+        NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Node *node = nullptr;
 
       public:
-        OsgCacheEntry(const char *unit, NetworkNodeOsgVisualization *visualization, osg::Node *node);
+        StatisticOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int moduleId, simsignal_t signal, const char *unit);
     };
 
   protected:
-    virtual CacheEntry *createCacheEntry(cComponent *source, simsignal_t signal) override;
-    virtual void addCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry) override;
-    virtual void removeCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry) override;
-    virtual void refreshStatistic(CacheEntry *cacheEntry) override;
+    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override;
+    virtual void addStatisticVisualization(StatisticVisualization *statisticVisualization) override;
+    virtual void removeStatisticVisualization(StatisticVisualization *statisticVisualization) override;
+    virtual void refreshStatisticVisualization(StatisticVisualization *statisticVisualization) override;
 
 #else // ifdef WITH_OSG
 
   protected:
-    virtual CacheEntry *createCacheEntry(cComponent *source, simsignal_t signal) override { return nullptr;}
-    virtual void addCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry) override {}
-    virtual void removeCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry) override {}
-    virtual void refreshStatistic(CacheEntry *cacheEntry) override {}
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override { return nullptr;}
+    virtual void addStatisticVisualization(StatisticVisualization *statisticVisualization) override {}
+    virtual void removeStatisticVisualization(StatisticVisualization *statisticVisualization) override {}
+    virtual void refreshStatisticVisualization(StatisticVisualization *statisticVisualization) override {}
 
 #endif // ifdef WITH_OSG
 };

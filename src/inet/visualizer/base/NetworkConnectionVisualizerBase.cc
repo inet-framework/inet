@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -39,7 +39,7 @@ void NetworkConnectionVisualizerBase::initialize(int stage)
                     auto gate = *gt;
                     auto startNetworkNode = getContainingNode(gate->getPathStartGate()->getOwnerModule());
                     auto endNetworkNode = getContainingNode(gate->getPathEndGate()->getOwnerModule());
-                    createConnection(startNetworkNode, endNetworkNode);
+                    createNetworkConnectionVisualization(startNetworkNode, endNetworkNode);
                 }
             }
         }

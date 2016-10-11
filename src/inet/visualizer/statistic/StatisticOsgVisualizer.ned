@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,8 +27,7 @@ import inet.visualizer.contract.IStatisticVisualizer;
 // the corresponding network node. The value and the unit is wrapped in a filled
 // rectangle.
 //
-// @see ~StatisticCanvasVisualizer, ~StatisticVisualizer,
-// ~StatisticVisualizerBase, and ~IStatisticVisualizer
+// @see ~StatisticCanvasVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer
 //
 simple StatisticOsgVisualizer extends StatisticVisualizerBase like IStatisticVisualizer
 {

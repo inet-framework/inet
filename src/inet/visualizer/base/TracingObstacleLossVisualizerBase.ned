@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,8 +22,7 @@ package inet.visualizer.base;
 // subscribes on the obstacle loss module for physical object penetrated signals.
 // The actual visualization of obstacle loss is done in derived modules.
 //
-// @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer,
-// ~ITracingObstacleLossVisualizer, and ~TracingObstacleLossVisualizerBase
+// @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer, ~ITracingObstacleLossVisualizer, ~TracingObstacleLossVisualizerBase
 //
 simple TracingObstacleLossVisualizerBase extends VisualizerBase
 {

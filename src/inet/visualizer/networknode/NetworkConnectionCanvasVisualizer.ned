@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,12 +23,12 @@ import inet.visualizer.contract.INetworkConnectionVisualizer;
 //
 // This module visualizes multiple network connections on a 2D canvas.
 //
-// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionVisualizer,
-// ~NetworkConnectionVisualizerBase, and ~INetworkConnectionVisualizer
+// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionVisualizer, ~NetworkConnectionVisualizerBase, ~INetworkConnectionVisualizer
 //
 simple NetworkConnectionCanvasVisualizer extends NetworkConnectionVisualizerBase like INetworkConnectionVisualizer
 {
     parameters:
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
         networkNodePathFilter = default(""); // disabled because omnetpp displays network connections by default 
         @class(NetworkConnectionCanvasVisualizer);
 }

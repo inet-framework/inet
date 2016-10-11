@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,8 +25,7 @@ package inet.visualizer.base;
 // to periodically update the user interface independently of the underlying
 // simulation. The actual visualization of the scene is done in derived modules.
 //
-// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~ISceneVisualizer, and
-// ~SceneVisualizerBase
+// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~ISceneVisualizer, ~SceneVisualizerBase
 //
 simple SceneVisualizerBase extends VisualizerBase
 {

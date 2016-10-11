@@ -520,7 +520,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
 #endif // ifdef WITH_IPv6
 #ifdef WITH_IPv4
                     case L3Address::IPv4:
-                        if (entry->ipv4Data()->getIPAddress() == add.toIPv4())
+                        if (entry->ipv4Data() && entry->ipv4Data()->getIPAddress() == add.toIPv4())
                             return mod;
                         break;
 

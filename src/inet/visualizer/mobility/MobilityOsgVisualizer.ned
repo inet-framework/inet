@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,8 +25,7 @@ import inet.visualizer.contract.IMobilityVisualizer;
 // visual represnetation according to their mobility model and it can also
 // display recent movement as a polyline.
 //
-// @see ~MobilityCanvasVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase,
-// and ~IMobilityVisualizer
+// @see ~MobilityCanvasVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~IMobilityVisualizer
 //
 simple MobilityOsgVisualizer extends MobilityVisualizerBase like IMobilityVisualizer
 {

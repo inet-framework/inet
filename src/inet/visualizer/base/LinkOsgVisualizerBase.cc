@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -33,34 +33,18 @@ namespace visualizer {
 
 #ifdef WITH_OSG
 
-LinkOsgVisualizerBase::OsgLink::OsgLink(osg::Node *node, int sourceModuleId, int destinationModuleId) :
-    Link(sourceModuleId, destinationModuleId),
+LinkOsgVisualizerBase::LinkOsgVisualization::LinkOsgVisualization(osg::Node *node, int sourceModuleId, int destinationModuleId) :
+    LinkVisualization(sourceModuleId, destinationModuleId),
     node(node)
 {
 }
 
-LinkOsgVisualizerBase::OsgLink::~OsgLink()
+LinkOsgVisualizerBase::LinkOsgVisualization::~LinkOsgVisualization()
 {
     // TODO: delete node;
 }
 
-void LinkOsgVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
-{
-    LinkVisualizerBase::addLink(sourceAndDestination, link);
-    auto osgLink = static_cast<const OsgLink *>(link);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    scene->addChild(osgLink->node);
-}
-
-void LinkOsgVisualizerBase::removeLink(const Link *link)
-{
-    LinkVisualizerBase::removeLink(link);
-    auto osgLink = static_cast<const OsgLink *>(link);
-    auto node = osgLink->node;
-    node->getParent(0)->removeChild(node);
-}
-
-const LinkVisualizerBase::Link *LinkOsgVisualizerBase::createLink(cModule *source, cModule *destination) const
+const LinkVisualizerBase::LinkVisualization *LinkOsgVisualizerBase::createLinkVisualization(cModule *source, cModule *destination) const
 {
     auto sourcePosition = getPosition(source);
     auto destinationPosition = getPosition(destination);
@@ -71,12 +55,28 @@ const LinkVisualizerBase::Link *LinkOsgVisualizerBase::createLink(cModule *sourc
     lineWidth->setWidth(this->lineWidth);
     stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
     node->setStateSet(stateSet);
-    return new OsgLink(node, source->getId(), destination->getId());
+    return new LinkOsgVisualization(node, source->getId(), destination->getId());
 }
 
-void LinkOsgVisualizerBase::setAlpha(const Link *link, double alpha) const
+void LinkOsgVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *link)
 {
-    auto osgLink = static_cast<const OsgLink *>(link);
+    LinkVisualizerBase::addLinkVisualization(sourceAndDestination, link);
+    auto osgLink = static_cast<const LinkOsgVisualization *>(link);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    scene->addChild(osgLink->node);
+}
+
+void LinkOsgVisualizerBase::removeLinkVisualization(const LinkVisualization *link)
+{
+    LinkVisualizerBase::removeLinkVisualization(link);
+    auto osgLink = static_cast<const LinkOsgVisualization *>(link);
+    auto node = osgLink->node;
+    node->getParent(0)->removeChild(node);
+}
+
+void LinkOsgVisualizerBase::setAlpha(const LinkVisualization *link, double alpha) const
+{
+    auto osgLink = static_cast<const LinkOsgVisualization *>(link);
     auto node = osgLink->node;
     auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
@@ -84,8 +84,8 @@ void LinkOsgVisualizerBase::setAlpha(const Link *link, double alpha) const
 
 void LinkOsgVisualizerBase::setPosition(cModule *node, const Coord& position) const
 {
-    for (auto it : links) {
-        auto link = static_cast<const OsgLink *>(it.second);
+    for (auto it : linkVisualizations) {
+        auto link = static_cast<const LinkOsgVisualization *>(it.second);
         auto group = static_cast<osg::Group *>(link->node);
         auto geode = static_cast<osg::Geode *>(group->getChild(0));
         auto geometry = static_cast<osg::Geometry *>(geode->getDrawable(0));

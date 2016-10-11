@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,10 +29,16 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
     NetworkNodeVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
+        zIndex = par("zIndex");
+        auto canvas = visualizerTargetModule->getCanvas();
+        auto canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && networkNodePathMatcher.matches(networkNode->getFullPath().c_str())) {
                 auto visualization = createNetworkNodeVisualization(networkNode);
+                visualization->setZIndex(zIndex);
+                auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
+                visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
                 setNetworkNodeVisualization(networkNode, visualization);
                 visualizerTargetModule->getCanvas()->addFigure(visualization);
             }

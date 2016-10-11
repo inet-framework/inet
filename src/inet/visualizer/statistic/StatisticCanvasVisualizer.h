@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,8 +18,10 @@
 #ifndef __INET_STATISTICCANVASVISUALIZER_H
 #define __INET_STATISTICCANVASVISUALIZER_H
 
+#include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 #include "inet/visualizer/networknode/NetworkNodeCanvasVisualization.h"
+#include "inet/visualizer/networknode/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 
@@ -28,21 +30,26 @@ namespace visualizer {
 class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
 {
   protected:
-    class CanvasCacheEntry : public CacheEntry {
+    class StatisticCanvasVisualization : public StatisticVisualization {
       public:
-        NetworkNodeCanvasVisualization *visualization = nullptr;
-        cGroupFigure *figure = nullptr;
-        cFigure::Point size;
+        NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
+        BoxedLabelFigure *figure = nullptr;
 
       public:
-        CanvasCacheEntry(const char *unit, NetworkNodeCanvasVisualization *visualization, cGroupFigure *figure, cFigure::Point size);
+        StatisticCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BoxedLabelFigure *figure, int moduleId, simsignal_t signal, const char *unit);
     };
 
   protected:
-    virtual CacheEntry *createCacheEntry(cComponent *source, simsignal_t signal) override;
-    virtual void addCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry) override;
-    virtual void removeCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry) override;
-    virtual void refreshStatistic(CacheEntry *cacheEntry) override;
+    double zIndex = NaN;
+    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override;
+    virtual void addStatisticVisualization(StatisticVisualization *statisticVisualization) override;
+    virtual void removeStatisticVisualization(StatisticVisualization *statisticVisualization) override;
+    virtual void refreshStatisticVisualization(StatisticVisualization *statisticVisualization) override;
 };
 
 } // namespace visualizer

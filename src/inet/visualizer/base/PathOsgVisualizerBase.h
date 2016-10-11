@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,21 +29,20 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API OsgPath : public Path {
+    class INET_API PathOsgVisualization : public PathVisualization {
       public:
         osg::Node *node = nullptr;
 
       public:
-        OsgPath(const std::vector<int>& path, osg::Node *node);
-        virtual ~OsgPath();
+        PathOsgVisualization(const std::vector<int>& path, osg::Node *node);
+        virtual ~PathOsgVisualization();
     };
 
   protected:
-    virtual void addPath(std::pair<int, int> sourceAndDestination, const Path *path) override;
-    virtual void removePath(std::pair<int, int> sourceAndDestination, const Path *path) override;
-
-    virtual const Path *createPath(const std::vector<int>& path) const override;
-    virtual void setAlpha(const Path *path, double alpha) const override;
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const override;
+    virtual void addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization) override;
+    virtual void removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization) override;
+    virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
     virtual void setPosition(cModule *node, const Coord& position) const override;
 
 #else // ifdef WITH_OSG
@@ -51,8 +50,8 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual const Path *createPath(const std::vector<int>& path) const override { return PathVisualizerBase::createPath(path); }
-    virtual void setAlpha(const Path *path, double alpha) const override {}
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const override { return PathVisualizerBase::createPathVisualization(path); }
+    virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override {}
     virtual void setPosition(cModule *node, const Coord& position) const override {}
 
 #endif // ifdef WITH_OSG

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -31,7 +31,20 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     /** @name Parameters */
     //@{
     cModule *subscriptionModule = nullptr;
+    // orientation
+    bool displayOrientation = false;
+    cFigure::Color orientationLineColor;
+    double orientationLineWidth = -1;
+    // velocity
+    bool displayVelocity = false;
+    cFigure::Color velocityLineColor;
+    double velocityLineWidth = -1;
+    cFigure::LineStyle velocityLineStyle;
+    // movement trail
     bool displayMovementTrail = false;
+    bool autoMovementTrailLineColor = false;
+    cFigure::Color movementTrailLineColor;
+    double movementTrailLineWidth = -1;
     int trailLength = -1;
     //@}
 

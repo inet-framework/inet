@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // ITracingObstacleLossVisualizer submodules from INI files. Such a visualizer
 // displays obstacle loss during wireless signal propagation.
 //
-// @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer,
-// and ~TracingObstacleLossVisualizerBase
+// @see ~TracingObstacleLossCanvasVisualizer, ~TracingObstacleLossOsgVisualizer, ~TracingObstacleLossVisualizerBase
 //
 moduleinterface ITracingObstacleLossVisualizer
 {

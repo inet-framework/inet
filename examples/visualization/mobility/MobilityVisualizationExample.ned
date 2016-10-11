@@ -1,7 +1,3 @@
-//
-// This program is property of its copyright holder. All rights reserved.
-//
-
 package inet.examples.visualization.mobility;
 
 import inet.node.inet.WirelessHost;

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -31,30 +31,33 @@ namespace visualizer {
 class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
 {
   protected:
-    class INET_API CacheEntry {
+    class INET_API MobilityCanvasVisualization {
       public:
-        NetworkNodeCanvasVisualization *visualization = nullptr;
+        NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         cModule *visualRepresentation = nullptr;
+        cArcFigure *orientationFigure = nullptr;
+        cLineFigure *veloctiyFigure = nullptr;
         TrailFigure *trailFigure = nullptr;
 
       public:
-        CacheEntry(NetworkNodeCanvasVisualization *visualization, cModule *visualRepresentation, TrailFigure *trailFigure);
+        MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure);
     };
 
   protected:
+    double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
     NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
-    std::map<const IMobility *, CacheEntry *> cacheEntries;
+    std::map<const IMobility *, MobilityCanvasVisualization *> mobilityVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
 
     virtual cModule *findVisualRepresentation(cModule *module) const;
 
-    virtual CacheEntry *getCacheEntry(const IMobility *mobility) const;
-    virtual void setCacheEntry(const IMobility *mobility, CacheEntry *entry);
-    virtual void removeCacheEntry(const IMobility *mobility);
-    virtual CacheEntry* ensureCacheEntry(const IMobility *mobility);
+    virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
+    virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);
+    virtual void removeMobilityVisualization(const IMobility *mobility);
+    virtual MobilityCanvasVisualization* ensureMobilityVisualization(const IMobility *mobility);
     virtual void extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position);
 
   public:

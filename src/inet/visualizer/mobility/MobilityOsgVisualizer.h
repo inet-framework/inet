@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -32,26 +32,26 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API CacheEntry {
+    class INET_API MobilityOsgVisualization {
       public:
         NetworkNodeOsgVisualization *networkNode;
         osg::Geode *trail;
 
       public:
-        CacheEntry(NetworkNodeOsgVisualization *networkNode, osg::Geode *trail);
+        MobilityOsgVisualization(NetworkNodeOsgVisualization *networkNode, osg::Geode *trail);
     };
 
   protected:
     NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
-    std::map<const IMobility *, CacheEntry *> cacheEntries;
+    std::map<const IMobility *, MobilityOsgVisualization *> mobilityVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual CacheEntry *getCacheEntry(const IMobility *mobility) const;
-    virtual void setCacheEntry(const IMobility *mobility, CacheEntry *entry);
-    virtual void removeCacheEntry(const IMobility *mobility);
-    virtual CacheEntry* ensureCacheEntry(const IMobility *mobility);
+    virtual MobilityOsgVisualization *getMobilityVisualization(const IMobility *mobility) const;
+    virtual void setMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *entry);
+    virtual void removeMobilityVisualization(const IMobility *mobility);
+    virtual MobilityOsgVisualization* ensureMobilityVisualization(const IMobility *mobility);
 
     virtual void extendMovementTrail(osg::Geode *trail, const Coord& position);
 

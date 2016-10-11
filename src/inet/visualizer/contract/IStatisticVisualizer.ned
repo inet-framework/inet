@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays a statistic for
 // multiple network nodes.
 //
-// @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, and
-// ~StatisticVisualizerBase
+// @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~StatisticVisualizerBase
 //
 moduleinterface IStatisticVisualizer
 {

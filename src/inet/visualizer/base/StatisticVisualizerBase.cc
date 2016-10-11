@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,7 +22,9 @@ namespace inet {
 
 namespace visualizer {
 
-StatisticVisualizerBase::CacheEntry::CacheEntry(const char *unit) :
+StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int moduleId, simsignal_t signal, const char *unit) :
+    moduleId(moduleId),
+    signal(signal),
     unit(unit)
 {
     recorder = new LastValueRecorder();
@@ -33,16 +35,17 @@ void StatisticVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
+        subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
+        if (*signalName != '\0')
+            subscriptionModule->subscribe(registerSignal(signalName), this);
+        sourcePathMatcher.setPattern(par("sourcePathFilter"), true, true, true);
         signalName = par("signalName");
         statisticName = par("statisticName");
         unit = par("unit");
         prefix = par("prefix");
-        color = cFigure::Color(par("color"));
-        const char *sourcePathFilter = par("sourcePathFilter");
-        sourcePathMatcher.setPattern(sourcePathFilter, true, true, true);
-        subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        if (*signalName != '\0')
-            subscriptionModule->subscribe(registerSignal(signalName), this);
+        fontColor = cFigure::Color(par("fontColor"));
+        backgroundColor = cFigure::Color(par("backgroundColor"));
+        opacity = par("opacity");
         minValue = par("minValue");
         maxValue = par("maxValue");
     }
@@ -78,14 +81,14 @@ cResultFilter *StatisticVisualizerBase::findResultFilter(cResultFilter *parentRe
     return nullptr;
 }
 
-std::string StatisticVisualizerBase::getText(CacheEntry *cacheEntry)
+std::string StatisticVisualizerBase::getText(StatisticVisualization *statisticVisualization)
 {
     char temp[128];
-    double value = cacheEntry->recorder->getLastValue();
+    double value = statisticVisualization->recorder->getLastValue();
     if (std::isnan(value))
         sprintf(temp, "%s: -", prefix);
     else {
-        auto valueUnit = cacheEntry->unit;
+        auto valueUnit = statisticVisualization->unit;
         if (*unit != '\0') {
             cStringTokenizer tokenizer(unit);
             while (tokenizer.hasMoreTokens()) {
@@ -114,42 +117,44 @@ const char *StatisticVisualizerBase::getUnit(cComponent *source)
     return nullptr;
 }
 
-StatisticVisualizerBase::CacheEntry *StatisticVisualizerBase::getCacheEntry(std::pair<int, int> moduleAndSignal)
+StatisticVisualizerBase::StatisticVisualization *StatisticVisualizerBase::getStatisticVisualization(cComponent *source, simsignal_t signal)
 {
-    auto it = cacheEntries.find(moduleAndSignal);
-    if (it == cacheEntries.end())
+    auto key = std::pair<int, simsignal_t>(source->getId(), signal);
+    auto it = statisticVisualizations.find(key);
+    if (it == statisticVisualizations.end())
         return nullptr;
     else
         return it->second;
 }
 
-void StatisticVisualizerBase::addCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry)
+void StatisticVisualizerBase::addStatisticVisualization(StatisticVisualization *statisticVisualization)
 {
-    cacheEntries[moduleAndSignal] = cacheEntry;
+    auto key = std::pair<int, simsignal_t>(statisticVisualization->moduleId, statisticVisualization->signal);
+    statisticVisualizations[key] = statisticVisualization;
 }
 
-void StatisticVisualizerBase::removeCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry)
+void StatisticVisualizerBase::removeStatisticVisualization(StatisticVisualization *statisticVisualization)
 {
-    cacheEntries.erase(cacheEntries.find(moduleAndSignal));
+    auto key = std::pair<int, simsignal_t>(statisticVisualization->moduleId, statisticVisualization->signal);
+    statisticVisualizations.erase(statisticVisualizations.find(key));
 }
 
 void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, double value)
 {
-    auto moduleAndSignal = std::pair<int, int>(source->getId(), signal);
-    auto cacheEntry = getCacheEntry(moduleAndSignal);
-    if (cacheEntry != nullptr)
-        refreshStatistic(cacheEntry);
+    auto statisticVisualization = getStatisticVisualization(source, signal);
+    if (statisticVisualization != nullptr)
+        refreshStatisticVisualization(statisticVisualization);
     else {
         if (sourcePathMatcher.matches(source->getFullPath().c_str())) {
-            cacheEntry = createCacheEntry(source, signal);
+            statisticVisualization = createStatisticVisualization(source, signal);
             auto resultFilter = findResultFilter(source, signal);
-            cacheEntry->recorder->setLastValue(value);
+            statisticVisualization->recorder->setLastValue(value);
             if (resultFilter == nullptr)
-                source->subscribe(registerSignal(signalName), cacheEntry->recorder);
+                source->subscribe(registerSignal(signalName), statisticVisualization->recorder);
             else
-                resultFilter->addDelegate(cacheEntry->recorder);
-            addCacheEntry(moduleAndSignal, cacheEntry);
-            refreshStatistic(cacheEntry);
+                resultFilter->addDelegate(statisticVisualization->recorder);
+            addStatisticVisualization(statisticVisualization);
+            refreshStatisticVisualization(statisticVisualization);
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -33,6 +33,13 @@ void VisualizerBase::initialize(int stage)
         if (visualizerTargetModule == nullptr)
             throw cRuntimeError("Module not found on path '%s' defined by par 'visualizerTargetModule'", path);
     }
+}
+
+double VisualizerBase::getRealTime() const
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec + tv.tv_usec / 1.0E+6;
 }
 
 Coord VisualizerBase::getPosition(cModule *node) const

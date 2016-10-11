@@ -24,8 +24,7 @@ package inet.visualizer.contract;
 // visualizers, most often simple modules, to provide a convenient way to add
 // complex visualization to a simulation. 
 //
-// @see ~IntegratedCanvasVisualizer, ~IntegratedOsgVisualizer, and
-// ~IntegratedVisualizerBase
+// @see ~IntegratedCanvasVisualizer, ~IntegratedOsgVisualizer, ~IntegratedVisualizerBase
 //
 moduleinterface IIntegratedVisualizer
 {

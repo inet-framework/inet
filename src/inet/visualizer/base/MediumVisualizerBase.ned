@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,8 +24,7 @@ package inet.visualizer.base;
 // parameter. The actual visualization of the radio medium is done in derived
 // modules.
 //
-// @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~IMediumVisualizer, and
-// ~MediumVisualizerBase
+// @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~IMediumVisualizer, ~MediumVisualizerBase
 //
 simple MediumVisualizerBase extends VisualizerBase
 {

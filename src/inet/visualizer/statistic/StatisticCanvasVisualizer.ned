@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,12 +27,12 @@ import inet.visualizer.contract.IStatisticVisualizer;
 // of the corresponding network node. The value and the unit is wrapped in a
 // filled white rectangle.
 //
-// @see ~StatisticOsgVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase,
-// and ~IStatisticVisualizer
+// @see ~StatisticOsgVisualizer, ~StatisticVisualizer, ~StatisticVisualizerBase, ~IStatisticVisualizer
 //
 simple StatisticCanvasVisualizer extends StatisticVisualizerBase like IStatisticVisualizer
 {
     parameters:
-        @class(StatisticCanvasVisualizer);
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer");
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
+        @class(StatisticCanvasVisualizer);
 }

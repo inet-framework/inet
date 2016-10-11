@@ -1017,6 +1017,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, L3Addres
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             tcpAlgorithm->established(true);
+            tcpMain->emit(TCP::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
 
             // This will trigger transition to ESTABLISHED. Timers and notifying

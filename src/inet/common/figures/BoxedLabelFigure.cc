@@ -16,6 +16,9 @@
 //
 
 #include "inet/common/figures/BoxedLabelFigure.h"
+#include <omnetpp/ccanvas.h>
+#include <omnetpp/cenvir.h>
+#include <omnetpp/csimulation.h>
 
 namespace inet {
 
@@ -28,7 +31,6 @@ BoxedLabelFigure::BoxedLabelFigure(const char *name) :
     rectangleFigure->setCornerRx(spacing);
     rectangleFigure->setCornerRy(spacing);
     rectangleFigure->setFilled(true);
-    rectangleFigure->setFillOpacity(0.5);
     rectangleFigure->setLineColor(cFigure::BLACK);
     addFigure(rectangleFigure);
     addFigure(labelFigure);
@@ -71,6 +73,17 @@ void BoxedLabelFigure::setText(const char *text)
     getSimulation()->getEnvir()->getTextExtent(labelFigure->getFont(), text, width, height, ascent);
     rectangleFigure->setBounds(cFigure::Rectangle(0, 0, width + spacing * 2, height + spacing * 2));
     labelFigure->setText(text);
+}
+
+double BoxedLabelFigure::getOpacity() const
+{
+    return rectangleFigure->getFillOpacity();
+}
+
+void BoxedLabelFigure::setOpacity(double opacity)
+{
+    rectangleFigure->setFillOpacity(opacity);
+    rectangleFigure->setLineOpacity(opacity);
 }
 
 } // namespace inet

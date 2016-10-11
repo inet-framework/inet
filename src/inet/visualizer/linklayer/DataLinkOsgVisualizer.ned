@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,8 +27,7 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 // until the link becomes inactive unless it is reinforced by another packet.
 // The line automatically follows the movement of mobile nodes.
 //
-// @see ~DataLinkCanvasVisualizer, ~DataLinkVisualizer,
-// ~DataLinkVisualizerBase, and ~IDataLinkVisualizer
+// @see ~DataLinkCanvasVisualizer, ~DataLinkVisualizer, ~LinkVisualizerBase, ~IDataLinkVisualizer
 //
 simple DataLinkOsgVisualizer extends LinkVisualizerBase like IDataLinkVisualizer
 {

@@ -22,8 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer updates the position of visual
 // representations according to the corresponding mobility model.
 //
-// @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, and
-// ~MobilityVisualizerBase
+// @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~MobilityVisualizerBase
 //
 moduleinterface IMobilityVisualizer
 {

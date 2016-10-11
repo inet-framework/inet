@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,8 +23,7 @@ package inet.visualizer.base;
 // derived modules. The actual visualization of physical objects is done in
 // derived modules.
 //
-// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer,
-// ~IPhysicalEnvironmentVisualizer, and ~PhysicalEnvironmentVisualizerBase
+// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~IPhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase
 //
 simple PhysicalEnvironmentVisualizerBase extends VisualizerBase
 {

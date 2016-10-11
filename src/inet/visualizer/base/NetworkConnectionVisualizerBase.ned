@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,8 +21,7 @@ package inet.visualizer.base;
 // This is a base module for connection visualizer simple modules. The actual
 // visualization of network connections is done in derived modules.
 //
-// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionOsgVisualizer,
-// ~INetworkConnectionVisualizer, and ~NetworkConnectionVisualizerBase
+// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionOsgVisualizer, ~INetworkConnectionVisualizer, ~NetworkConnectionVisualizerBase
 //
 simple NetworkConnectionVisualizerBase extends VisualizerBase
 {

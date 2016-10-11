@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,12 +28,13 @@ namespace visualizer {
 class INET_API NetworkConnectionCanvasVisualizer : public NetworkConnectionVisualizerBase
 {
   protected:
+    double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
-    void createConnection(cModule *startNetworkNode, cModule *endNetworkNode) override;
+    void createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode) override;
 };
 
 } // namespace visualizer

@@ -22,7 +22,7 @@ package inet.visualizer.contract;
 // submodules from INI files. Such a visualizer displays the playground, the
 // coordinate axes, sets up the initial viewpoint, etc.
 //
-// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, and ~SceneVisualizerBase
+// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~SceneVisualizerBase
 //
 moduleinterface ISceneVisualizer
 {

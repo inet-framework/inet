@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,8 +29,10 @@ void TracingObstacleLossCanvasVisualizer::initialize(int stage)
     TracingObstacleLossVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
+        zIndex = par("zIndex");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
+        intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
+        intersectionTrail->setZIndex(zIndex);
         canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,8 +22,7 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 //
 // This module integrates canvas and osg node visualizers into a single module.
 //
-// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer,
-// ~NetworkNodeVisualizerBase, and ~INetworkNodeVisualizer
+// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, ~NetworkNodeVisualizerBase, ~INetworkNodeVisualizer
 //
 module NetworkNodeVisualizer like INetworkNodeVisualizer
 {

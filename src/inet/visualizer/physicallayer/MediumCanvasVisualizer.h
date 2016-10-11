@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -36,6 +36,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
   protected:
     /** @name Parameters */
     //@{
+    double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
     SignalShape signalShape = SIGNAL_SHAPE_RING;
     cImageFigure *transmissionImage = nullptr;

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,13 +23,13 @@ namespace inet {
 
 namespace visualizer {
 
-PathCanvasVisualizerBase::CanvasPath::CanvasPath(const std::vector<int>& path, cPolylineFigure *figure) :
-    Path(path),
+PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const std::vector<int>& path, cPolylineFigure *figure) :
+    PathVisualization(path),
     figure(figure)
 {
 }
 
-PathCanvasVisualizerBase::CanvasPath::~CanvasPath()
+PathCanvasVisualizerBase::PathCanvasVisualization::~PathCanvasVisualization()
 {
     delete figure;
 }
@@ -38,25 +38,17 @@ void PathCanvasVisualizerBase::initialize(int stage)
 {
     PathVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL)
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+    if (stage == INITSTAGE_LOCAL) {
+        zIndex = par("zIndex");
+        auto canvas = visualizerTargetModule->getCanvas();
+        canvasProjection = CanvasProjection::getCanvasProjection(canvas);
+        pathGroup = new cGroupFigure("paths");
+        pathGroup->setZIndex(zIndex);
+        canvas->addFigure(pathGroup);
+    }
 }
 
-void PathCanvasVisualizerBase::addPath(std::pair<int, int> sourceAndDestination, const Path *path)
-{
-    PathVisualizerBase::addPath(sourceAndDestination, path);
-    auto canvasPath = static_cast<const CanvasPath *>(path);
-    visualizerTargetModule->getCanvas()->addFigure(canvasPath->figure);
-}
-
-void PathCanvasVisualizerBase::removePath(std::pair<int, int> sourceAndDestination, const Path *path)
-{
-    PathVisualizerBase::removePath(sourceAndDestination, path);
-    auto canvasPath = static_cast<const CanvasPath *>(path);
-    visualizerTargetModule->getCanvas()->removeFigure(canvasPath->figure);
-}
-
-const PathVisualizerBase::Path *PathCanvasVisualizerBase::createPath(const std::vector<int>& path) const
+const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path) const
 {
     auto figure = new cPolylineFigure();
     figure->setLineWidth(lineWidth);
@@ -67,26 +59,39 @@ const PathVisualizerBase::Path *PathCanvasVisualizerBase::createPath(const std::
         points.push_back(canvasProjection->computeCanvasPoint(getPosition(node)));
     }
     figure->setPoints(points);
-    auto color = cFigure::GOOD_DARK_COLORS[paths.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    auto color = cFigure::GOOD_DARK_COLORS[pathVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
     figure->setLineColor(color);
-    return new CanvasPath(path, figure);
+    return new PathCanvasVisualization(path, figure);
 }
 
-void PathCanvasVisualizerBase::setAlpha(const Path *path, double alpha) const
+void PathCanvasVisualizerBase::addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization)
 {
-    auto canvasPath = static_cast<const CanvasPath *>(path);
-    auto figure = canvasPath->figure;
-    figure->setLineOpacity(alpha);
+    PathVisualizerBase::addPathVisualization(sourceAndDestination, pathVisualization);
+    auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
+    pathGroup->addFigure(pathCanvasVisualization->figure);
+}
+
+void PathCanvasVisualizerBase::removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization)
+{
+    PathVisualizerBase::removePathVisualization(sourceAndDestination, pathVisualization);
+    auto canvasPath = static_cast<const PathCanvasVisualization *>(pathVisualization);
+    pathGroup->removeFigure(canvasPath->figure);
+}
+
+void PathCanvasVisualizerBase::setAlpha(const PathVisualization *path, double alpha) const
+{
+    auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(path);
+    pathCanvasVisualization->figure->setLineOpacity(alpha);
 }
 
 void PathCanvasVisualizerBase::setPosition(cModule *node, const Coord& position) const
 {
-    for (auto it : paths) {
-        auto path = static_cast<const CanvasPath *>(it.second);
-        auto figure = path->figure;
-        for (int i = 0; i < path->moduleIds.size(); i++)
-            if (node->getId() == path->moduleIds[i])
-                figure->setPoint(i, canvasProjection->computeCanvasPoint(position + Coord(0, 0, path->offset)));
+    for (auto it : pathVisualizations) {
+        auto pathVisualization = static_cast<const PathCanvasVisualization *>(it.second);
+        auto figure = pathVisualization->figure;
+        for (int i = 0; i < pathVisualization->moduleIds.size(); i++)
+            if (node->getId() == pathVisualization->moduleIds[i])
+                figure->setPoint(i, canvasProjection->computeCanvasPoint(position + Coord(0, 0, pathVisualization->offset)));
     }
 }
 

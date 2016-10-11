@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,7 +24,7 @@ namespace inet {
 
 namespace visualizer {
 
-LinkVisualizerBase::Link::Link(int sourceModuleId, int destinationModuleId) :
+LinkVisualizerBase::LinkVisualization::LinkVisualization(int sourceModuleId, int destinationModuleId) :
     sourceModuleId(sourceModuleId),
     destinationModuleId(destinationModuleId)
 {
@@ -43,42 +43,54 @@ void LinkVisualizerBase::initialize(int stage)
         lineColor = cFigure::Color(par("lineColor"));
         lineWidth = par("lineWidth");
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
-        opacityHalfLife = par("opacityHalfLife");
+        fadeOutMode = par("fadeOutMode");
+        fadeOutHalfLife = par("fadeOutHalfLife");
     }
 }
 
 void LinkVisualizerBase::refreshDisplay() const
 {
-    auto now = simTime();
-    std::vector<const Link *> removedLinks;
-    for (auto it : links) {
-        auto link = it.second;
-        auto alpha = std::min(1.0, std::pow(2.0, -(now - link->lastUsage).dbl() / opacityHalfLife));
-        if (alpha < 0.01)
-            removedLinks.push_back(link);
+    auto currentSimulationTime = simTime();
+    double currentAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
+    double currentRealTime = getRealTime();
+    std::vector<const LinkVisualization *> removedLinkVisualizations;
+    for (auto it : linkVisualizations) {
+        auto linkVisualization = it.second;
+        double delta;
+        if (!strcmp(fadeOutMode, "simulationTime"))
+            delta = (currentSimulationTime - linkVisualization->lastUsageSimulationTime).dbl();
+        else if (!strcmp(fadeOutMode, "animationTime"))
+            delta = currentAnimationTime - linkVisualization->lastUsageAnimationTime;
+        else if (!strcmp(fadeOutMode, "realTime"))
+            delta = currentRealTime - linkVisualization->lastUsageRealTime;
         else
-            setAlpha(link, alpha);
+            throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
+        auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));
+        if (alpha < 0.01)
+            removedLinkVisualizations.push_back(linkVisualization);
+        else
+            setAlpha(linkVisualization, alpha);
     }
-    for (auto link : removedLinks) {
-        const_cast<LinkVisualizerBase *>(this)->removeLink(link);
-        delete link;
+    for (auto linkVisualization : removedLinkVisualizations) {
+        const_cast<LinkVisualizerBase *>(this)->removeLinkVisualization(linkVisualization);
+        delete linkVisualization;
     }
 }
 
-const LinkVisualizerBase::Link *LinkVisualizerBase::getLink(std::pair<int, int> link)
+const LinkVisualizerBase::LinkVisualization *LinkVisualizerBase::getLinkVisualization(std::pair<int, int> linkVisualization)
 {
-    auto it = links.find(link);
-    return it == links.end() ? nullptr : it->second;
+    auto it = linkVisualizations.find(linkVisualization);
+    return it == linkVisualizations.end() ? nullptr : it->second;
 }
 
-void LinkVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
+void LinkVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization)
 {
-    links[sourceAndDestination] = link;
+    linkVisualizations[sourceAndDestination] = linkVisualization;
 }
 
-void LinkVisualizerBase::removeLink(const Link *link)
+void LinkVisualizerBase::removeLinkVisualization(const LinkVisualization *linkVisualization)
 {
-    links.erase(links.find(std::pair<int, int>(link->sourceModuleId, link->destinationModuleId)));
+    linkVisualizations.erase(linkVisualizations.find(std::pair<int, int>(linkVisualization->sourceModuleId, linkVisualization->destinationModuleId)));
 }
 
 cModule *LinkVisualizerBase::getLastModule(int treeId)
@@ -100,16 +112,19 @@ void LinkVisualizerBase::removeLastModule(int treeId)
     lastModules.erase(lastModules.find(treeId));
 }
 
-void LinkVisualizerBase::updateLink(cModule *source, cModule *destination)
+void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *destination)
 {
     auto key = std::pair<int, int>(source->getId(), destination->getId());
-    auto link = getLink(key);
-    if (link == nullptr) {
-        link = createLink(source, destination);
-        addLink(key, link);
+    auto linkVisualization = getLinkVisualization(key);
+    if (linkVisualization == nullptr) {
+        linkVisualization = createLinkVisualization(source, destination);
+        addLinkVisualization(key, linkVisualization);
     }
-    else
-        link->lastUsage = simTime();
+    else {
+        linkVisualization->lastUsageSimulationTime = getSimulation()->getSimTime();
+        linkVisualization->lastUsageAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
+        linkVisualization->lastUsageRealTime = getRealTime();
+    }
 }
 
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
@@ -139,7 +154,7 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
                 auto module = check_and_cast<cModule *>(source);
                 auto lastModule = getLastModule(treeId);
                 if (lastModule != nullptr) {
-                    updateLink(getContainingNode(lastModule), getContainingNode(module));
+                    updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module));
                     // TODO: breaks due to multiple recipient?
                     // removeLastModule(treeId);
                 }

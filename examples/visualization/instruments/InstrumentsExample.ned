@@ -1,12 +1,7 @@
-//
-// This program is property of its copyright holder. All rights reserved.
-//
-
 package inet.examples.visualization.instruments;
 
 import inet.common.misc.SignalSource;
 import inet.common.figures.DelegateSignalConfigurator;
-
 
 network InstrumentsExample
 {

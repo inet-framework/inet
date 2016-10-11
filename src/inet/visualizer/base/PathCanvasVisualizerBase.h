@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,26 +28,27 @@ namespace visualizer {
 class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
 {
   protected:
-    class INET_API CanvasPath : public Path {
+    class INET_API PathCanvasVisualization : public PathVisualization {
       public:
         cPolylineFigure *figure = nullptr;
 
       public:
-        CanvasPath(const std::vector<int>& path, cPolylineFigure *figure);
-        virtual ~CanvasPath();
+        PathCanvasVisualization(const std::vector<int>& path, cPolylineFigure *figure);
+        virtual ~PathCanvasVisualization();
     };
 
   protected:
+    double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
+    cGroupFigure *pathGroup = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void addPath(std::pair<int, int> sourceAndDestination, const Path *path) override;
-    virtual void removePath(std::pair<int, int> sourceAndDestination, const Path *path) override;
-
-    virtual const Path *createPath(const std::vector<int>& path) const override;
-    virtual void setAlpha(const Path *path, double alpha) const override;
+    virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const override;
+    virtual void addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization) override;
+    virtual void removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization) override;
+    virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
     virtual void setPosition(cModule *node, const Coord& position) const override;
 };
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,16 +28,14 @@ import inet.visualizer.contract.IMediumVisualizer;
 // radio signals as a 2D ring or a 3D sphere as they propagate through the
 // medium.
 //
-// @see ~MediumCanvasVisualizer, ~MediumVisualizer, ~MediumVisualizerBase,
-// and ~IMediumVisualizer
+// @see ~MediumCanvasVisualizer, ~MediumVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer
 //
 simple MediumCanvasVisualizer extends MediumVisualizerBase like IMediumVisualizer
 {
     parameters:
         @class(MediumCanvasVisualizer);
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path of the network node visualizer module
-
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
         string signalShape @enum("ring", "sphere") = default("ring"); // shape for displaying signals
-
         bool displayCommunicationHeat = default(false); // when enabled the radio medium displays recent successful receptions as a heat map overlay
 }

@@ -132,6 +132,7 @@ void DcfUpperMac::upperFrameReceived(Ieee80211DataOrMgmtFrame *frame)
 
     if (maxQueueSize > 0 && transmissionQueue.getLength() >= maxQueueSize && dynamic_cast<Ieee80211DataFrame *>(frame)) {
         EV << "Dataframe " << frame << " received from higher layer but MAC queue is full, dropping\n";
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, frame);
         delete frame;
         return;
     }
@@ -165,6 +166,7 @@ void DcfUpperMac::lowerFrameReceived(Ieee80211Frame *frame)
 
     if (!utils->isForUs(frame)) {
         EV_INFO << "This frame is not for us" << std::endl;
+        // TODO: add reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
         delete frame;
         if (frameExchange)
             frameExchange->corruptedOrNotForUsFrameReceived();

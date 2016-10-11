@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -35,7 +35,7 @@ class INET_API NetworkConnectionVisualizerBase : public VisualizerBase, public c
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void createConnection(cModule *startNetworkNode, cModule *endNetworkNode) = 0;
+    virtual void createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode) = 0;
 };
 
 } // namespace visualizer

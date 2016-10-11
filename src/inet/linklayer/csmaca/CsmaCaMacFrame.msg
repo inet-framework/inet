@@ -17,6 +17,7 @@
 
 cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/contract/IMACFrame.h"
 }}
 
 class noncobject MACAddress;
@@ -25,6 +26,7 @@ namespace inet;
 
 packet CsmaCaMacFrame
 {
+    @implements(IMACFrame);
     MACAddress transmitterAddress;
     MACAddress receiverAddress;
 }

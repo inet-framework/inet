@@ -313,7 +313,7 @@ class INET_API TCPStateVariables : public cObject
  * When the CLOSED state is reached, TCP will delete the TCPConnection object.
  *
  */
-class INET_API TCPConnection
+class INET_API TCPConnection : public cObject
 {
   public:
     // connection identification by apps: appgateIndex+connId
