@@ -63,21 +63,21 @@ const LinkVisualizerBase::LinkVisualization *LinkCanvasVisualizerBase::createLin
 void LinkCanvasVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *link)
 {
     LinkVisualizerBase::addLinkVisualization(sourceAndDestination, link);
-    auto canvasLink = static_cast<const LinkCanvasVisualization *>(link);
-    linkGroup->addFigure(canvasLink->figure);
+    auto linkCanvasVisualization = static_cast<const LinkCanvasVisualization *>(link);
+    linkGroup->addFigure(linkCanvasVisualization->figure);
 }
 
 void LinkCanvasVisualizerBase::removeLinkVisualization(const LinkVisualization *link)
 {
     LinkVisualizerBase::removeLinkVisualization(link);
-    auto canvasLink = static_cast<const LinkCanvasVisualization *>(link);
-    linkGroup->removeFigure(canvasLink->figure);
+    auto linkCanvasVisualization = static_cast<const LinkCanvasVisualization *>(link);
+    linkGroup->removeFigure(linkCanvasVisualization->figure);
 }
 
 void LinkCanvasVisualizerBase::setAlpha(const LinkVisualization *link, double alpha) const
 {
-    auto canvasLink = static_cast<const LinkCanvasVisualization *>(link);
-    auto figure = canvasLink->figure;
+    auto linkCanvasVisualization = static_cast<const LinkCanvasVisualization *>(link);
+    auto figure = linkCanvasVisualization->figure;
     figure->setLineOpacity(alpha);
 }
 

@@ -67,6 +67,16 @@ void NetworkNodeCanvasVisualization::removeAnnotation(cFigure *figure)
     updateAnnotationPositions();
 }
 
+void NetworkNodeCanvasVisualization::setAnnotationSize(cFigure *figure, cFigure::Point size)
+{
+    for (auto it = annotations.begin(); it != annotations.end(); it++) {
+        if ((*it).figure == figure) {
+            it->size = size;
+        }
+    }
+    updateAnnotationPositions();
+}
+
 } // namespace visualizer
 
 } // namespace inet

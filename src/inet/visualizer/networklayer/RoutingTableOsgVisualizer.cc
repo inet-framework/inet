@@ -41,19 +41,33 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::~RouteOsgVisualization()
     // TODO: delete node;
 }
 
-void RoutingTableOsgVisualizer::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *route)
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(cModule *node, cModule *nextHop) const
 {
-    RoutingTableVisualizerBase::addRouteVisualization(nodeAndNextHop, route);
-    auto osgRoute = static_cast<const RouteOsgVisualization *>(route);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    scene->addChild(osgRoute->node);
+    auto nodePosition = getPosition(node);
+    auto nextHopPosition = getPosition(nextHop);
+    auto osgNode = inet::osg::createLine(nodePosition, nextHopPosition, cFigure::ARROW_NONE, cFigure::ARROW_BARBED);
+    auto stateSet = inet::osg::createStateSet(lineColor, 1.0, false);
+    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    auto lineWidth = new osg::LineWidth();
+    lineWidth->setWidth(this->lineWidth);
+    stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
+    osgNode->setStateSet(stateSet);
+    return new RouteOsgVisualization(osgNode, node->getId(), nextHop->getId());
 }
 
-void RoutingTableOsgVisualizer::removeRouteVisualization(const RouteVisualization *route)
+void RoutingTableOsgVisualizer::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization)
 {
-    RoutingTableVisualizerBase::removeRouteVisualization(route);
-    auto osgRoute = static_cast<const RouteOsgVisualization *>(route);
-    auto node = osgRoute->node;
+    RoutingTableVisualizerBase::addRouteVisualization(nodeAndNextHop, routeVisualization);
+    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    scene->addChild(routeOsgVisualization->node);
+}
+
+void RoutingTableOsgVisualizer::removeRouteVisualization(const RouteVisualization *routeVisualization)
+{
+    RoutingTableVisualizerBase::removeRouteVisualization(routeVisualization);
+    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
+    auto node = routeOsgVisualization->node;
     node->getParent(0)->removeChild(node);
 }
 
@@ -77,20 +91,6 @@ void RoutingTableOsgVisualizer::setPosition(cModule *node, const Coord& position
         geometry->dirtyBound();
         geometry->dirtyDisplayList();
     }
-}
-
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(cModule *node, cModule *nextHop) const
-{
-    auto nodePosition = getPosition(node);
-    auto nextHopPosition = getPosition(nextHop);
-    auto osgNode = inet::osg::createLine(nodePosition, nextHopPosition, cFigure::ARROW_NONE, cFigure::ARROW_BARBED);
-    auto stateSet = inet::osg::createStateSet(lineColor, 1.0, false);
-    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-    auto lineWidth = new osg::LineWidth();
-    lineWidth->setWidth(this->lineWidth);
-    stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
-    osgNode->setStateSet(stateSet);
-    return new RouteOsgVisualization(osgNode, node->getId(), nextHop->getId());
 }
 
 } // namespace visualizer

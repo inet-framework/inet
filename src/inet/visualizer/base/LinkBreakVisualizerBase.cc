@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/linklayer/contract/IMACFrame.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/LinkBreakVisualizerBase.h"
@@ -93,21 +94,28 @@ void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
         setPosition(node, position);
     }
     else if (signal == NF_LINK_BREAK) {
-        auto frame = dynamic_cast<IMACFrame *>(object);
-        if (frame != nullptr) {
-            auto transmitter = findNode(frame->getTransmitterAddress());
-            auto receiver = findNode(frame->getReceiverAddress());
-            if (nodeMatcher.matches(transmitter->getFullPath().c_str()) && nodeMatcher.matches(receiver->getFullPath().c_str())) {
-                auto key = std::pair<int, int>(transmitter->getId(), receiver->getId());
-                auto it = linkBreakVisualizations.find(key);
-                if (it == linkBreakVisualizations.end())
-                    addLinkBreakVisualization(createLinkBreakVisualization(transmitter, receiver));
-                else {
-                    auto linkBreakVisualization = it->second;
-                    linkBreakVisualization->breakSimulationTime = simTime();
-                    linkBreakVisualization->breakAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
-                    linkBreakVisualization->breakRealTime = getRealTime();
-                }
+        MACAddress transmitterAddress;
+        MACAddress receiverAddress;
+        if (auto frame = dynamic_cast<IMACFrame *>(object)) {
+            transmitterAddress = frame->getTransmitterAddress();
+            receiverAddress = frame->getReceiverAddress();
+        }
+        if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressFrame *>(object)) {
+            transmitterAddress = frame->getTransmitterAddress();
+            receiverAddress = frame->getReceiverAddress();
+        }
+        auto transmitter = findNode(transmitterAddress);
+        auto receiver = findNode(receiverAddress);
+        if (nodeMatcher.matches(transmitter->getFullPath().c_str()) && nodeMatcher.matches(receiver->getFullPath().c_str())) {
+            auto key = std::pair<int, int>(transmitter->getId(), receiver->getId());
+            auto it = linkBreakVisualizations.find(key);
+            if (it == linkBreakVisualizations.end())
+                addLinkBreakVisualization(createLinkBreakVisualization(transmitter, receiver));
+            else {
+                auto linkBreakVisualization = it->second;
+                linkBreakVisualization->breakSimulationTime = simTime();
+                linkBreakVisualization->breakAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
+                linkBreakVisualization->breakRealTime = getRealTime();
             }
         }
     }

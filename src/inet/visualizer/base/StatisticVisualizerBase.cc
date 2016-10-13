@@ -36,10 +36,10 @@ void StatisticVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        if (*signalName != '\0')
-            subscriptionModule->subscribe(registerSignal(signalName), this);
         sourcePathMatcher.setPattern(par("sourcePathFilter"), true, true, true);
         signalName = par("signalName");
+        if (*signalName != '\0')
+            subscriptionModule->subscribe(registerSignal(signalName), this);
         statisticName = par("statisticName");
         unit = par("unit");
         prefix = par("prefix");

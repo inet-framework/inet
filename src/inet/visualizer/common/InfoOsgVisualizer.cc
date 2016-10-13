@@ -24,36 +24,51 @@ namespace visualizer {
 
 Define_Module(InfoOsgVisualizer);
 
+InfoOsgVisualizer::InfoOsgVisualization::InfoOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, int moduleId) :
+    InfoVisualization(moduleId),
+    networkNodeVisualization(networkNodeVisualization),
+    node(node)
+{
+}
+
 void InfoOsgVisualizer::initialize(int stage)
 {
     InfoVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
-        auto simulation = getSimulation();
-        for (int i = 0; i < moduleIds.size(); i++) {
-            auto text = new osgText::Text();
-            text->setCharacterSize(18);
-            text->setBoundingBoxColor(osg::Vec4(backgroundColor.red / 255.0, backgroundColor.green / 255.0, backgroundColor.blue / 255.0, 0.5));
-            text->setColor(osg::Vec4(fontColor.red / 255.0, fontColor.green / 255.0, fontColor.blue / 255.0, 1.0));
-            text->setAlignment(osgText::Text::CENTER_BOTTOM);
-            text->setText("");
-            text->setDrawMode(osgText::Text::FILLEDBOUNDINGBOX | osgText::Text::TEXT);
-            text->setPosition(osg::Vec3(0.0, 0.0, 0.0));
-            auto geode = new osg::Geode();
-            geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-            geode->addDrawable(text);
-            auto module = simulation->getModule(moduleIds[i]);
-            auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
-            visualization->addAnnotation(geode, osg::Vec3d(0, 0, 0), 0);
-            labels.push_back(geode);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        for (auto infoVisualization : infoVisualizations) {
+            auto infoOsgVisualization = static_cast<const InfoOsgVisualization *>(infoVisualization);
+            auto node = infoOsgVisualization->node;
+            infoOsgVisualization->networkNodeVisualization->addAnnotation(node, osg::Vec3d(0, 0, 0), 0);
         }
     }
 }
 
-void InfoOsgVisualizer::setInfo(int i, const char *info) const
+InfoVisualizerBase::InfoVisualization *InfoOsgVisualizer::createInfoVisualization(cModule *module) const
 {
-    auto text = static_cast<osgText::Text *>(labels[i]->getDrawable(0));
+    auto text = new osgText::Text();
+    text->setCharacterSize(18);
+    text->setBoundingBoxColor(osg::Vec4(backgroundColor.red / 255.0, backgroundColor.green / 255.0, backgroundColor.blue / 255.0, 0.5));
+    text->setColor(osg::Vec4(fontColor.red / 255.0, fontColor.green / 255.0, fontColor.blue / 255.0, 1.0));
+    text->setAlignment(osgText::Text::CENTER_BOTTOM);
+    text->setText("");
+    text->setDrawMode(osgText::Text::FILLEDBOUNDINGBOX | osgText::Text::TEXT);
+    text->setPosition(osg::Vec3(0.0, 0.0, 0.0));
+    auto geode = new osg::Geode();
+    geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    geode->addDrawable(text);
+    auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+    return new InfoOsgVisualization(visualization, geode, module->getId());
+}
+
+void InfoOsgVisualizer::refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const
+{
+    auto infoOsgVisualization = static_cast<const InfoOsgVisualization *>(infoVisualization);
+    auto node = infoOsgVisualization->node;
+    auto text = static_cast<osgText::Text *>(node->getDrawable(0));
     text->setText(info);
 }
 

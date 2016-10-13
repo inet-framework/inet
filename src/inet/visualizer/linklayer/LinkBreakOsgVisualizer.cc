@@ -17,7 +17,7 @@
 
 #include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
-#include "inet/visualizer/linklayer/LinkBreakVOsgVisualizer.h"
+#include "inet/visualizer/linklayer/LinkBreakOsgVisualizer.h"
 
 #ifdef WITH_OSG
 #include <osg/Geode>
@@ -30,33 +30,20 @@ namespace visualizer {
 
 Define_Module(LinkBreakOsgVisualizer);
 
-LinkBreakOsgVisualizer::OsgLinkBreak::OsgLinkBreak(osg::Node *node, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime) :
+LinkBreakOsgVisualizer::LinkBreakOsgVisualization::LinkBreakOsgVisualization(osg::Node *node, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime) :
     LinkBreakVisualization(transmitterModuleId, receiverModuleId, breakSimulationTime, breakAnimationTime, breakRealTime),
     node(node)
 {
 }
 
-LinkBreakOsgVisualizer::OsgLinkBreak::~OsgLinkBreak()
+LinkBreakOsgVisualizer::LinkBreakOsgVisualization::~LinkBreakOsgVisualization()
 {
     // TODO: delete node;
 }
 
-void LinkBreakOsgVisualizer::setPosition(cModule *node, const Coord& position) const
-{
-    // TODO:
-}
-
-void LinkBreakOsgVisualizer::setAlpha(const LinkBreakVisualization *linkBreak, double alpha) const
-{
-    auto osgLinkBreak = static_cast<const OsgLinkBreak *>(linkBreak);
-    auto node = osgLinkBreak->node;
-    auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-    material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
-}
-
 const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakOsgVisualizer::createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const
 {
-    auto path = resolveResourcePath(icon);
+    auto path = resolveResourcePath((std::string(icon) + ".png").c_str());
     auto image = inet::osg::createImage(path.c_str());
     auto texture = new osg::Texture2D();
     texture->setImage(image);
@@ -69,24 +56,43 @@ const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakOsgVisualizer::c
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     auto geode = new osg::Geode();
     geode->addDrawable(geometry);
+    auto material = new osg::Material();
+    osg::Vec4 colorVec((double)iconTintColor.red / 255.0, (double)iconTintColor.green / 255.0, (double)iconTintColor.blue / 255.0, 1.0);
+    material->setAmbient(osg::Material::FRONT_AND_BACK, colorVec);
+    material->setDiffuse(osg::Material::FRONT_AND_BACK, colorVec);
+    material->setAlpha(osg::Material::FRONT_AND_BACK, 1.0);
+    geode->getOrCreateStateSet()->setAttribute(material);
     // TODO: apply tinting
-    return new OsgLinkBreak(geode, transmitter->getId(), receiver->getId(), simTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
+    return new LinkBreakOsgVisualization(geode, transmitter->getId(), receiver->getId(), simTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
 }
 
-void LinkBreakOsgVisualizer::addLinkBreakVisualization(const LinkBreakVisualization *linkBreak)
+void LinkBreakOsgVisualizer::addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization)
 {
-    LinkBreakVisualizerBase::addLinkBreakVisualization(linkBreak);
-    auto osgLinkBreak = static_cast<const OsgLinkBreak *>(linkBreak);
+    LinkBreakVisualizerBase::addLinkBreakVisualization(linkBreakVisualization);
+    auto linkBreakOsgVisualization = static_cast<const LinkBreakOsgVisualization *>(linkBreakVisualization);
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    scene->addChild(osgLinkBreak->node);
+    scene->addChild(linkBreakOsgVisualization->node);
 }
 
 void LinkBreakOsgVisualizer::removeLinkBreakVisualization(const LinkBreakVisualization *linkBreak)
 {
     LinkBreakVisualizerBase::removeLinkBreakVisualization(linkBreak);
-    auto osgLinkBreak = static_cast<const OsgLinkBreak *>(linkBreak);
-    auto node = osgLinkBreak->node;
+    auto linkBreakOsgVisualization = static_cast<const LinkBreakOsgVisualization *>(linkBreak);
+    auto node = linkBreakOsgVisualization->node;
     node->getParent(0)->removeChild(node);
+}
+
+void LinkBreakOsgVisualizer::setPosition(cModule *node, const Coord& position) const
+{
+    // TODO:
+}
+
+void LinkBreakOsgVisualizer::setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const
+{
+    auto linkBreakOsgVisualization = static_cast<const LinkBreakOsgVisualization *>(linkBreakVisualization);
+    auto node = linkBreakOsgVisualization->node;
+    auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+    material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
 }
 
 } // namespace visualizer

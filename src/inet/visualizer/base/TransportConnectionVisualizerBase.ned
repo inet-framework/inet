@@ -35,5 +35,6 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer");
         string subscriptionModule = default(""); // module path where the visualizer subscribes for connection signals, root module by default
         string nodeFilter = default(""); // which network nodes are considered to display connections, matches no nodes by default
+        string icon = default("misc/marker_s"); // transport connection visualization icon
         @class(TransportConnectionVisualizerBase);
 }

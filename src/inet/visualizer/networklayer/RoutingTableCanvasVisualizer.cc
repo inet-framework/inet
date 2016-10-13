@@ -48,18 +48,30 @@ void RoutingTableCanvasVisualizer::initialize(int stage)
     }
 }
 
-void RoutingTableCanvasVisualizer::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *route)
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(cModule *node, cModule *nextHop) const
 {
-    RoutingTableVisualizerBase::addRouteVisualization(nodeAndNextHop, route);
-    auto canvasRoute = static_cast<const RouteCanvasVisualization *>(route);
-    routeGroup->addFigure(canvasRoute->figure);
+    auto figure = new cLineFigure();
+    figure->setStart(canvasProjection->computeCanvasPoint(getPosition(node)));
+    figure->setEnd(canvasProjection->computeCanvasPoint(getPosition(nextHop)));
+    figure->setEndArrowhead(cFigure::ARROW_BARBED);
+    figure->setLineWidth(lineWidth);
+    figure->setLineColor(lineColor);
+    figure->setLineStyle(lineStyle);
+    return new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
 }
 
-void RoutingTableCanvasVisualizer::removeRouteVisualization(const RouteVisualization *route)
+void RoutingTableCanvasVisualizer::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization)
 {
-    RoutingTableVisualizerBase::removeRouteVisualization(route);
-    auto canvasRoute = static_cast<const RouteCanvasVisualization *>(route);
-    routeGroup->removeFigure(canvasRoute->figure);
+    RoutingTableVisualizerBase::addRouteVisualization(nodeAndNextHop, routeVisualization);
+    auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
+    routeGroup->addFigure(routeCanvasVisualization->figure);
+}
+
+void RoutingTableCanvasVisualizer::removeRouteVisualization(const RouteVisualization *routeVisualization)
+{
+    RoutingTableVisualizerBase::removeRouteVisualization(routeVisualization);
+    auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
+    routeGroup->removeFigure(routeCanvasVisualization->figure);
 }
 
 void RoutingTableCanvasVisualizer::setPosition(cModule *node, const Coord& position) const
@@ -72,18 +84,6 @@ void RoutingTableCanvasVisualizer::setPosition(cModule *node, const Coord& posit
         else if (node->getId() == route->nextHopModuleId)
             figure->setEnd(canvasProjection->computeCanvasPoint(position));
     }
-}
-
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(cModule *node, cModule *nextHop) const
-{
-    auto figure = new cLineFigure();
-    figure->setStart(canvasProjection->computeCanvasPoint(getPosition(node)));
-    figure->setEnd(canvasProjection->computeCanvasPoint(getPosition(nextHop)));
-    figure->setEndArrowhead(cFigure::ARROW_BARBED);
-    figure->setLineWidth(lineWidth);
-    figure->setLineColor(lineColor);
-    figure->setLineStyle(lineStyle);
-    return new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
 }
 
 } // namespace visualizer

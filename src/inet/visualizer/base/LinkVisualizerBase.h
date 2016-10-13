@@ -69,13 +69,12 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 
     virtual bool isLinkEnd(cModule *module) const = 0;
 
-    virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const = 0;
-    virtual void setPosition(cModule *node, const Coord& position) const = 0;
-
     virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination) const = 0;
     virtual const LinkVisualization *getLinkVisualization(std::pair<int, int> linkVisualization);
     virtual void addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization);
     virtual void removeLinkVisualization(const LinkVisualization *linkVisualization);
+    virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const = 0;
+    virtual void setPosition(cModule *node, const Coord& position) const = 0;
 
     virtual cModule *getLastModule(int treeId);
     virtual void setLastModule(int treeId, cModule *lastModule);

@@ -28,20 +28,33 @@ namespace visualizer {
 class INET_API InfoVisualizerBase : public VisualizerBase
 {
   protected:
+    class INET_API InfoVisualization
+    {
+      public:
+        int moduleId = -1;
+
+      public:
+        InfoVisualization(int moduleId);
+        virtual ~InfoVisualization() {}
+    };
+
+  protected:
     /** @name Parameters */
     //@{
     cFigure::Color fontColor;
     cFigure::Color backgroundColor;
     inet::PatternMatcher moduleMatcher;
+    double opacity = NaN;
     //@}
 
-    std::vector<int> moduleIds;
+    std::vector<InfoVisualization *> infoVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual void setInfo(int index, const char *info) const = 0;
+    virtual InfoVisualization *createInfoVisualization(cModule *module) const = 0;
+    virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const = 0;
 };
 
 } // namespace visualizer

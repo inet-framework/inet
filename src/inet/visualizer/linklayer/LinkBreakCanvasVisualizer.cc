@@ -24,7 +24,7 @@ namespace visualizer {
 
 Define_Module(LinkBreakCanvasVisualizer);
 
-LinkBreakCanvasVisualizer::CanvasLinkBreak::CanvasLinkBreak(cIconFigure *figure, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime) :
+LinkBreakCanvasVisualizer::LinkBreakCanvasVisualization::LinkBreakCanvasVisualization(cIconFigure *figure, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime) :
     LinkBreakVisualization(transmitterModuleId, receiverModuleId, breakSimulationTime, breakAnimationTime, breakRealTime),
     figure(figure)
 {
@@ -44,26 +44,6 @@ void LinkBreakCanvasVisualizer::initialize(int stage)
     }
 }
 
-void LinkBreakCanvasVisualizer::setPosition(cModule *node, const Coord& position) const
-{
-    for (auto it : linkBreakVisualizations) {
-        auto linkBreak = static_cast<const CanvasLinkBreak *>(it.second);
-        auto transmitter = getSimulation()->getModule(linkBreak->transmitterModuleId);
-        auto receiver = getSimulation()->getModule(linkBreak->receiverModuleId);
-        auto transmitterPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(transmitter)));
-        auto receiverPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(receiver)));
-        auto figure = linkBreak->figure;
-        figure->setPosition((transmitterPosition + receiverPosition) / 2);
-    }
-}
-
-void LinkBreakCanvasVisualizer::setAlpha(const LinkBreakVisualization *linkBreak, double alpha) const
-{
-    auto canvasLinkBreak = static_cast<const CanvasLinkBreak *>(linkBreak);
-    auto figure = canvasLinkBreak->figure;
-    figure->setOpacity(alpha);
-}
-
 const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakCanvasVisualizer::createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const
 {
     auto transmitterPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(transmitter)));
@@ -73,21 +53,41 @@ const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakCanvasVisualizer
     figure->setTintAmount(iconTintAmount);
     figure->setTintColor(iconTintColor);
     figure->setPosition((transmitterPosition + receiverPosition) / 2);
-    return new CanvasLinkBreak(figure, transmitter->getId(), receiver->getId(), simTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
+    return new LinkBreakCanvasVisualization(figure, transmitter->getId(), receiver->getId(), simTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
 }
 
-void LinkBreakCanvasVisualizer::addLinkBreakVisualization(const LinkBreakVisualization *linkBreak)
+void LinkBreakCanvasVisualizer::addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization)
 {
-    LinkBreakVisualizerBase::addLinkBreakVisualization(linkBreak);
-    auto canvasLinkBreak = static_cast<const CanvasLinkBreak *>(linkBreak);
-    linkBreakGroup->addFigure(canvasLinkBreak->figure);
+    LinkBreakVisualizerBase::addLinkBreakVisualization(linkBreakVisualization);
+    auto linkBreakCanvasVisualization = static_cast<const LinkBreakCanvasVisualization *>(linkBreakVisualization);
+    linkBreakGroup->addFigure(linkBreakCanvasVisualization->figure);
 }
 
-void LinkBreakCanvasVisualizer::removeLinkBreakVisualization(const LinkBreakVisualization *linkBreak)
+void LinkBreakCanvasVisualizer::removeLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization)
 {
-    LinkBreakVisualizerBase::removeLinkBreakVisualization(linkBreak);
-    auto canvasLinkBreak = static_cast<const CanvasLinkBreak *>(linkBreak);
-    linkBreakGroup->removeFigure(canvasLinkBreak->figure);
+    LinkBreakVisualizerBase::removeLinkBreakVisualization(linkBreakVisualization);
+    auto linkBreakCanvasVisualization = static_cast<const LinkBreakCanvasVisualization *>(linkBreakVisualization);
+    linkBreakGroup->removeFigure(linkBreakCanvasVisualization->figure);
+}
+
+void LinkBreakCanvasVisualizer::setPosition(cModule *node, const Coord& position) const
+{
+    for (auto it : linkBreakVisualizations) {
+        auto linkBreak = static_cast<const LinkBreakCanvasVisualization *>(it.second);
+        auto transmitter = getSimulation()->getModule(linkBreak->transmitterModuleId);
+        auto receiver = getSimulation()->getModule(linkBreak->receiverModuleId);
+        auto transmitterPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(transmitter)));
+        auto receiverPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(receiver)));
+        auto figure = linkBreak->figure;
+        figure->setPosition((transmitterPosition + receiverPosition) / 2);
+    }
+}
+
+void LinkBreakCanvasVisualizer::setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const
+{
+    auto linkBreakCanvasVisualization = static_cast<const LinkBreakCanvasVisualization *>(linkBreakVisualization);
+    auto figure = linkBreakCanvasVisualization->figure;
+    figure->setOpacity(alpha);
 }
 
 } // namespace visualizer

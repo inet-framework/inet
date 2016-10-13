@@ -74,7 +74,7 @@ void PacketDropVisualizerBase::refreshDisplay() const
     auto currentSimulationTime = simTime();
     double currentAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
     double currentRealTime = getRealTime();
-    std::vector<const PacketDropVisualization *> removedPacketDrops;
+    std::vector<const PacketDropVisualization *> removedPacketDropVisualizations;
     for (auto packetDrop : packetDropVisualizations) {
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
@@ -87,11 +87,11 @@ void PacketDropVisualizerBase::refreshDisplay() const
             throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
         auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));
         if (alpha < 0.01)
-            removedPacketDrops.push_back(packetDrop);
+            removedPacketDropVisualizations.push_back(packetDrop);
         else
             setAlpha(packetDrop, alpha);
     }
-    for (auto packetDrop : removedPacketDrops) {
+    for (auto packetDrop : removedPacketDropVisualizations) {
         const_cast<PacketDropVisualizerBase *>(this)->removePacketDropVisualization(packetDrop);
         delete packetDrop;
     }

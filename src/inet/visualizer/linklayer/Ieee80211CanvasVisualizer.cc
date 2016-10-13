@@ -41,13 +41,14 @@ void Ieee80211CanvasVisualizer::initialize(int stage)
     }
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry)
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid)
 {
+    std::hash<std::string> hasher;
     auto iconFigure = new cIconFigure();
-    int ssid = 0; // TODO:
-    iconFigure->setImageName("misc/signal");
-    iconFigure->setTintColor(cFigure::GOOD_DARK_COLORS[ssid % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
-    iconFigure->setTintAmount(0.5);
+    iconFigure->setAnchor(cFigure::ANCHOR_NW);
+    iconFigure->setImageName(icon);
+    iconFigure->setTintColor(cFigure::GOOD_DARK_COLORS[hasher(ssid) % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
+    iconFigure->setTintAmount(1);
     auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
     return new Ieee80211CanvasVisualization(networkNodeVisualization, iconFigure, networkNode->getId(), interfaceEntry->getInterfaceId());
 }

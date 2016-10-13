@@ -29,5 +29,6 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         string subscriptionModule = default(""); // module path where the visualizer subscribes for interface changed signals, root module by default
         string nodeFilter = default(""); // which nodes are considered, matches no nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
+        string icon = default("misc/signal_s"); // wireless network visualization icon
         @class(Ieee80211VisualizerBase);
 }

@@ -24,6 +24,13 @@ namespace visualizer {
 
 Define_Module(InfoCanvasVisualizer);
 
+InfoCanvasVisualizer::InfoCanvasVisualization::InfoCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BoxedLabelFigure *figure, int moduleId) :
+    InfoVisualization(moduleId),
+    networkNodeVisualization(networkNodeVisualization),
+    figure(figure)
+{
+}
+
 void InfoCanvasVisualizer::initialize(int stage)
 {
     InfoVisualizerBase::initialize(stage);
@@ -31,43 +38,33 @@ void InfoCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
-        auto simulation = getSimulation();
-        for (int i = 0; i < moduleIds.size(); i++) {
-            double width = 100;
-            double height = 24;
-            double spacing = 4;
-            auto labelFigure = new cLabelFigure("text");
-            labelFigure->setColor(fontColor);
-            labelFigure->setPosition(cFigure::Point(spacing, spacing));
-            auto rectangleFigure = new cRectangleFigure("border");
-            rectangleFigure->setCornerRx(spacing);
-            rectangleFigure->setCornerRy(spacing);
-            rectangleFigure->setFilled(true);
-            rectangleFigure->setFillOpacity(0.5);
-            rectangleFigure->setFillColor(backgroundColor);
-            rectangleFigure->setLineColor(cFigure::BLACK);
-            rectangleFigure->setBounds(cFigure::Rectangle(0, 0, width, height));
-            auto groupFigure = new cGroupFigure("info");
-            groupFigure->addFigure(rectangleFigure);
-            groupFigure->addFigure(labelFigure);
-            groupFigure->setZIndex(zIndex);
-            auto module = simulation->getModule(moduleIds[i]);
-            auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
-            visualization->addAnnotation(groupFigure, cFigure::Point(width, height));
-            figures.push_back(groupFigure);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        for (auto infoVisualization : infoVisualizations) {
+            auto infoCanvasVisualization = static_cast<const InfoCanvasVisualization *>(infoVisualization);
+            auto figure = infoCanvasVisualization->figure;
+            infoCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize());
         }
     }
 }
 
-void InfoCanvasVisualizer::setInfo(int i, const char *info) const
+InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualization(cModule *module) const
 {
-    auto rectangleFigure = static_cast<cRectangleFigure *>(figures[i]->getFigure(0));
-    auto labelFigure = static_cast<cLabelFigure *>(figures[i]->getFigure(1));
-    double spacing = 4;
-    int width, height, ascent;
-    getSimulation()->getEnvir()->getTextExtent(labelFigure->getFont(), info, width, height, ascent);
-    rectangleFigure->setBounds(cFigure::Rectangle(0, 0, 2 * spacing + width , 2 * spacing + height));
-    labelFigure->setText(info);
+    auto figure = new BoxedLabelFigure();
+    figure->setZIndex(zIndex);
+    figure->setFontColor(fontColor);
+    figure->setBackgroundColor(backgroundColor);
+    figure->setOpacity(opacity);
+    auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+    return new InfoCanvasVisualization(visualization, figure, module->getId());
+}
+
+void InfoCanvasVisualizer::refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const
+{
+    auto infoCanvasVisualization = static_cast<const InfoCanvasVisualization *>(infoVisualization);
+    auto figure = infoCanvasVisualization->figure;
+    figure->setText(info);
+    infoCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, figure->getBounds().getSize());
 }
 
 } // namespace visualizer

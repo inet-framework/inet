@@ -61,23 +61,23 @@ const LinkVisualizerBase::LinkVisualization *LinkOsgVisualizerBase::createLinkVi
 void LinkOsgVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *link)
 {
     LinkVisualizerBase::addLinkVisualization(sourceAndDestination, link);
-    auto osgLink = static_cast<const LinkOsgVisualization *>(link);
+    auto linkOsgVisualization = static_cast<const LinkOsgVisualization *>(link);
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    scene->addChild(osgLink->node);
+    scene->addChild(linkOsgVisualization->node);
 }
 
 void LinkOsgVisualizerBase::removeLinkVisualization(const LinkVisualization *link)
 {
     LinkVisualizerBase::removeLinkVisualization(link);
-    auto osgLink = static_cast<const LinkOsgVisualization *>(link);
-    auto node = osgLink->node;
+    auto linkOsgVisualization = static_cast<const LinkOsgVisualization *>(link);
+    auto node = linkOsgVisualization->node;
     node->getParent(0)->removeChild(node);
 }
 
 void LinkOsgVisualizerBase::setAlpha(const LinkVisualization *link, double alpha) const
 {
-    auto osgLink = static_cast<const LinkOsgVisualization *>(link);
-    auto node = osgLink->node;
+    auto linkOsgVisualization = static_cast<const LinkOsgVisualization *>(link);
+    auto node = linkOsgVisualization->node;
     auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
 }

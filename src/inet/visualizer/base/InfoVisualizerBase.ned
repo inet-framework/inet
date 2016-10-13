@@ -34,5 +34,6 @@ simple InfoVisualizerBase extends VisualizerBase
         string content @enum("info", "displayStringText") = default("info"); // determines what is displayed on network nodes, info by default 
         string fontColor = default("black"); // info text font color, black by default
         string backgroundColor = default("white"); // info text background color, white by default
+        double opacity = default(0.5); // opacity of the visualization
         @class(InfoVisualizerBase);
 }

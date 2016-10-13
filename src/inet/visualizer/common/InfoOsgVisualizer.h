@@ -31,16 +31,28 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
 #ifdef WITH_OSG
 
   protected:
+    class INET_API InfoOsgVisualization : public InfoVisualization {
+      public:
+        NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
+        osg::Geode *node = nullptr;
+
+      public:
+        InfoOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *figure, int moduleId);
+    };
+
+  protected:
+    // parameters
     NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
-    std::vector<osg::Geode *> labels;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void setInfo(int i, const char *info) const override;
+
+    virtual InfoVisualization *createInfoVisualization(cModule *module) const override;
+    virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override;
 
 #else // ifdef WITH_OSG
 
-    virtual void setInfo(int i, const char *info) const override { }
+    virtual void refreshInfoVisualization(int i, const char *info) const override { }
 
 #endif // ifdef WITH_OSG
 };

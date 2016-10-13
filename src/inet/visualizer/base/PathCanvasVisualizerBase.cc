@@ -74,8 +74,8 @@ void PathCanvasVisualizerBase::addPathVisualization(std::pair<int, int> sourceAn
 void PathCanvasVisualizerBase::removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization)
 {
     PathVisualizerBase::removePathVisualization(sourceAndDestination, pathVisualization);
-    auto canvasPath = static_cast<const PathCanvasVisualization *>(pathVisualization);
-    pathGroup->removeFigure(canvasPath->figure);
+    auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
+    pathGroup->removeFigure(pathCanvasVisualization->figure);
 }
 
 void PathCanvasVisualizerBase::setAlpha(const PathVisualization *path, double alpha) const

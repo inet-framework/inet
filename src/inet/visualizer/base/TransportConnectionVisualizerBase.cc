@@ -41,17 +41,18 @@ void TransportConnectionVisualizerBase::initialize(int stage)
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
         subscriptionModule->subscribe(inet::tcp::TCP::tcpConnectionAddedSignal, this);
         nodeMatcher.setPattern(par("nodeFilter"), false, true, true);
+        icon = par("icon");
     }
 }
 
 void TransportConnectionVisualizerBase::addConnectionVisualization(const TransportConnectionVisualization *connection)
 {
-    connections.push_back(connection);
+    connectionVisualizations.push_back(connection);
 }
 
 void TransportConnectionVisualizerBase::removeConnectionVisualization(const TransportConnectionVisualization *connection)
 {
-    connections.erase(std::remove(connections.begin(), connections.end(), connection), connections.end());
+    connectionVisualizations.erase(std::remove(connectionVisualizations.begin(), connectionVisualizations.end(), connection), connectionVisualizations.end());
 }
 
 void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)

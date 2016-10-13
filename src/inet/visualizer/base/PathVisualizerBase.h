@@ -74,12 +74,11 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual bool isPathElement(cModule *module) const = 0;
 
     virtual const PathVisualization *createPathVisualization(const std::vector<int>& path) const = 0;
-    virtual void setAlpha(const PathVisualization *path, double alpha) const = 0;
+    virtual const PathVisualization *getPathVisualization(std::pair<int, int> sourceAndDestination, const std::vector<int>& path);
+    virtual void addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization);
+    virtual void removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *pathVisualization);
+    virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const = 0;
     virtual void setPosition(cModule *node, const Coord& position) const = 0;
-
-    virtual const PathVisualization *getPath(std::pair<int, int> sourceAndDestination, const std::vector<int>& path);
-    virtual void addPathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *path);
-    virtual void removePathVisualization(std::pair<int, int> sourceAndDestination, const PathVisualization *path);
 
     virtual const std::vector<int> *getIncompletePath(int treeId);
     virtual void addToIncompletePath(int treeId, cModule *module);

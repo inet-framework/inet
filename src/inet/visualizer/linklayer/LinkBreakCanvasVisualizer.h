@@ -28,13 +28,13 @@ namespace visualizer {
 class INET_API LinkBreakCanvasVisualizer : public LinkBreakVisualizerBase
 {
   protected:
-    class INET_API CanvasLinkBreak : public LinkBreakVisualization {
+    class INET_API LinkBreakCanvasVisualization : public LinkBreakVisualization {
       public:
         cIconFigure *figure = nullptr;
 
       public:
-        CanvasLinkBreak(cIconFigure *figure, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime);
-        virtual ~CanvasLinkBreak() { delete figure; }
+        LinkBreakCanvasVisualization(cIconFigure *figure, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime);
+        virtual ~LinkBreakCanvasVisualization() { delete figure; }
     };
 
   protected:
@@ -45,11 +45,11 @@ class INET_API LinkBreakCanvasVisualizer : public LinkBreakVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void setPosition(cModule *node, const Coord& position) const override;
-    virtual void setAlpha(const LinkBreakVisualization *linkBreak, double alpha) const override;
     virtual const LinkBreakVisualization *createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const override;
-    virtual void addLinkBreakVisualization(const LinkBreakVisualization *linkBreak) override;
-    virtual void removeLinkBreakVisualization(const LinkBreakVisualization *linkBreak) override;
+    virtual void addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
+    virtual void removeLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
+    virtual void setPosition(cModule *node, const Coord& position) const override;
+    virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override;
 };
 
 } // namespace visualizer

@@ -49,6 +49,7 @@ class INET_API NetworkNodeCanvasVisualization : public cGroupFigure
 
     virtual void addAnnotation(cFigure *figure, cFigure::Point size);
     virtual void removeAnnotation(cFigure *figure);
+    virtual void setAnnotationSize(cFigure *figure, cFigure::Point size);
 };
 
 } // namespace visualizer

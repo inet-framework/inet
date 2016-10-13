@@ -61,11 +61,11 @@ class INET_API LinkBreakVisualizerBase : public VisualizerBase, public cListener
     virtual void refreshDisplay() const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
 
-    virtual void setPosition(cModule *node, const Coord& position) const = 0;
-    virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const = 0;
     virtual const LinkBreakVisualization *createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const = 0;
     virtual void addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization);
     virtual void removeLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization);
+    virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const = 0;
+    virtual void setPosition(cModule *node, const Coord& position) const = 0;
 
     virtual cModule *findNode(MACAddress address);
 };

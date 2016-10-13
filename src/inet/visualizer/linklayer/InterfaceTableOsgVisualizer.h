@@ -53,7 +53,6 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
     virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override;
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
-
     virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry) override;
 
 #else // ifdef WITH_OSG

@@ -24,7 +24,7 @@ namespace visualizer {
 
 Define_Module(TransportConnectionCanvasVisualizer);
 
-TransportConnectionCanvasVisualizer::TransportConnectionCanvasVisualization::TransportConnectionCanvasVisualization(cFigure *sourceFigure, cFigure *destinationFigure, int sourceModuleId, int destinationModuleId, int count) :
+TransportConnectionCanvasVisualizer::TransportConnectionCanvasVisualization::TransportConnectionCanvasVisualization(cIconFigure *sourceFigure, cIconFigure *destinationFigure, int sourceModuleId, int destinationModuleId, int count) :
     TransportConnectionVisualization(sourceModuleId, destinationModuleId, count),
     sourceFigure(sourceFigure),
     destinationFigure(destinationFigure)
@@ -43,12 +43,13 @@ void TransportConnectionCanvasVisualizer::initialize(int stage)
     }
 }
 
-cFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigure(tcp::TCPConnection *tcpConnection) const
+cIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigure(tcp::TCPConnection *tcpConnection) const
 {
     auto figure = new cIconFigure();
-    figure->setImageName("misc/marker");
+    figure->setAnchor(cFigure::ANCHOR_NW);
+    figure->setImageName(icon);
     figure->setTintAmount(1);
-    figure->setTintColor(cFigure::GOOD_DARK_COLORS[connections.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
+    figure->setTintColor(cFigure::GOOD_DARK_COLORS[connectionVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
     figure->setAssociatedObject(tcpConnection);
     figure->setZIndex(zIndex);
     return figure;
@@ -61,28 +62,28 @@ const TransportConnectionVisualizerBase::TransportConnectionVisualization *Trans
     return new TransportConnectionCanvasVisualization(sourceFigure, destinationFigure, source->getId(), destination->getId(), 1);
 }
 
-void TransportConnectionCanvasVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connection)
+void TransportConnectionCanvasVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
 {
-    TransportConnectionVisualizerBase::addConnectionVisualization(connection);
-    auto canvasConnection = static_cast<const TransportConnectionCanvasVisualization *>(connection);
-    auto sourceModule = getSimulation()->getModule(connection->sourceModuleId);
+    TransportConnectionVisualizerBase::addConnectionVisualization(connectionVisualization);
+    auto connectionCanvasVisualization = static_cast<const TransportConnectionCanvasVisualization *>(connectionVisualization);
+    auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
     auto sourceVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->addAnnotation(canvasConnection->sourceFigure, cFigure::Point(0, 8));
-    auto destinationModule = getSimulation()->getModule(connection->destinationModuleId);
+    sourceVisualization->addAnnotation(connectionCanvasVisualization->sourceFigure, connectionCanvasVisualization->sourceFigure->getBounds().getSize());
+    auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->addAnnotation(canvasConnection->destinationFigure, cFigure::Point(0, 8));
+    destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds().getSize());
 }
 
-void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const TransportConnectionVisualization *connection)
+void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
 {
-    TransportConnectionVisualizerBase::removeConnectionVisualization(connection);
-    auto canvasConnection = static_cast<const TransportConnectionCanvasVisualization *>(connection);
-    auto sourceModule = getSimulation()->getModule(connection->sourceModuleId);
+    TransportConnectionVisualizerBase::removeConnectionVisualization(connectionVisualization);
+    auto connectionCanvasVisualization = static_cast<const TransportConnectionCanvasVisualization *>(connectionVisualization);
+    auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
     auto sourceVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->removeAnnotation(canvasConnection->sourceFigure);
-    auto destinationModule = getSimulation()->getModule(connection->destinationModuleId);
+    sourceVisualization->removeAnnotation(connectionCanvasVisualization->sourceFigure);
+    auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->removeAnnotation(canvasConnection->destinationFigure);
+    destinationVisualization->removeAnnotation(connectionCanvasVisualization->destinationFigure);
 }
 
 } // namespace visualizer

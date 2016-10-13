@@ -38,7 +38,14 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
     };
 
   protected:
-    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override;
+    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid) override;
+    virtual void addIeee80211Visualization(Ieee80211Visualization *ieee80211Visualization) override;
+    virtual void removeIeee80211Visualization(Ieee80211Visualization *ieee80211Visualization) override;
 };
 
 } // namespace visualizer

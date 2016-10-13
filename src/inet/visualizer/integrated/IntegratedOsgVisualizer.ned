@@ -130,18 +130,18 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
         }
         networkRouteVisualizer: <networkRouteVisualizerType> like INetworkRouteVisualizer if networkRouteVisualizerType != "" {
             parameters:
-                @display("p=450,650");
+                @display("p=450,550");
         }
         routingTableVisualizer: <routingTableVisualizerType> like IRoutingTableVisualizer if routingTableVisualizerType != "" {
             parameters:
-                @display("p=450,750");
+                @display("p=450,650");
         }
         transportRouteVisualizer: <transportRouteVisualizerType> like ITransportRouteVisualizer if transportRouteVisualizerType != "" {
             parameters:
-                @display("p=450,850");
+                @display("p=450,750");
         }
         transportConnectionVisualizer: <transportConnectionVisualizerType> like ITransportConnectionVisualizer if transportConnectionVisualizerType != "" {
             parameters:
-                @display("p=450,950");
+                @display("p=450,850");
         }
 }

@@ -25,13 +25,13 @@ namespace visualizer {
 
 Define_Module(PacketDropOsgVisualizer);
 
-PacketDropOsgVisualizer::OsgPacketDrop::OsgPacketDrop(osg::Node *node, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime) :
+PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(osg::Node *node, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime) :
     PacketDropVisualization(moduleId, packet, dropSimulationTime, dropAnimationTime, dropRealTime),
     node(node)
 {
 }
 
-PacketDropOsgVisualizer::OsgPacketDrop::~OsgPacketDrop()
+PacketDropOsgVisualizer::PacketDropOsgVisualization::~PacketDropOsgVisualization()
 {
     // TODO: delete node;
 }
@@ -51,32 +51,32 @@ const PacketDropVisualizerBase::PacketDropVisualization *PacketDropOsgVisualizer
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     auto geode = new osg::Geode();
     geode->addDrawable(geometry);
-    return new OsgPacketDrop(geode, module->getId(), packet, getSimulation()->getSimTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
+    return new PacketDropOsgVisualization(geode, module->getId(), packet, getSimulation()->getSimTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
 }
 
-void PacketDropOsgVisualizer::setAlpha(const PacketDropVisualization *packetDrop, double alpha) const
+void PacketDropOsgVisualizer::addPacketDropVisualization(const PacketDropVisualization *packetDropVisualization)
+{
+    PacketDropVisualizerBase::addPacketDropVisualization(packetDropVisualization);
+    auto packetDropOsgVisualization = static_cast<const PacketDropOsgVisualization *>(packetDropVisualization);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    scene->addChild(packetDropOsgVisualization->node);
+}
+
+void PacketDropOsgVisualizer::removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization)
+{
+    PacketDropVisualizerBase::removePacketDropVisualization(packetDropVisualization);
+    auto packetDropOsgVisualization = static_cast<const PacketDropOsgVisualization *>(packetDropVisualization);
+    auto node = packetDropOsgVisualization->node;
+    node->getParent(0)->removeChild(node);
+}
+
+void PacketDropOsgVisualizer::setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const
 {
     // TODO:
-//    auto osgPacketDrop = static_cast<const OsgPacketDrop *>(packetDrop);
-//    auto node = osgPacketDrop->node;
+//    auto packetDropOsgVisualization = static_cast<const OsgPacketDrop *>(packetDropVisualization);
+//    auto node = packetDropOsgVisualization->node;
 //    auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
 //    material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
-}
-
-void PacketDropOsgVisualizer::addPacketDropVisualization(const PacketDropVisualization *packetDrop)
-{
-    PacketDropVisualizerBase::addPacketDropVisualization(packetDrop);
-    auto osgPacketDrop = static_cast<const OsgPacketDrop *>(packetDrop);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    scene->addChild(osgPacketDrop->node);
-}
-
-void PacketDropOsgVisualizer::removePacketDropVisualization(const PacketDropVisualization *packetDrop)
-{
-    PacketDropVisualizerBase::removePacketDropVisualization(packetDrop);
-    auto osgPacketDrop = static_cast<const OsgPacketDrop *>(packetDrop);
-    auto node = osgPacketDrop->node;
-    node->getParent(0)->removeChild(node);
 }
 
 } // namespace visualizer

@@ -28,13 +28,13 @@ namespace visualizer {
 class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
 {
   protected:
-    class INET_API CanvasPacketDrop : public PacketDropVisualization {
+    class INET_API PacketDropCanvasVisualization : public PacketDropVisualization {
       public:
         cIconFigure *figure;
 
       public:
-        CanvasPacketDrop(cIconFigure *figure, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime);
-        virtual ~CanvasPacketDrop() { delete figure; }
+        PacketDropCanvasVisualization(cIconFigure *figure, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime);
+        virtual ~PacketDropCanvasVisualization() { delete figure; }
     };
 
   protected:
@@ -45,10 +45,10 @@ class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void setAlpha(const PacketDropVisualization *packetDrop, double alpha) const override;
     virtual const PacketDropVisualization *createPacketDropVisualization(cModule *module, cPacket *packet) const override;
     virtual void addPacketDropVisualization(const PacketDropVisualization *packetDrop) override;
     virtual void removePacketDropVisualization(const PacketDropVisualization *packetDrop) override;
+    virtual void setAlpha(const PacketDropVisualization *packetDrop, double alpha) const override;
 };
 
 } // namespace visualizer

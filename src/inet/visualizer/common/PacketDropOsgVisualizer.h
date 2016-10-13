@@ -29,27 +29,27 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API OsgPacketDrop : public PacketDropVisualization
+    class INET_API PacketDropOsgVisualization : public PacketDropVisualization
     {
       public:
         osg::Node *node = nullptr;
 
       public:
-        OsgPacketDrop(osg::Node *node, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime);
-        virtual ~OsgPacketDrop();
+        PacketDropOsgVisualization(osg::Node *node, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime);
+        virtual ~PacketDropOsgVisualization();
     };
 
   protected:
     virtual const PacketDropVisualization *createPacketDropVisualization(cModule *module, cPacket *packet) const override;
-    virtual void setAlpha(const PacketDropVisualization *packetDrop, double alpha) const override;
-    virtual void addPacketDropVisualization(const PacketDropVisualization *packetDrop) override;
-    virtual void removePacketDropVisualization(const PacketDropVisualization *packetDrop) override;
+    virtual void addPacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
+    virtual void removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
+    virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override;
 
 #else // ifdef WITH_OSG
 
   protected:
     virtual const PacketDropVisualization *createPacketDropVisualization(cModule *module, cPacket *packet) const override { return nullptr; }
-    virtual void setAlpha(const PacketDropVisualization *packetDrop, double alpha) const override { }
+    virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override { }
 
 #endif // ifdef WITH_OSG
 };

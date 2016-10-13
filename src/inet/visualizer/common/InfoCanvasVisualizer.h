@@ -18,6 +18,7 @@
 #ifndef __INET_INFOCANVASVISUALIZER_H
 #define __INET_INFOCANVASVISUALIZER_H
 
+#include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/base/InfoVisualizerBase.h"
 #include "inet/visualizer/networknode/NetworkNodeCanvasVisualizer.h"
 
@@ -28,13 +29,25 @@ namespace visualizer {
 class INET_API InfoCanvasVisualizer : public InfoVisualizerBase
 {
   protected:
+    class INET_API InfoCanvasVisualization : public InfoVisualization {
+      public:
+        NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
+        BoxedLabelFigure *figure = nullptr;
+
+      public:
+        InfoCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BoxedLabelFigure *figure, int moduleId);
+    };
+
+  protected:
+    // parameters
     double zIndex = NaN;
     NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
-    std::vector<cGroupFigure *> figures;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void setInfo(int i, const char *info) const override;
+
+    virtual InfoVisualization *createInfoVisualization(cModule *module) const override;
+    virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override;
 };
 
 } // namespace visualizer

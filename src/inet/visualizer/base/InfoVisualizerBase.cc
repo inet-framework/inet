@@ -21,6 +21,11 @@ namespace inet {
 
 namespace visualizer {
 
+InfoVisualizerBase::InfoVisualization::InfoVisualization(int moduleId) :
+    moduleId(moduleId)
+{
+}
+
 void InfoVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
@@ -29,11 +34,14 @@ void InfoVisualizerBase::initialize(int stage)
         fontColor = cFigure::Color(par("fontColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
         moduleMatcher.setPattern(par("modules"), true, true, true);
+        opacity = par("opacity");
+    }
+    else if (stage == INITSTAGE_LAST) {
         auto simulation = getSimulation();
         for (int id = 0; id < simulation->getLastComponentId(); id++) {
             auto component = simulation->getComponent(id);
             if (component != nullptr && component->isModule() && moduleMatcher.matches(component->getFullPath().c_str()))
-                moduleIds.push_back(static_cast<cModule *>(component)->getId());
+                infoVisualizations.push_back(createInfoVisualization(static_cast<cModule *>(component)));
         }
     }
 }
@@ -41,8 +49,8 @@ void InfoVisualizerBase::initialize(int stage)
 void InfoVisualizerBase::refreshDisplay() const
 {
     auto simulation = getSimulation();
-    for (int i = 0; i < moduleIds.size(); i++) {
-        auto module = simulation->getModule(moduleIds[i]);
+    for (auto infoVisualization : infoVisualizations) {
+        auto module = simulation->getModule(infoVisualization->moduleId);
         if (module != nullptr) {
             const char *content = par("content");
             const char *info;
@@ -52,7 +60,7 @@ void InfoVisualizerBase::refreshDisplay() const
                 info = module->getDisplayString().getTagArg("t", 0);
             else
                 throw cRuntimeError("Unknown content parameter value: %s", content);
-            setInfo(i, info);
+            refreshInfoVisualization(infoVisualization, info);
         }
     }
 }

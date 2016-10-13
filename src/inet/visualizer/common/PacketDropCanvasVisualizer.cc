@@ -24,7 +24,7 @@ namespace visualizer {
 
 Define_Module(PacketDropCanvasVisualizer);
 
-PacketDropCanvasVisualizer::CanvasPacketDrop::CanvasPacketDrop(cIconFigure *figure, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime) :
+PacketDropCanvasVisualizer::PacketDropCanvasVisualization::PacketDropCanvasVisualization(cIconFigure *figure, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime) :
     PacketDropVisualization(moduleId, packet, dropSimulationTime, dropAnimationTime, dropRealTime),
     figure(figure)
 {
@@ -44,17 +44,6 @@ void PacketDropCanvasVisualizer::initialize(int stage)
     }
 }
 
-void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetDrop, double alpha) const
-{
-    auto canvasPacketDrop = static_cast<const CanvasPacketDrop *>(packetDrop);
-    auto figure = canvasPacketDrop->figure;
-    figure->setOpacity(alpha);
-    auto position = getPosition(getContainingNode(getSimulation()->getModule(packetDrop->moduleId)));
-    double dx = 10 / alpha;
-    double dy = -16 + pow((dx / 4 - 9), 2) - 42;
-    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(dx, dy));
-}
-
 const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisualizer::createPacketDropVisualization(cModule *module, cPacket *packet) const
 {
     auto figure = new cIconFigure();
@@ -62,21 +51,32 @@ const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisuali
     figure->setTintAmount(iconTintAmount);
     figure->setTintColor(iconTintColor);
     figure->setPosition(canvasProjection->computeCanvasPoint(getPosition(getContainingNode(module))));
-    return new CanvasPacketDrop(figure, module->getId(), packet, getSimulation()->getSimTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
+    return new PacketDropCanvasVisualization(figure, module->getId(), packet, getSimulation()->getSimTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
 }
 
 void PacketDropCanvasVisualizer::addPacketDropVisualization(const PacketDropVisualization *packetDrop)
 {
     PacketDropVisualizerBase::addPacketDropVisualization(packetDrop);
-    auto canvasPacketDrop = static_cast<const CanvasPacketDrop *>(packetDrop);
-    packetDropGroup->addFigure(canvasPacketDrop->figure);
+    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
+    packetDropGroup->addFigure(packetDropCanvasVisualization->figure);
 }
 
 void PacketDropCanvasVisualizer::removePacketDropVisualization(const PacketDropVisualization *packetDrop)
 {
     PacketDropVisualizerBase::removePacketDropVisualization(packetDrop);
-    auto canvasPacketDrop = static_cast<const CanvasPacketDrop *>(packetDrop);
-    packetDropGroup->removeFigure(canvasPacketDrop->figure);
+    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
+    packetDropGroup->removeFigure(packetDropCanvasVisualization->figure);
+}
+
+void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetDrop, double alpha) const
+{
+    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
+    auto figure = packetDropCanvasVisualization->figure;
+    figure->setOpacity(alpha);
+    auto position = getPosition(getContainingNode(getSimulation()->getModule(packetDrop->moduleId)));
+    double dx = 10 / alpha;
+    double dy = -16 + pow((dx / 4 - 9), 2) - 42;
+    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(dx, dy));
 }
 
 } // namespace visualizer

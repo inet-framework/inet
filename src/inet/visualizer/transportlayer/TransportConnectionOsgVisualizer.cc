@@ -43,7 +43,7 @@ void TransportConnectionOsgVisualizer::initialize(int stage)
 
 osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TCPConnection *tcpConnection) const
 {
-    auto path = resolveResourcePath("misc/marker.png");
+    auto path = resolveResourcePath((std::string(icon) + ".png").c_str());
     auto image = inet::osg::createImage(path.c_str());
     auto texture = new osg::Texture2D();
     texture->setImage(image);
@@ -54,7 +54,7 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TCPCon
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    auto color = cFigure::GOOD_DARK_COLORS[connections.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    auto color = cFigure::GOOD_DARK_COLORS[connectionVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
     auto colorArray = new osg::Vec4Array();
     colorArray->push_back(osg::Vec4((double)color.red / 255.0, (double)color.green / 255.0, (double)color.blue / 255.0, 1));
     geometry->setColorArray(colorArray, osg::Array::BIND_OVERALL);
@@ -70,28 +70,28 @@ const TransportConnectionVisualizerBase::TransportConnectionVisualization *Trans
     return new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1);
 }
 
-void TransportConnectionOsgVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connection)
+void TransportConnectionOsgVisualizer::addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
 {
-    TransportConnectionVisualizerBase::addConnectionVisualization(connection);
-    auto osgConnection = static_cast<const TransportConnectionOsgVisualization *>(connection);
-    auto sourceModule = getSimulation()->getModule(connection->sourceModuleId);
+    TransportConnectionVisualizerBase::addConnectionVisualization(connectionVisualization);
+    auto connectionOsgVisualization = static_cast<const TransportConnectionOsgVisualization *>(connectionVisualization);
+    auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
     auto sourceVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->addAnnotation(osgConnection->sourceNode, osg::Vec3d(0, 0, 32), 0);
-    auto destinationModule = getSimulation()->getModule(connection->destinationModuleId);
+    sourceVisualization->addAnnotation(connectionOsgVisualization->sourceNode, osg::Vec3d(0, 0, 32), 0); // TODO: size
+    auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->addAnnotation(osgConnection->destinationNode, osg::Vec3d(0, 0, 32), 0);
+    destinationVisualization->addAnnotation(connectionOsgVisualization->destinationNode, osg::Vec3d(0, 0, 32), 0); // TODO: size
 }
 
-void TransportConnectionOsgVisualizer::removeConnectionVisualization(const TransportConnectionVisualization *connection)
+void TransportConnectionOsgVisualizer::removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
 {
-    TransportConnectionVisualizerBase::removeConnectionVisualization(connection);
-    auto osgConnection = static_cast<const TransportConnectionOsgVisualization *>(connection);
-    auto sourceModule = getSimulation()->getModule(connection->sourceModuleId);
+    TransportConnectionVisualizerBase::removeConnectionVisualization(connectionVisualization);
+    auto connectionOsgVisualization = static_cast<const TransportConnectionOsgVisualization *>(connectionVisualization);
+    auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
     auto sourceVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(sourceModule));
-    sourceVisualization->removeAnnotation(osgConnection->sourceNode);
-    auto destinationModule = getSimulation()->getModule(connection->destinationModuleId);
+    sourceVisualization->removeAnnotation(connectionOsgVisualization->sourceNode);
+    auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(destinationModule));
-    destinationVisualization->removeAnnotation(osgConnection->destinationNode);
+    destinationVisualization->removeAnnotation(connectionOsgVisualization->destinationNode);
 }
 
 } // namespace visualizer

@@ -44,7 +44,7 @@ class INET_API Ieee80211CanvasVisualizer : public Ieee80211VisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override;
+    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid) override;
     virtual void addIeee80211Visualization(Ieee80211Visualization *ieee80211Visualization) override;
     virtual void removeIeee80211Visualization(Ieee80211Visualization *ieee80211Visualization) override;
 };
