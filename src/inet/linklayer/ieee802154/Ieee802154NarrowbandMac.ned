@@ -23,11 +23,6 @@ simple Ieee802154NarrowbandMac extends Ieee802154Mac
     parameters:
         useMACAcks = true;
 
-        // Time needed to switch from sleep to rx.
-        // TODO This is probabily wrong, since it is used to compute
-        //      the time for the CCA (and that might follow an RX state)
-        rxSetupTime = 0s;
-
         // aMaxPHYPacketSize = 127 Octets (802.15.4-2006, page 45)
         // aMinMPDUOverhead = 9 Octets (802.15.4-2006, page 159)
         // aMaxMACPayloadSize = aMaxPHYPacketSize - aMinMPDUOverhead (802.15.4-2006, page 159)

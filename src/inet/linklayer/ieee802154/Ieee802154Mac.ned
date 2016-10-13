@@ -49,7 +49,7 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
         // Clear Channel Assessment detection time
         double ccaDetectionTime @unit(s) = default(0.000128 s); // 8 symbols
         // Time to setup radio to reception state
-        double rxSetupTime @unit(s) = default(0 s);
+        double rxSetupTime @unit(s);
         // Time to switch radio from Rx to Tx state
         double aTurnaroundTime @unit(s) = default(0.000192 s);    // 12 symbols
 
