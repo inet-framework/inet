@@ -25,10 +25,10 @@ simple Ieee802154NarrowbandMac extends CSMA
     parameters:
         useMACAcks = true;
 
-        // Time needed to switch from sleep to rx.
-        // TODO This is probabily wrong, since it is used to compute
-        //      the time for the CCA (and that might follow an RX state)
-        rxSetupTime = 0s;
+        // Time needed to switch from sleep to rx for ATmega256RFR2
+        // SLEEP -> TRX_OFF 240 us
+        // TRX_OFF -> RX_ON 110 us
+        rxSetupTime = 240us + 110us;
 
         // aMaxPHYPacketSize = 127 Octets (802.15.4-2006, page 45)
         // aMinMPDUOverhead = 9 Octets (802.15.4-2006, page 159)
