@@ -33,7 +33,7 @@ class INET_API LinkBreakCanvasVisualizer : public LinkBreakVisualizerBase
         cIconFigure *figure = nullptr;
 
       public:
-        LinkBreakCanvasVisualization(cIconFigure *figure, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime);
+        LinkBreakCanvasVisualization(cIconFigure *figure, int transmitterModuleId, int receiverModuleId);
         virtual ~LinkBreakCanvasVisualization() { delete figure; }
     };
 

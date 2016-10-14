@@ -44,8 +44,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     class StatisticVisualization {
       public:
         LastValueRecorder *recorder = nullptr;
-        int moduleId = -1;
-        simsignal_t signal = -1;
+        const int moduleId = -1;
+        const simsignal_t signal = -1;
         const char *unit = nullptr;
 
       public:

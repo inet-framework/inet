@@ -24,8 +24,8 @@ namespace visualizer {
 
 Define_Module(PacketDropCanvasVisualizer);
 
-PacketDropCanvasVisualizer::PacketDropCanvasVisualization::PacketDropCanvasVisualization(cIconFigure *figure, int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime) :
-    PacketDropVisualization(moduleId, packet, dropSimulationTime, dropAnimationTime, dropRealTime),
+PacketDropCanvasVisualizer::PacketDropCanvasVisualization::PacketDropCanvasVisualization(cIconFigure *figure, int moduleId, const cPacket *packet, const Coord& position) :
+    PacketDropVisualization(moduleId, packet, position),
     figure(figure)
 {
 }
@@ -51,7 +51,8 @@ const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisuali
     figure->setTintAmount(iconTintAmount);
     figure->setTintColor(iconTintColor);
     figure->setPosition(canvasProjection->computeCanvasPoint(getPosition(getContainingNode(module))));
-    return new PacketDropCanvasVisualization(figure, module->getId(), packet, getSimulation()->getSimTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
+    auto position = getPosition(getContainingNode(module));
+    return new PacketDropCanvasVisualization(figure, module->getId(), packet, position);
 }
 
 void PacketDropCanvasVisualizer::addPacketDropVisualization(const PacketDropVisualization *packetDrop)
@@ -73,10 +74,9 @@ void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetD
     auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
     auto figure = packetDropCanvasVisualization->figure;
     figure->setOpacity(alpha);
-    auto position = getPosition(getContainingNode(getSimulation()->getModule(packetDrop->moduleId)));
     double dx = 10 / alpha;
-    double dy = -16 + pow((dx / 4 - 9), 2) - 42;
-    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(dx, dy));
+    double dy = pow((dx / 4 - 9), 2) - 58;
+    figure->setPosition(canvasProjection->computeCanvasPoint(packetDrop->position) + cFigure::Point(dx, dy));
 }
 
 } // namespace visualizer

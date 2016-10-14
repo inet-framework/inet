@@ -30,8 +30,8 @@ namespace visualizer {
 
 Define_Module(LinkBreakOsgVisualizer);
 
-LinkBreakOsgVisualizer::LinkBreakOsgVisualization::LinkBreakOsgVisualization(osg::Node *node, int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime) :
-    LinkBreakVisualization(transmitterModuleId, receiverModuleId, breakSimulationTime, breakAnimationTime, breakRealTime),
+LinkBreakOsgVisualizer::LinkBreakOsgVisualization::LinkBreakOsgVisualization(osg::Node *node, int transmitterModuleId, int receiverModuleId) :
+    LinkBreakVisualization(transmitterModuleId, receiverModuleId),
     node(node)
 {
 }
@@ -63,7 +63,7 @@ const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakOsgVisualizer::c
     material->setAlpha(osg::Material::FRONT_AND_BACK, 1.0);
     geode->getOrCreateStateSet()->setAttribute(material);
     // TODO: apply tinting
-    return new LinkBreakOsgVisualization(geode, transmitter->getId(), receiver->getId(), simTime(), getSimulation()->getEnvir()->getAnimationTime(), getRealTime());
+    return new LinkBreakOsgVisualization(geode, transmitter->getId(), receiver->getId());
 }
 
 void LinkBreakOsgVisualizer::addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization)

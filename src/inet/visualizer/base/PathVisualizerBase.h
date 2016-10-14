@@ -21,6 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/common/AnimationPosition.h"
 
 namespace inet {
 
@@ -32,9 +33,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     class INET_API PathVisualization {
       public:
         mutable double offset = NaN;
-        mutable simtime_t lastUsageSimulationTime = simTime();
-        mutable double lastUsageAnimationTime;
-        mutable double lastUsageRealTime;
+        mutable AnimationPosition lastUsageAnimationPosition;
         const std::vector<int> moduleIds;
 
       public:

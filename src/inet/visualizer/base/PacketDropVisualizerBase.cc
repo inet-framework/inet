@@ -25,12 +25,10 @@ namespace inet {
 
 namespace visualizer {
 
-PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime) :
+PacketDropVisualizerBase::PacketDropVisualization::PacketDropVisualization(int moduleId, const cPacket *packet, const Coord& position) :
     moduleId(moduleId),
     packet(packet),
-    dropSimulationTime(dropSimulationTime),
-    dropAnimationTime(dropAnimationTime),
-    dropRealTime(dropRealTime)
+    position(position)
 {
 }
 
@@ -71,18 +69,16 @@ void PacketDropVisualizerBase::initialize(int stage)
 
 void PacketDropVisualizerBase::refreshDisplay() const
 {
-    auto currentSimulationTime = simTime();
-    double currentAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
-    double currentRealTime = getRealTime();
+    AnimationPosition currentAnimationPosition;
     std::vector<const PacketDropVisualization *> removedPacketDropVisualizations;
     for (auto packetDrop : packetDropVisualizations) {
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
-            delta = (currentSimulationTime - packetDrop->dropSimulationTime).dbl();
+            delta = (currentAnimationPosition.getSimulationTime() - packetDrop->packetDropAnimationPosition.getSimulationTime()).dbl();
         else if (!strcmp(fadeOutMode, "animationTime"))
-            delta = currentAnimationTime - packetDrop->dropAnimationTime;
+            delta = currentAnimationPosition.getAnimationTime() - packetDrop->packetDropAnimationPosition.getAnimationTime();
         else if (!strcmp(fadeOutMode, "realTime"))
-            delta = currentRealTime - packetDrop->dropRealTime;
+            delta = currentAnimationPosition.getRealTime() - packetDrop->packetDropAnimationPosition.getRealTime();
         else
             throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
         auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));

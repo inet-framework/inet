@@ -21,6 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/common/AnimationPosition.h"
 
 namespace inet {
 
@@ -31,11 +32,9 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
   protected:
     class INET_API LinkVisualization {
       public:
-        mutable simtime_t lastUsageSimulationTime = simTime();
-        mutable double lastUsageAnimationTime;
-        mutable double lastUsageRealTime;
-        const int sourceModuleId;
-        const int destinationModuleId;
+        mutable AnimationPosition lastUsageAnimationPosition;
+        const int sourceModuleId = -1;
+        const int destinationModuleId = -1;
 
       public:
         LinkVisualization(int sourceModuleId, int destinationModuleId);

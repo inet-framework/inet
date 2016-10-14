@@ -35,13 +35,6 @@ void VisualizerBase::initialize(int stage)
     }
 }
 
-double VisualizerBase::getRealTime() const
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec + tv.tv_usec / 1.0E+6;
-}
-
 Coord VisualizerBase::getPosition(cModule *node) const
 {
     auto mobility = node->getSubmodule("mobility");

@@ -20,6 +20,7 @@
 
 #include "inet/common/PatternMatcher.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/common/AnimationPosition.h"
 
 namespace inet {
 
@@ -30,14 +31,13 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
   protected:
     class INET_API PacketDropVisualization {
       public:
-        int moduleId;
-        cPacket *packet;
-        simtime_t dropSimulationTime;
-        double dropAnimationTime;
-        double dropRealTime;
+        mutable AnimationPosition packetDropAnimationPosition;
+        const int moduleId = -1;
+        const cPacket *packet = nullptr;
+        const Coord position;
 
       public:
-        PacketDropVisualization(int moduleId, cPacket *packet, simtime_t dropSimulationTime, double dropAnimationTime, int dropRealTime);
+        PacketDropVisualization(int moduleId, const cPacket *packet, const Coord& position);
         virtual ~PacketDropVisualization();
     };
 

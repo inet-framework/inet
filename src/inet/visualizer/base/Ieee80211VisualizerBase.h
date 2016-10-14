@@ -31,8 +31,8 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
   protected:
     class INET_API Ieee80211Visualization {
       public:
-        int networkNodeId = -1;
-        int interfaceId = -1;
+        const int networkNodeId = -1;
+        const int interfaceId = -1;
 
       public:
         Ieee80211Visualization(int networkNodeId, int interfaceId);

@@ -50,19 +50,17 @@ void PathVisualizerBase::initialize(int stage)
 
 void PathVisualizerBase::refreshDisplay() const
 {
-    auto currentSimulationTime = simTime();
-    double currentAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
-    double currentRealTime = getRealTime();
+    AnimationPosition currentAnimationPosition;
     std::vector<const PathVisualization *> removedPathVisualizations;
     for (auto it : pathVisualizations) {
         auto path = it.second;
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
-            delta = (currentSimulationTime - path->lastUsageSimulationTime).dbl();
+            delta = (currentAnimationPosition.getSimulationTime() - path->lastUsageAnimationPosition.getSimulationTime()).dbl();
         else if (!strcmp(fadeOutMode, "animationTime"))
-            delta = currentAnimationTime - path->lastUsageAnimationTime;
+            delta = currentAnimationPosition.getAnimationTime() - path->lastUsageAnimationPosition.getAnimationTime();
         else if (!strcmp(fadeOutMode, "realTime"))
-            delta = currentRealTime - path->lastUsageRealTime;
+            delta = currentAnimationPosition.getRealTime() - path->lastUsageAnimationPosition.getRealTime();
         else
             throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
         auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));
@@ -170,9 +168,7 @@ void PathVisualizerBase::updatePath(const std::vector<int>& moduleIds)
         addPathVisualization(key, path);
     }
     else {
-        path->lastUsageSimulationTime = getSimulation()->getSimTime();
-        path->lastUsageAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
-        path->lastUsageRealTime = getRealTime();
+        path->lastUsageAnimationPosition = AnimationPosition();
     }
 }
 

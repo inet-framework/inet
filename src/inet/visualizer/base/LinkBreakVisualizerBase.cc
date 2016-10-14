@@ -28,12 +28,9 @@ namespace inet {
 
 namespace visualizer {
 
-LinkBreakVisualizerBase::LinkBreakVisualization::LinkBreakVisualization(int transmitterModuleId, int receiverModuleId, simtime_t breakSimulationTime, double breakAnimationTime, double breakRealTime) :
+LinkBreakVisualizerBase::LinkBreakVisualization::LinkBreakVisualization(int transmitterModuleId, int receiverModuleId) :
     transmitterModuleId(transmitterModuleId),
-    receiverModuleId(receiverModuleId),
-    breakSimulationTime(breakSimulationTime),
-    breakAnimationTime(breakAnimationTime),
-    breakRealTime(breakRealTime)
+    receiverModuleId(receiverModuleId)
 {
 }
 
@@ -57,19 +54,17 @@ void LinkBreakVisualizerBase::initialize(int stage)
 
 void LinkBreakVisualizerBase::refreshDisplay() const
 {
-    auto currentSimulationTime = simTime();
-    double currentAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
-    double currentRealTime = getRealTime();
+    AnimationPosition currentAnimationPosition;
     std::vector<const LinkBreakVisualization *> removedLinkBreakVisualizations;
     for (auto it : linkBreakVisualizations) {
         auto linkBreakVisualization = it.second;
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
-            delta = (currentSimulationTime - linkBreakVisualization->breakSimulationTime).dbl();
+            delta = (currentAnimationPosition.getSimulationTime() - linkBreakVisualization->linkBreakAnimationPosition.getSimulationTime()).dbl();
         else if (!strcmp(fadeOutMode, "animationTime"))
-            delta = currentAnimationTime - linkBreakVisualization->breakAnimationTime;
+            delta = currentAnimationPosition.getAnimationTime() - linkBreakVisualization->linkBreakAnimationPosition.getAnimationTime();
         else if (!strcmp(fadeOutMode, "realTime"))
-            delta = currentRealTime - linkBreakVisualization->breakRealTime;
+            delta = currentAnimationPosition.getRealTime() - linkBreakVisualization->linkBreakAnimationPosition.getRealTime();
         else
             throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
         auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));
@@ -113,9 +108,7 @@ void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
                 addLinkBreakVisualization(createLinkBreakVisualization(transmitter, receiver));
             else {
                 auto linkBreakVisualization = it->second;
-                linkBreakVisualization->breakSimulationTime = simTime();
-                linkBreakVisualization->breakAnimationTime = getSimulation()->getEnvir()->getAnimationTime();
-                linkBreakVisualization->breakRealTime = getRealTime();
+                linkBreakVisualization->linkBreakAnimationPosition = AnimationPosition();
             }
         }
     }

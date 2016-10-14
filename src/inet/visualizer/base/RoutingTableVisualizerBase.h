@@ -32,8 +32,8 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
   protected:
     class INET_API RouteVisualization {
       public:
-        const int nodeModuleId;
-        const int nextHopModuleId;
+        const int nodeModuleId = -1;
+        const int nextHopModuleId = -1;
 
       public:
         RouteVisualization(int nodeModuleId, int nextHopModuleId);
