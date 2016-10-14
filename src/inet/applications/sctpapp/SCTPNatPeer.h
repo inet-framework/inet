@@ -13,7 +13,7 @@
 
 #ifndef __INET_SCTPNATPEER_H
 #define __INET_SCTPNATPEER_H
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
