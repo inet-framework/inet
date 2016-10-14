@@ -29,7 +29,7 @@ namespace tcp {
 class INET_API TCPSpoof : public cSimpleModule
 {
   protected:
-    virtual void sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest);
+    virtual void sendToIP(FlatPacket *pk, L3Address src, L3Address dest);
     virtual unsigned long chooseInitialSeqNum();
     virtual void sendSpoofPacket();
 

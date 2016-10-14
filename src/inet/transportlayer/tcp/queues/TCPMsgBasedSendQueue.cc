@@ -81,6 +81,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
 
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
+    tcpseg->addChunkByteLength(numBytes);
 
     // add payload messages whose endSequenceNo is between fromSeq and fromSeq + numBytes
     auto i = payloadQueue.begin();

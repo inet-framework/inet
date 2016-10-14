@@ -21,6 +21,7 @@ cplusplus {{
 #include <iostream>
 #include "inet/common/INETDefs.h"
 #include "inet/common/ByteArray.h"
+#include "inet/common/packet/FlatPacket.h"
 
 namespace inet {
 namespace tcp {
@@ -31,6 +32,8 @@ typedef TCPOption *TCPOptionPtr;
 }
 
 }}
+
+class inet::Chunk extends cOwnedObject;
 
 namespace inet::tcp;
 
@@ -198,9 +201,10 @@ class TCPOptionUnknown extends TCPOption
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-packet TCPSegment
+packet TCPSegment extends Chunk
 {
     @customize(true);
+    chunkByteLength = TCP_HEADER_OCTETS;
 
     // Source Port
     unsigned short srcPort;

@@ -331,11 +331,12 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-    inetSockPair.remoteM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    inetSockPair.localM.ipAddrM = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestAddress();
+    FlatPacket *packet = tcpsegP->getMandatoryOwnerPacket();
+    inetSockPair.remoteM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    inetSockPair.localM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
     //int interfaceId = controlInfo->getInterfaceId();
 
-    if (tcpsegP->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
+    if (packet->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
         {
             // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
             //       with IP header size difference
@@ -412,7 +413,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
         Context c;
         c.l3AddressesPtr = &ih->saddr;
         c.l3AddressesLength = 8;
-        TCPSerializer().serializePacket(tcpsegP, b, c);
+        TCPSerializer().serializePacket(packet, b, c);
         totalTcpLen = b.getPos();
     }
 
@@ -688,7 +689,8 @@ void TCP_NSC::handleMessage(cMessage *msgP)
         else {
             EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
             // must be a TCPSegment
-            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msgP);
+            FlatPacket *fp = check_and_cast<FlatPacket *>(msgP);
+            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(fp->peekHeader());
             handleIpInputMessage(tcpseg);
         }
     }
@@ -886,15 +888,16 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     }
 
     ASSERT(tcpseg);
+    FlatPacket *fp = tcpseg->getMandatoryOwnerPacket();
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
              << " to " << dest << "\n";
 
     IL3AddressType *addressType = dest.getAddressType();
-    tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    fp->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+    fp->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    fp->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = fp->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 
@@ -926,7 +929,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
-    send(tcpseg, "ipOut");
+    send(fp, "ipOut");
 }
 
 void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)

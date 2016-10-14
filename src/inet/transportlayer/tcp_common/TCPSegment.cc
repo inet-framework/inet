@@ -110,7 +110,7 @@ void TCPSegment::copy(const TCPSegment& other)
     for (const auto & elem : other.payloadList)
         addPayloadMessage(elem.msg->dup(), elem.endSequenceNo);
     for (const auto opt: other.headerOptionList)
-        addHeaderOption(opt->dup());
+        headerOptionList.push_back(opt->dup());
 }
 
 TCPSegment::~TCPSegment()
@@ -121,12 +121,16 @@ TCPSegment::~TCPSegment()
 void TCPSegment::clean()
 {
     dropHeaderOptions();
+    setHeaderLength(TCP_HEADER_OCTETS);
 
     while (!payloadList.empty()) {
         cPacket *msg = payloadList.front().msg;
         payloadList.pop_front();
         dropAndDelete(msg);
     }
+    payloadLength = 0;
+
+    setChunkByteLength(TCP_HEADER_OCTETS);
 }
 
 void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
@@ -144,6 +148,7 @@ void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
 
     sequenceNo += truncleft;
     payloadLength -= truncleft + truncright;
+    addChunkByteLength(-(truncleft + truncright));
 
     // truncate payload data correctly
     while (!payloadList.empty() && (payloadList.back().endSequenceNo - sequenceNo) > payloadLength) {
@@ -235,6 +240,8 @@ cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
 void TCPSegment::addHeaderOption(TCPOption *option)
 {
     headerOptionList.push_back(option);
+    headerLength += option->getLength();
+    addChunkByteLength(option->getLength());
 }
 
 void TCPSegment::setHeaderOptionArraySize(unsigned int size)
@@ -262,6 +269,8 @@ void TCPSegment::dropHeaderOptions()
     for (auto opt : headerOptionList)
         delete opt;
     headerOptionList.clear();
+    setHeaderLength(TCP_HEADER_OCTETS);
+    setChunkByteLength(TCP_HEADER_OCTETS + payloadLength);
 }
 
 

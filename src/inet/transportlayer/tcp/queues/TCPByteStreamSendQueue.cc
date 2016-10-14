@@ -78,6 +78,7 @@ TCPSegment *TCPByteStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong
     TCPSegment *tcpseg = new TCPSegment();
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
+    tcpseg->addChunkByteLength(numBytes);
 
     // add payload messages whose endSequenceNo is between fromSeq and fromSeq+numBytes
     unsigned int fromOffs = (uint32)(fromSeq - begin);

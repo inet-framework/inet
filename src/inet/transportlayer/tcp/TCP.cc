@@ -146,13 +146,14 @@ void TCP::handleMessage(cMessage *msg)
         }
         else {
             // must be a TCPSegment
-            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
+            FlatPacket *pkt = check_and_cast<FlatPacket *>(msg);
+            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(pkt->peekHeader());
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;
 
-            srcAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = tcpseg->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            destAddr = pkt->getMandatoryTag<L3AddressInd>()->getDestAddress();
             //interfaceId = controlInfo->getInterfaceId();
 
             // process segment
@@ -199,7 +200,7 @@ void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcAddr, L3Add
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
     delete tmp;
-    delete tcpseg;
+    delete tcpseg->getMandatoryOwnerPacket();
 }
 
 void TCP::refreshDisplay() const

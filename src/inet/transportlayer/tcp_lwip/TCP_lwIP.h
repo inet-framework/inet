@@ -25,6 +25,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/FlatPacket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "lwip/lwip_tcp.h"
@@ -106,7 +107,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     void printConnBrief(TcpLwipConnection& connP);
 
     void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(TCPSegment *tcpsegP);
+    void handleIpInputMessage(FlatPacket *packet);
 
     // to be refined...
 

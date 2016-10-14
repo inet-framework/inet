@@ -115,7 +115,7 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, L3Address sr
         event = processSegment1stThru8th(tcpseg);
     }
 
-    delete tcpseg;
+    delete tcpseg->getMandatoryOwnerPacket();
     return event;
 }
 

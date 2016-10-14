@@ -139,14 +139,15 @@ TCP_lwIP::~TCP_lwIP()
         delete pLwipTcpLayerM;
 }
 
-void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
+void TCP_lwIP::handleIpInputMessage(FlatPacket *packet)
 {
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    srcAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    destAddr = tcpsegP->getMandatoryTag<L3AddressInd>()->getDestAddress();
-    interfaceId = (tcpsegP->getMandatoryTag<InterfaceInd>())->getInterfaceId();
+    TCPSegment *tcpsegP = check_and_cast<TCPSegment *>(packet->peekHeader());
+    srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+    interfaceId = (packet->getMandatoryTag<InterfaceInd>())->getInterfaceId();
 
     // process segment
     size_t ipHdrLen = sizeof(ip_hdr);
@@ -170,7 +171,7 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
     Context c;
     //    c.l3AddressesPtr = ?;
     //    c.l3AddressesLength = ?;
-    TCPSerializer().serializePacket(tcpsegP, b, c);
+    TCPSerializer().serializePacket(packet, b, c);
     totalTcpLen = b.getPos();
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
@@ -433,10 +434,10 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
             delete msgP;
         }
         else {
-            // must be a TCPSegment
-            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msgP);
+            // must be a FlatPacket
+            FlatPacket *fp = check_and_cast<FlatPacket *>(msgP);
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
-            handleIpInputMessage(tcpseg);
+            handleIpInputMessage(fp);
         }
     }
     else {    // must be from app
@@ -582,16 +583,18 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
     }
 
     ASSERT(tcpseg);
+    FlatPacket *packet = tcpseg->getOwnerPacket();
+    ASSERT(packet);
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
              << " from " << srcP << " to " << destP << "\n";
 
     IL3AddressType *addressType = destP.getAddressType();
 
-    tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+    packet->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(srcP);
     addresses->setDestAddress(destP);
     if (conn) {
@@ -614,7 +617,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
         EV_INFO << " URG";
     EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
-    send(tcpseg, "ipOut");
+    send(packet, "ipOut");
 }
 
 void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)

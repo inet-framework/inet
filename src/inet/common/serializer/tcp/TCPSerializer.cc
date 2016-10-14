@@ -126,13 +126,14 @@ void TCPSerializer::serializeOption(const TCPOption *option, Buffer &b, Context&
     }    // switch
 }
 
-void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
+void TCPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
-    const TCPSegment *tcpseg = check_and_cast<const TCPSegment *>(pkt);
+    const FlatPacket *pkt = check_and_cast<const FlatPacket *>(_pkt);
+    const TCPSegment *tcpseg = check_and_cast<const TCPSegment *>(pkt->peekHeader());
     struct tcphdr tcp;  // = (struct tcphdr *)(b.accessNBytes(sizeof(struct tcphdr)))
 
-    int writtenbytes = tcpseg->getByteLength();
+    int writtenbytes = tcpseg->getChunkByteLength();
 
     // fill TCP header structure
     tcp.th_sum = 0;
@@ -179,8 +180,8 @@ void TCPSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
     }    // if options present
 
     // write data
-    if (tcpseg->getByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=nullptr
-        unsigned int dataLength = tcpseg->getByteLength() - tcpseg->getHeaderLength();
+    if (tcpseg->getChunkByteLength() > tcpseg->getHeaderLength()) {    // data present? FIXME TODO: || tcpseg->getEncapsulatedPacket()!=nullptr
+        unsigned int dataLength = tcpseg->getChunkByteLength() - tcpseg->getHeaderLength();
 
         if (tcpseg->getByteArray().getDataArraySize() > 0) {
             ASSERT(tcpseg->getByteArray().getDataArraySize() == dataLength);
@@ -292,6 +293,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
     ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
     b.readNBytes(TCP_HEADER_OCTETS, &tcp);
 
+    FlatPacket *pkt = new FlatPacket("parsed-tcp");
     TCPSegment *tcpseg = new TCPSegment("parsed-tcp");
 
     // fill TCP header structure
@@ -327,17 +329,19 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
             b.setError();
     }    // if options present
     b.seek(hdrLength);
-    tcpseg->setByteLength(b._getBufSize());
+    tcpseg->setChunkByteLength(b._getBufSize());
     unsigned int payloadLength = b.getRemainingSize();
     tcpseg->setPayloadLength(payloadLength);
     tcpseg->getByteArray().setDataFromBuffer(b.accessNBytes(payloadLength), payloadLength);
 
+    pkt->pushHeader(tcpseg);
+
     if (b.hasError())
-        tcpseg->setBitError(true);
+        pkt->setBitError(true);
     // Checksum: modeled by cPacket::hasBitError()
     if (tcp.th_sum != 0 && c.l3AddressesPtr && c.l3AddressesLength && TCPIPchecksum::checksum(IP_PROT_TCP, b._getBuf(), b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
-        tcpseg->setBitError(true);
-    return tcpseg;
+        pkt->setBitError(true);
+    return pkt;
 }
 
 } // namespace inet

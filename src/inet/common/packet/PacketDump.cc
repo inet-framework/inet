@@ -383,8 +383,8 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     else
 #endif // ifdef WITH_SCTP
 #ifdef WITH_TCP_COMMON
-    if (dynamic_cast<tcp::TCPSegment *>(msg)) {
-        tcpDump(l2r, "", static_cast<tcp::TCPSegment *>(msg), std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
+    if (tcp::TCPSegment *tcpseg = dynamic_cast<tcp::TCPSegment *>(msg)) {
+        tcpDump(l2r, "", tcpseg, std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
     }
     else
 #endif // ifdef WITH_TCP_COMMON
@@ -492,9 +492,9 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
     cPacket *encapmsg = dgram->getEncapsulatedPacket();
 
 #ifdef WITH_TCP_COMMON
-    if (dynamic_cast<tcp::TCPSegment *>(encapmsg)) {
+    if (tcp::TCPSegment *tcpseg = dynamic_cast<tcp::TCPSegment *>(encapmsg)) {
         // if TCP, dump as TCP
-        tcpDump(l2r, label, static_cast<tcp::TCPSegment *>(encapmsg), dgram->getSrcAddress().str(),
+        tcpDump(l2r, label, tcpseg, dgram->getSrcAddress().str(),
                 dgram->getDestAddress().str(), comment);
     }
     else

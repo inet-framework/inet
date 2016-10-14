@@ -246,11 +246,12 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         sndAckVector->record(tcpseg->getAckNo());
 
     // final touches on the segment before sending
+    FlatPacket *pkt = tcpseg->getMandatoryOwnerPacket();
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
     ASSERT(tcpseg->getHeaderLength() >= TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20 (without options)
     ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_OCTETS);    // TCP_MAX_HEADER_OCTETS = 60
-    tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
+    ASSERT(tcpseg->getChunkByteLength() == tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
     state->sentBytes = tcpseg->getPayloadLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
@@ -259,13 +260,13 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+    pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = pkt->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
-    tcpMain->send(tcpseg, "ipOut");
+    tcpMain->send(pkt, "ipOut");
 }
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
@@ -274,15 +275,16 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
 
+    FlatPacket *pkt = tcpseg->getMandatoryOwnerPacket();
     IL3AddressType *addressType = dest.getAddressType();
-    tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
-    tcpseg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    ASSERT(tcpseg->getChunkByteLength() == (tcpseg->getHeaderLength() + tcpseg->getPayloadLength()));
+    pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+    pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = pkt->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
-    check_and_cast<TCP *>(getSimulation()->getContextModule())->send(tcpseg, "ipOut");
+    check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 }
 
 TCPSegment *TCPConnection::createTCPSegment(const char *name)
@@ -517,6 +519,8 @@ void TCPConnection::sendSyn()
 
     // write header options
     writeHeaderOptions(tcpseg);
+    FlatPacket *fp = new FlatPacket("SYN");
+    fp->pushHeader(tcpseg);
 
     // send it
     sendToIP(tcpseg);
@@ -537,6 +541,9 @@ void TCPConnection::sendSynAck()
 
     // write header options
     writeHeaderOptions(tcpseg);
+
+    FlatPacket *fp = new FlatPacket("SYN+ACK");
+    fp->pushHeader(tcpseg);
 
     // send it
     sendToIP(tcpseg);
@@ -560,6 +567,9 @@ void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
     tcpseg->setRstBit(true);
     tcpseg->setSequenceNo(seq);
 
+    FlatPacket *fp = new FlatPacket("RST");
+    fp->pushHeader(tcpseg);
+
     // send it
     sendToIP(tcpseg, src, dest);
 }
@@ -575,6 +585,9 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(seq);
     tcpseg->setAckNo(ack);
+
+    FlatPacket *fp = new FlatPacket("RST+ACK");
+    fp->pushHeader(tcpseg);
 
     // send it
     sendToIP(tcpseg, src, dest);
@@ -595,6 +608,8 @@ void TCPConnection::sendAck()
 
     // write header options
     writeHeaderOptions(tcpseg);
+    FlatPacket *fp = new FlatPacket("ACK");
+    fp->pushHeader(tcpseg);
 
     // send it
     sendToIP(tcpseg);
@@ -614,6 +629,8 @@ void TCPConnection::sendFin()
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSequenceNo(state->snd_nxt);
     tcpseg->setWindow(updateRcvWnd());
+    FlatPacket *fp = new FlatPacket("FIN");
+    fp->pushHeader(tcpseg);
 
     // send it
     sendToIP(tcpseg);
@@ -658,6 +675,11 @@ void TCPConnection::sendSegment(uint32 bytes)
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
     TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
+    if (tcpseg->getOwnerPacket() == nullptr) {
+        //FIXME hack: createSegmentWithBytes should create FlatPackets
+        FlatPacket *fp = new FlatPacket(tcpseg->getName());
+        fp->pushHeader(tcpseg);
+    }
 
     // if sack_enabled copy region of tcpseg to rexmitQueue
     if (state->sack_enabled)
@@ -687,7 +709,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     for (uint i = 0; i < tcpseg_temp->getHeaderOptionArraySize(); i++)
         tcpseg->addHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
 
-    tcpseg->setHeaderLength(tcpseg_temp->getHeaderLength());
+    ASSERT(tcpseg->getHeaderLength() == tcpseg_temp->getHeaderLength());
     delete tcpseg_temp;
 
     // send it

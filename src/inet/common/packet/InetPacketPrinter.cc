@@ -85,8 +85,8 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 #endif // ifdef WITH_IPv4
         }
 #ifdef WITH_TCP_COMMON
-        else if (dynamic_cast<tcp::TCPSegment *>(pk)) {
-            printTCPPacket(os, srcAddr, destAddr, static_cast<tcp::TCPSegment *>(pk));
+        else if (tcp::TCPSegment *tcpSegment = dynamic_cast<tcp::TCPSegment *>(pk)) {
+            printTCPPacket(os, srcAddr, destAddr, tcpSegment);
             return;
         }
 #endif // ifdef WITH_TCP_COMMON
@@ -97,8 +97,8 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-        else if (dynamic_cast<ICMPMessage *>(pk)) {
-            printICMPPacket(os, srcAddr, destAddr, static_cast<ICMPMessage *>(pk));
+        else if (ICMPMessage *icmpPacket = dynamic_cast<ICMPMessage *>(pk)) {
+            printICMPPacket(os, srcAddr, destAddr, icmpPacket);
             return;
         }
 #endif // ifdef WITH_IPv4

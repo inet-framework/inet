@@ -76,6 +76,7 @@ TCPSegment *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulon
     TCPSegment *tcpseg = conn->createTCPSegment(msgname);
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
+    tcpseg->addChunkByteLength(numBytes);
     return tcpseg;
 }
 

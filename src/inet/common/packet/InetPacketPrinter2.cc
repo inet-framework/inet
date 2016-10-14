@@ -146,16 +146,21 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
             out << "ETH: " << eth->getSrc() << " > " << eth->getDest() << " (" << eth->getByteLength() << " bytes)";
         }
 #endif // ifdef WITH_ETHERNET
+        else if (FlatPacket *fp = dynamic_cast<FlatPacket *>(pk)) {
+            Chunk *header = fp->peekHeader();
 #ifdef WITH_TCP_COMMON
-        else if (dynamic_cast<tcp::TCPSegment *>(pk)) {
-            out << formatTCPPacket(static_cast<tcp::TCPSegment *>(pk));
-        }
+            if (tcp::TCPSegment *tcpseg = dynamic_cast<tcp::TCPSegment *>(header)) {
+                out << formatTCPPacket(tcpseg);
+            }
+            else
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-        else if (FlatPacket *fp = dynamic_cast<FlatPacket *>(pk)) {
-            out << formatUDPPacket(check_and_cast<UDPHeader *>(fp->peekHeader()));
-        }
+            if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(header)) {
+                out << formatUDPPacket(udpHeader);
+            } else
 #endif // ifdef WITH_UDP
+                out << pk->getClassName() << ": " << header->getClassName() << ": " << pk->getByteLength() << " bytes";
+        }
 #ifdef WITH_IPv4
         else if (dynamic_cast<ICMPMessage *>(pk)) {
             out << formatICMPPacket(static_cast<ICMPMessage *>(pk));

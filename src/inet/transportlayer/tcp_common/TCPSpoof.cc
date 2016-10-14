@@ -43,6 +43,7 @@ void TCPSpoof::handleMessage(cMessage *msg)
 
 void TCPSpoof::sendSpoofPacket()
 {
+    FlatPacket *packet = new FlatPacket("spoof");
     TCPSegment *tcpseg = new TCPSegment("spoof");
 
     L3Address srcAddr = L3AddressResolver().resolve(par("srcAddress"));
@@ -55,29 +56,31 @@ void TCPSpoof::sendSpoofPacket()
     // one can customize the following according to concrete needs
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
-    tcpseg->setByteLength(TCP_HEADER_OCTETS);
+    tcpseg->setChunkByteLength(TCP_HEADER_OCTETS);
     tcpseg->setSequenceNo(seq);
     //tcpseg->setAckNo(...);
     tcpseg->setSynBit(isSYN);
     tcpseg->setWindow(16384);
+    packet->pushHeader(tcpseg);
 
-    sendToIP(tcpseg, srcAddr, destAddr);
+    sendToIP(packet, srcAddr, destAddr);
 }
 
-void TCPSpoof::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
+void TCPSpoof::sendToIP(FlatPacket *pk, L3Address src, L3Address dest)
 {
     EV_INFO << "Sending: ";
     //printSegmentBrief(tcpseg);
 
+    ASSERT(pk != nullptr);
     IL3AddressType *addressType = dest.getAddressType();
-    tcpseg->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    tcpseg->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = tcpseg->ensureTag<L3AddressReq>();
+    pk->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    pk->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = pk->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
 
-    emit(sentPkSignal, tcpseg);
-    send(tcpseg, "ipOut");
+    emit(sentPkSignal, pk);
+    send(pk, "ipOut");
 }
 
 unsigned long TCPSpoof::chooseInitialSeqNum()
