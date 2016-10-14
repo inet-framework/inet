@@ -37,8 +37,6 @@ package inet.visualizer.base;
 // packetReceivedFromLowerSignal from a network protocol module, then it adds
 // the node to the intermediate nodes of the route. After a certain amount of
 // time the route becomes inactive unless it is reinforced by another packet. 
-// This module also subscribes for mobilityStateChangedSignal to be able to
-// follow the movement of mobile nodes.
 //
 // @see ~RouteCanvasVisualizer, ~RouteOsgVisualizer, ~IRouteVisualizer, ~RouteVisualizerBase
 //

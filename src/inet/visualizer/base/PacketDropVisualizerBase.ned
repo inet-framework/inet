@@ -26,9 +26,7 @@ package inet.visualizer.base;
 // This module subscribes for packetFromLowerDroppedSignal and
 // packetFromUpperDroppedSignal on the module determined by the subscriptionModule
 // parameter. If the visualizer receives a packet dropped signal, then it stores
-// the dropped packet and starts the drop visualization. This module also
-// subscribes for mobilityStateChangedSignal to be able to follow the movement
-// of mobile nodes.
+// the dropped packet and starts the drop visualization.
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropOsgVisualizer, ~IPacketDropVisualizer, ~PacketDropVisualizerBase
 //

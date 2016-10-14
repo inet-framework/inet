@@ -22,6 +22,11 @@ namespace inet {
 
 namespace visualizer {
 
+MobilityVisualizerBase::MobilityVisualization::MobilityVisualization(IMobility *mobility) :
+    mobility(mobility)
+{
+}
+
 MobilityVisualizerBase::~MobilityVisualizerBase()
 {
     if (subscriptionModule != nullptr)

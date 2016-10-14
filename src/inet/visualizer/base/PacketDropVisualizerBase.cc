@@ -42,7 +42,6 @@ PacketDropVisualizerBase::~PacketDropVisualizerBase()
     for (auto packetDrop : packetDropVisualizations)
         delete packetDrop->packet;
     if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(IMobility::mobilityStateChangedSignal, this);
         subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
         subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
     }
@@ -54,7 +53,6 @@ void PacketDropVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
         subscriptionModule->subscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
         subscriptionModule->subscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
         packetNameMatcher.setPattern(par("packetNameFilter"), false, true, true);
@@ -95,10 +93,7 @@ void PacketDropVisualizerBase::refreshDisplay() const
 
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
 {
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        // TODO: update packet drop positions
-    }
-    else if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal) {
+    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal) {
         if (packetNameMatcher.matches(object->getFullName()))
             addPacketDropVisualization(createPacketDropVisualization(check_and_cast<cModule*>(source), check_and_cast<cPacket*>(object)->dup()));
     }

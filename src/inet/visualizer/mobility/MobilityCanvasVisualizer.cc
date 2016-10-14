@@ -24,7 +24,8 @@ namespace visualizer {
 
 Define_Module(MobilityCanvasVisualizer);
 
-MobilityCanvasVisualizer::MobilityCanvasVisualization::MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure) :
+MobilityCanvasVisualizer::MobilityCanvasVisualization::MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility) :
+    MobilityVisualization(mobility),
     networkNodeVisualization(networkNodeVisualization),
     visualRepresentation(visualRepresentation),
     orientationFigure(orientationFigure),
@@ -47,6 +48,15 @@ void MobilityCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
+    }
+}
+
+void MobilityCanvasVisualizer::refreshDisplay() const
+{
+    for (auto it : mobilityVisualizations) {
+        auto mobilityVisualization = it.second;
+        auto position = canvasProjection->computeCanvasPoint(mobilityVisualization->mobility->getCurrentPosition());
+        mobilityVisualization->networkNodeVisualization->setTransform(cFigure::Transform().translate(position.x, position.y));
     }
 }
 
@@ -76,7 +86,7 @@ void MobilityCanvasVisualizer::removeMobilityVisualization(const IMobility *mobi
     mobilityVisualizations.erase(mobility);
 }
 
-MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer::ensureMobilityVisualization(const IMobility *mobility)
+MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer::ensureMobilityVisualization(IMobility *mobility)
 {
     auto mobilityVisualization = getMobilityVisualization(mobility);
     if (mobilityVisualization == nullptr) {
@@ -110,7 +120,7 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
             trailFigure->setZIndex(zIndex);
             canvas->addFigure(trailFigure);
         }
-        mobilityVisualization = new MobilityCanvasVisualization(visualization, visualRepresentation, orientationFigure, velocityFigure, trailFigure);
+        mobilityVisualization = new MobilityCanvasVisualization(visualization, visualRepresentation, orientationFigure, velocityFigure, trailFigure, mobility);
         setMobilityVisualization(mobility, mobilityVisualization);
     }
     return mobilityVisualization;
@@ -151,7 +161,6 @@ void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t sig
         auto orientation = mobility->getCurrentAngularPosition();
         auto speed = canvasProjection->computeCanvasPoint(mobility->getCurrentSpeed());
         auto entry = ensureMobilityVisualization(mobility);
-        entry->networkNodeVisualization->setTransform(cFigure::Transform().translate(position.x, position.y));
         if (entry->visualRepresentation != nullptr)
             setPosition(entry->visualRepresentation, position);
         if (displayOrientation) {

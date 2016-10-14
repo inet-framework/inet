@@ -31,7 +31,7 @@ namespace visualizer {
 class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
 {
   protected:
-    class INET_API MobilityCanvasVisualization {
+    class INET_API MobilityCanvasVisualization : public MobilityVisualization {
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         cModule *visualRepresentation = nullptr;
@@ -40,7 +40,7 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
         TrailFigure *trailFigure = nullptr;
 
       public:
-        MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure);
+        MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility);
     };
 
   protected:
@@ -51,13 +51,14 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
 
     virtual cModule *findVisualRepresentation(cModule *module) const;
 
     virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);
     virtual void removeMobilityVisualization(const IMobility *mobility);
-    virtual MobilityCanvasVisualization* ensureMobilityVisualization(const IMobility *mobility);
+    virtual MobilityCanvasVisualization* ensureMobilityVisualization(IMobility *mobility);
     virtual void extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position);
 
   public:
