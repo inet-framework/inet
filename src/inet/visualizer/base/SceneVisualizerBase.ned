@@ -33,6 +33,5 @@ simple SceneVisualizerBase extends VisualizerBase
         string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment module, refers to a top level submodule by default
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path of the network node visualizer, refers to a sibling submodule by default
         double axisLength @unit(m) = default(0m/0); // length of x, y, and z axes, no axis by default
-        double refreshDisplayInterval @unit(s) = default(0s); // time interval for periodic display refresh, no refresh by default
         @class(SceneVisualizerBase);
 }

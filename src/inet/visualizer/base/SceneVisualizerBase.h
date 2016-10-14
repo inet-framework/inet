@@ -29,17 +29,6 @@ namespace visualizer {
 class INET_API SceneVisualizerBase : public VisualizerBase
 {
   protected:
-    simtime_t refreshDisplayInterval = 0;
-    cMessage *refreshDisplayTimer = nullptr;
-
-  protected:
-    virtual ~SceneVisualizerBase();
-
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual void scheduleRefreshDisplay();
-
     virtual Box getPlaygroundBounds();
 };
 
