@@ -89,6 +89,7 @@ TCPSegment *TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(const void *tcpD
             (unsigned long)numBytes,
             tcpseg->getByteArray().getDataArraySize());
     tcpseg->setName(msgname);
+    tcpseg->getMandatoryOwnerPacket()->setName(msgname);
 
     return tcpseg;
 }

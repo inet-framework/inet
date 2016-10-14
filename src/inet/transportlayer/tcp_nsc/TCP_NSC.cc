@@ -530,7 +530,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
      */
 
     delete[] data;
-    delete tcpsegP;
+    delete packet;
 }
 
 void TCP_NSC::sendDataToApp(TCP_NSC_Connection& c)

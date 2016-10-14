@@ -90,6 +90,7 @@ TCPSegment *TcpLwipVirtualDataSendQueue::createSegmentWithBytes(const void *tcpD
             (tcpseg->getAckBit() && 0 == numBytes) ? " ACK" : "",
             (unsigned long)numBytes);
     tcpseg->setName(msgname);
+    tcpseg->getMandatoryOwnerPacket()->setName(msgname);
 
     return tcpseg;
 }

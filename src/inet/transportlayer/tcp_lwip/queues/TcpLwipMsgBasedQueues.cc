@@ -151,6 +151,7 @@ TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpData
             (unsigned long)numBytes,
             tcpseg->getPayloadArraySize());
     tcpseg->setName(msgname);
+    tcpseg->getMandatoryOwnerPacket()->setName(msgname);
 
     discardAckedBytes();
 

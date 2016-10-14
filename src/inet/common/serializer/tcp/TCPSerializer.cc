@@ -283,7 +283,8 @@ TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bu
 {
     Buffer b(const_cast<unsigned char *>(buf), bufsize);
     Context c;
-    return check_and_cast_nullable<TCPSegment *>(deserialize(b, c));
+    FlatPacket *pk = check_and_cast_nullable<FlatPacket *>(deserialize(b, c));
+    return pk ? check_and_cast_nullable<TCPSegment *>(pk->peekHeader()) : nullptr;
 }
 
 cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)

@@ -210,7 +210,7 @@ void TCP_lwIP::handleIpInputMessage(FlatPacket *packet)
     // LwipTcpLayer will call the tcp_event_recv() / tcp_event_err() and/or send a packet to sender
 
     delete[] data;
-    delete tcpsegP;
+    delete packet;
 }
 
 void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,

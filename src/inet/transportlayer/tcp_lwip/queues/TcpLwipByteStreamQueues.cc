@@ -93,6 +93,7 @@ TCPSegment *TcpLwipByteStreamSendQueue::createSegmentWithBytes(const void *tcpDa
             (unsigned long)numBytes,
             tcpseg->getByteArray().getDataArraySize());
     tcpseg->setName(msgname);
+    tcpseg->getMandatoryOwnerPacket()->setName(msgname);
 
     return tcpseg;
 }
