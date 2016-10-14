@@ -109,6 +109,11 @@ ifeq ($(WITH_OSG),yes)
 	@echo "#define WITH_OSG" >>$(DEFINES_FILE)
 	@echo "#endif" >>$(DEFINES_FILE)
 endif
+ifeq ($(WITH_OSGEARTH),yes)
+	@echo "#ifndef WITH_OSGEARTH" >>$(DEFINES_FILE)
+	@echo "#define WITH_OSGEARTH" >>$(DEFINES_FILE)
+	@echo "#endif" >>$(DEFINES_FILE)
+endif
 
 # dump out the actual compiler and linker command line for easier debugging
 ifneq ($(MAKECMDGOALS),clean)
