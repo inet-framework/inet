@@ -22,22 +22,46 @@ Chunk::~Chunk()
 
 void Chunk::copy(const Chunk& other)
 {
-    this->chunkBitLength = other.chunkBitLength;
+    chunkBitLength = other.chunkBitLength;
+}
+
+void Chunk::addChunkBitLength(int64_t x)
+{
+//    if (getOwnerPacket() != nullptr)
+//        throw cRuntimeError("setChunkBitLength(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modify content.");
+    chunkBitLength += x;
+    if (chunkBitLength < 0)
+        throw cRuntimeError(this, "addChunkBitLength(): length became negative (%" INT64_PRINTF_FORMAT ") after adding %" INT64_PRINTF_FORMAT "d", chunkBitLength, x);
+    if (FlatPacket *pk = getOwnerPacket()) {
+        pk->addBitLength(x);
+    }
 }
 
 void Chunk::setChunkBitLength(int64_t x)
 {
-    if (getOwnerPacket() != nullptr)
-        throw cRuntimeError("setChunkBitLength(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modify content.");
-    this->chunkBitLength = x;
+//    if (getOwnerPacket() != nullptr)
+//        throw cRuntimeError("setChunkBitLength(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modify content.");
+    if (FlatPacket *pk = getOwnerPacket()) {
+        pk->addBitLength(x - chunkBitLength);
+    }
+    chunkBitLength = x;
 }
 
 FlatPacket *Chunk::getOwnerPacket() const
 {
     cObject *owner = getOwner();
-    if (typeid(*owner) == typeid(FlatPacket))
+    if ((owner != nullptr) && (typeid(*owner) == typeid(FlatPacket)))
         return static_cast<FlatPacket *>(owner);
     return nullptr;
+}
+
+FlatPacket *Chunk::getMandatoryOwnerPacket() const
+{
+    FlatPacket *fp = getOwnerPacket();
+    if (fp == nullptr)
+        throw cRuntimeError("Chunk does not owned by a FlatPacket");
+    else
+        return fp;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -78,7 +102,7 @@ cPacket *PacketChunk::removePacket()
 void PacketChunk::setPacket(cPacket *pk)
 {
     if (packet != nullptr)           // throw error when PacketChunk already contains a packet
-        throw cRuntimeError("setPacket(): PacketChunk already own another packet.");
+        throw cRuntimeError("setPacket(): PacketChunk already owns another packet.");
     if (getOwnerPacket() != nullptr)           // throw error when PacketChunk owned by a FlatPacket
         throw cRuntimeError("setPacket(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modifying content");
     packet = pk;

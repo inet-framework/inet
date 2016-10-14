@@ -14,7 +14,10 @@ class Chunk : public cOwnedObject
     int64_t chunkBitLength = -1; //KLUDGE need for MSG: byteLength = x;
     void copy(const Chunk& other);
   protected:
-    void setChunkBitLength(int64_t x);     //TODO error when owned by FlatPacket?
+  public:
+    void addChunkBitLength(int64_t x);     // also update the length in owner when owner is a FlatPacket
+    void addChunkByteLength(int64_t x) { addChunkBitLength(x<<3); }
+    void setChunkBitLength(int64_t x);     // also update the length in owner when owner is a FlatPacket
     void setChunkByteLength(int64_t x) { setChunkBitLength(x<<3); }
   public:
     explicit Chunk(const char *name=nullptr, bool namepooling=true);
@@ -24,7 +27,8 @@ class Chunk : public cOwnedObject
 
     virtual int64_t getChunkBitLength() const { return chunkBitLength; }
     int64_t getChunkByteLength() const { return (getChunkBitLength()+7)>>3; }
-    FlatPacket *getOwnerPacket() const;
+    FlatPacket *getOwnerPacket() const;         // returns owner FlatPacket or nullptr
+    FlatPacket *getMandatoryOwnerPacket() const;        // throws error when chunk not owned by a FlatPacket
 };
 
 class PacketChunk : public Chunk
@@ -38,9 +42,10 @@ class PacketChunk : public Chunk
     virtual PacketChunk *dup() const override { return new PacketChunk(*this); }
     cPacket *getPacket() { return packet; }
     const cPacket *getPacket() const  { return packet; }
-    cPacket *removePacket();           // throw error when PacketChunk owned by a FlatPacket
-    void setPacket(cPacket *);           // throw error when PacketChunk owned by a FlatPacket or chunk already own another packet
+    cPacket *removePacket();           // throws error when PacketChunk owned by a FlatPacket
+    void setPacket(cPacket *);           // throws error when PacketChunk owned by a FlatPacket or chunk already own another packet
     int64_t getChunkBitLength() const override;
+    // void setChunkBitLength(int64_t x);     // TODO ??? packet->setBitLength() can produce inconsistent FlatPacket
 };
 
 #if 0   //FIXME
@@ -87,8 +92,8 @@ class FlatPacket : public cPacket       //TODO rename to Packet?
     virtual void encapsulate(cPacket *) override { throw 1; }
     virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }
     virtual cPacket *decapsulate() override { throw 1; }
-    virtual void setBitLength(int64_t) override { throw 1; }
-    virtual void addBitLength(int64_t delta) override { throw 1; }
+//    virtual void setBitLength(int64_t) override { throw 1; }
+//    virtual void addBitLength(int64_t delta) override { throw 1; }
   public:
     virtual int64_t getBitLength() const override;
 };
