@@ -29,6 +29,7 @@ enum UdpConstants{
 };
 
 class Chunk extends cOwnedObject;
+
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //

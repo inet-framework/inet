@@ -379,7 +379,7 @@ void UDP::processPacketFromApp(cPacket *appData)
 
 void UDP::processUDPPacket(UDPHeader *udpHeader)
 {
-    FlatPacket *udpPacket = udpHeader->getOwnerPacket();
+    FlatPacket *udpPacket = udpHeader->getMandatoryOwnerPacket();
     emit(rcvdPkSignal, udpPacket);
 
     ASSERT(udpPacket->peekHeader() == udpHeader);
@@ -538,7 +538,7 @@ void UDP::processICMPError(cPacket *pk)
 
 void UDP::processUndeliverablePacket(UDPHeader *udpHeader)
 {
-    FlatPacket *udpPacket = udpHeader->getOwnerPacket();
+    FlatPacket *udpPacket = udpHeader->getMandatoryOwnerPacket();
     emit(droppedPkWrongPortSignal, udpPacket);
     numDroppedWrongPort++;
 
