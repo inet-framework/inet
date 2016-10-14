@@ -58,17 +58,10 @@
  * directly into the top of the .c file it generates.
  */
 
-#if !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-
 #include "inet/common/INETDefs.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <arpa/inet.h>
-#include <netinet/in.h>
-#else
-#include "winsock2.h"
 #endif
 #include <stdio.h>
 #include <ctype.h>
