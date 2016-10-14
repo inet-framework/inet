@@ -90,7 +90,7 @@ int TLVOptions::findByType(short int type, int firstPos) const
 void TLVOptions::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
 {
     TLVOptions_Base::parsimPack(b);
-    TLVOptionVector::size_type s = optionVector.size();
+    int s = (int)optionVector.size();
     doParsimPacking(b, s);
     for (auto opt: optionVector)
         b->packObject(opt);
@@ -99,9 +99,9 @@ void TLVOptions::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
 void TLVOptions::parsimUnpack(cCommBuffer *b)
 {
     TLVOptions_Base::parsimUnpack(b);
-    TLVOptionVector::size_type s;
+    int s;
     doParsimUnpacking(b, s);
-    for (TLVOptionVector::size_type i = 0; i < s; i++)
+    for (int i = 0; i < s; i++)
         optionVector.push_back(check_and_cast<TLVOptionBase *>(b->unpackObject()));
 }
 
