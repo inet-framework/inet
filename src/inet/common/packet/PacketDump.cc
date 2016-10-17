@@ -368,17 +368,17 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     std::ostream& out = *outp;
 
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPv4Datagram *>(msg)) {
-        dumpIPv4(l2r, "", (IPv4Datagram *)msg, "");
+    if (IPv4Datagram *ipv4Header = dynamic_cast<IPv4Datagram *>(msg)) {
+        dumpIPv4(l2r, "", ipv4Header, "");
     }
-    else if (dynamic_cast<ARPPacket *>(msg)) {
-        dumpARP(l2r, "", (ARPPacket *)msg, "");
+    else if (ARPPacket *arpPacket = dynamic_cast<ARPPacket *>(msg)) {
+        dumpARP(l2r, "", arpPacket, "");
     }
     else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_SCTP
-    if (dynamic_cast<sctp::SCTPMessage *>(msg)) {
-        sctpDump("", (sctp::SCTPMessage *)msg, std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
+    if (sctp::SCTPMessage *sctpMessage = dynamic_cast<sctp::SCTPMessage *>(msg)) {
+        sctpDump("", sctpMessage, std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
     }
     else
 #endif // ifdef WITH_SCTP
@@ -398,18 +398,18 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
         // search for encapsulated IPv4[v6]Datagram in it
         while (msg) {
 #ifdef WITH_IPv4
-            if (dynamic_cast<IPv4Datagram *>(msg)) {
-                dumpIPv4(l2r, "", (IPv4Datagram *)msg);
+            if (IPv4Datagram *ipv4Header = dynamic_cast<IPv4Datagram *>(msg)) {
+                dumpIPv4(l2r, "", ipv4Header);
                 break;
             }
-            else if (dynamic_cast<ARPPacket *>(msg)) {
-                dumpARP(l2r, "", (ARPPacket *)msg, "");
+            else if (ARPPacket *arpPacket = dynamic_cast<ARPPacket *>(msg)) {
+                dumpARP(l2r, "", arpPacket, "");
                 break;
             }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-            if (dynamic_cast<IPv6Datagram *>(msg)) {
-                dumpIPv6(l2r, "", (IPv6Datagram *)msg);
+            if (IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(msg)) {
+                dumpIPv6(l2r, "", ipv6Datagram);
                 break;
             }
 #endif // ifdef WITH_IPv6

@@ -128,8 +128,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4
-            if (dynamic_cast<IPv4Datagram *>(pk)) {
-                IPv4Datagram *ipv4dgram = static_cast<IPv4Datagram *>(pk);
+            if (IPv4Datagram *ipv4dgram = dynamic_cast<IPv4Datagram *>(pk)) {
                 out << "IPv4: " << srcAddr << " > " << destAddr;
                 if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0) {
                     out << " " << (ipv4dgram->getMoreFragments() ? "" : "last ")

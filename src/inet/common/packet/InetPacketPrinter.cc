@@ -71,13 +71,11 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     L3Address srcAddr, destAddr;
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); pk; pk = pk->getEncapsulatedPacket()) {
-        INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk);
-        if (dgram) {
+        if (INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk)) {
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4
-            if (dynamic_cast<IPv4Datagram *>(pk)) {
-                IPv4Datagram *ipv4dgram = static_cast<IPv4Datagram *>(pk);
+            if (IPv4Datagram *ipv4dgram = dynamic_cast<IPv4Datagram *>(pk)) {
                 if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0)
                     os << (ipv4dgram->getMoreFragments() ? "" : "last ")
                        << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";

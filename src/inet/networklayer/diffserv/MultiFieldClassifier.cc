@@ -170,8 +170,8 @@ int MultiFieldClassifier::classifyPacket(cPacket *packet)
 {
     for ( ; packet; packet = packet->getEncapsulatedPacket()) {
 #ifdef WITH_IPv4
-        IPv4Datagram *ipv4Datagram = dynamic_cast<IPv4Datagram *>(packet);
-        if (ipv4Datagram) {
+        ;
+        if (IPv4Datagram *ipv4Datagram = dynamic_cast<IPv4Datagram *>(packet)) {
             for (auto & elem : filters)
                 if (elem.matches(ipv4Datagram))
                     return elem.gateIndex;
@@ -180,8 +180,7 @@ int MultiFieldClassifier::classifyPacket(cPacket *packet)
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet);
-        if (ipv6Datagram) {
+        if (IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet)) {
             for (auto & elem : filters)
                 if (elem.matches(ipv6Datagram))
                     return elem.gateIndex;
