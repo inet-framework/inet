@@ -302,8 +302,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
     tcpseg->setDestPort(ntohs(tcp.th_dport));
     tcpseg->setSequenceNo(ntohl(tcp.th_seq));
     tcpseg->setAckNo(ntohl(tcp.th_ack));
-    unsigned short hdrLength = tcp.th_offs * 4;
-    tcpseg->setHeaderLength(hdrLength);
+    unsigned short hdrLength = TCP_HEADER_OCTETS;
 
     // set flags
     unsigned char flags = tcp.th_flags;
@@ -329,6 +328,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
         if (sb.hasError())
             b.setError();
     }    // if options present
+    tcpseg->setHeaderLength(hdrLength);
     b.seek(hdrLength);
     tcpseg->setChunkByteLength(b._getBufSize());
     unsigned int payloadLength = b.getRemainingSize();
