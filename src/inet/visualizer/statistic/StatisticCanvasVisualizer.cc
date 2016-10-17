@@ -44,6 +44,8 @@ void StatisticCanvasVisualizer::initialize(int stage)
 StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::createStatisticVisualization(cComponent *source, simsignal_t signal)
 {
     auto labelFigure = new BoxedLabelFigure("statistic");
+    labelFigure->setTags("statistic");
+    labelFigure->setTooltip("This label shows the current value of a statistic");
     labelFigure->setZIndex(zIndex);
     labelFigure->setFontColor(fontColor);
     labelFigure->setBackgroundColor(backgroundColor);

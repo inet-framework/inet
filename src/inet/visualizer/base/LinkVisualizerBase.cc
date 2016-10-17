@@ -38,7 +38,6 @@ void LinkVisualizerBase::initialize(int stage)
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
         subscriptionModule->subscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
         subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
-        subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
         packetNameMatcher.setPattern(par("packetNameFilter"), false, true, true);
         lineColor = cFigure::Color(par("lineColor"));
         lineWidth = par("lineWidth");
@@ -54,6 +53,10 @@ void LinkVisualizerBase::refreshDisplay() const
     std::vector<const LinkVisualization *> removedLinkVisualizations;
     for (auto it : linkVisualizations) {
         auto linkVisualization = it.second;
+        auto sourceModule = getSimulation()->getModule(linkVisualization->sourceModuleId);
+        auto destinationModule = getSimulation()->getModule(linkVisualization->destinationModuleId);
+        setPosition(sourceModule, getPosition(sourceModule));
+        setPosition(destinationModule, getPosition(destinationModule));
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
             delta = (currentAnimationPosition.getSimulationTime() - linkVisualization->lastUsageAnimationPosition.getSimulationTime()).dbl();
@@ -125,14 +128,7 @@ void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *desti
 
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
-        auto position = mobility->getCurrentPosition();
-        auto module = check_and_cast<cModule *>(source);
-        auto node = getContainingNode(module);
-        setPosition(node, position);
-    }
-    else if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
+    if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
         if (isLinkEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {

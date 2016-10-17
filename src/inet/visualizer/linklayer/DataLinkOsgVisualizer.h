@@ -26,8 +26,8 @@ namespace visualizer {
 
 class INET_API DataLinkOsgVisualizer : public LinkOsgVisualizerBase
 {
-    protected:
-        virtual bool isLinkEnd(cModule *module) const override;
+  protected:
+    virtual bool isLinkEnd(cModule *module) const override;
 };
 
 } // namespace visualizer

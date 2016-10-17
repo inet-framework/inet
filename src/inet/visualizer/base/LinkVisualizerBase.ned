@@ -32,9 +32,7 @@ package inet.visualizer.base;
 // on the visualizer receives a packetSentToUpperSignal from another MAC
 // protocol module with the same packet id, then it adds an active link between
 // the source and the destination nodes. After a certain amount of time the link
-// becomes inactive unless it is reinforced by another packet. This module also
-// subscribes for mobilityStateChangedSignal to be able to follow the movement
-// of mobile nodes.
+// becomes inactive unless it is reinforced by another packet.
 //
 // @see ~LinkCanvasVisualizer, ~LinkOsgVisualizer, ~ILinkVisualizer, and ~LinkVisualizerBase
 //

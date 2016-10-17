@@ -29,6 +29,14 @@ bool PhysicalLinkCanvasVisualizer::isLinkEnd(cModule *module) const
     return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
 }
 
+const LinkVisualizerBase::LinkVisualization *PhysicalLinkCanvasVisualizer::createLinkVisualization(cModule *source, cModule *destination) const
+{
+    auto linkVisualization = static_cast<const LinkCanvasVisualization *>(LinkCanvasVisualizerBase::createLinkVisualization(source, destination));
+    linkVisualization->figure->setTags("physical_link");
+    linkVisualization->figure->setTooltip("This arrow represents a physical link between two network nodes");
+    return linkVisualization;
+}
+
 } // namespace visualizer
 
 } // namespace inet

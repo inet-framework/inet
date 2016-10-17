@@ -38,7 +38,6 @@ void RoutingTableVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
         subscriptionModule->subscribe(NF_ROUTE_ADDED, this);
         subscriptionModule->subscribe(NF_ROUTE_DELETED, this);
         subscriptionModule->subscribe(NF_ROUTE_CHANGED, this);
@@ -52,14 +51,14 @@ void RoutingTableVisualizerBase::initialize(int stage)
 
 void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
 {
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
-        auto position = mobility->getCurrentPosition();
-        auto module = check_and_cast<cModule *>(source);
-        auto node = getContainingNode(module);
-        setPosition(node, position);
-    }
-    else if (signal == NF_ROUTE_ADDED || signal == NF_ROUTE_DELETED || signal == NF_ROUTE_CHANGED)
+//    if (signal == IMobility::mobilityStateChangedSignal) {
+//        auto mobility = dynamic_cast<IMobility *>(object);
+//        auto position = mobility->getCurrentPosition();
+//        auto module = check_and_cast<cModule *>(source);
+//        auto node = getContainingNode(module);
+//        setPosition(node, position);
+//    }
+    if (signal == NF_ROUTE_ADDED || signal == NF_ROUTE_DELETED || signal == NF_ROUTE_CHANGED)
         updateRoutes(check_and_cast<IPv4RoutingTable *>(source));
 }
 
@@ -69,9 +68,10 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableVisualizerBase
     return it == routeVisualizations.end() ? nullptr : it->second;
 }
 
-void RoutingTableVisualizerBase::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization)
+void RoutingTableVisualizerBase::addRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    routeVisualizations[nodeAndNextHop] = routeVisualization;
+    auto key = std::pair<int, int>(routeVisualization->nodeModuleId, routeVisualization->nextHopModuleId);
+    routeVisualizations[key] = routeVisualization;
 }
 
 void RoutingTableVisualizerBase::removeRouteVisualization(const RouteVisualization *routeVisualization)
@@ -110,7 +110,7 @@ void RoutingTableVisualizerBase::addRoutes(IPv4RoutingTable *routingTable)
                 if (nextHop != nullptr) {
                     auto key = std::pair<int, int>(node->getId(), nextHop->getId());
                     if (routeVisualizations.find(key) == routeVisualizations.end())
-                        addRouteVisualization(key, createRouteVisualization(node, nextHop));
+                        addRouteVisualization(createRouteVisualization(route, node, nextHop));
                 }
             }
         }

@@ -50,7 +50,7 @@ void LinkCanvasVisualizerBase::initialize(int stage)
 
 const LinkVisualizerBase::LinkVisualization *LinkCanvasVisualizerBase::createLinkVisualization(cModule *source, cModule *destination) const
 {
-    auto figure = new cLineFigure();
+    auto figure = new cLineFigure("link");
     figure->setStart(canvasProjection->computeCanvasPoint(getPosition(source)));
     figure->setEnd(canvasProjection->computeCanvasPoint(getPosition(destination)));
     figure->setEndArrowhead(cFigure::ARROW_BARBED);

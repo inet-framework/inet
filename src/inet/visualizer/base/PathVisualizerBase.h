@@ -57,13 +57,13 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
      */
     std::map<int, std::vector<int>> incompletePaths;
     /**
-     * Maps source/destination modules to multiple paths between them.
-     */
-    std::multimap<std::pair<int, int>, const PathVisualization *> pathVisualizations;
-    /**
      * Maps nodes to the number of paths that go through it.
      */
     std::map<int, int> numPaths;
+    /**
+     * Maps source/destination modules to multiple paths between them.
+     */
+    std::multimap<std::pair<int, int>, const PathVisualization *> pathVisualizations;
 
   protected:
     virtual void initialize(int stage) override;

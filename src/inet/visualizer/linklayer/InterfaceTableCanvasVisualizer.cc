@@ -43,7 +43,10 @@ void InterfaceTableCanvasVisualizer::initialize(int stage)
 
 InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisualizer::createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry)
 {
-    auto figure = new BoxedLabelFigure();
+    auto figure = new BoxedLabelFigure("networkInterface");
+    figure->setTags("network_interface");
+    figure->setTooltip("This label represents a network interface in a network node");
+    figure->setAssociatedObject(interfaceEntry);
     figure->setZIndex(zIndex);
     figure->setFontColor(fontColor);
     figure->setBackgroundColor(backgroundColor);

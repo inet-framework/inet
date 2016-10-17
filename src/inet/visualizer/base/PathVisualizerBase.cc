@@ -38,7 +38,6 @@ void PathVisualizerBase::initialize(int stage)
         subscriptionModule->subscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
         subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
         subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromLowerSignal, this);
-        subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
         packetNameMatcher.setPattern(par("packetNameFilter"), false, true, true);
         if (*par("lineColor").stringValue() != '\0')
             lineColor = cFigure::Color(par("lineColor"));
@@ -53,21 +52,25 @@ void PathVisualizerBase::refreshDisplay() const
     AnimationPosition currentAnimationPosition;
     std::vector<const PathVisualization *> removedPathVisualizations;
     for (auto it : pathVisualizations) {
-        auto path = it.second;
+        auto pathVisualization = it.second;
+        for (auto moduleId : pathVisualization->moduleIds) {
+            auto module = getSimulation()->getModule(moduleId);
+            setPosition(module, getPosition(module));
+        }
         double delta;
         if (!strcmp(fadeOutMode, "simulationTime"))
-            delta = (currentAnimationPosition.getSimulationTime() - path->lastUsageAnimationPosition.getSimulationTime()).dbl();
+            delta = (currentAnimationPosition.getSimulationTime() - pathVisualization->lastUsageAnimationPosition.getSimulationTime()).dbl();
         else if (!strcmp(fadeOutMode, "animationTime"))
-            delta = currentAnimationPosition.getAnimationTime() - path->lastUsageAnimationPosition.getAnimationTime();
+            delta = currentAnimationPosition.getAnimationTime() - pathVisualization->lastUsageAnimationPosition.getAnimationTime();
         else if (!strcmp(fadeOutMode, "realTime"))
-            delta = currentAnimationPosition.getRealTime() - path->lastUsageAnimationPosition.getRealTime();
+            delta = currentAnimationPosition.getRealTime() - pathVisualization->lastUsageAnimationPosition.getRealTime();
         else
             throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
         auto alpha = std::min(1.0, std::pow(2.0, -delta / fadeOutHalfLife));
         if (alpha < 0.01)
-            removedPathVisualizations.push_back(path);
+            removedPathVisualizations.push_back(pathVisualization);
         else
-            setAlpha(path, alpha);
+            setAlpha(pathVisualization, alpha);
     }
     for (auto path : removedPathVisualizations) {
         auto sourceAndDestination = std::pair<int, int>(path->moduleIds.front(), path->moduleIds.back());
@@ -174,14 +177,14 @@ void PathVisualizerBase::updatePath(const std::vector<int>& moduleIds)
 
 void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
-        auto position = mobility->getCurrentPosition();
-        auto module = check_and_cast<cModule *>(source);
-        auto node = getContainingNode(module);
-        setPosition(node, position);
-    }
-    else if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
+//    if (signal == IMobility::mobilityStateChangedSignal) {
+//        auto mobility = dynamic_cast<IMobility *>(object);
+//        auto position = mobility->getCurrentPosition();
+//        auto module = check_and_cast<cModule *>(source);
+//        auto node = getContainingNode(module);
+//        setPosition(node, position);
+//    }
+    if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto packet = check_and_cast<cPacket *>(object);
             if (packetNameMatcher.matches(packet->getFullName())) {

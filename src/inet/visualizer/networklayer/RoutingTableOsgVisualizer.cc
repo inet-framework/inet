@@ -41,7 +41,7 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::~RouteOsgVisualization()
     // TODO: delete node;
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(cModule *node, cModule *nextHop) const
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto nodePosition = getPosition(node);
     auto nextHopPosition = getPosition(nextHop);
@@ -55,9 +55,9 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer:
     return new RouteOsgVisualization(osgNode, node->getId(), nextHop->getId());
 }
 
-void RoutingTableOsgVisualizer::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization)
+void RoutingTableOsgVisualizer::addRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    RoutingTableVisualizerBase::addRouteVisualization(nodeAndNextHop, routeVisualization);
+    RoutingTableVisualizerBase::addRouteVisualization(routeVisualization);
     auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
     scene->addChild(routeOsgVisualization->node);

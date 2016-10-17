@@ -45,8 +45,8 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const RouteVisualization *createRouteVisualization(cModule *node, cModule *nextHop) const override;
-    virtual void addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization) override;
+    virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const override;
+    virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void setPosition(cModule *node, const Coord& position) const override;
 };

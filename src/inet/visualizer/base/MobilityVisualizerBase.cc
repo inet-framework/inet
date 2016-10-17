@@ -42,10 +42,12 @@ void MobilityVisualizerBase::initialize(int stage)
         subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
         // orientation
         displayOrientation = par("displayOrientation");
+        orientationArcSize = par("orientationArcSize");
         orientationLineColor = cFigure::parseColor(par("orientationLineColor"));
         orientationLineWidth = par("orientationLineWidth");
         // velocity
         displayVelocity = par("displayVelocity");
+        velocityArrowScale = par("velocityArrowScale");
         velocityLineColor = cFigure::parseColor(par("velocityLineColor"));
         velocityLineWidth = par("velocityLineWidth");
         velocityLineStyle = cFigure::parseLineStyle(par("velocityLineStyle"));

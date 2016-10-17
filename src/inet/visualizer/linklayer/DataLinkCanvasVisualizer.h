@@ -26,8 +26,9 @@ namespace visualizer {
 
 class INET_API DataLinkCanvasVisualizer : public LinkCanvasVisualizerBase
 {
-    protected:
-        virtual bool isLinkEnd(cModule *module) const override;
+  protected:
+    virtual bool isLinkEnd(cModule *module) const override;
+    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination) const override;
 };
 
 } // namespace visualizer

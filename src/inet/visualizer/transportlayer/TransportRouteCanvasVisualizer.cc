@@ -69,6 +69,14 @@ bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
     return false;
 }
 
+const PathCanvasVisualizerBase::PathVisualization *TransportRouteCanvasVisualizer::createPathVisualization(const std::vector<int>& path) const
+{
+    auto pathVisualization = static_cast<const PathCanvasVisualization *>(PathCanvasVisualizerBase::createPathVisualization(path));
+    pathVisualization->figure->setTags("transport_route");
+    pathVisualization->figure->setTooltip("This path represents a recently active transport route between two network nodes");
+    return pathVisualization;
+}
+
 } // namespace visualizer
 
 } // namespace inet

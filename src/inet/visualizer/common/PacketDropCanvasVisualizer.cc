@@ -46,7 +46,10 @@ void PacketDropCanvasVisualizer::initialize(int stage)
 
 const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisualizer::createPacketDropVisualization(cModule *module, cPacket *packet) const
 {
-    auto figure = new cIconFigure();
+    auto figure = new cIconFigure("packetDrop");
+    figure->setTags("packet_drop");
+    figure->setTooltip("This icon represents a packet dropped in a network node");
+    figure->setAssociatedObject(packet);
     figure->setImageName(icon);
     figure->setTintAmount(iconTintAmount);
     figure->setTintColor(iconTintColor);

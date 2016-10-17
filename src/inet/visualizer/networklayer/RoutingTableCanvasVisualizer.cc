@@ -48,9 +48,12 @@ void RoutingTableCanvasVisualizer::initialize(int stage)
     }
 }
 
-const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(cModule *node, cModule *nextHop) const
+const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto figure = new cLineFigure();
+    figure->setTags("route");
+    figure->setTooltip("This arrow represents a route in a routing table");
+    figure->setAssociatedObject(route);
     figure->setStart(canvasProjection->computeCanvasPoint(getPosition(node)));
     figure->setEnd(canvasProjection->computeCanvasPoint(getPosition(nextHop)));
     figure->setEndArrowhead(cFigure::ARROW_BARBED);
@@ -60,9 +63,9 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualiz
     return new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
 }
 
-void RoutingTableCanvasVisualizer::addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization)
+void RoutingTableCanvasVisualizer::addRouteVisualization(const RouteVisualization *routeVisualization)
 {
-    RoutingTableVisualizerBase::addRouteVisualization(nodeAndNextHop, routeVisualization);
+    RoutingTableVisualizerBase::addRouteVisualization(routeVisualization);
     auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
     routeGroup->addFigure(routeCanvasVisualization->figure);
 }

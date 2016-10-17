@@ -156,11 +156,11 @@ void MobilityBase::handleMessage(cMessage *message)
 void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
-#ifdef WITH_VISUALIZERS
-    if (hasGUI() && visualRepresentation != nullptr) {
-        inet::visualizer::MobilityCanvasVisualizer::setPosition(visualRepresentation, canvasProjection->computeCanvasPoint(lastPosition));
-    }
-#endif
+//#ifdef WITH_VISUALIZERS
+//    if (hasGUI() && visualRepresentation != nullptr) {
+//        inet::visualizer::MobilityCanvasVisualizer::setPosition(visualRepresentation, canvasProjection->computeCanvasPoint(lastPosition));
+//    }
+//#endif
 }
 
 void MobilityBase::emitMobilityStateChangedSignal()

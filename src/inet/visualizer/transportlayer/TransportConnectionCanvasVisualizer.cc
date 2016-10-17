@@ -46,12 +46,14 @@ void TransportConnectionCanvasVisualizer::initialize(int stage)
 cIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigure(tcp::TCPConnection *tcpConnection) const
 {
     auto figure = new cIconFigure();
+    figure->setTags("transport_connection");
+    figure->setTooltip("This icon represents a transport connection between two network nodes");
+    figure->setAssociatedObject(tcpConnection);
+    figure->setZIndex(zIndex);
     figure->setAnchor(cFigure::ANCHOR_NW);
     figure->setImageName(icon);
     figure->setTintAmount(1);
     figure->setTintColor(cFigure::GOOD_DARK_COLORS[connectionVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
-    figure->setAssociatedObject(tcpConnection);
-    figure->setZIndex(zIndex);
     return figure;
 }
 

@@ -56,9 +56,9 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj DETAILS_ARG) override;
 
-    virtual const RouteVisualization *createRouteVisualization(cModule *node, cModule *nextHop) const = 0;
+    virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const = 0;
     virtual const RouteVisualization *getRouteVisualization(std::pair<int, int> route);
-    virtual void addRouteVisualization(std::pair<int, int> nodeAndNextHop, const RouteVisualization *routeVisualization);
+    virtual void addRouteVisualization(const RouteVisualization *routeVisualization);
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization);
     virtual void setPosition(cModule *node, const Coord& position) const = 0;
 

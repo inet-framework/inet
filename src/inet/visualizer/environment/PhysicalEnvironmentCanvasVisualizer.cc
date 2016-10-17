@@ -71,6 +71,8 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             if (sphere) {
                 double radius = sphere->getRadius();
                 cOvalFigure *figure = new cOvalFigure("sphere");
+                figure->setTooltip("This oval represents a physical object");
+                figure->setAssociatedObject(const_cast<cObject *>(check_and_cast<const cObject *>(object)));
                 figure->setFilled(true);
                 cFigure::Point center = canvasProjection->computeCanvasPoint(position);
                 figure->setBounds(cFigure::Rectangle(center.x - radius, center.y - radius, radius * 2, radius * 2));
@@ -126,6 +128,8 @@ void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObjec
             canvasPoints.push_back(canvPoint);
         }
         cPolygonFigure *figure = new cPolygonFigure("objectFace");
+        figure->setTooltip("This polygon represents a physical object");
+        figure->setAssociatedObject(const_cast<cObject *>(check_and_cast<const cObject *>(object)));
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
         figure->setLineWidth(object->getLineWidth());

@@ -31,10 +31,12 @@ simple MobilityVisualizerBase extends VisualizerBase
         string subscriptionModule = default(""); // module path where the visualizer subscribes for mobility signals, root module by default
         // orientation
         bool displayOrientation = default(false); // display an arc indicating the current orientation, disabled by default
+        double orientationArcSize = default(0.25); // relative size of the arc compared to the full circle 
         string orientationLineColor = default("black"); // orientation line color, black by default
         double orientationLineWidth = default(1); // orientation line width
         // velocity
         bool displayVelocity = default(false); // display an arrow indicating the current velocity, disabled by default
+        double velocityArrowScale = default(1); // velocity scaling factor to pixels
         string velocityLineColor = default("black"); // velocity line color, black by default
         double velocityLineWidth = default(1); // velocity line width
         string velocityLineStyle = default("solid"); // velocity line style (solid, dashed, dotted)

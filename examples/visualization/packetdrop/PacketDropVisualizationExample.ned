@@ -5,7 +5,6 @@ import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
-
 network PacketDropVisualizationExample
 {
     parameters:

@@ -40,7 +40,6 @@ void LinkBreakVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
         subscriptionModule->subscribe(NF_LINK_BREAK, this);
         nodeMatcher.setPattern(par("nodeFilter"), true, true, true);
         icon = par("icon");
@@ -81,14 +80,14 @@ void LinkBreakVisualizerBase::refreshDisplay() const
 
 void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
 {
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
-        auto position = mobility->getCurrentPosition();
-        auto module = check_and_cast<cModule *>(source);
-        auto node = getContainingNode(module);
-        setPosition(node, position);
-    }
-    else if (signal == NF_LINK_BREAK) {
+//    if (signal == IMobility::mobilityStateChangedSignal) {
+//        auto mobility = dynamic_cast<IMobility *>(object);
+//        auto position = mobility->getCurrentPosition();
+//        auto module = check_and_cast<cModule *>(source);
+//        auto node = getContainingNode(module);
+//        setPosition(node, position);
+//    }
+    if (signal == NF_LINK_BREAK) {
         MACAddress transmitterAddress;
         MACAddress receiverAddress;
         if (auto frame = dynamic_cast<IMACFrame *>(object)) {

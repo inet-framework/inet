@@ -123,6 +123,8 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
         m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
+        interferenceRangeFigure->setTags("interference_range");
+        interferenceRangeFigure->setTooltip("This circle represents the interference range of a wireless interface");
         interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRange.get(), -maxInterferenceRange.get(), 2 * maxInterferenceRange.get(), 2 * maxInterferenceRange.get()));
         interferenceRangeFigure->setLineColor(interferenceRangeColor);
         networkNodeVisualization->addFigure(interferenceRangeFigure);
@@ -133,6 +135,8 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto communicationRangeFigure = new cOvalFigure("communicationRange");
         m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
+        communicationRangeFigure->setTags("communication_range");
+        communicationRangeFigure->setTooltip("This circle represents the communication range of a wireless interface");
         communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
         communicationRangeFigure->setLineColor(communicationRangeColor);
         networkNodeVisualization->addFigure(communicationRangeFigure);
@@ -153,7 +157,8 @@ void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission
         cGroupFigure *groupFigure = new cGroupFigure("signal");
         cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
         cRingFigure *communicationFigure = new cRingFigure("bubble");
-        communicationFigure->setTags("ongoing_transmission");
+        communicationFigure->setTags("propagating_signal");
+        communicationFigure->setTooltip("This ring represents a signal propagating through the medium");
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFillColor(color);
         communicationFigure->setLineWidth(1);
@@ -165,7 +170,7 @@ void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission
         communicationFigure->setZoomLineWidth(false);
         cLabelFigure *nameFigure = new cLabelFigure("name");
         nameFigure->setPosition(position);
-        nameFigure->setTags("ongoing_transmission packet_name label");
+        nameFigure->setTags("propagating_signal packet_name label");
         nameFigure->setText(transmission->getMacFrame()->getName());
         nameFigure->setColor(color);
         groupFigure->addFigure(nameFigure);

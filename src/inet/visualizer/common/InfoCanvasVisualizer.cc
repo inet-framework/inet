@@ -51,6 +51,9 @@ void InfoCanvasVisualizer::initialize(int stage)
 InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualization(cModule *module) const
 {
     auto figure = new BoxedLabelFigure();
+    figure->setTags("info");
+    figure->setTooltip("This label represents a module");
+    figure->setAssociatedObject(module);
     figure->setZIndex(zIndex);
     figure->setFontColor(fontColor);
     figure->setBackgroundColor(backgroundColor);

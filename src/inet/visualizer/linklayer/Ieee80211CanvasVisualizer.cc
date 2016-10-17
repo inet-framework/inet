@@ -45,6 +45,8 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
 {
     std::hash<std::string> hasher;
     auto iconFigure = new cIconFigure();
+    iconFigure->setTags("ieee80211_association");
+    iconFigure->setTooltip("This icon represents an IEEE 802.11 association");
     iconFigure->setAnchor(cFigure::ANCHOR_NW);
     iconFigure->setImageName(icon);
     iconFigure->setTintColor(cFigure::GOOD_DARK_COLORS[hasher(ssid) % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
