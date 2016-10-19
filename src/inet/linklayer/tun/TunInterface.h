@@ -48,7 +48,6 @@ class INET_API TunInterface : public MACBase
         virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
         virtual void finish() override;
-        virtual void refreshDisplay() const override;
 };
 
 } // namespace inet

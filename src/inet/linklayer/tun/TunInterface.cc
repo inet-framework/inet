@@ -52,11 +52,6 @@ void TunInterface::handleMessage(cMessage *msg)
     }
 }
 
-void TunInterface::refreshDisplay() const
-{
-    return;
-}
-
 void TunInterface::finish()
 {
 }
