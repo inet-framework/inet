@@ -647,7 +647,7 @@ void BMacLayer::refreshDisplay() const
 {
     if (!animation)
         return;
-    cDisplayString& dispStr = findContainingNode(const_cast<BMacLayer *>(this))->getDisplayString();
+    cDisplayString& dispStr = findContainingNode(this)->getDisplayString();
 
     switch (macState) {
         case INIT:
