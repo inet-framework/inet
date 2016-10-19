@@ -19,13 +19,13 @@
 
 namespace inet {
 
-inline bool _isNetworkNode(cModule *mod)
+inline bool _isNetworkNode(const cModule *mod)
 {
     cProperties *props = mod->getProperties();
     return props && props->getAsBool("networkNode");
 }
 
-bool isNetworkNode(cModule *mod)
+bool isNetworkNode(const cModule *mod)
 {
     return (mod != nullptr) ? _isNetworkNode(mod) : false;
 }
@@ -53,16 +53,16 @@ cModule *findModuleSomewhereUp(const char *name, cModule *from)
     return mod;
 }
 
-cModule *findContainingNode(cModule *from)
+cModule *findContainingNode(const cModule *from)
 {
-    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
+    for (cModule *curmod = const_cast<cModule *>(from); curmod; curmod = curmod->getParentModule()) {
         if (_isNetworkNode(curmod))
             return curmod;
     }
     return nullptr;
 }
 
-cModule *getContainingNode(cModule *from)
+cModule *getContainingNode(const cModule *from)
 {
     cModule *curmod = findContainingNode(from);
     if (!curmod)
@@ -70,10 +70,10 @@ cModule *getContainingNode(cModule *from)
     return curmod;
 }
 
-cModule *findModuleUnderContainingNode(cModule *from)
+cModule *findModuleUnderContainingNode(const cModule *from)
 {
     cModule *prevmod = nullptr;
-    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
+    for (cModule *curmod = const_cast<cModule *>(from); curmod; curmod = curmod->getParentModule()) {
         if (_isNetworkNode(curmod))
             return prevmod;
         prevmod = curmod;

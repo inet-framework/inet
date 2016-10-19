@@ -27,7 +27,7 @@ namespace inet {
  * Returns true if the given module is a network node, i.e. a module
  * with the @networkNode property set.
  */
-INET_API bool isNetworkNode(cModule *mod);
+INET_API bool isNetworkNode(const cModule *mod);
 
 /**
  * Find a module with given name, and "closest" to module "from".
@@ -35,25 +35,25 @@ INET_API bool isNetworkNode(cModule *mod);
  * Operation: gradually rises in the module hierarchy, and looks for a submodule
  * of the given name.
  */
-INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
+INET_API cModule *findModuleSomewhereUp(const char *name, const cModule *from);
 
 /**
  * Find the node containing the given module.
  * Returns nullptr, if no containing node.
  */
-INET_API cModule *findContainingNode(cModule *from);
+INET_API cModule *findContainingNode(const cModule *from);
 
 /**
  * Find the node containing the given module.
  * throws error if no containing node.
  */
-INET_API cModule *getContainingNode(cModule *from);
+INET_API cModule *getContainingNode(const cModule *from);
 
 /**
  * Find the ancestor module under the node containing the given module.
  * Returns nullptr, if no such node found.
  */
-INET_API cModule *findModuleUnderContainingNode(cModule *from);
+INET_API cModule *findModuleUnderContainingNode(const cModule *from);
 
 /**
  * Finds a module in the module tree, given by its absolute or relative path
@@ -63,10 +63,10 @@ INET_API cModule *findModuleUnderContainingNode(cModule *from);
  * or type mismatch.
  */
 template<typename T>
-INET_API T *findModuleFromPar(cPar& par, cModule *from, bool required = true);
+INET_API T *findModuleFromPar(cPar& par, const cModule *from, bool required = true);
 
 template<typename T>
-T *findModuleFromPar(cPar& par, cModule *from, bool required)
+T *findModuleFromPar(cPar& par, const cModule *from, bool required)
 {
     const char *path = par.stringValue();
     if (path && *path) {
@@ -92,10 +92,10 @@ T *findModuleFromPar(cPar& par, cModule *from, bool required)
  * or type mismatch.
  */
 template<typename T>
-INET_API T *getModuleFromPar(cPar& par, cModule *from, bool required = true);
+INET_API T *getModuleFromPar(cPar& par, const cModule *from, bool required = true);
 
 template<typename T>
-T *getModuleFromPar(cPar& par, cModule *from, bool required)
+T *getModuleFromPar(cPar& par, const cModule *from, bool required)
 {
     const char *path = par.stringValue();
     cModule *mod = from->getModuleByPath(path);

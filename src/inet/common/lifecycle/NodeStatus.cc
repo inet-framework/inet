@@ -128,7 +128,7 @@ void NodeStatus::refreshDisplay() const
         default:
             throw cRuntimeError("Unknown status");
     }
-    cModule *node = getContainingNode(const_cast<NodeStatus *>(this));
+    cModule *node = getContainingNode(this);
     const char *myicon = state == UP ? origIcon.c_str() : icon;
     getDisplayString().setTagArg("i", 0, myicon);
     if (*icon)
