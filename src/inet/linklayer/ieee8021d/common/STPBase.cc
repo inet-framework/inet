@@ -158,7 +158,7 @@ InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int portNum)
     return gateIfEntry;
 }
 
-int STPBase::getRootIndex()
+int STPBase::getRootIndex() const
 {
     for (unsigned int i = 0; i < numPorts; i++)
         if (getPortInterfaceData(i)->getRole() == Ieee8021dInterfaceData::ROOT)
