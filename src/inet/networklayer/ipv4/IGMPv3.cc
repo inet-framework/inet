@@ -463,7 +463,7 @@ IGMPv3::~IGMPv3()
         deleteRouterInterfaceData(routerData.begin()->first);
 }
 
-void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 

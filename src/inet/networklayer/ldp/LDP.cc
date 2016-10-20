@@ -1216,7 +1216,7 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
     return false;
 }
 
-void LDP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void LDP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

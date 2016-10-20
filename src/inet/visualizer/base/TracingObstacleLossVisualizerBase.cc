@@ -36,7 +36,7 @@ void TracingObstacleLossVisualizerBase::initialize(int stage)
     }
 }
 
-void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
     auto event = static_cast<ITracingObstacleLoss::ObstaclePenetratedEvent *>(object);

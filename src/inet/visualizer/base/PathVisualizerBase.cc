@@ -155,7 +155,7 @@ void PathVisualizerBase::updatePath(const std::vector<int>& moduleIds)
         path->lastUsage = simTime();
 }
 
-void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == IMobility::mobilityStateChangedSignal) {
         auto mobility = dynamic_cast<IMobility *>(object);

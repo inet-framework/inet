@@ -452,7 +452,7 @@ class INET_API Ieee80211OldMac : public MACProtocolBase
      */
     //@{
     /** @brief Called by the signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
     virtual void handleUpperCommand(cMessage *msg) override;

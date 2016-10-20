@@ -746,7 +746,7 @@ bool GPSR::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 // notification
 //
 
-void GPSR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void GPSR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {

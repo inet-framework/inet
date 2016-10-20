@@ -79,7 +79,7 @@ void L2NodeConfigurator::configureNode()
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
 }
 
-void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     if (nodeStatus && nodeStatus->getState() != NodeStatus::UP)
         return;

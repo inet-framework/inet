@@ -1003,7 +1003,7 @@ IRoute *AODVRouting::createRoute(const L3Address& destAddr, const L3Address& nex
     return newRoute;
 }
 
-void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {

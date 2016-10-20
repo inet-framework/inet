@@ -87,7 +87,7 @@ int TLVOptions::findByType(short int type, int firstPos) const
     return -1;
 }
 
-void TLVOptions::parsimPack(cCommBuffer *b) PARSIMPACK_CONST
+void TLVOptions::parsimPack(cCommBuffer *b) const
 {
     TLVOptions_Base::parsimPack(b);
     int s = (int)optionVector.size();

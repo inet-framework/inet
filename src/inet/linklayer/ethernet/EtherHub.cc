@@ -94,7 +94,7 @@ void EtherHub::checkConnections(bool errorWhenAsymmetric)
     }
 }
 
-void EtherHub::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void EtherHub::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 

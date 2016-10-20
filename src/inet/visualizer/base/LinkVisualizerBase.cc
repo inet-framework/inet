@@ -112,7 +112,7 @@ void LinkVisualizerBase::updateLink(cModule *source, cModule *destination)
         link->lastUsage = simTime();
 }
 
-void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == IMobility::mobilityStateChangedSignal) {
         auto mobility = dynamic_cast<IMobility *>(object);

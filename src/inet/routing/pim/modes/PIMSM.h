@@ -240,7 +240,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
     virtual void handleNodeCrash() override;
     virtual void stopPIMRouting();
     virtual void handleMessageWhenUp(cMessage *msg) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   private:
     // process PIM messages

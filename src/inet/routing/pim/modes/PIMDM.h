@@ -187,7 +187,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
   private:
     // process signals
-    void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     void unroutableMulticastPacketArrived(IPv4Address srcAddress, IPv4Address destAddress, unsigned short ttl);
     void multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int interfaceId);
     void multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address group, IPv4Address source, unsigned short ttl);

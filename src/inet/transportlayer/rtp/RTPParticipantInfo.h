@@ -167,7 +167,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     virtual void addSDESItem(SDESItem::SDES_ITEM_TYPE type, const char *content);
 
-    virtual void parsimPack(cCommBuffer *b) PARSIMPACK_CONST override { throw cRuntimeError(this, "parsimPack() not implemented"); }
+    virtual void parsimPack(cCommBuffer *b) const override { throw cRuntimeError(this, "parsimPack() not implemented"); }
     virtual void parsimUnpack(cCommBuffer *b) override { throw cRuntimeError("The parsimUnpack() not implemented."); }
 
     /**

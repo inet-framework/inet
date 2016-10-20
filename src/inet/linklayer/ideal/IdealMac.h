@@ -79,7 +79,7 @@ class INET_API IdealMac : public MACProtocolBase
     virtual void getNextMsgFromHL();
 
     //cListener:
-    virtual void receiveSignal(cComponent *src, simsignal_t id, long value DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *src, simsignal_t id, long value, cObject *details) override;
 
     /** implements MACProtocolBase functions */
     //@{

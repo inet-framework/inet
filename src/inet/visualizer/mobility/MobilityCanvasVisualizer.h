@@ -60,7 +60,7 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
   public:
     virtual ~MobilityCanvasVisualizer();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 
     static void setPosition(cModule* visualRepresentation, cFigure::Point position);
 };

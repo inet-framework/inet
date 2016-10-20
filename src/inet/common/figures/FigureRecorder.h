@@ -30,7 +30,7 @@ class INET_API FigureRecorder : public cNumericResultRecorder
 
   protected:
     virtual void init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs = nullptr) override;
-    virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override;
+    virtual void collect(simtime_t_cref t, double value, cObject *details) override;
 };
 }    // namespace inet
 

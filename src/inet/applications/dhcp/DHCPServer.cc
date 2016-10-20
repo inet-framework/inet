@@ -88,7 +88,7 @@ void DHCPServer::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 
-void DHCPServer::receiveSignal(cComponent *source, int signalID, cObject *obj DETAILS_ARG)
+void DHCPServer::receiveSignal(cComponent *source, int signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 

@@ -32,13 +32,13 @@ class INET_API GroupCountRecorder : public cResultRecorder
         std::map<std::string,long> groupcounts;
     protected:
         virtual void collect(std::string val);
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b DETAILS_ARG) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l DETAILS_ARG) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l DETAILS_ARG) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d DETAILS_ARG) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v DETAILS_ARG) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s DETAILS_ARG) override;
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj DETAILS_ARG) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override;
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override;
 
     public:
         GroupCountRecorder() {}

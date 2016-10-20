@@ -68,7 +68,7 @@ std::string Topology::info() const
     return out.str();
 }
 
-void Topology::parsimPack(cCommBuffer *buffer) PARSIMPACK_CONST
+void Topology::parsimPack(cCommBuffer *buffer) const
 {
     throw cRuntimeError(this, "parsimPack() not implemented");
 }

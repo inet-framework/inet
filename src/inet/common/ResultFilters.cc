@@ -32,81 +32,81 @@ namespace filters {
 
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
-void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto msg = dynamic_cast<cMessage *>(object))
-        fire(this, t, t - msg->getCreationTime() DETAILS_ARG_NAME);
+        fire(this, t, t - msg->getCreationTime(), details);
 }
 
 Register_ResultFilter("messageTSAge", MessageTSAgeFilter);
 
-void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto msg = dynamic_cast<cMessage *>(object))
-        fire(this, t, t - msg->getTimestamp() DETAILS_ARG_NAME);
+        fire(this, t, t - msg->getTimestamp(), details);
 }
 
 Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 
-void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto msg = dynamic_cast<ApplicationPacket*>(object))
-        fire(this, t, msg->getSequenceNumber() DETAILS_ARG_NAME);
+        fire(this, t, msg->getSequenceNumber(), details);
 }
 
 
 Register_ResultFilter("mobilityPos", MobilityPosFilter);
 
-void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     IMobility *module = dynamic_cast<IMobility *>(object);
     if (module) {
         Coord coord = module->getCurrentPosition();
-        fire(this, t, &coord DETAILS_ARG_NAME);
+        fire(this, t, &coord, details);
     }
 }
 
 Register_ResultFilter("xCoord", XCoordFilter);
 
-void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (dynamic_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->x DETAILS_ARG_NAME);
+        fire(this, t, ((Coord *)object)->x, details);
 }
 
 Register_ResultFilter("yCoord", YCoordFilter);
 
-void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (dynamic_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->y DETAILS_ARG_NAME);
+        fire(this, t, ((Coord *)object)->y, details);
 }
 
 Register_ResultFilter("zCoord", ZCoordFilter);
 
-void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (dynamic_cast<Coord *>(object))
-        fire(this, t, ((Coord *)object)->z DETAILS_ARG_NAME);
+        fire(this, t, ((Coord *)object)->z, details);
 }
 
 Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 
-void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (dynamic_cast<cMessage *>(object)) {
         cMessage *msg = (cMessage *)object;
 
         INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
         if (ctrl != nullptr) {
-            fire(this, t, ctrl->getSourceAddress().str().c_str() DETAILS_ARG_NAME);
+            fire(this, t, ctrl->getSourceAddress().str().c_str(), details);
         }
     }
 }
 
 Register_ResultFilter("throughput", ThroughputFilter);
 
-void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<cPacket *>(object)) {
         const simtime_t now = simTime();
@@ -114,7 +114,7 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
             double throughput = 8 * bytes / (now - lastSignal).dbl();
             lastSignal = now;
             bytes = 0;
-            fire(this, now, throughput DETAILS_ARG_NAME);
+            fire(this, now, throughput, details);
         }
         bytes += packet->getByteLength();
     }

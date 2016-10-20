@@ -43,7 +43,7 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
     virtual void obstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) = 0;
 
   public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace visualizer

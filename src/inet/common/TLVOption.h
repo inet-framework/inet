@@ -90,7 +90,7 @@ class INET_API TLVOptions : public TLVOptions_Base
     virtual TLVOptionBase& getTlvOption(unsigned int k) override { return at(k); }
     virtual void setTlvOption(unsigned int k, const TLVOptionBase& tlvOption) override { throw cRuntimeError("Do not use it!"); }
 
-    virtual void parsimPack(cCommBuffer *b) PARSIMPACK_CONST override;
+    virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 };
 

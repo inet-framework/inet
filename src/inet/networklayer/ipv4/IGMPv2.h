@@ -167,7 +167,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual ~IGMPv2();
 
   protected:

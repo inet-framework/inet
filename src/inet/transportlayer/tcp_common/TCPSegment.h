@@ -75,7 +75,7 @@ class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);
     virtual TCPSegment *dup() const override { return new TCPSegment(*this); }
-    virtual void parsimPack(cCommBuffer *b) PARSIMPACK_CONST override;
+    virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 
     /** Generated but unused method, should not be called. */

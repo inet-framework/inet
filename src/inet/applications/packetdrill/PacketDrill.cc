@@ -392,7 +392,7 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
         PacketDrillSctpParameter *parameter;
         uint16 parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (iter());
+            parameter = (PacketDrillSctpParameter*) (*iter);
             printf("parameter type=%d\n", parameter->getType());
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {

@@ -184,7 +184,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     /* General functions to handle route errors */
     void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr);
     void handleLinkBreakSendRERR(const L3Address& unreachableAddr);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
     Result ensureRouteForDatagram(INetworkDatagram *datagram);
