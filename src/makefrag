@@ -47,7 +47,7 @@ endif
 WITH_VISUALIZERS := $(shell (cd .. && ./inet_featuretool -q isenabled visualization && echo enabled) )
 ifeq ($(WITH_VISUALIZERS), enabled)
   ifeq ($(WITH_OSG), yes)
-      LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil
+      OMNETPP_LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil
   endif
 endif
 
@@ -120,6 +120,6 @@ ifneq ($(MAKECMDGOALS),clean)
 $(info *** COMPILING with:)
 $(info $(CXX) -c $(CXXFLAGS) $(COPTS))
 $(info *** LINKING with:)
-$(info $(SHLIB_LD) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS))
+$(info $(SHLIB_LD) -o $O/$(TARGET) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS))
 $(info Compiling...)
 endif
