@@ -108,10 +108,8 @@ class Packet : public cPacket
     void prepend(const std::shared_ptr<Chunk>& chunk) { data->prepend(chunk); }
     void prepend(const std::shared_ptr<SequenceChunk>& chunk) { data->prepend(chunk); }
 
-    void append(const std::shared_ptr<Chunk>& chunk) { data->append(chunk); }
-    void append(const std::shared_ptr<SliceChunk>& chunk) { data->append(chunk); }
-    void append(const std::shared_ptr<SequenceChunk>& chunk) { data->append(chunk); }
-    void append(Packet *packet) { data->append(packet->data); }
+    void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true) { data->append(chunk, flatten); }
+    void append(Packet *packet, bool flatten = true) { data->append(packet->data, flatten); }
 
     int64_t getByteLength() const { return data->getByteLength(); }
 

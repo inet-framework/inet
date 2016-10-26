@@ -277,8 +277,12 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
   protected:
     std::vector<std::shared_ptr<Chunk>> chunks;
 
-    void doPrepend(const std::shared_ptr<Chunk>& chunk);
-    void doAppend(const std::shared_ptr<Chunk>& chunk);
+    void prependChunk(const std::shared_ptr<Chunk>& chunk);
+    void prependChunk(const std::shared_ptr<SequenceChunk>& chunk);
+
+    void appendChunk(const std::shared_ptr<Chunk>& chunk);
+    void appendChunk(const std::shared_ptr<SliceChunk>& chunk);
+    void appendChunk(const std::shared_ptr<SequenceChunk>& chunk);
 
   public:
     SequenceChunk() { }
@@ -343,12 +347,9 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
         return peekAt<SliceChunk>(iterator, byteOffset, byteLength);
     }
 
-    void prepend(const std::shared_ptr<Chunk>& chunk);
-    void prepend(const std::shared_ptr<SequenceChunk>& chunk);
-
-    void append(const std::shared_ptr<Chunk>& chunk);
-    void append(const std::shared_ptr<SliceChunk>& chunk);
-    void append(const std::shared_ptr<SequenceChunk>& chunk);
+    // TODO: implement these with insert()
+    void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
+    void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
 
     virtual int64_t getByteLength() const override;
 
