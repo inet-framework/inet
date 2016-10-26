@@ -46,7 +46,7 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListen
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void registerInterface();    // do not override! override createInterfaceEntry()
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void updateOperationalFlag(bool isNodeUp);
     virtual bool isNodeUp();

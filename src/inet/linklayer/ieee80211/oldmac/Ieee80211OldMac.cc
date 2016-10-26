@@ -763,7 +763,7 @@ void Ieee80211OldMac::handleLowerPacket(cPacket *msg)
     EV_TRACE << "Leave handleLowerMsg...\n";
 }
 
-void Ieee80211OldMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void Ieee80211OldMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal)

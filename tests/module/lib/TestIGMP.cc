@@ -31,7 +31,7 @@ class INET_API TestIGMP : public IGMPv2, public IScriptable
   protected:
     typedef IPv4InterfaceData::IPv4AddressVector IPv4AddressVector;
     virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void configureInterface(InterfaceEntry *ie) override;
     virtual void processIgmpMessage(IGMPMessage *msg) override;
     virtual void processHostGroupTimer(cMessage *msg) override;
@@ -66,26 +66,26 @@ void TestIGMP::initialize(int stage)
     IGMPv2::initialize(stage);
 }
 
-void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     const IPv4MulticastGroupInfo *info;
     if (signalID == NF_IPv4_MCAST_JOIN)
     {
         info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
         startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-        IGMPv2::receiveSignal(source, signalID, obj DETAILS_ARG_NAME);
+        IGMPv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
     else if (signalID == NF_IPv4_MCAST_LEAVE)
     {
         info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
         startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-        IGMPv2::receiveSignal(source, signalID, obj DETAILS_ARG_NAME);
+        IGMPv2::receiveSignal(source, signalID, obj, details);
         endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
     }
     else
     {
-        IGMPv2::receiveSignal(source, signalID, obj DETAILS_ARG_NAME);
+        IGMPv2::receiveSignal(source, signalID, obj, details);
     }
 }
 

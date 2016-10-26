@@ -852,7 +852,7 @@ void RSTP::flushOtherPorts(unsigned int portNum)
 }
 
 //void RSTP::receiveChangeNotification(int signalID, const cObject *obj)
-void RSTP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void RSTP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
 

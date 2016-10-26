@@ -122,7 +122,7 @@ PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
     return nullptr;
 }
 
-void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

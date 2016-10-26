@@ -30,18 +30,12 @@
 
 using namespace omnetpp;
 
-#if OMNETPP_VERSION < 0x0500
+#if OMNETPP_VERSION < 0x0500 || OMNETPP_BUILDNUM < 1006
 #  error At least OMNeT++/OMNEST version 5.0 required
 #endif // if OMNETPP_VERSION < 0x0500
 
-// OMNETPP_BUILDNUM was introduced around OMNeT++ 5.0beta2, with the initial value of 1001.
-// The following lines fake a build number for earlier versions.
-#ifndef OMNETPP_BUILDNUM
-#  define OMNETPP_BUILDNUM 1000
-#endif
-
-#define INET_VERSION  0x0302
-#define INET_PATCH_LEVEL 0x04
+#define INET_VERSION  0x0304
+#define INET_PATCH_LEVEL 0x00
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT
@@ -91,6 +85,11 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
     return p;
 }
 
+#define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
+
+#define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x); }
+#define FINGERPRINT_ADD_EXTRA_DATA2(x,y)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x, y); }
+
 #define CHK(x)     __checknull((x), #x, __FILE__, __LINE__)
 
 #define PK(msg)    check_and_cast<cPacket *>(msg)    /*XXX temp def*/
@@ -105,4 +104,3 @@ inline void printElapsedTime(const char *name, long startTime)
 } // namespace inet
 
 #endif // ifndef __INET_INETDEFS_H
-

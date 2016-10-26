@@ -39,51 +39,6 @@ typedef uint8_t  uint8;
 
 #define EVSTREAM                      EV
 
-// Around OMNeT++ 5.0 beta 2, the "ev" and "simulation" macros were eliminated, and replaced
-// by the functions/methods getEnvir() and getSimulation(), the INET codebase updated.
-// The following lines let the code compile with earlier OMNeT++ versions as well.
-#ifdef ev
-inline cEnvir *getEnvir() {return cSimulation::getActiveEnvir();}
-inline cSimulation *getSimulation() {return cSimulation::getActiveSimulation();}
-inline bool hasGUI() {return cSimulation::getActiveEnvir()->isGUI();}
-#endif  //ev
-
-// Around OMNeT++ 5.0 beta 2, random variate generation functions like exponential() became
-// members of cComponent. By prefixing calls with the following macro you can make the code
-// compile with earlier OMNeT++ versions as well.
-#if OMNETPP_BUILDNUM >= 1002
-#define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
-#else
-#define RNGCONTEXT
-#endif
-
-// Around OMNeT++ 5.0 beta 3, signal listeners and result filters/recorders received
-// an extra cObject *details argument.
-#if OMNETPP_BUILDNUM >= 1005
-#define DETAILS_ARG        ,cObject *details
-#define DETAILS_ARG_NAME   ,details
-#else
-#define DETAILS_ARG
-#define DETAILS_ARG_NAME
-#endif
-
-// Around OMNeT++ 5.0 beta 3, fingerprint computation has been changed.
-#if OMNETPP_BUILDNUM >= 1006
-#define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x); }
-#define FINGERPRINT_ADD_EXTRA_DATA2(x,y)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x, y); }
-#elif OMNETPP_BUILDNUM >= 1005
-#define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cFingerprint *fingerprint = getSimulation()->getFingerprint()) fingerprint->addExtraData(x); }
-#define FINGERPRINT_ADD_EXTRA_DATA2(x,y)  { if (cFingerprint *fingerprint = getSimulation()->getFingerprint()) fingerprint->addExtraData(x, y); }
-#else
-#define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cHasher *hasher = getSimulation()->getHasher()) hasher->add(x); }
-#define FINGERPRINT_ADD_EXTRA_DATA2(x,y)  { if (cHasher *hasher = getSimulation()->getHasher()) hasher->add(x, y); }
-#endif
-
-// Around OMNeT++ 5.0 beta 3, MAXTIME was renamed to SIMTIME_MAX
-#if OMNETPP_BUILDNUM < 1005
-#define SIMTIME_MAX MAXTIME
-#endif
-
 #ifdef _MSC_VER
 // complementary error function, not in MSVC
 double INET_API erfc(double x);
@@ -111,4 +66,3 @@ inline double fmax(double a, double b)
 } // namespace inet
 
 #endif // ifndef __INET_COMPAT_H
-

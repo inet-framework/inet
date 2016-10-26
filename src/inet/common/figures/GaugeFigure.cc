@@ -216,19 +216,19 @@ const char *GaugeFigure::getClassNameForRenderer() const {
     return "cOvalFigure";
 } // denotes renderer of which figure class to use; override if you want to subclass a figure while reusing renderer of the base class
 
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, long l DETAILS_ARG) {
+void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, long l, cObject *details) {
     setValue(l);
 }
 
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l DETAILS_ARG) {
+void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l, cObject *details) {
     setValue(l);
 }
 
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, double d DETAILS_ARG) {
+void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) {
     setValue(d);
 }
 
-void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) {
+void GaugeFigure::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) {
     value++;
     setValue(value);
 }

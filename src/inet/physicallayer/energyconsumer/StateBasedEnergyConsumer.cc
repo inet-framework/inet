@@ -79,7 +79,7 @@ void StateBasedEnergyConsumer::initialize(int stage)
     }
 }
 
-void StateBasedEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void StateBasedEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     energySource->setPowerConsumption(energyConsumerId, getPowerConsumption());
 }

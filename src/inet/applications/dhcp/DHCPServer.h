@@ -112,7 +112,7 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     /*
      * Signal handler for cObject, override cListener function.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void startApp();
     virtual void stopApp();
