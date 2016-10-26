@@ -71,7 +71,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 
     int payloadLength = 0;
     for (int i=1; i<pkt->getNumChunks(); i++) {
-        const Chunk *chunk = pkt->getChunk(i);
+        const FlatChunk *chunk = pkt->getChunk(i);
         SerializerBase::lookupAndSerialize(check_and_cast<const PacketChunk *>(chunk)->getPacket(), b, c, UNKNOWN, 0);
         payloadLength += chunk->getChunkByteLength();
     }

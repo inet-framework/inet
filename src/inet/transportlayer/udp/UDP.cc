@@ -160,7 +160,7 @@ void UDP::handleMessage(cMessage *msg)
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
         if (FlatPacket *packet = dynamic_cast<FlatPacket *>(msg)) {
-            Chunk *header = packet->peekHeader();
+            FlatChunk *header = packet->peekHeader();
             if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(header))
                 processUDPPacket(udpHeader);
             else

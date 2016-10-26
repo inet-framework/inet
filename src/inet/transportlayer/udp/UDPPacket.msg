@@ -28,12 +28,12 @@ enum UdpConstants{
     UDP_HEADER_BYTES = 8;
 };
 
-class Chunk extends cOwnedObject;
+class FlatChunk extends cOwnedObject;
 
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //
-class UDPHeader extends Chunk
+class UDPHeader extends FlatChunk
 {
     @customize(true);
     unsigned short srcPort;

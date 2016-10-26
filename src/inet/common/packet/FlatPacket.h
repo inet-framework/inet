@@ -9,10 +9,10 @@ namespace inet {
 
 class FlatPacket;
 
-class Chunk : public cOwnedObject
+class FlatChunk : public cOwnedObject
 {
     int64_t chunkBitLength = -1; //KLUDGE need for MSG: byteLength = x;
-    void copy(const Chunk& other);
+    void copy(const FlatChunk& other);
   protected:
   public:
     void addChunkBitLength(int64_t x);     // also update the length in owner when owner is a FlatPacket
@@ -20,10 +20,10 @@ class Chunk : public cOwnedObject
     void setChunkBitLength(int64_t x);     // also update the length in owner when owner is a FlatPacket
     void setChunkByteLength(int64_t x) { setChunkBitLength(x<<3); }
   public:
-    explicit Chunk(const char *name=nullptr, bool namepooling=true);
-    Chunk(const Chunk& other);
-    virtual ~Chunk();
-    virtual Chunk *dup() const override { return new Chunk(*this); }
+    explicit FlatChunk(const char *name=nullptr, bool namepooling=true);
+    FlatChunk(const FlatChunk& other);
+    virtual ~FlatChunk();
+    virtual FlatChunk *dup() const override { return new FlatChunk(*this); }
 
     virtual int64_t getChunkBitLength() const { return chunkBitLength; }
     int64_t getChunkByteLength() const { return (getChunkBitLength()+7)>>3; }
@@ -31,7 +31,7 @@ class Chunk : public cOwnedObject
     FlatPacket *getMandatoryOwnerPacket() const;        // throws error when chunk not owned by a FlatPacket
 };
 
-class PacketChunk : public Chunk
+class PacketChunk : public FlatChunk
 {
     cPacket *packet = nullptr;
     void copy(const PacketChunk& other);
@@ -49,7 +49,7 @@ class PacketChunk : public Chunk
 };
 
 #if 0   //FIXME
-class PacketSliceChunk : public Chunk
+class PacketSliceChunk : public FlatChunk
 {
     cPacket *packet;        // shared ptr, counted
     int64_t bitOffset;         // [bits]
@@ -65,25 +65,25 @@ class PacketSliceChunk : public Chunk
 
 class FlatPacket : public cPacket       //TODO rename to Packet?
 {
-    std::vector <Chunk *> chunks;       //FIXME: std::shared_ptr
+    std::vector <FlatChunk *> chunks;       //FIXME: std::shared_ptr
     void copy(const FlatPacket& other);
   public:
     explicit FlatPacket(const char *name=nullptr, short kind=0, int64_t bitLength=0);
     FlatPacket(const FlatPacket& other);
     virtual ~FlatPacket();
     virtual FlatPacket *dup() const override { return new FlatPacket(*this); }
-    void pushHeader(Chunk *);
-    void pushTrailer(Chunk *);
-    Chunk *peekHeader();
-    Chunk *peekTrailer();
-    const Chunk *peekHeader() const;
-    const Chunk *peekTrailer() const;
-    Chunk *popHeader();
-    Chunk *popTrailer();
+    void pushHeader(FlatChunk *);
+    void pushTrailer(FlatChunk *);
+    FlatChunk *peekHeader();
+    FlatChunk *peekTrailer();
+    const FlatChunk *peekHeader() const;
+    const FlatChunk *peekTrailer() const;
+    FlatChunk *popHeader();
+    FlatChunk *popTrailer();
     int getNumChunks() const;
-    Chunk *getChunk(int i);
-    const Chunk *getChunk(int i) const;
-    int getChunkIndex(const Chunk *) const;     // -1 means: chunk not in
+    FlatChunk *getChunk(int i);
+    const FlatChunk *getChunk(int i) const;
+    int getChunkIndex(const FlatChunk *) const;     // -1 means: chunk not in
 
 
 

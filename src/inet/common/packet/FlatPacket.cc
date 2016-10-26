@@ -6,26 +6,26 @@
 
 namespace inet {
 
-Chunk::Chunk(const char *name, bool namepooling)
+FlatChunk::FlatChunk(const char *name, bool namepooling)
     :cOwnedObject(name, namepooling)
 {
 }
 
-Chunk::Chunk(const Chunk& other) : ::omnetpp::cOwnedObject(other)
+FlatChunk::FlatChunk(const FlatChunk& other) : ::omnetpp::cOwnedObject(other)
 {
     copy(other);
 }
 
-Chunk::~Chunk()
+FlatChunk::~FlatChunk()
 {
 }
 
-void Chunk::copy(const Chunk& other)
+void FlatChunk::copy(const FlatChunk& other)
 {
     chunkBitLength = other.chunkBitLength;
 }
 
-void Chunk::addChunkBitLength(int64_t x)
+void FlatChunk::addChunkBitLength(int64_t x)
 {
 //    if (getOwnerPacket() != nullptr)
 //        throw cRuntimeError("setChunkBitLength(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modify content.");
@@ -37,7 +37,7 @@ void Chunk::addChunkBitLength(int64_t x)
     }
 }
 
-void Chunk::setChunkBitLength(int64_t x)
+void FlatChunk::setChunkBitLength(int64_t x)
 {
 //    if (getOwnerPacket() != nullptr)
 //        throw cRuntimeError("setChunkBitLength(): PacketChunk Owned by a FlatPacket. Should remove PacketChunk from FlatPacket before modify content.");
@@ -47,7 +47,7 @@ void Chunk::setChunkBitLength(int64_t x)
     chunkBitLength = x;
 }
 
-FlatPacket *Chunk::getOwnerPacket() const
+FlatPacket *FlatChunk::getOwnerPacket() const
 {
     cObject *owner = getOwner();
     if ((owner != nullptr) && (typeid(*owner) == typeid(FlatPacket)))
@@ -55,7 +55,7 @@ FlatPacket *Chunk::getOwnerPacket() const
     return nullptr;
 }
 
-FlatPacket *Chunk::getMandatoryOwnerPacket() const
+FlatPacket *FlatChunk::getMandatoryOwnerPacket() const
 {
     FlatPacket *fp = getOwnerPacket();
     if (fp == nullptr)
@@ -73,7 +73,7 @@ PacketChunk::PacketChunk(cPacket *pk)
     setChunkBitLength(pk->getBitLength());
 }
 
-PacketChunk::PacketChunk(const PacketChunk& other) : Chunk(other)
+PacketChunk::PacketChunk(const PacketChunk& other) : FlatChunk(other)
 {
     copy(other);
 }
@@ -129,70 +129,70 @@ FlatPacket::FlatPacket(const FlatPacket& other) : cPacket(other)
 
 FlatPacket::~FlatPacket()
 {
-    for (Chunk *chunk: chunks) {
+    for (FlatChunk *chunk: chunks) {
         dropAndDelete(chunk);
     }
 }
 
 void FlatPacket::copy(const FlatPacket& other)
 {
-    for (Chunk *chunk: other.chunks) {
-        Chunk *chunkCopy = chunk->dup();
+    for (FlatChunk *chunk: other.chunks) {
+        FlatChunk *chunkCopy = chunk->dup();
         take(chunkCopy);
         chunks.push_back(chunkCopy);
     }
 }
 
-void FlatPacket::pushHeader(Chunk *chunk)
+void FlatPacket::pushHeader(FlatChunk *chunk)
 {
     take(chunk);
     chunks.insert(chunks.begin(), chunk);
     cPacket::addBitLength(chunk->getChunkBitLength());
 }
 
-void FlatPacket::pushTrailer(Chunk *chunk)
+void FlatPacket::pushTrailer(FlatChunk *chunk)
 {
     take(chunk);
     chunks.push_back(chunk);
     cPacket::addBitLength(chunk->getChunkBitLength());
 }
 
-Chunk *FlatPacket::peekHeader()
+FlatChunk *FlatPacket::peekHeader()
 {
     return chunks.empty() ? nullptr : chunks.front();
 }
 
-const Chunk *FlatPacket::peekHeader() const
+const FlatChunk *FlatPacket::peekHeader() const
 {
     return chunks.empty() ? nullptr : chunks.front();
 }
 
-Chunk *FlatPacket::peekTrailer()
+FlatChunk *FlatPacket::peekTrailer()
 {
     return chunks.empty() ? nullptr : chunks.back();
 }
 
-const Chunk *FlatPacket::peekTrailer() const
+const FlatChunk *FlatPacket::peekTrailer() const
 {
     return chunks.empty() ? nullptr : chunks.back();
 }
 
-Chunk *FlatPacket::popHeader()
+FlatChunk *FlatPacket::popHeader()
 {
     if (chunks.empty())
         return nullptr;
-    Chunk *chunk = chunks.front();
+    FlatChunk *chunk = chunks.front();
     chunks.erase(chunks.begin());
     drop(chunk);
     cPacket::addBitLength(-chunk->getChunkBitLength());
     return chunk;
 }
 
-Chunk *FlatPacket::popTrailer()
+FlatChunk *FlatPacket::popTrailer()
 {
     if (chunks.empty())
         return nullptr;
-    Chunk *chunk = chunks.back();
+    FlatChunk *chunk = chunks.back();
     chunks.pop_back();
     drop(chunk);
     cPacket::addBitLength(-chunk->getChunkBitLength());
@@ -204,19 +204,19 @@ int FlatPacket::getNumChunks() const
     return chunks.size();
 }
 
-Chunk *FlatPacket::getChunk(int i)
+FlatChunk *FlatPacket::getChunk(int i)
 {
     ASSERT(i>=0 && i<chunks.size());
     return chunks.at(i);
 }
 
-const Chunk *FlatPacket::getChunk(int i) const
+const FlatChunk *FlatPacket::getChunk(int i) const
 {
     ASSERT(i>=0 && i<chunks.size());
     return chunks.at(i);
 }
 
-int FlatPacket::getChunkIndex(const Chunk *chunk) const
+int FlatPacket::getChunkIndex(const FlatChunk *chunk) const
 {
     //FIXME use std::find
     auto it = std::find(chunks.begin(), chunks.end(), chunk);

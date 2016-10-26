@@ -146,7 +146,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_ETHERNET
         else if (FlatPacket *fp = dynamic_cast<FlatPacket *>(pk)) {
-            Chunk *header = fp->peekHeader();
+            FlatChunk *header = fp->peekHeader();
 #ifdef WITH_TCP_COMMON
             if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(header)) {
                 out << formatTCPPacket(tcpseg);
