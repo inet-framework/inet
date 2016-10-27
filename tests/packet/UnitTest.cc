@@ -138,14 +138,13 @@ static void testNesting()
     packet1.makeImmutable();
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
     assert(compoundHeader2 != nullptr);
-    // 2. TODO: packet provides compound header after serialization
+    // 2. packet provides compound header after serialization
     const auto& byteArrayChunk1 = packet1.peekHeaderAt<ByteArrayChunk>(0);
     Packet packet2;
     packet2.append(byteArrayChunk1);
     const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
     assert(compoundHeader3 != nullptr);
-    // TODO: this iterator stuff shouldn't be here
-    SequenceChunk::ForwardIterator it = compoundHeader3->createForwardIterator();
+    auto it = compoundHeader3->createForwardIterator();
     const auto& ipHeader2 = compoundHeader3->peek<IpHeader>(it);
     assert(ipHeader2 != nullptr);
     assert(ipHeader2->getProtocol() == Protocol::Tcp);

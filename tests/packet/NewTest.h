@@ -24,94 +24,35 @@
 class ApplicationHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        int64_t position = stream.getPosition();
-        stream.writeInt16(static_cast<const ApplicationHeader&>(chunk).getSomeData());
-        stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        int64_t position = stream.getPosition();
-        static_cast<ApplicationHeader&>(chunk).setSomeData(stream.readInt16());
-        stream.readByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
 };
 
 class TcpHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        int64_t position = stream.getPosition();
-        auto& tcpHeader = static_cast<const TcpHeader&>(chunk);
-        if (tcpHeader.getBitError() != BIT_ERROR_CRC)
-            throw cRuntimeError("Cannot serialize TCP header");
-        stream.writeInt16(tcpHeader.getLengthField());
-        stream.writeInt16(tcpHeader.getSrcPort());
-        stream.writeInt16(tcpHeader.getDestPort());
-        stream.writeInt16(tcpHeader.getCrc());
-        stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        int64_t position = stream.getPosition();
-        auto& tcpHeader = static_cast<TcpHeader&>(chunk);
-        int64_t remainingSize = stream.getRemainingSize();
-        int16_t lengthField = stream.readInt16();
-        if (lengthField > remainingSize)
-            chunk.makeIncomplete();
-        int16_t byteLength = std::min(lengthField, (int16_t)remainingSize);
-        tcpHeader.setByteLength(byteLength);
-        tcpHeader.setLengthField(lengthField);
-        tcpHeader.setSrcPort(stream.readInt16());
-        tcpHeader.setDestPort(stream.readInt16());
-        tcpHeader.setBitError(BIT_ERROR_CRC);
-        tcpHeader.setCrc(stream.readInt16());
-        stream.readByteRepeatedly(0, byteLength - stream.getPosition() + position);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
 };
 
 class IpHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        int64_t position = stream.getPosition();
-        stream.writeInt16((int16_t)static_cast<const IpHeader&>(chunk).getProtocol());
-        stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getSize() + position);
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        int64_t position = stream.getPosition();
-        static_cast<IpHeader&>(chunk).setProtocol((Protocol)stream.readInt16());
-        stream.readByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
 };
 
 class EthernetHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        int64_t position = stream.getPosition();
-        stream.writeInt16((int16_t)static_cast<const EthernetHeader&>(chunk).getProtocol());
-        stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        int64_t position = stream.getPosition();
-        static_cast<EthernetHeader&>(chunk).setProtocol((Protocol)stream.readInt16());
-        stream.readByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
 };
 
 class CompoundHeaderSerializer : public SequenceChunkSerializer
 {
   public:
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        auto& compoundHeader = static_cast<CompoundHeader&>(chunk);
-        IpHeaderSerializer ipHeaderSerializer;
-        auto ipHeader = std::make_shared<IpHeader>();
-        ipHeaderSerializer.deserialize(stream, *ipHeader);
-        compoundHeader.append(ipHeader);
-    }
+    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
 };
 
 class NewMedium
@@ -157,7 +98,6 @@ class NewReceiver
   protected:
     NewMedium& medium;
     Buffer applicationData;
-    int applicationDataPosition = 0;
 
   protected:
     void receiveApplication(Packet *packet);

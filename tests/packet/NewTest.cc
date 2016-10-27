@@ -27,6 +27,88 @@ static int16_t computeTcpCrc(const ByteArrayChunk& pseudoHeader, const std::shar
     return 42;
 }
 
+void ApplicationHeaderSerializer::serialize(ByteOutputStream& stream, const Chunk &chunk) const
+{
+    int64_t position = stream.getPosition();
+    stream.writeInt16(static_cast<const ApplicationHeader&>(chunk).getSomeData());
+    stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
+}
+
+void ApplicationHeaderSerializer::deserialize(ByteInputStream& stream, Chunk &chunk)
+{
+    int64_t position = stream.getPosition();
+    static_cast<ApplicationHeader&>(chunk).setSomeData(stream.readInt16());
+    stream.readByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
+}
+
+void TcpHeaderSerializer::serialize(ByteOutputStream& stream, const Chunk &chunk) const
+{
+    int64_t position = stream.getPosition();
+    auto& tcpHeader = static_cast<const TcpHeader&>(chunk);
+    if (tcpHeader.getBitError() != BIT_ERROR_CRC)
+        throw cRuntimeError("Cannot serialize TCP header");
+    stream.writeInt16(tcpHeader.getLengthField());
+    stream.writeInt16(tcpHeader.getSrcPort());
+    stream.writeInt16(tcpHeader.getDestPort());
+    stream.writeInt16(tcpHeader.getCrc());
+    stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
+}
+
+void TcpHeaderSerializer::deserialize(ByteInputStream& stream, Chunk &chunk)
+{
+    int64_t position = stream.getPosition();
+    auto& tcpHeader = static_cast<TcpHeader&>(chunk);
+    int64_t remainingSize = stream.getRemainingSize();
+    int16_t lengthField = stream.readInt16();
+    if (lengthField > remainingSize)
+        chunk.makeIncomplete();
+    int16_t byteLength = std::min(lengthField, (int16_t)remainingSize);
+    tcpHeader.setByteLength(byteLength);
+    tcpHeader.setLengthField(lengthField);
+    tcpHeader.setSrcPort(stream.readInt16());
+    tcpHeader.setDestPort(stream.readInt16());
+    tcpHeader.setBitError(BIT_ERROR_CRC);
+    tcpHeader.setCrc(stream.readInt16());
+    stream.readByteRepeatedly(0, byteLength - stream.getPosition() + position);
+}
+
+void IpHeaderSerializer::serialize(ByteOutputStream& stream, const Chunk &chunk) const
+{
+    int64_t position = stream.getPosition();
+    stream.writeInt16((int16_t)static_cast<const IpHeader&>(chunk).getProtocol());
+    stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getSize() + position);
+}
+
+void IpHeaderSerializer::deserialize(ByteInputStream& stream, Chunk &chunk)
+{
+    int64_t position = stream.getPosition();
+    static_cast<IpHeader&>(chunk).setProtocol((Protocol)stream.readInt16());
+    stream.readByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
+}
+
+void EthernetHeaderSerializer::serialize(ByteOutputStream& stream, const Chunk &chunk) const
+{
+    int64_t position = stream.getPosition();
+    stream.writeInt16((int16_t)static_cast<const EthernetHeader&>(chunk).getProtocol());
+    stream.writeByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
+}
+
+void EthernetHeaderSerializer::deserialize(ByteInputStream& stream, Chunk &chunk)
+{
+    int64_t position = stream.getPosition();
+    static_cast<EthernetHeader&>(chunk).setProtocol((Protocol)stream.readInt16());
+    stream.readByteRepeatedly(0, chunk.getByteLength() - stream.getPosition() + position);
+}
+
+void CompoundHeaderSerializer::deserialize(ByteInputStream& stream, Chunk &chunk)
+{
+    auto& compoundHeader = static_cast<CompoundHeader&>(chunk);
+    IpHeaderSerializer ipHeaderSerializer;
+    auto ipHeader = std::make_shared<IpHeader>();
+    ipHeaderSerializer.deserialize(stream, *ipHeader);
+    compoundHeader.append(ipHeader);
+}
+
 std::string ApplicationHeader::str() const
 {
     std::ostringstream os;
@@ -181,18 +263,12 @@ void NewReceiver::receiveApplication(Packet *packet)
 {
     applicationData.push(packet->peekHeader());
     EV_DEBUG << "Collecting application data: " << applicationData << std::endl;
-    if (applicationDataPosition == 0 && applicationData.has<ByteArrayChunk>(10)) {
+    if (applicationData.getPoppedByteLength() == 0 && applicationData.has<ByteArrayChunk>(10))
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteArrayChunk>(10) << std::endl;
-        applicationDataPosition += 10;
-    }
-    if (applicationDataPosition == 10 && applicationData.has<ApplicationHeader>()) {
+    if (applicationData.getPoppedByteLength() == 10 && applicationData.has<ApplicationHeader>())
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ApplicationHeader>() << std::endl;
-        applicationDataPosition += 10;
-    }
-    if (applicationDataPosition == 20 && applicationData.has<ByteLengthChunk>(10)) {
+    if (applicationData.getPoppedByteLength() == 20 && applicationData.has<ByteLengthChunk>(10))
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteLengthChunk>(10) << std::endl;
-        applicationDataPosition += 10;
-    }
     delete packet;
 }
 
