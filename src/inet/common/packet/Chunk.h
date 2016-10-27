@@ -19,8 +19,6 @@
 #include <memory>
 #include "inet/common/packet/ByteStream.h"
 
-// TODO: flag for disabling serialization completely
-
 namespace inet {
 
 class Chunk : public cObject

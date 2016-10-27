@@ -20,6 +20,8 @@
 
 namespace inet {
 
+#define ENABLE_CHUNK_SERIALIZATION true
+
 class SequenceChunk : public Chunk, public std::enable_shared_from_this<SequenceChunk>
 {
   public:
@@ -123,6 +125,8 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
             position += chunk->getByteLength();
         }
         // slow path
+        if (!ENABLE_CHUNK_SERIALIZATION)
+            throw cRuntimeError("Chunk serialization is disabled to prevent unpredictable performance degradation, set ENABLE_CHUNK_SERIALIZATION to allow transparent chunk serialization");
         // TODO: prevents easy access for application buffer assertImmutable();
         assert(increment == 1 || byteLength != -1);
         // TODO: move make_shared into deserialize to allow polymorphism?
