@@ -28,6 +28,7 @@ class Chunk : public cObject
   protected:
     bool isImmutable_ = false;
     bool isIncomplete_ = false;
+    bool isIncorrect_ = false;
 
   public:
     Chunk() { }
@@ -45,6 +46,12 @@ class Chunk : public cObject
     void assertComplete() const { assert(!isIncomplete_); }
     void assertIncomplete() const { assert(isIncomplete_); }
     void makeIncomplete() { isIncomplete_ = true; }
+
+    bool isCorrect() const { return !isIncorrect_; }
+    bool isIncorrect() const { return isIncorrect_; }
+    void assertCorrect() const { assert(!isIncorrect_); }
+    void assertIncorrect() const { assert(isIncorrect_); }
+    void makeIncorrect() { isIncorrect_ = true; }
 
     virtual int64_t getByteLength() const = 0;
 
