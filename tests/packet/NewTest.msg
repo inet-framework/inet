@@ -39,7 +39,7 @@ enum BitError
 class ApplicationHeader extends Chunk
 {
     @str;
-    string serializerClassName = "ApplicationHeaderSerializer";
+    string serializerClassName = "inet::ApplicationHeaderSerializer";
     int64_t byteLength = 10;
     int16_t someData = -1;
 }
@@ -47,7 +47,7 @@ class ApplicationHeader extends Chunk
 class TcpHeader extends Chunk
 {
     @str;
-    string serializerClassName = "TcpHeaderSerializer";
+    string serializerClassName = "inet::TcpHeaderSerializer";
     int64_t byteLength = -1;
     int16_t lengthField = -1;
     int16_t srcPort = -1;
@@ -59,7 +59,7 @@ class TcpHeader extends Chunk
 class IpHeader extends Chunk
 {
     @str;
-    string serializerClassName = "IpHeaderSerializer";
+    string serializerClassName = "inet::IpHeaderSerializer";
     int64_t byteLength = 20;
     int16_t protocol @enum(Protocol) = -1;
 }
@@ -67,13 +67,13 @@ class IpHeader extends Chunk
 class EthernetHeader extends Chunk
 {
     @str;
-    string serializerClassName = "EthernetHeaderSerializer";
+    string serializerClassName = "inet::EthernetHeaderSerializer";
     int64_t byteLength = 14;
     int16_t protocol @enum(Protocol) = -1;
 }
 
 class CompoundHeader extends SequenceChunk
 {
-    string serializerClassName = "CompoundHeaderSerializer";
+    string serializerClassName = "inet::CompoundHeaderSerializer";
 }
 
