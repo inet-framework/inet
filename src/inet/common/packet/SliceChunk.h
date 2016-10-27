@@ -42,7 +42,7 @@ class SliceChunk : public Chunk
     virtual void replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1) override;
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
 
-    virtual const char *getSerializerClassName() const override { return "SliceChunkSerializer"; }
+    virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
     virtual std::string str() const override;
 };
 

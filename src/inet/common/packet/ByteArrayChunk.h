@@ -37,7 +37,7 @@ class ByteArrayChunk : public Chunk
     virtual void replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength) override;
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
 
-    virtual const char *getSerializerClassName() const override { return "ByteArrayChunkSerializer"; }
+    virtual const char *getSerializerClassName() const override { return "inet::ByteArrayChunkSerializer"; }
     virtual std::string str() const override;
 };
 
