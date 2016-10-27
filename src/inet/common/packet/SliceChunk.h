@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/Chunk.h"
 
+namespace inet {
+
 class SliceChunk : public Chunk
 {
   protected:
@@ -43,6 +45,8 @@ class SliceChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "SliceChunkSerializer"; }
     virtual std::string str() const override;
 };
+
+} // namespace
 
 #endif // #ifndef __INET_SLICECHUNK_H_
 

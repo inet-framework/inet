@@ -15,6 +15,8 @@
 
 #include "Packet.h"
 
+namespace inet {
+
 Packet::Packet(const Packet& other) :
     data(other.data),
     headerIterator(other.headerIterator),
@@ -28,3 +30,5 @@ Packet::Packet() :
     trailerIterator(data->createBackwardIterator())
 {
 }
+
+} // namespace

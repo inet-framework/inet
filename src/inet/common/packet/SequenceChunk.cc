@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/SequenceChunk.h"
 
+namespace inet {
+
 SequenceChunk::SequenceChunk(const SequenceChunk& other) :
     Chunk(other),
     chunks(other.chunks)
@@ -161,3 +163,5 @@ std::string SequenceChunk::str() const
     os << "]";
     return os.str();
 }
+
+} // namespace

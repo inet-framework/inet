@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/cPacketChunk.h"
 
+namespace inet {
+
 cPacketChunk::cPacketChunk(cPacket *packet) :
     packet(packet)
 {
@@ -25,3 +27,5 @@ std::string cPacketChunk::str() const {
     os << "cPacketChunk, packet = {" << packet->str() << "}";
     return os.str();
 }
+
+} // namespace

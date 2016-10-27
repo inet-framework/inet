@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/SliceChunk.h"
 
+namespace inet {
+
 class SequenceChunk : public Chunk, public std::enable_shared_from_this<SequenceChunk>
 {
   public:
@@ -145,6 +147,8 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
     virtual const char *getSerializerClassName() const override { return "SequenceChunkSerializer"; }
     virtual std::string str() const override;
 };
+
+} // namespace
 
 #endif // #ifndef __INET_SEQUENCECHUNK_H_
 

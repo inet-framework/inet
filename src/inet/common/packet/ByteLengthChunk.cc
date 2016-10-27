@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/ByteLengthChunk.h"
 
+namespace inet {
+
 ByteLengthChunk::ByteLengthChunk(int64_t byteLength) :
     byteLength(byteLength)
 {
@@ -49,3 +51,5 @@ std::string ByteLengthChunk::str() const
     os << "ByteLengthChunk, byteLength = " << byteLength;
     return os.str();
 }
+
+} // namespace

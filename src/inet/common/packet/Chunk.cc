@@ -16,6 +16,8 @@
 #include "inet/common/packet/Chunk.h"
 #include "inet/common/packet/Serializer.h"
 
+namespace inet {
+
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(other.isImmutable_),
     isIncomplete_(other.isIncomplete_)
@@ -58,3 +60,5 @@ std::string Chunk::str() const
     os << "Chunk, byteLength = " << getByteLength();
     return os.str();
 }
+
+} // namespace

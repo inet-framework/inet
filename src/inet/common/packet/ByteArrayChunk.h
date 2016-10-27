@@ -18,6 +18,8 @@
 
 #include "Chunk.h"
 
+namespace inet {
+
 class ByteArrayChunk : public Chunk
 {
   protected:
@@ -38,6 +40,8 @@ class ByteArrayChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "ByteArrayChunkSerializer"; }
     virtual std::string str() const override;
 };
+
+} // namespace
 
 #endif // #ifndef __INET_BYTEARRAYCHUNK_H_
 

@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/Buffer.h"
 
+namespace inet {
+
 Buffer::Buffer() :
     data(std::make_shared<SequenceChunk>()),
     iterator(data->createForwardIterator())
@@ -26,3 +28,5 @@ Buffer::Buffer(const Buffer& other) :
     iterator(other.iterator)
 {
 }
+
+} // namespace

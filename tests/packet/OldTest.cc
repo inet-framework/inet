@@ -15,6 +15,8 @@
 
 #include "OldTest.h"
 
+namespace inet {
+
 Define_Module(OldTest);
 
 void TcpSegment::copy(const TcpSegment& other)
@@ -251,3 +253,5 @@ void OldTest::finish()
 {
     recordScalar("runtime", runtime);
 }
+
+} // namespace

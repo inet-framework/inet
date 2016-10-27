@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/SequenceChunk.h"
 
+namespace inet {
+
 class Buffer : public cObject
 {
   protected:
@@ -73,8 +75,9 @@ class Buffer : public cObject
 
 inline std::ostream& operator<<(std::ostream& os, const Buffer *buffer) { return os << buffer->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const Buffer& buffer) { return os << buffer.str();
-}
+inline std::ostream& operator<<(std::ostream& os, const Buffer& buffer) { return os << buffer.str(); }
+
+} // namespace
 
 #endif // #ifndef __INET_BUFFER_H_
 

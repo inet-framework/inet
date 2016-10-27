@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/Chunk.h"
 
+namespace inet {
+
 class cPacketChunk : public Chunk
 {
   protected:
@@ -31,6 +33,8 @@ class cPacketChunk : public Chunk
 
     virtual std::string str() const override;
 };
+
+} // namespace
 
 #endif // #ifndef __INET_CPACKETCHUNK_H_
 

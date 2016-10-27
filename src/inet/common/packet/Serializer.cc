@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/Serializer.h"
 
+namespace inet {
+
 Register_Class(ByteArrayChunkSerializer);
 Register_Class(ByteLengthChunkSerializer);
 Register_Class(SliceChunkSerializer);
@@ -74,3 +76,5 @@ void SequenceChunkSerializer::deserialize(ByteInputStream& stream, Chunk& chunk)
 {
     throw cRuntimeError("Invalid operation");
 }
+
+} // namespace

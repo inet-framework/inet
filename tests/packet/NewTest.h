@@ -21,6 +21,8 @@
 #include "inet/common/packet/Serializer.h"
 #include "NewTest_m.h"
 
+namespace inet {
+
 class ApplicationHeaderSerializer : public ChunkSerializer
 {
   public:
@@ -121,6 +123,8 @@ class NewTest : public cSimpleModule
     void initialize() override;
     void finish() override;
 };
+
+} // namespace
 
 #endif // #ifndef __NEWTEST_H_
 

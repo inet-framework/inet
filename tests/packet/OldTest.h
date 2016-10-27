@@ -19,6 +19,8 @@
 #include "inet/common/packet/Defs.h"
 #include "OldTest_m.h"
 
+namespace inet {
+
 class TcpSegment : public TcpSegment_Base
 {
   private:
@@ -100,6 +102,8 @@ class OldTest : public cSimpleModule
     void initialize() override;
     void finish() override;
 };
+
+} // namespace
 
 #endif // #ifndef __NEWTEST_H_
 

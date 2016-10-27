@@ -17,6 +17,8 @@ cplusplus {{
 #include "inet/common/packet/Packet.h"
 }}
 
+namespace inet;
+
 class Chunk extends cObject;
 class SequenceChunk extends cObject;
 

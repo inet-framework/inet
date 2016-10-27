@@ -21,6 +21,8 @@
 
 // TODO: flag for disabling serialization completely
 
+namespace inet {
+
 class Chunk : public cObject
 {
   protected:
@@ -70,6 +72,8 @@ inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) {
 inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) {
     return os << chunk.str();
 }
+
+} // namespace
 
 #endif // #ifndef __INET_CHUNK_H_
 

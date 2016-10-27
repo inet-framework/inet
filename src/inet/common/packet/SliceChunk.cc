@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/SequenceChunk.h"
 
+namespace inet {
+
 SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength) :
     chunk(chunk),
     byteOffset(byteOffset == -1 ? 0 : byteOffset),
@@ -73,3 +75,5 @@ std::string SliceChunk::str() const
             << ", byteLength = " << byteLength;
     return os.str();
 }
+
+} // namespace

@@ -15,6 +15,8 @@
 
 #include "inet/common/packet/ByteArrayChunk.h"
 
+namespace inet {
+
 ByteArrayChunk::ByteArrayChunk(const std::vector<uint8_t>& bytes) :
     bytes(bytes)
 {
@@ -66,3 +68,5 @@ std::string ByteArrayChunk::str() const
     os << "}";
     return os.str();
 }
+
+} // namespace

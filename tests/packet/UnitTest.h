@@ -18,11 +18,15 @@
 
 #include "inet/common/packet/Defs.h"
 
+namespace inet {
+
 class UnitTest : public cSimpleModule
 {
   protected:
     void initialize() override;
 };
+
+} // namespace
 
 #endif // #ifndef __NEWTEST_H_
 

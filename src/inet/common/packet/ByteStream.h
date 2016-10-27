@@ -21,6 +21,8 @@
 #include <vector>
 #include "Defs.h"
 
+namespace inet {
+
 class ByteOutputStream {
   protected:
     std::vector<uint8_t> bytes;
@@ -120,6 +122,8 @@ class ByteInputStream {
         return value;
     }
 };
+
+} // namespace
 
 #endif // #ifndef __BYTESTREAM_H_
 

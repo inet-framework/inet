@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/Chunk.h"
 
+namespace inet {
+
 class ByteLengthChunk : public Chunk
 {
   protected:
@@ -36,6 +38,8 @@ class ByteLengthChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "ByteLengthChunkSerializer"; }
     virtual std::string str() const override;
 };
+
+} // namespace
 
 #endif // #ifndef __INET_BYTELENGTHCHUNK_H_
 

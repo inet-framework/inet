@@ -22,6 +22,8 @@
 #include "inet/common/packet/SliceChunk.h"
 #include "inet/common/packet/SequenceChunk.h"
 
+namespace inet {
+
 class ChunkSerializer : public cObject
 {
   public:
@@ -59,6 +61,8 @@ class SequenceChunkSerializer : public ChunkSerializer
 
     virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
 };
+
+} // namespace
 
 #endif // #ifndef __INET_SERIALIZER_H_
 

@@ -17,6 +17,8 @@ cplusplus {{
     typedef omnetpp::cPacket *cPacketPtr;
 }}
 
+namespace inet;
+
 struct cPacketPtr;
 
 class Fragment

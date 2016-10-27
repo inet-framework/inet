@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/SequenceChunk.h"
 
+namespace inet {
+
 class Packet : public cPacket
 {
   protected:
@@ -110,6 +112,8 @@ class Packet : public cPacket
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
 
 inline std::ostream& operator<<(std::ostream& os, const Packet& packet) { return os << packet.str(); }
+
+} // namespace
 
 #endif // #ifndef __INET_PACKET_H_
 

@@ -19,6 +19,8 @@
 #include "NewTest_m.h"
 #include "UnitTest.h"
 
+namespace inet {
+
 Define_Module(UnitTest);
 
 static void testMutable()
@@ -161,3 +163,5 @@ void UnitTest::initialize()
     testMerge();
     testNesting();
 }
+
+} // namespace

@@ -15,6 +15,8 @@
 
 #include "NewTest.h"
 
+namespace inet {
+
 Register_Class(ApplicationHeaderSerializer);
 Register_Class(TcpHeaderSerializer);
 Register_Class(IpHeaderSerializer);
@@ -351,3 +353,5 @@ void NewTest::finish()
 {
     recordScalar("runtime", runtime);
 }
+
+} // namespace
