@@ -17,7 +17,7 @@
 #define __INET_CHUNK_H_
 
 #include <memory>
-#include "ByteStream.h"
+#include "inet/common/packet/ByteStream.h"
 
 // TODO: flag for disabling serialization completely
 
