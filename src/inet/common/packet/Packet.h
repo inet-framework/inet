@@ -96,8 +96,8 @@ class Packet : public cPacket
         return data->peekAt(trailerIterator, byteOffset, byteLength);
     }
 
-    void prepend(const std::shared_ptr<Chunk>& chunk) { data->prepend(chunk); }
-    void prepend(const std::shared_ptr<SequenceChunk>& chunk) { data->prepend(chunk); }
+    void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true) { data->prepend(chunk, flatten); }
+    void prepend(Packet *packet, bool flatten = true) { data->prepend(packet->data, flatten); }
 
     void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true) { data->append(chunk, flatten); }
     void append(Packet *packet, bool flatten = true) { data->append(packet->data, flatten); }

@@ -20,8 +20,6 @@
 #include "ByteStream.h"
 
 // TODO: flag for disabling serialization completely
-// TODO: flag for flattening
-// TODO: erroneous flag for deserialized chunks which can't be correctly represented
 
 class Chunk : public cObject
 {
@@ -35,14 +33,14 @@ class Chunk : public cObject
     Chunk(const Chunk& other);
     virtual ~Chunk() { }
 
-    bool isImmutable() const { return isImmutable_; }
     bool isMutable() const { return !isImmutable_; }
+    bool isImmutable() const { return isImmutable_; }
     void assertMutable() const { assert(!isImmutable_); }
     void assertImmutable() const { assert(isImmutable_); }
     void makeImmutable() { isImmutable_ = true; }
 
-    bool isIncomplete() const { return isIncomplete_; }
     bool isComplete() const { return !isIncomplete_; }
+    bool isIncomplete() const { return isIncomplete_; }
     void assertComplete() const { assert(!isIncomplete_); }
     void assertIncomplete() const { assert(isIncomplete_); }
     void makeIncomplete() { isIncomplete_ = true; }
@@ -55,7 +53,6 @@ class Chunk : public cObject
 
     virtual int64_t getByteLength() const = 0;
 
-    // TODO: is it justified to have a separate replace? why not deserialize directly?
     virtual void replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const { return nullptr; }
 
