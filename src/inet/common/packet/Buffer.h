@@ -21,6 +21,8 @@
 class Buffer : public cObject
 {
   protected:
+    int64_t pushedByteLength = 0;
+    int64_t poppedByteLength = 0;
     std::shared_ptr<SequenceChunk> data;
     SequenceChunk::ForwardIterator iterator;
 
@@ -29,6 +31,9 @@ class Buffer : public cObject
     Buffer(const Buffer& other);
 
     virtual Buffer *dup() const override { return new Buffer(*this); }
+
+    int64_t getPushedByteLength() const { return pushedByteLength; }
+    int64_t getPoppedByteLength() const { return poppedByteLength; }
 
     bool isImmutable() const { return data->isImmutable(); }
     bool isMutable() const { return !data->isImmutable(); }
@@ -50,13 +55,16 @@ class Buffer : public cObject
     template <typename T>
     std::shared_ptr<T> pop(int64_t byteLength = -1) {
         const auto& chunk = data->peek<T>(iterator, byteLength);
-        if (chunk != nullptr)
-            iterator.move(chunk->getByteLength());
+        if (chunk != nullptr) {
+            auto byteLength = chunk->getByteLength();
+            iterator.move(byteLength);
+            poppedByteLength += byteLength;
+        }
         return chunk;
     }
 
-    void push(const std::shared_ptr<Chunk>& chunk) { data->append(chunk); }
-    void push(Buffer *buffer) { data->append(buffer->data); }
+    void push(const std::shared_ptr<Chunk>& chunk, bool flatten = true) { data->append(chunk, flatten); pushedByteLength += chunk->getByteLength(); }
+    void push(Buffer *buffer, bool flatten = true) { data->append(buffer->data, flatten); pushedByteLength += buffer->getByteLength(); }
 
     int64_t getByteLength() const { return data->getByteLength() - iterator.getPosition(); }
 
