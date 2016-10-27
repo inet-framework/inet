@@ -92,7 +92,6 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
     ForwardIterator createForwardIterator() const { return ForwardIterator(this->shared_from_this()); }
     BackwardIterator createBackwardIterator() const { return BackwardIterator(this->shared_from_this()); }
 
-    // TODO: should we support polymorphic peek? what about current cPacket class hierarchies?
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {
         return peekAt<T>(iterator, iterator.getPosition(), byteLength);

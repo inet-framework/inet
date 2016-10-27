@@ -39,10 +39,11 @@ class Packet : public cPacket
     void assertImmutable() const { data->assertImmutable(); }
     void makeImmutable() { data->makeImmutable(); }
 
-    void setHeaderPosition(int64_t offset) { headerIterator.seek(offset); }
-    void setTrailerPosition(int64_t offset) { trailerIterator.seek(offset); }
     int64_t getHeaderPosition() const { return headerIterator.getPosition(); }
+    void setHeaderPosition(int64_t offset) { headerIterator.seek(offset); }
+
     int64_t getTrailerPosition() const { return trailerIterator.getPosition(); }
+    void setTrailerPosition(int64_t offset) { trailerIterator.seek(offset); }
 
     template <typename T>
     bool hasHeader(int64_t byteLength = -1) const {

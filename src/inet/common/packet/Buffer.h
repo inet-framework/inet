@@ -18,6 +18,8 @@
 
 #include "inet/common/packet/SequenceChunk.h"
 
+// TODO: remove popped chunks from data
+
 namespace inet {
 
 class Buffer : public cObject
