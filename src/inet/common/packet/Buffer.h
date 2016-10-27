@@ -25,17 +25,10 @@ class Buffer : public cObject
     SequenceChunk::ForwardIterator iterator;
 
   public:
-    Buffer() :
-        data(std::make_shared<SequenceChunk>()),
-        iterator(data->createForwardIterator())
-    {
-    }
+    Buffer();
+    Buffer(const Buffer& other);
 
-    Buffer(const Buffer& other) :
-        data(other.data),
-        iterator(other.iterator)
-    {
-    }
+    virtual Buffer *dup() const override { return new Buffer(*this); }
 
     bool isImmutable() const { return data->isImmutable(); }
     bool isMutable() const { return !data->isImmutable(); }
@@ -63,22 +56,17 @@ class Buffer : public cObject
     }
 
     void push(const std::shared_ptr<Chunk>& chunk) { data->append(chunk); }
-    void push(const std::shared_ptr<SliceChunk>& chunk) { data->append(chunk); }
-    void push(const std::shared_ptr<SequenceChunk>& chunk) { data->append(chunk); }
     void push(Buffer *buffer) { data->append(buffer->data); }
 
     int64_t getByteLength() const { return data->getByteLength() - iterator.getPosition(); }
 
-    virtual std::string str() const override {
-        return data->str();
-    }
-
-    virtual Buffer *dup() const override { return new Buffer(*this); }
+    virtual std::string str() const override { return data->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Buffer *buffer) { return os << buffer->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const Buffer& buffer) { return os << buffer.str(); }
+inline std::ostream& operator<<(std::ostream& os, const Buffer& buffer) { return os << buffer.str();
+}
 
 #endif // #ifndef __INET_BUFFER_H_
 

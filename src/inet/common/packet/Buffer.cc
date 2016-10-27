@@ -14,3 +14,15 @@
 // 
 
 #include "inet/common/packet/Buffer.h"
+
+Buffer::Buffer() :
+    data(std::make_shared<SequenceChunk>()),
+    iterator(data->createForwardIterator())
+{
+}
+
+Buffer::Buffer(const Buffer& other) :
+    data(other.data),
+    iterator(other.iterator)
+{
+}

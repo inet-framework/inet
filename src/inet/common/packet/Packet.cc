@@ -14,3 +14,17 @@
 // 
 
 #include "Packet.h"
+
+Packet::Packet(const Packet& other) :
+    data(other.data),
+    headerIterator(other.headerIterator),
+    trailerIterator(other.trailerIterator)
+{
+}
+
+Packet::Packet() :
+    data(std::make_shared<SequenceChunk>()),
+    headerIterator(data->createForwardIterator()),
+    trailerIterator(data->createBackwardIterator())
+{
+}

@@ -34,64 +34,30 @@ class ChunkSerializer : public cObject
 class ByteArrayChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        auto& byteArrayChunk = static_cast<const ByteArrayChunk&>(chunk);
-        stream.writeBytes(byteArrayChunk.getBytes());
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        auto& byteArrayChunk = static_cast<ByteArrayChunk&>(chunk);
-        int byteLength = stream.getRemainingSize();
-        std::vector<uint8_t> chunkBytes;
-        for (int64_t i = 0; i < byteLength; i++)
-            chunkBytes.push_back(stream.readByte());
-        byteArrayChunk.setBytes(chunkBytes);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
+    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
 };
 
 class ByteLengthChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        auto& byteLengthChunk = static_cast<const ByteLengthChunk&>(chunk);
-        stream.writeByteRepeatedly('?', byteLengthChunk.getByteLength());
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        auto& byteLengthChunk = static_cast<ByteLengthChunk&>(chunk);
-        int byteLength = stream.getRemainingSize();
-        stream.readByteRepeatedly('?', byteLength);
-        byteLengthChunk.setByteLength(byteLength);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
+    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
 };
 
 class SliceChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        auto& sliceChunk = static_cast<const SliceChunk&>(chunk);
-        ByteOutputStream outputStream;
-        sliceChunk.getChunk()->serialize(outputStream);
-        stream.writeBytes(outputStream.getBytes(), sliceChunk.getByteOffset(), sliceChunk.getByteLength());
-    }
-
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        throw cRuntimeError("Invalid operation");
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
+    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
 };
 
 class SequenceChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override {
-        auto& sequenceChunk = static_cast<const SequenceChunk&>(chunk);
-        for (auto& chunk : sequenceChunk.getChunks())
-            chunk->serialize(stream);
-    }
+    virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
 
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override {
-        throw cRuntimeError("Invalid operation");
-    }
+    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
 };
 
 #endif // #ifndef __INET_SERIALIZER_H_

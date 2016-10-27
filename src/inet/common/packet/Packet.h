@@ -26,19 +26,10 @@ class Packet : public cPacket
     SequenceChunk::BackwardIterator trailerIterator;
 
   public:
-    Packet() :
-        data(std::make_shared<SequenceChunk>()),
-        headerIterator(data->createForwardIterator()),
-        trailerIterator(data->createBackwardIterator())
-    {
-    }
+    Packet();
+    Packet(const Packet& other);
 
-    Packet(const Packet& other) :
-        data(other.data),
-        headerIterator(other.headerIterator),
-        trailerIterator(other.trailerIterator)
-    {
-    }
+    virtual Packet *dup() const override { return new Packet(*this); }
 
     bool isImmutable() const { return data->isImmutable(); }
     bool isMutable() const { return !data->isImmutable(); }
@@ -113,11 +104,7 @@ class Packet : public cPacket
 
     int64_t getByteLength() const { return data->getByteLength(); }
 
-    virtual std::string str() const override {
-        return data->str();
-    }
-
-    virtual Packet *dup() const override { return new Packet(*this); }
+    virtual std::string str() const override { return data->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
