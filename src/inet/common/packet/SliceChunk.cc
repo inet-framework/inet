@@ -41,7 +41,7 @@ void SliceChunk::setByteLength(int64_t byteLength)
     this->byteLength = byteLength;
 }
 
-void SliceChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> SliceChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
     this->chunk = chunk;
     this->byteOffset = byteOffset == -1 ? 0 : byteOffset;
@@ -49,6 +49,7 @@ void SliceChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset
     this->chunk->assertImmutable();
     assert(this->byteOffset >= 0);
     assert(this->byteLength >= 0);
+    return shared_from_this();
 }
 
 std::shared_ptr<Chunk> SliceChunk::merge(const std::shared_ptr<Chunk>& other) const

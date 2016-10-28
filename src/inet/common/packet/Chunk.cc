@@ -24,8 +24,9 @@ Chunk::Chunk(const Chunk& other) :
 {
 }
 
-void Chunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> Chunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
+    // TODO: prevent unnecessary complete serialization, and serialize only relevant parts
     ByteOutputStream outputStream;
     chunk->serialize(outputStream);
     auto& outputBytes = outputStream.getBytes();
@@ -33,7 +34,7 @@ void Chunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int
     auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
     std::vector<uint8_t> inputBytes(begin, end);
     ByteInputStream inputStream(inputBytes);
-    deserialize(inputStream);
+    return deserialize(inputStream);
 }
 
 void Chunk::serialize(ByteOutputStream& stream) const
@@ -44,14 +45,15 @@ void Chunk::serialize(ByteOutputStream& stream) const
     delete serializer;
 }
 
-void Chunk::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream)
 {
     auto serializerClassName = getSerializerClassName();
     auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
-    serializer->deserialize(stream, *this);
-    if (stream.isReadBeyondEnd())
-        makeIncomplete();
+    auto chunk = serializer->deserialize(stream);
     delete serializer;
+    if (stream.isReadBeyondEnd())
+        chunk->makeIncomplete();
+    return chunk;
 }
 
 std::string Chunk::str() const

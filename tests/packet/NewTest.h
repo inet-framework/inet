@@ -27,34 +27,34 @@ class ApplicationHeaderSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class TcpHeaderSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class IpHeaderSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class EthernetHeaderSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class CompoundHeaderSerializer : public SequenceChunkSerializer
 {
   public:
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class NewMedium

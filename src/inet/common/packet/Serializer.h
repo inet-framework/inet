@@ -30,36 +30,35 @@ class ChunkSerializer : public cObject
     virtual ~ChunkSerializer() { }
 
     virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const = 0;
-    virtual void deserialize(ByteInputStream& stream, Chunk &chunk) = 0;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) = 0;
 };
 
 class ByteArrayChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
-    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
 };
 
 class ByteLengthChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
-    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
 };
 
 class SliceChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
-    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
 };
 
 class SequenceChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const Chunk& chunk) const;
-
-    virtual void deserialize(ByteInputStream& stream, Chunk& chunk);
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
 };
 
 } // namespace

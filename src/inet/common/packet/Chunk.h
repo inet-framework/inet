@@ -21,7 +21,7 @@
 
 namespace inet {
 
-class Chunk : public cObject
+class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   protected:
     bool isImmutable_ = false;
@@ -53,11 +53,11 @@ class Chunk : public cObject
 
     virtual int64_t getByteLength() const = 0;
 
-    virtual void replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
+    virtual std::shared_ptr<Chunk> replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const { return nullptr; }
 
     virtual void serialize(ByteOutputStream& stream) const;
-    virtual void deserialize(ByteInputStream& stream);
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
 
     virtual const char *getSerializerClassName() const { return nullptr; }
     virtual std::string str() const override;

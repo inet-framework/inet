@@ -28,7 +28,7 @@ void ByteArrayChunk::setBytes(const std::vector<uint8_t>& bytes)
     this->bytes = bytes;
 }
 
-void ByteArrayChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> ByteArrayChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
     ByteOutputStream outputStream;
     chunk->serialize(outputStream);
@@ -37,6 +37,7 @@ void ByteArrayChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOf
     for (int64_t i = 0; i < byteCount; i++)
         chunkBytes.push_back(outputStream[byteOffset + i]);
     setBytes(chunkBytes);
+    return shared_from_this();
 }
 
 std::shared_ptr<Chunk> ByteArrayChunk::merge(const std::shared_ptr<Chunk>& other) const

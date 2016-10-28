@@ -22,7 +22,7 @@ namespace inet {
 
 #define ENABLE_CHUNK_SERIALIZATION true
 
-class SequenceChunk : public Chunk, public std::enable_shared_from_this<SequenceChunk>
+class SequenceChunk : public Chunk
 {
   public:
     class Iterator
@@ -89,8 +89,8 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
     void makeImmutable();
 
     const std::vector<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
-    ForwardIterator createForwardIterator() const { return ForwardIterator(this->shared_from_this()); }
-    BackwardIterator createBackwardIterator() const { return BackwardIterator(this->shared_from_this()); }
+    ForwardIterator createForwardIterator() const { return ForwardIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this())); }
+    BackwardIterator createBackwardIterator() const { return BackwardIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this())); }
 
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {
@@ -129,12 +129,12 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
         // TODO: prevents easy access for application buffer assertImmutable();
         assert(increment == 1 || byteLength != -1);
         // TODO: move make_shared into deserialize to allow polymorphism?
-        auto chunk = std::make_shared<T>();
+        const auto& t = std::make_shared<T>();
         // TODO: eliminate const_cast
-        chunk->replace(const_cast<SequenceChunk *>(this)->shared_from_this(), increment == 1 ? byteOffset : getByteLength() - byteOffset - byteLength, byteLength);
+        const auto& chunk = t->replace(const_cast<SequenceChunk *>(this)->shared_from_this(), increment == 1 ? byteOffset : getByteLength() - byteOffset - byteLength, byteLength);
         chunk->makeImmutable();
         if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getByteLength())
-            return chunk;
+            return std::dynamic_pointer_cast<T>(chunk);
         else
             return nullptr;
     }
