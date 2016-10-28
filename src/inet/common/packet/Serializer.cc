@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "Serializer.h"
+#include "inet/common/packet/Serializer.h"
 
 Register_Class(ByteArrayChunkSerializer);
 Register_Class(ByteLengthChunkSerializer);

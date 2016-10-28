@@ -13,9 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/ByteLengthChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "UnitTest.h"
 #include "NewTest_m.h"
+#include "UnitTest.h"
 
 Define_Module(UnitTest);
 
@@ -126,18 +128,17 @@ static void testMerge()
 
 static void testNesting()
 {
-    // 1. TODO: documentation
+    // 1. packet contains compound header
     Packet packet1;
     auto ipHeader1 = std::make_shared<IpHeader>();
     ipHeader1->setProtocol(Protocol::Tcp);
     auto compoundHeader1 = std::make_shared<CompoundHeader>();
     compoundHeader1->append(ipHeader1);
-    // TODO: this cast looks bad
-    packet1.append(std::static_pointer_cast<Chunk>(compoundHeader1));
+    packet1.append(compoundHeader1, false);
     packet1.makeImmutable();
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
     assert(compoundHeader2 != nullptr);
-    // 2. TODO: documentation
+    // 2. TODO: packet provides compound header after serialization
     const auto& byteArrayChunk1 = packet1.peekHeaderAt<ByteArrayChunk>(0);
     Packet packet2;
     packet2.append(byteArrayChunk1);

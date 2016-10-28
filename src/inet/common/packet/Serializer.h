@@ -13,11 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __SERIALIZER_H_
-#define __SERIALIZER_H_
+#ifndef __INET_SERIALIZER_H_
+#define __INET_SERIALIZER_H_
 
-#include "ByteStream.h"
-#include "Chunk.h"
+#include "inet/common/packet/ByteStream.h"
+#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/ByteLengthChunk.h"
+#include "inet/common/packet/SliceChunk.h"
+#include "inet/common/packet/SequenceChunk.h"
 
 class ChunkSerializer : public cObject
 {
@@ -91,5 +94,5 @@ class SequenceChunkSerializer : public ChunkSerializer
     }
 };
 
-#endif // #ifndef __SERIALIZER_H_
+#endif // #ifndef __INET_SERIALIZER_H_
 

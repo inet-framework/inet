@@ -13,10 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __BUFFER_H_
-#define __BUFFER_H_
+#ifndef __INET_BUFFER_H_
+#define __INET_BUFFER_H_
 
-#include "Chunk.h"
+#include "inet/common/packet/SequenceChunk.h"
 
 class Buffer : public cObject
 {
@@ -80,5 +80,5 @@ inline std::ostream& operator<<(std::ostream& os, const Buffer *buffer) { return
 
 inline std::ostream& operator<<(std::ostream& os, const Buffer& buffer) { return os << buffer.str(); }
 
-#endif // #ifndef __BUFFER_H_
+#endif // #ifndef __INET_BUFFER_H_
 

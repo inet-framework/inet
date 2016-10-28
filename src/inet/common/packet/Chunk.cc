@@ -13,8 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "Chunk.h"
-#include "Serializer.h"
+#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/Serializer.h"
+
+Chunk::Chunk(const Chunk& other) :
+    isImmutable_(other.isImmutable_),
+    isIncomplete_(other.isIncomplete_)
+{
+}
 
 void Chunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
@@ -46,186 +52,9 @@ void Chunk::deserialize(ByteInputStream& stream)
     delete serializer;
 }
 
-void ByteArrayChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::string Chunk::str() const
 {
-    ByteOutputStream outputStream;
-    chunk->serialize(outputStream);
-    std::vector<uint8_t> chunkBytes;
-    int byteCount = byteLength == -1 ? outputStream.getSize() : byteLength;
-    for (int64_t i = 0; i < byteCount; i++)
-        chunkBytes.push_back(outputStream[byteOffset + i]);
-    setBytes(chunkBytes);
-}
-
-std::shared_ptr<Chunk> ByteArrayChunk::merge(const std::shared_ptr<Chunk>& other) const
-{
-    if (std::dynamic_pointer_cast<ByteArrayChunk>(other) != nullptr) {
-        auto otherByteArrayChunk = std::static_pointer_cast<ByteArrayChunk>(other);
-        std::vector<uint8_t> mergedBytes;
-        mergedBytes.insert(mergedBytes.end(), bytes.begin(), bytes.end());
-        mergedBytes.insert(mergedBytes.end(), otherByteArrayChunk->bytes.begin(), otherByteArrayChunk->bytes.end());
-        return std::make_shared<ByteArrayChunk>(mergedBytes);
-    }
-    else
-        return nullptr;
-}
-
-void ByteLengthChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
-{
-    setByteLength(byteLength);
-}
-
-std::shared_ptr<Chunk> ByteLengthChunk::merge(const std::shared_ptr<Chunk>& other) const
-{
-    if (std::dynamic_pointer_cast<ByteArrayChunk>(other) != nullptr) {
-        auto otherByteLengthChunk = std::static_pointer_cast<ByteLengthChunk>(other);
-        return std::make_shared<ByteLengthChunk>(byteLength + otherByteLengthChunk->byteLength);
-    }
-    else
-        return nullptr;
-}
-
-void SliceChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
-{
-    this->chunk = chunk;
-    this->byteOffset = byteOffset == -1 ? 0 : byteOffset;
-    this->byteLength = byteLength == -1 ? chunk->getByteLength() - this->byteOffset : byteLength;
-    this->chunk->assertImmutable();
-    assert(this->byteOffset >= 0);
-    assert(this->byteLength >= 0);
-}
-
-std::shared_ptr<Chunk> SliceChunk::merge(const std::shared_ptr<Chunk>& other) const
-{
-    if (std::dynamic_pointer_cast<SliceChunk>(other) != nullptr) {
-        auto otherSliceChunk = std::static_pointer_cast<SliceChunk>(other);
-        if (chunk == otherSliceChunk->getChunk() && byteOffset + byteLength == otherSliceChunk->getByteOffset()) {
-            if (byteOffset == 0 && byteLength + otherSliceChunk->getByteLength() == chunk->getByteLength())
-                return chunk;
-            else
-                return std::make_shared<SliceChunk>(chunk, byteOffset, byteLength + otherSliceChunk->getByteLength());
-        }
-        else
-            return nullptr;
-    }
-    else
-        return nullptr;
-}
-
-void SequenceChunk::makeImmutable()
-{
-    Chunk::makeImmutable();
-    for (auto& chunk : chunks)
-        chunk->makeImmutable();
-}
-
-int64_t SequenceChunk::getByteLength() const
-{
-    int64_t byteLength = 0;
-    for (auto& chunk : chunks)
-        byteLength += chunk->getByteLength();
-    return byteLength;
-}
-
-void SequenceChunk::Iterator::seek(int64_t byteOffset)
-{
-    position = byteOffset;
-    if (byteOffset == 0)
-        index = 0;
-    else {
-        int startIndex = getStartIndex();
-        int endIndex = getEndIndex();
-        int increment = getIndexIncrement();
-        int64_t p = 0;
-        for (int i = startIndex; i != endIndex + increment; i += increment) {
-            p += chunk->chunks[i]->getByteLength();
-            if (p == byteOffset) {
-                index = i + 1;
-                return;
-            }
-        }
-    }
-}
-
-void SequenceChunk::Iterator::move(int64_t byteLength)
-{
-    position += byteLength;
-    if (index != -1 && index != chunk->chunks.size() && getChunk()->getByteLength() == byteLength)
-        index++;
-    else
-        index = -1;
-}
-
-void SequenceChunk::prependChunk(const std::shared_ptr<Chunk>& chunk)
-{
-    assertMutable();
-    chunks.insert(chunks.begin(), chunk);
-}
-
-void SequenceChunk::prependChunk(const std::shared_ptr<SequenceChunk>& chunk)
-{
-    for (auto it = chunk->chunks.rbegin(); it != chunk->chunks.rend(); it++)
-        prependChunk(*it);
-}
-
-void SequenceChunk::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
-{
-    if (!flatten)
-        prependChunk(chunk);
-    else if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk))
-        prependChunk(sliceChunk);
-    else if (auto sequenceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk))
-        prependChunk(sequenceChunk);
-    else
-        prependChunk(chunk);
-}
-
-void SequenceChunk::appendChunk(const std::shared_ptr<Chunk>& chunk)
-{
-    assertMutable();
-    const auto& mergedChunk = chunks.size() > 0 ? chunks.back()->merge(chunk) : nullptr;
-    if (mergedChunk != nullptr)
-        chunks.back() = mergedChunk;
-    else
-        chunks.push_back(chunk);
-}
-
-void SequenceChunk::appendChunk(const std::shared_ptr<SliceChunk>& sliceChunk)
-{
-    if (auto sequenceChunk = std::dynamic_pointer_cast<SequenceChunk>(sliceChunk->getChunk())) {
-        int64_t byteOffset = 0;
-        for (auto& elementChunk : sequenceChunk->chunks) {
-            int64_t sliceChunkBegin = sliceChunk->getByteOffset();
-            int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getByteLength();
-            int64_t chunkBegin = byteOffset;
-            int64_t chunkEnd = byteOffset + elementChunk->getByteLength();
-            if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
-                appendChunk(elementChunk);
-            else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                appendChunk(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
-            else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                appendChunk(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
-            byteOffset += elementChunk->getByteLength();
-        }
-    }
-    else
-        appendChunk(std::static_pointer_cast<Chunk>(sliceChunk));
-}
-
-void SequenceChunk::appendChunk(const std::shared_ptr<SequenceChunk>& chunk)
-{
-    for (auto& chunk : chunk->chunks)
-        appendChunk(chunk);
-}
-
-void SequenceChunk::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
-{
-    if (!flatten)
-        appendChunk(chunk);
-    else if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk))
-        appendChunk(sliceChunk);
-    else if (auto sequenceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk))
-        appendChunk(sequenceChunk);
-    else
-        appendChunk(chunk);
+    std::ostringstream os;
+    os << "Chunk, byteLength = " << getByteLength();
+    return os.str();
 }
