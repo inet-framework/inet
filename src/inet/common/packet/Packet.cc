@@ -18,13 +18,15 @@
 namespace inet {
 
 Packet::Packet(const Packet& other) :
+    cPacket(other),
     data(other.data),
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator)
 {
 }
 
-Packet::Packet() :
+Packet::Packet(const char *name, short kind) :
+    cPacket(name, kind),
     data(std::make_shared<SequenceChunk>()),
     headerIterator(data->createForwardIterator()),
     trailerIterator(data->createBackwardIterator())

@@ -28,7 +28,7 @@ class Packet : public cPacket
     SequenceChunk::BackwardIterator trailerIterator;
 
   public:
-    Packet();
+    explicit Packet(const char *name = nullptr, short kind = 0);
     Packet(const Packet& other);
 
     virtual Packet *dup() const override { return new Packet(*this); }
