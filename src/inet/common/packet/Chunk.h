@@ -21,8 +21,13 @@
 
 namespace inet {
 
+class SliceChunk;
+
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
+  public:
+    static const bool ENABLE_IMPLICIT_CHUNK_SERIALIZATION = true;
+
   protected:
     bool isImmutable_ = false;
     bool isIncomplete_ = false;
@@ -58,6 +63,23 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     virtual void serialize(ByteOutputStream& stream) const;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
+
+    template <typename T>
+    std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
+        if (!ENABLE_IMPLICIT_CHUNK_SERIALIZATION)
+            throw cRuntimeError("Chunk serialization is disabled to prevent unpredictable performance degradation, set ENABLE_CHUNK_SERIALIZATION to allow transparent chunk serialization");
+        // TODO: prevents easy access for application buffer
+        // assertImmutable();
+        const auto& t = std::make_shared<T>();
+        // TODO: eliminate const_cast
+        const auto& chunk = t->replace(const_cast<Chunk *>(this)->shared_from_this(), byteOffset, byteLength);
+        chunk->makeImmutable();
+        if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getByteLength())
+            return std::dynamic_pointer_cast<T>(chunk);
+        else
+            return nullptr;
+    }
+    std::shared_ptr<SliceChunk> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const;
 
     virtual const char *getSerializerClassName() const { return nullptr; }
     virtual std::string str() const override;

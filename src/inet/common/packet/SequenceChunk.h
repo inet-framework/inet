@@ -20,8 +20,6 @@
 
 namespace inet {
 
-#define ENABLE_CHUNK_SERIALIZATION true
-
 class SequenceChunk : public Chunk
 {
   public:
@@ -101,7 +99,7 @@ class SequenceChunk : public Chunk
     }
 
     template <typename T>
-    std::shared_ptr<T> peekAt(const Iterator& iterator, int64_t byteOffset, int64_t byteLength = -1) const {
+    std::shared_ptr<T> peekAt(const Iterator& iterator, int64_t byteOffset = 0, int64_t byteLength = -1) const {
         // fast path
         if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && byteOffset == iterator.getPosition()) {
             const auto& chunk = iterator.getChunk();
@@ -124,21 +122,10 @@ class SequenceChunk : public Chunk
             position += chunk->getByteLength();
         }
         // slow path
-        if (!ENABLE_CHUNK_SERIALIZATION)
-            throw cRuntimeError("Chunk serialization is disabled to prevent unpredictable performance degradation, set ENABLE_CHUNK_SERIALIZATION to allow transparent chunk serialization");
-        // TODO: prevents easy access for application buffer assertImmutable();
         assert(increment == 1 || byteLength != -1);
-        // TODO: move make_shared into deserialize to allow polymorphism?
-        const auto& t = std::make_shared<T>();
-        // TODO: eliminate const_cast
-        const auto& chunk = t->replace(const_cast<SequenceChunk *>(this)->shared_from_this(), increment == 1 ? byteOffset : getByteLength() - byteOffset - byteLength, byteLength);
-        chunk->makeImmutable();
-        if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getByteLength())
-            return std::dynamic_pointer_cast<T>(chunk);
-        else
-            return nullptr;
+        return Chunk::peekAt<T>(increment == 1 ? byteOffset : getByteLength() - byteOffset - byteLength, byteLength);
     }
-    std::shared_ptr<SliceChunk> peekAt(const Iterator& iterator, int64_t byteOffset, int64_t byteLength) const {
+    std::shared_ptr<SliceChunk> peekAt(const Iterator& iterator, int64_t byteOffset = 0, int64_t byteLength = -1) const {
         return peekAt<SliceChunk>(iterator, byteOffset, byteLength);
     }
 
