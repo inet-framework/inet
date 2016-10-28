@@ -25,6 +25,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/cPacketChunk.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -132,7 +133,7 @@ void GPSR::processSelfMessage(cMessage *message)
 
 void GPSR::processMessage(cMessage *message)
 {
-    if (auto pk = dynamic_cast<FlatPacket *>(message))
+    if (auto pk = dynamic_cast<Packet *>(message))
         processUDPPacket(pk);
     else
         throw cRuntimeError("Unknown message");
@@ -196,7 +197,7 @@ void GPSR::processPurgeNeighborsTimer()
 // handling UDP packets
 //
 
-void GPSR::sendUDPPacket(FlatPacket *packet, double delay)
+void GPSR::sendUDPPacket(Packet *packet, double delay)
 {
     if (delay == 0)
         send(packet, "ipOut");
@@ -204,11 +205,11 @@ void GPSR::sendUDPPacket(FlatPacket *packet, double delay)
         sendDelayed(packet, delay, "ipOut");
 }
 
-void GPSR::processUDPPacket(FlatPacket *packet)
+void GPSR::processUDPPacket(Packet *packet)
 {
-    UDPHeader *udpHeader = check_and_cast<UDPHeader *>(packet->popHeader());
-    PacketChunk *pk = check_and_cast<PacketChunk *>(packet->popHeader());
-    cPacket *encapsulatedPacket = pk->getPacket();
+    const auto& udpHeader = packet->popHeader<UDPHeader>();
+    auto pk = packet->popHeader<cPacketChunk>();
+    cPacket *encapsulatedPacket = pk->removePacket();
     if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket)) {
         beacon->transferTagsFrom(packet);
         processBeacon(beacon);
@@ -234,14 +235,14 @@ GPSRBeacon *GPSR::createBeacon()
 void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
-    FlatPacket *udpPacket = new FlatPacket(beacon->getName());
-    UDPHeader *udpHeader = new UDPHeader(beacon->getName());
+    Packet *udpPacket = new Packet(beacon->getName());
+    auto udpHeader = std::make_shared<UDPHeader>();
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
-    udpPacket->pushHeader(udpHeader);
+    udpPacket->prepend(udpHeader);
     udpPacket->transferTagsFrom(beacon);
-    udpPacket->pushTrailer(new PacketChunk(beacon));
+    udpPacket->append(std::make_shared<cPacketChunk>(beacon));
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());

@@ -23,6 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -98,8 +99,8 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processPurgeNeighborsTimer();
 
     // handling UDP packets
-    void sendUDPPacket(FlatPacket *packet, double delay);
-    void processUDPPacket(FlatPacket *packet);
+    void sendUDPPacket(Packet *packet, double delay);
+    void processUDPPacket(Packet *packet);
 
     // handling beacons
     GPSRBeacon *createBeacon();
