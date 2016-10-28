@@ -104,7 +104,7 @@ class Packet : public cPacket
     void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true) { data->append(chunk, flatten); }
     void append(Packet *packet, bool flatten = true) { data->append(packet->data, flatten); }
 
-    int64_t getByteLength() const { return data->getByteLength(); }
+    virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }
 
     virtual std::string str() const override { return data->str(); }
 };
