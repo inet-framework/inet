@@ -27,10 +27,12 @@ class cPacketChunk : public Chunk
 
   public:
     cPacketChunk() { }
+    ~cPacketChunk();
     cPacketChunk(cPacket *packet);
 
-    virtual int64_t getByteLength() const override { return packet->getByteLength(); }
+    virtual int64_t getByteLength() const override { return packet != nullptr ? packet->getByteLength() : 0; }
 
+    virtual cPacket *removePacket();
     virtual std::string str() const override;
 };
 

@@ -20,11 +20,28 @@ namespace inet {
 cPacketChunk::cPacketChunk(cPacket *packet) :
     packet(packet)
 {
+    take(packet);
+}
+
+cPacketChunk::~cPacketChunk()
+{
+    dropAndDelete(packet);
+}
+
+//TODO copy constructor: dup packet or store a shared ptr to cPacket???
+
+cPacket *cPacketChunk::removePacket()
+{
+    //FIXME
+    drop(packet);
+    cPacket *pk = packet;
+    packet = nullptr;
+    return pk;
 }
 
 std::string cPacketChunk::str() const {
     std::ostringstream os;
-    os << "cPacketChunk, packet = {" << packet->str() << "}";
+    os << "cPacketChunk, packet = {" << ( packet != nullptr ? packet->str() : std::string("<null>")) << "}";
     return os.str();
 }
 
