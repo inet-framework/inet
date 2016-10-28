@@ -56,6 +56,7 @@ struct udphdr
 
 void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
+#if 0
     ASSERT(b.getPos() == 0);
     const FlatPacket *pkt = check_and_cast<const FlatPacket *>(_pkt);
     const UDPHeader *header = check_and_cast<const UDPHeader *>(pkt->peekHeader());
@@ -79,10 +80,12 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 
     unsigned int endPos = b.getPos();
     b.writeUint16To(chksumPos, TCPIPchecksum::checksum(IP_PROT_UDP, b._getBuf(), endPos, c.l3AddressesPtr, c.l3AddressesLength));
+#endif
 }
 
 cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
 {
+#if 0
     ASSERT(b.getPos() == 0);
     FlatPacket *pkt = new FlatPacket("parsed-udp");
     UDPHeader *header = new UDPHeader("parsed-udp");
@@ -104,6 +107,8 @@ cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
     else chksum = 0;
     header->setIsChecksumCorrect(length >= UDP_HEADER_BYTES && chksum == 0 && pkt->getByteLength() == length);
     return pkt;
+#endif
+    return nullptr;
 }
 
 } // namespace serializer

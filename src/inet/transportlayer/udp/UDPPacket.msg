@@ -19,7 +19,7 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/FlatPacket.h"
+#include "inet/common/packet/Chunk.h"
 }}
 
 namespace inet;
@@ -28,18 +28,26 @@ enum UdpConstants{
     UDP_HEADER_BYTES = 8;
 };
 
-class FlatChunk extends cOwnedObject;
+class Chunk extends cObject;
+
+enum BitError
+{
+    BIT_ERROR_YES = 0;
+    BIT_ERROR_NO  = 1;
+    BIT_ERROR_CRC = 2;
+}
 
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //
-class UDPHeader extends FlatChunk
+class UDPHeader extends Chunk
 {
     @customize(true);
     unsigned short srcPort;
     unsigned short destPort;
-    chunkByteLength = UDP_HEADER_BYTES;
+    int64_t byteLength = UDP_HEADER_BYTES;
     int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
-    bool isChecksumCorrect = true;
+    uint16_t crc = 0;
+    short bitError @enum(BitError) = -1;
 }
 

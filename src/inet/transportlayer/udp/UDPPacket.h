@@ -29,7 +29,7 @@ class INET_API UDPHeader : public UDPHeader_Base, public ITransportPacket
     void copy(const UDPHeader& other) {}
 
   public:
-    UDPHeader(const char *name=NULL) : UDPHeader_Base(name) {}
+    UDPHeader() : UDPHeader_Base() {}
     UDPHeader(const UDPHeader& other) : UDPHeader_Base(other) {copy(other);}
     UDPHeader& operator=(const UDPHeader& other) {if (this==&other) return *this; UDPHeader_Base::operator=(other); copy(other); return *this;}
 

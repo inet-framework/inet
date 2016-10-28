@@ -22,6 +22,7 @@ cplusplus {{
 
 namespace inet;
 
+class Chunk extends cObject;
 class noncobject L3Address;
 
 //
@@ -44,7 +45,7 @@ enum AODVControlPacketType
 //
 // Base packet for AODV Control Packets
 //
-packet AODVControlPacket
+class AODVControlPacket extends Chunk
 {
     unsigned int packetType;
 }

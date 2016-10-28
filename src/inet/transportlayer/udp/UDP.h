@@ -23,6 +23,8 @@
 #include <list>
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 
 namespace inet {
@@ -154,14 +156,14 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual std::vector<SockDesc *> findSocketsForMcastBcastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
     virtual SockDesc *findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort);
     virtual void sendUp(cPacket *payload, SockDesc *sd, ushort srcPort, ushort destPort);
-    virtual void processUndeliverablePacket(UDPHeader *udpPacket);
+    virtual void processUndeliverablePacket(Packet *udpPacket);
     virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet
     virtual void processICMPError(cPacket *icmpErrorMsg);    // TODO use ICMPMessage
 
     // process UDP packets coming from IP
-    virtual void processUDPPacket(UDPHeader *udpPacket);
+    virtual void processUDPPacket(Packet *udpPacket);
 
     // process packets from application
     virtual void processPacketFromApp(cPacket *appData);
@@ -170,7 +172,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void processCommandFromApp(cMessage *msg);
 
     // create a blank UDP packet; override to subclass UDPPacket
-    virtual UDPHeader *createUDPPacket(const char *name);
+    virtual UDPHeader *createUDPPacket();
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
@@ -184,6 +186,8 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
 };
+
+uint16_t computeUdpCrc(const ByteArrayChunk& pseudoHeader, const ByteArrayChunk& udpPacket);
 
 } // namespace inet
 

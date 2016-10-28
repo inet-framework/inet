@@ -20,6 +20,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
@@ -154,42 +155,50 @@ void AODVRouting::handleMessage(cMessage *msg)
         else
             throw cRuntimeError("Unknown self message");
     }
-    else if (ICMPMessage *icmpPacket = dynamic_cast<ICMPMessage *>(msg)) {
-        // ICMP packet arrived, dropped
-        delete icmpPacket;
-    }
     else {
-        FlatPacket *udpPacket = check_and_cast<FlatPacket *>(msg);
-        UDPHeader *udpHeader = check_and_cast<UDPHeader *>(udpPacket->popHeader());
-        L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-        unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
-        PacketChunk *payload = check_and_cast<PacketChunk *>(udpPacket->popHeader());
-        AODVControlPacket *ctrlPacket = check_and_cast<AODVControlPacket *>(payload->removePacket());
-        delete payload;
-        ctrlPacket->transferTagsFrom(msg);
+        auto& protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
 
-        switch (ctrlPacket->getPacketType()) {
-            case RREQ:
-                handleRREQ(check_and_cast<AODVRREQ *>(ctrlPacket), sourceAddr, arrivalPacketTTL);
-                break;
-
-            case RREP:
-                handleRREP(check_and_cast<AODVRREP *>(ctrlPacket), sourceAddr);
-                break;
-
-            case RERR:
-                handleRERR(check_and_cast<AODVRERR *>(ctrlPacket), sourceAddr);
-                break;
-
-            case RREPACK:
-                handleRREPACK(check_and_cast<AODVRREPACK *>(ctrlPacket), sourceAddr);
-                break;
-
-            default:
-                throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacket->getPacketType());
+        if (protocol == Protocol::icmpv4) {
+            ICMPMessage *icmpPacket = check_and_cast<ICMPMessage *>(msg);
+            // ICMP packet arrived, dropped
+            delete icmpPacket;
         }
-        delete udpPacket;
-        delete udpHeader;
+        else
+        if (protocol == Protocol::icmpv6) {
+            ICMPMessage *icmpPacket = check_and_cast<ICMPMessage *>(msg);
+            // ICMP packet arrived, dropped
+            delete icmpPacket;
+        }
+        else if (true) {  //FIXME protocol == ???
+            Packet *udpPacket = check_and_cast<Packet *>(msg);
+            const auto& udpHeader = udpPacket->popHeader<UDPHeader>();
+            L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit();
+            const auto& ctrlPacket = udpPacket->popHeader<AODVControlPacket>();
+//            ctrlPacket->transferTagsFrom(msg);
+
+            switch (ctrlPacket->getPacketType()) {
+                case RREQ:
+                    handleRREQ(check_and_cast<AODVRREQ *>(ctrlPacket), sourceAddr, arrivalPacketTTL);
+                    break;
+
+                case RREP:
+                    handleRREP(check_and_cast<AODVRREP *>(ctrlPacket), sourceAddr);
+                    break;
+
+                case RERR:
+                    handleRERR(check_and_cast<AODVRERR *>(ctrlPacket), sourceAddr);
+                    break;
+
+                case RREPACK:
+                    handleRREPACK(check_and_cast<AODVRREPACK *>(ctrlPacket), sourceAddr);
+                    break;
+
+                default:
+                    throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacket->getPacketType());
+            }
+            delete udpPacket;
+        }
     }
 }
 
@@ -743,13 +752,13 @@ void AODVRouting::sendAODVPacket(AODVControlPacket *packet, const L3Address& des
     // TODO: Implement: support for multiple interfaces
     InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");
 
-    FlatPacket *udpPacket = new FlatPacket(packet->getName());
-    UDPHeader *udpHeader = new UDPHeader(packet->getName());
+    Packet *udpPacket = new Packet(packet->getName());
+    auto udpHeader = std::make_shared<UDPHeader>();
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
-    udpPacket->pushHeader(udpHeader);
+    udpPacket->prepend(udpHeader);
     udpPacket->transferTagsFrom(packet);
-    udpPacket->pushTrailer(new PacketChunk(packet));
+    udpPacket->append(new PacketChunk(packet));
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     udpPacket->ensureTag<InterfaceReq>()->setInterfaceId(ifEntry->getInterfaceId());

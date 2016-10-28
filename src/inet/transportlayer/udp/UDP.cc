@@ -22,7 +22,9 @@
 #include "inet/transportlayer/udp/UDP.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/packet/FlatPacket.h"
+#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/cPacketChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
@@ -159,12 +161,16 @@ void UDP::handleMessage(cMessage *msg)
 
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
-        if (FlatPacket *packet = dynamic_cast<FlatPacket *>(msg)) {
-            FlatChunk *header = packet->peekHeader();
-            if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(header))
-                processUDPPacket(udpHeader);
-            else
+        if (Packet *packet = dynamic_cast<Packet *>(msg)) {
+            auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+            if (protocol == &Protocol::udp) {
+                processUDPPacket(packet);
+            }
+            else if (protocol == &Protocol::icmpv4) {
                 processICMPError(PK(msg)); // assume it's an ICMP error
+            }
+            else
+                throw cRuntimeError("unknown protocol");
         }
         else
             processICMPError(PK(msg)); // assume it's an ICMP error
@@ -336,11 +342,11 @@ void UDP::processPacketFromApp(cPacket *appData)
     if (destPort <= 0 || destPort > 65535)
         throw cRuntimeError("send invalid remote port number %d", destPort);
 
-    UDPHeader *udpHeader = new UDPHeader();
-    FlatPacket * udpPacket = new FlatPacket(appData->getName());
-    udpPacket->pushHeader(udpHeader);
-    udpPacket->pushTrailer(new PacketChunk(appData)); //TODO
+    Packet *udpPacket = new Packet(appData->getName());
     udpPacket->transferTagsFrom(appData);
+    auto udpHeader = std::make_shared<UDPHeader>();
+    udpPacket->prepend(udpHeader);
+    udpPacket->append(std::make_shared<cPacketChunk>(appData)); //TODO
 
     if (udpPacket->getTag<MulticastReq>() == nullptr)
         udpPacket->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
@@ -353,6 +359,13 @@ void UDP::processPacketFromApp(cPacket *appData)
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
     udpHeader->setTotalLengthField(udpPacket->getByteLength());
+    udpHeader->setBitError(BIT_ERROR_NO);       //FIXME choose BIT_ERROR_NO, BIT_ERROR_YES, BIT_ERROR_CRC
+    uint16_t crc = 0;
+    if (udpHeader->getBitError() == BIT_ERROR_CRC) {
+        ByteArrayChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
+        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<ByteArrayChunk>(0)));
+    }
+    udpHeader->setCrc(crc);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
     udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
 
@@ -377,17 +390,50 @@ void UDP::processPacketFromApp(cPacket *appData)
     numSent++;
 }
 
-void UDP::processUDPPacket(UDPHeader *udpHeader)
+void UDP::processUDPPacket(Packet *udpPacket)
 {
-    FlatPacket *udpPacket = udpHeader->getMandatoryOwnerPacket();
+    ASSERT(udpPacket->getControlInfo() == nullptr);
     emit(rcvdPkSignal, udpPacket);
 
-    ASSERT(udpPacket->peekHeader() == udpHeader);
+    int64_t udpHeaderPosition = udpPacket->getHeaderPosition();
+    const auto& udpHeader = udpPacket->popHeader<UDPHeader>();
+    if (udpHeader == nullptr)
+        throw cRuntimeError("not an udp header");
 
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
 
-    if (!udpHeader->getIsChecksumCorrect()) {
+    auto srcPort = udpHeader->getSourcePort();
+    auto destPort = udpHeader->getDestinationPort();
+    auto l3AddressInd = udpPacket->getMandatoryTag<L3AddressInd>();
+    auto srcAddr = l3AddressInd->getSrcAddress();
+    auto destAddr = l3AddressInd->getDestAddress();
+    auto totalLength = udpHeader->getTotalLengthField();
+    auto crc = udpHeader->getCrc();
+
+    bool bitError = false;
+    switch (udpHeader->getBitError()) {
+        case BIT_ERROR_YES:
+            bitError = true;
+            break;
+        case BIT_ERROR_NO:
+            bitError = false;
+            break;
+        case BIT_ERROR_CRC: {
+            if (totalLength > udpPacket->getByteLength() - udpHeaderPosition - udpPacket->getTrailerPosition())
+                bitError = true;
+            else if (crc == 0)
+                bitError = false;
+            else {
+                ByteArrayChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
+                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<ByteArrayChunk>(udpHeaderPosition, totalLength)));
+            }
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown bit error value");
+    }
+    if (bitError) {
         EV_WARN << "Packet has bit error, discarding\n";
         emit(droppedPkBadChecksumSignal, udpPacket);
         numDroppedBadChecksum++;
@@ -396,36 +442,22 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
         return;
     }
 
-    L3Address srcAddr;
-    L3Address destAddr;
-    int srcPort = udpHeader->getSourcePort();
-    int destPort = udpHeader->getDestinationPort();
-
-    srcAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-    destAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getDestAddress();
-    ASSERT(udpPacket->getControlInfo() == nullptr);
     bool isMulticast = destAddr.isMulticast();
     bool isBroadcast = destAddr.isBroadcast();
-
     if (!isMulticast && !isBroadcast) {
         // unicast packet, there must be only one socket listening
         SockDesc *sd = findSocketForUnicastPacket(destAddr, destPort, srcAddr, srcPort);
         if (!sd) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            processUndeliverablePacket(udpHeader);
+            udpPacket->setHeaderPosition(udpHeaderPosition);
+            processUndeliverablePacket(udpPacket);
             return;
         }
         else {
-            delete udpPacket->popHeader();     // drop the UDP header
-            cPacket *payload = udpPacket;
-            if (udpPacket->getNumChunks() == 1) {
-                if (PacketChunk *pc = dynamic_cast<PacketChunk*>(udpPacket->popTrailer())) {
-                    payload = pc->removePacket();
-                    payload->transferTagsFrom(udpPacket);
-                    delete pc;
-                    delete udpPacket;
-                }
-            }
+            const auto& payloadChunk = udpPacket->popHeader<cPacketChunk>();
+            cPacket *payload = payloadChunk->removePacket();
+            payload->transferTagsFrom(udpPacket);
+            delete udpPacket;
             sendUp(payload, sd, srcPort, destPort);
         }
     }
@@ -434,20 +466,15 @@ void UDP::processUDPPacket(UDPHeader *udpHeader)
         std::vector<SockDesc *> sds = findSocketsForMcastBcastPacket(destAddr, destPort, srcAddr, srcPort, isMulticast, isBroadcast);
         if (sds.empty()) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            processUndeliverablePacket(udpHeader);
+            processUndeliverablePacket(udpPacket);
             return;
         }
         else {
-            delete udpPacket->popHeader();     // drop the UDP header
-            cPacket *payload = udpPacket;
-            if (udpPacket->getNumChunks() == 1) {
-                if (PacketChunk *pc = dynamic_cast<PacketChunk*>(udpPacket->popTrailer())) {
-                    payload = pc->removePacket();
-                    payload->transferTagsFrom(udpPacket);
-                    delete pc;
-                    delete udpPacket;
-                }
-            }
+            const auto& payloadChunk = udpPacket->popHeader<cPacketChunk>();
+            cPacket *payload = payloadChunk->removePacket();
+            payload->transferTagsFrom(udpPacket);
+            delete udpPacket;
+
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
                 sendUp(payload->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
@@ -476,8 +503,8 @@ void UDP::processICMPError(cPacket *pk)
         // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
         IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
         if (datagram->getDontFragment() || datagram->getFragmentOffset() == 0) {
-            if (FlatPacket *packet = dynamic_cast<FlatPacket *>(datagram->getEncapsulatedPacket())) {
-                if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(packet->peekHeader())) {
+            if (Packet *packet = dynamic_cast<Packet *>(datagram->getEncapsulatedPacket())) {
+                if (const auto& udpHeader = packet->peekHeader<UDPHeader>()) {
                     localAddr = datagram->getSrcAddress();
                     remoteAddr = datagram->getDestAddress();
                     localPort = udpHeader->getSourcePort();
@@ -497,8 +524,8 @@ void UDP::processICMPError(cPacket *pk)
         IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
         IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
         if (!fh || fh->getFragmentOffset() == 0) {
-            if (FlatPacket *packet = dynamic_cast<FlatPacket *>(datagram->getEncapsulatedPacket())) {
-                if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(packet->peekHeader())) {
+            if (Packet *packet = dynamic_cast<Packet *>(datagram->getEncapsulatedPacket())) {
+                if (const auto& udpHeader = packet->peekHeader<UDPHeader>()) {
                     localAddr = datagram->getSrcAddress();
                     remoteAddr = datagram->getDestAddress();
                     localPort = udpHeader->getSourcePort();
@@ -536,9 +563,9 @@ void UDP::processICMPError(cPacket *pk)
     delete pk;
 }
 
-void UDP::processUndeliverablePacket(UDPHeader *udpHeader)
+void UDP::processUndeliverablePacket(Packet *udpPacket)
 {
-    FlatPacket *udpPacket = udpHeader->getMandatoryOwnerPacket();
+    const auto& udpHeader = udpPacket->peekHeader<UDPHeader>();
     emit(droppedPkWrongPortSignal, udpPacket);
     numDroppedWrongPort++;
 
@@ -805,9 +832,9 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     send(notifyMsg, "appOut");
 }
 
-UDPHeader *UDP::createUDPPacket(const char *name)
+UDPHeader *UDP::createUDPPacket()
 {
-    return new UDPHeader(name);
+    return new UDPHeader();
 }
 
 UDP::SockDesc *UDP::getSocketById(int sockId)
@@ -1200,6 +1227,11 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
     multicastMembershipTable.erase(std::remove(multicastMembershipTable.begin(), multicastMembershipTable.end(), membership),
             multicastMembershipTable.end());
     delete membership;
+}
+
+uint16_t computeUdpCrc(const ByteArrayChunk& pseudoHeader, const ByteArrayChunk& udpPacket)
+{
+    return 0;   //FIXME add implementation
 }
 
 } // namespace inet
