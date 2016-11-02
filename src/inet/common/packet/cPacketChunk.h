@@ -34,6 +34,9 @@ class cPacketChunk : public Chunk
 
     virtual cPacket *removePacket();
     virtual std::string str() const override;
+  protected:
+    virtual cPacket *getPacket() const { return packet; }       /// do not use, only for TkEnv/QtEnv
+  friend class cPacketChunkDescriptor;
 };
 
 } // namespace

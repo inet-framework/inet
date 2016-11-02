@@ -107,6 +107,11 @@ class Packet : public cPacket
     virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }
 
     virtual std::string str() const override { return data->str(); }
+
+  protected:
+    int getNumChunks() const;
+    Chunk *getChunk(int i) const;
+    friend class PacketDescriptor;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
@@ -116,4 +121,5 @@ inline std::ostream& operator<<(std::ostream& os, const Packet& packet) { return
 } // namespace
 
 #endif // #ifndef __INET_PACKET_H_
+
 

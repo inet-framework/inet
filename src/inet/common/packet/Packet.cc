@@ -33,4 +33,14 @@ Packet::Packet(const char *name, short kind) :
 {
 }
 
+int Packet::getNumChunks() const
+{
+    return data->chunks.size();
+}
+
+Chunk *Packet::getChunk(int i) const
+{
+    return data->chunks[i].get();
+}
+
 } // namespace

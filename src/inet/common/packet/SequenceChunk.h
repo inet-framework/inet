@@ -146,6 +146,9 @@ class SequenceChunk : public Chunk, public std::enable_shared_from_this<Sequence
 
     virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
     virtual std::string str() const override;
+
+    friend class Packet;
+    friend class PacketDescriptor;
 };
 
 } // namespace
