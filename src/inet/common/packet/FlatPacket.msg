@@ -11,7 +11,7 @@ namespace inet;
 
 packet FlatPacket;
 
-class Chunk extends cOwnedObject
+class FlatChunk extends cOwnedObject
 {
     @existingClass(true);
     @descriptor(readonly);
@@ -20,7 +20,7 @@ class Chunk extends cOwnedObject
     FlatPacket* ownerPacket;     //FIXME readonly
 }
 
-class PacketChunk extends Chunk
+class PacketChunk extends FlatChunk
 {
     @existingClass(true);
     @descriptor(readonly);
@@ -44,6 +44,6 @@ packet FlatPacket       //TODO rename to Packet?
 {
     @existingClass(true);
     @descriptor(readonly);
-    Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
+    FlatChunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
 }
 
