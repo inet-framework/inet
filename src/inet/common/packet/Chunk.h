@@ -58,21 +58,21 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     virtual int64_t getByteLength() const = 0;
 
-    virtual std::shared_ptr<Chunk> replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const { return nullptr; }
 
-    virtual void serialize(ByteOutputStream& stream) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream);
+    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk);
+    static std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo);
+
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
         if (!ENABLE_IMPLICIT_CHUNK_SERIALIZATION)
-            throw cRuntimeError("Chunk serialization is disabled to prevent unpredictable performance degradation, set ENABLE_CHUNK_SERIALIZATION to allow transparent chunk serialization");
+            throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation, you may consider changing ENABLE_IMPLICIT_CHUNK_SERIALIZATION");
         // TODO: prevents easy access for application buffer
         // assertImmutable();
-        const auto& t = std::make_shared<T>();
         // TODO: eliminate const_cast
-        const auto& chunk = t->replace(const_cast<Chunk *>(this)->shared_from_this(), byteOffset, byteLength);
+        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), byteOffset, byteLength);
         chunk->makeImmutable();
         if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getByteLength())
             return std::dynamic_pointer_cast<T>(chunk);

@@ -34,7 +34,7 @@ class ByteArrayChunk : public Chunk
 
     virtual int64_t getByteLength() const override { return bytes.size(); }
 
-    virtual std::shared_ptr<Chunk> replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength) override;
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
 
     virtual const char *getSerializerClassName() const override { return "inet::ByteArrayChunkSerializer"; }

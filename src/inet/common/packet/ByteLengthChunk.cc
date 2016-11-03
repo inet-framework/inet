@@ -30,10 +30,9 @@ void ByteLengthChunk::setByteLength(int64_t byteLength)
     this->byteLength = byteLength;
 }
 
-std::shared_ptr<Chunk> ByteLengthChunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> ByteLengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
-    setByteLength(byteLength);
-    return shared_from_this();
+    return std::make_shared<ByteLengthChunk>(byteLength);
 }
 
 std::shared_ptr<Chunk> ByteLengthChunk::merge(const std::shared_ptr<Chunk>& other) const

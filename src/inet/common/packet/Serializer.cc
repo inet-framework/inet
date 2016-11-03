@@ -33,16 +33,16 @@ std::shared_ptr<Chunk> ByteArrayChunkSerializer::deserialize(ByteInputStream& st
     return byteArrayChunk;
 }
 
-void ByteArrayChunkSerializer::serialize(ByteOutputStream& stream, const Chunk& chunk) const
+void ByteArrayChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    auto& byteArrayChunk = static_cast<const ByteArrayChunk&>(chunk);
-    stream.writeBytes(byteArrayChunk.getBytes());
+    const auto& byteArrayChunk = std::static_pointer_cast<const ByteArrayChunk>(chunk);
+    stream.writeBytes(byteArrayChunk->getBytes());
 }
 
-void ByteLengthChunkSerializer::serialize(ByteOutputStream& stream, const Chunk& chunk) const
+void ByteLengthChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    auto& byteLengthChunk = static_cast<const ByteLengthChunk&>(chunk);
-    stream.writeByteRepeatedly('?', byteLengthChunk.getByteLength());
+    const auto& byteLengthChunk = std::static_pointer_cast<const ByteLengthChunk>(chunk);
+    stream.writeByteRepeatedly('?', byteLengthChunk->getByteLength());
 }
 
 std::shared_ptr<Chunk> ByteLengthChunkSerializer::deserialize(ByteInputStream& stream)
@@ -54,12 +54,12 @@ std::shared_ptr<Chunk> ByteLengthChunkSerializer::deserialize(ByteInputStream& s
     return byteLengthChunk;
 }
 
-void SliceChunkSerializer::serialize(ByteOutputStream& stream, const Chunk& chunk) const
+void SliceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    auto& sliceChunk = static_cast<const SliceChunk&>(chunk);
+    const auto& sliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
     ByteOutputStream outputStream;
-    sliceChunk.getChunk()->serialize(outputStream);
-    stream.writeBytes(outputStream.getBytes(), sliceChunk.getByteOffset(), sliceChunk.getByteLength());
+    Chunk::serialize(outputStream, sliceChunk->getChunk());
+    stream.writeBytes(outputStream.getBytes(), sliceChunk->getByteOffset(), sliceChunk->getByteLength());
 }
 
 std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream)
@@ -67,11 +67,11 @@ std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream
     throw cRuntimeError("Invalid operation");
 }
 
-void SequenceChunkSerializer::serialize(ByteOutputStream& stream, const Chunk& chunk) const
+void SequenceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    auto& sequenceChunk = static_cast<const SequenceChunk&>(chunk);
-    for (auto& chunk : sequenceChunk.getChunks())
-        chunk->serialize(stream);
+    const auto& sequenceChunk = std::static_pointer_cast<const SequenceChunk>(chunk);
+    for (auto& chunk : sequenceChunk->getChunks())
+        Chunk::serialize(stream, chunk);
 }
 
 std::shared_ptr<Chunk> SequenceChunkSerializer::deserialize(ByteInputStream& stream)

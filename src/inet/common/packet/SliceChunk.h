@@ -39,7 +39,7 @@ class SliceChunk : public Chunk
     virtual int64_t getByteLength() const override { return byteLength; }
     void setByteLength(int64_t byteLength);
 
-    virtual std::shared_ptr<Chunk> replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1) override;
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1);
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
 
     virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }

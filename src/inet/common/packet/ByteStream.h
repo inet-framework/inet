@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <vector>
-#include "Defs.h"
+#include "inet/common/packet/Defs.h"
 
 namespace inet {
 
@@ -49,7 +49,11 @@ class ByteOutputStream {
             this->bytes.push_back(bytes[byteOffset + i]);
     }
 
-    void writeInt16(uint16_t value) {
+    void writeUint8(uint8_t byte) {
+        writeByte(byte);
+    }
+
+    void writeUint16(uint16_t value) {
         bytes.push_back((uint8_t)(value >> 8));
         bytes.push_back((uint8_t)value);
     }
@@ -75,6 +79,8 @@ class ByteInputStream {
     int64_t getPosition() const { return position; }
     const std::vector<uint8_t>& getBytes() { return bytes; }
     uint8_t operator[](int64_t i) { return bytes[i]; }
+
+    void seek(int64_t position) { this->position = position; }
 
     uint8_t readByte() {
         if (position == bytes.size()) {
@@ -107,7 +113,11 @@ class ByteInputStream {
         }
     }
 
-    uint16_t readInt16() {
+    uint8_t readUint8() {
+        return readByte();
+    }
+
+    uint16_t readUint16() {
         uint16_t value = 0;
         if (position == bytes.size()) {
             isReadBeyondEnd_ = true;

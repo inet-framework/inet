@@ -24,36 +24,40 @@ Chunk::Chunk(const Chunk& other) :
 {
 }
 
-std::shared_ptr<Chunk> Chunk::replace(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
-    // TODO: prevent unnecessary complete serialization, and serialize only relevant parts
     ByteOutputStream outputStream;
-    chunk->serialize(outputStream);
+    serialize(outputStream, chunk);
     auto& outputBytes = outputStream.getBytes();
     auto begin = outputBytes.begin() + byteOffset;
     auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
     std::vector<uint8_t> inputBytes(begin, end);
     ByteInputStream inputStream(inputBytes);
-    return deserialize(inputStream);
+    return deserialize(inputStream, typeInfo);
 }
 
-void Chunk::serialize(ByteOutputStream& stream) const
+void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk)
 {
-    auto serializerClassName = getSerializerClassName();
+    auto serializerClassName = chunk->getSerializerClassName();
     auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
-    serializer->serialize(stream, *this);
+    serializer->serialize(stream, chunk);
     delete serializer;
 }
 
-std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
 {
-    auto serializerClassName = getSerializerClassName();
-    auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
+    auto serializerClassName = std::string(opp_demangle_typename(typeInfo.name())) + std::string("Serializer");
+    auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName.c_str()));
     auto chunk = serializer->deserialize(stream);
     delete serializer;
     if (stream.isReadBeyondEnd())
         chunk->makeIncomplete();
     return chunk;
+}
+
+std::shared_ptr<SliceChunk> Chunk::peekAt(int64_t byteOffset, int64_t byteLength) const
+{
+    return peekAt<SliceChunk>(byteOffset, byteLength);
 }
 
 std::string Chunk::str() const
