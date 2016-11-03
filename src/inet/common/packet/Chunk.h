@@ -26,7 +26,7 @@ class SliceChunk;
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   public:
-    static const bool ENABLE_IMPLICIT_CHUNK_SERIALIZATION = true;
+    static bool ENABLE_IMPLICIT_CHUNK_SERIALIZATION = true;
 
   protected:
     bool isImmutable_ = false;
@@ -68,7 +68,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
         if (!ENABLE_IMPLICIT_CHUNK_SERIALIZATION)
-            throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation, you may consider changing ENABLE_IMPLICIT_CHUNK_SERIALIZATION");
+            throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
         // TODO: prevents easy access for application buffer
         // assertImmutable();
         // TODO: eliminate const_cast
