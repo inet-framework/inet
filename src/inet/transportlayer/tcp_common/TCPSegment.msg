@@ -33,7 +33,7 @@ typedef TCPOption *TCPOptionPtr;
 
 }}
 
-class inet::Chunk extends cOwnedObject;
+class inet::FlatChunk extends cOwnedObject;
 
 namespace inet::tcp;
 
@@ -201,7 +201,7 @@ class TCPOptionUnknown extends TCPOption
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-packet TcpHeader extends Chunk
+packet TcpHeader extends FlatChunk
 {
     @customize(true);
     chunkByteLength = TCP_HEADER_OCTETS;
