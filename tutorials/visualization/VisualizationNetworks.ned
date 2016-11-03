@@ -15,14 +15,21 @@
 
 package inet.tutorials.visualization;
 
+//networkA
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.common.geometry.common.OsgGeographicCoordinateSystem;
+//networkB
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
 //
 // TODO documentation
 //
-network VisualizationNetworkA
+network VisualizationA
 {
     parameters:
         @display("bgb=0,0");
@@ -33,6 +40,34 @@ network VisualizationNetworkA
         coordinateSystem: OsgGeographicCoordinateSystem {
             parameters:
                 @display("p=100,150");
+        }
+}
+
+network VisualizationB extends VisualizationA
+{
+    parameters:
+        @display("bgb=0,0");
+    submodules:
+        pedestrian0: WirelessHost {
+            parameters:
+                @display("p=395,53;i=device/cellphone");
+        }
+        pedestrian1: WirelessHost {
+            parameters:
+                @display("p=595,75;i=device/cellphone");
+        }
+        accessPoint: AccessPoint {
+            parameters:
+                @display("p=487,163");
+        }
+
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,350");
         }
 }
 

@@ -14,7 +14,7 @@ INET Visualization Tutorial
 12) add signal
 13) add obstacle loss
 
-networks
+networks	visualizationTutorialA
 --------
 A.
  a) no network nodes
@@ -23,7 +23,7 @@ A.
  d) add void application
  e) add 1 wireless adhoc node (pedestrian with notebook) and add router, switch, server triplet and video stream application
  f) add another access point, router and separate pedestrians with mobiles, connect routers
- g) add houese and forest
+ g) add houses and forest
  h) add 2 cars and extra access points and routers
 
 steps
@@ -31,6 +31,7 @@ steps
 a)
  1. Showing Boston downtown
  2. Adding static 3D objects to the scene
+ 		kml file beolv
 b)
  3. Displaying communiation/interference range
  4. Using 3D models for network nodes

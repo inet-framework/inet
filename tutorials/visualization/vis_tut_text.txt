@@ -1,0 +1,94 @@
+1. Showing Boston downtown
+	- Goals:
+		- Showing a map of a real city
+	- Model:
+		- network:
+			- ?IMG: VisualizationNetworkA
+			- VisualizationNetworkA
+				- adding coordinateSystem
+				- adding visualizer
+		- parameters:
+			- ?IMG: [Config Visualization01]
+			- coordinate system:
+				- setting the longitude, latitude and altitude coordinate of the playground origin
+				- setting the orientation of the playground
+			- scene visualizer:
+				- setting our mapfile
+				- setting the playground shading, color and opacity
+				- setting the axis length
+	- Results:
+		- showing the map and the axis in 3d
+		- IMG: contains the axis' neighborhood, and the park
+		- can zoom in/out, rotate, move
+		- change camera mode, that means you can change the mouse buttons' and wheel's action
+		- in 2d you can see only the coordinateSystem and the visualizer submodule
+
+2. Adding static 3D objects to the scene	(under construction, dependency!!!)
+	- Goals:
+		- adding kml file because it's looking good
+	- Model:
+		- network:
+			- 
+	- Results:
+		- 
+
+3. Displaying communiation/interference range
+	- Goals:
+		- Showing communication range of the peds and ap &
+		- Showing interference range of the pads and ap, becausewe want to know that in what areas they can communicate
+	- Model:
+		- network:
+			- VisualizationNetworkB
+			- adding peds and one ap to the appropriate position
+			- adding networkConfigurator to configurate network nodes
+			- adding radioMedium that's simulating the media
+		- parameters:
+			- set wlan transmitter power, that define the communication range
+			- set displayCommunicationRange true, to display communication range
+			- set displayInterferenceRange true, to display interference range
+	- Results:
+		- each node has two circles:
+			- we can see communication range (small one)
+			- we can see interference range (big one). Must zoom out to see
+			- we can see these in 2d mode too
+
+4. Using 3D models for network nodes	(under construction, dependency!!!)
+	- Goals:
+		- changing nodes to 3d models because it's swag
+	- Model:
+		- network:
+			- 
+	- Results:
+		- 
+
+5. Displaying recent movement and orientation
+	- Goals:
+		- Displaying the peds' movement and orientation, because they're walking in the park during the call
+	- Model:
+		- parameters:
+			- adding mobility parameters:
+				- mobilityType sets the movement of the network nodes. The access point's type is StationaryMobility, the pedestrians' type is MassMobility
+				- the or initialX, initialY and initialZ show the pedestrians' starting position
+				- with the constraintArea parameters we can set borders for the pedestrians. They can move only within these boundaries
+				- setting their movement direction with the changeAngleBy, and how often they change that with the changeInterval parameter
+				- we can set their speed
+			- adding visualizer parameters
+				- we can visualize the nodes velocity, orientation and we can display their movement trail with these settings
+	- Results:
+		- The ap is on its place
+		- In 3d the peds are moving in random directon, leaving a movement trail behind
+		- In 2d happens the same + we can see a velocity vector and the orientation at each peds
+		
+6. Showing IP addresses
+	- Goals:
+		- We want to know the nodes' IP adress because of a troubleshooting reason for example
+	- Model:
+		- parameters:
+			- set which nodes' which interfaces are considered
+			- adding interface table visualizer parameters:
+				- the nodeFilter parameter shows which nodes are considered. By default it's "no nodes"
+				- the interfaceFilter parameter shows which interfaces are considered for each nodes. By default "all interfaces" considered.
+	- Results:
+		- on a yellow background we can see the pedestrians' IP addresses
+		- IMG: a pedestrian with its IP address
+		- GIF: the access point and the moving pedestrians with their IP addresses

@@ -1,0 +1,25 @@
+All steps:
+	- milyen képeket lehetne a html oldalra rakni. Miről kéne csinálni, hova kéne elhelyezni a szövegben, stb...
+	- minden resultsba kell valami kép/gif/mindkettő
+	- nézzen ki jól
+	- choose appropriate network name
+		???SOLVED: remove "Network" from network name
+	
+Step 1:
+	- change words: "ha a camera mode-ot váltom, akkor változik hogy az egér melyik gombjára mit reagál a simulation"
+		SOLVED: change camera mode, that means you can change the mouse buttons' and wheel's action
+	
+Step 3:
+	- if Visualization02 became active change Visualization01 to Visualization02
+		
+Step 4:
+	- search any 3d model on google
+		
+	
+Step 5:
+	- don't display orientation
+		SOLVED: deleted this line: *.visualizer.*.mobilityVisualizer.displayOrientation = true
+	- if Visualization04 became active change Visualization04 to Visualization04
+		
+	- optimize pedestrians common movement parameters/
+		SOLVED: -30,30 --> -15,15		0.1s --> 0.3s		5mps --> 2mps
