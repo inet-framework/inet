@@ -32,10 +32,9 @@ class cPacketChunk : public Chunk
 
     virtual int64_t getByteLength() const override { return packet != nullptr ? packet->getByteLength() : 0; }
 
-    virtual cPacket *removePacket();
+    virtual cPacket *getPacket() const { return packet; }       /// do not change, do not delete returned packet, the Chunk is the owner !!!!
     virtual std::string str() const override;
   protected:
-    virtual cPacket *getPacket() const { return packet; }       /// do not use, only for TkEnv/QtEnv
   friend class cPacketChunkDescriptor;
 };
 

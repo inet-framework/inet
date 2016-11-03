@@ -455,7 +455,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
         }
         else {
             const auto& payloadChunk = udpPacket->popHeader<cPacketChunk>();
-            cPacket *payload = payloadChunk->removePacket();
+            cPacket *payload = payloadChunk->getPacket()->dup();
             payload->transferTagsFrom(udpPacket);
             delete udpPacket;
             sendUp(payload, sd, srcPort, destPort);
@@ -471,7 +471,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
         }
         else {
             const auto& payloadChunk = udpPacket->popHeader<cPacketChunk>();
-            cPacket *payload = payloadChunk->removePacket();
+            cPacket *payload = payloadChunk->getPacket()->dup();
             payload->transferTagsFrom(udpPacket);
             delete udpPacket;
 

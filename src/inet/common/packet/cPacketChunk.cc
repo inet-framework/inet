@@ -30,15 +30,6 @@ cPacketChunk::~cPacketChunk()
 
 //TODO copy constructor: dup packet or store a shared ptr to cPacket???
 
-cPacket *cPacketChunk::removePacket()
-{
-    //FIXME
-    drop(packet);
-    cPacket *pk = packet;
-    packet = nullptr;
-    return pk;
-}
-
 std::string cPacketChunk::str() const {
     std::ostringstream os;
     os << "cPacketChunk, packet = {" << ( packet != nullptr ? packet->str() : std::string("<null>")) << "}";

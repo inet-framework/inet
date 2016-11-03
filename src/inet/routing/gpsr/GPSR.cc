@@ -209,7 +209,7 @@ void GPSR::processUDPPacket(Packet *packet)
 {
     const auto& udpHeader = packet->popHeader<UDPHeader>();
     auto pk = packet->popHeader<cPacketChunk>();
-    cPacket *encapsulatedPacket = pk->removePacket();
+    cPacket *encapsulatedPacket = pk->getPacket()->dup();
     if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket)) {
         beacon->transferTagsFrom(packet);
         processBeacon(beacon);
