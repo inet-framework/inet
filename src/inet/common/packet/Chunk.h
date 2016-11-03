@@ -26,12 +26,13 @@ class SliceChunk;
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   public:
-    static bool ENABLE_IMPLICIT_CHUNK_SERIALIZATION = true;
+    static bool ENABLE_IMPLICIT_CHUNK_SERIALIZATION;
 
   protected:
     bool isImmutable_ = false;
     bool isIncomplete_ = false;
     bool isIncorrect_ = false;
+    std::vector<uint8_t> *serializedBytes = nullptr;
 
   public:
     Chunk() { }
@@ -60,6 +61,10 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const { return nullptr; }
 
+    virtual const char *getSerializerClassName() const { return nullptr; }
+
+    virtual std::string str() const override;
+
     static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk);
     static std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo);
 
@@ -80,18 +85,11 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
             return nullptr;
     }
     std::shared_ptr<SliceChunk> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const;
-
-    virtual const char *getSerializerClassName() const { return nullptr; }
-    virtual std::string str() const override;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) {
-    return os << chunk->str();
-}
+inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { return os << chunk->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) {
-    return os << chunk.str();
-}
+inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }
 
 } // namespace
 

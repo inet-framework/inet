@@ -18,22 +18,12 @@
 
 namespace inet {
 
+bool Chunk::ENABLE_IMPLICIT_CHUNK_SERIALIZATION = true;
+
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(other.isImmutable_),
     isIncomplete_(other.isIncomplete_)
 {
-}
-
-std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
-{
-    ByteOutputStream outputStream;
-    serialize(outputStream, chunk);
-    auto& outputBytes = outputStream.getBytes();
-    auto begin = outputBytes.begin() + byteOffset;
-    auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
-    std::vector<uint8_t> inputBytes(begin, end);
-    ByteInputStream inputStream(inputBytes);
-    return deserialize(inputStream, typeInfo);
 }
 
 void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk)
@@ -53,6 +43,18 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
     if (stream.isReadBeyondEnd())
         chunk->makeIncomplete();
     return chunk;
+}
+
+std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+{
+    ByteOutputStream outputStream;
+    serialize(outputStream, chunk);
+    auto& outputBytes = outputStream.getBytes();
+    auto begin = outputBytes.begin() + byteOffset;
+    auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
+    std::vector<uint8_t> inputBytes(begin, end);
+    ByteInputStream inputStream(inputBytes);
+    return deserialize(inputStream, typeInfo);
 }
 
 std::shared_ptr<SliceChunk> Chunk::peekAt(int64_t byteOffset, int64_t byteLength) const

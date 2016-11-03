@@ -54,28 +54,28 @@ namespace inet {
 class CompoundHeaderSerializer : public SequenceChunkSerializer
 {
   public:
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
 class TlvHeaderSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
 class TlvHeader1Serializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
 class TlvHeader2Serializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
 class UnitTest : public cSimpleModule

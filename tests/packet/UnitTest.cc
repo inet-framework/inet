@@ -22,13 +22,13 @@
 
 namespace inet {
 
-Register_Class(CompoundHeaderSerializer);
-Register_Class(TlvHeaderSerializer);
-Register_Class(TlvHeader1Serializer);
-Register_Class(TlvHeader2Serializer);
+Register_Serializer(CompoundHeaderSerializer);
+Register_Serializer(TlvHeaderSerializer);
+Register_Serializer(TlvHeader1Serializer);
+Register_Serializer(TlvHeader2Serializer);
 Define_Module(UnitTest);
 
-std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream) const
 {
     auto compoundHeader = std::make_shared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
@@ -42,7 +42,7 @@ void TlvHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_
     throw cRuntimeError("Invalid operation");
 }
 
-std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(ByteInputStream& stream) const
 {
     uint8_t type = stream.readUint8();
     stream.seek(stream.getPosition() - 1);
@@ -64,7 +64,7 @@ void TlvHeader1Serializer::serialize(ByteOutputStream& stream, const std::shared
     stream.writeUint8(tlvHeader->getBoolValue());
 }
 
-std::shared_ptr<Chunk> TlvHeader1Serializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> TlvHeader1Serializer::deserialize(ByteInputStream& stream) const
 {
     auto tlvHeader = std::make_shared<TlvHeader1>();
     assert(tlvHeader->getType() == stream.readUint8());
@@ -81,7 +81,7 @@ void TlvHeader2Serializer::serialize(ByteOutputStream& stream, const std::shared
     stream.writeUint16(tlvHeader->getInt16Value());
 }
 
-std::shared_ptr<Chunk> TlvHeader2Serializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> TlvHeader2Serializer::deserialize(ByteInputStream& stream) const
 {
     auto tlvHeader = std::make_shared<TlvHeader2>();
     assert(tlvHeader->getType() == stream.readUint8());

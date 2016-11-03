@@ -17,12 +17,18 @@
 
 namespace inet {
 
-Register_Class(ByteArrayChunkSerializer);
-Register_Class(ByteLengthChunkSerializer);
-Register_Class(SliceChunkSerializer);
-Register_Class(SequenceChunkSerializer);
+Register_Serializer(ByteArrayChunkSerializer);
+Register_Serializer(ByteLengthChunkSerializer);
+Register_Serializer(SliceChunkSerializer);
+Register_Serializer(SequenceChunkSerializer);
 
-std::shared_ptr<Chunk> ByteArrayChunkSerializer::deserialize(ByteInputStream& stream)
+void ByteArrayChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+{
+    const auto& byteArrayChunk = std::static_pointer_cast<const ByteArrayChunk>(chunk);
+    stream.writeBytes(byteArrayChunk->getBytes());
+}
+
+std::shared_ptr<Chunk> ByteArrayChunkSerializer::deserialize(ByteInputStream& stream) const
 {
     auto byteArrayChunk = std::make_shared<ByteArrayChunk>();
     int byteLength = stream.getRemainingSize();
@@ -33,19 +39,13 @@ std::shared_ptr<Chunk> ByteArrayChunkSerializer::deserialize(ByteInputStream& st
     return byteArrayChunk;
 }
 
-void ByteArrayChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
-{
-    const auto& byteArrayChunk = std::static_pointer_cast<const ByteArrayChunk>(chunk);
-    stream.writeBytes(byteArrayChunk->getBytes());
-}
-
 void ByteLengthChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& byteLengthChunk = std::static_pointer_cast<const ByteLengthChunk>(chunk);
     stream.writeByteRepeatedly('?', byteLengthChunk->getByteLength());
 }
 
-std::shared_ptr<Chunk> ByteLengthChunkSerializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> ByteLengthChunkSerializer::deserialize(ByteInputStream& stream) const
 {
     auto byteLengthChunk = std::make_shared<ByteLengthChunk>();
     int byteLength = stream.getRemainingSize();
@@ -62,7 +62,7 @@ void SliceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared
     stream.writeBytes(outputStream.getBytes(), sliceChunk->getByteOffset(), sliceChunk->getByteLength());
 }
 
-std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream) const
 {
     throw cRuntimeError("Invalid operation");
 }
@@ -74,7 +74,7 @@ void SequenceChunkSerializer::serialize(ByteOutputStream& stream, const std::sha
         Chunk::serialize(stream, chunk);
 }
 
-std::shared_ptr<Chunk> SequenceChunkSerializer::deserialize(ByteInputStream& stream)
+std::shared_ptr<Chunk> SequenceChunkSerializer::deserialize(ByteInputStream& stream) const
 {
     throw cRuntimeError("Invalid operation");
 }
