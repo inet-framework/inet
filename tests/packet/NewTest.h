@@ -26,34 +26,28 @@ namespace inet {
 class ApplicationHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class TcpHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class IpHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 
 class EthernetHeaderSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const Chunk &chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
-};
-
-class CompoundHeaderSerializer : public SequenceChunkSerializer
-{
-  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
 };
 

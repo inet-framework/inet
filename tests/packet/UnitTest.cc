@@ -16,12 +16,79 @@
 #include "inet/common/packet/ByteArrayChunk.h"
 #include "inet/common/packet/ByteLengthChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "NewTest_m.h"
+#include "NewTest.h"
+#include "UnitTest_m.h"
 #include "UnitTest.h"
 
 namespace inet {
 
+Register_Class(CompoundHeaderSerializer);
+Register_Class(TlvHeaderSerializer);
+Register_Class(TlvHeader1Serializer);
+Register_Class(TlvHeader2Serializer);
 Define_Module(UnitTest);
+
+std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream)
+{
+    auto compoundHeader = std::make_shared<CompoundHeader>();
+    IpHeaderSerializer ipHeaderSerializer;
+    auto ipHeader = ipHeaderSerializer.deserialize(stream);
+    compoundHeader->append(ipHeader);
+    return compoundHeader;
+}
+
+void TlvHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+{
+    throw cRuntimeError("Invalid operation");
+}
+
+std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(ByteInputStream& stream)
+{
+    uint8_t type = stream.readUint8();
+    stream.seek(stream.getPosition() - 1);
+    switch (type) {
+        case 1:
+            return TlvHeader1Serializer().deserialize(stream);
+        case 2:
+            return TlvHeader2Serializer().deserialize(stream);
+        default:
+            throw cRuntimeError("Invalid TLV type");
+    }
+}
+
+void TlvHeader1Serializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+{
+    const auto& tlvHeader = std::static_pointer_cast<const TlvHeader1>(chunk);
+    stream.writeUint8(tlvHeader->getType());
+    stream.writeUint8(tlvHeader->getByteLength());
+    stream.writeUint8(tlvHeader->getBoolValue());
+}
+
+std::shared_ptr<Chunk> TlvHeader1Serializer::deserialize(ByteInputStream& stream)
+{
+    auto tlvHeader = std::make_shared<TlvHeader1>();
+    assert(tlvHeader->getType() == stream.readUint8());
+    assert(tlvHeader->getByteLength() == stream.readUint8());
+    tlvHeader->setBoolValue(stream.readUint8());
+    return tlvHeader;
+}
+
+void TlvHeader2Serializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+{
+    const auto& tlvHeader = std::static_pointer_cast<const TlvHeader2>(chunk);
+    stream.writeUint8(tlvHeader->getType());
+    stream.writeUint8(tlvHeader->getByteLength());
+    stream.writeUint16(tlvHeader->getInt16Value());
+}
+
+std::shared_ptr<Chunk> TlvHeader2Serializer::deserialize(ByteInputStream& stream)
+{
+    auto tlvHeader = std::make_shared<TlvHeader2>();
+    assert(tlvHeader->getType() == stream.readUint8());
+    assert(tlvHeader->getByteLength() == stream.readUint8());
+    tlvHeader->setInt16Value(stream.readUint16());
+    return tlvHeader;
+}
 
 static void testMutable()
 {
@@ -152,6 +219,35 @@ static void testNesting()
     assert(ipHeader2->getProtocol() == Protocol::Tcp);
 }
 
+static void testPolymorphism()
+{
+    // 1. TODO
+    Packet packet1;
+    auto tlvHeader1 = std::make_shared<TlvHeader1>();
+    tlvHeader1->setBoolValue(true);
+    packet1.append(tlvHeader1);
+    auto tlvHeader2 = std::make_shared<TlvHeader2>();
+    tlvHeader2->setInt16Value(42);
+    packet1.append(tlvHeader2);
+    packet1.makeImmutable();
+    const auto& tlvHeader3 = std::dynamic_pointer_cast<TlvHeader1>(packet1.popHeader<TlvHeader>());
+    assert(tlvHeader3 != nullptr);
+    assert(tlvHeader3->getBoolValue());
+    const auto& tlvHeader4 = std::dynamic_pointer_cast<TlvHeader2>(packet1.popHeader<TlvHeader>());
+    assert(tlvHeader4 != nullptr);
+    assert(tlvHeader4->getInt16Value() == 42);
+    // 2. TODO
+    const auto& byteArrayChunk1 = packet1.peekHeaderAt<ByteArrayChunk>(0);
+    Packet packet2;
+    packet2.append(byteArrayChunk1);
+    const auto& tlvHeader5 = std::dynamic_pointer_cast<TlvHeader1>(packet2.popHeader<TlvHeader>());
+    assert(tlvHeader5 != nullptr);
+    assert(tlvHeader5->getBoolValue());
+    const auto& tlvHeader6 = std::dynamic_pointer_cast<TlvHeader2>(packet2.popHeader<TlvHeader>());
+    assert(tlvHeader6 != nullptr);
+    assert(tlvHeader6->getInt16Value() == 42);
+}
+
 void UnitTest::initialize()
 {
     testMutable();
@@ -162,6 +258,7 @@ void UnitTest::initialize()
     testIncomplete();
     testMerge();
     testNesting();
+    testPolymorphism();
 }
 
 } // namespace

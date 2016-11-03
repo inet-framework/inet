@@ -1,0 +1,52 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+//
+
+cplusplus {{
+#include "inet/common/packet/Packet.h"
+}}
+
+namespace inet;
+
+class Chunk extends cObject;
+class SequenceChunk extends cObject;
+
+class CompoundHeader extends SequenceChunk
+{
+    string serializerClassName = "inet::CompoundHeaderSerializer";
+}
+
+class TlvHeader extends Chunk
+{
+    int8_t type = -1;
+    int64_t byteLength = -1;
+}
+
+class TlvHeader1 extends TlvHeader
+{
+    string serializerClassName = "inet::TlvHeader1Serializer";
+    bool boolValue = false;
+
+    type = 1;
+    byteLength = 3;
+}
+
+class TlvHeader2 extends TlvHeader
+{
+    string serializerClassName = "inet::TlvHeader2Serializer";
+    int16_t int16Value = -1;
+
+    type = 2;
+    byteLength = 4;
+}

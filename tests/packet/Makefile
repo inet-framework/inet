@@ -30,12 +30,19 @@ PROJECTRELATIVE_PATH = /tests/packet
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS = $O/NewTest.o $O/OldTest.o $O/UnitTest.o $O/NewTest_m.o $O/OldTest_m.o
+OBJS = \
+    $O/NewTest.o \
+    $O/OldTest.o \
+    $O/UnitTest.o \
+    $O/NewTest_m.o \
+    $O/OldTest_m.o \
+    $O/UnitTest_m.o
 
 # Message files
 MSGFILES = \
     NewTest.msg \
-    OldTest.msg
+    OldTest.msg \
+    UnitTest.msg
 
 # SM files
 SMFILES =

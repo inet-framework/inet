@@ -71,9 +71,3 @@ class EthernetHeader extends Chunk
     int64_t byteLength = 14;
     int16_t protocol @enum(Protocol) = -1;
 }
-
-class CompoundHeader extends SequenceChunk
-{
-    string serializerClassName = "inet::CompoundHeaderSerializer";
-}
-

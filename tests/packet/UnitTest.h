@@ -13,12 +13,70 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __NEWTEST_H_
-#define __NEWTEST_H_
+#ifndef __UNITTEST_H_
+#define __UNITTEST_H_
 
 #include "inet/common/packet/Defs.h"
 
+// TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
+// TODO: how do we represent the random subfield sequences (options) right after mandatory header part?
+//packet
+// - IpHeader
+//   - IpHeaderNonOptionalPartForFun
+//   - IpOption1
+// - TcpHeader
+//   - TcpHeader
+//   - TcpOption1
+//
+//packet
+// - Ieee80211PhyHeader
+// - Ieee80211MacHeader
+//   - QosField
+// - IpHeader
+// - IpOptions
+//   - IpOption1
+//   - IpOption2
+// - TcpHeader
+// - TcpOptions
+//   - TcpOption1
+//   - TcpOption2
+//
+//packet
+// - IpHeader
+// - IpOption1
+// - IpOption2
+// - TcpHeader
+// - TcpOption1
+// - TcpOption2
+
 namespace inet {
+
+class CompoundHeaderSerializer : public SequenceChunkSerializer
+{
+  public:
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+};
+
+class TlvHeaderSerializer : public ChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+};
+
+class TlvHeader1Serializer : public ChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+};
+
+class TlvHeader2Serializer : public ChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) override;
+};
 
 class UnitTest : public cSimpleModule
 {
@@ -28,5 +86,5 @@ class UnitTest : public cSimpleModule
 
 } // namespace
 
-#endif // #ifndef __NEWTEST_H_
+#endif // #ifndef __UNITTEST_H_
 
