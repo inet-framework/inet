@@ -24,8 +24,6 @@ import inet.node.wireless.AccessPoint;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
-
 //
 // TODO documentation
 //
@@ -70,4 +68,3 @@ network VisualizationB extends VisualizationA
                 @display("p=100,350");
         }
 }
-

@@ -3,12 +3,12 @@
 		- Showing a map of a real city
 	- Model:
 		- network:
-			- ?IMG: VisualizationNetworkA
+			- IMG: VisualizationNetworkA
 			- VisualizationNetworkA
 				- adding coordinateSystem
 				- adding visualizer
 		- parameters:
-			- ?IMG: [Config Visualization01]
+			- IMG: [Config Visualization01]
 			- coordinate system:
 				- setting the longitude, latitude and altitude coordinate of the playground origin
 				- setting the orientation of the playground
@@ -23,6 +23,7 @@
 		- change camera mode, that means you can change the mouse buttons' and wheel's action
 		- in 2d you can see only the coordinateSystem and the visualizer submodule
 
+
 2. Adding static 3D objects to the scene	(under construction, dependency!!!)
 	- Goals:
 		- adding kml file because it's looking good
@@ -32,6 +33,7 @@
 	- Results:
 		- 
 
+
 3. Displaying communiation/interference range
 	- Goals:
 		- Showing communication range of the peds and ap &
@@ -39,7 +41,7 @@
 	- Model:
 		- network:
 			- VisualizationNetworkB
-			- adding peds and one ap to the appropriate position
+			- adding pedestrians and one ap to the appropriate position
 			- adding networkConfigurator to configurate network nodes
 			- adding radioMedium that's simulating the media
 		- parameters:
@@ -52,18 +54,24 @@
 			- we can see interference range (big one). Must zoom out to see
 			- we can see these in 2d mode too
 
-4. Using 3D models for network nodes	(under construction, dependency!!!)
-	- Goals:
-		- changing nodes to 3d models because it's swag
-	- Model:
-		- network:
-			- 
-	- Results:
-		- 
 
-5. Displaying recent movement and orientation
+4. Using 3D models for network nodes
 	- Goals:
-		- Displaying the peds' movement and orientation, because they're walking in the park during the call
+		- changing nodes to 3d models because it's swag, we have really good boxman model to change the pedestrians' cellphone
+	- Model:
+		- parameters:
+			- we use the osgModel parameter to change the pedestrians' displaying
+			- after the equal sign we have to set our model.
+			- with the ".(0.1).scale" we can change the model size. Smaller number means smaller model 
+	- Results:
+		- GIF: the walking boxmen
+		- we can see walking boxmen in the park
+		- no change in 2d
+
+
+5. Displaying recent movement
+	- Goals:
+		- Displaying the pedestrians' movement, because they're walking in the park during the call
 	- Model:
 		- parameters:
 			- adding mobility parameters:
@@ -77,18 +85,100 @@
 	- Results:
 		- The ap is on its place
 		- In 3d the peds are moving in random directon, leaving a movement trail behind
-		- In 2d happens the same + we can see a velocity vector and the orientation at each peds
-		
+		- In 2d happens the same + we can see a velocity vector at each pedestrian
+
+################################################################################################################################################
+Reviewed until this mark
+
 6. Showing IP addresses
 	- Goals:
-		- We want to know the nodes' IP adress because of a troubleshooting reason for example
+		- Showing the nodes' IP address because of a troubleshooting reason for example
 	- Model:
 		- parameters:
-			- set which nodes' which interfaces are considered
+			- set which node's which interface is considered
 			- adding interface table visualizer parameters:
 				- the nodeFilter parameter shows which nodes are considered. By default it's "no nodes"
 				- the interfaceFilter parameter shows which interfaces are considered for each nodes. By default "all interfaces" considered.
 	- Results:
-		- on a yellow background we can see the pedestrians' IP addresses
+		- on a yellow background we can see the pedestrians' IP addresses (we can change the background and the font color???)
 		- IMG: a pedestrian with its IP address
 		- GIF: the access point and the moving pedestrians with their IP addresses
+
+
+7. Showing wifi association - DOESN'T WORK PROPERLY YET!!!
+	- Goals:
+		- Displaying the pedestrians to which access point connect. We will see an SSID probably, or any unequivocal data from the access point
+		- Displaying the access point's ssid
+	- Model:
+		- parameters:
+			- turn off the interfaceTableVisualizer, because of looking reasons
+			- we set the ssid parameter's "location" to the "infoVisualizer.modules". That will be displaying the access point's ssid
+			- we can change the text color, and the text background color, to looks these information clearly
+	- Results:
+		- Above the nodes we can see the appropriate information
+		- IMG: include the nodes
+		- GIF: the "" change to "SSID" above a node/the nodes
+
+
+8. Displaying transmissions & receptions
+	- Goals:
+		- The network works properly, the peds associated to access point, so we create some communication between the peds through the access point
+		- We want to know who transmits and who receives the signal at any moment
+	- Model:
+		- parameters:
+			- setting the application's parameters. They're necessary to keep the simulation realistic:
+				- simulate a voice stream --> basic udp app
+				- set the destination addresses to the other pedestrian, and set the source and destination port at each pedestrian
+				- we can set the message length
+				- set the interval of the message sending
+				- add a name to the packets, that identifies the packets
+			- setting the visualization's parameters:
+				- these belong to the medium, so we use mediumVisualizer parameters
+				- displayTransmissions/displayReceptions to display who transmits and receives the signals
+				- we assign images to the transmission/reception roles
+	- Results:
+		- we can see the assigned images above the network nodes at appropriate moment
+		- GIF: include the nodes for a few seconds
+
+
+9. Showing propagating signals
+	- Goals:
+		- We can see the transmitter&receiver, but we want to see the propagated signals too
+	- Model:
+		- parameters:
+			- setting medium visualizer parameters:
+				- enable signal displaying
+				- we can set the signal propagation interval (by default it doesn't update)
+				- set the signal shape both. There are three modes: ring, sphere, both. ring is a 2d ring on the ground, sphere is a 3d propagation mode, both means displaying both of them (by default it's ring)
+				-3 GIF: include the three signal shapes?
+	- Results:
+		- at every propagation interval the signal is spreading on the ground as a ring and in the air as a sphere
+		- the signal has a beginning and an ending point (not a point exatly.. a ring maybe)
+		- we can see the signal's type on the ground, and it's going with the signals end
+		- between the signal beginning and ending we can see the transmissions and receptions mark above the nodes
+		- GIF: include the lines above this
+
+
+10. Showing active physical links
+	- Goals:
+		- Displaying the active physical links between the network nodes
+	- Model:
+		- with the physical link visualizer packet name filter parameter we can filtering which packets are considered to determine active pyhisical links
+		- by the way we can change the line widht, line color, line style and fading mode too
+	- Results:
+		- it displays an arrow for each active link in the network
+		- the arrow points from the source towards the destination. If a link is used in both directions then there are arrowheads on both ends of the arrow
+		- each arrow fades out over time until the link becomes inactive unless it is reinforced by another packet.
+		- the arrow automatically follows the movement of mobile nodes.
+
+
+11. Showing active data links
+	- Goals:
+		- Showing the active data links between the pedestrians and the access point
+	- Model:
+		- parameter:
+			- turn off the physical link visualizer, so we can follow the data links without any disturbing factors
+			- with the data link visualizer packet name filter parameter we can filtering which packets are considered to determine active links
+	- Results:
+		- similar the results of showing active physical links
+		- different is the data link not equal physical link, so it's displaying rarely

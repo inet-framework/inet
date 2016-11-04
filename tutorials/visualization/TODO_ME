@@ -13,13 +13,36 @@ Step 3:
 	- if Visualization02 became active change Visualization01 to Visualization02
 		
 Step 4:
-	- search any 3d model on google
-		
+	- search any 3d model on google or anywhere
+		SOLVED: found boxman.osgb in "inet/examples/visualization/networknode/" folder
 	
 Step 5:
 	- don't display orientation
 		SOLVED: deleted this line: *.visualizer.*.mobilityVisualizer.displayOrientation = true
 	- if Visualization04 became active change Visualization04 to Visualization04
-		
+		SOLVED: Visualization04 is working now
 	- optimize pedestrians common movement parameters/
-		SOLVED: -30,30 --> -15,15		0.1s --> 0.3s		5mps --> 2mps
+		SOLVED: -30,30 --> -10,10		0.1s --> 0.5s		5mps --> 2mps
+
+Step 6:
+	- Q: Results: can we change the background and the font color at the interface table visualizer?
+
+Step 7:
+	- Q: csak meg kell jeleníteni a jeleket? Vagy infoval az állapotukat?
+		SOLVED: csak azt kell, hogy a pedestrian melyik ap-hez csatlakozott. Talán az ap ssid-jét is ki lehet
+	- Q: InfoVisualizerBase Question: module-nak tetszoleges valtozojat ki lehet iratni? (CObjectet pl)
+		
+
+Step 8:
+	- Q: message length necessary?
+		
+
+Step 10:
+	- There are more unused parameters...
+		
+	- Q: What is physical link exactly?
+		
+
+Step 11:
+	- Q: What is data link exactly?
+		
