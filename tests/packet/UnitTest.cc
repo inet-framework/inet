@@ -221,7 +221,7 @@ static void testNesting()
 
 static void testPolymorphism()
 {
-    // 1. TODO
+    // 1. packet provides headers in a polymorphic way without serialization
     Packet packet1;
     auto tlvHeader1 = std::make_shared<TlvHeader1>();
     tlvHeader1->setBoolValue(true);
@@ -236,7 +236,7 @@ static void testPolymorphism()
     const auto& tlvHeader4 = std::dynamic_pointer_cast<TlvHeader2>(packet1.popHeader<TlvHeader>());
     assert(tlvHeader4 != nullptr);
     assert(tlvHeader4->getInt16Value() == 42);
-    // 2. TODO
+    // 1. packet provides serialized headers in a polymorphic way after deserialization
     const auto& byteArrayChunk1 = packet1.peekHeaderAt<ByteArrayChunk>(0);
     Packet packet2;
     packet2.append(byteArrayChunk1);
@@ -246,6 +246,40 @@ static void testPolymorphism()
     const auto& tlvHeader6 = std::dynamic_pointer_cast<TlvHeader2>(packet2.popHeader<TlvHeader>());
     assert(tlvHeader6 != nullptr);
     assert(tlvHeader6->getInt16Value() == 42);
+}
+
+static void testSerialization()
+{
+    // 1. serialized bytes is cached after serialization
+    ByteOutputStream stream1;
+    auto applicationHeader1 = std::make_shared<ApplicationHeader>();
+    auto totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    Chunk::serialize(stream1, applicationHeader1);
+    auto size = stream1.getSize();
+    assert(size != 0);
+    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    Chunk::serialize(stream1, applicationHeader1);
+    assert(stream1.getSize() == 2 * size);
+    assert(totalSerializedBytes == ChunkSerializer::totalSerializedBytes);
+    // 2. serialized bytes is cached after deserialization
+    ByteInputStream stream2(stream1.getBytes());
+    auto totalDeserializedBytes = ChunkSerializer::totalDeserializedBytes;
+    auto applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(Chunk::deserialize(stream2, typeid(ApplicationHeader)));
+    assert(totalDeserializedBytes + size == ChunkSerializer::totalDeserializedBytes);
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    Chunk::serialize(stream1, applicationHeader2);
+    assert(stream1.getSize() == 3 * size);
+    assert(totalSerializedBytes == ChunkSerializer::totalSerializedBytes);
+    // 3. serialized bytes is deleted after change
+    applicationHeader1->setSomeData(42);
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    Chunk::serialize(stream1, applicationHeader1);
+    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
+    applicationHeader2->setSomeData(42);
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    Chunk::serialize(stream1, applicationHeader2);
+    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
 }
 
 void UnitTest::initialize()
@@ -259,6 +293,7 @@ void UnitTest::initialize()
     testMerge();
     testNesting();
     testPolymorphism();
+    testSerialization();
 }
 
 } // namespace
