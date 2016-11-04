@@ -18,7 +18,7 @@
 
 namespace inet {
 
-bool Chunk::ENABLE_IMPLICIT_CHUNK_SERIALIZATION = true;
+bool Chunk::enableImplicitChunkSerialization = true;
 
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(other.isImmutable_),
@@ -26,22 +26,47 @@ Chunk::Chunk(const Chunk& other) :
 {
 }
 
+Chunk::~Chunk()
+{
+    delete serializedBytes;
+}
+
+// TODO: call this whenever something changes in a chunk
+void Chunk::handleChange()
+{
+    assertMutable();
+    delete serializedBytes;
+    serializedBytes = nullptr;
+}
+
 void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk)
 {
-    auto serializerClassName = chunk->getSerializerClassName();
-    auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
-    serializer->serialize(stream, chunk);
-    delete serializer;
+    if (chunk->serializedBytes != nullptr)
+        stream.writeBytes(*chunk->serializedBytes);
+    else {
+        auto streamPosition = stream.getPosition();
+        auto serializerClassName = chunk->getSerializerClassName();
+        auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
+        serializer->serialize(stream, chunk);
+        delete serializer;
+        auto byteLength = stream.getPosition() - streamPosition;
+        chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
+        ChunkSerializer::totalSerializedBytes += byteLength;
+    }
 }
 
 std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
 {
+    auto streamPosition = stream.getPosition();
     auto serializerClassName = std::string(opp_demangle_typename(typeInfo.name())) + std::string("Serializer");
     auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName.c_str()));
     auto chunk = serializer->deserialize(stream);
     delete serializer;
     if (stream.isReadBeyondEnd())
         chunk->makeIncomplete();
+    auto byteLength = stream.getPosition() - streamPosition;
+    chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
+    ChunkSerializer::totalDeserializedBytes += byteLength;
     return chunk;
 }
 

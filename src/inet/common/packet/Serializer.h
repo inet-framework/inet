@@ -29,6 +29,10 @@ namespace inet {
 class ChunkSerializer : public cObject
 {
   public:
+    static int64_t totalSerializedBytes;
+    static int64_t totalDeserializedBytes;
+
+  public:
     virtual ~ChunkSerializer() { }
 
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const = 0;

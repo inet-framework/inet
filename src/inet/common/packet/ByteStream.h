@@ -28,10 +28,13 @@ class ByteOutputStream {
     std::vector<uint8_t> bytes;
 
   public:
+    uint8_t operator[](int64_t i) { return bytes[i]; }
     int64_t getSize() const { return bytes.size(); }
     int64_t getPosition() const { return bytes.size(); }
     const std::vector<uint8_t>& getBytes() { return bytes; }
-    uint8_t operator[](int64_t i) { return bytes[i]; }
+    std::vector<uint8_t> *copyBytes(int64_t byteOffset = 0, int64_t byteLength = -1) {
+        return new std::vector<uint8_t>(bytes.begin() + byteOffset, bytes.begin() + (byteLength == -1 ? bytes.size() : byteOffset + byteLength));
+    }
 
     void writeByte(uint8_t byte) {
         bytes.push_back(byte);
@@ -74,11 +77,14 @@ class ByteInputStream {
 
     bool isReadBeyondEnd() const { return isReadBeyondEnd_; }
 
+    uint8_t operator[](int64_t i) { return bytes[i]; }
     int64_t getSize() const { return bytes.size(); }
     int64_t getRemainingSize() const { return bytes.size() - position; }
     int64_t getPosition() const { return position; }
     const std::vector<uint8_t>& getBytes() { return bytes; }
-    uint8_t operator[](int64_t i) { return bytes[i]; }
+    std::vector<uint8_t> *copyBytes(int64_t byteOffset = 0, int64_t byteLength = -1) {
+        return new std::vector<uint8_t>(bytes.begin() + byteOffset, bytes.begin() + (byteLength == -1 ? bytes.size() : byteOffset + byteLength));
+    }
 
     void seek(int64_t position) { this->position = position; }
 

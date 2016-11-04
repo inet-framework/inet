@@ -23,10 +23,13 @@ namespace inet {
 
 class SliceChunk;
 
+/**
+ * This class represents a piece of data.
+ */
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   public:
-    static bool ENABLE_IMPLICIT_CHUNK_SERIALIZATION;
+    static bool enableImplicitChunkSerialization;
 
   protected:
     bool isImmutable_ = false;
@@ -34,28 +37,34 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     bool isIncorrect_ = false;
     std::vector<uint8_t> *serializedBytes = nullptr;
 
+  protected:
+    void handleChange();
+
   public:
     Chunk() { }
     Chunk(const Chunk& other);
-    virtual ~Chunk() { }
+    virtual ~Chunk();
 
     bool isMutable() const { return !isImmutable_; }
     bool isImmutable() const { return isImmutable_; }
     void assertMutable() const { assert(!isImmutable_); }
     void assertImmutable() const { assert(isImmutable_); }
     void makeImmutable() { isImmutable_ = true; }
+    // NOTE: there is no makeMutable() intentionally
 
     bool isComplete() const { return !isIncomplete_; }
     bool isIncomplete() const { return isIncomplete_; }
     void assertComplete() const { assert(!isIncomplete_); }
     void assertIncomplete() const { assert(isIncomplete_); }
     void makeIncomplete() { isIncomplete_ = true; }
+    // NOTE: there is no makeComplete() intentionally
 
     bool isCorrect() const { return !isIncorrect_; }
     bool isIncorrect() const { return isIncorrect_; }
     void assertCorrect() const { assert(!isIncorrect_); }
     void assertIncorrect() const { assert(isIncorrect_); }
     void makeIncorrect() { isIncorrect_ = true; }
+    // NOTE: there is no makeCorrect() intentionally
 
     virtual int64_t getByteLength() const = 0;
 
@@ -72,7 +81,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        if (!ENABLE_IMPLICIT_CHUNK_SERIALIZATION)
+        if (!enableImplicitChunkSerialization)
             throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
         // TODO: prevents easy access for application buffer
         // assertImmutable();
