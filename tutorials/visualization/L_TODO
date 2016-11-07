@@ -3,4 +3,6 @@
 			No source available for "0x72657a" 
 			
 - Would look great, if the node visualizer can rotate the model to the speed's direction 
+	SOLVED
 - InfoVisualizerBase Question: module-nak tetszoleges valtozojat ki lehet iratni? (CObjectet pl)
+	SOLUTION: *.visualizer.*.ieee80211Visualizer.nodeFilter = "**" legyen rajta cimke: ssid, jelerösség

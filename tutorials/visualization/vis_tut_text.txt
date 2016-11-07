@@ -20,7 +20,7 @@
 		- showing the map and the axis in 3d
 		- IMG: contains the axis' neighborhood, and the park
 		- can zoom in/out, rotate, move
-		- change camera mode, that means you can change the mouse buttons' and wheel's action
+		- change camera mode, that means you can change the mouse buttons' and mouse wheel's camera action
 		- in 2d you can see only the coordinateSystem and the visualizer submodule
 
 
@@ -88,7 +88,7 @@
 		- In 2d happens the same + we can see a velocity vector at each pedestrian
 
 ################################################################################################################################################
-Reviewed until this mark
+Review 1
 
 6. Showing IP addresses
 	- Goals:
@@ -98,38 +98,37 @@ Reviewed until this mark
 			- set which node's which interface is considered
 			- adding interface table visualizer parameters:
 				- the nodeFilter parameter shows which nodes are considered. By default it's "no nodes"
-				- the interfaceFilter parameter shows which interfaces are considered for each nodes. By default "all interfaces" considered.
+				- the interfaceFilter parameter shows which interfaces are considered for each nodes. By default "all interfaces" are considered.
+				- we can change the background and the font color if we want
 	- Results:
-		- on a yellow background we can see the pedestrians' IP addresses (we can change the background and the font color???)
+		- on a yellow background we can see the pedestrians' IP addresses
 		- IMG: a pedestrian with its IP address
 		- GIF: the access point and the moving pedestrians with their IP addresses
 
 
 7. Showing wifi association - DOESN'T WORK PROPERLY YET!!!
 	- Goals:
-		- Displaying the pedestrians to which access point connect. We will see an SSID probably, or any unequivocal data from the access point
-		- Displaying the access point's ssid
+		- Displaying the pedestrians to which access point connect. We want to see a signal and a label with the wireless network's ssid
 	- Model:
 		- parameters:
 			- turn off the interfaceTableVisualizer, because of looking reasons
-			- we set the ssid parameter's "location" to the "infoVisualizer.modules". That will be displaying the access point's ssid
-			- we can change the text color, and the text background color, to looks these information clearly
+			- we set the 802.11 visualizer parameter. Show at all devices
 	- Results:
 		- Above the nodes we can see the appropriate information
 		- IMG: include the nodes
-		- GIF: the "" change to "SSID" above a node/the nodes
+		- GIF: the association process
 
 
 8. Displaying transmissions & receptions
 	- Goals:
 		- The network works properly, the peds associated to access point, so we create some communication between the peds through the access point
-		- We want to know who transmits and who receives the signal at any moment
+		- Showing to know who transmits and who receives the signal at any moment
 	- Model:
 		- parameters:
 			- setting the application's parameters. They're necessary to keep the simulation realistic:
 				- simulate a voice stream --> basic udp app
 				- set the destination addresses to the other pedestrian, and set the source and destination port at each pedestrian
-				- we can set the message length
+				- we can set the message length. If we don't set it int the ini file, then we have to set it at the beginning of the simulation
 				- set the interval of the message sending
 				- add a name to the packets, that identifies the packets
 			- setting the visualization's parameters:
@@ -148,7 +147,7 @@ Reviewed until this mark
 		- parameters:
 			- setting medium visualizer parameters:
 				- enable signal displaying
-				- we can set the signal propagation interval (by default it doesn't update)
+				- we can set the signal propagation interval (by default it doesn't update, so we can't see anything)
 				- set the signal shape both. There are three modes: ring, sphere, both. ring is a 2d ring on the ground, sphere is a 3d propagation mode, both means displaying both of them (by default it's ring)
 				-3 GIF: include the three signal shapes?
 	- Results:
@@ -156,7 +155,9 @@ Reviewed until this mark
 		- the signal has a beginning and an ending point (not a point exatly.. a ring maybe)
 		- we can see the signal's type on the ground, and it's going with the signals end
 		- between the signal beginning and ending we can see the transmissions and receptions mark above the nodes
+		- in 2D mode we can see ring only
 		- GIF: include the lines above this
+		- GIF: 2D mode
 
 
 10. Showing active physical links
@@ -164,12 +165,14 @@ Reviewed until this mark
 		- Displaying the active physical links between the network nodes
 	- Model:
 		- with the physical link visualizer packet name filter parameter we can filtering which packets are considered to determine active pyhisical links
-		- by the way we can change the line widht, line color, line style and fading mode too
+		- by the way we can change the line width, line color, line style and fading mode too
 	- Results:
 		- it displays an arrow for each active link in the network
 		- the arrow points from the source towards the destination. If a link is used in both directions then there are arrowheads on both ends of the arrow
 		- each arrow fades out over time until the link becomes inactive unless it is reinforced by another packet.
 		- the arrow automatically follows the movement of mobile nodes.
+		- in 2D mode the physical links marked by dotted arrow. Its every property is the same as in 3d view mode
+		- GIF: for the appearing and fading links, both in 2d and 3d view
 
 
 11. Showing active data links
@@ -182,3 +185,40 @@ Reviewed until this mark
 	- Results:
 		- similar the results of showing active physical links
 		- different is the data link not equal physical link, so it's displaying rarely
+		- it's the same arrow type in 2d mode
+		GIF: for the appearing and fading links, both in 2d and 3d view mode
+
+
+12. Displaying throughput statistics
+	- Goals:
+		- Displaying some statistics about the network, throughput statistic in this case
+	- Model:
+		- parameter:
+			- we have some statistic about the UDPApp
+			- subscribing to a signal (UDPApp has sentPk and rcvdPk)
+			- using one of the built-in statistics, in this case it's throughput
+			- we can add a prefix text, should be expressive
+			- determining the source path of the statistic
+			- we can add the measurement
+			- we can add max and min value of the statistic
+	- Results:
+		- above the name of pedestrians appears the throughput statistic at each device
+		- GIF: include pedestrians and their throughput for a few seconds, showing some value changing
+		- in 2d mode this do the same. In a bubble looks the throughput at each device
+		- GIF: 2d mode including all devices for a few seconds
+
+
+13. Showing configured routing tables
+	- Goals:
+		- 
+	- Model:
+		- network:
+			- 
+		- parameter:
+			- 
+	- Results:
+		- 
+
+
+
+

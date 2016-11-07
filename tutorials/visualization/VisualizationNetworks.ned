@@ -41,6 +41,7 @@ network VisualizationA
         }
 }
 
+
 network VisualizationB extends VisualizationA
 {
     parameters:
@@ -52,7 +53,7 @@ network VisualizationB extends VisualizationA
         }
         pedestrian1: WirelessHost {
             parameters:
-                @display("p=595,75;i=device/cellphone");
+                @display("p=600,85;i=device/cellphone");
         }
         accessPoint: AccessPoint {
             parameters:
@@ -66,5 +67,17 @@ network VisualizationB extends VisualizationA
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,350");
+        }
+}
+
+
+network VisualizationC extends VisualizationB
+{
+    parameters:
+        @display("bgb=0,0");
+    submodules:
+
+        pedestrianVideo: WirelessHost {
+            @display("p=366,150");
         }
 }

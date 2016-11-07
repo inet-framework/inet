@@ -7,7 +7,7 @@ All steps:
 	
 Step 1:
 	- change words: "ha a camera mode-ot váltom, akkor változik hogy az egér melyik gombjára mit reagál a simulation"
-		SOLVED: change camera mode, that means you can change the mouse buttons' and wheel's action
+		SOLVED: change camera mode, that means you can change the mouse buttons' and mouse wheel's camera action
 	
 Step 3:
 	- if Visualization02 became active change Visualization01 to Visualization02
@@ -23,26 +23,39 @@ Step 5:
 		SOLVED: Visualization04 is working now
 	- optimize pedestrians common movement parameters/
 		SOLVED: -30,30 --> -10,10		0.1s --> 0.5s		5mps --> 2mps
+#####################
+Review 1
+
 
 Step 6:
 	- Q: Results: can we change the background and the font color at the interface table visualizer?
+		SOLVED: yes, we can, InfoVisualizerBase
 
 Step 7:
 	- Q: csak meg kell jeleníteni a jeleket? Vagy infoval az állapotukat?
 		SOLVED: csak azt kell, hogy a pedestrian melyik ap-hez csatlakozott. Talán az ap ssid-jét is ki lehet
-	- Q: InfoVisualizerBase Question: module-nak tetszoleges valtozojat ki lehet iratni? (CObjectet pl)
+	- Q: InfoVisualizerBase Question: module-nak tetszőleges valtozójat ki lehet iratni? (CObjectet pl)
+		
+	- Q: Ki lehet iratni ezt+interfaceVisualizer-t ugy, hogy nem egymason vannak?
 		
 
 Step 8:
-	- Q: message length necessary?
+	- Q: message length mekkora legyen?
 		
-
+	- will be real voice stream
 Step 10:
-	- There are more unused parameters...
+	- physicalLinkVisualizer: There are more unused parameters...
 		
 	- Q: What is physical link exactly?
 		
 
 Step 11:
 	- Q: What is data link exactly?
+		
+
+
+Step 13:
+	- video pedestrian mar kesz
+	- tobbi hianyzik
+
 		
