@@ -237,7 +237,7 @@ static void testPolymorphism()
     assert(tlvHeader4 != nullptr);
     assert(tlvHeader4->getInt16Value() == 42);
     // 1. packet provides serialized headers in a polymorphic way after deserialization
-    const auto& byteArrayChunk1 = packet1.peekHeaderAt<ByteArrayChunk>(0);
+    const auto& byteArrayChunk1 = packet1.peekDataAt<ByteArrayChunk>(0, packet1.getByteLength());
     Packet packet2;
     packet2.append(byteArrayChunk1);
     const auto& tlvHeader5 = std::dynamic_pointer_cast<TlvHeader1>(packet2.popHeader<TlvHeader>());
@@ -253,33 +253,50 @@ static void testSerialization()
     // 1. serialized bytes is cached after serialization
     ByteOutputStream stream1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
-    auto totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    auto totalSerializedByteLength = ChunkSerializer::totalSerializedByteLength;
     Chunk::serialize(stream1, applicationHeader1);
     auto size = stream1.getSize();
     assert(size != 0);
-    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
-    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    assert(totalSerializedByteLength + size == ChunkSerializer::totalSerializedByteLength);
+    totalSerializedByteLength = ChunkSerializer::totalSerializedByteLength;
     Chunk::serialize(stream1, applicationHeader1);
     assert(stream1.getSize() == 2 * size);
-    assert(totalSerializedBytes == ChunkSerializer::totalSerializedBytes);
+    assert(totalSerializedByteLength == ChunkSerializer::totalSerializedByteLength);
     // 2. serialized bytes is cached after deserialization
     ByteInputStream stream2(stream1.getBytes());
-    auto totalDeserializedBytes = ChunkSerializer::totalDeserializedBytes;
+    auto totalDeserializedByteLength = ChunkSerializer::totalDeserializedByteLength;
     auto applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(Chunk::deserialize(stream2, typeid(ApplicationHeader)));
-    assert(totalDeserializedBytes + size == ChunkSerializer::totalDeserializedBytes);
-    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    assert(totalDeserializedByteLength + size == ChunkSerializer::totalDeserializedByteLength);
+    totalSerializedByteLength = ChunkSerializer::totalSerializedByteLength;
     Chunk::serialize(stream1, applicationHeader2);
     assert(stream1.getSize() == 3 * size);
-    assert(totalSerializedBytes == ChunkSerializer::totalSerializedBytes);
+    assert(totalSerializedByteLength == ChunkSerializer::totalSerializedByteLength);
     // 3. serialized bytes is deleted after change
     applicationHeader1->setSomeData(42);
-    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    totalSerializedByteLength = ChunkSerializer::totalSerializedByteLength;
     Chunk::serialize(stream1, applicationHeader1);
-    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
+    assert(totalSerializedByteLength + size == ChunkSerializer::totalSerializedByteLength);
     applicationHeader2->setSomeData(42);
-    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
+    totalSerializedByteLength = ChunkSerializer::totalSerializedByteLength;
     Chunk::serialize(stream1, applicationHeader2);
-    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
+    assert(totalSerializedByteLength + size == ChunkSerializer::totalSerializedByteLength);
+}
+
+static void testPeek()
+{
+    // 1. ByteLengthChunk peek always returns ByteLengthChunk
+    auto byteLengthChunk1 = std::make_shared<ByteLengthChunk>(10);
+    byteLengthChunk1->makeImmutable();
+    const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(byteLengthChunk1->peek2(0, 5));
+    assert(byteLengthChunk2 != nullptr);
+    assert(byteLengthChunk2->getByteLength() == 5);
+    // 2. ByteArrayChunk peek always returns ByteArrayChunk
+    auto byteArrayChunk1 = std::make_shared<ByteArrayChunk>();
+    byteArrayChunk1->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    byteArrayChunk1->makeImmutable();
+    const auto& byteArrayChunk2 = std::dynamic_pointer_cast<ByteArrayChunk>(byteArrayChunk1->peek2(0, 5));
+    assert(byteArrayChunk2 != nullptr);
+    assert(std::equal(byteArrayChunk2->getBytes().begin(), byteArrayChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4}).begin()));
 }
 
 void UnitTest::initialize()
@@ -294,6 +311,7 @@ void UnitTest::initialize()
     testNesting();
     testPolymorphism();
     testSerialization();
+    testPeek();
 }
 
 } // namespace

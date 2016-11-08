@@ -156,7 +156,7 @@ const std::vector<Packet *> NewMedium::receivePackets()
 
 Packet *NewMedium::serializePacket(Packet *packet)
 {
-    const auto& byteArrayChunk = packet->peekHeaderAt<ByteArrayChunk>(0, packet->getByteLength());
+    const auto& byteArrayChunk = packet->peekDataAt<ByteArrayChunk>(0, packet->getByteLength());
     auto serializedPacket = new Packet();
     serializedPacket->append(byteArrayChunk);
     serializedPacket->makeImmutable();
@@ -204,7 +204,7 @@ void NewSender::sendTcp(Packet *packet)
     int64_t tcpSegmentSizeLimit = 35;
     if (tcpSegment->getByteLength() + packet->getByteLength() >= tcpSegmentSizeLimit) {
         int64_t byteLength = tcpSegmentSizeLimit - tcpSegment->getByteLength();
-        tcpSegment->append(packet->peekHeaderAt(0, byteLength));
+        tcpSegment->append(packet->peekDataAt(0, byteLength));
         const auto& tcpHeader = tcpSegment->peekHeader<TcpHeader>();
         auto bitError = medium.getSerialize() ? BIT_ERROR_CRC : BIT_ERROR_NO;
         tcpHeader->setBitError(bitError);
@@ -214,7 +214,7 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case BIT_ERROR_CRC: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(ByteArrayChunk(), tcpSegment->peekHeaderAt<ByteArrayChunk>(0, tcpSegment->getByteLength())));
+                tcpHeader->setCrc(computeTcpCrc(ByteArrayChunk(), tcpSegment->peekDataAt<ByteArrayChunk>(0, tcpSegment->getByteLength())));
                 break;
             }
             default:
@@ -226,7 +226,7 @@ void NewSender::sendTcp(Packet *packet)
             tcpSegment = nullptr;
         else {
             tcpSegment = createTcpSegment();
-            tcpSegment->append(packet->peekHeaderAt(byteLength, remainingByteLength));
+            tcpSegment->append(packet->peekDataAt(byteLength, remainingByteLength));
         }
     }
     else
@@ -263,8 +263,10 @@ void NewSender::sendPackets()
 
 void NewReceiver::receiveApplication(Packet *packet)
 {
-    applicationData.push(packet->peekHeader());
-    EV_DEBUG << "Collecting application data: " << applicationData << std::endl;
+    const auto& chunk = packet->peekData();
+    EV_DEBUG << "Collecting application data: " << chunk << std::endl;
+    applicationData.push(chunk);
+    EV_DEBUG << "Buffered application data: " << applicationData << std::endl;
     if (applicationData.getPoppedByteLength() == 0 && applicationData.has<ByteArrayChunk>(10))
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteArrayChunk>(10) << std::endl;
     if (applicationData.getPoppedByteLength() == 10 && applicationData.has<ApplicationHeader>())
