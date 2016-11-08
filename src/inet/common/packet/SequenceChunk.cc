@@ -126,6 +126,14 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const SequenceIterato
     return nullptr;
 }
 
+std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byteLength) const
+{
+    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+        return const_cast<SequenceChunk *>(this)->shared_from_this();
+    else
+        return peek<SliceChunk>(static_cast<const SequenceIterator&>(iterator), byteLength);
+}
+
 void SequenceChunk::prependChunk(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();

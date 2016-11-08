@@ -101,6 +101,8 @@ class SequenceChunk : public Chunk
 
     /** @name Querying data related functions */
     //@{
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
+
     template <typename T>
     std::shared_ptr<T> peek(const SequenceIterator& iterator, int64_t byteLength = -1) const {
         if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))

@@ -42,12 +42,12 @@ void Buffer::remove(int64_t byteLength)
 
 std::shared_ptr<Chunk> Buffer::peek(int64_t byteLength) const
 {
-    return data->peek2(iterator, byteLength);
+    return data->peek(iterator, byteLength);
 }
 
 std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek2(Chunk::Iterator(byteOffset), byteLength);
+    return data->peek(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
 }
 
 void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)

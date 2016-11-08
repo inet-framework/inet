@@ -36,6 +36,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
       public:
         Iterator(int64_t position = 0);
         Iterator(const Iterator& other);
+        virtual ~Iterator() { }
 
         int64_t getPosition() const { return position; }
 
@@ -133,7 +134,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * default representation.
      */
     // TODO: rename to peek! conflict?
-    virtual std::shared_ptr<Chunk> peek2(const Iterator& iterator, int64_t byteLength = -1) const;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const;
 
     /**
      * Returns the designated part of the data represented by this chunk in the

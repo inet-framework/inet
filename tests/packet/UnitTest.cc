@@ -287,14 +287,14 @@ static void testPeek()
     // 1. ByteLengthChunk peek always returns ByteLengthChunk
     auto byteLengthChunk1 = std::make_shared<ByteLengthChunk>(10);
     byteLengthChunk1->makeImmutable();
-    const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(byteLengthChunk1->peek2(0, 5));
+    const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(byteLengthChunk1->peek(0, 5));
     assert(byteLengthChunk2 != nullptr);
     assert(byteLengthChunk2->getByteLength() == 5);
     // 2. ByteArrayChunk peek always returns ByteArrayChunk
     auto byteArrayChunk1 = std::make_shared<ByteArrayChunk>();
     byteArrayChunk1->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
     byteArrayChunk1->makeImmutable();
-    const auto& byteArrayChunk2 = std::dynamic_pointer_cast<ByteArrayChunk>(byteArrayChunk1->peek2(0, 5));
+    const auto& byteArrayChunk2 = std::dynamic_pointer_cast<ByteArrayChunk>(byteArrayChunk1->peek(0, 5));
     assert(byteArrayChunk2 != nullptr);
     assert(std::equal(byteArrayChunk2->getBytes().begin(), byteArrayChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4}).begin()));
 }

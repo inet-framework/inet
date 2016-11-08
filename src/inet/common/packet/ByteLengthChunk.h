@@ -36,7 +36,7 @@ class ByteLengthChunk : public Chunk
 
     virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
 
-    virtual std::shared_ptr<Chunk> peek2(const Iterator& iterator, int64_t byteLength = -1) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
 
     virtual const char *getSerializerClassName() const override { return "inet::ByteLengthChunkSerializer"; }
 

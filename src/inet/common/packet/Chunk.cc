@@ -92,12 +92,12 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
     return deserialize(inputStream, typeInfo);
 }
 
-std::shared_ptr<Chunk> Chunk::peek2(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t byteLength) const
 {
     if (iterator.getPosition() == 0 && byteLength == getByteLength())
         return const_cast<Chunk *>(this)->shared_from_this();
     else
-        return peek<SliceChunk>(iterator.getPosition(), byteLength);
+        return peek<SliceChunk>(iterator, byteLength);
 }
 
 std::string Chunk::str() const
