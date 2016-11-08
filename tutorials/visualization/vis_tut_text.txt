@@ -86,9 +86,9 @@
 		- The ap is on its place
 		- In 3d the peds are moving in random directon, leaving a movement trail behind
 		- In 2d happens the same + we can see a velocity vector at each pedestrian
-
 ################################################################################################################################################
 Review 1
+
 
 6. Showing IP addresses
 	- Goals:
@@ -206,18 +206,73 @@ Review 1
 		- GIF: include pedestrians and their throughput for a few seconds, showing some value changing
 		- in 2d mode this do the same. In a bubble looks the throughput at each device
 		- GIF: 2d mode including all devices for a few seconds
+################################################################################################################################################
+Review 2
 
 
 13. Showing configured routing tables
 	- Goals:
-		- 
+		- we want to show the active network routes between the nodes
 	- Model:
 		- network:
-			- 
+			- add a new network: VisualizationC
+			- add 1 wireless adhoc node (pedestrian with notebook)
+			- add router, switch, server triplet
+			- add connections between these
 		- parameter:
+			- add video stream application
+				- server udp: UDPVideoStreamSvr
+				- host udp: UDPVideoStreamCli
+			- turn off data links
+			- turn on routing table visualizer, that shows routes towards appropriate destination(s)
+				- we can set which destinations are considered
+	- Results:
+		- routing table elements represented with black arrows
+		- they're not follows the packets' real route
+		- they're pointing from sources, which have entry in its routing table towards pedestrianVideo
+		- it's also true in 2d mode
+		- IMG: the lines above
+		- ?GIF: simulation
+
+
+14. Displaying 802.11 channel access state
+	- Goals:
+		- we want to display the wireless nodes' channel access state
+	- Model:
+		- parameters:
+			- turn off the statistics, because it's overlapping
+			- set info visualizer
+				- .modules specifies the submodules of network nodes
+				- .content determines what is displayed on network nodes
+	- Results:
+		- we can see the wireless devices channel access state, also in 2d view mode
+		- GIF: simulation for a few seconds
+
+
+15. Showing active network routes
+	- Goals:
+		- we want to show the active network routes
+	- Model:
+		- parameters:
 			- 
 	- Results:
 		- 
+
+
+16. Displaying physical environment		(under construction)
+	- Goals:
+		- displaying physical environment, for example obstacles
+	- Model:
+		- network:
+			- VisualizationE
+				- add physical environment
+		- parameters:
+			- assign the physical environment to the coordinate system
+			- we can add and xml file, that describes the obstacles
+			- there are some other parameters
+	- Results:
+		- we can see the buildings in red, and "forrest" in green color
+		- they have some effect to the signal propagation, like in real world
 
 
 

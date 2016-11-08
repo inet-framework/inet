@@ -18,12 +18,25 @@ package inet.tutorials.visualization;
 //networkA
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.common.geometry.common.OsgGeographicCoordinateSystem;
+
 //networkB
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+//networkC
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth1G;
+
+//networkE
+import inet.environment.common.PhysicalEnvironment;
+
 //
 // TODO documentation
 //
@@ -33,7 +46,8 @@ network VisualizationA
         @display("bgb=0,0");
     submodules:
         visualizer: IntegratedVisualizer {
-            @display("p=100,50");
+            parameters:
+                @display("p=100,50");
         }
         coordinateSystem: OsgGeographicCoordinateSystem {
             parameters:
@@ -55,11 +69,10 @@ network VisualizationB extends VisualizationA
             parameters:
                 @display("p=600,85;i=device/cellphone");
         }
-        accessPoint: AccessPoint {
+        accessPoint0: AccessPoint {
             parameters:
                 @display("p=487,163");
         }
-
         configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=100,250");
@@ -76,8 +89,53 @@ network VisualizationC extends VisualizationB
     parameters:
         @display("bgb=0,0");
     submodules:
-
         pedestrianVideo: WirelessHost {
-            @display("p=366,150");
+            parameters:
+                @display("p=366,150");
+        }
+        router0: Router {
+            parameters:
+                @display("p=511,234;i=abstract/router");
+        }
+        switch0: EtherSwitch {
+            parameters:
+                @display("p=416,327");
+        }
+        server0: StandardHost {
+            parameters:
+                @display("p=443,405");
+        }
+    connections:
+        accessPoint0.ethg++ <--> Eth100M <--> router0.ethg++;
+        switch0.ethg++ <--> Eth100M <--> router0.ethg++;
+        server0.ethg++ <--> Eth100M <--> switch0.ethg++;
+}
+
+
+network VisualizationD extends VisualizationC
+{
+    parameters:
+        @display("bgb=0,0");
+    submodules:
+        accessPoint1: AccessPoint {
+            parameters:
+                @display("p=630,205");
+        }
+        router1: Router {
+            parameters:
+                @display("p=616,244;i=abstract/router");
+        }
+    connections:
+        router0.pppg++ <--> Eth100M <--> router1.pppg++;
+        accessPoint1.ethg++ <--> Eth100M <--> router1.ethg++;
+}
+
+
+network VisualizationE extends VisualizationD
+{
+    submodules:
+        physicalEnvironment: PhysicalEnvironment {
+            parameters:
+                @display("p=100,450");
         }
 }
