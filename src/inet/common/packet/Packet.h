@@ -134,7 +134,7 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> popTrailer(int64_t byteLength = -1) {
-        auto& chunk = peekTrailer<T>(byteLength);
+        const auto& chunk = peekTrailer<T>(byteLength);
         if (chunk != nullptr)
             trailerIterator.move(-chunk->getByteLength());
         return chunk;
