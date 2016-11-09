@@ -103,6 +103,14 @@ void GenericNetworkProtocol::refreshDisplay() const
 
 void GenericNetworkProtocol::handleMessage(cMessage *msg)
 {
+    if (!msg->isPacket())
+        handleCommand(msg);
+    else
+        QueueBase::handleMessage(msg);
+}
+
+void GenericNetworkProtocol::handleCommand(cMessage *msg)
+{
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = msg->getMandatoryTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
@@ -129,7 +137,7 @@ void GenericNetworkProtocol::handleMessage(cMessage *msg)
         delete msg;
     }
     else
-        QueueBase::handleMessage(msg);
+        throw cRuntimeError("Invalid command: (%s)%s", msg->getClassName(), msg->getName());
 }
 
 void GenericNetworkProtocol::endService(cPacket *pk)

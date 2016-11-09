@@ -176,6 +176,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     virtual void handleMessage(cMessage *msg) override;
+    void handleCommand(cMessage *msg);
 
     /**
      * Processing of generic datagrams. Called when a datagram reaches the front
