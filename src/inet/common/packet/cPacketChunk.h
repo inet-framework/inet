@@ -26,9 +26,9 @@ class cPacketChunk : public Chunk
     cPacket *packet = nullptr;
 
   public:
-    cPacketChunk() { }
-    ~cPacketChunk();
+    cPacketChunk(const cPacketChunk& other);
     cPacketChunk(cPacket *packet);
+    ~cPacketChunk();
 
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
 

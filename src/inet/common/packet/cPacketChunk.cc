@@ -17,6 +17,12 @@
 
 namespace inet {
 
+cPacketChunk::cPacketChunk(const cPacketChunk& other) :
+    packet(other.packet->dup())
+{
+    take(packet);
+}
+
 cPacketChunk::cPacketChunk(cPacket *packet) :
     packet(packet)
 {
