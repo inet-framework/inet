@@ -248,7 +248,7 @@ static void testPolymorphism()
     assert(tlvHeader6->getInt16Value() == 42);
 }
 
-static void testSerialization()
+static void testSerialize()
 {
     // 1. serialized bytes is cached after serialization
     ByteOutputStream stream1;
@@ -299,6 +299,38 @@ static void testPeek()
     assert(std::equal(byteArrayChunk2->getBytes().begin(), byteArrayChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4}).begin()));
 }
 
+static void testClone()
+{
+    // 1. copy of immutable packet shares data
+    Packet packet1;
+    std::shared_ptr<ByteLengthChunk> byteLengthChunk1 = std::make_shared<ByteLengthChunk>(10);
+    packet1.append(byteLengthChunk1);
+    packet1.makeImmutable();
+    auto packet2 = packet1.dup();
+    assert(packet2->getByteLength() == 10);
+    // NOTE: packet shares whole SequenceChunk
+    assert(byteLengthChunk1.use_count() == 2);
+    delete packet2;
+    // 2. copy of mutable packet copies data
+    Packet packet3;
+    auto byteLengthChunk2 = std::make_shared<ByteLengthChunk>(10);
+    packet3.append(byteLengthChunk2);
+    auto packet4 = packet3.dup();
+    byteLengthChunk2->setByteLength(20);
+    assert(packet4->getByteLength() == 10);
+    assert(byteLengthChunk2.use_count() == 2);
+    delete packet4;
+    // 3. copy of immutable chunk in mutable packet shares data
+    Packet packet5;
+    std::shared_ptr<ByteLengthChunk> byteLengthChunk3 = std::make_shared<ByteLengthChunk>(10);
+    packet5.append(byteLengthChunk3);
+    byteLengthChunk3->makeImmutable();
+    auto packet6 = packet5.dup();
+    assert(packet6->getByteLength() == 10);
+    assert(byteLengthChunk3.use_count() == 3);
+    delete packet6;
+}
+
 void UnitTest::initialize()
 {
     testMutable();
@@ -310,8 +342,9 @@ void UnitTest::initialize()
     testMerge();
     testNesting();
     testPolymorphism();
-    testSerialization();
+    testSerialize();
     testPeek();
+    testClone();
 }
 
 } // namespace

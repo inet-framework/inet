@@ -82,9 +82,19 @@ class SequenceChunk : public Chunk
     void appendChunk(const std::shared_ptr<SliceChunk>& chunk);
     void appendChunk(const std::shared_ptr<SequenceChunk>& chunk);
 
+    std::vector<std::shared_ptr<Chunk>> cloneChunks() const {
+        std::vector<std::shared_ptr<Chunk>> clones;
+        for (auto& chunk : chunks)
+            // TODO: is this the right way to do it?
+            clones.push_back(chunk->isImmutable() ? chunk : std::shared_ptr<Chunk>(static_cast<Chunk *>(chunk->dup())));
+        return clones;
+    }
+
   public:
     SequenceChunk() { }
     SequenceChunk(const SequenceChunk& other);
+
+    virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
 
     const std::vector<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
 

@@ -82,7 +82,7 @@ SequenceChunk::BackwardIterator::BackwardIterator(const ForwardIterator& other) 
 
 SequenceChunk::SequenceChunk(const SequenceChunk& other) :
     Chunk(other),
-    chunks(other.chunks)
+    chunks(other.isImmutable() ? other.chunks : other.cloneChunks())
 {
 }
 

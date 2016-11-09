@@ -32,7 +32,9 @@ Chunk::Iterator::Iterator(const Iterator& other) :
 
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(other.isImmutable_),
-    isIncomplete_(other.isIncomplete_)
+    isIncomplete_(other.isIncomplete_),
+    isIncorrect_(other.isIncorrect_),
+    serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
 {
 }
 

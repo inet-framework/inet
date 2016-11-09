@@ -24,7 +24,7 @@ Buffer::Buffer() :
 }
 
 Buffer::Buffer(const Buffer& other) :
-    data(other.data),
+    data(other.isImmutable() ? other.data : std::make_shared<SequenceChunk>(*other.data)),
     iterator(other.iterator)
 {
 }

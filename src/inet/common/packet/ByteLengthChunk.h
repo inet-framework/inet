@@ -29,6 +29,8 @@ class ByteLengthChunk : public Chunk
     ByteLengthChunk() { }
     ByteLengthChunk(int64_t byteLength);
 
+    virtual ByteLengthChunk *dup() const override { return new ByteLengthChunk(*this); }
+
     virtual int64_t getByteLength() const override { return byteLength; }
     void setByteLength(int64_t byteLength);
 

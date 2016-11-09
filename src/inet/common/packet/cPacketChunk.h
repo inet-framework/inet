@@ -30,7 +30,9 @@ class cPacketChunk : public Chunk
     ~cPacketChunk();
     cPacketChunk(cPacket *packet);
 
-    virtual int64_t getByteLength() const override { return packet != nullptr ? packet->getByteLength() : 0; }
+    virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
+
+    virtual int64_t getByteLength() const override { return packet->getByteLength(); }
 
     virtual cPacket *getPacket() const { return packet; }       /// do not change, do not delete returned packet, the Chunk is the owner !!!!
     virtual std::string str() const override;

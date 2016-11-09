@@ -29,6 +29,8 @@ class ByteArrayChunk : public Chunk
     ByteArrayChunk() { }
     ByteArrayChunk(const std::vector<uint8_t>& bytes);
 
+    virtual ByteArrayChunk *dup() const override { return new ByteArrayChunk(*this); }
+
     const std::vector<uint8_t>& getBytes() const { return bytes; }
     void setBytes(const std::vector<uint8_t>& bytes);
 
