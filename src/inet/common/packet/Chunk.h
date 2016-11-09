@@ -133,7 +133,6 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Returns the designated part of the data represented by this chunk in its
      * default representation.
      */
-    // TODO: rename to peek! conflict?
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const;
 
     /**

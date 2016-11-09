@@ -34,8 +34,6 @@ cPacketChunk::~cPacketChunk()
     dropAndDelete(packet);
 }
 
-//TODO copy constructor: dup packet or store a shared ptr to cPacket???
-
 std::string cPacketChunk::str() const {
     std::ostringstream os;
     os << "cPacketChunk, packet = {" << ( packet != nullptr ? packet->str() : std::string("<null>")) << "}";
