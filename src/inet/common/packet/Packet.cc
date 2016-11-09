@@ -17,6 +17,8 @@
 
 namespace inet {
 
+Register_Class(Packet);
+
 Packet::Packet(const char *name, short kind) :
     cPacket(name, kind),
     data(std::make_shared<SequenceChunk>()),
