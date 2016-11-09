@@ -23,18 +23,16 @@ namespace inet {
 class SequenceChunk : public Chunk
 {
   public:
-    class Iterator
+    class SequenceIterator : public Iterator
     {
       protected:
         const std::shared_ptr<const SequenceChunk> chunk = nullptr;
-        int64_t position = 0;
-        int index = 0;
+        int index = -1;
 
       public:
-        Iterator(const std::shared_ptr<const SequenceChunk>& chunk) : chunk(chunk) { }
-        Iterator(const Iterator& other);
+        SequenceIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index = 0, int64_t position = 0);
+        SequenceIterator(const SequenceIterator& other);
 
-        int64_t getPosition() const { return position; }
         int getIndex() const { return index; }
 
         void move(int64_t byteLength);
@@ -43,35 +41,39 @@ class SequenceChunk : public Chunk
         virtual int getStartIndex() const = 0;
         virtual int getEndIndex() const = 0;
         virtual int getIndexIncrement() const = 0;
-        virtual const std::shared_ptr<Chunk>& getChunk() const = 0;
+        virtual const std::shared_ptr<Chunk>& getElementChunk() const = 0;
     };
 
-    class ForwardIterator : public Iterator
+    class ForwardIterator : public SequenceIterator
     {
       public:
-        ForwardIterator(const std::shared_ptr<const SequenceChunk>& chunk) : Iterator(chunk) { }
-        ForwardIterator(const ForwardIterator &other) : Iterator(other) { }
+        ForwardIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index = 0, int64_t position = 0);
+        ForwardIterator(const ForwardIterator& other);
 
         virtual int getStartIndex() const override { return 0; }
         virtual int getEndIndex() const override { return chunk->chunks.size() - 1; }
         virtual int getIndexIncrement() const override { return 1; }
-        virtual const std::shared_ptr<Chunk>& getChunk() const override { return chunk->chunks[index]; }
+        virtual const std::shared_ptr<Chunk>& getElementChunk() const override { return chunk->chunks[index]; }
     };
 
-    class BackwardIterator : public Iterator
+    class BackwardIterator : public SequenceIterator
     {
       public:
-        BackwardIterator(const std::shared_ptr<const SequenceChunk>& chunk) : Iterator(chunk) { }
-        BackwardIterator(const ForwardIterator &other) : Iterator(other) { }
+        BackwardIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index = 0, int64_t position = 0);
+        BackwardIterator(const ForwardIterator& other);
 
         virtual int getStartIndex() const override { return chunk->chunks.size() - 1; }
         virtual int getEndIndex() const override { return 0; }
         virtual int getIndexIncrement() const override { return -1; }
-        virtual const std::shared_ptr<Chunk>& getChunk() const override { return chunk->chunks[chunk->chunks.size() - index - 1]; }
+        virtual const std::shared_ptr<Chunk>& getElementChunk() const override { return chunk->chunks[chunk->chunks.size() - index - 1]; }
     };
 
   protected:
     std::vector<std::shared_ptr<Chunk>> chunks;
+
+  protected:
+    std::shared_ptr<Chunk> peekWithIterator(const SequenceIterator& iterator, int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peekWithLinearSearch(const SequenceIterator& iterator, int64_t byteLength = -1) const;
 
     void prependChunk(const std::shared_ptr<Chunk>& chunk);
     void prependChunk(const std::shared_ptr<SequenceChunk>& chunk);
@@ -84,57 +86,47 @@ class SequenceChunk : public Chunk
     SequenceChunk() { }
     SequenceChunk(const SequenceChunk& other);
 
-    void makeImmutable();
-
     const std::vector<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
+
+    /** @name Mutability related functions */
+    //@{
+    void makeImmutable();
+    //@}
+
+    /** @name Iteration related functions */
+    //@{
     ForwardIterator createForwardIterator() const { return ForwardIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this())); }
     BackwardIterator createBackwardIterator() const { return BackwardIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this())); }
+    //@}
 
+    /** @name Querying data related functions */
+    //@{
     template <typename T>
-    std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {
-        return peekAt<T>(iterator, iterator.getPosition(), byteLength);
+    std::shared_ptr<T> peek(const SequenceIterator& iterator, int64_t byteLength = -1) const {
+        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))
+            return tChunk;
+        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, byteLength)))
+            return tChunk;
+        return Chunk::peek<T>(iterator, byteLength);
     }
-    std::shared_ptr<SliceChunk> peek(const Iterator& iterator, int64_t byteLength = -1) const {
-        return peekAt<SliceChunk>(iterator, iterator.getPosition(), byteLength);
-    }
+    //@}
 
-    template <typename T>
-    std::shared_ptr<T> peekAt(const Iterator& iterator, int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        // fast path
-        if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && byteOffset == iterator.getPosition()) {
-            const auto& chunk = iterator.getChunk();
-            if (byteLength == -1 || chunk->getByteLength() == byteLength) {
-                if (auto castChunk = std::dynamic_pointer_cast<T>(chunk))
-                    return castChunk;
-            }
-        }
-        // linear search path
-        int position = 0;
-        int startIndex = iterator.getStartIndex();
-        int endIndex = iterator.getEndIndex();
-        int increment = iterator.getIndexIncrement();
-        for (int i = startIndex; i != endIndex + increment; i += increment) {
-            auto& chunk = chunks[i];
-            if (byteOffset == position && (byteLength == -1 || byteLength == chunk->getByteLength())) {
-                if (auto castChunk = std::dynamic_pointer_cast<T>(chunk))
-                    return castChunk;
-            }
-            position += chunk->getByteLength();
-        }
-        // slow path
-        assert(increment == 1 || byteLength != -1);
-        return Chunk::peekAt<T>(increment == 1 ? byteOffset : getByteLength() - byteOffset - byteLength, byteLength);
-    }
-    std::shared_ptr<SliceChunk> peekAt(const Iterator& iterator, int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return peekAt<SliceChunk>(iterator, byteOffset, byteLength);
-    }
-
+    /** @name Filling with data related functions */
+    //@{
     void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
     void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
+    //@}
+
+    /** @name Removing data related functions */
+    //@{
+    void removeBeginning(int64_t byteLength);
+    void removeEnd(int64_t byteLength);
+    //@}
 
     virtual int64_t getByteLength() const override;
 
     virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
+
     virtual std::string str() const override;
 
     friend class Packet;

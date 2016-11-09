@@ -29,4 +29,37 @@ Buffer::Buffer(const Buffer& other) :
 {
 }
 
+void Buffer::remove(int64_t byteLength)
+{
+    iterator.move(byteLength);
+    poppedByteLength += byteLength;
+    auto position = iterator.getPosition();
+    if (position > data->getByteLength() / 2) {
+        data->removeBeginning(position);
+        iterator.seek(0);
+    }
+}
+
+std::shared_ptr<Chunk> Buffer::peek(int64_t byteLength) const
+{
+    return data->peek2(iterator, byteLength);
+}
+
+std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t byteLength) const
+{
+    return data->peek2(Chunk::Iterator(byteOffset), byteLength);
+}
+
+void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
+{
+    data->append(chunk, flatten);
+    pushedByteLength += chunk->getByteLength();
+}
+
+void Buffer::push(Buffer* buffer, bool flatten)
+{
+    data->append(buffer->data, flatten);
+    pushedByteLength += buffer->getByteLength();
+}
+
 } // namespace

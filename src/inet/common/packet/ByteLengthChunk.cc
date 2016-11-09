@@ -45,6 +45,14 @@ std::shared_ptr<Chunk> ByteLengthChunk::merge(const std::shared_ptr<Chunk>& othe
         return nullptr;
 }
 
+std::shared_ptr<Chunk> ByteLengthChunk::peek2(const Iterator& iterator, int64_t byteLength) const
+{
+    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+        return const_cast<ByteLengthChunk *>(this)->shared_from_this();
+    else
+        return std::make_shared<ByteLengthChunk>(byteLength);
+}
+
 std::string ByteLengthChunk::str() const
 {
     std::ostringstream os;

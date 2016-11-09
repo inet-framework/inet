@@ -20,6 +20,16 @@ namespace inet {
 
 bool Chunk::enableImplicitChunkSerialization = true;
 
+Chunk::Iterator::Iterator(int64_t position) :
+    position(position)
+{
+}
+
+Chunk::Iterator::Iterator(const Iterator& other) :
+    position(other.position)
+{
+}
+
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(other.isImmutable_),
     isIncomplete_(other.isIncomplete_)
@@ -51,7 +61,7 @@ void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& ch
         delete serializer;
         auto byteLength = stream.getPosition() - streamPosition;
         chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
-        ChunkSerializer::totalSerializedBytes += byteLength;
+        ChunkSerializer::totalSerializedByteLength += byteLength;
     }
 }
 
@@ -66,7 +76,7 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
         chunk->makeIncomplete();
     auto byteLength = stream.getPosition() - streamPosition;
     chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
-    ChunkSerializer::totalDeserializedBytes += byteLength;
+    ChunkSerializer::totalDeserializedByteLength += byteLength;
     return chunk;
 }
 
@@ -82,9 +92,12 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
     return deserialize(inputStream, typeInfo);
 }
 
-std::shared_ptr<SliceChunk> Chunk::peekAt(int64_t byteOffset, int64_t byteLength) const
+std::shared_ptr<Chunk> Chunk::peek2(const Iterator& iterator, int64_t byteLength) const
 {
-    return peekAt<SliceChunk>(byteOffset, byteLength);
+    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+        return const_cast<Chunk *>(this)->shared_from_this();
+    else
+        return peek<SliceChunk>(iterator.getPosition(), byteLength);
 }
 
 std::string Chunk::str() const

@@ -71,7 +71,7 @@ std::shared_ptr<Chunk> SliceChunk::merge(const std::shared_ptr<Chunk>& other) co
 std::string SliceChunk::str() const
 {
     std::ostringstream os;
-    os << "SliceChunk, chunk = " << chunk << ", byteOffset = " << byteOffset << ", byteLength = " << byteLength;
+    os << "SliceChunk, chunk = {" << chunk << "}, byteOffset = " << byteOffset << ", byteLength = " << byteLength;
     return os.str();
 }
 

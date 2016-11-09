@@ -29,8 +29,8 @@ namespace inet {
 class ChunkSerializer : public cObject
 {
   public:
-    static int64_t totalSerializedBytes;
-    static int64_t totalDeserializedBytes;
+    static int64_t totalSerializedByteLength;
+    static int64_t totalDeserializedByteLength;
 
   public:
     virtual ~ChunkSerializer() { }

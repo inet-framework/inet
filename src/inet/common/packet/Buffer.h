@@ -18,10 +18,11 @@
 
 #include "inet/common/packet/SequenceChunk.h"
 
-// TODO: remove popped chunks from data
-
 namespace inet {
 
+/**
+ * This class represents application or protocol buffers.
+ */
 class Buffer : public cObject
 {
   protected:
@@ -29,6 +30,8 @@ class Buffer : public cObject
     int64_t poppedByteLength = 0;
     std::shared_ptr<SequenceChunk> data;
     SequenceChunk::ForwardIterator iterator;
+
+    void remove(int64_t byteLength);
 
   public:
     Buffer();
@@ -39,36 +42,43 @@ class Buffer : public cObject
     int64_t getPushedByteLength() const { return pushedByteLength; }
     int64_t getPoppedByteLength() const { return poppedByteLength; }
 
+    /** @name Mutability related functions */
+    //@{
     bool isImmutable() const { return data->isImmutable(); }
     bool isMutable() const { return !data->isImmutable(); }
     void assertMutable() const { data->assertMutable(); }
     void assertImmutable() const { data->assertImmutable(); }
     void makeImmutable() { data->makeImmutable(); }
+    //@}
+
+    /** @name Data querying related functions */
+    //@{
+    std::shared_ptr<Chunk> peek(int64_t byteLength = -1) const;
+
+    std::shared_ptr<Chunk> peekAt(int64_t byteOffset, int64_t byteLength) const;
 
     template <typename T>
     bool has(int64_t byteLength = -1) const {
-        return data->peek<T>(iterator, byteLength) != nullptr;
+        return peek<T>(byteLength) != nullptr;
     }
     template <typename T>
     std::shared_ptr<T> peek(int64_t byteLength = -1) const {
         return data->peek<T>(iterator, byteLength);
     }
-    std::shared_ptr<SliceChunk> peek(int64_t byteLength = -1) const {
-        return data->peek(iterator, byteLength);
-    }
     template <typename T>
     std::shared_ptr<T> pop(int64_t byteLength = -1) {
-        const auto& chunk = data->peek<T>(iterator, byteLength);
-        if (chunk != nullptr) {
-            auto byteLength = chunk->getByteLength();
-            iterator.move(byteLength);
-            poppedByteLength += byteLength;
-        }
+        const auto& chunk = peek<T>(byteLength);
+        if (chunk != nullptr)
+            remove(chunk->getByteLength());
         return chunk;
     }
+    //@}
 
-    void push(const std::shared_ptr<Chunk>& chunk, bool flatten = true) { data->append(chunk, flatten); pushedByteLength += chunk->getByteLength(); }
-    void push(Buffer *buffer, bool flatten = true) { data->append(buffer->data, flatten); pushedByteLength += buffer->getByteLength(); }
+    /** @name Filling with data related functions */
+    //@{
+    void push(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
+    void push(Buffer* buffer, bool flatten = true);
+    //@}
 
     int64_t getByteLength() const { return data->getByteLength() - iterator.getPosition(); }
 

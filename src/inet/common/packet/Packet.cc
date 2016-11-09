@@ -43,4 +43,54 @@ Chunk *Packet::getChunk(int i) const
     return data->chunks[i].get();
 }
 
+std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const
+{
+    return data->peek2(headerIterator, byteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t byteLength) const
+{
+    return data->peek2(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peekTrailer(int64_t byteLength) const
+{
+    return data->peek2(trailerIterator, byteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t byteLength) const
+{
+    return data->peek2(SequenceChunk::BackwardIterator(data, -1, byteOffset), byteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
+{
+    return data->peek2(Chunk::Iterator(getDataPosition()), byteLength == -1 ? getDataSize() : byteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
+{
+    return data->peek2(Chunk::Iterator(byteOffset), byteLength);
+}
+
+void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
+{
+    data->prepend(chunk, flatten);
+}
+
+void Packet::prepend(Packet* packet, bool flatten)
+{
+    data->prepend(packet->data, flatten);
+}
+
+void Packet::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
+{
+    data->append(chunk, flatten);
+}
+
+void Packet::append(Packet* packet, bool flatten)
+{
+    data->append(packet->data, flatten);
+}
+
 } // namespace

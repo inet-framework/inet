@@ -22,8 +22,8 @@ Register_Serializer(ByteLengthChunkSerializer);
 Register_Serializer(SliceChunkSerializer);
 Register_Serializer(SequenceChunkSerializer);
 
-int64_t ChunkSerializer::totalSerializedBytes = 0;
-int64_t ChunkSerializer::totalDeserializedBytes = 0;
+int64_t ChunkSerializer::totalSerializedByteLength = 0;
+int64_t ChunkSerializer::totalDeserializedByteLength = 0;
 
 void ByteArrayChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
