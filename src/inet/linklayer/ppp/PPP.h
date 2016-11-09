@@ -66,8 +66,8 @@ class INET_API PPP : public MACBase
 
   protected:
     virtual void startTransmitting(cPacket *msg);
-    virtual PPPFrame *encapsulate(cPacket *msg);
-    virtual cPacket *decapsulate(PPPFrame *pppFrame);
+    virtual Packet *encapsulate(cPacket *msg);
+    virtual cPacket *decapsulate(Packet *packet);
     virtual void refreshDisplay() const override;
     virtual void refreshOutGateConnection(bool connected);
 

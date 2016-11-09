@@ -208,8 +208,7 @@ void PPP::refreshOutGateConnection(bool connected)
 void PPP::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
-    PPPFrame *pppFrame = encapsulate(msg);
-    delete msg->removeControlInfo();
+    Packet *pppFrame = encapsulate(msg);
 
     // fire notification
     notifDetails.setPacket(pppFrame);
@@ -274,9 +273,13 @@ void PPP::handleMessage(cMessage *msg)
         }
         else {
             // pass up payload
-            PPPFrame *pppFrame = check_and_cast<PPPFrame *>(msg);
-            emit(rxPkOkSignal, pppFrame);
-            cPacket *payload = decapsulate(pppFrame);
+            auto packet = check_and_cast<Packet *>(msg);
+            const auto& pppHeader = packet->peekHeader<PppHeader>();
+            const auto& pppTrailer = packet->peekTrailer<PppTrailer>();
+            if (pppHeader == nullptr || pppTrailer == nullptr)
+                throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
+            emit(rxPkOkSignal, packet);
+            cPacket *payload = decapsulate(packet);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
             EV_INFO << "Sending " << payload << " to upper layer.\n";
@@ -352,22 +355,27 @@ void PPP::refreshDisplay() const
     getDisplayString().setTagArg("i", 1, color);
 }
 
-PPPFrame *PPP::encapsulate(cPacket *msg)
+Packet *PPP::encapsulate(cPacket *msg)
 {
-    PPPFrame *pppFrame = new PPPFrame(msg->getName());
-    pppFrame->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
-    pppFrame->setByteLength(PPP_OVERHEAD_BYTES);
-    pppFrame->encapsulate(msg);
-    return pppFrame;
+    auto packet = check_and_cast<Packet*>(msg);
+    auto pppHeader = std::make_shared<PppHeader>();
+    auto pppTrailer = std::make_shared<PppTrailer>();
+    pppHeader->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    packet->prepend(pppHeader);
+    packet->append(pppTrailer);
+    return packet;
 }
 
-cPacket *PPP::decapsulate(PPPFrame *pppFrame)
+cPacket *PPP::decapsulate(Packet *packet)
 {
-    cPacket *payload = pppFrame->decapsulate();
-    payload->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppFrame->getProtocol()));
-    delete pppFrame;
-    return payload;
+    const auto& pppHeader = packet->popHeader<PppHeader>();
+    const auto& pppTrailer = packet->popTrailer<PppTrailer>();
+    if (pppHeader == nullptr || pppTrailer == nullptr)
+        throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
+    //TODO check CRC
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppHeader->getProtocol()));
+    return packet;
 }
 
 void PPP::flushQueue()
