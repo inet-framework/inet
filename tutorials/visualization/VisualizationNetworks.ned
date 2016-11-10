@@ -63,11 +63,11 @@ network VisualizationB extends VisualizationA
     submodules:
         pedestrian0: WirelessHost {
             parameters:
-                @display("p=395,53;i=device/cellphone");
+                @display("p=373,89;i=device/cellphone");
         }
         pedestrian1: WirelessHost {
             parameters:
-                @display("p=600,85;i=device/cellphone");
+                @display("p=548,89;i=device/cellphone");
         }
         accessPoint0: AccessPoint {
             parameters:
@@ -91,24 +91,24 @@ network VisualizationC extends VisualizationB
     submodules:
         pedestrianVideo: WirelessHost {
             parameters:
-                @display("p=366,150");
+                @display("p=338,139");
         }
         router0: Router {
             parameters:
-                @display("p=511,234;i=abstract/router");
+                @display("p=487,234;i=abstract/router");
         }
         switch0: EtherSwitch {
             parameters:
                 @display("p=416,327");
         }
-        server0: StandardHost {
+        videoStreamServer: StandardHost {
             parameters:
-                @display("p=443,405");
+                @display("p=487,403");
         }
     connections:
         accessPoint0.ethg++ <--> Eth100M <--> router0.ethg++;
         switch0.ethg++ <--> Eth100M <--> router0.ethg++;
-        server0.ethg++ <--> Eth100M <--> switch0.ethg++;
+        videoStreamServer.ethg++ <--> Eth100M <--> switch0.ethg++;
 }
 
 
@@ -119,11 +119,11 @@ network VisualizationD extends VisualizationC
     submodules:
         accessPoint1: AccessPoint {
             parameters:
-                @display("p=630,205");
+                @display("p=601,163");
         }
         router1: Router {
             parameters:
-                @display("p=616,244;i=abstract/router");
+                @display("p=601,234;i=abstract/router");
         }
     connections:
         router0.pppg++ <--> Eth100M <--> router1.pppg++;
@@ -138,4 +138,22 @@ network VisualizationE extends VisualizationD
             parameters:
                 @display("p=100,450");
         }
+}
+
+
+network VisualizationF extends VisualizationE
+{
+    submodules:
+        car[2]: WirelessHost {
+            @display("p=215,122");
+        }
+        accessPoint2: AccessPoint {
+            @display("p=215,233");
+        }
+        router2: Router {
+            @display("p=316,234");
+        }
+    connections:
+        router0.pppg++ <--> Eth100M <--> router2.pppg++;
+        router2.ethg++ <--> Eth100M <--> accessPoint2.ethg++;
 }

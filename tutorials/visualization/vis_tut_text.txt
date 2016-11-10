@@ -261,7 +261,7 @@ Review 2
 
 16. Displaying physical environment		(under construction)
 	- Goals:
-		- displaying physical environment, for example obstacles
+		- we want to show physical environment, for example obstacles
 	- Model:
 		- network:
 			- VisualizationE
@@ -275,5 +275,35 @@ Review 2
 		- they have some effect to the signal propagation, like in real world
 
 
+17. Displaying obstacle loss
+	- Goals:
+		- we want to display where the signal encounters an obstacle
+	- Model:
+		- parameters:
+			- set some obstacle loss visualizer parameter:
+				- the displayIntersectionTrail parameter enables displaying intersections between physical objects and primary propagation path
+				- the displayFaceNormalVectorTrail parameter enables displaying face normal vectors for physical objects at intersections
+	- Results:
+		- 
 
 
+18. Showing packet drops
+	- Goals:
+		- we want to see, when packets dropped
+	- Model:
+		- parameters:
+			- set the packetDropVisualizer.packetNameFilter to that value, what packets we want to see
+	- Results:
+		- when a packet was dropped we can see a gray cube that fall off the map
+
+
+19. Displaying transport connections
+	- Goals:
+		- 
+	- Model:
+		- network:
+			-
+		- parameters:
+			- 
+	- Results:
+		- 

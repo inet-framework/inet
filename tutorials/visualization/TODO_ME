@@ -1,10 +1,19 @@
 All steps:
 	- milyen képeket lehetne a html oldalra rakni. Miről kéne csinálni, hova kéne elhelyezni a szövegben, stb...
+		
 	- minden resultsba kell valami kép/gif/mindkettő
+		
 	- nézzen ki jól
+		
 	- choose appropriate network name
 		???SOLVED: remove "Network" from network name
-	
+	- change positions from meter to longitude, latitude
+		
+	- in step 3 we should placing the nodes as pedestrian[2] and place them with mobility submodule longitude latitude
+		
+
+
+
 Step 1:
 	- change words: "ha a camera mode-ot váltom, akkor változik hogy az egér melyik gombjára mit reagál a simulation"
 		SOLVED: change camera mode, that means you can change the mouse buttons' and mouse wheel's camera action
@@ -69,16 +78,19 @@ Review 2
 
 
 Step 13:
-	- Q: Router mobility-t miért nem veszi figyelembe?
-		
-	- Q: Is the router's routing table enough?
+	- Q: put mobilityModule in switch?
 		
 
 
 Step 15:
 	- If we'll have routeVisualizer, then activate the commented lines
-	
-	
-	
+		
+
+
+Step 16:
+	- make an obstacle
+		SOLVED: drawed, but it seems only walls
+	- it seems only walls and is not acting like an obstacle
+		
 	
 	
