@@ -109,10 +109,10 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual void handlePacketFromNetwork(Packet *datagram);
 
     /**
-     * Handle messages (typically packets to be send in Generic) from transport or ICMP.
+     * Handle packets from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
-    virtual void handleMessageFromHL(cPacket *packet);
+    virtual void handlePacketFromHL(Packet *packet);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to

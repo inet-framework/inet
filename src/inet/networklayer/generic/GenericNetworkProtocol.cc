@@ -143,7 +143,7 @@ void GenericNetworkProtocol::handleCommand(cMessage *msg)
 void GenericNetworkProtocol::endService(cPacket *pk)
 {
     if (pk->getArrivalGate()->isName("transportIn"))
-        handleMessageFromHL(pk);
+        handlePacketFromHL(check_and_cast<Packet *>(pk));
     else {
         handlePacketFromNetwork(check_and_cast<Packet *>(pk));
     }
@@ -174,18 +174,17 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     datagramPreRouting(packet, inIE, destIE, nextHop);
 }
 
-void GenericNetworkProtocol::handleMessageFromHL(cPacket *msg)
+void GenericNetworkProtocol::handlePacketFromHL(Packet *packet)
 {
     // if no interface exists, do not send datagram
     if (interfaceTable->getNumInterfaces() == 0) {
         EV_INFO << "No interfaces exist, dropping packet\n";
-        delete msg;
+        delete packet;
         return;
     }
 
     // encapsulate and send
     const InterfaceEntry *destIE;    // will be filled in by encapsulate()
-    Packet *packet = check_and_cast<Packet *>(msg);
     encapsulate(packet, destIE);
 
     L3Address nextHop;
