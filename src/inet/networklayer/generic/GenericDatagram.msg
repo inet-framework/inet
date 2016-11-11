@@ -49,7 +49,7 @@ enum GenericTLVOptionTypes
 class GenericDatagramHeader extends Chunk
 {
     @customize(true);
-    int64_t byteLength = 0;
+    int64_t byteLength = 10;    //FIXME //KLUDGE set to -1, and should reading from ned parameter
     L3Address sourceAddress @getter(_getSrcAddr);
     L3Address destinationAddress @getter(_getDestAddr);
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
