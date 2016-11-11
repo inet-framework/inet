@@ -94,7 +94,6 @@ void SequenceChunk::makeImmutable()
         chunk->makeImmutable();
 }
 
-
 std::vector<std::shared_ptr<Chunk> > SequenceChunk::cloneChunks() const
 {
     std::vector<std::shared_ptr<Chunk> > clones;
@@ -147,6 +146,7 @@ std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byt
 bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
+    handleChange();
     if (chunk->getByteLength() <= 0)
         throw cRuntimeError("Invalid chunk length: %li", chunk->getByteLength());
     chunks.insert(chunks.begin(), chunk);
@@ -174,6 +174,7 @@ void SequenceChunk::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
 bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
+    handleChange();
     if (chunk->getByteLength() <= 0)
         throw cRuntimeError("Invalid chunk length: %li", chunk->getByteLength());
     if (chunks.size() == 0)
@@ -234,6 +235,7 @@ void SequenceChunk::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
 
 bool SequenceChunk::removeFromBeginning(int64_t byteLength)
 {
+    handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
         auto chunk = *it;
@@ -255,6 +257,7 @@ bool SequenceChunk::removeFromBeginning(int64_t byteLength)
 
 bool SequenceChunk::removeFromEnd(int64_t byteLength)
 {
+    handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
         auto chunk = *it;

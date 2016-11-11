@@ -41,6 +41,8 @@ void ByteArrayChunk::setBytes(const std::vector<uint8_t>& bytes)
 
 bool ByteArrayChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
+    assertMutable();
+    handleChange();
     if (const auto& byteArrayChunk = std::dynamic_pointer_cast<ByteArrayChunk>(chunk)) {
         bytes.insert(bytes.begin(), byteArrayChunk->bytes.begin(), byteArrayChunk->bytes.end());
         return true;
@@ -51,6 +53,8 @@ bool ByteArrayChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 
 bool ByteArrayChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
+    assertMutable();
+    handleChange();
     if (const auto& byteArrayChunk = std::dynamic_pointer_cast<ByteArrayChunk>(chunk)) {
         bytes.insert(bytes.end(), byteArrayChunk->bytes.begin(), byteArrayChunk->bytes.end());
         return true;
@@ -62,6 +66,8 @@ bool ByteArrayChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool ByteArrayChunk::removeFromBeginning(int64_t byteLength)
 {
     assert(byteLength <= bytes.size());
+    assertMutable();
+    handleChange();
     bytes.erase(bytes.begin(), bytes.begin() + byteLength);
     return true;
 }
@@ -69,6 +75,8 @@ bool ByteArrayChunk::removeFromBeginning(int64_t byteLength)
 bool ByteArrayChunk::removeFromEnd(int64_t byteLength)
 {
     assert(byteLength <= bytes.size());
+    assertMutable();
+    handleChange();
     bytes.erase(bytes.end() - byteLength, bytes.end());
     return true;
 }

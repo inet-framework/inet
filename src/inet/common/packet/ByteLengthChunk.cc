@@ -37,6 +37,8 @@ void ByteLengthChunk::setByteLength(int64_t byteLength)
 
 bool ByteLengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
+    assertMutable();
+    handleChange();
     if (const auto& byteLengthChunk = std::dynamic_pointer_cast<ByteLengthChunk>(chunk)) {
         byteLength += byteLengthChunk->byteLength;
         return true;
@@ -47,6 +49,8 @@ bool ByteLengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 
 bool ByteLengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
+    assertMutable();
+    handleChange();
     if (const auto& byteLengthChunk = std::dynamic_pointer_cast<ByteLengthChunk>(chunk)) {
         byteLength += byteLengthChunk->byteLength;
         return true;
@@ -58,6 +62,8 @@ bool ByteLengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool ByteLengthChunk::removeFromBeginning(int64_t byteLength)
 {
     assert(byteLength <= this->byteLength);
+    assertMutable();
+    handleChange();
     this->byteLength -= byteLength;
     return true;
 }
@@ -65,6 +71,8 @@ bool ByteLengthChunk::removeFromBeginning(int64_t byteLength)
 bool ByteLengthChunk::removeFromEnd(int64_t byteLength)
 {
     assert(byteLength <= this->byteLength);
+    assertMutable();
+    handleChange();
     this->byteLength -= byteLength;
     return true;
 }

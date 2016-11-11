@@ -141,13 +141,13 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Inserts the provided chunk at the beginning of this chunk and returns
      * true if the insertion was successful.
      */
-    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
 
     /**
      * Inserts the provided chunk at the end of this chunk and returns true if
      * the insertion was successful.
      */
-    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
     //@}
 
     /** @name Removing data related functions */
@@ -156,13 +156,13 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Removes the requested number of bytes from the beginning of this chunk
      * and returns true if the removal was successful.
      */
-    virtual bool removeFromBeginning(int64_t byteLength) { return false; }
+    virtual bool removeFromBeginning(int64_t byteLength) { assertMutable(); return false; }
 
     /**
      * Removes the requested number of bytes from the end of this chunk and
      * returns true if the removal was successful.
      */
-    virtual bool removeFromEnd(int64_t byteLength) { return false; }
+    virtual bool removeFromEnd(int64_t byteLength) { assertMutable(); return false; }
     //@}
 
     /** @name Chunk querying related functions */

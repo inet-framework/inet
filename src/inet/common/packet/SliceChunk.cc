@@ -53,6 +53,8 @@ void SliceChunk::setByteLength(int64_t byteLength)
 
 bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
+    assertMutable();
+    handleChange();
     if (const auto& otherSliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
         if (this->chunk == otherSliceChunk->chunk && byteOffset == otherSliceChunk->byteOffset + otherSliceChunk->byteLength) {
             byteOffset -= otherSliceChunk->byteLength;
@@ -68,6 +70,8 @@ bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 
 bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
+    assertMutable();
+    handleChange();
     if (const auto& otherSliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
         if (this->chunk == otherSliceChunk->chunk && byteOffset + byteLength == otherSliceChunk->byteOffset) {
             byteLength += otherSliceChunk->byteLength;
@@ -83,6 +87,8 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool SliceChunk::removeFromBeginning(int64_t byteLength)
 {
     assert(byteLength <= this->byteLength);
+    assertMutable();
+    handleChange();
     this->byteOffset += byteLength;
     this->byteLength -= byteLength;
     return true;
@@ -91,6 +97,8 @@ bool SliceChunk::removeFromBeginning(int64_t byteLength)
 bool SliceChunk::removeFromEnd(int64_t byteLength)
 {
     assert(byteLength <= this->byteLength);
+    assertMutable();
+    handleChange();
     this->byteLength -= byteLength;
     return true;
 }
