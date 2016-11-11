@@ -70,7 +70,7 @@ class Packet : public cPacket
     /**
      * Returns the total byte length of the packet headers processed so far.
      */
-    int64_t getHeaderSize() const { return headerIterator.getPosition(); }
+    int64_t getHeaderSize() const { return headerIterator.getPosition(); }      //FIXME What???
 
     std::shared_ptr<Chunk> peekHeader(int64_t byteLength = -1) const;
 
