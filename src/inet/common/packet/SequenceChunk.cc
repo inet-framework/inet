@@ -99,8 +99,7 @@ std::vector<std::shared_ptr<Chunk> > SequenceChunk::cloneChunks() const
 {
     std::vector<std::shared_ptr<Chunk> > clones;
     for (auto& chunk : chunks)
-        // TODO: is this the right and efficient way to do it?
-        clones.push_back(chunk->isImmutable() ? chunk : std::shared_ptr<Chunk>(static_cast<Chunk*>(chunk->dup())));
+        clones.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
     return clones;
 }
 

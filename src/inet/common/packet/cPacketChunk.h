@@ -31,6 +31,7 @@ class cPacketChunk : public Chunk
     ~cPacketChunk();
 
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<cPacketChunk>(*this); }
 
     virtual int64_t getByteLength() const override { return packet->getByteLength(); }
 

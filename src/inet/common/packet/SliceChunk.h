@@ -40,6 +40,7 @@ class SliceChunk : public Chunk
     SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
 
     const std::shared_ptr<Chunk>& getChunk() const { return chunk; }
     void setChunk(const std::shared_ptr<Chunk>& chunk) { this->chunk = chunk; }

@@ -89,6 +89,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     Chunk(const Chunk& other);
     virtual ~Chunk();
 
+    virtual std::shared_ptr<Chunk> dupShared() const { return std::shared_ptr<Chunk>(static_cast<Chunk *>(dup())); };
+
     /** @name Mutability related functions */
     //@{
     // NOTE: there is no makeMutable() intentionally

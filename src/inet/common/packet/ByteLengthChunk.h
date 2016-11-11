@@ -38,6 +38,7 @@ class ByteLengthChunk : public Chunk
     ByteLengthChunk(int64_t byteLength);
 
     virtual ByteLengthChunk *dup() const override { return new ByteLengthChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<ByteLengthChunk>(*this); }
 
     virtual int64_t getByteLength() const override { return byteLength; }
     virtual void setByteLength(int64_t byteLength);
