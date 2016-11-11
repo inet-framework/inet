@@ -30,6 +30,26 @@ Chunk::Iterator::Iterator(const Iterator& other) :
 {
 }
 
+Chunk::ForwardIterator::ForwardIterator(int64_t position) :
+    Iterator(position)
+{
+}
+
+Chunk::ForwardIterator::ForwardIterator(const ForwardIterator& other) :
+    Iterator(other)
+{
+}
+
+Chunk::BackwardIterator::BackwardIterator(int64_t position) :
+    Iterator(position)
+{
+}
+
+Chunk::BackwardIterator::BackwardIterator(const ForwardIterator& other) :
+    Iterator(other)
+{
+}
+
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(other.isImmutable_),
     isIncomplete_(other.isIncomplete_),

@@ -62,6 +62,20 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         void seek(int64_t byteOffset) { position = byteOffset; }
     };
 
+    class ForwardIterator : public Iterator
+    {
+      public:
+        ForwardIterator(int64_t position = 0);
+        ForwardIterator(const ForwardIterator& other);
+    };
+
+    class BackwardIterator : public Iterator
+    {
+      public:
+        BackwardIterator(int64_t position = 0);
+        BackwardIterator(const ForwardIterator& other);
+    };
+
   public:
     static bool enableImplicitChunkSerialization;
 
