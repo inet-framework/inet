@@ -8,7 +8,7 @@ All steps:
 	- choose appropriate network name
 		???SOLVED: remove "Network" from network name
 	- change positions from meter to longitude, latitude
-		
+		SOLVED
 	- in step 3 we should placing the nodes as pedestrian[2] and place them with mobility submodule longitude latitude
 		
 
@@ -17,23 +17,25 @@ All steps:
 Step 1:
 	- change words: "ha a camera mode-ot váltom, akkor változik hogy az egér melyik gombjára mit reagál a simulation"
 		SOLVED: change camera mode, that means you can change the mouse buttons' and mouse wheel's camera action
-	
+
+
 Step 3:
 	- if Visualization02 became active change Visualization01 to Visualization02
 		
+
+
 Step 4:
 	- search any 3d model on google or anywhere
 		SOLVED: found boxman.osgb in "inet/examples/visualization/networknode/" folder
-	
+
+
 Step 5:
 	- don't display orientation
 		SOLVED: deleted this line: *.visualizer.*.mobilityVisualizer.displayOrientation = true
 	- if Visualization04 became active change Visualization04 to Visualization04
 		SOLVED: Visualization04 is working now
 	- optimize pedestrians common movement parameters/
-		SOLVED: -30,30 --> -10,10		0.1s --> 0.5s		5mps --> 2mps
-#####################
-Review 1
+		SOLVED: -30,30 --> -10,10		0.1s --> 0.5s		5mps --> 1.3mps
 
 
 Step 6:
@@ -46,8 +48,6 @@ Step 7:
 		SOLVED: csak azt kell, hogy a pedestrian melyik ap-hez csatlakozott. Talán az ap ssid-jét is ki lehet
 	- Q: InfoVisualizerBase Question: module-nak tetszőleges valtozójat ki lehet iratni? (CObjectet pl)
 		SOLVED: ieee80211Visualizer
-	- Q: Ki lehet iratni ezt+interfaceVisualizer-t ugy, hogy nem egymason vannak?
-		
 
 
 Step 8:
@@ -55,9 +55,11 @@ Step 8:
 		SOLVED: change to 400
 	- will be real voip stream
 		SOLVED: SimpleVoIPSender --> SimpleVoIPReceiver
-	- egyoldalú a kommunikáció
+	- egyoldalú a kommunikáció. Probléma???
 		
-
+	- turn off 802.11 visualizer?
+		a: turn off
+		b: turn on
 
 Step 10:
 	- physicalLinkVisualizer: There are more unused parameters...
@@ -73,8 +75,8 @@ Step 11:
 Step 12:
 	- nem jó a statisztika a simplevoip* miatt
 		SOLVED: change signal to VoIPPacketLossRate and statistic to packetLossRate
-#####################
-Review 2
+	- vagy másik statisztika kell, vagy ki kell engedni a range-ből a pedestrian1-et
+		
 
 
 Step 13:
@@ -85,12 +87,19 @@ Step 13:
 Step 15:
 	- If we'll have routeVisualizer, then activate the commented lines
 		
+	- Show the difference between dataLink and route?
+		
+	- Turn off communication ranges?
+		a: turn off
+		b: turn on
 
 
 Step 16:
 	- make an obstacle
 		SOLVED: drawed, but it seems only walls
 	- it seems only walls and is not acting like an obstacle
-		
-	
-	
+		SOLVED: points were in wrong sequence
+
+
+Step 19:
+	- signal propagation off?

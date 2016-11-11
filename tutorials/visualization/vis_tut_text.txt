@@ -294,7 +294,7 @@ Review 2
 		- parameters:
 			- set the packetDropVisualizer.packetNameFilter to that value, what packets we want to see
 	- Results:
-		- when a packet was dropped we can see a gray cube that fall off the map
+		- when a packet dropped we can see a gray cube that fall off the map
 
 
 19. Displaying transport connections
