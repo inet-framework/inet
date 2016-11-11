@@ -466,6 +466,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
         std::vector<SockDesc *> sds = findSocketsForMcastBcastPacket(destAddr, destPort, srcAddr, srcPort, isMulticast, isBroadcast);
         if (sds.empty()) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
+            udpPacket->setHeaderPosition(udpHeaderPosition);
             processUndeliverablePacket(udpPacket);
             return;
         }
