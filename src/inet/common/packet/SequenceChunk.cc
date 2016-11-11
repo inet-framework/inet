@@ -138,6 +138,8 @@ std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byt
 void SequenceChunk::prependChunk(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
+    if (chunk->getByteLength() <= 0)
+        throw cRuntimeError("invalid chunk length: %li", chunk->getByteLength());
     chunks.insert(chunks.begin(), chunk);
 }
 
@@ -162,6 +164,8 @@ void SequenceChunk::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
 void SequenceChunk::appendChunk(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
+    if (chunk->getByteLength() <= 0)
+        throw cRuntimeError("invalid chunk length: %li", chunk->getByteLength());
     const auto& mergedChunk = chunks.size() > 0 ? chunks.back()->merge(chunk) : nullptr;
     if (mergedChunk != nullptr)
         chunks.back() = mergedChunk;
