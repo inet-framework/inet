@@ -37,12 +37,12 @@ Packet::Packet(const Packet& other) :
 
 int Packet::getNumChunks() const
 {
-    return data->chunks.size();
+    return data->getChunks().size();
 }
 
 Chunk *Packet::getChunk(int i) const
 {
-    return data->chunks[i].get();
+    return data->getChunks()[i].get();
 }
 
 std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const

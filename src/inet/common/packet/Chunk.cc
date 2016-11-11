@@ -51,6 +51,18 @@ void Chunk::handleChange()
     serializedBytes = nullptr;
 }
 
+std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+{
+    ByteOutputStream outputStream;
+    serialize(outputStream, chunk);
+    auto& outputBytes = outputStream.getBytes();
+    auto begin = outputBytes.begin() + byteOffset;
+    auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
+    std::vector<uint8_t> inputBytes(begin, end);
+    ByteInputStream inputStream(inputBytes);
+    return deserialize(inputStream, typeInfo);
+}
+
 void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk)
 {
     if (chunk->serializedBytes != nullptr)
@@ -80,18 +92,6 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
     chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
     ChunkSerializer::totalDeserializedByteLength += byteLength;
     return chunk;
-}
-
-std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
-{
-    ByteOutputStream outputStream;
-    serialize(outputStream, chunk);
-    auto& outputBytes = outputStream.getBytes();
-    auto begin = outputBytes.begin() + byteOffset;
-    auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
-    std::vector<uint8_t> inputBytes(begin, end);
-    ByteInputStream inputStream(inputBytes);
-    return deserialize(inputStream, typeInfo);
 }
 
 std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t byteLength) const

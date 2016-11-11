@@ -72,23 +72,17 @@ class SequenceChunk : public Chunk
     std::vector<std::shared_ptr<Chunk>> chunks;
 
   protected:
+    virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
+
     std::shared_ptr<Chunk> peekWithIterator(const SequenceIterator& iterator, int64_t byteLength = -1) const;
     std::shared_ptr<Chunk> peekWithLinearSearch(const SequenceIterator& iterator, int64_t byteLength = -1) const;
 
-    void prependChunk(const std::shared_ptr<Chunk>& chunk);
-    void prependChunk(const std::shared_ptr<SequenceChunk>& chunk);
+    void insertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
 
-    void appendChunk(const std::shared_ptr<Chunk>& chunk);
-    void appendChunk(const std::shared_ptr<SliceChunk>& chunk);
-    void appendChunk(const std::shared_ptr<SequenceChunk>& chunk);
+    void insertToEnd(const std::shared_ptr<SliceChunk>& chunk);
+    void insertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
 
-    std::vector<std::shared_ptr<Chunk>> cloneChunks() const {
-        std::vector<std::shared_ptr<Chunk>> clones;
-        for (auto& chunk : chunks)
-            // TODO: is this the right and efficient way to do it?
-            clones.push_back(chunk->isImmutable() ? chunk : std::shared_ptr<Chunk>(static_cast<Chunk *>(chunk->dup())));
-        return clones;
-    }
+    std::vector<std::shared_ptr<Chunk> > cloneChunks() const;
 
   public:
     SequenceChunk() { }
@@ -109,8 +103,25 @@ class SequenceChunk : public Chunk
     BackwardIterator createBackwardIterator() const { return BackwardIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this())); }
     //@}
 
+    /** @name Filling with data related functions */
+    //@{
+    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
+
+    void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
+    void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
+    //@}
+
+    /** @name Removing data related functions */
+    //@{
+    virtual bool removeFromBeginning(int64_t byteLength) override;
+    virtual bool removeFromEnd(int64_t byteLength) override;
+    //@}
+
     /** @name Querying data related functions */
     //@{
+    virtual int64_t getByteLength() const override;
+
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
 
     template <typename T>
@@ -123,26 +134,7 @@ class SequenceChunk : public Chunk
     }
     //@}
 
-    /** @name Filling with data related functions */
-    //@{
-    void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    //@}
-
-    /** @name Removing data related functions */
-    //@{
-    void removeBeginning(int64_t byteLength);
-    void removeEnd(int64_t byteLength);
-    //@}
-
-    virtual int64_t getByteLength() const override;
-
-    virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
-
     virtual std::string str() const override;
-
-    friend class Packet;
-    friend class PacketDescriptor;
 };
 
 } // namespace

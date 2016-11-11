@@ -21,16 +21,22 @@
 namespace inet {
 
 /**
- * This class represents network packets, datagrams, frames and other kinds
+ * This class represents network packets, datagrams, frames and other kinds of
  * data used by communication protocols.
  */
 class Packet : public cPacket
 {
+  friend class PacketDescriptor;
+
   protected:
     // TODO: data could be std::shared_ptr<Chunk> simply, e.g. allowing for plain ByteLengthChunk or ByteArrayChunk if that's what we need
     std::shared_ptr<SequenceChunk> data;
     SequenceChunk::ForwardIterator headerIterator;
     SequenceChunk::BackwardIterator trailerIterator;
+
+  protected:
+    int getNumChunks() const;
+    Chunk *getChunk(int i) const;
 
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
@@ -187,11 +193,6 @@ class Packet : public cPacket
     virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }
 
     virtual std::string str() const override { return data->str(); }
-
-  protected:
-    int getNumChunks() const;
-    Chunk *getChunk(int i) const;
-    friend class PacketDescriptor;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
@@ -201,5 +202,4 @@ inline std::ostream& operator<<(std::ostream& os, const Packet& packet) { return
 } // namespace
 
 #endif // #ifndef __INET_PACKET_H_
-
 

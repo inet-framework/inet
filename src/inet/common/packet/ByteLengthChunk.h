@@ -22,8 +22,16 @@ namespace inet {
 
 class ByteLengthChunk : public Chunk
 {
+  friend Chunk;
+
   protected:
     int64_t byteLength = -1;
+
+  protected:
+    virtual const char *getSerializerClassName() const override { return "inet::ByteLengthChunkSerializer"; }
+
+  protected:
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
     ByteLengthChunk() { }
@@ -32,15 +40,15 @@ class ByteLengthChunk : public Chunk
     virtual ByteLengthChunk *dup() const override { return new ByteLengthChunk(*this); }
 
     virtual int64_t getByteLength() const override { return byteLength; }
-    void setByteLength(int64_t byteLength);
+    virtual void setByteLength(int64_t byteLength);
 
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
+    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
+    virtual bool removeFromBeginning(int64_t byteLength) override;
+    virtual bool removeFromEnd(int64_t byteLength) override;
 
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
-
-    virtual const char *getSerializerClassName() const override { return "inet::ByteLengthChunkSerializer"; }
 
     virtual std::string str() const override;
 };

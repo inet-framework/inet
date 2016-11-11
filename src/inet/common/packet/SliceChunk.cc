@@ -27,6 +27,16 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, 
     assert(this->byteLength >= 0);
 }
 
+std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+{
+    int64_t sliceChunkByteOffset = byteOffset == -1 ? 0 : byteOffset;
+    int64_t sliceChunkByteLength = byteLength == -1 ? chunk->getByteLength() - sliceChunkByteOffset : byteLength;
+    assert(sliceChunkByteOffset >= 0);
+    assert(sliceChunkByteLength >= 0);
+    chunk->assertImmutable();
+    return std::make_shared<SliceChunk>(chunk, sliceChunkByteOffset, sliceChunkByteLength);
+}
+
 void SliceChunk::setByteOffset(int64_t byteOffset)
 {
     assertMutable();
@@ -41,31 +51,48 @@ void SliceChunk::setByteLength(int64_t byteLength)
     this->byteLength = byteLength;
 }
 
-std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    int64_t sliceChunkByteOffset = byteOffset == -1 ? 0 : byteOffset;
-    int64_t sliceChunkByteLength = byteLength == -1 ? chunk->getByteLength() - sliceChunkByteOffset : byteLength;
-    assert(sliceChunkByteOffset >= 0);
-    assert(sliceChunkByteLength >= 0);
-    chunk->assertImmutable();
-    return std::make_shared<SliceChunk>(chunk, sliceChunkByteOffset, sliceChunkByteLength);
-}
-
-std::shared_ptr<Chunk> SliceChunk::merge(const std::shared_ptr<Chunk>& other) const
-{
-    if (std::dynamic_pointer_cast<SliceChunk>(other) != nullptr) {
-        auto otherSliceChunk = std::static_pointer_cast<SliceChunk>(other);
-        if (chunk == otherSliceChunk->getChunk() && byteOffset + byteLength == otherSliceChunk->getByteOffset()) {
-            if (byteOffset == 0 && byteLength + otherSliceChunk->getByteLength() == chunk->getByteLength())
-                return chunk;
-            else
-                return std::make_shared<SliceChunk>(chunk, byteOffset, byteLength + otherSliceChunk->getByteLength());
+    if (const auto& otherSliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+        if (this->chunk == otherSliceChunk->chunk && byteOffset == otherSliceChunk->byteOffset + otherSliceChunk->byteLength) {
+            byteOffset -= otherSliceChunk->byteLength;
+            byteLength += otherSliceChunk->byteLength;
+            return true;
         }
         else
-            return nullptr;
+            return false;
     }
     else
-        return nullptr;
+        return false;
+}
+
+bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+{
+    if (const auto& otherSliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+        if (this->chunk == otherSliceChunk->chunk && byteOffset + byteLength == otherSliceChunk->byteOffset) {
+            byteLength += otherSliceChunk->byteLength;
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+        return false;
+}
+
+bool SliceChunk::removeFromBeginning(int64_t byteLength)
+{
+    assert(byteLength <= this->byteLength);
+    this->byteOffset += byteLength;
+    this->byteLength -= byteLength;
+    return true;
+}
+
+bool SliceChunk::removeFromEnd(int64_t byteLength)
+{
+    assert(byteLength <= this->byteLength);
+    this->byteLength -= byteLength;
+    return true;
 }
 
 std::string SliceChunk::str() const

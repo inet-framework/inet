@@ -22,12 +22,6 @@ ByteArrayChunk::ByteArrayChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-void ByteArrayChunk::setBytes(const std::vector<uint8_t>& bytes)
-{
-    assertMutable();
-    this->bytes = bytes;
-}
-
 std::shared_ptr<Chunk> ByteArrayChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
     ByteOutputStream outputStream;
@@ -39,17 +33,44 @@ std::shared_ptr<Chunk> ByteArrayChunk::createChunk(const std::type_info& typeInf
     return std::make_shared<ByteArrayChunk>(chunkBytes);
 }
 
-std::shared_ptr<Chunk> ByteArrayChunk::merge(const std::shared_ptr<Chunk>& other) const
+void ByteArrayChunk::setBytes(const std::vector<uint8_t>& bytes)
 {
-    if (std::dynamic_pointer_cast<ByteArrayChunk>(other) != nullptr) {
-        auto otherByteArrayChunk = std::static_pointer_cast<ByteArrayChunk>(other);
-        std::vector<uint8_t> mergedBytes;
-        mergedBytes.insert(mergedBytes.end(), bytes.begin(), bytes.end());
-        mergedBytes.insert(mergedBytes.end(), otherByteArrayChunk->bytes.begin(), otherByteArrayChunk->bytes.end());
-        return std::make_shared<ByteArrayChunk>(mergedBytes);
+    assertMutable();
+    this->bytes = bytes;
+}
+
+bool ByteArrayChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+{
+    if (const auto& byteArrayChunk = std::dynamic_pointer_cast<ByteArrayChunk>(chunk)) {
+        bytes.insert(bytes.begin(), byteArrayChunk->bytes.begin(), byteArrayChunk->bytes.end());
+        return true;
     }
     else
-        return nullptr;
+        return false;
+}
+
+bool ByteArrayChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+{
+    if (const auto& byteArrayChunk = std::dynamic_pointer_cast<ByteArrayChunk>(chunk)) {
+        bytes.insert(bytes.end(), byteArrayChunk->bytes.begin(), byteArrayChunk->bytes.end());
+        return true;
+    }
+    else
+        return false;
+}
+
+bool ByteArrayChunk::removeFromBeginning(int64_t byteLength)
+{
+    assert(byteLength <= bytes.size());
+    bytes.erase(bytes.begin(), bytes.begin() + byteLength);
+    return true;
+}
+
+bool ByteArrayChunk::removeFromEnd(int64_t byteLength)
+{
+    assert(byteLength <= bytes.size());
+    bytes.erase(bytes.end() - byteLength, bytes.end());
+    return true;
 }
 
 std::shared_ptr<Chunk> ByteArrayChunk::peek(const Iterator& iterator, int64_t byteLength) const

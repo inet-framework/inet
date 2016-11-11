@@ -23,7 +23,25 @@ namespace inet {
 
 /**
  * This class represents a piece of data that is usually part of a packet or
- * some other data such as a protocol buffer.
+ * some other data such as a protocol buffer. When the actual bytes in the
+ * data is irrelevant, a chunk can be as simple as an integer specifying its
+ * length. Sometimes it might be necessary to represent the data bytes as is,
+ * but most often it's better to have a representation that is easy to inspect
+ * during debugging. In any case, a chunk can be always converted to a sequence
+ * of bytes.
+ *
+ * Chunks are initially:
+ *  - mutable, then may become immutable (but never the other way around)
+ *  - complete, then may become incomplete (but never the other way around)
+ *  - correct, then may become incorrect (but never the other way around)
+ * Chunks can be safely shared using std::shared_ptr, and in fact most usages
+ * take advantage of immutable chunks using shared pointers.
+ *
+ * In general, chunks support the following operations:
+ *  - insert to the beginning or end
+ *  - remove from the beginning or end
+ *  - query length and peek an arbitrary part
+ *  - serialize to and deserialize from a sequence of bytes
  */
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
@@ -48,13 +66,23 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     static bool enableImplicitChunkSerialization;
 
   protected:
+    // TODO: convert these booleans to a single integer flags
     bool isImmutable_ = false;
     bool isIncomplete_ = false;
     bool isIncorrect_ = false;
     std::vector<uint8_t> *serializedBytes = nullptr;
 
   protected:
-    void handleChange();
+    virtual const char *getSerializerClassName() const { return nullptr; }
+
+    virtual void handleChange();
+
+  protected:
+    /**
+     * Creates a new chunk of the given type that represents the designated part
+     * of the provided chunk.
+     */
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
     Chunk() { }
@@ -91,44 +119,43 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     void makeIncorrect() { isIncorrect_ = true; }
     //@}
 
-    virtual int64_t getByteLength() const = 0;
-
-    virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const { return nullptr; }
-
-    virtual const char *getSerializerClassName() const { return nullptr; }
-
-    /**
-     * Returns a human readable string representation of the data present in
-     * this chunk.
-     */
-    virtual std::string str() const override;
-
-    /**
-     * Creates a new chunk of the given type that represents the designated part
-     * of the other provided chunk.
-     */
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
-
-    /** @name Chunk serialization related functions */
+    /** @name Inserting data related functions */
     //@{
     /**
-     * Serializes a chunk into the given stream. The bytes representing the
-     * chunk is written at the current position of the stream up to the length
-     * required by the serializer of the chunk.
+     * Inserts the provided chunk at the beginning of this chunk and returns
+     * true if the insertion was successful.
      */
-    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk);
+    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) { return false; }
 
     /**
-     * Deserializes a chunk from the given stream that is an instance of the
-     * provided type. The chunk represents the bytes in the stream starting
-     * from the current stream position up to the length required by the
-     * deserializer of the chunk.
+     * Inserts the provided chunk at the end of this chunk and returns true if
+     * the insertion was successful.
      */
-    static std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo);
+    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) { return false; }
+    //@}
+
+    /** @name Removing data related functions */
+    //@{
+    /**
+     * Removes the requested number of bytes from the beginning of this chunk
+     * and returns true if the removal was successful.
+     */
+    virtual bool removeFromBeginning(int64_t byteLength) { return false; }
+
+    /**
+     * Removes the requested number of bytes from the end of this chunk and
+     * returns true if the removal was successful.
+     */
+    virtual bool removeFromEnd(int64_t byteLength) { return false; }
     //@}
 
     /** @name Chunk querying related functions */
     //@{
+    /**
+     * Returns the length of data measured in bytes represented by this chunk.
+     */
+    virtual int64_t getByteLength() const = 0;
+
     /**
      * Returns the designated part of the data represented by this chunk in its
      * default representation.
@@ -153,6 +180,30 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         else
             return nullptr;
     }
+    //@}
+
+    /**
+     * Returns a human readable string representation of the data present in
+     * this chunk.
+     */
+    virtual std::string str() const override;
+
+  public:
+    /** @name Chunk serialization related functions */
+    //@{
+    /**
+     * Serializes a chunk into the given stream. The bytes representing the
+     * chunk is written at the current position of the stream up to its length.
+     */
+    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk);
+
+    /**
+     * Deserializes a chunk from the given stream. The returned chunk will be
+     * an instance of the provided type. The chunk represents the bytes in the
+     * stream starting from the current stream position up to the length
+     * required by the deserializer of the chunk.
+     */
+    static std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo);
     //@}
 };
 

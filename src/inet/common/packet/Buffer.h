@@ -53,6 +53,8 @@ class Buffer : public cObject
 
     /** @name Data querying related functions */
     //@{
+    int64_t getByteLength() const { return data->getByteLength() - iterator.getPosition(); }
+
     std::shared_ptr<Chunk> peek(int64_t byteLength = -1) const;
 
     std::shared_ptr<Chunk> peekAt(int64_t byteOffset, int64_t byteLength) const;
@@ -79,8 +81,6 @@ class Buffer : public cObject
     void push(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
     void push(Buffer* buffer, bool flatten = true);
     //@}
-
-    int64_t getByteLength() const { return data->getByteLength() - iterator.getPosition(); }
 
     virtual std::string str() const override { return data->str(); }
 };

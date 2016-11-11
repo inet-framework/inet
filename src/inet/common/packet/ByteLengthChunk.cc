@@ -23,6 +23,11 @@ ByteLengthChunk::ByteLengthChunk(int64_t byteLength) :
     assert(byteLength >= 0);
 }
 
+std::shared_ptr<Chunk> ByteLengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+{
+    return std::make_shared<ByteLengthChunk>(byteLength);
+}
+
 void ByteLengthChunk::setByteLength(int64_t byteLength)
 {
     assertMutable();
@@ -30,19 +35,38 @@ void ByteLengthChunk::setByteLength(int64_t byteLength)
     this->byteLength = byteLength;
 }
 
-std::shared_ptr<Chunk> ByteLengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+bool ByteLengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    return std::make_shared<ByteLengthChunk>(byteLength);
-}
-
-std::shared_ptr<Chunk> ByteLengthChunk::merge(const std::shared_ptr<Chunk>& other) const
-{
-    if (std::dynamic_pointer_cast<ByteLengthChunk>(other) != nullptr) {
-        auto otherByteLengthChunk = std::static_pointer_cast<ByteLengthChunk>(other);
-        return std::make_shared<ByteLengthChunk>(byteLength + otherByteLengthChunk->byteLength);
+    if (const auto& byteLengthChunk = std::dynamic_pointer_cast<ByteLengthChunk>(chunk)) {
+        byteLength += byteLengthChunk->byteLength;
+        return true;
     }
     else
-        return nullptr;
+        return false;
+}
+
+bool ByteLengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+{
+    if (const auto& byteLengthChunk = std::dynamic_pointer_cast<ByteLengthChunk>(chunk)) {
+        byteLength += byteLengthChunk->byteLength;
+        return true;
+    }
+    else
+        return false;
+}
+
+bool ByteLengthChunk::removeFromBeginning(int64_t byteLength)
+{
+    assert(byteLength <= this->byteLength);
+    this->byteLength -= byteLength;
+    return true;
+}
+
+bool ByteLengthChunk::removeFromEnd(int64_t byteLength)
+{
+    assert(byteLength <= this->byteLength);
+    this->byteLength -= byteLength;
+    return true;
 }
 
 std::shared_ptr<Chunk> ByteLengthChunk::peek(const Iterator& iterator, int64_t byteLength) const

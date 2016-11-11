@@ -22,8 +22,16 @@ namespace inet {
 
 class ByteArrayChunk : public Chunk
 {
+  friend Chunk;
+
   protected:
     std::vector<uint8_t> bytes;
+
+  protected:
+    virtual const char *getSerializerClassName() const override { return "inet::ByteArrayChunkSerializer"; }
+
+  protected:
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
     ByteArrayChunk() { }
@@ -31,18 +39,18 @@ class ByteArrayChunk : public Chunk
 
     virtual ByteArrayChunk *dup() const override { return new ByteArrayChunk(*this); }
 
-    const std::vector<uint8_t>& getBytes() const { return bytes; }
-    void setBytes(const std::vector<uint8_t>& bytes);
+    virtual const std::vector<uint8_t>& getBytes() const { return bytes; }
+    virtual void setBytes(const std::vector<uint8_t>& bytes);
 
     virtual int64_t getByteLength() const override { return bytes.size(); }
 
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
+    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
+    virtual bool removeFromBeginning(int64_t byteLength) override;
+    virtual bool removeFromEnd(int64_t byteLength) override;
 
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
-
-    virtual const char *getSerializerClassName() const override { return "inet::ByteArrayChunkSerializer"; }
 
     virtual std::string str() const override;
 };

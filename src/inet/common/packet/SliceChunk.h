@@ -22,10 +22,18 @@ namespace inet {
 
 class SliceChunk : public Chunk
 {
+  friend Chunk;
+
   protected:
     std::shared_ptr<Chunk> chunk = nullptr;
     int64_t byteOffset = -1;
     int64_t byteLength = -1;
+
+  protected:
+    virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
+
+  protected:
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1);
 
   public:
     SliceChunk() { }
@@ -34,6 +42,7 @@ class SliceChunk : public Chunk
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
 
     const std::shared_ptr<Chunk>& getChunk() const { return chunk; }
+    void setChunk(const std::shared_ptr<Chunk>& chunk) { this->chunk = chunk; }
 
     int64_t getByteOffset() const { return byteOffset; }
     void setByteOffset(int64_t byteOffset);
@@ -41,11 +50,11 @@ class SliceChunk : public Chunk
     virtual int64_t getByteLength() const override { return byteLength; }
     void setByteLength(int64_t byteLength);
 
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1);
+    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual std::shared_ptr<Chunk> merge(const std::shared_ptr<Chunk>& other) const override;
-
-    virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
+    virtual bool removeFromBeginning(int64_t byteLength) override;
+    virtual bool removeFromEnd(int64_t byteLength) override;
 
     virtual std::string str() const override;
 };

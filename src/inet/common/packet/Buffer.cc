@@ -35,7 +35,7 @@ void Buffer::remove(int64_t byteLength)
     poppedByteLength += byteLength;
     auto position = iterator.getPosition();
     if (position > data->getByteLength() / 2) {
-        data->removeBeginning(position);
+        data->removeFromBeginning(position);
         iterator.seek(0);
     }
 }
