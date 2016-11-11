@@ -48,6 +48,7 @@ void SequenceChunk::SequenceIterator::seek(int64_t byteOffset)
                 return;
             }
         }
+        index = -1;
     }
 }
 
