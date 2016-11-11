@@ -50,6 +50,10 @@ network UdpClientServer
             parameters:
                 @display("p=281,67;i=device/pc2");
         }
+        unavserver2: StandardHost {
+            parameters:
+                @display("p=361,67;i=device/pc2");
+        }
 //        configurator: IPv4NetworkConfigurator {
 //            parameters:
 //                @display("p=53,134");
@@ -63,5 +67,6 @@ network UdpClientServer
         }
     connections:
         client1.pppg++ <--> C <--> server.pppg++;
+        unavserver.pppg++ <--> C <--> unavserver2.pppg++;
 }
 
