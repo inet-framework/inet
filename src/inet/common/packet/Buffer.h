@@ -29,7 +29,7 @@ class Buffer : public cObject
     int64_t pushedByteLength = 0;
     int64_t poppedByteLength = 0;
     std::shared_ptr<SequenceChunk> data;
-    SequenceChunk::ForwardIterator iterator;
+    SequenceChunk::SequenceIterator iterator;
 
     void remove(int64_t byteLength);
 

@@ -17,17 +17,15 @@
 
 namespace inet {
 
-SequenceChunk::SequenceIterator::SequenceIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index, int64_t position) :
-    Iterator(position),
-    chunk(chunk),
-    index(index)
+SequenceChunk::SequenceIterator::SequenceIterator(const std::shared_ptr<const SequenceChunk>& chunk, bool isForward, int index, int64_t position) :
+    Iterator(isForward, position),
+    chunk(chunk)
 {
 }
 
 SequenceChunk::SequenceIterator::SequenceIterator(const SequenceIterator& other) :
     Iterator(other),
-    chunk(other.chunk),
-    index(other.index)
+    chunk(other.chunk)
 {
 }
 
@@ -59,26 +57,6 @@ void SequenceChunk::SequenceIterator::move(int64_t byteLength)
         index++;
     else
         index = -1;
-}
-
-SequenceChunk::ForwardIterator::ForwardIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index, int64_t position) :
-    SequenceIterator(chunk, index, position)
-{
-}
-
-SequenceChunk::ForwardIterator::ForwardIterator(const ForwardIterator& other) :
-    SequenceIterator(other)
-{
-}
-
-SequenceChunk::BackwardIterator::BackwardIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index, int64_t position) :
-    SequenceIterator(chunk, index, position)
-{
-}
-
-SequenceChunk::BackwardIterator::BackwardIterator(const ForwardIterator& other) :
-    SequenceIterator(other)
-{
 }
 
 SequenceChunk::SequenceChunk(const SequenceChunk& other) :

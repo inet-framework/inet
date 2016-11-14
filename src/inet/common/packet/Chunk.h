@@ -75,31 +75,22 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class Iterator
     {
       protected:
+        bool isForward_ = true;
         int64_t position = 0;
+        int index = 0;
 
       public:
-        Iterator(int64_t position = 0);
+        Iterator(bool isForward, int64_t position = 0, int index = 0);
         Iterator(const Iterator& other);
         virtual ~Iterator() { }
 
+        bool isForward() const { return isForward_; }
+        bool isBackward() const { return !isForward_; }
         int64_t getPosition() const { return position; }
+        int getIndex() const { return index; }
 
         void move(int64_t byteLength) { position += byteLength; }
         void seek(int64_t byteOffset) { position = byteOffset; }
-    };
-
-    class ForwardIterator : public Iterator
-    {
-      public:
-        ForwardIterator(int64_t position = 0);
-        ForwardIterator(const ForwardIterator& other);
-    };
-
-    class BackwardIterator : public Iterator
-    {
-      public:
-        BackwardIterator(int64_t position = 0);
-        BackwardIterator(const ForwardIterator& other);
     };
 
   public:

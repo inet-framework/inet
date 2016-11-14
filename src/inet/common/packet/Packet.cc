@@ -52,7 +52,7 @@ std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(int64_t byteLength)
@@ -70,7 +70,7 @@ std::shared_ptr<Chunk> Packet::peekTrailer(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::BackwardIterator(data, -1, byteOffset), byteLength);
+    return data->peek(SequenceChunk::SequenceIterator(data, false, -1, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
@@ -83,12 +83,12 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
 
 std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::ForwardIterator(data, -1, getDataPosition()), byteLength == -1 ? getDataSize() : byteLength);
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition()), byteLength == -1 ? getDataSize() : byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)

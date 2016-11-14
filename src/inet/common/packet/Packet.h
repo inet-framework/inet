@@ -31,8 +31,8 @@ class Packet : public cPacket
   protected:
     // TODO: data could be std::shared_ptr<Chunk> simply, e.g. allowing for plain ByteLengthChunk or ByteArrayChunk if that's what we need
     std::shared_ptr<SequenceChunk> data;
-    SequenceChunk::ForwardIterator headerIterator;
-    SequenceChunk::BackwardIterator trailerIterator;
+    SequenceChunk::SequenceIterator headerIterator;
+    SequenceChunk::SequenceIterator trailerIterator;
 
   protected:
     int getNumChunks() const;
@@ -90,7 +90,7 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
     }
 
     template <typename T>
@@ -139,7 +139,7 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::BackwardIterator(data, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(data, false, -1, byteOffset), byteLength);
     }
 
     template <typename T>
@@ -176,12 +176,12 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekData(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::ForwardIterator(data, -1, getDataPosition()), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition()), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
     }
     //@}
 

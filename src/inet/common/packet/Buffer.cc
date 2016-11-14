@@ -47,7 +47,7 @@ std::shared_ptr<Chunk> Buffer::peek(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(Chunk::ForwardIterator(byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(true, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)
