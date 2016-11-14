@@ -77,6 +77,8 @@ class SequenceChunk : public Chunk
     std::shared_ptr<Chunk> peekWithIterator(const SequenceIterator& iterator, int64_t byteLength = -1) const;
     std::shared_ptr<Chunk> peekWithLinearSearch(const SequenceIterator& iterator, int64_t byteLength = -1) const;
 
+    bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
+
     void insertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
 
     void insertToEnd(const std::shared_ptr<SliceChunk>& chunk);

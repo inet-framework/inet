@@ -143,6 +143,37 @@ std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byt
         return peek<SliceChunk>(static_cast<const SequenceIterator&>(iterator), byteLength);
 }
 
+bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
+{
+    if (chunks.size() != 0) {
+        auto& lastChunk = chunks.back();
+        if (lastChunk->isImmutable() && chunk->isImmutable()) {
+            auto mergedChunk = lastChunk->dupShared();
+            if (mergedChunk->insertToEnd(chunk)) {
+                if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(mergedChunk)) {
+                    if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength()) {
+                        chunks.back() = sliceChunk->getChunk();
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+//    if (lastChunk->isMutable() && lastChunk->insertToEnd(chunk)) {
+//        if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(lastChunk)) {
+//            if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength())
+//                chunks.back() = sliceChunk->getChunk();
+//        }
+//    }
+//    else if (chunk->isMutable() && chunk->insertToBeginning(lastChunk)) {
+//        if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+//            if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength())
+//                chunks.back() = sliceChunk->getChunk();
+//        }
+//    }
+}
+
 bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
@@ -177,19 +208,8 @@ bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
     handleChange();
     if (chunk->getByteLength() <= 0)
         throw cRuntimeError("Invalid chunk length: %li", chunk->getByteLength());
-    if (chunks.size() == 0)
+    if (!mergeToEnd(chunk))
         chunks.push_back(chunk);
-    else {
-        auto& lastChunk = chunks.back();
-        if (lastChunk->insertToEnd(chunk)) {
-            if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(lastChunk)) {
-                if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength())
-                    chunks.back() = sliceChunk->getChunk();
-            }
-        }
-        else
-            chunks.push_back(chunk);
-    }
     return true;
 }
 
