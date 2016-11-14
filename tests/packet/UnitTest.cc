@@ -284,19 +284,34 @@ static void testSerialize()
 
 static void testPeekChunk()
 {
-    // 1. ByteLengthChunk peek always returns ByteLengthChunk
+    // 1. ByteLengthChunk always returns ByteLengthChunk
     auto byteLengthChunk1 = std::make_shared<ByteLengthChunk>(10);
     byteLengthChunk1->makeImmutable();
     const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(byteLengthChunk1->peek(0, 5));
     assert(byteLengthChunk2 != nullptr);
     assert(byteLengthChunk2->getByteLength() == 5);
-    // 2. ByteArrayChunk peek always returns ByteArrayChunk
+    // 2. ByteArrayChunk always returns ByteArrayChunk
     auto byteArrayChunk1 = std::make_shared<ByteArrayChunk>();
     byteArrayChunk1->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
     byteArrayChunk1->makeImmutable();
     const auto& byteArrayChunk2 = std::dynamic_pointer_cast<ByteArrayChunk>(byteArrayChunk1->peek(0, 5));
     assert(byteArrayChunk2 != nullptr);
     assert(std::equal(byteArrayChunk2->getBytes().begin(), byteArrayChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4}).begin()));
+    // 3. SliceChunk returns a SliceChunk containing the requested slice of the chunk that is used by the original SliceChunk
+    auto applicationHeader1 = std::make_shared<ApplicationHeader>();
+    applicationHeader1->makeImmutable();
+    auto sliceChunk1 = std::make_shared<SliceChunk>(applicationHeader1, 0, 10);
+    sliceChunk1->makeImmutable();
+    auto sliceChunk2 = std::dynamic_pointer_cast<SliceChunk>(sliceChunk1->peek(0, 5));
+    assert(sliceChunk1->getChunk() == sliceChunk2->getChunk());
+    // 4. SequenceChunk may return an element chunk, a SliceChunk of an element chunk, a SequenceChunk potentially containing SliceChunks at both ends
+    auto sequenceChunk = std::make_shared<SequenceChunk>();
+    // TODO:
+    // 5. any other chunk returns a SliceChunk
+    auto applicationHeader2 = std::make_shared<ApplicationHeader>();
+    applicationHeader2->makeImmutable();
+    auto sliceChunk3 = std::dynamic_pointer_cast<SliceChunk>(applicationHeader2->peek(0, 5));
+    assert(sliceChunk3 != nullptr);
 }
 
 static void testPeekPacket()
