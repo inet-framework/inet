@@ -101,5 +101,16 @@ Step 16:
 		SOLVED: points were in wrong sequence
 
 
+Step 17:
+	- all accessPoints and routers Z position is negative!!! It counts at displayObstacleLoss
+		
+
+
 Step 19:
 	- signal propagation off?
+		
+	- cars don't know the route to videoStreamServer
+		
+
+
+

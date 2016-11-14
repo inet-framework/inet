@@ -53,6 +53,7 @@
 			- we can see communication range (small one)
 			- we can see interference range (big one). Must zoom out to see
 			- we can see these in 2d mode too
+			- IMG: ranges
 
 
 4. Using 3D models for network nodes
@@ -273,9 +274,10 @@ Review 2
 	- Results:
 		- we can see the buildings in red, and "forrest" in green color
 		- they have some effect to the signal propagation, like in real world
+		- IMG: from the obstacles
 
 
-17. Displaying obstacle loss
+17. Displaying obstacle loss		# under construction, can't see the trails
 	- Goals:
 		- we want to display where the signal encounters an obstacle
 	- Model:
@@ -284,7 +286,8 @@ Review 2
 				- the displayIntersectionTrail parameter enables displaying intersections between physical objects and primary propagation path
 				- the displayFaceNormalVectorTrail parameter enables displaying face normal vectors for physical objects at intersections
 	- Results:
-		- 
+		- The long black lines across the obstacles display intersections between physical objects and primary propagation path
+		- The short red lines at the border of the obstacles displays face normal vectors for physical objects at intersections
 
 
 18. Showing packet drops
@@ -294,16 +297,37 @@ Review 2
 		- parameters:
 			- set the packetDropVisualizer.packetNameFilter to that value, what packets we want to see
 	- Results:
-		- when a packet dropped we can see a gray cube that fall off the map
+		- when a packet dropped we can see a gray cube that fall off the map (at about 10.4)
 
 
 19. Displaying transport connections
 	- Goals:
-		- 
+		- we want to display the transport connections between hosts
 	- Model:
 		- network:
-			-
+			- we use Visualization F
+				- add tcpHosts, 2 APs, switch, router, 2 cars
 		- parameters:
-			- 
+			- set devices mobility parameters
+			- set cars waypoints
+			- add video stream client app to cars
 	- Results:
-		- 
+		- we can see colorful markers above the hosts, that communicating via tcp
+
+
+20. Showing link breaks
+	- Goals:
+		- we want to see, when a communication link breaks
+	- Model:
+		- parameters:
+			- turn on link break visualizer, we can filter to nodes
+	- Results:
+		- 3D: we can see a white x on a red circle at the axis when a link breaks
+			- when the cars go in to the ap2's communication range
+			- when the cars go out from the ap2's communication range
+		- 2D: we can see the same at the network node, what drops too many packets
+
+
+21. Visualizing handovers
+	- Results
+		- About at 14-15s

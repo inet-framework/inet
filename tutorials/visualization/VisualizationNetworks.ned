@@ -159,13 +159,14 @@ network VisualizationF extends VisualizationE
         tcpHost[2]: StandardHost {
             @display("p=338,403");
         }
-        etherSwitch: EtherSwitch {
-            @display("p=601,327");
+        switch1: EtherSwitch {
+            @display("p=660,250");
         }
     connections:
         router0.pppg++ <--> Eth100M <--> router2.pppg++;
         router2.ethg++ <--> Eth100M <--> accessPoint2.ethg++;
         router2.ethg++ <--> Eth100M <--> accessPoint3.ethg++;
         switch0.ethg++ <--> Eth100M <--> tcpHost[0].ethg++;
-        switch0.ethg++ <--> Eth100M <--> tcpHost[1].ethg++;
+        switch1.ethg++ <--> Eth100M <--> tcpHost[1].ethg++;
+        router1.ethg++ <--> Eth100M <--> switch1.ethg++;
 }
