@@ -191,7 +191,6 @@ Packet *NewSender::createTcpSegment()
     tcpHeader->setLengthField(20);
     tcpHeader->setSrcPort(1000);
     tcpHeader->setDestPort(2000);
-    tcpHeader->makeImmutable();
     tcpSegment->prepend(tcpHeader);
     return tcpSegment;
 }

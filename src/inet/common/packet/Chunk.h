@@ -109,7 +109,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
   protected:
     virtual const char *getSerializerClassName() const { return nullptr; }
 
-    virtual void handleChange();
+    virtual void handleChange() override;
 
   protected:
     /**
