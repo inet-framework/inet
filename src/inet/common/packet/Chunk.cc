@@ -51,7 +51,7 @@ Chunk::BackwardIterator::BackwardIterator(const ForwardIterator& other) :
 }
 
 Chunk::Chunk(const Chunk& other) :
-    isImmutable_(other.isImmutable_),
+    isImmutable_(false),
     isIncomplete_(other.isIncomplete_),
     isIncorrect_(other.isIncorrect_),
     serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
