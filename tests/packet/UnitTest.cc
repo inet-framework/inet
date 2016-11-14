@@ -405,7 +405,7 @@ void UnitTest::initialize()
     testSerialize();
     testPeekChunk();
 //    testPeekPacket();
-//    testPeekBuffer();
+    testPeekBuffer();
     testClone();
 }
 

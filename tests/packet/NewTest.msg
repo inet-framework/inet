@@ -14,7 +14,7 @@
 //
 
 cplusplus {{
-#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/Chunk.h"
 }}
 
 namespace inet;
