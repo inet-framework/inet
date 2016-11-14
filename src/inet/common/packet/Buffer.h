@@ -16,7 +16,7 @@
 #ifndef __INET_BUFFER_H_
 #define __INET_BUFFER_H_
 
-#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/Chunk.h"
 
 namespace inet {
 
@@ -28,8 +28,8 @@ class Buffer : public cObject
   protected:
     int64_t pushedByteLength = 0;
     int64_t poppedByteLength = 0;
-    std::shared_ptr<SequenceChunk> data;
-    SequenceChunk::SequenceIterator iterator;
+    std::shared_ptr<Chunk> data = nullptr;
+    Chunk::Iterator iterator;
 
     void remove(int64_t byteLength);
 

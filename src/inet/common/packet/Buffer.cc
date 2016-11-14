@@ -14,17 +14,18 @@
 // 
 
 #include "inet/common/packet/Buffer.h"
+#include "inet/common/packet/SequenceChunk.h"
 
 namespace inet {
 
 Buffer::Buffer() :
-    data(std::make_shared<SequenceChunk>()),
-    iterator(data->createForwardIterator())
+    data(nullptr),
+    iterator(Chunk::Iterator(nullptr))
 {
 }
 
 Buffer::Buffer(const Buffer& other) :
-    data(other.isImmutable() ? other.data : std::make_shared<SequenceChunk>(*other.data)),
+    data(other.isImmutable() ? other.data : other.data->dupShared()),
     iterator(other.iterator)
 {
 }
@@ -60,14 +61,34 @@ std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)
 
 void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
 {
-    data->append(chunk, flatten);
+    if (data == nullptr) {
+        if (std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            sequenceChunk->append(chunk, flatten);
+            data = sequenceChunk;
+        }
+        else
+            data = chunk;
+        iterator = data->createForwardIterator();
+    }
+    else {
+        if (auto sequenceChunk = std::dynamic_pointer_cast<SequenceChunk>(data))
+            sequenceChunk->append(chunk, flatten);
+        else {
+            if (!data->insertToEnd(chunk)) {
+                auto sequenceChunk = std::make_shared<SequenceChunk>();
+                sequenceChunk->append(data, flatten);
+                sequenceChunk->append(chunk, flatten);
+                data = sequenceChunk;
+            }
+        }
+    }
     pushedByteLength += chunk->getByteLength();
 }
 
 void Buffer::push(Buffer* buffer, bool flatten)
 {
-    data->append(buffer->data, flatten);
-    pushedByteLength += buffer->getByteLength();
+    push(buffer->data, flatten);
 }
 
 } // namespace

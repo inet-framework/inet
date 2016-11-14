@@ -36,6 +36,15 @@ Chunk::Iterator::Iterator(const Iterator& other) :
 {
 }
 
+Chunk::Iterator& Chunk::Iterator::operator=(const Iterator& other)
+{
+    chunk = other.chunk;
+    isForward_ = other.isForward_;
+    position = other.position;
+    index = other.index;
+    return *this;
+}
+
 Chunk::Chunk(const Chunk& other) :
     isImmutable_(false),
     isIncomplete_(other.isIncomplete_),

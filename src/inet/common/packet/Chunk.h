@@ -75,7 +75,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class Iterator
     {
       protected:
-        const std::shared_ptr<const Chunk> chunk = nullptr;
+        std::shared_ptr<const Chunk> chunk = nullptr;
         bool isForward_ = true;
         int64_t position = 0;
         int index = 0;
@@ -84,6 +84,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         Iterator(const std::shared_ptr<const Chunk>& chunk, bool isForward = true, int64_t position = 0, int index = 0);
         Iterator(const Iterator& other);
         virtual ~Iterator() { }
+
+        Iterator& operator=(const Iterator& other);
 
         bool isForward() const { return isForward_; }
         bool isBackward() const { return !isForward_; }
