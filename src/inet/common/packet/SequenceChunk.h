@@ -25,45 +25,18 @@ class SequenceChunk : public Chunk
   public:
     class SequenceIterator : public Iterator
     {
-      protected:
-        const std::shared_ptr<const SequenceChunk> chunk = nullptr;
-
       public:
-        SequenceIterator(const std::shared_ptr<const SequenceChunk>& chunk, bool isForward, int index = 0, int64_t position = 0);
-        SequenceIterator(const SequenceIterator& other);
+        SequenceIterator(const std::shared_ptr<const Chunk>& chunk, bool isForward, int index = 0, int64_t position = 0);
+        SequenceIterator(const Iterator& other);
 
-        void move(int64_t byteLength);
-        void seek(int64_t byteOffset);
+        virtual void move(int64_t byteLength) override;
+        virtual void seek(int64_t byteOffset) override;
 
-        virtual int getStartIndex() const { return isForward_ ? 0 : chunk->chunks.size() - 1; }
-        virtual int getEndIndex() const { return isForward_ ? chunk->chunks.size() - 1 : 0; }
-        virtual int getIndexIncrement() const { return isForward_ ? 1 : -1; }
-        virtual const std::shared_ptr<Chunk>& getElementChunk() const { return isForward_ ? chunk->chunks[index] : chunk->chunks[chunk->chunks.size() - index - 1]; }
+        int getStartIndex() const { return isForward_ ? 0 : std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - 1; }
+        int getEndIndex() const { return isForward_ ? std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - 1 : 0; }
+        int getIndexIncrement() const { return isForward_ ? 1 : -1; }
+        const std::shared_ptr<Chunk>& getElementChunk() const { return isForward_ ? std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[index] : std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - index - 1]; }
     };
-
-//    class ForwardIterator : public SequenceIterator
-//    {
-//      public:
-//        ForwardIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index = 0, int64_t position = 0);
-//        ForwardIterator(const ForwardIterator& other);
-//
-//        virtual int getStartIndex() const override { return 0; }
-//        virtual int getEndIndex() const override { return chunk->chunks.size() - 1; }
-//        virtual int getIndexIncrement() const override { return 1; }
-//        virtual const std::shared_ptr<Chunk>& getElementChunk() const override { return chunk->chunks[index]; }
-//    };
-//
-//    class BackwardIterator : public SequenceIterator
-//    {
-//      public:
-//        BackwardIterator(const std::shared_ptr<const SequenceChunk>& chunk, int index = 0, int64_t position = 0);
-//        BackwardIterator(const ForwardIterator& other);
-//
-//        virtual int getStartIndex() const override { return chunk->chunks.size() - 1; }
-//        virtual int getEndIndex() const override { return 0; }
-//        virtual int getIndexIncrement() const override { return -1; }
-//        virtual const std::shared_ptr<Chunk>& getElementChunk() const override { return chunk->chunks[chunk->chunks.size() - index - 1]; }
-//    };
 
   protected:
     std::vector<std::shared_ptr<Chunk>> chunks;
@@ -95,12 +68,6 @@ class SequenceChunk : public Chunk
     /** @name Mutability related functions */
     //@{
     void makeImmutable();
-    //@}
-
-    /** @name Iteration related functions */
-    //@{
-    SequenceIterator createForwardIterator() const { return SequenceIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this()), true); }
-    SequenceIterator createBackwardIterator() const { return SequenceIterator(std::static_pointer_cast<const SequenceChunk>(shared_from_this()), false); }
     //@}
 
     /** @name Filling with data related functions */

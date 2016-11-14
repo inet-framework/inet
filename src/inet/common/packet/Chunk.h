@@ -75,12 +75,13 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class Iterator
     {
       protected:
+        const std::shared_ptr<const Chunk> chunk = nullptr;
         bool isForward_ = true;
         int64_t position = 0;
         int index = 0;
 
       public:
-        Iterator(bool isForward, int64_t position = 0, int index = 0);
+        Iterator(const std::shared_ptr<const Chunk>& chunk, bool isForward = true, int64_t position = 0, int index = 0);
         Iterator(const Iterator& other);
         virtual ~Iterator() { }
 
@@ -89,8 +90,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         int64_t getPosition() const { return position; }
         int getIndex() const { return index; }
 
-        void move(int64_t byteLength) { position += byteLength; }
-        void seek(int64_t byteOffset) { position = byteOffset; }
+        virtual void move(int64_t byteLength) { position += byteLength; }
+        virtual void seek(int64_t byteOffset) { position = byteOffset; }
     };
 
   public:
@@ -152,6 +153,12 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     void makeIncorrect() { isIncorrect_ = true; }
     //@}
 
+    /** @name Iteration related functions */
+    //@{
+    Iterator createForwardIterator() const { return Iterator(shared_from_this(), true); }
+    Iterator createBackwardIterator() const { return Iterator(shared_from_this(), false); }
+    //@}
+
     /** @name Inserting data related functions */
     //@{
     /**
@@ -188,6 +195,10 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Returns the length of data measured in bytes represented by this chunk.
      */
     virtual int64_t getByteLength() const = 0;
+
+    virtual std::shared_ptr<Chunk> peek(int64_t byteOffset = 0, int64_t byteLength = -1) const {
+        return peek(Iterator(shared_from_this(), true, 0, -1), byteLength);
+    }
 
     /**
      * Returns the designated part of the data represented by this chunk in its

@@ -1,5 +1,5 @@
 //
-// This program is free software: you can redistribute it and/or modify
+    // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -17,15 +17,13 @@
 
 namespace inet {
 
-SequenceChunk::SequenceIterator::SequenceIterator(const std::shared_ptr<const SequenceChunk>& chunk, bool isForward, int index, int64_t position) :
-    Iterator(isForward, position),
-    chunk(chunk)
+SequenceChunk::SequenceIterator::SequenceIterator(const std::shared_ptr<const Chunk>& chunk, bool isForward, int index, int64_t position) :
+    Iterator(chunk, isForward, position, index)
 {
 }
 
-SequenceChunk::SequenceIterator::SequenceIterator(const SequenceIterator& other) :
-    Iterator(other),
-    chunk(other.chunk)
+SequenceChunk::SequenceIterator::SequenceIterator(const Iterator& other) :
+    Iterator(other)
 {
 }
 
@@ -40,7 +38,7 @@ void SequenceChunk::SequenceIterator::seek(int64_t byteOffset)
         int increment = getIndexIncrement();
         int64_t p = 0;
         for (int i = startIndex; i != endIndex + increment; i += increment) {
-            p += chunk->chunks[i]->getByteLength();
+            p += std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[i]->getByteLength();
             if (p == byteOffset) {
                 index = i + 1;
                 return;
@@ -53,7 +51,7 @@ void SequenceChunk::SequenceIterator::seek(int64_t byteOffset)
 void SequenceChunk::SequenceIterator::move(int64_t byteLength)
 {
     position += byteLength;
-    if (index != -1 && index != chunk->chunks.size() && getElementChunk()->getByteLength() == byteLength)
+    if (index != -1 && index != std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() && getElementChunk()->getByteLength() == byteLength)
         index++;
     else
         index = -1;
@@ -118,7 +116,7 @@ std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byt
     if (iterator.getPosition() == 0 && byteLength == getByteLength())
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else
-        return peek<SliceChunk>(static_cast<const SequenceIterator&>(iterator), byteLength);
+        return peek<SliceChunk>(SequenceIterator(iterator), byteLength);
 }
 
 bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
@@ -138,18 +136,6 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
         }
     }
     return false;
-//    if (lastChunk->isMutable() && lastChunk->insertToEnd(chunk)) {
-//        if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(lastChunk)) {
-//            if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength())
-//                chunks.back() = sliceChunk->getChunk();
-//        }
-//    }
-//    else if (chunk->isMutable() && chunk->insertToBeginning(lastChunk)) {
-//        if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
-//            if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength())
-//                chunks.back() = sliceChunk->getChunk();
-//        }
-//    }
 }
 
 bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
