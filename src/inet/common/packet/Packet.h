@@ -233,7 +233,7 @@ class Packet : public cPacket
     void append(Packet *packet, bool flatten = true);
     //@}
 
-    virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }
+    virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }        //TODO REVIEW: returns total length, or returns length between header/trailer iterators only? in second case: need a getTotalLength() function
 
     virtual std::string str() const override { return data->str(); }
 };
