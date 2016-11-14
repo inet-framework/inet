@@ -103,6 +103,17 @@ bool SliceChunk::removeFromEnd(int64_t byteLength)
     return true;
 }
 
+std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t byteLength) const
+{
+    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+        return const_cast<SliceChunk *>(this)->shared_from_this();
+    else {
+        Iterator sliceIterator(iterator);
+        sliceIterator.move(byteOffset);
+        return chunk->peek(sliceIterator, byteLength);
+    }
+}
+
 std::string SliceChunk::str() const
 {
     std::ostringstream os;

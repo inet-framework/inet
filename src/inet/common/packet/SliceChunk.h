@@ -57,6 +57,8 @@ class SliceChunk : public Chunk
     virtual bool removeFromBeginning(int64_t byteLength) override;
     virtual bool removeFromEnd(int64_t byteLength) override;
 
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
+
     virtual std::string str() const override;
 };
 
