@@ -282,7 +282,7 @@ static void testSerialize()
     assert(totalSerializedByteLength + size == ChunkSerializer::totalSerializedByteLength);
 }
 
-static void testPeek()
+static void testPeekChunk()
 {
     // 1. ByteLengthChunk peek always returns ByteLengthChunk
     auto byteLengthChunk1 = std::make_shared<ByteLengthChunk>(10);
@@ -297,6 +297,51 @@ static void testPeek()
     const auto& byteArrayChunk2 = std::dynamic_pointer_cast<ByteArrayChunk>(byteArrayChunk1->peek(0, 5));
     assert(byteArrayChunk2 != nullptr);
     assert(std::equal(byteArrayChunk2->getBytes().begin(), byteArrayChunk2->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4}).begin()));
+}
+
+static void testPeekPacket()
+{
+    // 1. packet provides ByteLengthChunks by default if it contains a ByteLengthChunk only
+    Packet packet1;
+    packet1.append(std::make_shared<ByteLengthChunk>(10));
+    packet1.append(std::make_shared<ByteLengthChunk>(10));
+    packet1.append(std::make_shared<ByteLengthChunk>(10));
+    packet1.makeImmutable();
+    const auto& byteLengthChunk1 = std::dynamic_pointer_cast<ByteLengthChunk>(packet1.popHeader(15));
+    const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(packet1.popHeader(15));
+    assert(byteLengthChunk1 != nullptr);
+    assert(byteLengthChunk2 != nullptr);
+    // 2. packet provides ByteArrayChunks by default if it contains a ByteArrayChunk only
+    Packet packet2;
+    packet2.append(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    packet2.append(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    packet2.append(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& byteLengthChunk3 = std::dynamic_pointer_cast<ByteArrayChunk>(packet2.popHeader(15));
+    const auto& byteLengthChunk4 = std::dynamic_pointer_cast<ByteArrayChunk>(packet2.popHeader(15));
+    assert(byteLengthChunk3 != nullptr);
+    assert(byteLengthChunk4 != nullptr);
+}
+
+static void testPeekBuffer()
+{
+    // 1. buffer provides ByteLengthChunks by default if it contains a ByteLengthChunk only
+    Buffer buffer1;
+    buffer1.push(std::make_shared<ByteLengthChunk>(10));
+    buffer1.push(std::make_shared<ByteLengthChunk>(10));
+    buffer1.push(std::make_shared<ByteLengthChunk>(10));
+    const auto& byteLengthChunk1 = std::dynamic_pointer_cast<ByteLengthChunk>(buffer1.pop(15));
+    const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(buffer1.pop(15));
+    assert(byteLengthChunk1 != nullptr);
+    assert(byteLengthChunk2 != nullptr);
+    // 2. buffer provides ByteArrayChunks by default if it contains a ByteArrayChunk only
+    Buffer buffer2;
+    buffer2.push(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    buffer2.push(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    buffer2.push(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& byteLengthChunk3 = std::dynamic_pointer_cast<ByteArrayChunk>(buffer2.pop(15));
+    const auto& byteLengthChunk4 = std::dynamic_pointer_cast<ByteArrayChunk>(buffer2.pop(15));
+    assert(byteLengthChunk3 != nullptr);
+    assert(byteLengthChunk4 != nullptr);
 }
 
 static void testClone()
@@ -343,7 +388,9 @@ void UnitTest::initialize()
     testNesting();
     testPolymorphism();
     testSerialize();
-    testPeek();
+    testPeekChunk();
+//    testPeekPacket();
+//    testPeekBuffer();
     testClone();
 }
 
