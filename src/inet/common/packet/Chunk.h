@@ -42,6 +42,32 @@ namespace inet {
  *  - remove from the beginning or end
  *  - query length and peek an arbitrary part
  *  - serialize to and deserialize from a sequence of bytes
+ *
+ * 1) Peeking without providing a return type for a
+ *    a) ByteArrayChunk always returns a ByteArrayChunk containing the bytes
+ *       of the requested part
+ *    b) ByteLengthChunk always returns a ByteLengthChunk containing the
+ *       requested byte length
+ *    c) SliceChunk always returns a SliceChunk containing the requested slice
+ *       of the chunk that is used by the original SliceChunk
+ *    d) SequenceChunk may return
+ *       - an element chunk
+ *       - a SliceChunk of an element chunk
+ *       - a SequenceChunk potentially containing SliceChunks at both ends
+ *    e) any other chunk returns a SliceChunk
+ * 2) Peeking with providing a return type always returns a chunk of the
+ *    requested type (or a subtype)
+ *    a) Peeking with a ByteLengthChunk return type for any chunk returns a
+ *       ByteLengthChunk containing the requested byte length
+ *    b) Peeking with a ByteArrayChunk return type for any chunk returns a
+ *       ByteArrayChunk containing a part of the serialized bytes of the
+ *       original chunk
+ *    c) Peeking with a SliceChunk return type for any chunk returns a
+ *       SliceChunk containing the original chunk
+ *    d) Peeking with a SequenceChunk return type is an error
+ *    e) Peeking with a any other return type for any chunk returns a chunk of
+ *       the requested type containing data deserialized from the bytes that
+ *       were serialized from the original chunk
  */
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
