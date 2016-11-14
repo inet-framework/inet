@@ -82,7 +82,7 @@ class SequenceChunk : public Chunk
     void insertToEnd(const std::shared_ptr<SliceChunk>& chunk);
     void insertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
 
-    std::vector<std::shared_ptr<Chunk> > cloneChunks() const;
+    std::vector<std::shared_ptr<Chunk> > dupChunks() const;
 
   public:
     SequenceChunk() { }

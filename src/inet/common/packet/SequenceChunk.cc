@@ -83,7 +83,7 @@ SequenceChunk::BackwardIterator::BackwardIterator(const ForwardIterator& other) 
 
 SequenceChunk::SequenceChunk(const SequenceChunk& other) :
     Chunk(other),
-    chunks(other.isImmutable() ? other.chunks : other.cloneChunks())
+    chunks(other.isImmutable() ? other.chunks : other.dupChunks())
 {
 }
 
@@ -94,12 +94,12 @@ void SequenceChunk::makeImmutable()
         chunk->makeImmutable();
 }
 
-std::vector<std::shared_ptr<Chunk> > SequenceChunk::cloneChunks() const
+std::vector<std::shared_ptr<Chunk> > SequenceChunk::dupChunks() const
 {
-    std::vector<std::shared_ptr<Chunk> > clones;
+    std::vector<std::shared_ptr<Chunk> > copies;
     for (auto& chunk : chunks)
-        clones.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
-    return clones;
+        copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
+    return copies;
 }
 
 int64_t SequenceChunk::getByteLength() const
