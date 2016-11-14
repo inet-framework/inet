@@ -47,7 +47,15 @@ std::shared_ptr<Chunk> Buffer::peek(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::ForwardIterator(data, -1, byteOffset), byteLength);
+    return data->peek(Chunk::ForwardIterator(byteOffset), byteLength);
+}
+
+std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)
+{
+    const auto& chunk = peek(byteLength);
+    if (chunk != nullptr)
+        remove(chunk->getByteLength());
+    return chunk;
 }
 
 void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)

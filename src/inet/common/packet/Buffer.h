@@ -59,6 +59,8 @@ class Buffer : public cObject
 
     std::shared_ptr<Chunk> peekAt(int64_t byteOffset, int64_t byteLength) const;
 
+    std::shared_ptr<Chunk> pop(int64_t byteLength = -1);
+
     template <typename T>
     bool has(int64_t byteLength = -1) const {
         return peek<T>(byteLength) != nullptr;
