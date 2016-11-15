@@ -62,7 +62,7 @@ std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)
 void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
 {
     if (data == nullptr) {
-        if (std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+        if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
             sequenceChunk->append(chunk, flatten);
             data = sequenceChunk;
@@ -72,8 +72,8 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
         iterator = data->createForwardIterator();
     }
     else {
-        if (auto sequenceChunk = std::dynamic_pointer_cast<SequenceChunk>(data))
-            sequenceChunk->append(chunk, flatten);
+        if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
+            std::static_pointer_cast<SequenceChunk>(data)->append(chunk, flatten);
         else {
             if (!data->insertToEnd(chunk)) {
                 auto sequenceChunk = std::make_shared<SequenceChunk>();

@@ -40,6 +40,8 @@ class ByteArrayChunk : public Chunk
     virtual ByteArrayChunk *dup() const override { return new ByteArrayChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<ByteArrayChunk>(*this); }
 
+    virtual Type getChunkType() const override { return TYPE_BYTEARRAY; }
+
     virtual const std::vector<uint8_t>& getBytes() const { return bytes; }
     virtual void setBytes(const std::vector<uint8_t>& bytes);
 

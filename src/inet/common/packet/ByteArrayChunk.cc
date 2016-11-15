@@ -43,7 +43,8 @@ bool ByteArrayChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (const auto& byteArrayChunk = std::dynamic_pointer_cast<ByteArrayChunk>(chunk)) {
+    if (chunk->getChunkType() == TYPE_BYTEARRAY) {
+        const auto& byteArrayChunk = std::static_pointer_cast<ByteArrayChunk>(chunk);
         bytes.insert(bytes.begin(), byteArrayChunk->bytes.begin(), byteArrayChunk->bytes.end());
         return true;
     }
@@ -55,7 +56,8 @@ bool ByteArrayChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (const auto& byteArrayChunk = std::dynamic_pointer_cast<ByteArrayChunk>(chunk)) {
+    if (chunk->getChunkType() == TYPE_BYTEARRAY) {
+        const auto& byteArrayChunk = std::static_pointer_cast<ByteArrayChunk>(chunk);
         bytes.insert(bytes.end(), byteArrayChunk->bytes.begin(), byteArrayChunk->bytes.end());
         return true;
     }

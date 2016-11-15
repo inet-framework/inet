@@ -63,6 +63,8 @@ class SequenceChunk : public Chunk
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
 
+    virtual Type getChunkType() const override { return TYPE_SEQUENCE; }
+
     const std::vector<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
 
     /** @name Mutability related functions */

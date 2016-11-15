@@ -126,7 +126,8 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
         if (lastChunk->isImmutable() && chunk->isImmutable()) {
             auto mergedChunk = lastChunk->dupShared();
             if (mergedChunk->insertToEnd(chunk)) {
-                if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(mergedChunk)) {
+                if (mergedChunk->getChunkType() == TYPE_SLICE) {
+                    auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
                     if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength()) {
                         chunks.back() = sliceChunk->getChunk();
                         return true;
@@ -158,10 +159,10 @@ void SequenceChunk::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
 {
     if (!flatten)
         insertToBeginning(chunk);
-    else if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk))
-        insertToBeginning(sliceChunk);
-    else if (auto sequenceChunk = std::dynamic_pointer_cast<SequenceChunk>(chunk))
-        insertToBeginning(sequenceChunk);
+    else if (chunk->getChunkType() == TYPE_SLICE)
+        insertToBeginning(std::static_pointer_cast<SliceChunk>(chunk));
+    else if (chunk->getChunkType() == TYPE_SEQUENCE)
+        insertToBeginning(std::static_pointer_cast<SequenceChunk>(chunk));
     else
         insertToBeginning(chunk);
 }
@@ -179,7 +180,8 @@ bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::insertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
-    if (auto sequenceChunk = std::dynamic_pointer_cast<SequenceChunk>(sliceChunk->getChunk())) {
+    if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
+        auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         int64_t byteOffset = 0;
         for (auto& elementChunk : sequenceChunk->chunks) {
             int64_t sliceChunkBegin = sliceChunk->getByteOffset();
@@ -209,10 +211,10 @@ void SequenceChunk::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
 {
     if (!flatten)
         insertToEnd(chunk);
-    else if (auto sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk))
-        insertToEnd(sliceChunk);
-    else if (auto sequenceChunk = std::dynamic_pointer_cast<SequenceChunk>(chunk))
-        insertToEnd(sequenceChunk);
+    else if (chunk->getChunkType() == TYPE_SLICE)
+        insertToEnd(std::static_pointer_cast<SliceChunk>(chunk));
+    else if (chunk->getChunkType() == TYPE_SEQUENCE)
+        insertToEnd(std::static_pointer_cast<SequenceChunk>(chunk));
     else
         insertToEnd(chunk);
 }

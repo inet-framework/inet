@@ -39,7 +39,8 @@ bool ByteLengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (const auto& byteLengthChunk = std::dynamic_pointer_cast<ByteLengthChunk>(chunk)) {
+    if (chunk->getChunkType() == TYPE_BYTELENGTH) {
+        const auto& byteLengthChunk = std::static_pointer_cast<ByteLengthChunk>(chunk);
         byteLength += byteLengthChunk->byteLength;
         return true;
     }
@@ -51,7 +52,8 @@ bool ByteLengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (const auto& byteLengthChunk = std::dynamic_pointer_cast<ByteLengthChunk>(chunk)) {
+    if (chunk->getChunkType() == TYPE_BYTELENGTH) {
+        const auto& byteLengthChunk = std::static_pointer_cast<ByteLengthChunk>(chunk);
         byteLength += byteLengthChunk->byteLength;
         return true;
     }

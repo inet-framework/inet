@@ -55,7 +55,8 @@ bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (const auto& otherSliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+    if (chunk->getChunkType() == TYPE_SLICE) {
+        const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
         if (this->chunk == otherSliceChunk->chunk && byteOffset == otherSliceChunk->byteOffset + otherSliceChunk->byteLength) {
             byteOffset -= otherSliceChunk->byteLength;
             byteLength += otherSliceChunk->byteLength;
@@ -72,7 +73,8 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (const auto& otherSliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+    if (chunk->getChunkType() == TYPE_SLICE) {
+        const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
         if (this->chunk == otherSliceChunk->chunk && byteOffset + byteLength == otherSliceChunk->byteOffset) {
             byteLength += otherSliceChunk->byteLength;
             return true;

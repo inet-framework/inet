@@ -79,6 +79,14 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     };
 
   public:
+    enum Type {
+        TYPE_BYTELENGTH,
+        TYPE_BYTEARRAY,
+        TYPE_SLICE,
+        TYPE_SEQUENCE,
+        TYPE_OTHER
+    };
+
     class Iterator
     {
       protected:
@@ -128,6 +136,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     virtual ~Chunk();
 
     virtual std::shared_ptr<Chunk> dupShared() const { return std::shared_ptr<Chunk>(static_cast<Chunk *>(dup())); };
+
+    virtual Type getChunkType() const { return TYPE_OTHER; }
 
     /** @name Mutability related functions */
     //@{
