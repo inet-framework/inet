@@ -45,10 +45,14 @@ Chunk::Iterator& Chunk::Iterator::operator=(const Iterator& other)
     return *this;
 }
 
+Chunk::Chunk() :
+    flags(0),
+    serializedBytes(nullptr)
+{
+}
+
 Chunk::Chunk(const Chunk& other) :
-    isImmutable_(false),
-    isIncomplete_(other.isIncomplete_),
-    isIncorrect_(other.isIncorrect_),
+    flags(other.flags & ~FLAG_IMMUTABLE),
     serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
 {
 }

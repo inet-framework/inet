@@ -71,6 +71,13 @@ namespace inet {
  */
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
+  protected:
+    enum Flag {
+        FLAG_IMMUTABLE  = 1,
+        FLAG_INCOMPLETE = 2,
+        FLAG_INCORRECT  = 4,
+    };
+
   public:
     class Iterator
     {
@@ -100,11 +107,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     static bool enableImplicitChunkSerialization;
 
   protected:
-    // TODO: convert these booleans to a single integer flags
-    bool isImmutable_ = false;
-    bool isIncomplete_ = false;
-    bool isIncorrect_ = false;
-    std::vector<uint8_t> *serializedBytes = nullptr;
+    uint16_t flags;
+    std::vector<uint8_t> *serializedBytes;
 
   protected:
     virtual const char *getSerializerClassName() const { return nullptr; }
@@ -119,7 +123,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
-    Chunk() { }
+    Chunk();
     Chunk(const Chunk& other);
     virtual ~Chunk();
 
@@ -128,31 +132,31 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /** @name Mutability related functions */
     //@{
     // NOTE: there is no makeMutable() intentionally
-    bool isMutable() const { return !isImmutable_; }
-    bool isImmutable() const { return isImmutable_; }
-    void assertMutable() const { assert(!isImmutable_); }
-    void assertImmutable() const { assert(isImmutable_); }
-    void makeImmutable() { isImmutable_ = true; }
+    bool isMutable() const { return !(flags & FLAG_IMMUTABLE); }
+    bool isImmutable() const { return flags & FLAG_IMMUTABLE; }
+    void assertMutable() const { assert(isMutable()); }
+    void assertImmutable() const { assert(isImmutable()); }
+    void makeImmutable() { flags |= FLAG_IMMUTABLE; }
     //@}
 
     /** @name Completeness related functions */
     //@{
     // NOTE: there is no makeComplete() intentionally
-    bool isComplete() const { return !isIncomplete_; }
-    bool isIncomplete() const { return isIncomplete_; }
-    void assertComplete() const { assert(!isIncomplete_); }
-    void assertIncomplete() const { assert(isIncomplete_); }
-    void makeIncomplete() { isIncomplete_ = true; }
+    bool isComplete() const { return !(flags & FLAG_INCOMPLETE); }
+    bool isIncomplete() const { return flags & FLAG_INCOMPLETE; }
+    void assertComplete() const { assert(isComplete()); }
+    void assertIncomplete() const { assert(isIncomplete()); }
+    void makeIncomplete() { flags |= FLAG_INCOMPLETE; }
     //@}
 
     /** @name Correctness related functions */
     //@{
     // NOTE: there is no makeCorrect() intentionally
-    bool isCorrect() const { return !isIncorrect_; }
-    bool isIncorrect() const { return isIncorrect_; }
-    void assertCorrect() const { assert(!isIncorrect_); }
-    void assertIncorrect() const { assert(isIncorrect_); }
-    void makeIncorrect() { isIncorrect_ = true; }
+    bool isCorrect() const { return !(flags & FLAG_INCORRECT); }
+    bool isIncorrect() const { return flags & FLAG_INCORRECT; }
+    void assertCorrect() const { assert(isCorrect()); }
+    void assertIncorrect() const { assert(isIncorrect()); }
+    void makeIncorrect() { flags |= FLAG_INCORRECT; }
     //@}
 
     /** @name Iteration related functions */
