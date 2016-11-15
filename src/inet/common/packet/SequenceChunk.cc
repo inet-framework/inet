@@ -97,7 +97,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator,
     return nullptr;
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const SequenceIterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& iterator, int64_t byteLength) const
 {
     int position = 0;
     int startIndex = getStartIndex(iterator);
@@ -110,14 +110,6 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const SequenceIterato
         position += chunk->getByteLength();
     }
     return nullptr;
-}
-
-std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byteLength) const
-{
-    if (iterator.getPosition() == 0 && byteLength == getByteLength())
-        return const_cast<SequenceChunk *>(this)->shared_from_this();
-    else
-        return peek<SliceChunk>(SequenceIterator(iterator), byteLength);
 }
 
 bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)

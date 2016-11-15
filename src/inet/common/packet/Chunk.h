@@ -256,11 +256,14 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {
+        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))
+            return tChunk;
+        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, byteLength)))
+            return tChunk;
         if (!enableImplicitChunkSerialization)
             throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
         // TODO: prevents easy access for application buffer
         // assertImmutable();
-        // TODO: eliminate const_cast
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), byteLength);
         chunk->makeImmutable();
         if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getByteLength())

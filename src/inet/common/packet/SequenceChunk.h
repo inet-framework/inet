@@ -33,8 +33,8 @@ class SequenceChunk : public Chunk
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
-    std::shared_ptr<Chunk> peekWithIterator(const SequenceIterator& iterator, int64_t byteLength = -1) const;
-    std::shared_ptr<Chunk> peekWithLinearSearch(const SequenceIterator& iterator, int64_t byteLength = -1) const;
+    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t byteLength = -1) const override;
+    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t byteLength = -1) const override;
 
     bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
 
@@ -86,17 +86,6 @@ class SequenceChunk : public Chunk
     /** @name Querying data related functions */
     //@{
     virtual int64_t getByteLength() const override;
-
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
-
-    template <typename T>
-    std::shared_ptr<T> peek(const SequenceIterator& iterator, int64_t byteLength = -1) const {
-        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))
-            return tChunk;
-        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, byteLength)))
-            return tChunk;
-        return Chunk::peek<T>(iterator, byteLength);
-    }
     //@}
 
     virtual std::string str() const override;
