@@ -208,7 +208,7 @@ static void testNesting()
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
     assert(compoundHeader2 != nullptr);
     // 2. packet provides compound header after serialization
-    const auto& byteArrayChunk1 = packet1.peekHeaderAt<ByteArrayChunk>(0);
+    const auto& byteArrayChunk1 = packet1.peek<ByteArrayChunk>();
     Packet packet2;
     packet2.append(byteArrayChunk1);
     const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
@@ -237,7 +237,7 @@ static void testPolymorphism()
     assert(tlvHeader4 != nullptr);
     assert(tlvHeader4->getInt16Value() == 42);
     // 1. packet provides serialized headers in a polymorphic way after deserialization
-    const auto& byteArrayChunk1 = packet1.peekDataAt<ByteArrayChunk>(0, packet1.getByteLength());
+    const auto& byteArrayChunk1 = packet1.peek<ByteArrayChunk>();
     Packet packet2;
     packet2.append(byteArrayChunk1);
     const auto& tlvHeader5 = std::dynamic_pointer_cast<TlvHeader1>(packet2.popHeader<TlvHeader>());

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "Packet.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -83,12 +83,27 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
 
 std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition()), byteLength == -1 ? getDataSize() : byteLength);
+    int64_t peekByteLength = byteLength == -1 ? getDataSize() : byteLength;
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition()), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
+    int64_t peekByteOffset = getDataPosition() + byteOffset;
+    int64_t peekByteLength = byteLength == -1 ? getDataSize() - byteOffset : byteLength;
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, peekByteOffset), peekByteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peek(int64_t byteLength) const
+{
+    int64_t peekByteLength = byteLength == -1 ? getByteLength() : byteLength;
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, 0), peekByteLength);
+}
+
+std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t byteLength) const
+{
+    int64_t peekByteLength = byteLength == -1 ? getByteLength() - byteOffset : byteLength;
+    return data->peek(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), peekByteLength);
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)

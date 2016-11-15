@@ -197,7 +197,29 @@ class Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const { // TODO: start peeking from getDataPosition()
+    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
+        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition() + byteOffset), byteLength);
+    }
+    //@}
+
+    /** @name Querying related functions */
+    //@{
+    std::shared_ptr<Chunk> peek(int64_t byteLength = -1) const;
+
+    std::shared_ptr<Chunk> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const;
+
+    template <typename T>
+    bool has(int64_t byteLength = -1) const {
+        return peek<T>(byteLength) != nullptr;
+    }
+
+    template <typename T>
+    std::shared_ptr<T> peek(int64_t byteLength = -1) const {
+        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, 0), byteLength);
+    }
+
+    template <typename T>
+    std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
         return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
     }
     //@}
