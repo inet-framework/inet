@@ -42,7 +42,13 @@ namespace inet {
  *  - remove from the beginning or end
  *  - query length and peek an arbitrary part
  *  - serialize to and deserialize from a sequence of bytes
+ *  - copying to a new mutable chunk
  *
+ * General rules for peeking a chunk:
+ * 1) Peeking (various special cases)
+ *    a) an empty part of the chunk returns an empty chunk
+ *    b) the whole of the chunk returns the chunk
+ *    c) any part that is directly represented by a chunk returns that chunk
  * 1) Peeking without providing a return type for a
  *    a) ByteArrayChunk always returns a ByteArrayChunk containing the bytes
  *       of the requested part
@@ -53,6 +59,7 @@ namespace inet {
  *    d) SequenceChunk may return
  *       - an element chunk
  *       - a SliceChunk of an element chunk
+ *       - a SliceChunk using the original SequenceChunk
  *       - a SequenceChunk potentially containing SliceChunks at both ends
  *    e) any other chunk returns a SliceChunk
  * 2) Peeking with providing a return type always returns a chunk of the

@@ -22,7 +22,24 @@ namespace inet {
 
 /**
  * This class represents network packets, datagrams, frames and other kinds of
- * data used by communication protocols.
+ * data used by communication protocols. Packets store their data in different
+ * kind of chunks.
+ *
+ * Packets are initially mutable, then may become immutable (but never the
+ * other way around). All chunks are immutable in an immutable packet.
+ * Immutable chunks are automatically shared among immutable packets when
+ * duplicating.
+ *
+ * A packet is conceptually divided into three parts during processing: headers,
+ * data, and trailers. These parts are separated by iterators maintained by
+ * the packet.
+ *
+ * In general, packets support the following operations:
+ *  - insert to the beginning or end
+ *  - remove from the beginning or end
+ *  - query length and peek an arbitrary part
+ *  - serialize to and deserialize from a sequence of bytes
+ *  - copying to a new mutable packet
  */
 class Packet : public cPacket
 {
@@ -70,7 +87,7 @@ class Packet : public cPacket
     /**
      * Returns the total byte length of the packet headers processed so far.
      */
-    int64_t getHeaderSize() const { return headerIterator.getPosition(); }      //FIXME What???
+    int64_t getHeaderSize() const { return headerIterator.getPosition(); }      // TODO: rename to getHeaderLength, or rather getProcessedHeaderLength to avoid confusion?
 
     std::shared_ptr<Chunk> peekHeader(int64_t byteLength = -1) const;
 
@@ -180,7 +197,7 @@ class Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
+    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const { // TODO: start peeking from getDataPosition()
         return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
     }
     //@}
