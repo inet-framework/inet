@@ -83,14 +83,14 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
 
 std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
 {
-    int64_t peekByteLength = byteLength == -1 ? getDataSize() : byteLength;
+    int64_t peekByteLength = byteLength == -1 ? getDataLength() : byteLength;
     return data->peek(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition()), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
 {
     int64_t peekByteOffset = getDataPosition() + byteOffset;
-    int64_t peekByteLength = byteLength == -1 ? getDataSize() - byteOffset : byteLength;
+    int64_t peekByteLength = byteLength == -1 ? getDataLength() - byteOffset : byteLength;
     return data->peek(SequenceChunk::SequenceIterator(data, true, -1, peekByteOffset), peekByteLength);
 }
 

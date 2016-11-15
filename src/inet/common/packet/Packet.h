@@ -87,7 +87,7 @@ class Packet : public cPacket
     /**
      * Returns the total byte length of the packet headers processed so far.
      */
-    int64_t getHeaderSize() const { return headerIterator.getPosition(); }      // TODO: rename to getHeaderLength, or rather getProcessedHeaderLength to avoid confusion?
+    int64_t getHeaderLength() const { return headerIterator.getPosition(); }      // TODO: rename to getHeaderLength, or rather getProcessedHeaderLength to avoid confusion?
 
     std::shared_ptr<Chunk> peekHeader(int64_t byteLength = -1) const;
 
@@ -136,7 +136,7 @@ class Packet : public cPacket
     /**
      * Returns the total byte length of the packet trailers processed so far.
      */
-    int64_t getTrailerSize() const { return trailerIterator.getPosition(); }
+    int64_t getTrailerLength() const { return trailerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekTrailer(int64_t byteLength = -1) const;
 
@@ -180,7 +180,7 @@ class Packet : public cPacket
      * Returns the current data size measured in bytes. The returned value is
      * in the range [0, getByteLength()].
      */
-    int64_t getDataSize() const { return getByteLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
+    int64_t getDataLength() const { return getByteLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekData(int64_t byteLength = -1) const;
 
