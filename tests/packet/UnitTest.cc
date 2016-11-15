@@ -368,8 +368,7 @@ static void testClone()
     packet1.makeImmutable();
     auto packet2 = packet1.dup();
     assert(packet2->getByteLength() == 10);
-    // NOTE: packet shares whole SequenceChunk
-    assert(byteLengthChunk1.use_count() == 2);
+    assert(byteLengthChunk1.use_count() == 3);
     delete packet2;
     // 2. copy of mutable packet copies data
     Packet packet3;
@@ -404,7 +403,7 @@ void UnitTest::initialize()
     testPolymorphism();
     testSerialize();
     testPeekChunk();
-//    testPeekPacket();
+    testPeekPacket();
     testPeekBuffer();
     testClone();
 }
