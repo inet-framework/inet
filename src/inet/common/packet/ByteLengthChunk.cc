@@ -38,7 +38,7 @@ ByteLengthChunk::ByteLengthChunk(int64_t byteLength) :
 
 std::shared_ptr<Chunk> ByteLengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
-    return std::make_shared<ByteLengthChunk>(byteLength);
+    return std::make_shared<ByteLengthChunk>(byteLength == -1 ? chunk->getByteLength() : byteLength);
 }
 
 void ByteLengthChunk::setByteLength(int64_t byteLength)
@@ -97,7 +97,7 @@ std::shared_ptr<Chunk> ByteLengthChunk::peek(const Iterator& iterator, int64_t b
     if (iterator.getPosition() == 0 && byteLength == getByteLength())
         return const_cast<ByteLengthChunk *>(this)->shared_from_this();
     else
-        return std::make_shared<ByteLengthChunk>(byteLength);
+        return std::make_shared<ByteLengthChunk>(byteLength == -1 ? getByteLength() - iterator.getPosition() : byteLength);
 }
 
 std::string ByteLengthChunk::str() const

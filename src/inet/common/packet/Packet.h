@@ -87,7 +87,7 @@ class Packet : public cPacket
     /**
      * Returns the total byte length of the packet headers processed so far.
      */
-    int64_t getHeaderLength() const { return headerIterator.getPosition(); }      // TODO: rename to getHeaderLength, or rather getProcessedHeaderLength to avoid confusion?
+    int64_t getHeaderLength() const { return headerIterator.getPosition(); }      // TODO: rename getProcessedHeaderLength to avoid confusion?
 
     std::shared_ptr<Chunk> peekHeader(int64_t byteLength = -1) const;
 
