@@ -19,8 +19,7 @@
 namespace inet {
 
 Buffer::Buffer() :
-    data(nullptr),
-    iterator(Chunk::Iterator(nullptr))
+    data(nullptr)
 {
 }
 
