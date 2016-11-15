@@ -22,27 +22,16 @@ namespace inet {
 
 class SequenceChunk : public Chunk
 {
-  public:
-    class SequenceIterator : public Iterator
-    {
-      public:
-        SequenceIterator(bool isForward = true, int64_t position = 0, int index = 0);
-        SequenceIterator(const Iterator& other);
-
-        virtual void move(const std::shared_ptr<const Chunk>& chunk, int64_t byteLength) override;
-        virtual void seek(const std::shared_ptr<const Chunk>& chunk, int64_t byteOffset) override;
-    };
-
   protected:
     std::vector<std::shared_ptr<Chunk>> chunks;
 
   protected:
     virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
 
-    int getStartIndex(const SequenceIterator& iterator) const { return iterator.isForward() ? 0 : chunks.size() - 1; }
-    int getEndIndex(const SequenceIterator& iterator) const { return iterator.isForward() ? chunks.size() - 1 : 0; }
-    int getIndexIncrement(const SequenceIterator& iterator) const { return iterator.isForward() ? 1 : -1; }
-    const std::shared_ptr<Chunk>& getElementChunk(const SequenceIterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
+    int getStartIndex(const Iterator& iterator) const { return iterator.isForward() ? 0 : chunks.size() - 1; }
+    int getEndIndex(const Iterator& iterator) const { return iterator.isForward() ? chunks.size() - 1 : 0; }
+    int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
+    const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
     std::shared_ptr<Chunk> peekWithIterator(const SequenceIterator& iterator, int64_t byteLength = -1) const;
     std::shared_ptr<Chunk> peekWithLinearSearch(const SequenceIterator& iterator, int64_t byteLength = -1) const;
@@ -71,6 +60,12 @@ class SequenceChunk : public Chunk
     /** @name Mutability related functions */
     //@{
     void makeImmutable();
+    //@}
+
+    /** @name Iteration related functions */
+    //@{
+    virtual void moveIterator(Iterator& iterator, int64_t byteLength) const override;
+    virtual void seekIterator(Iterator& iterator, int64_t byteOffset) const override;
     //@}
 
     /** @name Filling with data related functions */

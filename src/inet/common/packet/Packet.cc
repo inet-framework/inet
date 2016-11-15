@@ -36,9 +36,7 @@ Packet::Packet(const Packet& other) :
 
 Packet::Packet(const std::shared_ptr<Chunk>& data, const char *name, short kind) :
     cPacket(name, kind),
-    data(data),
-    headerIterator(data->createForwardIterator()),
-    trailerIterator(data->createBackwardIterator())
+    data(data)
 {
 }
 
@@ -129,8 +127,6 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
         }
         else
             data = chunk;
-        headerIterator = data->createForwardIterator();
-        trailerIterator = data->createBackwardIterator();
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
@@ -161,8 +157,6 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
         }
         else
             data = chunk;
-        headerIterator = data->createForwardIterator();
-        trailerIterator = data->createBackwardIterator();
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)

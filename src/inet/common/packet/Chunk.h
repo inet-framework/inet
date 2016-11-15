@@ -97,24 +97,40 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class Iterator
     {
       protected:
-        bool isForward_;
+        const bool isForward_;
         int64_t position;
         int index;
 
       public:
         Iterator(bool isForward = true, int64_t position = 0, int index = 0);
         Iterator(const Iterator& other);
-        virtual ~Iterator() { }
-
-        Iterator& operator=(const Iterator& other);
 
         bool isForward() const { return isForward_; }
         bool isBackward() const { return !isForward_; }
-        int64_t getPosition() const { return position; }
-        int getIndex() const { return index; }
 
-        virtual void move(const std::shared_ptr<const Chunk>& chunk, int64_t byteLength) { position += byteLength; }
-        virtual void seek(const std::shared_ptr<const Chunk>& chunk, int64_t byteOffset) { position = byteOffset; }
+        int64_t getPosition() const { return position; }
+        void setPosition(uint64_t position) { this->position = position; }
+
+        int getIndex() const { return index; }
+        void setIndex(int index) { this->index = index; }
+    };
+
+    class ForwardIterator : public Iterator
+    {
+      public:
+        ForwardIterator(int64_t position = 0, int index = 0) :
+            Iterator(true, position, index)
+        {
+        }
+    };
+
+    class BackwardIterator : public Iterator
+    {
+      public:
+        BackwardIterator(int64_t position = 0, int index = 0) :
+            Iterator(false, position, index)
+        {
+        }
     };
 
   public:
@@ -128,6 +144,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     virtual const char *getSerializerClassName() const { return nullptr; }
 
     virtual void handleChange() override;
+
+    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t byteLength = -1) const { return nullptr; }
+    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t byteLength = -1) const { return nullptr; }
 
   protected:
     /**
@@ -179,6 +198,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     //@{
     Iterator createForwardIterator() const { return Iterator(true); }
     Iterator createBackwardIterator() const { return Iterator(false); }
+
+    virtual void moveIterator(Iterator& iterator, int64_t byteLength) const { iterator.setPosition(iterator.getPosition() + byteLength); }
+    virtual void seekIterator(Iterator& iterator, int64_t byteOffset) const { iterator.setPosition(byteOffset); }
     //@}
 
     /** @name Inserting data related functions */

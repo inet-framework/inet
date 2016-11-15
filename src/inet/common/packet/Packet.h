@@ -47,8 +47,8 @@ class Packet : public cPacket
 
   protected:
     std::shared_ptr<Chunk> data;
-    Chunk::Iterator headerIterator;
-    Chunk::Iterator trailerIterator;
+    Chunk::ForwardIterator headerIterator;
+    Chunk::BackwardIterator trailerIterator;
 
   protected:
     int getNumChunks() const;

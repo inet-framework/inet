@@ -34,14 +34,6 @@ Chunk::Iterator::Iterator(const Iterator& other) :
 {
 }
 
-Chunk::Iterator& Chunk::Iterator::operator=(const Iterator& other)
-{
-    isForward_ = other.isForward_;
-    position = other.position;
-    index = other.index;
-    return *this;
-}
-
 Chunk::Chunk() :
     flags(0),
     serializedBytes(nullptr)

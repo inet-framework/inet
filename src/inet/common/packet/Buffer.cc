@@ -73,7 +73,6 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
         }
         else
             data = chunk;
-        iterator = data->createForwardIterator();
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)

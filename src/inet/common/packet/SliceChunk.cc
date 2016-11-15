@@ -128,7 +128,7 @@ std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t byteLe
         return const_cast<SliceChunk *>(this)->shared_from_this();
     else {
         Iterator sliceIterator(iterator);
-        sliceIterator.move(shared_from_this(), byteOffset);
+        moveIterator(sliceIterator, byteOffset);
         return chunk->peek(sliceIterator, byteLength);
     }
 }

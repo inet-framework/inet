@@ -17,48 +17,6 @@
 
 namespace inet {
 
-SequenceChunk::SequenceIterator::SequenceIterator(bool isForward, int64_t position, int index) :
-    Iterator(isForward, position, index)
-{
-}
-
-SequenceChunk::SequenceIterator::SequenceIterator(const Iterator& other) :
-    Iterator(other)
-{
-}
-
-void SequenceChunk::SequenceIterator::seek(const std::shared_ptr<const Chunk>& chunk, int64_t byteOffset)
-{
-    position = byteOffset;
-    if (byteOffset == 0)
-        index = 0;
-    else {
-        const auto& sequenceChunk = std::static_pointer_cast<const SequenceChunk>(chunk);
-        int startIndex = sequenceChunk->getStartIndex(*this);
-        int endIndex = sequenceChunk->getEndIndex(*this);
-        int increment = sequenceChunk->getIndexIncrement(*this);
-        int64_t p = 0;
-        for (int i = startIndex; i != endIndex + increment; i += increment) {
-            p += sequenceChunk->chunks[i]->getByteLength();
-            if (p == byteOffset) {
-                index = i + 1;
-                return;
-            }
-        }
-        index = -1;
-    }
-}
-
-void SequenceChunk::SequenceIterator::move(const std::shared_ptr<const Chunk>& chunk, int64_t byteLength)
-{
-    const auto& sequenceChunk = std::static_pointer_cast<const SequenceChunk>(chunk);
-    position += byteLength;
-    if (index != -1 && index != sequenceChunk->chunks.size() && sequenceChunk->getElementChunk(*this)->getByteLength() == byteLength)
-        index++;
-    else
-        index = -1;
-}
-
 SequenceChunk::SequenceChunk() :
     Chunk()
 {
@@ -99,7 +57,37 @@ int64_t SequenceChunk::getByteLength() const
     return byteLength;
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const SequenceIterator& iterator, int64_t byteLength) const
+void SequenceChunk::seekIterator(Iterator& iterator, int64_t byteOffset) const
+{
+    iterator.setPosition(byteOffset);
+    if (byteOffset == 0)
+        iterator.setIndex(0);
+    else {
+        int startIndex = getStartIndex(iterator);
+        int endIndex = getEndIndex(iterator);
+        int increment = getIndexIncrement(iterator);
+        int64_t p = 0;
+        for (int i = startIndex; i != endIndex + increment; i += increment) {
+            p += chunks[i]->getByteLength();
+            if (p == byteOffset) {
+                iterator.setIndex(i + 1);
+                return;
+            }
+        }
+        iterator.setIndex(-1);
+    }
+}
+
+void SequenceChunk::moveIterator(Iterator& iterator, int64_t byteLength) const
+{
+    iterator.setPosition(iterator.getPosition() + byteLength);
+    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getByteLength() == byteLength)
+        iterator.setIndex(iterator.getIndex() + 1);
+    else
+        iterator.setIndex(-1);
+}
+
+std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator, int64_t byteLength) const
 {
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
         const auto& chunk = getElementChunk(iterator);
