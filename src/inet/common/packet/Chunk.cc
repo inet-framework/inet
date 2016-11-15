@@ -62,7 +62,6 @@ Chunk::~Chunk()
     delete serializedBytes;
 }
 
-// TODO: call this whenever something changes in a chunk
 void Chunk::handleChange()
 {
     assertMutable();
