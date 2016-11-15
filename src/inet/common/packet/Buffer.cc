@@ -32,12 +32,12 @@ Buffer::Buffer(const Buffer& other) :
 
 void Buffer::remove(int64_t byteLength)
 {
-    iterator.move(byteLength);
+    iterator.move(data, byteLength);
     poppedByteLength += byteLength;
     auto position = iterator.getPosition();
     if (position > data->getByteLength() / 2) {
         data->removeFromBeginning(position);
-        iterator.seek(0);
+        iterator.seek(data, 0);
     }
 }
 
@@ -48,7 +48,7 @@ std::shared_ptr<Chunk> Buffer::peek(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(Chunk::Iterator(data, true, byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(true, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)

@@ -53,7 +53,7 @@ class ByteLengthChunk : public Chunk
 
     // TODO: remove
     virtual std::shared_ptr<Chunk> peek(int64_t byteOffset = 0, int64_t byteLength = -1) const override {
-        return peek(Iterator(shared_from_this(), true, 0, -1), byteLength);
+        return peek(Iterator(true, 0, -1), byteLength);
     }
 
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;

@@ -97,13 +97,12 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class Iterator
     {
       protected:
-        std::shared_ptr<const Chunk> chunk = nullptr;
         bool isForward_ = true;
         int64_t position = 0;
         int index = 0;
 
       public:
-        Iterator(const std::shared_ptr<const Chunk>& chunk, bool isForward = true, int64_t position = 0, int index = 0);
+        Iterator(bool isForward = true, int64_t position = 0, int index = 0);
         Iterator(const Iterator& other);
         virtual ~Iterator() { }
 
@@ -114,8 +113,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         int64_t getPosition() const { return position; }
         int getIndex() const { return index; }
 
-        virtual void move(int64_t byteLength) { position += byteLength; }
-        virtual void seek(int64_t byteOffset) { position = byteOffset; }
+        virtual void move(const std::shared_ptr<const Chunk>& chunk, int64_t byteLength) { position += byteLength; }
+        virtual void seek(const std::shared_ptr<const Chunk>& chunk, int64_t byteOffset) { position = byteOffset; }
     };
 
   public:
@@ -178,8 +177,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     /** @name Iteration related functions */
     //@{
-    Iterator createForwardIterator() const { return Iterator(shared_from_this(), true); }
-    Iterator createBackwardIterator() const { return Iterator(shared_from_this(), false); }
+    Iterator createForwardIterator() const { return Iterator(true); }
+    Iterator createBackwardIterator() const { return Iterator(false); }
     //@}
 
     /** @name Inserting data related functions */
@@ -220,7 +219,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     virtual int64_t getByteLength() const = 0;
 
     virtual std::shared_ptr<Chunk> peek(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return peek(Iterator(shared_from_this(), true, 0, -1), byteLength);
+        return peek(Iterator(true, 0, -1), byteLength);
     }
 
     /**

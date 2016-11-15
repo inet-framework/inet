@@ -26,16 +26,16 @@ class SequenceChunk : public Chunk
     class SequenceIterator : public Iterator
     {
       public:
-        SequenceIterator(const std::shared_ptr<const Chunk>& chunk, bool isForward, int index = 0, int64_t position = 0);
+        SequenceIterator(bool isForward, int index = 0, int64_t position = 0);
         SequenceIterator(const Iterator& other);
 
-        virtual void move(int64_t byteLength) override;
-        virtual void seek(int64_t byteOffset) override;
+        virtual void move(const std::shared_ptr<const Chunk>& chunk, int64_t byteLength) override;
+        virtual void seek(const std::shared_ptr<const Chunk>& chunk, int64_t byteOffset) override;
 
-        int getStartIndex() const { return isForward_ ? 0 : std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - 1; }
-        int getEndIndex() const { return isForward_ ? std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - 1 : 0; }
-        int getIndexIncrement() const { return isForward_ ? 1 : -1; }
-        const std::shared_ptr<Chunk>& getElementChunk() const { return isForward_ ? std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[index] : std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - index - 1]; }
+        int getStartIndex(const std::shared_ptr<const Chunk>& chunk) const { return isForward_ ? 0 : std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - 1; }
+        int getEndIndex(const std::shared_ptr<const Chunk>& chunk) const { return isForward_ ? std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - 1 : 0; }
+        int getIndexIncrement(const std::shared_ptr<const Chunk>& chunk) const { return isForward_ ? 1 : -1; }
+        const std::shared_ptr<Chunk>& getElementChunk(const std::shared_ptr<const Chunk>& chunk) const { return isForward_ ? std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[index] : std::static_pointer_cast<const SequenceChunk>(chunk)->chunks[std::static_pointer_cast<const SequenceChunk>(chunk)->chunks.size() - index - 1]; }
     };
 
   protected:

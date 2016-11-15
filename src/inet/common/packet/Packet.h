@@ -82,7 +82,7 @@ class Packet : public cPacket
      * Changes the current header iterator position measured in bytes from the
      * beginning of the packet. The value must be in the range [0, getByteLength()].
      */
-    void setHeaderPosition(int64_t offset) { headerIterator.seek(offset); }
+    void setHeaderPosition(int64_t offset) { headerIterator.seek(data, offset); }
 
     /**
      * Returns the total byte length of the packet headers processed so far.
@@ -107,14 +107,14 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, byteOffset), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> popHeader(int64_t byteLength = -1) {
         const auto& chunk = peekHeader<T>(byteLength);
         if (chunk != nullptr)
-            headerIterator.move(chunk->getByteLength());
+            headerIterator.move(data, chunk->getByteLength());
         return chunk;
     }
     //@}
@@ -131,7 +131,7 @@ class Packet : public cPacket
      * Changes the current trailer iterator position measured in bytes from the
      * end of the packet. The value must be in the range [0, getByteLength()].
      */
-    void setTrailerPosition(int64_t offset) { trailerIterator.seek(offset); }
+    void setTrailerPosition(int64_t offset) { trailerIterator.seek(data, offset); }
 
     /**
      * Returns the total byte length of the packet trailers processed so far.
@@ -156,14 +156,14 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(data, false, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(false, -1, byteOffset), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> popTrailer(int64_t byteLength = -1) {
         const auto& chunk = peekTrailer<T>(byteLength);
         if (chunk != nullptr)
-            trailerIterator.move(-chunk->getByteLength());
+            trailerIterator.move(data, -chunk->getByteLength());
         return chunk;
     }
     //@}
@@ -193,12 +193,12 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekData(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition()), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, getDataPosition()), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, getDataPosition() + byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, getDataPosition() + byteOffset), byteLength);
     }
     //@}
 
@@ -215,12 +215,12 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peek(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, 0), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, 0), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(data, true, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, byteOffset), byteLength);
     }
     //@}
 
