@@ -45,10 +45,10 @@ class Buffer : public cObject
 
     /** @name Mutability related functions */
     //@{
-    bool isImmutable() const { return data->isImmutable(); }
-    bool isMutable() const { return !data->isImmutable(); }
-    void assertMutable() const { data->assertMutable(); }
-    void assertImmutable() const { data->assertImmutable(); }
+    bool isImmutable() const { return data != nullptr && data->isImmutable(); }
+    bool isMutable() const { return data == nullptr && !data->isMutable(); }
+    void assertMutable() const { assert(isMutable()); }
+    void assertImmutable() const { assert(isImmutable()); }
     void makeImmutable() { data->makeImmutable(); }
     //@}
 
@@ -82,7 +82,7 @@ class Buffer : public cObject
     /** @name Filling with data related functions */
     //@{
     void push(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void push(Buffer* buffer, bool flatten = true);
+    void push(Buffer *buffer, bool flatten = true);
     //@}
 
     virtual std::string str() const override { return data->str(); }

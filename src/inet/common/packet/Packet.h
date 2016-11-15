@@ -16,7 +16,7 @@
 #ifndef __INET_PACKET_H_
 #define __INET_PACKET_H_
 
-#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/Chunk.h"
 
 namespace inet {
 
@@ -46,10 +46,9 @@ class Packet : public cPacket
   friend class PacketDescriptor;
 
   protected:
-    // TODO: data could be std::shared_ptr<Chunk> simply, e.g. allowing for plain ByteLengthChunk or ByteArrayChunk if that's what we need
-    std::shared_ptr<SequenceChunk> data;
-    SequenceChunk::SequenceIterator headerIterator;
-    SequenceChunk::SequenceIterator trailerIterator;
+    std::shared_ptr<Chunk> data;
+    Chunk::Iterator headerIterator;
+    Chunk::Iterator trailerIterator;
 
   protected:
     int getNumChunks() const;
@@ -58,16 +57,16 @@ class Packet : public cPacket
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
     Packet(const Packet& other);
-    Packet(const std::shared_ptr<SequenceChunk>& data, const char *name = nullptr, short kind = 0);
+    Packet(const std::shared_ptr<Chunk>& data, const char *name = nullptr, short kind = 0);
 
     virtual Packet *dup() const override { return new Packet(*this); }
 
     /** @name Mutability related functions */
     //@{
-    bool isImmutable() const { return data->isImmutable(); }
-    bool isMutable() const { return !data->isImmutable(); }
-    void assertMutable() const { data->assertMutable(); }
-    void assertImmutable() const { data->assertImmutable(); }
+    bool isImmutable() const { return data != nullptr && data->isImmutable(); }
+    bool isMutable() const { return data == nullptr || data->isMutable(); }
+    void assertMutable() const { assert(isMutable()); }
+    void assertImmutable() const { assert(isImmutable()); }
     void makeImmutable() { data->makeImmutable(); }
     //@}
 
@@ -83,7 +82,7 @@ class Packet : public cPacket
      * Changes the current header iterator position measured in bytes from the
      * beginning of the packet. The value must be in the range [0, getByteLength()].
      */
-    void setHeaderPosition(int64_t offset) { headerIterator.seek(data, offset); }
+    void setHeaderPosition(int64_t offset) { data->seekIterator(headerIterator, offset); }
 
     /**
      * Returns the total byte length of the packet headers processed so far.
@@ -108,14 +107,14 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, byteOffset), byteLength);
+        return data->peek<T>(Chunk::Iterator(true, byteOffset), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> popHeader(int64_t byteLength = -1) {
         const auto& chunk = peekHeader<T>(byteLength);
         if (chunk != nullptr)
-            headerIterator.move(data, chunk->getByteLength());
+            data->moveIterator(headerIterator, chunk->getByteLength());
         return chunk;
     }
     //@}
@@ -132,7 +131,7 @@ class Packet : public cPacket
      * Changes the current trailer iterator position measured in bytes from the
      * end of the packet. The value must be in the range [0, getByteLength()].
      */
-    void setTrailerPosition(int64_t offset) { trailerIterator.seek(data, offset); }
+    void setTrailerPosition(int64_t offset) { data->seekIterator(trailerIterator, offset); }
 
     /**
      * Returns the total byte length of the packet trailers processed so far.
@@ -157,14 +156,14 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(false, byteOffset), byteLength);
+        return data->peek<T>(Chunk::Iterator(false, byteOffset), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> popTrailer(int64_t byteLength = -1) {
         const auto& chunk = peekTrailer<T>(byteLength);
         if (chunk != nullptr)
-            trailerIterator.move(data, -chunk->getByteLength());
+            data->moveIterator(trailerIterator, -chunk->getByteLength());
         return chunk;
     }
     //@}
@@ -194,12 +193,12 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekData(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, getDataPosition()), byteLength);
+        return data->peek<T>(Chunk::Iterator(true, getDataPosition()), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, getDataPosition() + byteOffset), byteLength);
+        return data->peek<T>(Chunk::Iterator(true, getDataPosition() + byteOffset), byteLength);
     }
     //@}
 
@@ -216,22 +215,22 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peek(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, 0), byteLength);
+        return data->peek<T>(Chunk::Iterator(true, 0), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, byteOffset), byteLength);
+        return data->peek<T>(Chunk::Iterator(true, byteOffset), byteLength);
     }
     //@}
 
     /** @name Filling with data related functions */
     //@{
     void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void prepend(Packet* packet, bool flatten = true);
+    void prepend(Packet *packet, bool flatten = true);
 
     void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void append(Packet* packet, bool flatten = true);
+    void append(Packet *packet, bool flatten = true);
     //@}
 
     virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }

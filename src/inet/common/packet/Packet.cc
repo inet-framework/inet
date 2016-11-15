@@ -14,6 +14,7 @@
 // 
 
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/SequenceChunk.h"
 
 namespace inet {
 
@@ -21,21 +22,19 @@ Register_Class(Packet);
 
 Packet::Packet(const char *name, short kind) :
     cPacket(name, kind),
-    data(std::make_shared<SequenceChunk>()),
-    headerIterator(data->createForwardIterator()),
-    trailerIterator(data->createBackwardIterator())
+    data(nullptr)
 {
 }
 
 Packet::Packet(const Packet& other) :
     cPacket(other),
-    data(other.isImmutable() ? other.data : std::make_shared<SequenceChunk>(*other.data)),
+    data(other.isImmutable() ? other.data : other.data->dupShared()),
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator)
 {
 }
 
-Packet::Packet(const std::shared_ptr<SequenceChunk>& data, const char *name, short kind) :
+Packet::Packet(const std::shared_ptr<Chunk>& data, const char *name, short kind) :
     cPacket(name, kind),
     data(data),
     headerIterator(data->createForwardIterator()),
@@ -45,12 +44,18 @@ Packet::Packet(const std::shared_ptr<SequenceChunk>& data, const char *name, sho
 
 int Packet::getNumChunks() const
 {
-    return data->getChunks().size();
+    if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
+        return std::static_pointer_cast<SequenceChunk>(data)->getChunks().size();
+    else
+        return 1;
 }
 
 Chunk *Packet::getChunk(int i) const
 {
-    return data->getChunks()[i].get();
+    if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
+        return std::static_pointer_cast<SequenceChunk>(data)->getChunks()[i].get();
+    else
+        return data.get();
 }
 
 std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const
@@ -60,14 +65,14 @@ std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::SequenceIterator(true, byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(true, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(int64_t byteLength)
 {
     const auto& chunk = peekHeader(byteLength);
     if (chunk != nullptr)
-        headerIterator.move(data, chunk->getByteLength());
+        data->moveIterator(headerIterator, chunk->getByteLength());
     return chunk;
 }
 
@@ -78,60 +83,104 @@ std::shared_ptr<Chunk> Packet::peekTrailer(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::SequenceIterator(false, byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(false, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
 {
     const auto& chunk = peekTrailer(byteLength);
     if (chunk != nullptr)
-        trailerIterator.move(data, -chunk->getByteLength());
+        data->moveIterator(trailerIterator, -chunk->getByteLength());
     return chunk;
 }
 
 std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
 {
     int64_t peekByteLength = byteLength == -1 ? getDataLength() : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, getDataPosition()), peekByteLength);
+    return data->peek(Chunk::Iterator(true, getDataPosition()), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
 {
     int64_t peekByteOffset = getDataPosition() + byteOffset;
     int64_t peekByteLength = byteLength == -1 ? getDataLength() - byteOffset : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, peekByteOffset), peekByteLength);
+    return data->peek(Chunk::Iterator(true, peekByteOffset), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peek(int64_t byteLength) const
 {
     int64_t peekByteLength = byteLength == -1 ? getByteLength() : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, 0), peekByteLength);
+    return data->peek(Chunk::Iterator(true, 0), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t byteLength) const
 {
     int64_t peekByteLength = byteLength == -1 ? getByteLength() - byteOffset : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, byteOffset), peekByteLength);
+    return data->peek(Chunk::Iterator(true, byteOffset), peekByteLength);
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
 {
-    data->prepend(chunk, flatten);
+    if (data == nullptr) {
+        if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
+            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            sequenceChunk->append(chunk, flatten);
+            data = sequenceChunk;
+        }
+        else
+            data = chunk;
+        headerIterator = data->createForwardIterator();
+        trailerIterator = data->createBackwardIterator();
+    }
+    else {
+        if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
+            std::static_pointer_cast<SequenceChunk>(data)->prepend(chunk, flatten);
+        else {
+            if (!data->insertToBeginning(chunk)) {
+                auto sequenceChunk = std::make_shared<SequenceChunk>();
+                sequenceChunk->prepend(data, flatten);
+                sequenceChunk->prepend(chunk, flatten);
+                data = sequenceChunk;
+            }
+        }
+    }
 }
 
-void Packet::prepend(Packet* packet, bool flatten)
+void Packet::prepend(Packet *packet, bool flatten)
 {
-    data->prepend(packet->data, flatten);
+    prepend(packet->data, flatten);
 }
 
 void Packet::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
 {
-    data->append(chunk, flatten);
+    if (data == nullptr) {
+        if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
+            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            sequenceChunk->append(chunk, flatten);
+            data = sequenceChunk;
+        }
+        else
+            data = chunk;
+        headerIterator = data->createForwardIterator();
+        trailerIterator = data->createBackwardIterator();
+    }
+    else {
+        if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
+            std::static_pointer_cast<SequenceChunk>(data)->append(chunk, flatten);
+        else {
+            if (!data->insertToEnd(chunk)) {
+                auto sequenceChunk = std::make_shared<SequenceChunk>();
+                sequenceChunk->append(data, flatten);
+                sequenceChunk->append(chunk, flatten);
+                data = sequenceChunk;
+            }
+        }
+    }
 }
 
-void Packet::append(Packet* packet, bool flatten)
+void Packet::append(Packet *packet, bool flatten)
 {
-    data->append(packet->data, flatten);
+    append(packet->data, flatten);
 }
 
 } // namespace

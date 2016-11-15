@@ -36,12 +36,12 @@ Buffer::Buffer(const std::shared_ptr<Chunk>& data) :
 
 void Buffer::remove(int64_t byteLength)
 {
-    iterator.move(data, byteLength);
+    data->moveIterator(iterator, byteLength);
     poppedByteLength += byteLength;
     auto position = iterator.getPosition();
     if (position > data->getByteLength() / 2) {
         data->removeFromBeginning(position);
-        iterator.seek(data, 0);
+        data->seekIterator(iterator, 0);
     }
 }
 
@@ -90,7 +90,7 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
     pushedByteLength += chunk->getByteLength();
 }
 
-void Buffer::push(Buffer* buffer, bool flatten)
+void Buffer::push(Buffer *buffer, bool flatten)
 {
     push(buffer->data, flatten);
 }
