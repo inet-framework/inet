@@ -26,7 +26,7 @@ class SequenceChunk : public Chunk
     class SequenceIterator : public Iterator
     {
       public:
-        SequenceIterator(bool isForward = true, int index = 0, int64_t position = 0);
+        SequenceIterator(bool isForward = true, int64_t position = 0, int index = 0);
         SequenceIterator(const Iterator& other);
 
         virtual void move(const std::shared_ptr<const Chunk>& chunk, int64_t byteLength) override;

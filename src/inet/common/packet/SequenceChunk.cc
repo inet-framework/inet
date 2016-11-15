@@ -17,7 +17,7 @@
 
 namespace inet {
 
-SequenceChunk::SequenceIterator::SequenceIterator(bool isForward, int index, int64_t position) :
+SequenceChunk::SequenceIterator::SequenceIterator(bool isForward, int64_t position, int index) :
     Iterator(isForward, position, index)
 {
 }

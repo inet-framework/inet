@@ -107,7 +107,7 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, byteOffset), byteLength);
     }
 
     template <typename T>
@@ -156,7 +156,7 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(false, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(false, byteOffset), byteLength);
     }
 
     template <typename T>
@@ -193,12 +193,12 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekData(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, getDataPosition()), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, getDataPosition()), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, getDataPosition() + byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, getDataPosition() + byteOffset), byteLength);
     }
     //@}
 
@@ -215,12 +215,12 @@ class Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peek(int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, 0), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, 0), byteLength);
     }
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(SequenceChunk::SequenceIterator(true, -1, byteOffset), byteLength);
+        return data->peek<T>(SequenceChunk::SequenceIterator(true, byteOffset), byteLength);
     }
     //@}
 

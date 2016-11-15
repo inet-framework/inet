@@ -52,7 +52,7 @@ std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::SequenceIterator(true, -1, byteOffset), byteLength);
+    return data->peek(SequenceChunk::SequenceIterator(true, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(int64_t byteLength)
@@ -70,7 +70,7 @@ std::shared_ptr<Chunk> Packet::peekTrailer(int64_t byteLength) const
 
 std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t byteLength) const
 {
-    return data->peek(SequenceChunk::SequenceIterator(false, -1, byteOffset), byteLength);
+    return data->peek(SequenceChunk::SequenceIterator(false, byteOffset), byteLength);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
@@ -84,26 +84,26 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
 std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
 {
     int64_t peekByteLength = byteLength == -1 ? getDataLength() : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, -1, getDataPosition()), peekByteLength);
+    return data->peek(SequenceChunk::SequenceIterator(true, getDataPosition()), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
 {
     int64_t peekByteOffset = getDataPosition() + byteOffset;
     int64_t peekByteLength = byteLength == -1 ? getDataLength() - byteOffset : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, -1, peekByteOffset), peekByteLength);
+    return data->peek(SequenceChunk::SequenceIterator(true, peekByteOffset), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peek(int64_t byteLength) const
 {
     int64_t peekByteLength = byteLength == -1 ? getByteLength() : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, -1, 0), peekByteLength);
+    return data->peek(SequenceChunk::SequenceIterator(true, 0), peekByteLength);
 }
 
 std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t byteLength) const
 {
     int64_t peekByteLength = byteLength == -1 ? getByteLength() - byteOffset : byteLength;
-    return data->peek(SequenceChunk::SequenceIterator(true, -1, byteOffset), peekByteLength);
+    return data->peek(SequenceChunk::SequenceIterator(true, byteOffset), peekByteLength);
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
