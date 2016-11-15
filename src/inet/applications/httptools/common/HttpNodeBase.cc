@@ -48,7 +48,7 @@ void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, sim
     if (rdDelay != nullptr)
         delay += rdDelay->draw();
     EV_DEBUG << "Sending " << pckt->getName() << " direct to " << getContainingNode(receiver)->getName() << " with a delay of " << delay << " s\n";
-    sendDirect(pckt, receiver, "httpIn");
+    sendDirect(pckt, delay, 0, receiver, "httpIn");
 }
 
 double HttpNodeBase::transmissionDelay(cPacket *pckt)
@@ -231,4 +231,3 @@ std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage *httpRes
 } // namespace httptools
 
 } // namespace inet
-
