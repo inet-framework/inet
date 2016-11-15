@@ -11,6 +11,8 @@ All steps:
 		SOLVED
 	- in step 3 we should placing the nodes as pedestrian[2] and place them with mobility submodule longitude latitude
 		
+	- waypoint files changed: point 1 --> last point
+	
 
 
 

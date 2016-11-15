@@ -15,6 +15,7 @@
 
 package inet.tutorials.visualization;
 
+import inet.node.aodv.AODVRouter;
 //networkA
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.common.geometry.common.OsgGeographicCoordinateSystem;
@@ -61,11 +62,11 @@ network VisualizationB extends VisualizationA
     parameters:
         @display("bgb=0,0");
     submodules:
-        pedestrian0: WirelessHost {
+        pedestrian0: AODVRouter {
             parameters:
                 @display("p=373,89;i=device/cellphone");
         }
-        pedestrian1: WirelessHost {
+        pedestrian1: AODVRouter {
             parameters:
                 @display("p=548,89;i=device/cellphone");
         }
@@ -89,9 +90,9 @@ network VisualizationC extends VisualizationB
     parameters:
         @display("bgb=0,0");
     submodules:
-        pedestrianVideo: WirelessHost {
+        pedestrianVideo: AODVRouter {
             parameters:
-                @display("p=338,139");
+                @display("p=338,139;i=device/wifilaptop");
         }
         router0: Router {
             parameters:
@@ -144,7 +145,7 @@ network VisualizationE extends VisualizationD
 network VisualizationF extends VisualizationE
 {
     submodules:
-        car[2]: WirelessHost {
+        car[2]: AODVRouter {
             @display("p=215,122");
         }
         accessPoint2: AccessPoint {
@@ -157,16 +158,20 @@ network VisualizationF extends VisualizationE
             @display("p=215,298");
         }
         tcpHost[2]: StandardHost {
-            @display("p=338,403");
+            @display("p=621,403");
         }
         switch1: EtherSwitch {
             @display("p=660,250");
         }
+        router3: Router {
+            @display("p=316,299");
+        }
     connections:
         router0.pppg++ <--> Eth100M <--> router2.pppg++;
         router2.ethg++ <--> Eth100M <--> accessPoint2.ethg++;
-        router2.ethg++ <--> Eth100M <--> accessPoint3.ethg++;
         switch0.ethg++ <--> Eth100M <--> tcpHost[0].ethg++;
         switch1.ethg++ <--> Eth100M <--> tcpHost[1].ethg++;
         router1.ethg++ <--> Eth100M <--> switch1.ethg++;
+        router0.pppg++ <--> Eth100M <--> router3.pppg++;
+        accessPoint3.ethg++ <--> Eth100M <--> router3.ethg++;
 }
