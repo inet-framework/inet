@@ -35,6 +35,14 @@ Packet::Packet(const Packet& other) :
 {
 }
 
+Packet::Packet(const std::shared_ptr<SequenceChunk>& data, const char *name, short kind) :
+    cPacket(name, kind),
+    data(data),
+    headerIterator(data->createForwardIterator()),
+    trailerIterator(data->createBackwardIterator())
+{
+}
+
 int Packet::getNumChunks() const
 {
     return data->getChunks().size();

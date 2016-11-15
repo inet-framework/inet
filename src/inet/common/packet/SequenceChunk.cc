@@ -59,9 +59,20 @@ void SequenceChunk::SequenceIterator::move(const std::shared_ptr<const Chunk>& c
         index = -1;
 }
 
+SequenceChunk::SequenceChunk() :
+    Chunk()
+{
+}
+
 SequenceChunk::SequenceChunk(const SequenceChunk& other) :
     Chunk(other),
     chunks(other.isImmutable() ? other.chunks : other.dupChunks())
+{
+}
+
+SequenceChunk::SequenceChunk(const std::vector<std::shared_ptr<Chunk>>& chunks) :
+    Chunk(),
+    chunks(chunks)
 {
 }
 

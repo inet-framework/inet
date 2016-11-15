@@ -17,7 +17,20 @@
 
 namespace inet {
 
+ByteLengthChunk::ByteLengthChunk() :
+    Chunk(),
+    byteLength(-1)
+{
+}
+
+ByteLengthChunk::ByteLengthChunk(const ByteLengthChunk& other) :
+    Chunk(other),
+    byteLength(other.byteLength)
+{
+}
+
 ByteLengthChunk::ByteLengthChunk(int64_t byteLength) :
+    Chunk(),
     byteLength(byteLength)
 {
     assert(byteLength >= 0);

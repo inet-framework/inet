@@ -58,6 +58,7 @@ class Packet : public cPacket
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
     Packet(const Packet& other);
+    Packet(const std::shared_ptr<SequenceChunk>& data, const char *name = nullptr, short kind = 0);
 
     virtual Packet *dup() const override { return new Packet(*this); }
 

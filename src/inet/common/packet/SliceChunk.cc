@@ -17,10 +17,27 @@
 
 namespace inet {
 
+SliceChunk::SliceChunk() :
+    Chunk(),
+    chunk(nullptr),
+    byteOffset(-1),
+    byteLength(-1)
+{
+}
+
+SliceChunk::SliceChunk(const SliceChunk& other) :
+    Chunk(other),
+    chunk(other.chunk),
+    byteOffset(other.byteOffset),
+    byteLength(other.byteLength)
+{
+}
+
 SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength) :
+    Chunk(),
     chunk(chunk),
-    byteOffset(byteOffset == -1 ? 0 : byteOffset),
-    byteLength(byteLength == -1 ? chunk->getByteLength() - this->byteOffset : byteLength)
+    byteOffset(byteOffset),
+    byteLength(byteLength == -1 ? chunk->getByteLength() - byteOffset : byteLength)
 {
     chunk->assertImmutable();
     assert(this->byteOffset >= 0);

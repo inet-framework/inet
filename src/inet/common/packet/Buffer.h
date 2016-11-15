@@ -36,6 +36,7 @@ class Buffer : public cObject
   public:
     Buffer();
     Buffer(const Buffer& other);
+    Buffer(const std::shared_ptr<Chunk>& data);
 
     virtual Buffer *dup() const override { return new Buffer(*this); }
 

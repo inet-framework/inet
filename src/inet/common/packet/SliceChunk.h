@@ -25,9 +25,9 @@ class SliceChunk : public Chunk
   friend Chunk;
 
   protected:
-    std::shared_ptr<Chunk> chunk = nullptr;
-    int64_t byteOffset = -1;
-    int64_t byteLength = -1;
+    std::shared_ptr<Chunk> chunk;
+    int64_t byteOffset;
+    int64_t byteLength;
 
   protected:
     virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
@@ -36,8 +36,9 @@ class SliceChunk : public Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1);
 
   public:
-    SliceChunk() { }
-    SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t byteLength = -1);
+    SliceChunk();
+    SliceChunk(const SliceChunk& other);
+    SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = 0, int64_t byteLength = -1);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }

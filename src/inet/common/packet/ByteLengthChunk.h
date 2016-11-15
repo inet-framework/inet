@@ -25,7 +25,7 @@ class ByteLengthChunk : public Chunk
   friend Chunk;
 
   protected:
-    int64_t byteLength = -1;
+    int64_t byteLength;
 
   protected:
     virtual const char *getSerializerClassName() const override { return "inet::ByteLengthChunkSerializer"; }
@@ -34,7 +34,8 @@ class ByteLengthChunk : public Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
-    ByteLengthChunk() { }
+    ByteLengthChunk();
+    ByteLengthChunk(const ByteLengthChunk& other);
     ByteLengthChunk(int64_t byteLength);
 
     virtual ByteLengthChunk *dup() const override { return new ByteLengthChunk(*this); }

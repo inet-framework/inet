@@ -97,9 +97,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class Iterator
     {
       protected:
-        bool isForward_ = true;
-        int64_t position = 0;
-        int index = 0;
+        bool isForward_;
+        int64_t position;
+        int index;
 
       public:
         Iterator(bool isForward = true, int64_t position = 0, int index = 0);

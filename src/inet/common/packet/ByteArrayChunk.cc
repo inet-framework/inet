@@ -17,7 +17,19 @@
 
 namespace inet {
 
+ByteArrayChunk::ByteArrayChunk() :
+    Chunk()
+{
+}
+
+ByteArrayChunk::ByteArrayChunk(const ByteArrayChunk& other) :
+    Chunk(other),
+    bytes(other.bytes)
+{
+}
+
 ByteArrayChunk::ByteArrayChunk(const std::vector<uint8_t>& bytes) :
+    Chunk(),
     bytes(bytes)
 {
 }

@@ -29,6 +29,11 @@ Buffer::Buffer(const Buffer& other) :
 {
 }
 
+Buffer::Buffer(const std::shared_ptr<Chunk>& data) :
+    data(data)
+{
+}
+
 void Buffer::remove(int64_t byteLength)
 {
     iterator.move(data, byteLength);

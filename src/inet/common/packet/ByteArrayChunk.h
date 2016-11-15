@@ -34,7 +34,8 @@ class ByteArrayChunk : public Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
-    ByteArrayChunk() { }
+    ByteArrayChunk();
+    ByteArrayChunk(const ByteArrayChunk& other);
     ByteArrayChunk(const std::vector<uint8_t>& bytes);
 
     virtual ByteArrayChunk *dup() const override { return new ByteArrayChunk(*this); }
