@@ -219,6 +219,7 @@ void PPP::startTransmitting(cPacket *msg)
     emit(txStateSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     pppFrame->clearTags();
+    pppFrame->makeImmutable();
     send(pppFrame, physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
