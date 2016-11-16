@@ -162,8 +162,6 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     }
 
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
-    // hop counter decrement; FIXME but not if it will be locally delivered
-    header->setHopLimit(header->getHopLimit() - 1);
 
     L3Address nextHop;
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
@@ -198,7 +196,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
 {
     // TBD add option handling code here
 
-    const auto& header = datagram->peekHeader<GenericDatagramHeader>();
+    auto header = datagram->peekHeader<GenericDatagramHeader>();
     L3Address destAddr = header->getDestinationAddress();
 
     EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
@@ -250,6 +248,16 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         nextHop = re->getNextHopAsGeneric();
     }
 
+    if (header->isImmutable()) {
+        auto newPacket = new Packet(datagram->getName());
+        auto newHeader = std::make_shared<GenericDatagramHeader>(*header.get());     //KLUDGE
+        newPacket->append(newHeader);
+        newPacket->append(datagram->peekDataAt(datagram->getHeaderPosition() + header->getByteLength()));
+        delete datagram;
+        datagram = newPacket;
+        header = newHeader;
+    }
+    header->setHopLimit(header->getHopLimit() - 1);
     // set datagram source address if not yet set
     if (header->getSourceAddress().isUnspecified())
         header->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
@@ -267,6 +275,9 @@ void GenericNetworkProtocol::routeMulticastPacket(Packet *datagram, const Interf
     L3Address destAddr = header->getDestinationAddress();
     // if received from the network...
     if (fromIE != nullptr) {
+
+        //TODO: decrement hopLimit before forward frame to another host
+
         // check for local delivery
         if (routingTable->isLocalMulticastAddress(destAddr))
             sendDatagramToHL(datagram);
