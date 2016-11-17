@@ -38,6 +38,7 @@ class SequenceChunk : public Chunk
 
     bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
 
+    void insertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
     void insertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
 
     void insertToEnd(const std::shared_ptr<SliceChunk>& chunk);

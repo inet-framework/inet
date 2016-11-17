@@ -142,6 +142,30 @@ bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
     return true;
 }
 
+void SequenceChunk::insertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)
+{
+    if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
+        auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
+        int64_t byteOffset = sequenceChunk->getByteLength();
+        int64_t sliceChunkBegin = sliceChunk->getByteOffset();
+        int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getByteLength();
+        for (auto it = sequenceChunk->chunks.rbegin(); it != sequenceChunk->chunks.rend(); it++) {
+            auto& elementChunk = *it;
+            byteOffset -= elementChunk->getByteLength();
+            int64_t chunkBegin = byteOffset;
+            int64_t chunkEnd = byteOffset + elementChunk->getByteLength();
+            if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
+                insertToBeginning(elementChunk);
+            else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
+                insertToBeginning(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+            else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
+                insertToBeginning(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
+        }
+    }
+    else
+        insertToBeginning(std::static_pointer_cast<Chunk>(sliceChunk));
+}
+
 void SequenceChunk::insertToBeginning(const std::shared_ptr<SequenceChunk>& chunk)
 {
     for (auto it = chunk->chunks.rbegin(); it != chunk->chunks.rend(); it++)
@@ -176,9 +200,9 @@ void SequenceChunk::insertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
     if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         int64_t byteOffset = 0;
+        int64_t sliceChunkBegin = sliceChunk->getByteOffset();
+        int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getByteLength();
         for (auto& elementChunk : sequenceChunk->chunks) {
-            int64_t sliceChunkBegin = sliceChunk->getByteOffset();
-            int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getByteLength();
             int64_t chunkBegin = byteOffset;
             int64_t chunkEnd = byteOffset + elementChunk->getByteLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
