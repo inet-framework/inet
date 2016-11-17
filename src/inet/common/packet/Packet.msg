@@ -45,6 +45,9 @@ packet Packet
 {
     @existingClass(true);
     @descriptor(readonly);
+    int64_t headerPosition;
+    int64_t dataLength;
+    int64_t trailerLength;
     Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
 }
 
