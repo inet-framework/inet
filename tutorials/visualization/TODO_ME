@@ -13,6 +13,7 @@ All steps:
 		
 	- waypoint files changed: point 1 --> last point
 	
+	- wireless nodes are aodv routers
 
 
 
@@ -23,7 +24,7 @@ Step 1:
 
 Step 3:
 	- if Visualization02 became active change Visualization01 to Visualization02
-		
+		SOLVED
 
 
 Step 4:
@@ -78,7 +79,7 @@ Step 12:
 	- nem jó a statisztika a simplevoip* miatt
 		SOLVED: change signal to VoIPPacketLossRate and statistic to packetLossRate
 	- vagy másik statisztika kell, vagy ki kell engedni a range-ből a pedestrian1-et
-		
+		SOLVED: playout delay statistic
 
 
 Step 13:
@@ -88,12 +89,9 @@ Step 13:
 
 Step 15:
 	- If we'll have routeVisualizer, then activate the commented lines
-		
+		SOLVED
 	- Show the difference between dataLink and route?
 		
-	- Turn off communication ranges?
-		a: turn off
-		b: turn on
 
 
 Step 16:

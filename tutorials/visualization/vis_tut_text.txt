@@ -139,6 +139,7 @@ Review 1
 	- Results:
 		- we can see the assigned images above the network nodes at appropriate moment
 		- GIF: include the nodes for a few seconds
+		- in 2d we can't see transmissions & receptions
 
 
 9. Showing propagating signals
@@ -190,20 +191,20 @@ Review 1
 		GIF: for the appearing and fading links, both in 2d and 3d view mode
 
 
-12. Displaying throughput statistics
+12. Displaying playout delay statistics
 	- Goals:
-		- Displaying some statistics about the network, throughput statistic in this case
+		- Displaying some statistics about the network, playout delay statistic in this case
 	- Model:
 		- parameter:
-			- we have some statistic about the UDPApp
-			- subscribing to a signal (UDPApp has sentPk and rcvdPk)
-			- using one of the built-in statistics, in this case it's throughput
+			- we have some statistic about the SimpleVoIPReceiver
+			- subscribing to a signal 
+			- using one of the built-in statistics
 			- we can add a prefix text, should be expressive
 			- determining the source path of the statistic
 			- we can add the measurement
 			- we can add max and min value of the statistic
 	- Results:
-		- above the name of pedestrians appears the throughput statistic at each device
+		- above the name of pedestrians appears the playout delay statistic at each device
 		- GIF: include pedestrians and their throughput for a few seconds, showing some value changing
 		- in 2d mode this do the same. In a bubble looks the throughput at each device
 		- GIF: 2d mode including all devices for a few seconds
@@ -255,9 +256,12 @@ Review 2
 		- we want to show the active network routes
 	- Model:
 		- parameters:
-			- 
+			- optional: show voip data links 
+			- turn off data links
+			- turn on voip network routes
 	- Results:
-		- 
+		- we can see an arrow through the route when the voip packet arrive to the destination
+		- GIF: from the line above this
 
 
 16. Displaying physical environment		(under construction)

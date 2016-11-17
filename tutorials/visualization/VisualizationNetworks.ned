@@ -15,6 +15,9 @@
 
 package inet.tutorials.visualization;
 
+import inet.examples.adhoc.hostautoconf.Host;
+import inet.node.inet.AdhocHost;
+import inet.node.dymo.DYMORouter;
 import inet.node.aodv.AODVRouter;
 //networkA
 import inet.visualizer.integrated.IntegratedVisualizer;
@@ -62,11 +65,11 @@ network VisualizationB extends VisualizationA
     parameters:
         @display("bgb=0,0");
     submodules:
-        pedestrian0: AODVRouter {
+        pedestrian0: WirelessHost {
             parameters:
-                @display("p=373,89;i=device/cellphone");
+                @display("p=398,89;i=device/cellphone");
         }
-        pedestrian1: AODVRouter {
+        pedestrian1: WirelessHost {
             parameters:
                 @display("p=548,89;i=device/cellphone");
         }
@@ -90,9 +93,9 @@ network VisualizationC extends VisualizationB
     parameters:
         @display("bgb=0,0");
     submodules:
-        pedestrianVideo: AODVRouter {
+        pedestrianVideo: WirelessHost {
             parameters:
-                @display("p=338,139;i=device/wifilaptop");
+                @display("p=351,164;i=device/wifilaptop");
         }
         router0: Router {
             parameters:

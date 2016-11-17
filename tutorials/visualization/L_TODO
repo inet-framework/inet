@@ -5,4 +5,3 @@
 - InfoVisualizerBase Question: module-nak tetszoleges valtozojat ki lehet iratni? (CObjectet pl)
 	SOLUTION: *.visualizer.*.ieee80211Visualizer.nodeFilter = "**" legyen rajta cimke: ssid, jelerösség
 
-- we don't have routeVisualizer for step 15 and step 22
