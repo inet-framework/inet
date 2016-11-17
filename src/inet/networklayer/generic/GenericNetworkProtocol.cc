@@ -248,11 +248,12 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         nextHop = re->getNextHopAsGeneric();
     }
 
-    if (header->isImmutable()) {
+    if (!fromHL) {
+        datagram->popHeader<GenericDatagramHeader>();
         auto newPacket = new Packet(datagram->getName());
-        auto newHeader = std::make_shared<GenericDatagramHeader>(*header.get());     //KLUDGE
+        auto newHeader = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
         newPacket->append(newHeader);
-        newPacket->append(datagram->peekDataAt(datagram->getHeaderPosition() + header->getByteLength()));
+        newPacket->append(datagram->peekData());
         delete datagram;
         datagram = newPacket;
         header = newHeader;

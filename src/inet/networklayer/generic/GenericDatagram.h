@@ -33,7 +33,7 @@ class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base, public
 {
   public:
     GenericDatagramHeader() : GenericDatagramHeader_Base() {}
-    GenericDatagramHeader(const GenericDatagramHeader& other) : GenericDatagramHeader_Base() { operator=(other); }
+    GenericDatagramHeader(const GenericDatagramHeader& other) : GenericDatagramHeader_Base(other) {}
     GenericDatagramHeader& operator=(const GenericDatagramHeader& other) { GenericDatagramHeader_Base::operator=(other); return *this; }
     virtual GenericDatagramHeader *dup() const override { return new GenericDatagramHeader(*this); }
 
