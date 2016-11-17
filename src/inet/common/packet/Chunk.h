@@ -30,10 +30,22 @@ namespace inet {
  * during debugging. In any case, a chunk can be always converted to a sequence
  * of bytes.
  *
+ * To summarize, chunks represent data in different ways:
+ *  - ByteLengthChunk contains a length field only
+ *  - ByteArrayChunk contains a sequence of bytes
+ *  - SliceChunk contains a slice of another chunk
+ *  - SequenceChunk contains a sequence of other chunks
+ *  - cPacketChunk contains a cPacket
+ *  - message compiler generated chunks contain various user defined fields
+ *
  * Chunks are initially:
  *  - mutable, then may become immutable (but never the other way around)
+ *    immutable means the chunk cannot be changed anymore
  *  - complete, then may become incomplete (but never the other way around)
+ *    incomplete means the chunk isn't totally filled in (e.g. deserialization)
  *  - correct, then may become incorrect (but never the other way around)
+ *    incorrect means the chunk contains bit errors
+ *
  * Chunks can be safely shared using std::shared_ptr, and in fact most usages
  * take advantage of immutable chunks using shared pointers.
  *
@@ -42,7 +54,8 @@ namespace inet {
  *  - remove from the beginning or end
  *  - query length and peek an arbitrary part
  *  - serialize to and deserialize from a sequence of bytes
- *  - copying to a new mutable chunk
+ *  - copy to a new mutable chunk
+ *  - convert to a human readable string
  *
  * General rules for peeking a chunk:
  * 1) Peeking (various special cases)
@@ -63,7 +76,7 @@ namespace inet {
  *       - a SequenceChunk potentially containing SliceChunks at both ends
  *    e) any other chunk returns a SliceChunk
  * 2) Peeking with providing a return type always returns a chunk of the
- *    requested type (or a subtype)
+ *    requested type (or a subtype thereof)
  *    a) Peeking with a ByteLengthChunk return type for any chunk returns a
  *       ByteLengthChunk containing the requested byte length
  *    b) Peeking with a ByteArrayChunk return type for any chunk returns a
@@ -240,6 +253,10 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      */
     virtual int64_t getByteLength() const = 0;
 
+    /**
+     * Returns the designated part of the data represented by this chunk in its
+     * default representation.
+     */
     virtual std::shared_ptr<Chunk> peek(int64_t byteOffset = 0, int64_t byteLength = -1) const {
         return peek(Iterator(true, 0, -1), byteLength);
     }

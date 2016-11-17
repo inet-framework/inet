@@ -20,6 +20,7 @@
 
 namespace inet {
 
+// TODO: rename to LengthChunk?
 class ByteLengthChunk : public Chunk
 {
   friend Chunk;

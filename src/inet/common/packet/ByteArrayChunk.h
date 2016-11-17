@@ -20,6 +20,7 @@
 
 namespace inet {
 
+// TODO: rename type RawChunk?
 class ByteArrayChunk : public Chunk
 {
   friend Chunk;

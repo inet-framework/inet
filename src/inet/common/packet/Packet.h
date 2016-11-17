@@ -22,24 +22,32 @@ namespace inet {
 
 /**
  * This class represents network packets, datagrams, frames and other kinds of
- * data used by communication protocols. Packets store their data in different
- * kind of chunks.
+ * data used by communication protocols. The underlying data structure supports
+ * efficient construction, duplication, encapsulation, aggregation, fragmentation
+ * and serialization. The data structure also supports dual representation by
+ * default: data can be accessed as raw bytes and also as field based classes.
+ * Internally, packets store their data in different kind of chunks. See the
+ * Chunk class and its subclasses for details.
  *
  * Packets are initially mutable, then may become immutable (but never the
  * other way around). All chunks are immutable in an immutable packet.
  * Immutable chunks are automatically shared among immutable packets when
  * duplicating.
  *
- * A packet is conceptually divided into three parts during processing: headers,
- * data, and trailers. These parts are separated by iterators maintained by
- * the packet.
+ * Packets are conceptually divided into three parts during processing: headers,
+ * data, and trailers. These parts are separated by iterators which are stored
+ * within the packet. During packet processing, as the packet is passed through
+ * the protocol layers at receivers, headers and trailers are popped from the
+ * beginning and the end. This effectively reduces the remaining (unprocessed)
+ * data part, but it doesn't affect the data stored in the chunks.
  *
  * In general, packets support the following operations:
  *  - insert to the beginning or end
  *  - remove from the beginning or end
  *  - query length and peek an arbitrary part
  *  - serialize to and deserialize from a sequence of bytes
- *  - copying to a new mutable packet
+ *  - copy to a new mutable packet
+ *  - convert to a human readable string
  */
 class Packet : public cPacket
 {
