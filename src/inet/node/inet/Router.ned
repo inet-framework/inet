@@ -56,6 +56,7 @@ module Router extends NodeBase
         bool hasRIP = default(false);
         bool hasBGP = default(false);
         bool hasPIM = default(false);
+        bool hasDHCP = default(false);
         string tcpType = default(firstAvailableOrEmpty("TCP", "TCP_lwIP", "TCP_NSC"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
         string udpType = default("UDP");
 
@@ -77,7 +78,11 @@ module Router extends NodeBase
             parameters:
                 @display("p=404,80");
         }
-        udp: <udpType> like IUDP if hasRIP {
+        dhcp: <"DHCPServer"> like IUDPApp if hasDHCP {
+            parameters:
+                @display("p=566,80");
+        }
+        udp: <udpType> like IUDP if hasRIP || hasDHCP {
             @display("p=404,180");
         }
         pim: <"PIMRouting"> like IPIMRouting if hasPIM {
@@ -101,7 +106,14 @@ module Router extends NodeBase
         if hasRIP {
             rip.udpOut --> udp.appIn++;
             rip.udpIn <-- udp.appOut++;
+        }
 
+        if hasDHCP {
+            dhcp.udpOut --> udp.appIn++;
+            dhcp.udpIn <-- udp.appOut++;
+        }
+
+        if hasRIP || hasDHCP {
             udp.ipOut --> networkLayer.transportIn++;
             udp.ipIn <-- networkLayer.transportOut++;
         }
