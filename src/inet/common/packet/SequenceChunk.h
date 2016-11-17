@@ -59,7 +59,7 @@ class SequenceChunk : public Chunk
 
     /** @name Mutability related functions */
     //@{
-    void makeImmutable();
+    virtual void makeImmutable() override;
     //@}
 
     /** @name Iteration related functions */
