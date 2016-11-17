@@ -241,6 +241,12 @@ class Packet : public cPacket
     void append(Packet *packet, bool flatten = true);
     //@}
 
+    /** @name Removing data related functions */
+    //@{
+    void removeFromBeginning(int64_t byteLength);
+    void removeFromEnd(int64_t byteLength);
+    //@}
+
     virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }        //TODO REVIEW: returns total length, or returns length between header/trailer iterators only? in second case: need a getTotalLength() function
 
     virtual std::string str() const override { return data->str(); }

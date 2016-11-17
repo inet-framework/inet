@@ -177,4 +177,16 @@ void Packet::append(Packet *packet, bool flatten)
     append(packet->data, flatten);
 }
 
+void Packet::removeFromBeginning(int64_t byteLength)
+{
+    if (!data->removeFromBeginning(byteLength))
+        throw cRuntimeError("Cannot remove from the beginning");
+}
+
+void Packet::removeFromEnd(int64_t byteLength)
+{
+    if (!data->removeFromEnd(byteLength))
+        throw cRuntimeError("Cannot remove from the end");
+}
+
 } // namespace
