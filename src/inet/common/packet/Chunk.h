@@ -251,7 +251,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /**
      * Returns the length of data measured in bytes represented by this chunk.
      */
-    virtual int64_t getByteLength() const = 0;
+    virtual int64_t getByteLength() const = 0; // TODO: rename to getChunkLength()?
 
     /**
      * Returns the designated part of the data represented by this chunk in its
@@ -303,7 +303,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
      */
-    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk);
+    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk); // TODO: serialize a part only?
 
     /**
      * Deserializes a chunk from the given stream. The returned chunk will be
