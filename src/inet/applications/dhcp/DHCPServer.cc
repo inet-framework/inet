@@ -346,7 +346,7 @@ void DHCPServer::sendACK(DHCPLease *lease, DHCPMessage *packet)
     if (packet->getGiaddr().isUnspecified() && !packet->getCiaddr().isUnspecified())
         sendToUDP(ack, serverPort, packet->getCiaddr(), clientPort);
     else
-        sendToUDP(ack, serverPort, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), clientPort);
+        sendToUDP(ack, serverPort, lease->ip.makeBroadcastAddress(lease->subnetMask), clientPort);
 }
 
 void DHCPServer::sendOffer(DHCPLease *lease)
@@ -387,7 +387,7 @@ void DHCPServer::sendOffer(DHCPLease *lease)
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
 
-    sendToUDP(offer, serverPort, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), clientPort);
+    sendToUDP(offer, serverPort, lease->ip.makeBroadcastAddress(lease->subnetMask), clientPort);
 }
 
 DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
@@ -457,6 +457,15 @@ void DHCPServer::startApp()
 {
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
+    IPv4InterfaceData *ipv4data = ie->ipv4Data();
+    if (ipv4data == nullptr)
+        throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
+    if (ipv4data->getNetmask() != subnetMask)
+        throw cRuntimeError("Network mask must be the same as the interface network mask");     // we only serve the local network
+    if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), ipAddressStart, subnetMask))
+        throw cRuntimeError("ipAddressStart must be in the interface's subnet");
+    if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), IPv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
+        throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
     scheduleAt(start, startTimer);
 }
 
