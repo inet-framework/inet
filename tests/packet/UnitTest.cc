@@ -106,15 +106,11 @@ static void testMutable()
 
 static void testImmutable()
 {
-    // 1. packet is immutable after making it immutable
-    Packet packet1;
-    packet1.makeImmutable();
-    assert(packet1.isImmutable());
-    // 2. chunk is immutable after making it immutable
+    // 1. chunk is immutable after making it immutable
     auto byteLengthChunk1 = std::make_shared<ByteLengthChunk>(10);
     byteLengthChunk1->makeImmutable();
     assert(byteLengthChunk1->isImmutable());
-    // 3. chunks become immutable after making a packet immutable
+    // 2. chunks become immutable after making a packet immutable
     Packet packet2;
     auto byteLengthChunk2 = std::make_shared<ByteLengthChunk>(10);
     packet2.append(byteLengthChunk2);
@@ -128,17 +124,37 @@ static void testHeader()
     // 1. packet contains header after chunk is appended
     Packet packet1;
     packet1.append(std::make_shared<ByteLengthChunk>(10));
-    const auto& byteLengthChunk = packet1.peekHeader<ByteLengthChunk>();
-    assert(byteLengthChunk != nullptr);
+    const auto& byteLengthChunk1 = packet1.peekHeader<ByteLengthChunk>();
+    assert(byteLengthChunk1 != nullptr);
+    // 2. packet provides headers in normal order
+    Packet packet2;
+    packet2.append(std::make_shared<ByteLengthChunk>(10));
+    packet2.append(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& byteLengthChunk2 = packet2.popHeader<ByteLengthChunk>();
+    const auto& byteArrayChunk1 = packet2.popHeader<ByteArrayChunk>();
+    assert(byteLengthChunk2 != nullptr);
+    assert(byteLengthChunk2->getByteLength() == 10);
+    assert(byteArrayChunk1 != nullptr);
+    assert(std::equal(byteArrayChunk1->getBytes().begin(), byteArrayChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}).begin()));
 }
 
 static void testTrailer()
 {
     // 1. packet contains trailer after chunk is appended
+    Packet packet1;
+    packet1.append(std::make_shared<ByteLengthChunk>(10));
+    const auto& byteLengthChunk1 = packet1.peekTrailer<ByteLengthChunk>();
+    assert(byteLengthChunk1 != nullptr);
+    // 2. packet provides trailers in reverse order
     Packet packet2;
     packet2.append(std::make_shared<ByteLengthChunk>(10));
-    const auto& byteLengthChunk = packet2.peekTrailer<ByteLengthChunk>();
-    assert(byteLengthChunk != nullptr);
+    packet2.append(std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& byteArrayChunk1 = packet2.popTrailer<ByteArrayChunk>();
+    const auto& byteLengthChunk2 = packet2.popTrailer<ByteLengthChunk>();
+    assert(byteArrayChunk1 != nullptr);
+    assert(std::equal(byteArrayChunk1->getBytes().begin(), byteArrayChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}).begin()));
+    assert(byteLengthChunk2 != nullptr);
+    assert(byteLengthChunk2->getByteLength() == 10);
 }
 
 static void testComplete()

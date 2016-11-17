@@ -171,7 +171,7 @@ class Packet : public cPacket
     std::shared_ptr<T> popTrailer(int64_t byteLength = -1) {
         const auto& chunk = peekTrailer<T>(byteLength);
         if (chunk != nullptr)
-            data->moveIterator(trailerIterator, -chunk->getByteLength());
+            data->moveIterator(trailerIterator, chunk->getByteLength());
         return chunk;
     }
     //@}
