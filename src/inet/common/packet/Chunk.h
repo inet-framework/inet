@@ -23,31 +23,39 @@ namespace inet {
 
 /**
  * This class represents a piece of data that is usually part of a packet or
- * some other data such as a protocol buffer. When the actual bytes in the
- * data is irrelevant, a chunk can be as simple as an integer specifying its
- * length. Sometimes it might be necessary to represent the data bytes as is,
- * but most often it's better to have a representation that is easy to inspect
- * during debugging. In any case, a chunk can be always converted to a sequence
- * of bytes.
+ * some other data such as a protocol buffer. The chunk interface is designed
+ * to be very flexible in terms of alternative representations. For example,
+ * when the actual bytes in the data is irrelevant, a chunk can be as simple as
+ * an integer specifying its length. Contrary, sometimes it might be necessary
+ * to represent the data bytes as is. For example, when one is using an external
+ * program to send or receive the data. But most often it's better to have a
+ * representation that is easy to inspect and understand during debugging.
+ * Fortunately this representation can be easily generated using the omnetpp
+ * message compiler. In any case, chunks can always be converted to and from a
+ * sequence of bytes using the corresponding serializer.
  *
- * To summarize, chunks represent data in different ways:
+ * TODO: polymorphism, nesting, compacting
+ *
+ * Chunks can represent data in different ways:
  *  - ByteLengthChunk contains a length field only
  *  - ByteArrayChunk contains a sequence of bytes
  *  - SliceChunk contains a slice of another chunk
  *  - SequenceChunk contains a sequence of other chunks
- *  - cPacketChunk contains a cPacket
+ *  - cPacketChunk contains a cPacket for compatibility
  *  - message compiler generated chunks contain various user defined fields
  *
  * Chunks are initially:
  *  - mutable, then may become immutable (but never the other way around)
- *    immutable means the chunk cannot be changed anymore
+ *    immutable chunks cannot be changed anymore
  *  - complete, then may become incomplete (but never the other way around)
- *    incomplete means the chunk isn't totally filled in (e.g. deserialization)
+ *    incomplete chunks are not totally filled in (e.g. due to deserialization)
  *  - correct, then may become incorrect (but never the other way around)
- *    incorrect means the chunk contains bit errors
+ *    incorrect chunks contain bit errors
  *
- * Chunks can be safely shared using std::shared_ptr, and in fact most usages
- * take advantage of immutable chunks using shared pointers.
+ * Chunks can be safely shared using std::shared_ptr. In fact, the reason for
+ * having immutable chunks is to allow for efficient sharing using shared
+ * pointers. For example, when a Packet data structure is duplicated the copy
+ * can share immutable chunks with the original.
  *
  * In general, chunks support the following operations:
  *  - insert to the beginning or end
@@ -57,7 +65,7 @@ namespace inet {
  *  - copy to a new mutable chunk
  *  - convert to a human readable string
  *
- * General rules for peeking a chunk:
+ * General rules for peeking into a chunk:
  * 1) Peeking (various special cases)
  *    a) an empty part of the chunk returns an empty chunk
  *    b) the whole of the chunk returns the chunk
@@ -92,6 +100,9 @@ namespace inet {
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   protected:
+    /**
+     * This enum specifies bitmasks for the flags field.
+     */
     enum Flag {
         FLAG_IMMUTABLE  = 1,
         FLAG_INCOMPLETE = 2,
@@ -99,6 +110,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     };
 
   public:
+    /**
+     * This enum is used to avoid std::dynamic_cast and std::dynamic_pointer_cast.
+     */
     enum Type {
         TYPE_BYTELENGTH,
         TYPE_BYTEARRAY,
@@ -128,6 +142,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         void setIndex(int index) { this->index = index; }
     };
 
+    /**
+     * Position and index are measured from the beginning.
+     */
     class ForwardIterator : public Iterator
     {
       public:
@@ -137,6 +154,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         }
     };
 
+    /**
+     * Position and index are measured from the end.
+     */
     class BackwardIterator : public Iterator
     {
       public:
@@ -147,6 +167,10 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     };
 
   public:
+    /**
+     * Peeking some part into a chunk that requires automatic serialization
+     * will throw an exception when implicit chunk serialization is disabled.
+     */
     static bool enableImplicitChunkSerialization;
 
   protected:

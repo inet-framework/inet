@@ -37,8 +37,8 @@ namespace inet {
  * Packets are conceptually divided into three parts during processing: headers,
  * data, and trailers. These parts are separated by iterators which are stored
  * within the packet. During packet processing, as the packet is passed through
- * the protocol layers at receivers, headers and trailers are popped from the
- * beginning and the end. This effectively reduces the remaining (unprocessed)
+ * the protocol layers at the receiver, headers and trailers are popped from the
+ * beginning and the end. This effectively reduces the remaining unprocessed
  * data part, but it doesn't affect the data stored in the chunks.
  *
  * In general, packets support the following operations:
