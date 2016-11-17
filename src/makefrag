@@ -60,9 +60,9 @@ CFLAGS += -Wno-overloaded-virtual
 #########################################################################
 # precompiled header support for GCC and CLANG
 
-ifeq ($(TOOLCHAIN_NAME),gcc)
+ifeq ($(CC),gcc)
 PRECOMPILED_EXT=gch
-else ifeq ($(TOOLCHAIN_NAME),clang)
+else ifeq ($(CC),clang)
 PRECOMPILED_EXT=pch
 else
 PRECOMPILED_EXT=
@@ -82,8 +82,8 @@ pch : $(PRECOMPILED_HEADER_PCH)
 
 $(PRECOMPILED_HEADER_PCH): $(PRECOMPILED_HEADER)
 ifneq ("$(PRECOMPILED_EXT)","")
-	@echo Creating precompiled header for $(TOOLCHAIN_NAME)...
-	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(COPTS) -o $@ $<
+	@echo Creating precompiled header for $(CC)...
+	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(filter-out -include $(PRECOMPILED_HEADER),$(COPTS)) -o $@ $<
 endif
 
 clean: clean-pch clean-defines
