@@ -61,8 +61,7 @@ Step 8:
 	- egyoldalú a kommunikáció. Probléma???
 		
 	- turn off 802.11 visualizer?
-		a: turn off
-		b: turn on
+
 
 Step 10:
 	- physicalLinkVisualizer: There are more unused parameters...
@@ -92,6 +91,7 @@ Step 15:
 		SOLVED
 	- Show the difference between dataLink and route?
 		
+	- check and cast exception
 
 
 Step 16:
