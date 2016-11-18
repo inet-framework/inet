@@ -57,12 +57,6 @@ void DHCPServer::initialize(int stage)
         WATCH(numReceived);
         WATCH_MAP(leased);
 
-        subnetMask = IPv4Address(par("subnetMask").stringValue());
-        gateway = IPv4Address(par("gateway").stringValue());
-        ipAddressStart = IPv4Address(par("ipAddressStart").stringValue());
-        maxNumOfClients = par("maxNumClients");
-        leaseTime = par("leaseTime");
-
         // DHCP UDP ports
         clientPort = 68;    // client
         serverPort = 67;    // server
@@ -455,15 +449,22 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr,
 
 void DHCPServer::startApp()
 {
+    maxNumOfClients = par("maxNumClients");
+    leaseTime = par("leaseTime");
+
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
     IPv4InterfaceData *ipv4data = ie->ipv4Data();
     if (ipv4data == nullptr)
         throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
-    if (ipv4data->getNetmask() != subnetMask)
-        throw cRuntimeError("Network mask must be the same as the interface network mask");     // we only serve the local network
+    const char *gatewayStr = par("gateway").stringValue();
+    gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIPv4() : ipv4data->getIPAddress();
+    subnetMask = ipv4data->getNetmask();
+    long numReservedAddresses = par("numReservedAddresses").longValue();
+    uint32_t networkStartAddress = ipv4data->getIPAddress().getInt() & ipv4data->getNetmask().getInt();
+    ipAddressStart = IPv4Address(networkStartAddress + numReservedAddresses);
     if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), ipAddressStart, subnetMask))
-        throw cRuntimeError("ipAddressStart must be in the interface's subnet");
+        throw cRuntimeError("The numReservedAddresses parameter larger than address range");
     if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), IPv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
         throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
     scheduleAt(start, startTimer);
