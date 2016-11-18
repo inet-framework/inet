@@ -38,12 +38,13 @@ void EchoProtocol::handleMessage(cMessage *msg)
 {
     cGate *arrivalGate = msg->getArrivalGate();
     if (!strcmp(arrivalGate->getName(), "ipIn"))
-        processPacket(check_and_cast<EchoPacket *>(msg));
+        processPacket(check_and_cast<Packet *>(msg));
 }
 
-void EchoProtocol::processPacket(EchoPacket *msg)
+void EchoProtocol::processPacket(Packet *msg)
 {
-    switch (msg->getType()) {
+    const auto& echoHdr = msg->peekHeader<EchoPacket>();
+    switch (echoHdr->getType()) {
         case ECHO_PROTOCOL_REQUEST:
             processEchoRequest(msg);
             break;
@@ -53,30 +54,32 @@ void EchoProtocol::processPacket(EchoPacket *msg)
             break;
 
         default:
-            throw cRuntimeError("Unknown type %d", msg->getType());
+            throw cRuntimeError("Unknown type %d", echoHdr->getType());
     }
 }
 
-void EchoProtocol::processEchoRequest(EchoPacket *request)
+void EchoProtocol::processEchoRequest(Packet *request)
 {
     // turn request into a reply
-    EchoPacket *reply = request;
-    reply->setName((std::string(request->getName()) + "-reply").c_str());
-    reply->setType(ECHO_PROTOCOL_REPLY);
+    const auto& icmpReq = request->popHeader<EchoPacket>();
+    Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
+    const auto& echoReply = std::make_shared<EchoPacket>();
+    reply->append(echoReply);
+    reply->append(request->peekData());
+    auto addressInd = request->getMandatoryTag<L3AddressInd>();
+    echoReply->setType(ECHO_PROTOCOL_REPLY);
+
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    auto addressInd = reply->removeMandatoryTag<L3AddressInd>();
-    reply->clearTags();
-    reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
-    reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
     auto addressReq = reply->ensureTag<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress());
     addressReq->setDestAddress(addressInd->getSrcAddress());
-    delete addressInd;
+
     send(reply, "ipOut");
+    delete request;
 }
 
-void EchoProtocol::processEchoReply(EchoPacket *reply)
+void EchoProtocol::processEchoReply(Packet *reply)
 {
     delete reply;
 }

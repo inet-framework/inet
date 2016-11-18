@@ -17,10 +17,12 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Chunk.h"
 }}
 
 namespace inet;
 
+class Chunk extends cObject;
 //
 // Determines the packet type.
 //
@@ -33,7 +35,9 @@ enum EchoProtocolType
 //
 // Generic network protocol packet for testing network connectivity.
 //
-packet EchoPacket
+class EchoPacket extends Chunk
 {
     int type @enum(EchoProtocolType);
+    int64_t byteLength = 0;
 }
+

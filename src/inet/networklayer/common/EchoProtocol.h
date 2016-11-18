@@ -19,6 +19,7 @@
 #define __INET_ECHOPROTOCOL_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/EchoPacket_m.h"
 
@@ -32,9 +33,9 @@ class PingPayload;
 class INET_API EchoProtocol : public cSimpleModule
 {
   protected:
-    virtual void processPacket(EchoPacket *packet);
-    virtual void processEchoRequest(EchoPacket *packet);
-    virtual void processEchoReply(EchoPacket *packet);
+    virtual void processPacket(Packet *packet);
+    virtual void processEchoRequest(Packet *packet);
+    virtual void processEchoReply(Packet *packet);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -242,15 +242,16 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
 #ifdef WITH_GENERIC
-        if (EchoPacket *icmpMessage = dynamic_cast<EchoPacket *>(msg)) {
+        if (const auto& icmpMessage = packet->popHeader<EchoPacket>()) {
             if (icmpMessage->getType() == ECHO_PROTOCOL_REPLY) {
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
+//                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
+                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekData())->getPacket()->dup());
                 processPingResponse(pingPayload);
             }
             else {
-                // process other EchoPacket
+                // process other icmp messages, process icmp errors
             }
-            delete icmpMessage;
+            delete packet;
         }
         else
 #endif
@@ -388,12 +389,12 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEID:
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
-            auto *request = new EchoPacket(msg->getName());
-            outPacket = request;
+            const auto& request = std::make_shared<EchoPacket>();
             request->setByteLength(4);
             request->setType(ECHO_PROTOCOL_REQUEST);
-            request->encapsulate(msg);
-            request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+            outPacket->prepend(request);
+            outPacket->append(std::make_shared<cPacketChunk>(msg));
+            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);  //FIXME do not use icmpv4 for generic network protocol
             break;
 #else
             throw cRuntimeError("INET compiled without Generic Network");
