@@ -702,6 +702,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         return;
     }
 
+    packet->makeImmutable();
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
     int payloadLength = packet->getDataLength() - headerLength;
@@ -717,12 +718,13 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     std::string fragMsgName = ipv4Header->getName();
     fragMsgName += "-frag";
 
-    for (int offset = 0; offset < payloadLength; offset += fragmentLength) {
+    int offset = 0;
+    while (offset < payloadLength) {
         bool lastFragment = (offset + fragmentLength >= payloadLength);
         // length equal to fragmentLength, except for last fragment;
         int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
 
-        Packet *fragment = new Packet(fragMsgName.c_str());
+        Packet *fragment = new Packet(fragMsgName.c_str());     //TODO add offset or index to fragment name
 
         //FIXME copy Tags from packet to fragment
 
@@ -739,6 +741,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
 
         sendDatagramToOutput(fragment, destIe, nextHopAddr);
+        offset += thisFragmentLength;
     }
 
     delete packet;
