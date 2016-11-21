@@ -152,7 +152,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
      * Removes the configured IP address (e. g. when clients get a DHCPNAK message in REBINDING or RENEWING states
      * or the lease time expires).
      */
-    virtual void unboundLease();
+    virtual void unbindLease();
 
     /*
      * Starts the DHCP configuration process with sending a DHCPDISCOVER.

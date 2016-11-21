@@ -259,7 +259,7 @@ void DHCPClient::handleTimer(cMessage *msg)
     }
     else if (category == LEASE_TIMEOUT) {
         EV_INFO << "Lease has expired. Starting DHCP process in INIT state." << endl;
-        unboundLease();
+        unbindLease();
         clientState = INIT;
         initClient();
     }
@@ -355,9 +355,9 @@ void DHCPClient::bindLease()
     scheduleAt(simTime() + lease->leaseTime, leaseTimer);
 }
 
-void DHCPClient::unboundLease()
+void DHCPClient::unbindLease()
 {
-    EV_INFO << "Unbound lease on " << ie->getName() << "." << endl;
+    EV_INFO << "Unbinding lease on " << ie->getName() << "." << endl;
 
     cancelEvent(timerT1);
     cancelEvent(timerT2);
@@ -452,7 +452,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
             }
             else if (messageType == DHCPNAK) {
                 EV_INFO << "DHPCNAK message arrived in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
-                unboundLease();    // halt network (remove address)
+                unbindLease();
                 initClient();
             }
             else {
@@ -463,7 +463,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
         case REBINDING:
             if (messageType == DHCPNAK) {
                 EV_INFO << "DHPCNAK message arrived in REBINDING state. The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
-                unboundLease();    // halt network (remove address)
+                unbindLease();
                 initClient();
             }
             else if (messageType == DHCPACK) {
@@ -484,7 +484,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
             }
             else if (messageType == DHCPNAK) {
                 EV_INFO << "DHCPNAK message arrived in REBOOTING. Initialization with known IP address was unsuccessful." << endl;
-                unboundLease();    // halt network (remove address)
+                unbindLease();
                 initClient();
             }
             else {
@@ -507,7 +507,7 @@ void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
         if (associatedIE && ie == associatedIE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
-            unboundLease();    // halt network (remove address)
+            unbindLease();
             initClient();
         }
     }
