@@ -482,6 +482,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
             }
             else if (messageType == DHCPNAK) {
                 EV_INFO << "DHCPNAK message arrived in REBOOTING. Initialization with known IP address was unsuccessful." << endl;
+                unboundLease();    // halt network (remove address)
                 initClient();
             }
             else {
@@ -504,6 +505,7 @@ void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
         if (associatedIE && ie == associatedIE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
+            unboundLease();    // halt network (remove address)
             initClient();
         }
     }
