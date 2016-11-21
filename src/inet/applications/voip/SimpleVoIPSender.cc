@@ -65,8 +65,6 @@ void SimpleVoIPSender::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
-
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort);
 
@@ -89,7 +87,7 @@ void SimpleVoIPSender::handleMessage(cMessage *msg)
         if (msg == selfSender)
             sendVoIPPacket();
         else
-            selectPeriodTime();
+            selectTalkOrSilenceInterval();
     }
 }
 
@@ -113,7 +111,7 @@ void SimpleVoIPSender::talkspurt(simtime_t dur)
     scheduleAt(startTime + packetizationInterval, selfSender);
 }
 
-void SimpleVoIPSender::selectPeriodTime()
+void SimpleVoIPSender::selectTalkOrSilenceInterval()
 {
     simtime_t now = simTime();
     if (stopTime >= SIMTIME_ZERO && now >= stopTime)
@@ -122,10 +120,10 @@ void SimpleVoIPSender::selectPeriodTime()
     if (isTalk) {
         silenceDuration = par("silenceDuration").doubleValue();
         EV_DEBUG << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
-        simtime_t endSilent = now + silenceDuration;
-        if (stopTime >= SIMTIME_ZERO && endSilent > stopTime)
-            endSilent = stopTime;
-        scheduleAt(endSilent, selfSource);
+        simtime_t endSilence = now + silenceDuration;
+        if (stopTime >= SIMTIME_ZERO && endSilence > stopTime)
+            endSilence = stopTime;
+        scheduleAt(endSilence, selfSource);
         isTalk = false;
     }
     else {
@@ -144,6 +142,9 @@ void SimpleVoIPSender::selectPeriodTime()
 
 void SimpleVoIPSender::sendVoIPPacket()
 {
+    if (destAddress.isUnspecified())
+        destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
+
     SimpleVoIPPacket *packet = new SimpleVoIPPacket("VoIP");
     packet->setTalkspurtID(talkspurtID - 1);
     packet->setTalkspurtNumPackets(talkspurtNumPackets);
