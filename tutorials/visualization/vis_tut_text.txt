@@ -334,4 +334,4 @@ Review 2
 
 21. Visualizing handovers
 	- Results
-		- About at 14-15s
+		- About at 17-18s

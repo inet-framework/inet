@@ -12,11 +12,7 @@ All steps:
 	- in step 3 we should placing the nodes as pedestrian[2] and place them with mobility submodule longitude latitude
 		
 	- waypoint files changed: point 1 --> last point
-	
-	- wireless nodes are aodv routers
-	
-	- addstaticroute, adddefaultroute off
-
+		
 
 
 Step 1:
@@ -60,9 +56,6 @@ Step 8:
 		SOLVED: change to 400
 	- will be real voip stream
 		SOLVED: SimpleVoIPSender --> SimpleVoIPReceiver
-	- egyoldalú a kommunikáció. Probléma???
-		
-	- turn off 802.11 visualizer?
 
 
 Step 10:
@@ -84,16 +77,11 @@ Step 12:
 		SOLVED: playout delay statistic
 
 
-Step 13:
-	- Q: put mobilityModule in switch?
-		
-
-
 Step 15:
 	- If we'll have routeVisualizer, then activate the commented lines
 		SOLVED
 	- check and cast error
-		
+		SOLVED
 
 
 Step 16:
@@ -106,10 +94,14 @@ Step 16:
 Step 17:
 	- all accessPoints and routers Z position is negative!!! It counts at displayObstacleLoss
 		SOLVED
+	- Q: VisualizationF???
 
 
 Step 18:
 	- network: VisualizationF
+		
+	- handover problem
+		SOLVED
 Step 19:
 	- signal propagation off?
 		SOLVED
