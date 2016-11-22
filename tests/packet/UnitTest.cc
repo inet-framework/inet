@@ -317,14 +317,36 @@ static void testPeekChunk()
     sliceChunk1->makeImmutable();
     auto sliceChunk2 = std::dynamic_pointer_cast<SliceChunk>(sliceChunk1->peek(0, 5));
     assert(sliceChunk1->getChunk() == sliceChunk2->getChunk());
-    // 4. SequenceChunk may return an element chunk, a SliceChunk of an element chunk, a SequenceChunk potentially containing SliceChunks at both ends
-    auto sequenceChunk = std::make_shared<SequenceChunk>();
-    // TODO:
-    // 5. any other chunk returns a SliceChunk
-    auto applicationHeader2 = std::make_shared<ApplicationHeader>();
-    applicationHeader2->makeImmutable();
-    auto sliceChunk3 = std::dynamic_pointer_cast<SliceChunk>(applicationHeader2->peek(0, 5));
+    // 4a. SequenceChunk may return an element chunk
+    auto sequenceChunk1 = std::make_shared<SequenceChunk>();
+    sequenceChunk1->append(byteLengthChunk1);
+    sequenceChunk1->append(byteArrayChunk1);
+    sequenceChunk1->append(applicationHeader1);
+    sequenceChunk1->makeImmutable();
+    const auto& byteLengthChunk3 = std::dynamic_pointer_cast<ByteLengthChunk>(sequenceChunk1->peek(0, 10));
+    const auto& byteArrayChunk3 = std::dynamic_pointer_cast<ByteArrayChunk>(sequenceChunk1->peek(10, 10));
+    const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(sequenceChunk1->peek(20, 10));
+    assert(byteLengthChunk3 != nullptr);
+    assert(byteArrayChunk3 != nullptr);
+    assert(applicationHeader2 != nullptr);
+    // 4b. SequenceChunk may return a SliceChunk of an element chunk
+    const auto& sliceChunk3 = std::dynamic_pointer_cast<SliceChunk>(sequenceChunk1->peek(0, 5));
+    const auto& sliceChunk4 = std::dynamic_pointer_cast<SliceChunk>(sequenceChunk1->peek(15, 5));
+    const auto& sliceChunk5 = std::dynamic_pointer_cast<SliceChunk>(sequenceChunk1->peek(20, 5));
     assert(sliceChunk3 != nullptr);
+    assert(sliceChunk4 != nullptr);
+    assert(sliceChunk5 != nullptr);
+    // 4c. SequenceChunk may return a SliceChunk using the original SequenceChunk
+    const auto& sliceChunk6 = std::dynamic_pointer_cast<SliceChunk>(sequenceChunk1->peek(5, 20));
+    assert(sliceChunk6 != nullptr);
+    // 4d. SequenceChunk may return a SequenceChunk potentially containing SliceChunks at both ends
+    const auto& sequenceChunk2 = std::dynamic_pointer_cast<SequenceChunk>(sequenceChunk1->peek(10, 20));
+    assert(sequenceChunk2 != nullptr);
+    // 5. any other chunk returns a SliceChunk
+    auto applicationHeader3 = std::make_shared<ApplicationHeader>();
+    applicationHeader3->makeImmutable();
+    auto sliceChunk7 = std::dynamic_pointer_cast<SliceChunk>(applicationHeader3->peek(0, 5));
+    assert(sliceChunk7 != nullptr);
 }
 
 static void testPeekPacket()
