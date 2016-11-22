@@ -156,7 +156,7 @@ const std::vector<Packet *> NewMedium::receivePackets()
 
 Packet *NewMedium::serializePacket(Packet *packet)
 {
-    const auto& byteArrayChunk = packet->peekDataAt<ByteArrayChunk>(0, packet->getByteLength());
+    const auto& byteArrayChunk = packet->peekAt<ByteArrayChunk>(0, packet->getByteLength());
     auto serializedPacket = new Packet();
     serializedPacket->append(byteArrayChunk);
     serializedPacket->makeImmutable();
@@ -203,7 +203,7 @@ void NewSender::sendTcp(Packet *packet)
     int64_t tcpSegmentSizeLimit = 35;
     if (tcpSegment->getByteLength() + packet->getByteLength() >= tcpSegmentSizeLimit) {
         int64_t byteLength = tcpSegmentSizeLimit - tcpSegment->getByteLength();
-        tcpSegment->append(packet->peekDataAt(0, byteLength));
+        tcpSegment->append(packet->peekAt(0, byteLength));
         const auto& tcpHeader = tcpSegment->peekHeader<TcpHeader>();
         auto bitError = medium.getSerialize() ? BIT_ERROR_CRC : BIT_ERROR_NO;
         tcpHeader->setBitError(bitError);
@@ -213,7 +213,7 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case BIT_ERROR_CRC: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(ByteArrayChunk(), tcpSegment->peekDataAt<ByteArrayChunk>(0, tcpSegment->getByteLength())));
+                tcpHeader->setCrc(computeTcpCrc(ByteArrayChunk(), tcpSegment->peekAt<ByteArrayChunk>(0, tcpSegment->getByteLength())));
                 break;
             }
             default:
@@ -225,11 +225,11 @@ void NewSender::sendTcp(Packet *packet)
             tcpSegment = nullptr;
         else {
             tcpSegment = createTcpSegment();
-            tcpSegment->append(packet->peekDataAt(byteLength, remainingByteLength));
+            tcpSegment->append(packet->peekAt(byteLength, remainingByteLength));
         }
     }
     else
-        tcpSegment->append(packet);
+        tcpSegment->append(packet->peek());
     delete packet;
 }
 

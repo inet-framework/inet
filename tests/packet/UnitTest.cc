@@ -220,7 +220,7 @@ static void testNesting()
     ipHeader1->setProtocol(Protocol::Tcp);
     auto compoundHeader1 = std::make_shared<CompoundHeader>();
     compoundHeader1->append(ipHeader1);
-    packet1.append(compoundHeader1, false);
+    packet1.append(compoundHeader1);
     packet1.makeImmutable();
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
     assert(compoundHeader2 != nullptr);
