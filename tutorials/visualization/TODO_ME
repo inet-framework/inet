@@ -28,6 +28,7 @@ Step 3:
 Step 4:
 	- search any 3d model on google or anywhere
 		SOLVED: found boxman.osgb in "inet/examples/visualization/networknode/" folder
+	- external 3D animated osg model, I take it from "inet/examples/visualization/networknode/" folder
 
 
 Step 5:
@@ -63,6 +64,9 @@ Step 10:
 		SOLVED: We don't need
 	- Q: What is physical link exactly?
 		SOLVED: it's ok now. Every packet
+		
+	- nyilak egyezzenek
+	- halványodás időtartamának növelése
 
 
 Step 11:
@@ -99,7 +103,7 @@ Step 17:
 
 Step 18:
 	- network: VisualizationF
-		
+		SOLVED
 	- handover problem
 		SOLVED
 Step 19:

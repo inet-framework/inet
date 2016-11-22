@@ -86,7 +86,7 @@ network VisualizationB extends VisualizationA
                 @display("p=100,350");
         }
 }
-
+//#### doxygen marker
 
 network VisualizationC extends VisualizationB
 {
