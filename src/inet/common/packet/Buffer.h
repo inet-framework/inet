@@ -23,6 +23,7 @@ namespace inet {
 /**
  * This class represents application or protocol buffers.
  */
+// TODO: we need another buffer class for Tcp and Ip fregmentation which supports random writes and reads
 class Buffer : public cObject
 {
   protected:
