@@ -282,7 +282,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * default representation.
      */
     virtual std::shared_ptr<Chunk> peek(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return peek(Iterator(true, 0, -1), byteLength);
+        return peek(Iterator(true, byteOffset, -1), byteLength);
     }
 
     /**
