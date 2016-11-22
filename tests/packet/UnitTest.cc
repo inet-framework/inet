@@ -16,6 +16,7 @@
 #include "inet/common/packet/ByteArrayChunk.h"
 #include "inet/common/packet/ByteLengthChunk.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/ReassemblyBuffer.h"
 #include "NewTest.h"
 #include "UnitTest_m.h"
 #include "UnitTest.h"
@@ -402,6 +403,63 @@ static void testClone()
     delete packet6;
 }
 
+static void testReassembly()
+{
+    // 1. single chunk
+    NewReassemblyBuffer buffer1;
+    buffer1.setData(0, std::make_shared<ByteLengthChunk>(10));
+    assert(buffer1.isComplete());
+    assert(buffer1.getData() != nullptr);
+    // 2. consecutive chunks
+    NewReassemblyBuffer buffer2;
+    buffer2.setData(0, std::make_shared<ByteLengthChunk>(10));
+    buffer2.setData(10, std::make_shared<ByteLengthChunk>(10));
+    const auto& byteLengthChunk1 = std::dynamic_pointer_cast<ByteLengthChunk>(buffer2.getData());
+    assert(buffer2.isComplete());
+    assert(byteLengthChunk1 != nullptr);
+    // 3. consecutive slice chunks
+    NewReassemblyBuffer buffer3;
+    auto applicationHeader1 = std::make_shared<ApplicationHeader>();
+    applicationHeader1->makeImmutable();
+    buffer3.setData(0, applicationHeader1->peek(0, 5));
+    buffer3.setData(5, applicationHeader1->peek(5, 5));
+    const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(buffer2.getData());
+    assert(buffer3.isComplete());
+    assert(applicationHeader2 != nullptr);
+    // 4. out of order consecutive chunks
+    NewReassemblyBuffer buffer4;
+    buffer4.setData(0, std::make_shared<ByteLengthChunk>(10));
+    buffer4.setData(20, std::make_shared<ByteLengthChunk>(10));
+    buffer4.setData(10, std::make_shared<ByteLengthChunk>(10));
+    const auto& byteLengthChunk2 = std::dynamic_pointer_cast<ByteLengthChunk>(buffer4.getData());
+    assert(buffer4.isComplete());
+    assert(byteLengthChunk2 != nullptr);
+    // 5. heterogeneous chunks
+    NewReassemblyBuffer buffer5;
+    buffer5.setData(0, std::make_shared<ByteLengthChunk>(10));
+    buffer5.setData(10, std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    assert(buffer5.isComplete());
+    assert(buffer5.getData() != nullptr);
+    // 6. completely overwriting a chunk
+    NewReassemblyBuffer buffer6;
+    buffer6.setData(1, std::make_shared<ByteLengthChunk>(8));
+    buffer6.setData(0, std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& byteArrayChunk1 = std::dynamic_pointer_cast<ByteArrayChunk>(buffer6.getData());
+    assert(buffer6.isComplete());
+    assert(byteArrayChunk1 != nullptr);
+    // 7. partially overwriting multiple chunks
+    NewReassemblyBuffer buffer7;
+    buffer7.setData(0, std::make_shared<ByteLengthChunk>(10));
+    buffer7.setData(10, std::make_shared<ByteLengthChunk>(10));
+    buffer7.setData(5, std::make_shared<ByteArrayChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& sequenceChunk1 = std::dynamic_pointer_cast<SequenceChunk>(buffer7.getData());
+    sequenceChunk1->makeImmutable();
+    const auto& byteArrayChunk2 = std::dynamic_pointer_cast<ByteArrayChunk>(sequenceChunk1->peek(5, 10));
+    assert(buffer7.isComplete());
+    assert(sequenceChunk1 != nullptr);
+    assert(byteArrayChunk2 != nullptr);
+}
+
 void UnitTest::initialize()
 {
     testMutable();
@@ -418,6 +476,7 @@ void UnitTest::initialize()
     testPeekPacket();
     testPeekBuffer();
     testClone();
+    testReassembly();
 }
 
 } // namespace
