@@ -118,7 +118,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         TYPE_BYTEARRAY,
         TYPE_SLICE,
         TYPE_SEQUENCE,
-        TYPE_OTHER
+        TYPE_FIELD
     };
 
     class Iterator
@@ -199,7 +199,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     virtual std::shared_ptr<Chunk> dupShared() const { return std::shared_ptr<Chunk>(static_cast<Chunk *>(dup())); };
 
-    virtual Type getChunkType() const { return TYPE_OTHER; }
+    virtual Type getChunkType() const { return TYPE_FIELD; }
 
     /** @name Mutability related functions */
     //@{
