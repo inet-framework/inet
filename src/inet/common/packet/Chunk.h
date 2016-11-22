@@ -304,10 +304,12 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {
-        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))
-            return tChunk;
-        if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, byteLength)))
-            return tChunk;
+        if (getChunkType() == TYPE_SEQUENCE) {
+            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))
+                return tChunk;
+            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, byteLength)))
+                return tChunk;
+        }
         if (!enableImplicitChunkSerialization)
             throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
         // TODO: prevents easy access for application buffer

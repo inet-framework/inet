@@ -280,6 +280,19 @@ bool SequenceChunk::removeFromEnd(int64_t byteLength)
     return true;
 }
 
+std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byteLength) const
+{
+    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+        return const_cast<SequenceChunk *>(this)->shared_from_this();
+    else {
+        if (auto chunk = peekWithIterator(iterator, byteLength))
+            return chunk;
+        if (auto chunk = peekWithLinearSearch(iterator, byteLength))
+            return chunk;
+        return Chunk::peek<SliceChunk>(iterator, byteLength);
+    }
+}
+
 std::string SequenceChunk::str() const
 {
     std::ostringstream os;
