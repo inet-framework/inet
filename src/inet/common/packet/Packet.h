@@ -234,11 +234,8 @@ class Packet : public cPacket
 
     /** @name Filling with data related functions */
     //@{
-    void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void prepend(Packet *packet, bool flatten = true);
-
-    void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void append(Packet *packet, bool flatten = true);
+    void prepend(const std::shared_ptr<Chunk>& chunk);
+    void append(const std::shared_ptr<Chunk>& chunk);
     //@}
 
     /** @name Removing data related functions */

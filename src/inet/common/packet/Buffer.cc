@@ -63,12 +63,12 @@ std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)
     return chunk;
 }
 
-void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
+void Buffer::push(const std::shared_ptr<Chunk>& chunk)
 {
     if (data == nullptr) {
         if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->append(chunk, flatten);
+            sequenceChunk->append(chunk);
             data = sequenceChunk;
         }
         else
@@ -76,22 +76,17 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk, bool flatten)
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
-            std::static_pointer_cast<SequenceChunk>(data)->append(chunk, flatten);
+            std::static_pointer_cast<SequenceChunk>(data)->append(chunk);
         else {
             if (!data->insertToEnd(chunk)) {
                 auto sequenceChunk = std::make_shared<SequenceChunk>();
-                sequenceChunk->append(data, flatten);
-                sequenceChunk->append(chunk, flatten);
+                sequenceChunk->append(data);
+                sequenceChunk->append(chunk);
                 data = sequenceChunk;
             }
         }
     }
     pushedByteLength += chunk->getByteLength();
-}
-
-void Buffer::push(Buffer *buffer, bool flatten)
-{
-    push(buffer->data, flatten);
 }
 
 } // namespace

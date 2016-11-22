@@ -82,8 +82,7 @@ class Buffer : public cObject
 
     /** @name Filling with data related functions */
     //@{
-    void push(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void push(Buffer *buffer, bool flatten = true);
+    void push(const std::shared_ptr<Chunk>& chunk);
     //@}
 
     virtual std::string str() const override { return data->str(); }

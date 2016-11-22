@@ -117,12 +117,12 @@ std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t byteLength) co
     return data->peek(Chunk::Iterator(true, byteOffset), peekByteLength);
 }
 
-void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
+void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 {
     if (data == nullptr) {
         if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->append(chunk, flatten);
+            sequenceChunk->append(chunk);
             data = sequenceChunk;
         }
         else
@@ -130,29 +130,24 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
-            std::static_pointer_cast<SequenceChunk>(data)->prepend(chunk, flatten);
+            std::static_pointer_cast<SequenceChunk>(data)->prepend(chunk);
         else {
             if (!data->insertToBeginning(chunk)) {
                 auto sequenceChunk = std::make_shared<SequenceChunk>();
-                sequenceChunk->prepend(data, flatten);
-                sequenceChunk->prepend(chunk, flatten);
+                sequenceChunk->prepend(data);
+                sequenceChunk->prepend(chunk);
                 data = sequenceChunk;
             }
         }
     }
 }
 
-void Packet::prepend(Packet *packet, bool flatten)
-{
-    prepend(packet->data, flatten);
-}
-
-void Packet::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
+void Packet::append(const std::shared_ptr<Chunk>& chunk)
 {
     if (data == nullptr) {
         if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->append(chunk, flatten);
+            sequenceChunk->append(chunk);
             data = sequenceChunk;
         }
         else
@@ -160,21 +155,16 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
-            std::static_pointer_cast<SequenceChunk>(data)->append(chunk, flatten);
+            std::static_pointer_cast<SequenceChunk>(data)->append(chunk);
         else {
             if (!data->insertToEnd(chunk)) {
                 auto sequenceChunk = std::make_shared<SequenceChunk>();
-                sequenceChunk->append(data, flatten);
-                sequenceChunk->append(chunk, flatten);
+                sequenceChunk->append(data);
+                sequenceChunk->append(chunk);
                 data = sequenceChunk;
             }
         }
     }
-}
-
-void Packet::append(Packet *packet, bool flatten)
-{
-    append(packet->data, flatten);
 }
 
 void Packet::removeFromBeginning(int64_t byteLength)
