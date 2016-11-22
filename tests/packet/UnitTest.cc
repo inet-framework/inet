@@ -229,7 +229,7 @@ static void testNesting()
     const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
     assert(compoundHeader3 != nullptr);
     auto it = compoundHeader3->createForwardIterator();
-    const auto& ipHeader2 = compoundHeader3->peek<IpHeader>(it);
+    const auto& ipHeader2 = compoundHeader3->Chunk::peek<IpHeader>(it);
     assert(ipHeader2 != nullptr);
     assert(ipHeader2->getProtocol() == Protocol::Tcp);
 }
@@ -339,9 +339,6 @@ static void testPeekChunk()
     // 4c. SequenceChunk may return a SliceChunk using the original SequenceChunk
     const auto& sliceChunk6 = std::dynamic_pointer_cast<SliceChunk>(sequenceChunk1->peek(5, 20));
     assert(sliceChunk6 != nullptr);
-    // 4d. SequenceChunk may return a SequenceChunk potentially containing SliceChunks at both ends
-    const auto& sequenceChunk2 = std::dynamic_pointer_cast<SequenceChunk>(sequenceChunk1->peek(10, 20));
-    assert(sequenceChunk2 != nullptr);
     // 5. any other chunk returns a SliceChunk
     auto applicationHeader3 = std::make_shared<ApplicationHeader>();
     applicationHeader3->makeImmutable();

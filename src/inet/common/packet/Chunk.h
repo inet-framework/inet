@@ -81,7 +81,6 @@ namespace inet {
  *       - an element chunk
  *       - a SliceChunk of an element chunk
  *       - a SliceChunk using the original SequenceChunk
- *       - a SequenceChunk potentially containing SliceChunks at both ends
  *    e) any other chunk returns a SliceChunk
  * 2) Peeking with providing a return type always returns a chunk of the
  *    requested type (or a subtype thereof)
