@@ -129,7 +129,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         int index;
 
       public:
-        Iterator(bool isForward = true, int64_t position = 0, int index = 0);
+        Iterator(int64_t position);
+        explicit Iterator(bool isForward = true, int64_t position = 0, int index = 0);
         Iterator(const Iterator& other);
 
         bool isForward() const { return isForward_; }
@@ -148,7 +149,12 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class ForwardIterator : public Iterator
     {
       public:
-        ForwardIterator(int64_t position = 0, int index = 0) :
+        ForwardIterator(int64_t position) :
+            Iterator(true, position, -1)
+        {
+        }
+
+        explicit ForwardIterator(int64_t position = 0, int index = 0) :
             Iterator(true, position, index)
         {
         }
@@ -160,7 +166,12 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class BackwardIterator : public Iterator
     {
       public:
-        BackwardIterator(int64_t position = 0, int index = 0) :
+        BackwardIterator(int64_t position) :
+            Iterator(false, position, -1)
+        {
+        }
+
+        explicit BackwardIterator(int64_t position = 0, int index = 0) :
             Iterator(false, position, index)
         {
         }
@@ -279,21 +290,17 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     /**
      * Returns the designated part of the data represented by this chunk in its
-     * default representation.
-     */
-    virtual std::shared_ptr<Chunk> peek(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return peek(Iterator(true, byteOffset, -1), byteLength);
-    }
-
-    /**
-     * Returns the designated part of the data represented by this chunk in its
-     * default representation.
+     * default representation. The returned chunk is mutable if and only if the
+     * requested part is directly represented in this chunk by a mutable chunk,
+     * otherwise the returned chunk is immutable.
      */
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const;
 
     /**
      * Returns the designated part of the data represented by this chunk in the
-     * requested representation.
+     * requested representation. The returned chunk is mutable if and only if the
+     * requested part is directly represented in this chunk by a mutable chunk,
+     * otherwise the returned chunk is immutable.
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {

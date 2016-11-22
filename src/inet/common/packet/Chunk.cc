@@ -20,6 +20,13 @@ namespace inet {
 
 bool Chunk::enableImplicitChunkSerialization = true;
 
+Chunk::Iterator::Iterator(int64_t position) :
+    isForward_(true),
+    position(position),
+    index(position == 0 ? 0 : -1)
+{
+}
+
 Chunk::Iterator::Iterator(bool isForward, int64_t position, int index) :
     isForward_(isForward),
     position(position),
