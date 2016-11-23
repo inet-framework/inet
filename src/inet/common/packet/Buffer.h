@@ -58,7 +58,7 @@ class Buffer : public cObject
 
     std::shared_ptr<Chunk> peek(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekAt(int64_t byteOffset, int64_t length) const;
+    std::shared_ptr<Chunk> peekAt(int64_t offset, int64_t length) const;
 
     std::shared_ptr<Chunk> pop(int64_t length = -1);
 

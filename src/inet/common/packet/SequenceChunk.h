@@ -66,7 +66,7 @@ class SequenceChunk : public Chunk
     /** @name Iteration related functions */
     //@{
     virtual void moveIterator(Iterator& iterator, int64_t length) const override;
-    virtual void seekIterator(Iterator& iterator, int64_t byteOffset) const override;
+    virtual void seekIterator(Iterator& iterator, int64_t offset) const override;
     //@}
 
     /** @name Filling with data related functions */

@@ -26,19 +26,19 @@ class SliceChunk : public Chunk
 
   protected:
     std::shared_ptr<Chunk> chunk;
-    int64_t byteOffset;
+    int64_t offset;
     int64_t length;
 
   protected:
     virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = -1, int64_t length = -1);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = -1, int64_t length = -1);
 
   public:
     SliceChunk();
     SliceChunk(const SliceChunk& other);
-    SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset = 0, int64_t length = -1);
+    SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
@@ -46,8 +46,8 @@ class SliceChunk : public Chunk
     const std::shared_ptr<Chunk>& getChunk() const { return chunk; }
     void setChunk(const std::shared_ptr<Chunk>& chunk) { this->chunk = chunk; }
 
-    int64_t getByteOffset() const { return byteOffset; }
-    void setByteOffset(int64_t byteOffset);
+    int64_t getOffset() const { return offset; }
+    void setOffset(int64_t offset);
 
     int64_t getLength() const { return length; }
     void setLength(int64_t length);

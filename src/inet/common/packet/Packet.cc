@@ -61,9 +61,9 @@ std::shared_ptr<Chunk> Packet::peekHeader(int64_t length) const
     return data->peek(headerIterator, length);
 }
 
-std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t length) const
+std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t offset, int64_t length) const
 {
-    return data->peek(Chunk::Iterator(true, byteOffset), length);
+    return data->peek(Chunk::Iterator(true, offset), length);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
@@ -79,9 +79,9 @@ std::shared_ptr<Chunk> Packet::peekTrailer(int64_t length) const
     return data->peek(trailerIterator, length);
 }
 
-std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t length) const
+std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t offset, int64_t length) const
 {
-    return data->peek(Chunk::Iterator(false, byteOffset), length);
+    return data->peek(Chunk::Iterator(false, offset), length);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
@@ -98,11 +98,11 @@ std::shared_ptr<Chunk> Packet::peekData(int64_t length) const
     return data->peek(Chunk::Iterator(true, getDataPosition()), peekLength);
 }
 
-std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t length) const
+std::shared_ptr<Chunk> Packet::peekDataAt(int64_t offset, int64_t length) const
 {
-    int64_t peekByteOffset = getDataPosition() + byteOffset;
-    int64_t peekLength = length == -1 ? getDataLength() - byteOffset : length;
-    return data->peek(Chunk::Iterator(true, peekByteOffset), peekLength);
+    int64_t peekOffset = getDataPosition() + offset;
+    int64_t peekLength = length == -1 ? getDataLength() - offset : length;
+    return data->peek(Chunk::Iterator(true, peekOffset), peekLength);
 }
 
 std::shared_ptr<Chunk> Packet::peek(int64_t length) const
@@ -111,10 +111,10 @@ std::shared_ptr<Chunk> Packet::peek(int64_t length) const
     return data->peek(Chunk::Iterator(true, 0), peekLength);
 }
 
-std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t length) const
+std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
 {
-    int64_t peekLength = length == -1 ? getByteLength() - byteOffset : length;
-    return data->peek(Chunk::Iterator(true, byteOffset), peekLength);
+    int64_t peekLength = length == -1 ? getByteLength() - offset : length;
+    return data->peek(Chunk::Iterator(true, offset), peekLength);
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk)

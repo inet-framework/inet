@@ -31,7 +31,7 @@ class BytesChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "inet::BytesChunkSerializer"; }
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
     BytesChunk();

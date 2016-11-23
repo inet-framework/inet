@@ -19,8 +19,8 @@
 
 namespace inet {
 
-NewReassemblyBuffer::Region::Region(int64_t byteOffset, const std::shared_ptr<Chunk>& data) :
-    byteOffset(byteOffset),
+NewReassemblyBuffer::Region::Region(int64_t offset, const std::shared_ptr<Chunk>& data) :
+    offset(offset),
     data(data)
 {
 }
@@ -62,7 +62,7 @@ void NewReassemblyBuffer::sliceRegions(Region& newRegion)
             // new splits old into two parts
             Region previousRegin(oldRegion.getStartOffset(), oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset()));
             Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset()));
-            oldRegion.byteOffset = nextRegion.byteOffset;
+            oldRegion.offset = nextRegion.offset;
             oldRegion.data = nextRegion.data;
             regions.insert(it, previousRegin);
             return;
@@ -97,18 +97,18 @@ void NewReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegio
     }
 }
 
-void NewReassemblyBuffer::setData(int64_t byteOffset, const std::shared_ptr<Chunk>& chunk)
+void NewReassemblyBuffer::setData(int64_t offset, const std::shared_ptr<Chunk>& chunk)
 {
-    Region newRegion(byteOffset, chunk);
+    Region newRegion(offset, chunk);
     sliceRegions(newRegion);
     if (regions.empty())
         regions.push_back(newRegion);
-    else if (regions.back().getEndOffset() <= byteOffset) {
+    else if (regions.back().getEndOffset() <= offset) {
         regions.push_back(newRegion);
         mergeRegions(regions[regions.size() - 2], regions[regions.size() - 1]);
         eraseEmptyRegions(regions.end() - 2, regions.end());
     }
-    else if (byteOffset + chunk->getChunkLength() <= regions.front().getStartOffset()) {
+    else if (offset + chunk->getChunkLength() <= regions.front().getStartOffset()) {
         regions.insert(regions.begin(), newRegion);
         mergeRegions(regions[0], regions[1]);
         eraseEmptyRegions(regions.begin(), regions.begin() + 2);

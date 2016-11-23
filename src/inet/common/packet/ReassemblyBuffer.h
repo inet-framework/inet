@@ -25,14 +25,14 @@ class NewReassemblyBuffer : public cObject
   protected:
     class Region {
       public:
-        int64_t byteOffset;
+        int64_t offset;
         std::shared_ptr<Chunk> data;
 
       public:
-        Region(int64_t byteOffset, const std::shared_ptr<Chunk>& data);
+        Region(int64_t offset, const std::shared_ptr<Chunk>& data);
 
-        int64_t getStartOffset() const { return byteOffset; }
-        int64_t getEndOffset() const { return byteOffset + data->getChunkLength(); }
+        int64_t getStartOffset() const { return offset; }
+        int64_t getEndOffset() const { return offset + data->getChunkLength(); }
 
         static bool compareStartOffset(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
         static bool compareEndOffset(const Region& a, const Region& b) { return a.getEndOffset() < b.getEndOffset(); }
@@ -55,9 +55,9 @@ class NewReassemblyBuffer : public cObject
     bool isComplete() const { return regions.size() == 1; }
 
     int64_t getLength() const;
-    int64_t getOffset() const { return regions.empty() ? -1 : regions[0].byteOffset; }
+    int64_t getOffset() const { return regions.empty() ? -1 : regions[0].offset; }
 
-    void setData(int64_t byteOffset, const std::shared_ptr<Chunk>& chunk);
+    void setData(int64_t offset, const std::shared_ptr<Chunk>& chunk);
     std::shared_ptr<Chunk> getData();
 
     virtual std::string str() const override { return ""; }

@@ -34,14 +34,14 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
+std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
     std::vector<uint8_t> chunkBytes;
     int byteCount = length == -1 ? outputStream.getSize() : length;
     for (int64_t i = 0; i < byteCount; i++)
-        chunkBytes.push_back(outputStream[byteOffset + i]);
+        chunkBytes.push_back(outputStream[offset + i]);
     return std::make_shared<BytesChunk>(chunkBytes);
 }
 

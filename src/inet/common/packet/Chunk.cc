@@ -65,13 +65,13 @@ void Chunk::handleChange()
     serializedBytes = nullptr;
 }
 
-std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
+std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
     ByteOutputStream outputStream;
     serialize(outputStream, chunk);
     auto& outputBytes = outputStream.getBytes();
-    auto begin = outputBytes.begin() + byteOffset;
-    auto end = length == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + length;
+    auto begin = outputBytes.begin() + offset;
+    auto end = length == -1 ? outputBytes.end() : outputBytes.begin() + offset + length;
     std::vector<uint8_t> inputBytes(begin, end);
     ByteInputStream inputStream(inputBytes);
     return deserialize(inputStream, typeInfo);

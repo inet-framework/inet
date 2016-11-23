@@ -62,7 +62,7 @@ void SliceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared
     const auto& sliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, sliceChunk->getChunk());
-    stream.writeBytes(outputStream.getBytes(), sliceChunk->getByteOffset(), sliceChunk->getChunkLength());
+    stream.writeBytes(outputStream.getBytes(), sliceChunk->getOffset(), sliceChunk->getChunkLength());
 }
 
 std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream) const

@@ -199,7 +199,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk.
      */
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
     Chunk();
@@ -246,7 +246,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     Iterator createBackwardIterator() const { return Iterator(false); }
 
     virtual void moveIterator(Iterator& iterator, int64_t length) const { iterator.setPosition(iterator.getPosition() + length); }
-    virtual void seekIterator(Iterator& iterator, int64_t byteOffset) const { iterator.setPosition(byteOffset); }
+    virtual void seekIterator(Iterator& iterator, int64_t offset) const { iterator.setPosition(offset); }
     //@}
 
     /** @name Inserting data related functions */

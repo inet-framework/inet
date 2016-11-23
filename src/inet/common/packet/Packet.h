@@ -99,7 +99,7 @@ class Packet : public cPacket
 
     std::shared_ptr<Chunk> peekHeader(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekHeaderAt(int64_t byteOffset, int64_t length) const;
+    std::shared_ptr<Chunk> peekHeaderAt(int64_t offset, int64_t length) const;
 
     std::shared_ptr<Chunk> popHeader(int64_t length = -1);
 
@@ -114,8 +114,8 @@ class Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, byteOffset), length);
+    std::shared_ptr<T> peekHeaderAt(int64_t offset, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, offset), length);
     }
 
     template <typename T>
@@ -148,7 +148,7 @@ class Packet : public cPacket
 
     std::shared_ptr<Chunk> peekTrailer(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekTrailerAt(int64_t byteOffset, int64_t length) const;
+    std::shared_ptr<Chunk> peekTrailerAt(int64_t offset, int64_t length) const;
 
     std::shared_ptr<Chunk> popTrailer(int64_t length = -1);
 
@@ -163,8 +163,8 @@ class Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(false, byteOffset), length);
+    std::shared_ptr<T> peekTrailerAt(int64_t offset, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(false, offset), length);
     }
 
     template <typename T>
@@ -192,7 +192,7 @@ class Packet : public cPacket
 
     std::shared_ptr<Chunk> peekData(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekDataAt(int64_t byteOffset = 0, int64_t length = -1) const;
+    std::shared_ptr<Chunk> peekDataAt(int64_t offset = 0, int64_t length = -1) const;
 
     template <typename T>
     bool hasData(int64_t length = -1) const {
@@ -205,8 +205,8 @@ class Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, getDataPosition() + byteOffset), length);
+    std::shared_ptr<T> peekDataAt(int64_t offset = 0, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, getDataPosition() + offset), length);
     }
     //@}
 
@@ -214,7 +214,7 @@ class Packet : public cPacket
     //@{
     std::shared_ptr<Chunk> peek(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekAt(int64_t byteOffset = 0, int64_t length = -1) const;
+    std::shared_ptr<Chunk> peekAt(int64_t offset = 0, int64_t length = -1) const;
 
     template <typename T>
     bool has(int64_t length = -1) const {
@@ -227,8 +227,8 @@ class Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, byteOffset), length);
+    std::shared_ptr<T> peekAt(int64_t offset = 0, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, offset), length);
     }
     //@}
 

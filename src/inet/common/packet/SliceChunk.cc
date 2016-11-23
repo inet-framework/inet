@@ -20,7 +20,7 @@ namespace inet {
 SliceChunk::SliceChunk() :
     Chunk(),
     chunk(nullptr),
-    byteOffset(-1),
+    offset(-1),
     length(-1)
 {
 }
@@ -28,37 +28,37 @@ SliceChunk::SliceChunk() :
 SliceChunk::SliceChunk(const SliceChunk& other) :
     Chunk(other),
     chunk(other.chunk),
-    byteOffset(other.byteOffset),
+    offset(other.offset),
     length(other.length)
 {
 }
 
-SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length) :
+SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) :
     Chunk(),
     chunk(chunk),
-    byteOffset(byteOffset),
-    length(length == -1 ? chunk->getChunkLength() - byteOffset : length)
+    offset(offset),
+    length(length == -1 ? chunk->getChunkLength() - offset : length)
 {
     chunk->assertImmutable();
-    assert(this->byteOffset >= 0);
+    assert(this->offset >= 0);
     assert(this->length >= 0);
 }
 
-std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
+std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
-    int64_t sliceChunkByteOffset = byteOffset == -1 ? 0 : byteOffset;
-    int64_t sliceChunkLength = length == -1 ? chunk->getChunkLength() - sliceChunkByteOffset : length;
-    assert(sliceChunkByteOffset >= 0);
+    int64_t sliceChunkOffset = offset == -1 ? 0 : offset;
+    int64_t sliceChunkLength = length == -1 ? chunk->getChunkLength() - sliceChunkOffset : length;
+    assert(sliceChunkOffset >= 0);
     assert(sliceChunkLength >= 0);
     chunk->assertImmutable();
-    return std::make_shared<SliceChunk>(chunk, sliceChunkByteOffset, sliceChunkLength);
+    return std::make_shared<SliceChunk>(chunk, sliceChunkOffset, sliceChunkLength);
 }
 
-void SliceChunk::setByteOffset(int64_t byteOffset)
+void SliceChunk::setOffset(int64_t offset)
 {
     assertMutable();
-    assert(byteOffset >= 0);
-    this->byteOffset = byteOffset;
+    assert(offset >= 0);
+    this->offset = offset;
 }
 
 void SliceChunk::setLength(int64_t length)
@@ -74,8 +74,8 @@ bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-        if (this->chunk == otherSliceChunk->chunk && byteOffset == otherSliceChunk->byteOffset + otherSliceChunk->length) {
-            byteOffset -= otherSliceChunk->length;
+        if (this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length) {
+            offset -= otherSliceChunk->length;
             length += otherSliceChunk->length;
             return true;
         }
@@ -92,7 +92,7 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-        if (this->chunk == otherSliceChunk->chunk && byteOffset + length == otherSliceChunk->byteOffset) {
+        if (this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset) {
             length += otherSliceChunk->length;
             return true;
         }
@@ -108,7 +108,7 @@ bool SliceChunk::removeFromBeginning(int64_t length)
     assert(length <= this->length);
     assertMutable();
     handleChange();
-    this->byteOffset += length;
+    this->offset += length;
     this->length -= length;
     return true;
 }
@@ -128,7 +128,7 @@ std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length
         return const_cast<SliceChunk *>(this)->shared_from_this();
     else {
         Iterator sliceIterator(iterator);
-        moveIterator(sliceIterator, byteOffset);
+        moveIterator(sliceIterator, offset);
         return chunk->peek(sliceIterator, length);
     }
 }
@@ -136,7 +136,7 @@ std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length
 std::string SliceChunk::str() const
 {
     std::ostringstream os;
-    os << "SliceChunk, chunk = {" << chunk << "}, byteOffset = " << byteOffset << ", length = " << length;
+    os << "SliceChunk, chunk = {" << chunk << "}, offset = " << offset << ", length = " << length;
     return os.str();
 }
 

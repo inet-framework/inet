@@ -36,7 +36,7 @@ LengthChunk::LengthChunk(int64_t length) :
     assert(length >= 0);
 }
 
-std::shared_ptr<Chunk> LengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
+std::shared_ptr<Chunk> LengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
     return std::make_shared<LengthChunk>(length == -1 ? chunk->getChunkLength() : length);
 }
