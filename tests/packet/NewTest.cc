@@ -23,7 +23,7 @@ Register_Serializer(IpHeaderSerializer);
 Register_Serializer(EthernetHeaderSerializer);
 Define_Module(NewTest);
 
-static int16_t computeTcpCrc(const ByteArrayChunk& pseudoHeader, const std::shared_ptr<ByteArrayChunk>& tcpSegment)
+static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_ptr<BytesChunk>& tcpSegment)
 {
     return 42;
 }
@@ -156,9 +156,9 @@ const std::vector<Packet *> NewMedium::receivePackets()
 
 Packet *NewMedium::serializePacket(Packet *packet)
 {
-    const auto& byteArrayChunk = packet->peekAt<ByteArrayChunk>(0, packet->getByteLength());
+    const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getByteLength());
     auto serializedPacket = new Packet();
-    serializedPacket->append(byteArrayChunk);
+    serializedPacket->append(bytesChunk);
     serializedPacket->makeImmutable();
     return serializedPacket;
 }
@@ -213,7 +213,7 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case BIT_ERROR_CRC: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(ByteArrayChunk(), tcpSegment->peekAt<ByteArrayChunk>(0, tcpSegment->getByteLength())));
+                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpSegment->peekAt<BytesChunk>(0, tcpSegment->getByteLength())));
                 break;
             }
             default:
@@ -235,12 +235,12 @@ void NewSender::sendTcp(Packet *packet)
 
 void NewSender::sendPackets()
 {
-    auto byteArrayChunk = std::make_shared<ByteArrayChunk>();
-    byteArrayChunk->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-    byteArrayChunk->makeImmutable();
-    EV_DEBUG << "Sending application data: " << byteArrayChunk << std::endl;
+    auto bytesChunk = std::make_shared<BytesChunk>();
+    bytesChunk->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    bytesChunk->makeImmutable();
+    EV_DEBUG << "Sending application data: " << bytesChunk << std::endl;
     auto packet1 = new Packet();
-    packet1->append(byteArrayChunk);
+    packet1->append(bytesChunk);
     sendTcp(packet1);
 
     auto applicationHeader = std::make_shared<ApplicationHeader>();
@@ -266,8 +266,8 @@ void NewReceiver::receiveApplication(Packet *packet)
     EV_DEBUG << "Collecting application data: " << chunk << std::endl;
     applicationData.push(chunk);
     EV_DEBUG << "Buffered application data: " << applicationData << std::endl;
-    if (applicationData.getPoppedByteLength() == 0 && applicationData.has<ByteArrayChunk>(10))
-        EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteArrayChunk>(10) << std::endl;
+    if (applicationData.getPoppedByteLength() == 0 && applicationData.has<BytesChunk>(10))
+        EV_DEBUG << "Receiving application data: " << applicationData.pop<BytesChunk>(10) << std::endl;
     if (applicationData.getPoppedByteLength() == 10 && applicationData.has<ApplicationHeader>())
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ApplicationHeader>() << std::endl;
     if (applicationData.getPoppedByteLength() == 20 && applicationData.has<LengthChunk>(10))
@@ -293,7 +293,7 @@ void NewReceiver::receiveTcp(Packet *packet)
             break;
         case BIT_ERROR_CRC: {
             int64_t byteLength = packet->getByteLength() - tcpHeaderPosition - packet->getTrailerPosition();
-            if (crc != computeTcpCrc(ByteArrayChunk(), packet->peekHeaderAt<ByteArrayChunk>(tcpHeaderPosition, byteLength))) {
+            if (crc != computeTcpCrc(BytesChunk(), packet->peekHeaderAt<BytesChunk>(tcpHeaderPosition, byteLength))) {
                 delete packet;
                 return;
             }

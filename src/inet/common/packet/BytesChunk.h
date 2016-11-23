@@ -13,15 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __INET_BYTEARRAYCHUNK_H_
-#define __INET_BYTEARRAYCHUNK_H_
+#ifndef __INET_BYTESCHUNK_H_
+#define __INET_BYTESCHUNK_H_
 
 #include "Chunk.h"
 
 namespace inet {
 
-// TODO: rename type BitsChunk? or BytesChunk? or RawChunk?
-class ByteArrayChunk : public Chunk
+class BytesChunk : public Chunk
 {
   friend Chunk;
 
@@ -29,20 +28,20 @@ class ByteArrayChunk : public Chunk
     std::vector<uint8_t> bytes;
 
   protected:
-    virtual const char *getSerializerClassName() const override { return "inet::ByteArrayChunkSerializer"; }
+    virtual const char *getSerializerClassName() const override { return "inet::BytesChunkSerializer"; }
 
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
 
   public:
-    ByteArrayChunk();
-    ByteArrayChunk(const ByteArrayChunk& other);
-    ByteArrayChunk(const std::vector<uint8_t>& bytes);
+    BytesChunk();
+    BytesChunk(const BytesChunk& other);
+    BytesChunk(const std::vector<uint8_t>& bytes);
 
-    virtual ByteArrayChunk *dup() const override { return new ByteArrayChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<ByteArrayChunk>(*this); }
+    virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
 
-    virtual Type getChunkType() const override { return TYPE_BYTEARRAY; }
+    virtual Type getChunkType() const override { return TYPE_BYTES; }
 
     virtual const std::vector<uint8_t>& getBytes() const { return bytes; }
     virtual void setBytes(const std::vector<uint8_t>& bytes);
@@ -62,5 +61,5 @@ class ByteArrayChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_BYTEARRAYCHUNK_H_
+#endif // #ifndef __INET_BYTESCHUNK_H_
 

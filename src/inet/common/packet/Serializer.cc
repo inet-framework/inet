@@ -17,7 +17,7 @@
 
 namespace inet {
 
-Register_Serializer(ByteArrayChunkSerializer);
+Register_Serializer(BytesChunkSerializer);
 Register_Serializer(LengthChunkSerializer);
 Register_Serializer(SliceChunkSerializer);
 Register_Serializer(SequenceChunkSerializer);
@@ -25,15 +25,15 @@ Register_Serializer(SequenceChunkSerializer);
 int64_t ChunkSerializer::totalSerializedLength = 0;
 int64_t ChunkSerializer::totalDeserializedLength = 0;
 
-void ByteArrayChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    const auto& byteArrayChunk = std::static_pointer_cast<const ByteArrayChunk>(chunk);
+    const auto& byteArrayChunk = std::static_pointer_cast<const BytesChunk>(chunk);
     stream.writeBytes(byteArrayChunk->getBytes());
 }
 
-std::shared_ptr<Chunk> ByteArrayChunkSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream) const
 {
-    auto byteArrayChunk = std::make_shared<ByteArrayChunk>();
+    auto byteArrayChunk = std::make_shared<BytesChunk>();
     int byteLength = stream.getRemainingSize();
     std::vector<uint8_t> chunkBytes;
     for (int64_t i = 0; i < byteLength; i++)

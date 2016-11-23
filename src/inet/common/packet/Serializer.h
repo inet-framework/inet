@@ -16,7 +16,7 @@
 #ifndef __INET_SERIALIZER_H_
 #define __INET_SERIALIZER_H_
 
-#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/ByteStream.h"
 #include "inet/common/packet/LengthChunk.h"
 #include "inet/common/packet/SequenceChunk.h"
@@ -39,7 +39,7 @@ class ChunkSerializer : public cObject
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const = 0;
 };
 
-class ByteArrayChunkSerializer : public ChunkSerializer
+class BytesChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;

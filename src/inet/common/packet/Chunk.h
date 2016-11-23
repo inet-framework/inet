@@ -114,7 +114,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      */
     enum Type {
         TYPE_LENGTH,
-        TYPE_BYTEARRAY,
+        TYPE_BYTES,
         TYPE_SLICE,
         TYPE_SEQUENCE,
         TYPE_FIELD

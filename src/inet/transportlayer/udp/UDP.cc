@@ -22,7 +22,7 @@
 #include "inet/transportlayer/udp/UDP.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/cPacketChunk.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -362,8 +362,8 @@ void UDP::processPacketFromApp(cPacket *appData)
     udpHeader->setBitError(BIT_ERROR_NO);       //FIXME choose BIT_ERROR_NO, BIT_ERROR_YES, BIT_ERROR_CRC
     uint16_t crc = 0;
     if (udpHeader->getBitError() == BIT_ERROR_CRC) {
-        ByteArrayChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
-        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<ByteArrayChunk>(0)));
+        BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
+        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<BytesChunk>(0)));
     }
     udpHeader->setCrc(crc);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
@@ -425,8 +425,8 @@ void UDP::processUDPPacket(Packet *udpPacket)
             else if (crc == 0)
                 bitError = false;
             else {
-                ByteArrayChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
-                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<ByteArrayChunk>(udpHeaderPosition, totalLength)));
+                BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
+                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<BytesChunk>(udpHeaderPosition, totalLength)));
             }
             break;
         }
@@ -1230,7 +1230,7 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
     delete membership;
 }
 
-uint16_t computeUdpCrc(const ByteArrayChunk& pseudoHeader, const ByteArrayChunk& udpPacket)
+uint16_t computeUdpCrc(const BytesChunk& pseudoHeader, const BytesChunk& udpPacket)
 {
     return 0;   //FIXME add implementation
 }

@@ -23,7 +23,7 @@
 #include <list>
 
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/packet/ByteArrayChunk.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 
@@ -187,7 +187,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
 };
 
-uint16_t computeUdpCrc(const ByteArrayChunk& pseudoHeader, const ByteArrayChunk& udpPacket);
+uint16_t computeUdpCrc(const BytesChunk& pseudoHeader, const BytesChunk& udpPacket);
 
 } // namespace inet
 
