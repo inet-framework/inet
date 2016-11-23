@@ -36,8 +36,6 @@ class NewReassemblyBuffer : public cObject
 
         static bool compareStartOffset(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
         static bool compareEndOffset(const Region& a, const Region& b) { return a.getEndOffset() < b.getEndOffset(); }
-
-        static bool compareStartOffset2(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
     };
 
   protected:
