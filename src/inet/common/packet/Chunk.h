@@ -37,7 +37,7 @@ namespace inet {
  * TODO: polymorphism, nesting, compacting
  *
  * Chunks can represent data in different ways:
- *  - ByteLengthChunk contains a length field only
+ *  - LengthChunk contains a length field only
  *  - ByteArrayChunk contains a sequence of bytes
  *  - SliceChunk contains a slice of another chunk
  *  - SequenceChunk contains a sequence of other chunks
@@ -73,8 +73,7 @@ namespace inet {
  * 1) Peeking without providing a return type for a
  *    a) ByteArrayChunk always returns a ByteArrayChunk containing the bytes
  *       of the requested part
- *    b) ByteLengthChunk always returns a ByteLengthChunk containing the
- *       requested byte length
+ *    b) LengthChunk always returns a LengthChunk containing the requested length
  *    c) SliceChunk always returns a SliceChunk containing the requested slice
  *       of the chunk that is used by the original SliceChunk
  *    d) SequenceChunk may return
@@ -84,8 +83,8 @@ namespace inet {
  *    e) any other chunk returns a SliceChunk
  * 2) Peeking with providing a return type always returns a chunk of the
  *    requested type (or a subtype thereof)
- *    a) Peeking with a ByteLengthChunk return type for any chunk returns a
- *       ByteLengthChunk containing the requested byte length
+ *    a) Peeking with a LengthChunk return type for any chunk returns a
+ *       LengthChunk containing the requested byte length
  *    b) Peeking with a ByteArrayChunk return type for any chunk returns a
  *       ByteArrayChunk containing a part of the serialized bytes of the
  *       original chunk
@@ -192,15 +191,15 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     virtual void handleChange() override;
 
-    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t byteLength = -1) const { return nullptr; }
-    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t byteLength = -1) const { return nullptr; }
+    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length = -1) const { return nullptr; }
+    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length = -1) const { return nullptr; }
 
   protected:
     /**
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk.
      */
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length);
 
   public:
     Chunk();
@@ -246,7 +245,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     Iterator createForwardIterator() const { return Iterator(true); }
     Iterator createBackwardIterator() const { return Iterator(false); }
 
-    virtual void moveIterator(Iterator& iterator, int64_t byteLength) const { iterator.setPosition(iterator.getPosition() + byteLength); }
+    virtual void moveIterator(Iterator& iterator, int64_t length) const { iterator.setPosition(iterator.getPosition() + length); }
     virtual void seekIterator(Iterator& iterator, int64_t byteOffset) const { iterator.setPosition(byteOffset); }
     //@}
 
@@ -271,13 +270,13 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Removes the requested number of bytes from the beginning of this chunk
      * and returns true if the removal was successful.
      */
-    virtual bool removeFromBeginning(int64_t byteLength) { assertMutable(); return false; }
+    virtual bool removeFromBeginning(int64_t length) { assertMutable(); return false; }
 
     /**
      * Removes the requested number of bytes from the end of this chunk and
      * returns true if the removal was successful.
      */
-    virtual bool removeFromEnd(int64_t byteLength) { assertMutable(); return false; }
+    virtual bool removeFromEnd(int64_t length) { assertMutable(); return false; }
     //@}
 
     /** @name Chunk querying related functions */
@@ -293,7 +292,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * requested part is directly represented in this chunk by a mutable chunk,
      * otherwise the returned chunk is immutable.
      */
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const;
 
     /**
      * Returns the designated part of the data represented by this chunk in the
@@ -302,20 +301,20 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * otherwise the returned chunk is immutable.
      */
     template <typename T>
-    std::shared_ptr<T> peek(const Iterator& iterator, int64_t byteLength = -1) const {
+    std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
         if (getChunkType() == TYPE_SEQUENCE) {
-            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, byteLength)))
+            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, length)))
                 return tChunk;
-            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, byteLength)))
+            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, length)))
                 return tChunk;
         }
         if (!enableImplicitChunkSerialization)
             throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
         // TODO: prevents easy access for application buffer
         // assertImmutable();
-        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), byteLength);
+        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
         chunk->makeImmutable();
-        if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getChunkLength())
+        if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
             return std::dynamic_pointer_cast<T>(chunk);
         else
             return nullptr;

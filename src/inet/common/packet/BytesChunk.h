@@ -31,7 +31,7 @@ class BytesChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "inet::BytesChunkSerializer"; }
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length);
 
   public:
     BytesChunk();
@@ -51,10 +51,10 @@ class BytesChunk : public Chunk
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool removeFromBeginning(int64_t byteLength) override;
-    virtual bool removeFromEnd(int64_t byteLength) override;
+    virtual bool removeFromBeginning(int64_t length) override;
+    virtual bool removeFromEnd(int64_t length) override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength = -1) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
 
     virtual std::string str() const override;
 };

@@ -41,10 +41,11 @@ class LengthChunk : public Chunk
     virtual LengthChunk *dup() const override { return new LengthChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<LengthChunk>(*this); }
 
-    virtual Type getChunkType() const override { return TYPE_LENGTH; }
+    int64_t getLength() const { return length; }
+    void setLength(int64_t length);
 
+    virtual Type getChunkType() const override { return TYPE_LENGTH; }
     virtual int64_t getChunkLength() const override { return length; }
-    virtual void setByteLength(int64_t length);
 
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;

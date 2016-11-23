@@ -65,13 +65,13 @@ void Chunk::handleChange()
     serializedBytes = nullptr;
 }
 
-std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
 {
     ByteOutputStream outputStream;
     serialize(outputStream, chunk);
     auto& outputBytes = outputStream.getBytes();
     auto begin = outputBytes.begin() + byteOffset;
-    auto end = byteLength == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + byteLength;
+    auto end = length == -1 ? outputBytes.end() : outputBytes.begin() + byteOffset + length;
     std::vector<uint8_t> inputBytes(begin, end);
     ByteInputStream inputStream(inputBytes);
     return deserialize(inputStream, typeInfo);
@@ -91,9 +91,9 @@ void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& ch
             throw cRuntimeError("Serializer class not found");
         serializer->serialize(stream, chunk);
         delete serializer;
-        auto byteLength = stream.getPosition() - streamPosition;
-        chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
-        ChunkSerializer::totalSerializedLength += byteLength;
+        auto length = stream.getPosition() - streamPosition;
+        chunk->serializedBytes = stream.copyBytes(streamPosition, length);
+        ChunkSerializer::totalSerializedLength += length;
     }
 }
 
@@ -108,24 +108,24 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
     delete serializer;
     if (stream.isReadBeyondEnd())
         chunk->makeIncomplete();
-    auto byteLength = stream.getPosition() - streamPosition;
-    chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
-    ChunkSerializer::totalDeserializedLength += byteLength;
+    auto length = stream.getPosition() - streamPosition;
+    chunk->serializedBytes = stream.copyBytes(streamPosition, length);
+    ChunkSerializer::totalDeserializedLength += length;
     return chunk;
 }
 
-std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
+    if (iterator.getPosition() == 0 && length == getChunkLength())
         return const_cast<Chunk *>(this)->shared_from_this();
     else
-        return peek<SliceChunk>(iterator, byteLength);
+        return peek<SliceChunk>(iterator, length);
 }
 
 std::string Chunk::str() const
 {
     std::ostringstream os;
-    os << "Chunk, byteLength = " << getChunkLength();
+    os << "Chunk, length = " << getChunkLength();
     return os.str();
 }
 

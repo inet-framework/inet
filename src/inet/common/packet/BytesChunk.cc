@@ -34,12 +34,12 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
 {
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
     std::vector<uint8_t> chunkBytes;
-    int byteCount = byteLength == -1 ? outputStream.getSize() : byteLength;
+    int byteCount = length == -1 ? outputStream.getSize() : length;
     for (int64_t i = 0; i < byteCount; i++)
         chunkBytes.push_back(outputStream[byteOffset + i]);
     return std::make_shared<BytesChunk>(chunkBytes);
@@ -77,30 +77,30 @@ bool BytesChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-bool BytesChunk::removeFromBeginning(int64_t byteLength)
+bool BytesChunk::removeFromBeginning(int64_t length)
 {
-    assert(byteLength <= bytes.size());
+    assert(length <= bytes.size());
     assertMutable();
     handleChange();
-    bytes.erase(bytes.begin(), bytes.begin() + byteLength);
+    bytes.erase(bytes.begin(), bytes.begin() + length);
     return true;
 }
 
-bool BytesChunk::removeFromEnd(int64_t byteLength)
+bool BytesChunk::removeFromEnd(int64_t length)
 {
-    assert(byteLength <= bytes.size());
+    assert(length <= bytes.size());
     assertMutable();
     handleChange();
-    bytes.erase(bytes.end() - byteLength, bytes.end());
+    bytes.erase(bytes.end() - length, bytes.end());
     return true;
 }
 
-std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
+    if (iterator.getPosition() == 0 && length == getChunkLength())
         return const_cast<BytesChunk *>(this)->shared_from_this();
     else
-        return std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition(), byteLength == -1 ? bytes.end() : bytes.begin() + iterator.getPosition() + byteLength));
+        return std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition(), length == -1 ? bytes.end() : bytes.begin() + iterator.getPosition() + length));
 }
 
 std::string BytesChunk::str() const

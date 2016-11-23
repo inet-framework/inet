@@ -41,7 +41,7 @@ std::shared_ptr<Chunk> LengthChunk::createChunk(const std::type_info& typeInfo, 
     return std::make_shared<LengthChunk>(length == -1 ? chunk->getChunkLength() : length);
 }
 
-void LengthChunk::setByteLength(int64_t length)
+void LengthChunk::setLength(int64_t length)
 {
     assertMutable();
     assert(length >= 0);

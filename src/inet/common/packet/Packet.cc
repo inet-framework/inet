@@ -56,65 +56,65 @@ Chunk *Packet::getChunk(int i) const
         return data.get();
 }
 
-std::shared_ptr<Chunk> Packet::peekHeader(int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekHeader(int64_t length) const
 {
-    return data->peek(headerIterator, byteLength);
+    return data->peek(headerIterator, length);
 }
 
-std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekHeaderAt(int64_t byteOffset, int64_t length) const
 {
-    return data->peek(Chunk::Iterator(true, byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(true, byteOffset), length);
 }
 
-std::shared_ptr<Chunk> Packet::popHeader(int64_t byteLength)
+std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
 {
-    const auto& chunk = peekHeader(byteLength);
+    const auto& chunk = peekHeader(length);
     if (chunk != nullptr)
         data->moveIterator(headerIterator, chunk->getChunkLength());
     return chunk;
 }
 
-std::shared_ptr<Chunk> Packet::peekTrailer(int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekTrailer(int64_t length) const
 {
-    return data->peek(trailerIterator, byteLength);
+    return data->peek(trailerIterator, length);
 }
 
-std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekTrailerAt(int64_t byteOffset, int64_t length) const
 {
-    return data->peek(Chunk::Iterator(false, byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(false, byteOffset), length);
 }
 
-std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
+std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
 {
-    const auto& chunk = peekTrailer(byteLength);
+    const auto& chunk = peekTrailer(length);
     if (chunk != nullptr)
         data->moveIterator(trailerIterator, -chunk->getChunkLength());
     return chunk;
 }
 
-std::shared_ptr<Chunk> Packet::peekData(int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekData(int64_t length) const
 {
-    int64_t peekByteLength = byteLength == -1 ? getDataLength() : byteLength;
-    return data->peek(Chunk::Iterator(true, getDataPosition()), peekByteLength);
+    int64_t peekLength = length == -1 ? getDataLength() : length;
+    return data->peek(Chunk::Iterator(true, getDataPosition()), peekLength);
 }
 
-std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekDataAt(int64_t byteOffset, int64_t length) const
 {
     int64_t peekByteOffset = getDataPosition() + byteOffset;
-    int64_t peekByteLength = byteLength == -1 ? getDataLength() - byteOffset : byteLength;
-    return data->peek(Chunk::Iterator(true, peekByteOffset), peekByteLength);
+    int64_t peekLength = length == -1 ? getDataLength() - byteOffset : length;
+    return data->peek(Chunk::Iterator(true, peekByteOffset), peekLength);
 }
 
-std::shared_ptr<Chunk> Packet::peek(int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peek(int64_t length) const
 {
-    int64_t peekByteLength = byteLength == -1 ? getByteLength() : byteLength;
-    return data->peek(Chunk::Iterator(true, 0), peekByteLength);
+    int64_t peekLength = length == -1 ? getByteLength() : length;
+    return data->peek(Chunk::Iterator(true, 0), peekLength);
 }
 
-std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t byteLength) const
+std::shared_ptr<Chunk> Packet::peekAt(int64_t byteOffset, int64_t length) const
 {
-    int64_t peekByteLength = byteLength == -1 ? getByteLength() - byteOffset : byteLength;
-    return data->peek(Chunk::Iterator(true, byteOffset), peekByteLength);
+    int64_t peekLength = length == -1 ? getByteLength() - byteOffset : length;
+    return data->peek(Chunk::Iterator(true, byteOffset), peekLength);
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
@@ -167,15 +167,15 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
     }
 }
 
-void Packet::removeFromBeginning(int64_t byteLength)
+void Packet::removeFromBeginning(int64_t length)
 {
-    if (!data->removeFromBeginning(byteLength))
+    if (!data->removeFromBeginning(length))
         throw cRuntimeError("Cannot remove from the beginning");
 }
 
-void Packet::removeFromEnd(int64_t byteLength)
+void Packet::removeFromEnd(int64_t length)
 {
-    if (!data->removeFromEnd(byteLength))
+    if (!data->removeFromEnd(length))
         throw cRuntimeError("Cannot remove from the end");
 }
 

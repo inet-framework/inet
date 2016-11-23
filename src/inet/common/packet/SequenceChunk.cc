@@ -51,10 +51,10 @@ std::vector<std::shared_ptr<Chunk> > SequenceChunk::dupChunks() const
 
 int64_t SequenceChunk::getChunkLength() const
 {
-    int64_t byteLength = 0;
+    int64_t length = 0;
     for (auto& chunk : chunks)
-        byteLength += chunk->getChunkLength();
-    return byteLength;
+        length += chunk->getChunkLength();
+    return length;
 }
 
 void SequenceChunk::seekIterator(Iterator& iterator, int64_t byteOffset) const
@@ -78,26 +78,26 @@ void SequenceChunk::seekIterator(Iterator& iterator, int64_t byteOffset) const
     }
 }
 
-void SequenceChunk::moveIterator(Iterator& iterator, int64_t byteLength) const
+void SequenceChunk::moveIterator(Iterator& iterator, int64_t length) const
 {
-    iterator.setPosition(iterator.getPosition() + byteLength);
-    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getChunkLength() == byteLength)
+    iterator.setPosition(iterator.getPosition() + length);
+    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getChunkLength() == length)
         iterator.setIndex(iterator.getIndex() + 1);
     else
         iterator.setIndex(-1);
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator, int64_t length) const
 {
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
         const auto& chunk = getElementChunk(iterator);
-        if (byteLength == -1 || chunk->getChunkLength() == byteLength)
+        if (length == -1 || chunk->getChunkLength() == length)
             return chunk;
     }
     return nullptr;
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& iterator, int64_t length) const
 {
     int position = 0;
     int startIndex = getStartIndex(iterator);
@@ -105,7 +105,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& itera
     int increment = getIndexIncrement(iterator);
     for (int i = startIndex; i != endIndex + increment; i += increment) {
         auto& chunk = chunks[i];
-        if (iterator.getPosition() == position && (byteLength == -1 || byteLength == chunk->getChunkLength()))
+        if (iterator.getPosition() == position && (length == -1 || length == chunk->getChunkLength()))
             return chunk;
         position += chunk->getChunkLength();
     }
@@ -236,60 +236,60 @@ void SequenceChunk::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
         insertToEnd(chunk);
 }
 
-bool SequenceChunk::removeFromBeginning(int64_t byteLength)
+bool SequenceChunk::removeFromBeginning(int64_t length)
 {
     handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
         auto chunk = *it;
-        int64_t chunkByteLength = chunk->getChunkLength();
-        if (chunkByteLength <= byteLength) {
+        int64_t chunkLength = chunk->getChunkLength();
+        if (chunkLength <= length) {
             it++;
-            byteLength -= chunkByteLength;
+            length -= chunkLength;
         }
         else {
-            *it = std::make_shared<SliceChunk>(chunk, byteLength, chunkByteLength - byteLength);
-            byteLength = 0;
+            *it = std::make_shared<SliceChunk>(chunk, length, chunkLength - length);
+            length = 0;
         }
-        if (byteLength == 0)
+        if (length == 0)
             break;
     }
     chunks.erase(chunks.begin(), it);
     return true;
 }
 
-bool SequenceChunk::removeFromEnd(int64_t byteLength)
+bool SequenceChunk::removeFromEnd(int64_t length)
 {
     handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
         auto chunk = *it;
-        int64_t chunkByteLength = chunk->getChunkLength();
-        if (chunkByteLength <= byteLength) {
+        int64_t chunkLength = chunk->getChunkLength();
+        if (chunkLength <= length) {
             it++;
-            byteLength -= chunkByteLength;
+            length -= chunkLength;
         }
         else {
-            *it = std::make_shared<SliceChunk>(chunk, 0, chunkByteLength - byteLength);
-            byteLength = 0;
+            *it = std::make_shared<SliceChunk>(chunk, 0, chunkLength - length);
+            length = 0;
         }
-        if (byteLength == 0)
+        if (length == 0)
             break;
     }
     chunks.erase((++it).base(), chunks.end());
     return true;
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
+    if (iterator.getPosition() == 0 && length == getChunkLength())
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else {
-        if (auto chunk = peekWithIterator(iterator, byteLength))
+        if (auto chunk = peekWithIterator(iterator, length))
             return chunk;
-        if (auto chunk = peekWithLinearSearch(iterator, byteLength))
+        if (auto chunk = peekWithLinearSearch(iterator, length))
             return chunk;
-        return Chunk::peek<SliceChunk>(iterator, byteLength);
+        return Chunk::peek<SliceChunk>(iterator, length);
     }
 }
 

@@ -34,10 +34,10 @@ Buffer::Buffer(const std::shared_ptr<Chunk>& data) :
 {
 }
 
-void Buffer::remove(int64_t byteLength)
+void Buffer::remove(int64_t length)
 {
-    data->moveIterator(iterator, byteLength);
-    poppedByteLength += byteLength;
+    data->moveIterator(iterator, length);
+    poppedLength += length;
     auto position = iterator.getPosition();
     if (position > data->getChunkLength() / 2) {
         data->removeFromBeginning(position);
@@ -45,19 +45,19 @@ void Buffer::remove(int64_t byteLength)
     }
 }
 
-std::shared_ptr<Chunk> Buffer::peek(int64_t byteLength) const
+std::shared_ptr<Chunk> Buffer::peek(int64_t length) const
 {
-    return data->peek(iterator, byteLength);
+    return data->peek(iterator, length);
 }
 
-std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t byteLength) const
+std::shared_ptr<Chunk> Buffer::peekAt(int64_t byteOffset, int64_t length) const
 {
-    return data->peek(Chunk::Iterator(true, byteOffset), byteLength);
+    return data->peek(Chunk::Iterator(true, byteOffset), length);
 }
 
-std::shared_ptr<Chunk> Buffer::pop(int64_t byteLength)
+std::shared_ptr<Chunk> Buffer::pop(int64_t length)
 {
-    const auto& chunk = peek(byteLength);
+    const auto& chunk = peek(length);
     if (chunk != nullptr)
         remove(chunk->getChunkLength());
     return chunk;
@@ -86,7 +86,7 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk)
             }
         }
     }
-    pushedByteLength += chunk->getChunkLength();
+    pushedLength += chunk->getChunkLength();
 }
 
 } // namespace

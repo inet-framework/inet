@@ -407,7 +407,7 @@ static void testClone()
     auto lengthChunk2 = std::make_shared<LengthChunk>(10);
     packet3.append(lengthChunk2);
     auto packet4 = packet3.dup();
-    lengthChunk2->setByteLength(20);
+    lengthChunk2->setLength(20);
     assert(packet4->getByteLength() == 10);
     assert(lengthChunk2.use_count() == 2);
     delete packet4;

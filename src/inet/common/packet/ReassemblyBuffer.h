@@ -54,8 +54,8 @@ class NewReassemblyBuffer : public cObject
 
     bool isComplete() const { return regions.size() == 1; }
 
-    int64_t getByteLength() const;
-    int64_t getByteOffset() const { return regions.empty() ? -1 : regions[0].byteOffset; }
+    int64_t getLength() const;
+    int64_t getOffset() const { return regions.empty() ? -1 : regions[0].byteOffset; }
 
     void setData(int64_t byteOffset, const std::shared_ptr<Chunk>& chunk);
     std::shared_ptr<Chunk> getData();

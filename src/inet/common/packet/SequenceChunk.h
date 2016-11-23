@@ -33,8 +33,8 @@ class SequenceChunk : public Chunk
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
-    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t byteLength = -1) const override;
-    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t byteLength = -1) const override;
+    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length = -1) const override;
+    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length = -1) const override;
 
     bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
 
@@ -65,7 +65,7 @@ class SequenceChunk : public Chunk
 
     /** @name Iteration related functions */
     //@{
-    virtual void moveIterator(Iterator& iterator, int64_t byteLength) const override;
+    virtual void moveIterator(Iterator& iterator, int64_t length) const override;
     virtual void seekIterator(Iterator& iterator, int64_t byteOffset) const override;
     //@}
 
@@ -80,15 +80,15 @@ class SequenceChunk : public Chunk
 
     /** @name Removing data related functions */
     //@{
-    virtual bool removeFromBeginning(int64_t byteLength) override;
-    virtual bool removeFromEnd(int64_t byteLength) override;
+    virtual bool removeFromBeginning(int64_t length) override;
+    virtual bool removeFromEnd(int64_t length) override;
     //@}
 
     /** @name Querying data related functions */
     //@{
     virtual int64_t getChunkLength() const override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length) const override;
     //@}
 
     virtual std::string str() const override;

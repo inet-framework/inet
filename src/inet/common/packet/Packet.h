@@ -97,30 +97,30 @@ class Packet : public cPacket
      */
     int64_t getHeaderLength() const { return headerIterator.getPosition(); }      // TODO: rename getProcessedHeaderLength to avoid confusion?
 
-    std::shared_ptr<Chunk> peekHeader(int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peekHeader(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekHeaderAt(int64_t byteOffset, int64_t byteLength) const;
+    std::shared_ptr<Chunk> peekHeaderAt(int64_t byteOffset, int64_t length) const;
 
-    std::shared_ptr<Chunk> popHeader(int64_t byteLength = -1);
+    std::shared_ptr<Chunk> popHeader(int64_t length = -1);
 
     template <typename T>
-    bool hasHeader(int64_t byteLength = -1) const {
-        return peekHeader<T>(byteLength) != nullptr;
+    bool hasHeader(int64_t length = -1) const {
+        return peekHeader<T>(length) != nullptr;
     }
 
     template <typename T>
-    std::shared_ptr<T> peekHeader(int64_t byteLength = -1) const {
-        return data->peek<T>(headerIterator, byteLength);
+    std::shared_ptr<T> peekHeader(int64_t length = -1) const {
+        return data->peek<T>(headerIterator, length);
     }
 
     template <typename T>
-    std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, byteOffset), byteLength);
+    std::shared_ptr<T> peekHeaderAt(int64_t byteOffset, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, byteOffset), length);
     }
 
     template <typename T>
-    std::shared_ptr<T> popHeader(int64_t byteLength = -1) {
-        const auto& chunk = peekHeader<T>(byteLength);
+    std::shared_ptr<T> popHeader(int64_t length = -1) {
+        const auto& chunk = peekHeader<T>(length);
         if (chunk != nullptr)
             data->moveIterator(headerIterator, chunk->getChunkLength());
         return chunk;
@@ -146,30 +146,30 @@ class Packet : public cPacket
      */
     int64_t getTrailerLength() const { return trailerIterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peekTrailer(int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peekTrailer(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekTrailerAt(int64_t byteOffset, int64_t byteLength) const;
+    std::shared_ptr<Chunk> peekTrailerAt(int64_t byteOffset, int64_t length) const;
 
-    std::shared_ptr<Chunk> popTrailer(int64_t byteLength = -1);
+    std::shared_ptr<Chunk> popTrailer(int64_t length = -1);
 
     template <typename T>
-    bool hasTrailer(int64_t byteLength = -1) const {
-        return peekTrailer<T>(byteLength) != nullptr;
+    bool hasTrailer(int64_t length = -1) const {
+        return peekTrailer<T>(length) != nullptr;
     }
 
     template <typename T>
-    std::shared_ptr<T> peekTrailer(int64_t byteLength = -1) const {
-        return data->peek<T>(trailerIterator, byteLength);
+    std::shared_ptr<T> peekTrailer(int64_t length = -1) const {
+        return data->peek<T>(trailerIterator, length);
     }
 
     template <typename T>
-    std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t byteLength = -1) const {
-        return data->peek<T>(Chunk::Iterator(false, byteOffset), byteLength);
+    std::shared_ptr<T> peekTrailerAt(int64_t byteOffset, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(false, byteOffset), length);
     }
 
     template <typename T>
-    std::shared_ptr<T> popTrailer(int64_t byteLength = -1) {
-        const auto& chunk = peekTrailer<T>(byteLength);
+    std::shared_ptr<T> popTrailer(int64_t length = -1) {
+        const auto& chunk = peekTrailer<T>(length);
         if (chunk != nullptr)
             data->moveIterator(trailerIterator, chunk->getChunkLength());
         return chunk;
@@ -190,45 +190,45 @@ class Packet : public cPacket
      */
     int64_t getDataLength() const { return getByteLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peekData(int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peekData(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peekDataAt(int64_t byteOffset = 0, int64_t length = -1) const;
 
     template <typename T>
-    bool hasData(int64_t byteLength = -1) const {
-        return peekData<T>(byteLength) != nullptr;
+    bool hasData(int64_t length = -1) const {
+        return peekData<T>(length) != nullptr;
     }
 
     template <typename T>
-    std::shared_ptr<T> peekData(int64_t byteLength = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, getDataPosition()), byteLength);
+    std::shared_ptr<T> peekData(int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, getDataPosition()), length);
     }
 
     template <typename T>
-    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, getDataPosition() + byteOffset), byteLength);
+    std::shared_ptr<T> peekDataAt(int64_t byteOffset = 0, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, getDataPosition() + byteOffset), length);
     }
     //@}
 
     /** @name Querying related functions */
     //@{
-    std::shared_ptr<Chunk> peek(int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peek(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peekAt(int64_t byteOffset = 0, int64_t length = -1) const;
 
     template <typename T>
-    bool has(int64_t byteLength = -1) const {
-        return peek<T>(byteLength) != nullptr;
+    bool has(int64_t length = -1) const {
+        return peek<T>(length) != nullptr;
     }
 
     template <typename T>
-    std::shared_ptr<T> peek(int64_t byteLength = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, 0), byteLength);
+    std::shared_ptr<T> peek(int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, 0), length);
     }
 
     template <typename T>
-    std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t byteLength = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, byteOffset), byteLength);
+    std::shared_ptr<T> peekAt(int64_t byteOffset = 0, int64_t length = -1) const {
+        return data->peek<T>(Chunk::Iterator(true, byteOffset), length);
     }
     //@}
 
@@ -240,8 +240,8 @@ class Packet : public cPacket
 
     /** @name Removing data related functions */
     //@{
-    void removeFromBeginning(int64_t byteLength);
-    void removeFromEnd(int64_t byteLength);
+    void removeFromBeginning(int64_t length);
+    void removeFromEnd(int64_t length);
     //@}
 
     virtual int64_t getBitLength() const override { return data->getChunkLength() << 3; }        //TODO REVIEW: returns total length, or returns length between header/trailer iterators only? in second case: need a getTotalLength() function

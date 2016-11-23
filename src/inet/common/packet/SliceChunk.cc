@@ -21,7 +21,7 @@ SliceChunk::SliceChunk() :
     Chunk(),
     chunk(nullptr),
     byteOffset(-1),
-    byteLength(-1)
+    length(-1)
 {
 }
 
@@ -29,29 +29,29 @@ SliceChunk::SliceChunk(const SliceChunk& other) :
     Chunk(other),
     chunk(other.chunk),
     byteOffset(other.byteOffset),
-    byteLength(other.byteLength)
+    length(other.length)
 {
 }
 
-SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength) :
+SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length) :
     Chunk(),
     chunk(chunk),
     byteOffset(byteOffset),
-    byteLength(byteLength == -1 ? chunk->getChunkLength() - byteOffset : byteLength)
+    length(length == -1 ? chunk->getChunkLength() - byteOffset : length)
 {
     chunk->assertImmutable();
     assert(this->byteOffset >= 0);
-    assert(this->byteLength >= 0);
+    assert(this->length >= 0);
 }
 
-std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
 {
     int64_t sliceChunkByteOffset = byteOffset == -1 ? 0 : byteOffset;
-    int64_t sliceChunkByteLength = byteLength == -1 ? chunk->getChunkLength() - sliceChunkByteOffset : byteLength;
+    int64_t sliceChunkLength = length == -1 ? chunk->getChunkLength() - sliceChunkByteOffset : length;
     assert(sliceChunkByteOffset >= 0);
-    assert(sliceChunkByteLength >= 0);
+    assert(sliceChunkLength >= 0);
     chunk->assertImmutable();
-    return std::make_shared<SliceChunk>(chunk, sliceChunkByteOffset, sliceChunkByteLength);
+    return std::make_shared<SliceChunk>(chunk, sliceChunkByteOffset, sliceChunkLength);
 }
 
 void SliceChunk::setByteOffset(int64_t byteOffset)
@@ -61,11 +61,11 @@ void SliceChunk::setByteOffset(int64_t byteOffset)
     this->byteOffset = byteOffset;
 }
 
-void SliceChunk::setByteLength(int64_t byteLength)
+void SliceChunk::setLength(int64_t length)
 {
     assertMutable();
-    assert(byteLength >= 0);
-    this->byteLength = byteLength;
+    assert(length >= 0);
+    this->length = length;
 }
 
 bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
@@ -74,9 +74,9 @@ bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-        if (this->chunk == otherSliceChunk->chunk && byteOffset == otherSliceChunk->byteOffset + otherSliceChunk->byteLength) {
-            byteOffset -= otherSliceChunk->byteLength;
-            byteLength += otherSliceChunk->byteLength;
+        if (this->chunk == otherSliceChunk->chunk && byteOffset == otherSliceChunk->byteOffset + otherSliceChunk->length) {
+            byteOffset -= otherSliceChunk->length;
+            length += otherSliceChunk->length;
             return true;
         }
         else
@@ -92,8 +92,8 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-        if (this->chunk == otherSliceChunk->chunk && byteOffset + byteLength == otherSliceChunk->byteOffset) {
-            byteLength += otherSliceChunk->byteLength;
+        if (this->chunk == otherSliceChunk->chunk && byteOffset + length == otherSliceChunk->byteOffset) {
+            length += otherSliceChunk->length;
             return true;
         }
         else
@@ -103,40 +103,40 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-bool SliceChunk::removeFromBeginning(int64_t byteLength)
+bool SliceChunk::removeFromBeginning(int64_t length)
 {
-    assert(byteLength <= this->byteLength);
+    assert(length <= this->length);
     assertMutable();
     handleChange();
-    this->byteOffset += byteLength;
-    this->byteLength -= byteLength;
+    this->byteOffset += length;
+    this->length -= length;
     return true;
 }
 
-bool SliceChunk::removeFromEnd(int64_t byteLength)
+bool SliceChunk::removeFromEnd(int64_t length)
 {
-    assert(byteLength <= this->byteLength);
+    assert(length <= this->length);
     assertMutable();
     handleChange();
-    this->byteLength -= byteLength;
+    this->length -= length;
     return true;
 }
 
-std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
+    if (iterator.getPosition() == 0 && length == getChunkLength())
         return const_cast<SliceChunk *>(this)->shared_from_this();
     else {
         Iterator sliceIterator(iterator);
         moveIterator(sliceIterator, byteOffset);
-        return chunk->peek(sliceIterator, byteLength);
+        return chunk->peek(sliceIterator, length);
     }
 }
 
 std::string SliceChunk::str() const
 {
     std::ostringstream os;
-    os << "SliceChunk, chunk = {" << chunk << "}, byteOffset = " << byteOffset << ", byteLength = " << byteLength;
+    os << "SliceChunk, chunk = {" << chunk << "}, byteOffset = " << byteOffset << ", length = " << length;
     return os.str();
 }
 

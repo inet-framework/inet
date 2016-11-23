@@ -26,12 +26,12 @@ namespace inet {
 class Buffer : public cObject
 {
   protected:
-    int64_t pushedByteLength = 0;
-    int64_t poppedByteLength = 0;
+    int64_t pushedLength = 0;
+    int64_t poppedLength = 0;
     std::shared_ptr<Chunk> data = nullptr;
     Chunk::Iterator iterator;
 
-    void remove(int64_t byteLength);
+    void remove(int64_t length);
 
   public:
     Buffer();
@@ -40,8 +40,8 @@ class Buffer : public cObject
 
     virtual Buffer *dup() const override { return new Buffer(*this); }
 
-    int64_t getPushedByteLength() const { return pushedByteLength; }
-    int64_t getPoppedByteLength() const { return poppedByteLength; }
+    int64_t getPushedLength() const { return pushedLength; }
+    int64_t getPoppedLength() const { return poppedLength; }
 
     /** @name Mutability related functions */
     //@{
@@ -56,23 +56,23 @@ class Buffer : public cObject
     //@{
     int64_t getLength() const { return data->getChunkLength() - iterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peek(int64_t byteLength = -1) const;
+    std::shared_ptr<Chunk> peek(int64_t length = -1) const;
 
-    std::shared_ptr<Chunk> peekAt(int64_t byteOffset, int64_t byteLength) const;
+    std::shared_ptr<Chunk> peekAt(int64_t byteOffset, int64_t length) const;
 
-    std::shared_ptr<Chunk> pop(int64_t byteLength = -1);
+    std::shared_ptr<Chunk> pop(int64_t length = -1);
 
     template <typename T>
-    bool has(int64_t byteLength = -1) const {
-        return peek<T>(byteLength) != nullptr;
+    bool has(int64_t length = -1) const {
+        return peek<T>(length) != nullptr;
     }
     template <typename T>
-    std::shared_ptr<T> peek(int64_t byteLength = -1) const {
-        return data->peek<T>(iterator, byteLength);
+    std::shared_ptr<T> peek(int64_t length = -1) const {
+        return data->peek<T>(iterator, length);
     }
     template <typename T>
-    std::shared_ptr<T> pop(int64_t byteLength = -1) {
-        const auto& chunk = peek<T>(byteLength);
+    std::shared_ptr<T> pop(int64_t length = -1) {
+        const auto& chunk = peek<T>(length);
         if (chunk != nullptr)
             remove(chunk->getChunkLength());
         return chunk;

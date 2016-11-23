@@ -34,9 +34,9 @@ void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared
 std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream) const
 {
     auto byteArrayChunk = std::make_shared<BytesChunk>();
-    int byteLength = stream.getRemainingSize();
+    int length = stream.getRemainingSize();
     std::vector<uint8_t> chunkBytes;
-    for (int64_t i = 0; i < byteLength; i++)
+    for (int64_t i = 0; i < length; i++)
         chunkBytes.push_back(stream.readByte());
     byteArrayChunk->setBytes(chunkBytes);
     return byteArrayChunk;
@@ -53,7 +53,7 @@ std::shared_ptr<Chunk> LengthChunkSerializer::deserialize(ByteInputStream& strea
     auto lengthChunk = std::make_shared<LengthChunk>();
     int length = stream.getRemainingSize();
     stream.readByteRepeatedly('?', length);
-    lengthChunk->setByteLength(length);
+    lengthChunk->setLength(length);
     return lengthChunk;
 }
 

@@ -30,7 +30,7 @@ NewReassemblyBuffer::NewReassemblyBuffer(const NewReassemblyBuffer& other) :
 {
 }
 
-int64_t NewReassemblyBuffer::getByteLength() const
+int64_t NewReassemblyBuffer::getLength() const
 {
     int64_t startOffset = 0;
     int64_t endOffset = 0;
