@@ -83,7 +83,7 @@ pch : $(PRECOMPILED_HEADER_PCH)
 $(PRECOMPILED_HEADER_PCH): $(PRECOMPILED_HEADER)
 ifneq ("$(PRECOMPILED_EXT)","")
 	@echo Creating precompiled header for $(CC)...
-	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(filter-out -include $(PRECOMPILED_HEADER),$(COPTS)) -o $@ $<
+	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(filter-out -MMD -include $(PRECOMPILED_HEADER),$(COPTS)) -MD -o $@ $<
 endif
 
 clean: clean-pch clean-defines
