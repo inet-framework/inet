@@ -78,17 +78,30 @@ class Packet : public cPacket
     void makeImmutable() { data->makeImmutable(); }
     //@}
 
+    /** @name Length querying related functions */
+    //@{
+    /**
+     * Returns the packet length in bytes ignoring header and trailer iterators.
+     */
+    virtual int64_t getPacketLength() const { return data->getChunkLength(); }
+
+    /**
+     * Returns the unprocessed length in bits between the header and trailer iterators.
+     */
+    virtual int64_t getBitLength() const override { return getDataLength() << 3; }
+    //@}
+
     /** @name Header querying related functions */
     //@{
     /**
      * Returns the current header iterator position measured in bytes from the
-     * beginning of the packet. The returned value is in the range [0, getChunkLength()].
+     * beginning of the packet. The returned value is in the range [0, getPacketLength()].
      */
     int64_t getHeaderPosition() const { return headerIterator.getPosition(); }
 
     /**
      * Changes the current header iterator position measured in bytes from the
-     * beginning of the packet. The value must be in the range [0, getChunkLength()].
+     * beginning of the packet. The value must be in the range [0, getPacketLength()].
      */
     void setHeaderPosition(int64_t offset) { data->seekIterator(headerIterator, offset); }
 
@@ -131,13 +144,13 @@ class Packet : public cPacket
     //@{
     /**
      * Returns the current trailer iterator position measured in bytes from the
-     * end of the packet. The returned value is in the range [0, getChunkLength()].
+     * end of the packet. The returned value is in the range [0, getPacketLength()].
      */
     int64_t getTrailerPosition() const { return trailerIterator.getPosition(); }
 
     /**
      * Changes the current trailer iterator position measured in bytes from the
-     * end of the packet. The value must be in the range [0, getChunkLength()].
+     * end of the packet. The value must be in the range [0, getPacketLength()].
      */
     void setTrailerPosition(int64_t offset) { data->seekIterator(trailerIterator, offset); }
 
@@ -180,15 +193,15 @@ class Packet : public cPacket
     //@{
     /**
      * Returns the current data position measured in bytes from the beginning
-     * of the packet. The returned value is in the range [0, getChunkLength()].
+     * of the packet. The returned value is in the range [0, getPacketLength()].
      */
     int64_t getDataPosition() const { return headerIterator.getPosition(); }
 
     /**
      * Returns the current data size measured in bytes. The returned value is
-     * in the range [0, getChunkLength()].
+     * in the range [0, getPacketLength()].
      */
-    int64_t getDataLength() const { return getByteLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
+    int64_t getDataLength() const { return getPacketLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekData(int64_t length = -1) const;
 
@@ -243,8 +256,6 @@ class Packet : public cPacket
     void removeFromBeginning(int64_t length);
     void removeFromEnd(int64_t length);
     //@}
-
-    virtual int64_t getBitLength() const override { return data->getChunkLength() << 3; }        //TODO REVIEW: returns total length, or returns length between header/trailer iterators only? in second case: need a getTotalLength() function
 
     virtual std::string str() const override { return data->str(); }
 };

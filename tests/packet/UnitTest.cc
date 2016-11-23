@@ -399,7 +399,7 @@ static void testClone()
     packet1.append(lengthChunk1);
     packet1.makeImmutable();
     auto packet2 = packet1.dup();
-    assert(packet2->getByteLength() == 10);
+    assert(packet2->getPacketLength() == 10);
     assert(lengthChunk1.use_count() == 3);
     delete packet2;
     // 2. copy of mutable packet copies data
@@ -408,7 +408,7 @@ static void testClone()
     packet3.append(lengthChunk2);
     auto packet4 = packet3.dup();
     lengthChunk2->setLength(20);
-    assert(packet4->getByteLength() == 10);
+    assert(packet4->getPacketLength() == 10);
     assert(lengthChunk2.use_count() == 2);
     delete packet4;
     // 3. copy of immutable chunk in mutable packet shares data
@@ -417,7 +417,7 @@ static void testClone()
     packet5.append(lengthChunk3);
     lengthChunk3->makeImmutable();
     auto packet6 = packet5.dup();
-    assert(packet6->getByteLength() == 10);
+    assert(packet6->getPacketLength() == 10);
     assert(lengthChunk3.use_count() == 3);
     delete packet6;
 }

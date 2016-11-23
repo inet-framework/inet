@@ -156,7 +156,7 @@ const std::vector<Packet *> NewMedium::receivePackets()
 
 Packet *NewMedium::serializePacket(Packet *packet)
 {
-    const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getByteLength());
+    const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getPacketLength());
     auto serializedPacket = new Packet();
     serializedPacket->append(bytesChunk);
     serializedPacket->makeImmutable();
@@ -201,8 +201,8 @@ void NewSender::sendTcp(Packet *packet)
     if (tcpSegment == nullptr)
         tcpSegment = createTcpSegment();
     int64_t tcpSegmentSizeLimit = 35;
-    if (tcpSegment->getByteLength() + packet->getByteLength() >= tcpSegmentSizeLimit) {
-        int64_t length = tcpSegmentSizeLimit - tcpSegment->getByteLength();
+    if (tcpSegment->getPacketLength() + packet->getPacketLength() >= tcpSegmentSizeLimit) {
+        int64_t length = tcpSegmentSizeLimit - tcpSegment->getPacketLength();
         tcpSegment->append(packet->peekAt(0, length));
         const auto& tcpHeader = tcpSegment->peekHeader<TcpHeader>();
         auto bitError = medium.getSerialize() ? BIT_ERROR_CRC : BIT_ERROR_NO;
@@ -213,14 +213,14 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case BIT_ERROR_CRC: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpSegment->peekAt<BytesChunk>(0, tcpSegment->getByteLength())));
+                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpSegment->peekAt<BytesChunk>(0, tcpSegment->getPacketLength())));
                 break;
             }
             default:
                 throw cRuntimeError("Unknown bit error value");
         }
         sendIp(tcpSegment);
-        int64_t remainingLength = packet->getByteLength() - length;
+        int64_t remainingLength = packet->getPacketLength() - length;
         if (remainingLength == 0)
             tcpSegment = nullptr;
         else {
@@ -292,7 +292,7 @@ void NewReceiver::receiveTcp(Packet *packet)
         case BIT_ERROR_NO:
             break;
         case BIT_ERROR_CRC: {
-            int64_t length = packet->getByteLength() - tcpHeaderPosition - packet->getTrailerPosition();
+            int64_t length = packet->getPacketLength() - tcpHeaderPosition - packet->getTrailerPosition();
             if (crc != computeTcpCrc(BytesChunk(), packet->peekHeaderAt<BytesChunk>(tcpHeaderPosition, length))) {
                 delete packet;
                 return;
