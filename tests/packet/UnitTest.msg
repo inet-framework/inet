@@ -30,7 +30,7 @@ class CompoundHeader extends SequenceChunk
 class TlvHeader extends Chunk
 {
     int8_t type = -1;
-    int64_t byteLength = -1;
+    int64_t chunkLength = -1;
 }
 
 class TlvHeader1 extends TlvHeader
@@ -39,7 +39,7 @@ class TlvHeader1 extends TlvHeader
     bool boolValue = false;
 
     type = 1;
-    byteLength = 3;
+    chunkLength = 3;
 }
 
 class TlvHeader2 extends TlvHeader
@@ -48,5 +48,5 @@ class TlvHeader2 extends TlvHeader
     int16_t int16Value = -1;
 
     type = 2;
-    byteLength = 4;
+    chunkLength = 4;
 }

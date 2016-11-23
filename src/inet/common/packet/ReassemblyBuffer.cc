@@ -108,7 +108,7 @@ void NewReassemblyBuffer::setData(int64_t byteOffset, const std::shared_ptr<Chun
         mergeRegions(regions[regions.size() - 2], regions[regions.size() - 1]);
         eraseEmptyRegions(regions.end() - 2, regions.end());
     }
-    else if (byteOffset + chunk->getByteLength() <= regions.front().getStartOffset()) {
+    else if (byteOffset + chunk->getChunkLength() <= regions.front().getStartOffset()) {
         regions.insert(regions.begin(), newRegion);
         mergeRegions(regions[0], regions[1]);
         eraseEmptyRegions(regions.begin(), regions.begin() + 2);

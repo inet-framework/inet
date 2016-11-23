@@ -49,11 +49,11 @@ std::vector<std::shared_ptr<Chunk> > SequenceChunk::dupChunks() const
     return copies;
 }
 
-int64_t SequenceChunk::getByteLength() const
+int64_t SequenceChunk::getChunkLength() const
 {
     int64_t byteLength = 0;
     for (auto& chunk : chunks)
-        byteLength += chunk->getByteLength();
+        byteLength += chunk->getChunkLength();
     return byteLength;
 }
 
@@ -68,7 +68,7 @@ void SequenceChunk::seekIterator(Iterator& iterator, int64_t byteOffset) const
         int increment = getIndexIncrement(iterator);
         int64_t p = 0;
         for (int i = startIndex; i != endIndex + increment; i += increment) {
-            p += chunks[i]->getByteLength();
+            p += chunks[i]->getChunkLength();
             if (p == byteOffset) {
                 iterator.setIndex(i + 1);
                 return;
@@ -81,7 +81,7 @@ void SequenceChunk::seekIterator(Iterator& iterator, int64_t byteOffset) const
 void SequenceChunk::moveIterator(Iterator& iterator, int64_t byteLength) const
 {
     iterator.setPosition(iterator.getPosition() + byteLength);
-    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getByteLength() == byteLength)
+    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size() && getElementChunk(iterator)->getChunkLength() == byteLength)
         iterator.setIndex(iterator.getIndex() + 1);
     else
         iterator.setIndex(-1);
@@ -91,7 +91,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator,
 {
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
         const auto& chunk = getElementChunk(iterator);
-        if (byteLength == -1 || chunk->getByteLength() == byteLength)
+        if (byteLength == -1 || chunk->getChunkLength() == byteLength)
             return chunk;
     }
     return nullptr;
@@ -105,9 +105,9 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& itera
     int increment = getIndexIncrement(iterator);
     for (int i = startIndex; i != endIndex + increment; i += increment) {
         auto& chunk = chunks[i];
-        if (iterator.getPosition() == position && (byteLength == -1 || byteLength == chunk->getByteLength()))
+        if (iterator.getPosition() == position && (byteLength == -1 || byteLength == chunk->getChunkLength()))
             return chunk;
-        position += chunk->getByteLength();
+        position += chunk->getChunkLength();
     }
     return nullptr;
 }
@@ -121,7 +121,7 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
             if (mergedChunk->insertToEnd(chunk)) {
                 if (mergedChunk->getChunkType() == TYPE_SLICE) {
                     auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
-                    if (sliceChunk->getByteOffset() == 0 && sliceChunk->getByteLength() == sliceChunk->getChunk()->getByteLength()) {
+                    if (sliceChunk->getByteOffset() == 0 && sliceChunk->getChunkLength() == sliceChunk->getChunk()->getChunkLength()) {
                         chunks.back() = sliceChunk->getChunk();
                         return true;
                     }
@@ -136,8 +136,8 @@ bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (chunk->getByteLength() <= 0)
-        throw cRuntimeError("Invalid chunk length: %li", chunk->getByteLength());
+    if (chunk->getChunkLength() <= 0)
+        throw cRuntimeError("Invalid chunk length: %li", chunk->getChunkLength());
     chunks.insert(chunks.begin(), chunk);
     return true;
 }
@@ -146,14 +146,14 @@ void SequenceChunk::insertToBeginning(const std::shared_ptr<SliceChunk>& sliceCh
 {
     if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
-        int64_t byteOffset = sequenceChunk->getByteLength();
+        int64_t byteOffset = sequenceChunk->getChunkLength();
         int64_t sliceChunkBegin = sliceChunk->getByteOffset();
-        int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getByteLength();
+        int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getChunkLength();
         for (auto it = sequenceChunk->chunks.rbegin(); it != sequenceChunk->chunks.rend(); it++) {
             auto& elementChunk = *it;
-            byteOffset -= elementChunk->getByteLength();
+            byteOffset -= elementChunk->getChunkLength();
             int64_t chunkBegin = byteOffset;
-            int64_t chunkEnd = byteOffset + elementChunk->getByteLength();
+            int64_t chunkEnd = byteOffset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 insertToBeginning(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
@@ -188,8 +188,8 @@ bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (chunk->getByteLength() <= 0)
-        throw cRuntimeError("Invalid chunk length: %li", chunk->getByteLength());
+    if (chunk->getChunkLength() <= 0)
+        throw cRuntimeError("Invalid chunk length: %li", chunk->getChunkLength());
     if (!mergeToEnd(chunk))
         chunks.push_back(chunk);
     return true;
@@ -201,17 +201,17 @@ void SequenceChunk::insertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         int64_t byteOffset = 0;
         int64_t sliceChunkBegin = sliceChunk->getByteOffset();
-        int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getByteLength();
+        int64_t sliceChunkEnd = sliceChunk->getByteOffset() + sliceChunk->getChunkLength();
         for (auto& elementChunk : sequenceChunk->chunks) {
             int64_t chunkBegin = byteOffset;
-            int64_t chunkEnd = byteOffset + elementChunk->getByteLength();
+            int64_t chunkEnd = byteOffset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 insertToEnd(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 insertToEnd(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
                 insertToEnd(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
-            byteOffset += elementChunk->getByteLength();
+            byteOffset += elementChunk->getChunkLength();
         }
     }
     else
@@ -242,7 +242,7 @@ bool SequenceChunk::removeFromBeginning(int64_t byteLength)
     auto it = chunks.begin();
     while (it != chunks.end()) {
         auto chunk = *it;
-        int64_t chunkByteLength = chunk->getByteLength();
+        int64_t chunkByteLength = chunk->getChunkLength();
         if (chunkByteLength <= byteLength) {
             it++;
             byteLength -= chunkByteLength;
@@ -264,7 +264,7 @@ bool SequenceChunk::removeFromEnd(int64_t byteLength)
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
         auto chunk = *it;
-        int64_t chunkByteLength = chunk->getByteLength();
+        int64_t chunkByteLength = chunk->getChunkLength();
         if (chunkByteLength <= byteLength) {
             it++;
             byteLength -= chunkByteLength;
@@ -282,7 +282,7 @@ bool SequenceChunk::removeFromEnd(int64_t byteLength)
 
 std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t byteLength) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else {
         if (auto chunk = peekWithIterator(iterator, byteLength))

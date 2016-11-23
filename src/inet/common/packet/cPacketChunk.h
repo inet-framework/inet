@@ -33,7 +33,7 @@ class cPacketChunk : public Chunk
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<cPacketChunk>(*this); }
 
-    virtual int64_t getByteLength() const override { return packet->getByteLength(); }
+    virtual int64_t getChunkLength() const override { return packet->getByteLength(); }
 
     virtual cPacket *getPacket() const { return packet; }       /// do not change, do not delete returned packet, the Chunk is the owner !!!!
 

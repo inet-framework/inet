@@ -86,7 +86,7 @@ class SequenceChunk : public Chunk
 
     /** @name Querying data related functions */
     //@{
-    virtual int64_t getByteLength() const override;
+    virtual int64_t getChunkLength() const override;
 
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t byteLength) const override;
     //@}

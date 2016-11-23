@@ -40,7 +40,7 @@ class ApplicationHeader extends Chunk
 {
     @str;
     string serializerClassName = "inet::ApplicationHeaderSerializer";
-    int64_t byteLength = 10;
+    int64_t chunkLength = 10;
     int16_t someData = -1;
 }
 
@@ -48,7 +48,7 @@ class TcpHeader extends Chunk
 {
     @str;
     string serializerClassName = "inet::TcpHeaderSerializer";
-    int64_t byteLength = -1;
+    int64_t chunkLength = -1;
     int16_t lengthField = -1;
     int16_t srcPort = -1;
     int16_t destPort = -1;
@@ -60,7 +60,7 @@ class IpHeader extends Chunk
 {
     @str;
     string serializerClassName = "inet::IpHeaderSerializer";
-    int64_t byteLength = 20;
+    int64_t chunkLength = 20;
     int16_t protocol @enum(Protocol) = -1;
 }
 
@@ -68,6 +68,6 @@ class EthernetHeader extends Chunk
 {
     @str;
     string serializerClassName = "inet::EthernetHeaderSerializer";
-    int64_t byteLength = 14;
+    int64_t chunkLength = 14;
     int16_t protocol @enum(Protocol) = -1;
 }

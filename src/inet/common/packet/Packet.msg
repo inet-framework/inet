@@ -31,7 +31,7 @@ class Chunk extends cObject
     bool mutable @getter("isMutable");
     bool complete @getter("isComplete");
     bool correct @getter("isCorrect");
-    int64_t byteLength;
+    int64_t chunkLength;
 }
 
 class cPacketChunk extends Chunk

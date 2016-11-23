@@ -32,7 +32,7 @@ class NewReassemblyBuffer : public cObject
         Region(int64_t byteOffset, const std::shared_ptr<Chunk>& data);
 
         int64_t getStartOffset() const { return byteOffset; }
-        int64_t getEndOffset() const { return byteOffset + data->getByteLength(); }
+        int64_t getEndOffset() const { return byteOffset + data->getChunkLength(); }
 
         static bool compareStartOffset(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
         static bool compareEndOffset(const Region& a, const Region& b) { return a.getEndOffset() < b.getEndOffset(); }

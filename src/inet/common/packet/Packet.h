@@ -82,13 +82,13 @@ class Packet : public cPacket
     //@{
     /**
      * Returns the current header iterator position measured in bytes from the
-     * beginning of the packet. The returned value is in the range [0, getByteLength()].
+     * beginning of the packet. The returned value is in the range [0, getChunkLength()].
      */
     int64_t getHeaderPosition() const { return headerIterator.getPosition(); }
 
     /**
      * Changes the current header iterator position measured in bytes from the
-     * beginning of the packet. The value must be in the range [0, getByteLength()].
+     * beginning of the packet. The value must be in the range [0, getChunkLength()].
      */
     void setHeaderPosition(int64_t offset) { data->seekIterator(headerIterator, offset); }
 
@@ -122,7 +122,7 @@ class Packet : public cPacket
     std::shared_ptr<T> popHeader(int64_t byteLength = -1) {
         const auto& chunk = peekHeader<T>(byteLength);
         if (chunk != nullptr)
-            data->moveIterator(headerIterator, chunk->getByteLength());
+            data->moveIterator(headerIterator, chunk->getChunkLength());
         return chunk;
     }
     //@}
@@ -131,13 +131,13 @@ class Packet : public cPacket
     //@{
     /**
      * Returns the current trailer iterator position measured in bytes from the
-     * end of the packet. The returned value is in the range [0, getByteLength()].
+     * end of the packet. The returned value is in the range [0, getChunkLength()].
      */
     int64_t getTrailerPosition() const { return trailerIterator.getPosition(); }
 
     /**
      * Changes the current trailer iterator position measured in bytes from the
-     * end of the packet. The value must be in the range [0, getByteLength()].
+     * end of the packet. The value must be in the range [0, getChunkLength()].
      */
     void setTrailerPosition(int64_t offset) { data->seekIterator(trailerIterator, offset); }
 
@@ -171,7 +171,7 @@ class Packet : public cPacket
     std::shared_ptr<T> popTrailer(int64_t byteLength = -1) {
         const auto& chunk = peekTrailer<T>(byteLength);
         if (chunk != nullptr)
-            data->moveIterator(trailerIterator, chunk->getByteLength());
+            data->moveIterator(trailerIterator, chunk->getChunkLength());
         return chunk;
     }
     //@}
@@ -180,13 +180,13 @@ class Packet : public cPacket
     //@{
     /**
      * Returns the current data position measured in bytes from the beginning
-     * of the packet. The returned value is in the range [0, getByteLength()].
+     * of the packet. The returned value is in the range [0, getChunkLength()].
      */
     int64_t getDataPosition() const { return headerIterator.getPosition(); }
 
     /**
      * Returns the current data size measured in bytes. The returned value is
-     * in the range [0, getByteLength()].
+     * in the range [0, getChunkLength()].
      */
     int64_t getDataLength() const { return getByteLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
@@ -244,7 +244,7 @@ class Packet : public cPacket
     void removeFromEnd(int64_t byteLength);
     //@}
 
-    virtual int64_t getBitLength() const override { return data->getByteLength() << 3; }        //TODO REVIEW: returns total length, or returns length between header/trailer iterators only? in second case: need a getTotalLength() function
+    virtual int64_t getBitLength() const override { return data->getChunkLength() << 3; }        //TODO REVIEW: returns total length, or returns length between header/trailer iterators only? in second case: need a getTotalLength() function
 
     virtual std::string str() const override { return data->str(); }
 };

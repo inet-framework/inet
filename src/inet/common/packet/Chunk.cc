@@ -116,7 +116,7 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
 
 std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t byteLength) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
         return const_cast<Chunk *>(this)->shared_from_this();
     else
         return peek<SliceChunk>(iterator, byteLength);
@@ -125,7 +125,7 @@ std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t byteLength)
 std::string Chunk::str() const
 {
     std::ostringstream os;
-    os << "Chunk, byteLength = " << getByteLength();
+    os << "Chunk, byteLength = " << getChunkLength();
     return os.str();
 }
 

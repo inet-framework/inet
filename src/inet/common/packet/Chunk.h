@@ -285,7 +285,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /**
      * Returns the length of data measured in bytes represented by this chunk.
      */
-    virtual int64_t getByteLength() const = 0; // TODO: rename to getChunkLength()?
+    virtual int64_t getChunkLength() const = 0;
 
     /**
      * Returns the designated part of the data represented by this chunk in its
@@ -315,7 +315,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         // assertImmutable();
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), byteLength);
         chunk->makeImmutable();
-        if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getByteLength())
+        if ((chunk->isComplete() && byteLength == -1) || byteLength == chunk->getChunkLength())
             return std::dynamic_pointer_cast<T>(chunk);
         else
             return nullptr;

@@ -51,7 +51,7 @@ class SliceChunk : public Chunk
     int64_t getByteOffset() const { return byteOffset; }
     void setByteOffset(int64_t byteOffset);
 
-    virtual int64_t getByteLength() const override { return byteLength; }
+    virtual int64_t getChunkLength() const override { return byteLength; }
     void setByteLength(int64_t byteLength);
 
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;

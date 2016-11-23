@@ -43,7 +43,7 @@ class LengthChunk : public Chunk
 
     virtual Type getChunkType() const override { return TYPE_LENGTH; }
 
-    virtual int64_t getByteLength() const override { return length; }
+    virtual int64_t getChunkLength() const override { return length; }
     virtual void setByteLength(int64_t length);
 
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;

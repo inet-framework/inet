@@ -54,7 +54,7 @@ class Buffer : public cObject
 
     /** @name Data querying related functions */
     //@{
-    int64_t getByteLength() const { return data->getByteLength() - iterator.getPosition(); }
+    int64_t getLength() const { return data->getChunkLength() - iterator.getPosition(); }
 
     std::shared_ptr<Chunk> peek(int64_t byteLength = -1) const;
 
@@ -74,7 +74,7 @@ class Buffer : public cObject
     std::shared_ptr<T> pop(int64_t byteLength = -1) {
         const auto& chunk = peek<T>(byteLength);
         if (chunk != nullptr)
-            remove(chunk->getByteLength());
+            remove(chunk->getChunkLength());
         return chunk;
     }
     //@}

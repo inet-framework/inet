@@ -70,7 +70,7 @@ std::shared_ptr<Chunk> Packet::popHeader(int64_t byteLength)
 {
     const auto& chunk = peekHeader(byteLength);
     if (chunk != nullptr)
-        data->moveIterator(headerIterator, chunk->getByteLength());
+        data->moveIterator(headerIterator, chunk->getChunkLength());
     return chunk;
 }
 
@@ -88,7 +88,7 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t byteLength)
 {
     const auto& chunk = peekTrailer(byteLength);
     if (chunk != nullptr)
-        data->moveIterator(trailerIterator, -chunk->getByteLength());
+        data->moveIterator(trailerIterator, -chunk->getChunkLength());
     return chunk;
 }
 

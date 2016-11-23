@@ -45,7 +45,7 @@ class UDPHeader extends Chunk
     @customize(true);
     unsigned short srcPort;
     unsigned short destPort;
-    int64_t byteLength = UDP_HEADER_BYTES;
+    int64_t chunkLength = UDP_HEADER_BYTES;
     int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
     uint16_t crc = 0;
     short bitError @enum(BitError) = -1;

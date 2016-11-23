@@ -45,7 +45,7 @@ std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream
 void LengthChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& lengthChunk = std::static_pointer_cast<const LengthChunk>(chunk);
-    stream.writeByteRepeatedly('?', lengthChunk->getByteLength());
+    stream.writeByteRepeatedly('?', lengthChunk->getChunkLength());
 }
 
 std::shared_ptr<Chunk> LengthChunkSerializer::deserialize(ByteInputStream& stream) const
@@ -62,7 +62,7 @@ void SliceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared
     const auto& sliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, sliceChunk->getChunk());
-    stream.writeBytes(outputStream.getBytes(), sliceChunk->getByteOffset(), sliceChunk->getByteLength());
+    stream.writeBytes(outputStream.getBytes(), sliceChunk->getByteOffset(), sliceChunk->getChunkLength());
 }
 
 std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream) const

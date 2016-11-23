@@ -46,7 +46,7 @@ class BytesChunk : public Chunk
     virtual const std::vector<uint8_t>& getBytes() const { return bytes; }
     virtual void setBytes(const std::vector<uint8_t>& bytes);
 
-    virtual int64_t getByteLength() const override { return bytes.size(); }
+    virtual int64_t getChunkLength() const override { return bytes.size(); }
 
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;

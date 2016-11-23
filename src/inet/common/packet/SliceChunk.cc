@@ -37,7 +37,7 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, 
     Chunk(),
     chunk(chunk),
     byteOffset(byteOffset),
-    byteLength(byteLength == -1 ? chunk->getByteLength() - byteOffset : byteLength)
+    byteLength(byteLength == -1 ? chunk->getChunkLength() - byteOffset : byteLength)
 {
     chunk->assertImmutable();
     assert(this->byteOffset >= 0);
@@ -47,7 +47,7 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, 
 std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
 {
     int64_t sliceChunkByteOffset = byteOffset == -1 ? 0 : byteOffset;
-    int64_t sliceChunkByteLength = byteLength == -1 ? chunk->getByteLength() - sliceChunkByteOffset : byteLength;
+    int64_t sliceChunkByteLength = byteLength == -1 ? chunk->getChunkLength() - sliceChunkByteOffset : byteLength;
     assert(sliceChunkByteOffset >= 0);
     assert(sliceChunkByteLength >= 0);
     chunk->assertImmutable();
@@ -124,7 +124,7 @@ bool SliceChunk::removeFromEnd(int64_t byteLength)
 
 std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t byteLength) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
         return const_cast<SliceChunk *>(this)->shared_from_this();
     else {
         Iterator sliceIterator(iterator);

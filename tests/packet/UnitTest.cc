@@ -61,7 +61,7 @@ void TlvHeader1Serializer::serialize(ByteOutputStream& stream, const std::shared
 {
     const auto& tlvHeader = std::static_pointer_cast<const TlvHeader1>(chunk);
     stream.writeUint8(tlvHeader->getType());
-    stream.writeUint8(tlvHeader->getByteLength());
+    stream.writeUint8(tlvHeader->getChunkLength());
     stream.writeUint8(tlvHeader->getBoolValue());
 }
 
@@ -69,7 +69,7 @@ std::shared_ptr<Chunk> TlvHeader1Serializer::deserialize(ByteInputStream& stream
 {
     auto tlvHeader = std::make_shared<TlvHeader1>();
     assert(tlvHeader->getType() == stream.readUint8());
-    assert(tlvHeader->getByteLength() == stream.readUint8());
+    assert(tlvHeader->getChunkLength() == stream.readUint8());
     tlvHeader->setBoolValue(stream.readUint8());
     return tlvHeader;
 }
@@ -78,7 +78,7 @@ void TlvHeader2Serializer::serialize(ByteOutputStream& stream, const std::shared
 {
     const auto& tlvHeader = std::static_pointer_cast<const TlvHeader2>(chunk);
     stream.writeUint8(tlvHeader->getType());
-    stream.writeUint8(tlvHeader->getByteLength());
+    stream.writeUint8(tlvHeader->getChunkLength());
     stream.writeUint16(tlvHeader->getInt16Value());
 }
 
@@ -86,7 +86,7 @@ std::shared_ptr<Chunk> TlvHeader2Serializer::deserialize(ByteInputStream& stream
 {
     auto tlvHeader = std::make_shared<TlvHeader2>();
     assert(tlvHeader->getType() == stream.readUint8());
-    assert(tlvHeader->getByteLength() == stream.readUint8());
+    assert(tlvHeader->getChunkLength() == stream.readUint8());
     tlvHeader->setInt16Value(stream.readUint16());
     return tlvHeader;
 }
@@ -134,7 +134,7 @@ static void testHeader()
     const auto& lengthChunk2 = packet2.popHeader<LengthChunk>();
     const auto& bytesChunk1 = packet2.popHeader<BytesChunk>();
     assert(lengthChunk2 != nullptr);
-    assert(lengthChunk2->getByteLength() == 10);
+    assert(lengthChunk2->getChunkLength() == 10);
     assert(bytesChunk1 != nullptr);
     assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}).begin()));
 }
@@ -155,7 +155,7 @@ static void testTrailer()
     assert(bytesChunk1 != nullptr);
     assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}).begin()));
     assert(lengthChunk2 != nullptr);
-    assert(lengthChunk2->getByteLength() == 10);
+    assert(lengthChunk2->getChunkLength() == 10);
 }
 
 static void testComplete()
@@ -181,7 +181,7 @@ static void testIncomplete()
     // 2. packet provides incomplete header if requested
     Packet packet2;
     auto tcpHeader1 = std::make_shared<TcpHeader>();
-    tcpHeader1->setByteLength(16);
+    tcpHeader1->setChunkLength(16);
     tcpHeader1->setLengthField(16);
     tcpHeader1->setBitError(BIT_ERROR_CRC);
     tcpHeader1->setSrcPort(1000);
@@ -189,7 +189,7 @@ static void testIncomplete()
     packet2.makeImmutable();
     const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(8);
     assert(tcpHeader2->isIncomplete());
-    assert(tcpHeader2->getByteLength() == 8);
+    assert(tcpHeader2->getChunkLength() == 8);
     assert(tcpHeader2->getBitError() == BIT_ERROR_CRC);
     assert(tcpHeader2->getSrcPort() == 1000);
 }
@@ -209,7 +209,7 @@ static void testMerge()
     packet2.makeImmutable();
     const auto& applicationHeader2 = packet2.peekHeader<ApplicationHeader>();
     assert(applicationHeader2->isComplete());
-    assert(applicationHeader2->getByteLength() == 10);
+    assert(applicationHeader2->getChunkLength() == 10);
 }
 
 static void testNesting()
@@ -302,7 +302,7 @@ static void testPeekChunk()
     lengthChunk1->makeImmutable();
     const auto& lengthChunk2 = std::dynamic_pointer_cast<LengthChunk>(lengthChunk1->peek(0, 5));
     assert(lengthChunk2 != nullptr);
-    assert(lengthChunk2->getByteLength() == 5);
+    assert(lengthChunk2->getChunkLength() == 5);
     // 2. BytesChunk always returns BytesChunk
     auto bytesChunk1 = std::make_shared<BytesChunk>();
     bytesChunk1->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
@@ -445,7 +445,7 @@ static void testReassembly()
     buffer3.setData(5, applicationHeader1->peek(5, 5)->dupShared());
     const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(buffer2.getData());
     assert(buffer3.isComplete());
-    //assert(applicationHeader2 != nullptr);
+    // TODO: assert(applicationHeader2 != nullptr);
     // 4. out of order consecutive chunks
     NewReassemblyBuffer buffer4;
     buffer4.setData(0, std::make_shared<LengthChunk>(10));

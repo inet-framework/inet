@@ -97,7 +97,7 @@ bool BytesChunk::removeFromEnd(int64_t byteLength)
 
 std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t byteLength) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getByteLength())
+    if (iterator.getPosition() == 0 && byteLength == getChunkLength())
         return const_cast<BytesChunk *>(this)->shared_from_this();
     else
         return std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition(), byteLength == -1 ? bytes.end() : bytes.begin() + iterator.getPosition() + byteLength));
@@ -106,7 +106,7 @@ std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t byteLe
 std::string BytesChunk::str() const
 {
     std::ostringstream os;
-    os << "BytesChunk, length = " << getByteLength() << ", bytes = {";
+    os << "BytesChunk, length = " << getChunkLength() << ", bytes = {";
     bool first = true;
     for (auto byte : bytes) {
         if (!first)
