@@ -251,7 +251,7 @@ void NewSender::sendPackets()
     packet2->append(applicationHeader);
     sendTcp(packet2);
 
-    auto byteSizeChunk = std::make_shared<ByteLengthChunk>();
+    auto byteSizeChunk = std::make_shared<LengthChunk>();
     byteSizeChunk->setByteLength(10);
     byteSizeChunk->makeImmutable();
     EV_DEBUG << "Sending application data: " << byteSizeChunk << std::endl;
@@ -270,8 +270,8 @@ void NewReceiver::receiveApplication(Packet *packet)
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteArrayChunk>(10) << std::endl;
     if (applicationData.getPoppedByteLength() == 10 && applicationData.has<ApplicationHeader>())
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ApplicationHeader>() << std::endl;
-    if (applicationData.getPoppedByteLength() == 20 && applicationData.has<ByteLengthChunk>(10))
-        EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteLengthChunk>(10) << std::endl;
+    if (applicationData.getPoppedByteLength() == 20 && applicationData.has<LengthChunk>(10))
+        EV_DEBUG << "Receiving application data: " << applicationData.pop<LengthChunk>(10) << std::endl;
     delete packet;
 }
 

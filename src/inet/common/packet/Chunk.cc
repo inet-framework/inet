@@ -93,7 +93,7 @@ void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& ch
         delete serializer;
         auto byteLength = stream.getPosition() - streamPosition;
         chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
-        ChunkSerializer::totalSerializedByteLength += byteLength;
+        ChunkSerializer::totalSerializedLength += byteLength;
     }
 }
 
@@ -110,7 +110,7 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
         chunk->makeIncomplete();
     auto byteLength = stream.getPosition() - streamPosition;
     chunk->serializedBytes = stream.copyBytes(streamPosition, byteLength);
-    ChunkSerializer::totalDeserializedByteLength += byteLength;
+    ChunkSerializer::totalDeserializedLength += byteLength;
     return chunk;
 }
 

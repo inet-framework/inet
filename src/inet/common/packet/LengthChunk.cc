@@ -13,97 +13,97 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "inet/common/packet/ByteLengthChunk.h"
+#include "inet/common/packet/LengthChunk.h"
 
 namespace inet {
 
-ByteLengthChunk::ByteLengthChunk() :
+LengthChunk::LengthChunk() :
     Chunk(),
-    byteLength(-1)
+    length(-1)
 {
 }
 
-ByteLengthChunk::ByteLengthChunk(const ByteLengthChunk& other) :
+LengthChunk::LengthChunk(const LengthChunk& other) :
     Chunk(other),
-    byteLength(other.byteLength)
+    length(other.length)
 {
 }
 
-ByteLengthChunk::ByteLengthChunk(int64_t byteLength) :
+LengthChunk::LengthChunk(int64_t length) :
     Chunk(),
-    byteLength(byteLength)
+    length(length)
 {
-    assert(byteLength >= 0);
+    assert(length >= 0);
 }
 
-std::shared_ptr<Chunk> ByteLengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t byteLength)
+std::shared_ptr<Chunk> LengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t byteOffset, int64_t length)
 {
-    return std::make_shared<ByteLengthChunk>(byteLength == -1 ? chunk->getByteLength() : byteLength);
+    return std::make_shared<LengthChunk>(length == -1 ? chunk->getByteLength() : length);
 }
 
-void ByteLengthChunk::setByteLength(int64_t byteLength)
+void LengthChunk::setByteLength(int64_t length)
 {
     assertMutable();
-    assert(byteLength >= 0);
-    this->byteLength = byteLength;
+    assert(length >= 0);
+    this->length = length;
 }
 
-bool ByteLengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+bool LengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (chunk->getChunkType() == TYPE_BYTELENGTH) {
-        const auto& byteLengthChunk = std::static_pointer_cast<ByteLengthChunk>(chunk);
-        byteLength += byteLengthChunk->byteLength;
+    if (chunk->getChunkType() == TYPE_LENGTH) {
+        const auto& lengthChunk = std::static_pointer_cast<LengthChunk>(chunk);
+        length += lengthChunk->length;
         return true;
     }
     else
         return false;
 }
 
-bool ByteLengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+bool LengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
-    if (chunk->getChunkType() == TYPE_BYTELENGTH) {
-        const auto& byteLengthChunk = std::static_pointer_cast<ByteLengthChunk>(chunk);
-        byteLength += byteLengthChunk->byteLength;
+    if (chunk->getChunkType() == TYPE_LENGTH) {
+        const auto& lengthChunk = std::static_pointer_cast<LengthChunk>(chunk);
+        length += lengthChunk->length;
         return true;
     }
     else
         return false;
 }
 
-bool ByteLengthChunk::removeFromBeginning(int64_t byteLength)
+bool LengthChunk::removeFromBeginning(int64_t length)
 {
-    assert(byteLength <= this->byteLength);
+    assert(length <= this->length);
     assertMutable();
     handleChange();
-    this->byteLength -= byteLength;
+    this->length -= length;
     return true;
 }
 
-bool ByteLengthChunk::removeFromEnd(int64_t byteLength)
+bool LengthChunk::removeFromEnd(int64_t length)
 {
-    assert(byteLength <= this->byteLength);
+    assert(length <= this->length);
     assertMutable();
     handleChange();
-    this->byteLength -= byteLength;
+    this->length -= length;
     return true;
 }
 
-std::shared_ptr<Chunk> ByteLengthChunk::peek(const Iterator& iterator, int64_t byteLength) const
+std::shared_ptr<Chunk> LengthChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && byteLength == getByteLength())
-        return const_cast<ByteLengthChunk *>(this)->shared_from_this();
+    if (iterator.getPosition() == 0 && length == getByteLength())
+        return const_cast<LengthChunk *>(this)->shared_from_this();
     else
-        return std::make_shared<ByteLengthChunk>(byteLength == -1 ? getByteLength() - iterator.getPosition() : byteLength);
+        return std::make_shared<LengthChunk>(length == -1 ? getByteLength() - iterator.getPosition() : length);
 }
 
-std::string ByteLengthChunk::str() const
+std::string LengthChunk::str() const
 {
     std::ostringstream os;
-    os << "ByteLengthChunk, byteLength = " << byteLength;
+    os << "LengthChunk, length = " << length;
     return os.str();
 }
 
