@@ -28,10 +28,24 @@ SequenceChunk::SequenceChunk(const SequenceChunk& other) :
 {
 }
 
-SequenceChunk::SequenceChunk(const std::vector<std::shared_ptr<Chunk>>& chunks) :
+SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
     Chunk(),
     chunks(chunks)
 {
+}
+
+std::deque<std::shared_ptr<Chunk>> SequenceChunk::dupChunks() const
+{
+    std::deque<std::shared_ptr<Chunk>> copies;
+    for (auto& chunk : chunks)
+        copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
+    return copies;
+}
+
+void SequenceChunk::setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks)
+{
+    assertMutable();
+    this->chunks = chunks;
 }
 
 void SequenceChunk::makeImmutable()
@@ -39,14 +53,6 @@ void SequenceChunk::makeImmutable()
     Chunk::makeImmutable();
     for (auto& chunk : chunks)
         chunk->makeImmutable();
-}
-
-std::vector<std::shared_ptr<Chunk> > SequenceChunk::dupChunks() const
-{
-    std::vector<std::shared_ptr<Chunk> > copies;
-    for (auto& chunk : chunks)
-        copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
-    return copies;
 }
 
 int64_t SequenceChunk::getChunkLength() const
@@ -157,7 +163,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
     if (chunk->getChunkLength() <= 0)
         throw cRuntimeError("Invalid chunk length: %li", chunk->getChunkLength());
     if (!mergeToBeginning(chunk))
-        chunks.insert(chunks.begin(), chunk);
+        chunks.push_front(chunk);
 }
 
 void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)

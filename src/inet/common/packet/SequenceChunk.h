@@ -16,6 +16,7 @@
 #ifndef __INET_SEQUENCECHUNK_H_
 #define __INET_SEQUENCECHUNK_H_
 
+#include <deque>
 #include "inet/common/packet/SliceChunk.h"
 
 namespace inet {
@@ -31,7 +32,7 @@ class SequenceChunk : public Chunk
     /**
      * The list of chunks that make up this chunk.
      */
-    std::vector<std::shared_ptr<Chunk>> chunks;
+    std::deque<std::shared_ptr<Chunk>> chunks;
 
   protected:
     virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
@@ -55,22 +56,22 @@ class SequenceChunk : public Chunk
     void doInsertToEnd(const std::shared_ptr<SliceChunk>& chunk);
     void doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
 
-    std::vector<std::shared_ptr<Chunk> > dupChunks() const;
+    std::deque<std::shared_ptr<Chunk> > dupChunks() const;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     SequenceChunk();
     SequenceChunk(const SequenceChunk& other);
-    SequenceChunk(const std::vector<std::shared_ptr<Chunk>>& chunks);
+    SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks);
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
-    const std::vector<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
-    void setChunks(const std::vector<std::shared_ptr<Chunk>>& chunks);
+    const std::deque<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
+    void setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks);
     //@}
 
     /** @name Mutability related functions */
