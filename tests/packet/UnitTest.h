@@ -18,40 +18,6 @@
 
 #include "inet/common/packet/Defs.h"
 
-// TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
-// - message compiler could support @optional fields, inspectors could hide them, etc.
-// TODO: how do we represent the random subfield sequences (options) right after mandatory header part?
-// packet
-// - IpHeader
-//   - IpHeaderNonOptionalPartForFun
-//   - IpOption1
-//   - IpOption2
-// - TcpHeader
-//   - TcpHeader
-//   - TcpOption1
-//   - TcpOption2
-//
-// packet
-// - Ieee80211PhyHeader
-// - Ieee80211MacHeader
-//   - QosField
-// - IpHeader
-// - IpOptions
-//   - IpOption1
-//   - IpOption2
-// - TcpHeader
-// - TcpOptions
-//   - TcpOption1
-//   - TcpOption2
-//
-// packet
-// - IpHeader
-// - IpOption1
-// - IpOption2
-// - TcpHeader
-// - TcpOption1
-// - TcpOption2
-
 namespace inet {
 
 class CompoundHeaderSerializer : public SequenceChunkSerializer

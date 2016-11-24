@@ -20,9 +20,17 @@
 
 namespace inet {
 
+/**
+ * This class represents data with an ordered list of consecutive chunks. It's
+ * used by the Chunk API implementation internally to manage compound data.
+ * User code should not directly instantiate this class.
+ */
 class SequenceChunk : public Chunk
 {
   protected:
+    /**
+     * The list of chunks that make up this chunk.
+     */
     std::vector<std::shared_ptr<Chunk>> chunks;
 
   protected:
@@ -47,16 +55,20 @@ class SequenceChunk : public Chunk
     std::vector<std::shared_ptr<Chunk> > dupChunks() const;
 
   public:
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
     SequenceChunk();
     SequenceChunk(const SequenceChunk& other);
     SequenceChunk(const std::vector<std::shared_ptr<Chunk>>& chunks);
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
+    //@}
 
-    virtual Type getChunkType() const override { return TYPE_SEQUENCE; }
-
+    /** @name Field accessor functions */
     const std::vector<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
+    void setChunks(const std::vector<std::shared_ptr<Chunk>>& chunks);
+    //@}
 
     /** @name Mutability related functions */
     //@{
@@ -86,6 +98,8 @@ class SequenceChunk : public Chunk
 
     /** @name Querying data related functions */
     //@{
+    virtual Type getChunkType() const override { return TYPE_SEQUENCE; }
+
     virtual int64_t getChunkLength() const override;
 
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length) const override;

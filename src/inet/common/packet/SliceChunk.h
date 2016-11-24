@@ -20,13 +20,29 @@
 
 namespace inet {
 
+/**
+ * This class represents data using a slice of another chunk. The slice is
+ * designated with the sliced chunk, an offset, and a length field, both
+ * measured in bytes. It's used by the Chunk API implementation internally to
+ * efficiently represent slices of other chunks. User code should not directly
+ * instantiate this class.
+ */
 class SliceChunk : public Chunk
 {
   friend Chunk;
 
   protected:
+    /**
+     * The chunk of which this chunk is a slice, or nullptr if not yet specified.
+     */
     std::shared_ptr<Chunk> chunk;
+    /**
+     * The offset measured in bytes, or -1 if not yet specified.
+     */
     int64_t offset;
+    /**
+     * The length measured in bytes, or -1 if not yet specified.
+     */
     int64_t length;
 
   protected:
@@ -36,12 +52,18 @@ class SliceChunk : public Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = -1, int64_t length = -1);
 
   public:
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
     SliceChunk();
     SliceChunk(const SliceChunk& other);
     SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
+    //@}
+
+    /** @name Field accessor functions */
+    //@{
 
     const std::shared_ptr<Chunk>& getChunk() const { return chunk; }
     void setChunk(const std::shared_ptr<Chunk>& chunk) { this->chunk = chunk; }
@@ -51,7 +73,10 @@ class SliceChunk : public Chunk
 
     int64_t getLength() const { return length; }
     void setLength(int64_t length);
+    //@}
 
+    /** @name Overridden chunk functions */
+    //@{
     virtual Type getChunkType() const override { return TYPE_SLICE; }
     virtual int64_t getChunkLength() const override { return length; }
 
@@ -64,6 +89,7 @@ class SliceChunk : public Chunk
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
 
     virtual std::string str() const override;
+    //@}
 };
 
 } // namespace

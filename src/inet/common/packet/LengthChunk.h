@@ -20,11 +20,18 @@
 
 namespace inet {
 
+/**
+ * This class represents data using a length field only. This can be useful
+ * when the actual data is irrelevant and memory efficiency is high priority.
+ */
 class LengthChunk : public Chunk
 {
   friend Chunk;
 
   protected:
+    /**
+     * The chunk length in bytes, or -1 if not yet specified.
+     */
     int64_t length;
 
   protected:
@@ -34,16 +41,24 @@ class LengthChunk : public Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
     LengthChunk();
     LengthChunk(const LengthChunk& other);
     LengthChunk(int64_t length);
 
     virtual LengthChunk *dup() const override { return new LengthChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<LengthChunk>(*this); }
+    //@}
 
+    /** @name Field accessor functions */
+    //@{
     int64_t getLength() const { return length; }
     void setLength(int64_t length);
+    //@}
 
+    /** @name Overridden chunk functions */
+    //@{
     virtual Type getChunkType() const override { return TYPE_LENGTH; }
     virtual int64_t getChunkLength() const override { return length; }
 
@@ -56,6 +71,7 @@ class LengthChunk : public Chunk
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
 
     virtual std::string str() const override;
+    //@}
 };
 
 } // namespace

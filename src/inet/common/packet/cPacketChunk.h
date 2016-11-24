@@ -20,24 +20,40 @@
 
 namespace inet {
 
+/**
+ * This class represents data using an OMNeT++ cPacket instance. This can be
+ * useful to make components using the new Packet class backward compatible
+ * with other components using plain cPackets. The packet is owned by this
+ * chunk and it shouldn't be deleted or modified in any way.
+ */
 class cPacketChunk : public Chunk
 {
   protected:
-    cPacket *packet = nullptr;
+    cPacket *packet;
 
   public:
-    cPacketChunk(const cPacketChunk& other);
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
     cPacketChunk(cPacket *packet);
+    cPacketChunk(const cPacketChunk& other);
     ~cPacketChunk();
 
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<cPacketChunk>(*this); }
+    //@}
 
+    /** @name Field accessor functions */
+    //@{
+    // TODO: it should return a const cPacket *
+    virtual cPacket *getPacket() const { return packet; }
+    //@}
+
+    /** @name Overridden chunk functions */
+    //@{
     virtual int64_t getChunkLength() const override { return packet->getByteLength(); }
 
-    virtual cPacket *getPacket() const { return packet; }
-
     virtual std::string str() const override;
+    //@}
 };
 
 } // namespace

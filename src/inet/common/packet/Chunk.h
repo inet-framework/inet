@@ -95,6 +95,39 @@ namespace inet {
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
+// TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
+// - message compiler could support @optional fields, inspectors could hide them, etc.
+// TODO: how do we represent the random subfield sequences (options) right after mandatory header part?
+// packet
+// - IpHeader
+//   - IpHeaderNonOptionalPartForFun
+//   - IpOption1
+//   - IpOption2
+// - TcpHeader
+//   - TcpHeader
+//   - TcpOption1
+//   - TcpOption2
+//
+// packet
+// - Ieee80211PhyHeader
+// - Ieee80211MacHeader
+//   - QosField
+// - IpHeader
+// - IpOptions
+//   - IpOption1
+//   - IpOption2
+// - TcpHeader
+// - TcpOptions
+//   - TcpOption1
+//   - TcpOption2
+//
+// packet
+// - IpHeader
+// - IpOption1
+// - IpOption2
+// - TcpHeader
+// - TcpOption1
+// - TcpOption2
 class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   protected:
@@ -179,14 +212,26 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /**
      * Peeking some part into a chunk that requires automatic serialization
      * will throw an exception when implicit chunk serialization is disabled.
+     * Implicit chunk serialization is enabled by default.
      */
     static bool enableImplicitChunkSerialization;
 
   protected:
     uint16_t flags;
+    /**
+     * The serialized representation of this chunk or nullptr if not available.
+     * When a chunk is serialized, the result is stored here for fast subsequent
+     * serializations. Moreover, if a chunk is created by deserialization, then
+     * the original bytes are also stored here. The serialized representation
+     * is deleted if a chunk is modified.
+     */
     std::vector<uint8_t> *serializedBytes;
 
   protected:
+    /**
+     * Returns the class name of the serializer that can be used to serialize
+     * and deserialize this type of chunk.
+     */
     virtual const char *getSerializerClassName() const { return nullptr; }
 
     virtual void handleChange() override;
@@ -197,7 +242,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
   protected:
     /**
      * Creates a new chunk of the given type that represents the designated part
-     * of the provided chunk.
+     * of the provided chunk. The designated part starts at the provided offset
+     * and has the provided length, both measured in bytes.
      */
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
@@ -206,8 +252,15 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     Chunk(const Chunk& other);
     virtual ~Chunk();
 
+    /**
+     * Returns a mutable copy of this chunk in a shared pointer.
+     */
     virtual std::shared_ptr<Chunk> dupShared() const { return std::shared_ptr<Chunk>(static_cast<Chunk *>(dup())); };
 
+    /**
+     * Returns the type of this chunk as an enum member. This can be used to
+     * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.
+     */
     virtual Type getChunkType() const { return TYPE_FIELD; }
 
     /** @name Mutability related functions */

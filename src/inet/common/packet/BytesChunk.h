@@ -20,11 +20,19 @@
 
 namespace inet {
 
+/**
+ * This class represents data using a sequence of bytes. This can be useful
+ * when the actual data is important because. For example, when an external
+ * program sends or receives the data, or in hardware in the loop simulations.
+ */
 class BytesChunk : public Chunk
 {
   friend Chunk;
 
   protected:
+    /**
+     * The data bytes as is.
+     */
     std::vector<uint8_t> bytes;
 
   protected:
@@ -34,18 +42,25 @@ class BytesChunk : public Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
     BytesChunk();
     BytesChunk(const BytesChunk& other);
     BytesChunk(const std::vector<uint8_t>& bytes);
 
     virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
+    //@}
 
+    /** @name Field accessor functions */
+    //@{
+    const std::vector<uint8_t>& getBytes() const { return bytes; }
+    void setBytes(const std::vector<uint8_t>& bytes);
+    //@}
+
+    /** @name Overridden chunk functions */
+    //@{
     virtual Type getChunkType() const override { return TYPE_BYTES; }
-
-    virtual const std::vector<uint8_t>& getBytes() const { return bytes; }
-    virtual void setBytes(const std::vector<uint8_t>& bytes);
-
     virtual int64_t getChunkLength() const override { return bytes.size(); }
 
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
@@ -57,6 +72,7 @@ class BytesChunk : public Chunk
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
 
     virtual std::string str() const override;
+    //@}
 };
 
 } // namespace
