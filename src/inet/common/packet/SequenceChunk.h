@@ -28,6 +28,8 @@ namespace inet {
  */
 class SequenceChunk : public Chunk
 {
+  friend Chunk;
+
   protected:
     /**
      * The list of chunks that make up this chunk.

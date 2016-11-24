@@ -360,6 +360,10 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
+        if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength())) {
+            if (auto tChunk = std::dynamic_pointer_cast<T>(const_cast<Chunk *>(this)->shared_from_this()))
+                return tChunk;
+        }
         if (getChunkType() == TYPE_SEQUENCE) {
             if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, length)))
                 return tChunk;
