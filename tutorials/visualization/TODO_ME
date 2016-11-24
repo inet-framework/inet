@@ -1,18 +1,20 @@
 All steps:
 	- milyen képeket lehetne a html oldalra rakni. Miről kéne csinálni, hova kéne elhelyezni a szövegben, stb...
-		
 	- minden resultsba kell valami kép/gif/mindkettő
-		
 	- nézzen ki jól
 		
 	- choose appropriate network name
-		???SOLVED: remove "Network" from network name
+		SOLVED: remove "Network" from network name
 	- change positions from meter to longitude, latitude
 		SOLVED
-	- in step 3 we should placing the nodes as pedestrian[2] and place them with mobility submodule longitude latitude
-		
+
 	- waypoint files changed: point 1 --> last point
 		
+	Q:
+	- 2d-ben jol elfer a ieee80211Visualizer es a interfaceTableVisualizer, de 3d-ben egymason vannak
+	- amikor 2 célhoz megy videoStreamPk, akkor az egyiknél nem marad piros
+	- 2d-ben lehet valtoztatni a packetdropVisualizer.iconTintColor-t, 3d-ben nem valtozik
+	- linkBreakVisualizer 3dben
 
 
 Step 1:
@@ -63,15 +65,20 @@ Step 10:
 	- physicalLinkVisualizer: There are more unused parameters...
 		SOLVED: We don't need
 	- Q: What is physical link exactly?
-		SOLVED: it's ok now. Every packet
-		
+		SOLVED: amikor bármilyen, akár neki, akár nem neki küldött jel vétele befejeződik a fizikai rétegben
 	- nyilak egyezzenek
+		SOLVED
 	- halványodás időtartamának növelése
+		SOLVED
 
 
 Step 11:
 	- Q: What is data link exactly?
-		SOLVED: VoIP packets
+		SOLVED: amikor a mac veszi a keretet
+	- nyilak egyezzenek
+		SOLVED
+	- halványodás időtartamának növelése
+		SOLVED
 
 
 Step 12:
@@ -81,11 +88,18 @@ Step 12:
 		SOLVED: playout delay statistic
 
 
+Step 13:
+	- routingTableVisualizer most a routokat mutatja a videoStreamServer felé. Túl egyszerű a hálózat?
+	
+
+
 Step 15:
 	- If we'll have routeVisualizer, then activate the commented lines
 		SOLVED
 	- check and cast error
 		SOLVED
+	- when?
+		SOLVED: amikor a videoPedestrian hálózati rétege megkapja a csomagot. A kezdo ponttol a végpontig jut. Kozben nem rajzolja ki a lepeseket
 
 
 Step 16:
@@ -106,6 +120,8 @@ Step 18:
 		SOLVED
 	- handover problem
 		SOLVED
+		
+		
 Step 19:
 	- signal propagation off?
 		SOLVED
