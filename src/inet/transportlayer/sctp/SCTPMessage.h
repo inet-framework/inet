@@ -122,10 +122,15 @@ class INET_API SCTPStreamResetChunk : public SCTPStreamResetChunk_Base
   protected:
     std::vector<cPacket *> parameterList;
 
+  private:
+    void copy(const SCTPStreamResetChunk& other);
+    void clean();
+
   public:
     SCTPStreamResetChunk(const char *name = nullptr, int32 kind = 0) : SCTPStreamResetChunk_Base(name, kind) {};
     SCTPStreamResetChunk(const SCTPStreamResetChunk& other) : SCTPStreamResetChunk_Base(other.getName()) { operator=(other); };
     SCTPStreamResetChunk& operator=(const SCTPStreamResetChunk& other);
+    ~SCTPStreamResetChunk();
 
     virtual SCTPStreamResetChunk *dup() const override { return new SCTPStreamResetChunk(*this); }
     virtual void setParametersArraySize(const uint32 size) override;
@@ -181,6 +186,18 @@ class INET_API SCTPAsconfChunk : public SCTPAsconfChunk_Base
      * Removes and returns the first message object in this SCTP packet.
      */
     virtual cPacket *removeAsconfParam();
+};
+
+class SCTPIncomingSSNResetRequestParameter : public SCTPIncomingSSNResetRequestParameter_Base
+{
+  private:
+    void copy(const SCTPIncomingSSNResetRequestParameter& other);
+
+  public:
+    SCTPIncomingSSNResetRequestParameter(const char *name=nullptr, int kind=0) : SCTPIncomingSSNResetRequestParameter_Base(name,kind) {}
+    SCTPIncomingSSNResetRequestParameter(const SCTPIncomingSSNResetRequestParameter& other) : SCTPIncomingSSNResetRequestParameter_Base(other) {copy(other);}
+    SCTPIncomingSSNResetRequestParameter& operator=(const SCTPIncomingSSNResetRequestParameter& other) {if (this==&other) return *this; SCTPIncomingSSNResetRequestParameter_Base::operator=(other); copy(other); return *this;}
+    virtual SCTPIncomingSSNResetRequestParameter *dup() const override {return new SCTPIncomingSSNResetRequestParameter(*this);}
 };
 
 class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base

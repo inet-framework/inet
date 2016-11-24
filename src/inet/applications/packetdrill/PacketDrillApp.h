@@ -63,6 +63,9 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
     uint32 getPeerCumTsn() { return peerCumTsn; };
     uint32 getInitPeerTsn() { return initPeerTsn; };
     simtime_t getPeerHeartbeatTime() { return peerHeartbeatTime; };
+    void setSeqNumMap(uint32 ownNum, uint32 liveNum) { seqNumMap[ownNum] = liveNum; };
+    uint32 getSeqNumMap(uint32 ownNum) { return seqNumMap[ownNum]; };
+    bool findSeqNumMap(uint32 num);
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -117,6 +120,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         uint32 idOutbound;
         uint32 localVTag;
         uint32 peerVTag;
+        std::map<uint32, uint32> seqNumMap;
         simtime_t peerHeartbeatTime;
         cMessage *eventTimer;
 
@@ -141,6 +145,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         int syscallSetsockopt(struct syscall_spec *syscall, cQueue *args, char **error);
 
+        int syscallGetsockopt(struct syscall_spec *syscall, cQueue *args, char **error);
+
         int syscallSendTo(struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallRead(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error);
@@ -148,6 +154,12 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         int syscallRecvFrom(PacketDrillEvent *event, struct syscall_spec *syscall, cQueue *args, char **error);
 
         int syscallClose(struct syscall_spec *syscall, cQueue *args, char **error);
+
+        int syscallShutdown(struct syscall_spec *syscall, cQueue *args, char **error);
+
+        int syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *args, char **error);
+
+        int syscallSctpSend(struct syscall_spec *syscall, cQueue *args, char **error);
 
         bool compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram);
 
@@ -164,6 +176,8 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         bool compareSackPacket(SCTPSackChunk* storedSackChunk, SCTPSackChunk* liveSackChunk);
 
         bool compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, SCTPInitAckChunk* liveInitAckChunk);
+
+        bool compareReconfigPacket(SCTPStreamResetChunk* storedReconfigChunk, SCTPStreamResetChunk* liveReconfigChunk);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,

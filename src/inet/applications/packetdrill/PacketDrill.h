@@ -78,6 +78,10 @@ class INET_API PacketDrill
 
         static PacketDrillSctpChunk* buildHeartbeatAckChunk(int64 flgs, PacketDrillSctpParameter *info);
 
+        static PacketDrillSctpChunk* buildReconfigChunk(int64 flgs, cQueue *parameters);
+
+        static PacketDrillSctpChunk* buildErrorChunk(int64 flgs, cQueue *causes);
+
         static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 
         int evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error);

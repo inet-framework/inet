@@ -30,6 +30,7 @@ namespace sctp {
 class INET_API SCTPReceiveStream : public cObject
 {
   protected:
+    SCTPAssociation *assoc;
     uint16 streamId;
     int32 expectedStreamSeqNum;
     SCTPQueue *deliveryQ;
@@ -42,7 +43,9 @@ class INET_API SCTPReceiveStream : public cObject
     /**
      * Ctor.
      */
-    SCTPReceiveStream();
+    SCTPReceiveStream(SCTPAssociation *assoc);
+    int32 getExpectedStreamSeqNum();
+    void setExpectedStreamSeqNum(const int32 num);
 
     /**
      * Virtual dtor.
@@ -51,9 +54,8 @@ class INET_API SCTPReceiveStream : public cObject
     inline SCTPQueue *getDeliveryQ() const { return deliveryQ; };
     inline SCTPQueue *getOrderedQ() const { return orderedQ; };
     inline SCTPQueue *getUnorderedQ() const { return unorderedQ; };
-    inline int32 getExpectedStreamSeqNum() const { return expectedStreamSeqNum; };
+
     inline int32 getStreamId() const { return streamId; };
-    inline void setExpectedStreamSeqNum(const int32 num) { expectedStreamSeqNum = num; };
     inline void setStreamId(const uint16 id) { streamId = id; };
 };
 

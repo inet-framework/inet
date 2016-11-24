@@ -26,6 +26,7 @@ simple TunInterface like ITunNic
 {
     parameters:
         string interfaceTableModule;    // The path to the InterfaceTable module
+        int mtu @unit("B") = default(1500B);
         @display("i=block/tunnel");
 
         @signal[packetSentToLower](type=cPacket);

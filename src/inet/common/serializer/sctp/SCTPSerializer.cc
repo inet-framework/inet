@@ -967,6 +967,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             errorc->reserved = 0;
                             break;
                         }
+                        default: printf("Error cause %d not implemented\n", parameter->getParameterType());
                     }
                     writtenbytes += errorchunk->getByteLength();
                 }
@@ -975,14 +976,14 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 break;
             }
 
-            case STREAM_RESET: {
+            case RE_CONFIG: {
                 SCTPStreamResetChunk *streamReset = check_and_cast<SCTPStreamResetChunk *>(chunk);
                 struct stream_reset_chunk *stream = (struct stream_reset_chunk *)(buf + writtenbytes);
                 writtenbytes += (streamReset->getByteLength());
                 stream->type = streamReset->getChunkType();
-                stream->length = htons(streamReset->getByteLength());
                 int parPtr = 0;
-                for (unsigned int i = 0; i < streamReset->getParametersArraySize(); i++) {
+                uint16 numParameters = streamReset->getParametersArraySize();
+                for (int i = 0; i < numParameters; i++) {
                     SCTPParameter *parameter = check_and_cast<SCTPParameter *>(streamReset->getParameters(i));
                     switch (parameter->getParameterType()) {
                         case OUTGOING_RESET_REQUEST_PARAMETER: {
@@ -995,9 +996,13 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             parPtr += sizeof(struct outgoing_reset_request_parameter);
                             if (outparam->getStreamNumbersArraySize() > 0) {
                                 for (unsigned int j = 0; j < outparam->getStreamNumbersArraySize(); j++) {
-                                    out->streamNumbers[j * 2] = htons(outparam->getStreamNumbers(j));
+                                    out->streamNumbers[j] = htons(outparam->getStreamNumbers(j));
                                 }
-                                parPtr += ADD_PADDING(outparam->getStreamNumbersArraySize() * 2);
+                                if (i < numParameters - 1) {
+                                    parPtr += ADD_PADDING(outparam->getStreamNumbersArraySize() * 2);
+                                } else {
+                                    parPtr += outparam->getStreamNumbersArraySize() * 2;
+                                }
                             }
                             out->length = htons(sizeof(struct outgoing_reset_request_parameter) + outparam->getStreamNumbersArraySize() * 2);
                             break;
@@ -1011,9 +1016,13 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             parPtr += sizeof(struct incoming_reset_request_parameter);
                             if (inparam->getStreamNumbersArraySize() > 0) {
                                 for (unsigned int j = 0; j < inparam->getStreamNumbersArraySize(); j++) {
-                                    in->streamNumbers[j * 2] = htons(inparam->getStreamNumbers(j));
+                                    in->streamNumbers[j] = htons(inparam->getStreamNumbers(j));
                                 }
-                                parPtr += ADD_PADDING(inparam->getStreamNumbersArraySize() * 2);
+                                if (i < numParameters - 1) {
+                                    parPtr += ADD_PADDING(inparam->getStreamNumbersArraySize() * 2);
+                                } else {
+                                    parPtr += inparam->getStreamNumbersArraySize() * 2;
+                                }
                             }
                             in->length = htons(sizeof(struct incoming_reset_request_parameter) + inparam->getStreamNumbersArraySize() * 2);
                             break;
@@ -1023,7 +1032,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             SCTPSSNTSNResetRequestParameter *ssnparam = check_and_cast<SCTPSSNTSNResetRequestParameter *>(parameter);
                             struct ssn_tsn_reset_request_parameter *ssn = (struct ssn_tsn_reset_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             ssn->type = htons(ssnparam->getParameterType());
-                            ssn->length = htons(4);
+                            ssn->length = htons(8);
                             ssn->srReqSn = htonl(ssnparam->getSrReqSn());
                             parPtr += sizeof(struct ssn_tsn_reset_request_parameter);
                             break;
@@ -1045,8 +1054,33 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             }
                             break;
                         }
+
+                        case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
+                            SCTPAddStreamsRequestParameter *instreams = check_and_cast<SCTPAddStreamsRequestParameter *>(parameter);
+                            struct add_streams_request_parameter *addinp = (struct add_streams_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
+                            addinp->type = htons(instreams->getParameterType());
+                            addinp->srReqSn = htonl(instreams->getSrReqSn());
+                            addinp->numberOfStreams = htons(instreams->getNumberOfStreams());
+                            addinp->reserved = 0;
+                            addinp->length = htons(12);
+                            parPtr += 12;
+                            break;
+                        }
+
+                       case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
+                            SCTPAddStreamsRequestParameter *outstreams = check_and_cast<SCTPAddStreamsRequestParameter *>(parameter);
+                            struct add_streams_request_parameter *addoutp = (struct add_streams_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
+                            addoutp->type = htons(outstreams->getParameterType());
+                            addoutp->srReqSn = htonl(outstreams->getSrReqSn());
+                            addoutp->numberOfStreams = htons(outstreams->getNumberOfStreams());
+                            addoutp->reserved = 0;
+                            addoutp->length = htons(12);
+                            parPtr += 12;
+                            break;
+                        }
                     }
                 }
+                stream->length = htons(SCTP_STREAM_RESET_CHUNK_LENGTH + parPtr);
                 break;
             }
 
@@ -2049,13 +2083,13 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                 break;
             }
 
-            case STREAM_RESET: {
+            case RE_CONFIG: {
                 const struct stream_reset_chunk *stream_reset_chunk;
                 stream_reset_chunk = (struct stream_reset_chunk *)(chunks + chunkPtr);
                 SCTPStreamResetChunk *chunk;
-                chunk = new SCTPStreamResetChunk("STREAM_RESET");
+                chunk = new SCTPStreamResetChunk("RE_CONFIG");
                 chunk->setChunkType(chunkType);
-                chunk->setName("STREAM_RESET");
+                chunk->setName("RE_CONFIG");
                 chunk->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
                 chunklen = SCTP_STREAM_RESET_CHUNK_LENGTH;
                 int len;

@@ -2,7 +2,7 @@
 +0      setsockopt(3, IPPROTO_SCTP, SCTP_INITMSG, {sinit_num_ostreams=256, sinit_max_instreams=1024, sinit_max_attempts=3, sinit_max_init_timeo=100}, 8) = 0
 +0      connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
 +0    > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=256, is=1024, tsn=1, ...]
-+0.05 < sctp: INIT_ACK[flgs=0, tag=22, a_rwnd=100000, os=1024, is=10, tsn=0, STATE_COOKIE[len=4, val=...]]
++0.05 < sctp: INIT_ACK[flgs=0, tag=22, a_rwnd=100000, os=1024, is=10, tsn=1, STATE_COOKIE[len=4, val=...]]
 +0    > sctp: COOKIE_ECHO[flgs=0, len=4, val=...]
 +0.05 < sctp: COOKIE_ACK[flgs=0]
 +1      close(3) = 0
