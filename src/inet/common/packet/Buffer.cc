@@ -75,15 +75,11 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk)
             data = chunk;
     }
     else {
-        if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
-            std::static_pointer_cast<SequenceChunk>(data)->insertToEnd(chunk);
-        else {
-            if (!data->insertToEnd(chunk)) {
-                auto sequenceChunk = std::make_shared<SequenceChunk>();
-                sequenceChunk->insertToEnd(data);
-                sequenceChunk->insertToEnd(chunk);
-                data = sequenceChunk;
-            }
+        if (!data->insertToEnd(chunk)) {
+            auto sequenceChunk = std::make_shared<SequenceChunk>();
+            sequenceChunk->insertToEnd(data);
+            sequenceChunk->insertToEnd(chunk);
+            data = sequenceChunk;
         }
     }
     pushedLength += chunk->getChunkLength();
