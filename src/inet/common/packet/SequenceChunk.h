@@ -44,13 +44,16 @@ class SequenceChunk : public Chunk
     virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length = -1) const override;
     virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length = -1) const override;
 
+    bool mergeToBeginning(const std::shared_ptr<Chunk>& chunk);
     bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
 
-    void insertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
-    void insertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
+    void doInsertToBeginning(const std::shared_ptr<Chunk>& chunk);
+    void doInsertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
+    void doInsertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
 
-    void insertToEnd(const std::shared_ptr<SliceChunk>& chunk);
-    void insertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
+    void doInsertToEnd(const std::shared_ptr<Chunk>& chunk);
+    void doInsertToEnd(const std::shared_ptr<SliceChunk>& chunk);
+    void doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
 
     std::vector<std::shared_ptr<Chunk> > dupChunks() const;
 
@@ -85,9 +88,6 @@ class SequenceChunk : public Chunk
     //@{
     virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
-
-    void prepend(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
-    void append(const std::shared_ptr<Chunk>& chunk, bool flatten = true);
     //@}
 
     /** @name Removing data related functions */

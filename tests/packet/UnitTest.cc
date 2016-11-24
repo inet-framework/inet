@@ -34,7 +34,7 @@ std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& st
     auto compoundHeader = std::make_shared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
     auto ipHeader = ipHeaderSerializer.deserialize(stream);
-    compoundHeader->append(ipHeader);
+    compoundHeader->insertToEnd(ipHeader);
     return compoundHeader;
 }
 
@@ -219,7 +219,7 @@ static void testNesting()
     auto ipHeader1 = std::make_shared<IpHeader>();
     ipHeader1->setProtocol(Protocol::Tcp);
     auto compoundHeader1 = std::make_shared<CompoundHeader>();
-    compoundHeader1->append(ipHeader1);
+    compoundHeader1->insertToEnd(ipHeader1);
     packet1.append(compoundHeader1);
     packet1.makeImmutable();
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
@@ -319,9 +319,9 @@ static void testPeekChunk()
     assert(sliceChunk1->getChunk() == sliceChunk2->getChunk());
     // 4a. SequenceChunk may return an element chunk
     auto sequenceChunk1 = std::make_shared<SequenceChunk>();
-    sequenceChunk1->append(lengthChunk1);
-    sequenceChunk1->append(bytesChunk1);
-    sequenceChunk1->append(applicationHeader1);
+    sequenceChunk1->insertToEnd(lengthChunk1);
+    sequenceChunk1->insertToEnd(bytesChunk1);
+    sequenceChunk1->insertToEnd(applicationHeader1);
     sequenceChunk1->makeImmutable();
     const auto& lengthChunk3 = std::dynamic_pointer_cast<LengthChunk>(sequenceChunk1->peek(0, 10));
     const auto& bytesChunk3 = std::dynamic_pointer_cast<BytesChunk>(sequenceChunk1->peek(10, 10));

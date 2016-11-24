@@ -68,7 +68,7 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk)
     if (data == nullptr) {
         if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->append(chunk);
+            sequenceChunk->insertToEnd(chunk);
             data = sequenceChunk;
         }
         else
@@ -76,12 +76,12 @@ void Buffer::push(const std::shared_ptr<Chunk>& chunk)
     }
     else {
         if (data->getChunkType() == Chunk::TYPE_SEQUENCE)
-            std::static_pointer_cast<SequenceChunk>(data)->append(chunk);
+            std::static_pointer_cast<SequenceChunk>(data)->insertToEnd(chunk);
         else {
             if (!data->insertToEnd(chunk)) {
                 auto sequenceChunk = std::make_shared<SequenceChunk>();
-                sequenceChunk->append(data);
-                sequenceChunk->append(chunk);
+                sequenceChunk->insertToEnd(data);
+                sequenceChunk->insertToEnd(chunk);
                 data = sequenceChunk;
             }
         }

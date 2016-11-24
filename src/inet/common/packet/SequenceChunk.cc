@@ -112,6 +112,26 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& itera
     return nullptr;
 }
 
+bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
+{
+    if (chunks.size() != 0) {
+        auto& firstChunk = chunks.front();
+        if (firstChunk->isImmutable() && chunk->isImmutable()) {
+            auto mergedChunk = firstChunk->dupShared();
+            if (mergedChunk->insertToBeginning(chunk)) {
+                if (mergedChunk->getChunkType() == TYPE_SLICE) {
+                    auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
+                    if (sliceChunk->getOffset() == 0 && sliceChunk->getChunkLength() == sliceChunk->getChunk()->getChunkLength()) {
+                        chunks.front() = sliceChunk->getChunk();
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     if (chunks.size() != 0) {
@@ -132,17 +152,15 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
     return false;
 }
 
-bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
-    handleChange();
     if (chunk->getChunkLength() <= 0)
         throw cRuntimeError("Invalid chunk length: %li", chunk->getChunkLength());
-    chunks.insert(chunks.begin(), chunk);
-    return true;
+    if (!mergeToBeginning(chunk))
+        chunks.insert(chunks.begin(), chunk);
 }
 
-void SequenceChunk::insertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
@@ -155,47 +173,45 @@ void SequenceChunk::insertToBeginning(const std::shared_ptr<SliceChunk>& sliceCh
             int64_t chunkBegin = offset;
             int64_t chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
-                insertToBeginning(elementChunk);
+                doInsertToBeginning(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                insertToBeginning(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+                doInsertToBeginning(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                insertToBeginning(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
+                doInsertToBeginning(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
         }
     }
     else
-        insertToBeginning(std::static_pointer_cast<Chunk>(sliceChunk));
+        doInsertToBeginning(std::static_pointer_cast<Chunk>(sliceChunk));
 }
 
-void SequenceChunk::insertToBeginning(const std::shared_ptr<SequenceChunk>& chunk)
+void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SequenceChunk>& chunk)
 {
     for (auto it = chunk->chunks.rbegin(); it != chunk->chunks.rend(); it++)
-        insertToBeginning(*it);
+        doInsertToBeginning(*it);
 }
 
-void SequenceChunk::prepend(const std::shared_ptr<Chunk>& chunk, bool flatten)
-{
-    if (!flatten)
-        insertToBeginning(chunk);
-    else if (chunk->getChunkType() == TYPE_SLICE)
-        insertToBeginning(std::static_pointer_cast<SliceChunk>(chunk));
-    else if (chunk->getChunkType() == TYPE_SEQUENCE)
-        insertToBeginning(std::static_pointer_cast<SequenceChunk>(chunk));
-    else
-        insertToBeginning(chunk);
-}
-
-bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();
     handleChange();
+    if (chunk->getChunkType() == TYPE_SLICE)
+        doInsertToBeginning(std::static_pointer_cast<SliceChunk>(chunk));
+    else if (chunk->getChunkType() == TYPE_SEQUENCE)
+        doInsertToBeginning(std::static_pointer_cast<SequenceChunk>(chunk));
+    else
+        doInsertToBeginning(chunk);
+    return true;
+}
+
+void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
+{
     if (chunk->getChunkLength() <= 0)
         throw cRuntimeError("Invalid chunk length: %li", chunk->getChunkLength());
     if (!mergeToEnd(chunk))
         chunks.push_back(chunk);
-    return true;
 }
 
-void SequenceChunk::insertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
@@ -206,34 +222,35 @@ void SequenceChunk::insertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
             int64_t chunkBegin = offset;
             int64_t chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
-                insertToEnd(elementChunk);
+                doInsertToEnd(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                insertToEnd(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+                doInsertToEnd(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                insertToEnd(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
+                doInsertToEnd(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
             offset += elementChunk->getChunkLength();
         }
     }
     else
-        insertToEnd(std::static_pointer_cast<Chunk>(sliceChunk));
+        doInsertToEnd(std::static_pointer_cast<Chunk>(sliceChunk));
 }
 
-void SequenceChunk::insertToEnd(const std::shared_ptr<SequenceChunk>& chunk)
+void SequenceChunk::doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk)
 {
     for (auto& chunk : chunk->chunks)
-        insertToEnd(chunk);
+        doInsertToEnd(chunk);
 }
 
-void SequenceChunk::append(const std::shared_ptr<Chunk>& chunk, bool flatten)
+bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    if (!flatten)
-        insertToEnd(chunk);
-    else if (chunk->getChunkType() == TYPE_SLICE)
-        insertToEnd(std::static_pointer_cast<SliceChunk>(chunk));
+    assertMutable();
+    handleChange();
+    if (chunk->getChunkType() == TYPE_SLICE)
+        doInsertToEnd(std::static_pointer_cast<SliceChunk>(chunk));
     else if (chunk->getChunkType() == TYPE_SEQUENCE)
-        insertToEnd(std::static_pointer_cast<SequenceChunk>(chunk));
+        doInsertToEnd(std::static_pointer_cast<SequenceChunk>(chunk));
     else
-        insertToEnd(chunk);
+        doInsertToEnd(chunk);
+    return true;
 }
 
 bool SequenceChunk::removeFromBeginning(int64_t length)

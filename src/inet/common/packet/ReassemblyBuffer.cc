@@ -89,8 +89,8 @@ void NewReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegio
         else {
             // merge as a sequence
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->append(previousRegion.data);
-            sequenceChunk->append(nextRegion.data);
+            sequenceChunk->insertToEnd(previousRegion.data);
+            sequenceChunk->insertToEnd(nextRegion.data);
             previousRegion.data = sequenceChunk;
             nextRegion.data = nullptr;
         }
