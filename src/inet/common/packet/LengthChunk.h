@@ -38,7 +38,7 @@ class LengthChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "inet::LengthChunkSerializer"; }
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
 
   public:
     /** @name Constructors, destructors and duplication related functions */

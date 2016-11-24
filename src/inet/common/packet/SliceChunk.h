@@ -49,7 +49,7 @@ class SliceChunk : public Chunk
     virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = -1, int64_t length = -1);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
