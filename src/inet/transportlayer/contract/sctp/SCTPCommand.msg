@@ -117,6 +117,7 @@ message SCTPOpenCommand extends SCTPCommand
     uint32 inboundStreams;
     uint32 outboundStreams;
     bool streamReset;
+    bool appLimited;
     int prMethod;
     uint32 numRequests;
     uint32 messagesToPush;
@@ -137,6 +138,17 @@ message SCTPSendInfo extends SCTPCommand
     bool sackNow = false;
 }
 
+//
+// Control info to be used when setsockopt changes RtoInfo.
+//
+// @see ~SctpCommandCode, ~SCTP
+//
+message SCTPRtoInfo extends SCTPCommand
+{
+    double rtoInitial;
+    double rtoMin;
+    double rtoMax;
+}
 
 //
 // Control info to be used with the DATA command.
@@ -190,7 +202,9 @@ message SCTPResetInfo extends SCTPCommand
 {
     L3Address remoteAddr;
     unsigned short requestType = 0;
-    char streams[];
+    uint16 instreams = 0;
+    uint16 outstreams = 0;
+    uint16 streams[];
 }
 
 message SCTPInfo extends SCTPCommand

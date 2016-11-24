@@ -87,7 +87,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
+    virtual void refreshDisplay(const char *s) const;
 
     void connect();
     void close();

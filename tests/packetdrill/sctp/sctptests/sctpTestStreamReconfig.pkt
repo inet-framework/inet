@@ -1,0 +1,80 @@
+//
+// Copyright (c) 2016 Jens Hoelscher, Michael Tuexen
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+// OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+// SUCH DAMAGE.
+//
+
+--tolerance_usecs=75000
+
+// Enable SCTP Extensions
+0.0  `sysctl -w net.inet.sctp.ecn_enable=0`
++0.0 `sysctl -w net.inet.sctp.pr_enable=0`
++0.0 `sysctl -w net.inet.sctp.asconf_enable=0`
+#ifdef FreeBSD
++0.0 `sysctl -iw net.inet.sctp.auth_disable=1`
++0.0 `sysctl -iw net.inet.sctp.auth_enable=0`
+#endif
++0.0 `sysctl -w net.inet.sctp.reconfig_enable=1`
+
+// Create a non-blocking 1-to-1 style socket
++0.0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0.0 fcntl(3, F_GETFL) = 0x02 (flags O_RDWR)
++0.0 fcntl(3, F_SETFL, O_RDWR | O_NONBLOCK) = 0
+
+// Enable reception of stream reset requests
++0.0 setsockopt(3, IPPROTO_SCTP, SCTP_ENABLE_STREAM_RESET, {assoc_id=0, assoc_value=SCTP_ENABLE_RESET_STREAM_REQ}, 8) = 0
+
+// Trigger the active associtation setup
++0.1 connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
++0.0 > sctp: INIT[flgs=0, tag=1, a_rwnd=..., os=..., is=..., tsn=1, SUPPORTED_EXTENSIONS[types=[RECONFIG]], SUPPORTED_ADDRESS_TYPES[types=[IPv4]]]
++0.0 < sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=15000, os=10, is=10, tsn=1, SUPPORTED_EXTENSIONS[types=[RECONFIG]], STATE_COOKIE[len=204, val=...]]
++0.0 > sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
++0.0 < sctp: COOKIE_ACK[flgs=0]
+
+// Made traffic to increment ssn for one stream
++0.0 < sctp: DATA[flgs=BE, len=1016, tsn=1, sid=0, ssn=0, ppid=7]
+*    > sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=..., gaps=[], dups=[]]
++0.0 read(3, ..., 2000) = 1000
++0.0 < sctp: DATA[flgs=BE, len=1016, tsn=2, sid=0, ssn=1, ppid=7]
+*    > sctp: SACK[flgs=0, cum_tsn=2, a_rwnd=..., gaps=[], dups=[]]
++0.0 read(3, ..., 2000) = 1000
+
+// Send INCOMING_SSN_RESET_REQUEST from upper Layer
++0.1 setsockopt(3, IPPROTO_SCTP, SCTP_RESET_STREAMS, {srs_assoc_id=3,
+						      srs_flags=SCTP_STREAM_RESET_INCOMING,
+						      srs_number_streams=1,
+						      srs_stream_list=[0]}, 10) = 0
++0.0 > sctp: RECONFIG[flgs=0x00, INCOMING_SSN_RESET[req_sn=1, sids=[0]]]
++0.0 < sctp: RECONFIG[flgs=0x00, RECONFIG_RESPONSE[resp_sn=1, result=2]]
+
+// Send a second INCOMING_SSN_RESET_REQUEST to ensure that SUT increment the req_sn
++0.1 setsockopt(3, IPPROTO_SCTP, SCTP_RESET_STREAMS, {srs_assoc_id=3,
+						      srs_flags=SCTP_STREAM_RESET_INCOMING,
+						      srs_number_streams=1,
+						      srs_stream_list=[0]}, 10) = 0
++0.0 > sctp: RECONFIG[flgs=0x00, INCOMING_SSN_RESET[req_sn=2, sids=[0]]]
+
++0.1 close(3) = 0
++0.0 > sctp: SHUTDOWN[flgs=0, cum_tsn=2]
++0.1 < sctp: SHUTDOWN_ACK[flgs=0]
++0.0 > sctp: SHUTDOWN_COMPLETE[flgs=0]

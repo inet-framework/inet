@@ -40,12 +40,17 @@ typedef struct {
     double sackPeriod;
     int maxBurst;
     int fragPoint;
-    int noDelay;
+    int nagle;
+    bool enableHeartbeats;
+    int pathMaxRetrans;
+    double hbInterval;
+    int assocMaxRtx;
 } SocketOptions;
 
 typedef struct {
     int inboundStreams;
     int outboundStreams;
+    bool streamReset;
 } AppSocketOptions;
 
 class INET_API SCTPSocket
@@ -86,6 +91,7 @@ class INET_API SCTPSocket
     static int32 nextAssocId;
     int sockstate;
     bool oneToOne;
+    bool appLimited;
 
     L3Address localAddr;
     AddressVector localAddresses;
@@ -145,7 +151,7 @@ class INET_API SCTPSocket
      * CONNECTED, etc. Messages received from SCTP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState() const { return sockstate; }
+    int getState() { return sockstate; }
 
     /**
      * Returns name of socket state code returned by state().
@@ -154,11 +160,11 @@ class INET_API SCTPSocket
 
     /** @name Getter functions */
     //@{
-    AddressVector getLocalAddresses() const { return localAddresses; }
-    int getLocalPort() const { return localPrt; }
-    AddressVector getRemoteAddresses() const { return remoteAddresses; }
-    int getRemotePort() const { return remotePrt; }
-    L3Address getRemoteAddr() const { return remoteAddr; }
+    AddressVector getLocalAddresses() { return localAddresses; }
+    int getLocalPort() { return localPrt; }
+    AddressVector getRemoteAddresses() { return remoteAddresses; }
+    int getRemotePort() { return remotePrt; }
+    L3Address getRemoteAddr() { return remoteAddr; }
     //@}
 
     /** @name Opening and closing connections, sending data */
@@ -175,6 +181,8 @@ class INET_API SCTPSocket
      */
     void setOutboundStreams(int streams) { appOptions->outboundStreams = streams; };
     void setInboundStreams(int streams) { appOptions->inboundStreams = streams; };
+    void setAppLimited(bool option) { appLimited = option; };
+    void setStreamReset(int option) { appOptions->streamReset = option; };
     void setStreamPriority(uint32 stream, uint32 priority);
     void setMaxInitRetrans(int option) { sOptions->maxInitRetrans = option; };
     void setMaxInitRetransTimeout(int option) { sOptions->maxInitRetransTimeout = option; };
@@ -185,18 +193,25 @@ class INET_API SCTPSocket
     void setSackPeriod(double option) { sOptions->sackPeriod = option; };
     void setMaxBurst(int option) { sOptions->maxBurst = option; };
     void setFragPoint(int option) { sOptions->fragPoint = option; };
-    void setNoDelay(int option) { sOptions->noDelay = option; };
+    void setNagle(int option) { sOptions->nagle = option; };
+    void setPathMaxRetrans(int option) { sOptions->pathMaxRetrans = option; };
+    void setEnableHeartbeats(bool option) { sOptions->enableHeartbeats = option; printf("enableHeartbeats set to %d\n", sOptions->enableHeartbeats);};
+    void setHbInterval(double option) { sOptions->hbInterval = option; };
+    void setRtoInfo(double initial, double max, double min);
+    void setAssocMaxRtx(int option) { sOptions->assocMaxRtx = option; };
 
     void setUserOptions(void* msg) { sOptions = (SocketOptions*) msg; };
 
     int getOutboundStreams() { return appOptions->outboundStreams; };
     int getInboundStreams() { return appOptions->inboundStreams; };
+    bool getStreamReset() { return appOptions->streamReset; }
     int getLastStream() { return lastStream; };
     double getRtoInitial() { return sOptions->rtoInitial; };
     int getMaxInitRetransTimeout() { return sOptions->maxInitRetransTimeout; };
     int getMaxInitRetrans() { return sOptions->maxInitRetrans; };
     int getMaxBurst() { return sOptions->maxBurst; };
     int getFragPoint() { return sOptions->fragPoint; };
+    int getAssocMaxRtx() { return sOptions->assocMaxRtx; };
 
     void getSocketOptions();
 
@@ -279,7 +294,7 @@ class INET_API SCTPSocket
      * Aborts the association.
      */
     void abort();
-    void shutdown();
+    void shutdown(int id = -1);
     /**
      * Causes SCTP to reply with a fresh SCTPStatusInfo, attached to a dummy
      * message as controlInfo(). The reply message can be recognized by its

@@ -38,20 +38,28 @@ class SCTPDataVariables;
 class INET_API SCTPSendStream : public cObject
 {
   protected:
+    SCTPAssociation *assoc;
     uint16 streamId;
     uint16 nextStreamSeqNum;
+    uint32 bytesInFlight;
+    bool resetRequested;
+    bool fragInProgress;
     cPacketQueue *streamQ;
     cPacketQueue *uStreamQ;
 
   public:
 
-    SCTPSendStream(const uint16 id);
+    SCTPSendStream(SCTPAssociation *assoc, const uint16 id);
     ~SCTPSendStream();
 
     inline cPacketQueue *getStreamQ() const { return streamQ; };
     inline cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };
-    inline uint32 getNextStreamSeqNum() const { return nextStreamSeqNum; };
-    inline void setNextStreamSeqNum(const uint16 num) { nextStreamSeqNum = num; };
+    uint32 getNextStreamSeqNum();
+    inline uint32 getBytesInFlight() const { return bytesInFlight; };
+    void setNextStreamSeqNum(const uint16 num);
+    inline void setBytesInFlight(const uint32 bytes) { bytesInFlight = bytes; };
+    inline bool getFragInProgress() const { return fragInProgress; };
+    inline void setFragInProgress(const bool frag) { fragInProgress = frag; };
     inline uint16 getStreamId() const { return streamId; };
     inline void setStreamId(const uint16 id) { streamId = id; };
     void deleteQueue();

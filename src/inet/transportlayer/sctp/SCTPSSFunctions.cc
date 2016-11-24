@@ -48,17 +48,43 @@ void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
     EV_INFO << "initStreams instreams=" << inStreams << "  outstream=" << outStreams << "\n";
     if (receiveStreams.size() == 0 && sendStreams.size() == 0) {
         for (i = 0; i < inStreams; i++) {
-            SCTPReceiveStream *rcvStream = new SCTPReceiveStream();
+            SCTPReceiveStream *rcvStream = new SCTPReceiveStream(this);
 
             this->receiveStreams[i] = rcvStream;
             rcvStream->setStreamId(i);
             this->state->numMsgsReq[i] = 0;
         }
         for (i = 0; i < outStreams; i++) {
-            SCTPSendStream *sendStream = new SCTPSendStream(i);
+            SCTPSendStream *sendStream = new SCTPSendStream(this, i);
             sendStream->setStreamId(i);
             this->sendStreams[i] = sendStream;
         }
+    }
+}
+
+void SCTPAssociation::addInStreams(uint32 inStreams)
+{
+    uint32 i, j;
+    char vectorName[128];
+    EV_INFO << "Add " << inStreams << " inbound streams" << endl;
+    for (i = receiveStreams.size(), j = 0; j < inStreams; i++, j++) {
+        SCTPReceiveStream *rcvStream = new SCTPReceiveStream(this);
+        this->receiveStreams[i] = rcvStream;
+        rcvStream->setStreamId(i);
+        this->state->numMsgsReq[i] = 0;
+        snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
+        streamThroughputVectors[i] = new cOutVector(vectorName);
+    }
+}
+
+void SCTPAssociation::addOutStreams(uint32 outStreams)
+{
+    uint32 i, j;
+    EV_INFO << "Add " << outStreams << " outbound streams" << endl;
+    for (i = sendStreams.size(), j = 0; j < outStreams; i++, j++) {
+        SCTPSendStream *sendStream = new SCTPSendStream(this, i);
+        sendStream->setStreamId(i);
+        this->sendStreams[i] = sendStream;
     }
 }
 
@@ -82,13 +108,11 @@ int32 SCTPAssociation::streamScheduler(SCTPPathVariables *path, bool peek)    //
 
     if ((state->ssLastDataChunkSizeSet == false || state->ssNextStream == false) &&
         (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->getLength() > 0 ||
-         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0))
-    {
+         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->getLength() > 0)) {
         sid = state->lastStreamScheduled;
         EV_DETAIL << "Stream Scheduler: again sid " << sid << ".\n";
         state->ssNextStream = true;
-    }
-    else {
+    } else {
         testsid = state->lastStreamScheduled;
 
         do {
@@ -100,8 +124,10 @@ int32 SCTPAssociation::streamScheduler(SCTPPathVariables *path, bool peek)    //
                 sid = testsid;
                 EV_DETAIL << "Stream Scheduler: chose sid " << sid << ".\n";
 
-                if (!peek)
+                if (!peek) {
                     state->lastStreamScheduled = sid;
+                    break;
+                }
             }
         } while (sid == -1 && testsid != (int32)state->lastStreamScheduled);
     }
