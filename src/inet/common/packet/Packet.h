@@ -118,6 +118,8 @@ class Packet : public cPacket
 
     std::shared_ptr<Chunk> popHeader(int64_t length = -1);
 
+    void pushHeader(const std::shared_ptr<Chunk>& chunk);
+
     template <typename T>
     bool hasHeader(int64_t length = -1) const {
         return peekHeader<T>(length) != nullptr;
@@ -166,6 +168,8 @@ class Packet : public cPacket
     std::shared_ptr<Chunk> peekTrailerAt(int64_t offset, int64_t length) const;
 
     std::shared_ptr<Chunk> popTrailer(int64_t length = -1);
+
+    void pushTrailer(const std::shared_ptr<Chunk>& chunk);
 
     template <typename T>
     bool hasTrailer(int64_t length = -1) const {

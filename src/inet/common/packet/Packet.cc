@@ -74,6 +74,13 @@ std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
     return chunk;
 }
 
+void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
+{
+    prepend(chunk);
+    if (headerIterator.getPosition() != 0)
+        data->moveIterator(headerIterator, chunk->getChunkLength());
+}
+
 std::shared_ptr<Chunk> Packet::peekTrailer(int64_t length) const
 {
     return data->peek(trailerIterator, length);
@@ -90,6 +97,13 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
     if (chunk != nullptr)
         data->moveIterator(trailerIterator, -chunk->getChunkLength());
     return chunk;
+}
+
+void Packet::pushTrailer(const std::shared_ptr<Chunk>& chunk)
+{
+    append(chunk);
+    if (trailerIterator.getPosition() != 0)
+        data->moveIterator(trailerIterator, chunk->getChunkLength());
 }
 
 std::shared_ptr<Chunk> Packet::peekData(int64_t length) const
