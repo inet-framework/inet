@@ -24,6 +24,7 @@ class SequenceChunk extends cObject;
 
 class CompoundHeader extends SequenceChunk
 {
+    @customize();
     string serializerClassName = "inet::CompoundHeaderSerializer";
 }
 
