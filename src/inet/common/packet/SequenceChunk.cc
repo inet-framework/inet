@@ -34,6 +34,13 @@ SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
 {
 }
 
+std::shared_ptr<Chunk> SequenceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+{
+    auto sequenceChunk = std::make_shared<SequenceChunk>();
+    sequenceChunk->insertToEnd(std::make_shared<SliceChunk>(chunk, offset, length));
+    return sequenceChunk;
+}
+
 std::deque<std::shared_ptr<Chunk>> SequenceChunk::dupChunks() const
 {
     std::deque<std::shared_ptr<Chunk>> copies;
@@ -261,6 +268,8 @@ bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 bool SequenceChunk::removeFromBeginning(int64_t length)
 {
+    assert(0 <= length && length <= getChunkLength());
+    assertMutable();
     handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
@@ -283,6 +292,8 @@ bool SequenceChunk::removeFromBeginning(int64_t length)
 
 bool SequenceChunk::removeFromEnd(int64_t length)
 {
+    assert(0 <= length && length <= getChunkLength());
+    assertMutable();
     handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
@@ -305,7 +316,7 @@ bool SequenceChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && length == getChunkLength())
+    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else {
         if (auto chunk = peekWithIterator(iterator, length))

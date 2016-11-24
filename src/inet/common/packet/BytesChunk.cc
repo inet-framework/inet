@@ -38,11 +38,13 @@ std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, c
 {
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
-    std::vector<uint8_t> chunkBytes;
-    int byteCount = length == -1 ? outputStream.getSize() : length;
-    for (int64_t i = 0; i < byteCount; i++)
-        chunkBytes.push_back(outputStream[offset + i]);
-    return std::make_shared<BytesChunk>(chunkBytes);
+    std::vector<uint8_t> bytes;
+    int64_t chunkLength = chunk->getChunkLength();
+    int64_t resultLength = length == -1 ? chunkLength - offset : length;
+    assert(0 <= resultLength && resultLength <= chunkLength);
+    for (int64_t i = 0; i < resultLength; i++)
+        bytes.push_back(outputStream[offset + i]);
+    return std::make_shared<BytesChunk>(bytes);
 }
 
 void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
@@ -79,7 +81,7 @@ bool BytesChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 bool BytesChunk::removeFromBeginning(int64_t length)
 {
-    assert(length <= bytes.size());
+    assert(0 <= length && length <= bytes.size());
     assertMutable();
     handleChange();
     bytes.erase(bytes.begin(), bytes.begin() + length);
@@ -88,7 +90,7 @@ bool BytesChunk::removeFromBeginning(int64_t length)
 
 bool BytesChunk::removeFromEnd(int64_t length)
 {
-    assert(length <= bytes.size());
+    assert(0 <= length && length <= bytes.size());
     assertMutable();
     handleChange();
     bytes.erase(bytes.end() - length, bytes.end());
@@ -97,7 +99,7 @@ bool BytesChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && length == getChunkLength())
+    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
         return const_cast<BytesChunk *>(this)->shared_from_this();
     else
         return std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition(), length == -1 ? bytes.end() : bytes.begin() + iterator.getPosition() + length));

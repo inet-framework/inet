@@ -40,31 +40,32 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset, int6
     length(length == -1 ? chunk->getChunkLength() - offset : length)
 {
     chunk->assertImmutable();
-    assert(this->offset >= 0);
-    assert(this->length >= 0);
+    int64_t chunkLength = chunk->getChunkLength();
+    assert(0 <= this->offset && this->offset <= chunkLength);
+    assert(0 <= this->length && this->offset + this->length <= chunkLength);
 }
 
 std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
-    int64_t sliceChunkOffset = offset == -1 ? 0 : offset;
-    int64_t sliceChunkLength = length == -1 ? chunk->getChunkLength() - sliceChunkOffset : length;
-    assert(sliceChunkOffset >= 0);
-    assert(sliceChunkLength >= 0);
     chunk->assertImmutable();
-    return std::make_shared<SliceChunk>(chunk, sliceChunkOffset, sliceChunkLength);
+    int64_t chunkLength = chunk->getChunkLength();
+    int64_t sliceLength = length == -1 ? chunkLength - offset : length;
+    assert(0 <= offset && offset <= chunkLength);
+    assert(0 <= sliceLength && sliceLength <= chunkLength);
+    return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
 }
 
 void SliceChunk::setOffset(int64_t offset)
 {
     assertMutable();
-    assert(offset >= 0);
+    assert(0 <= offset && offset <= chunk->getChunkLength());
     this->offset = offset;
 }
 
 void SliceChunk::setLength(int64_t length)
 {
     assertMutable();
-    assert(length >= 0);
+    assert(0 <= length && length <= chunk->getChunkLength());
     this->length = length;
 }
 
@@ -105,7 +106,7 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 bool SliceChunk::removeFromBeginning(int64_t length)
 {
-    assert(length <= this->length);
+    assert(0 <= length && length <= this->length);
     assertMutable();
     handleChange();
     this->offset += length;
@@ -115,7 +116,7 @@ bool SliceChunk::removeFromBeginning(int64_t length)
 
 bool SliceChunk::removeFromEnd(int64_t length)
 {
-    assert(length <= this->length);
+    assert(0 <= length && length <= this->length);
     assertMutable();
     handleChange();
     this->length -= length;
@@ -124,7 +125,7 @@ bool SliceChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && length == getChunkLength())
+    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
         return const_cast<SliceChunk *>(this)->shared_from_this();
     else {
         Iterator sliceIterator(iterator);

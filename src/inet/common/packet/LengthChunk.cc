@@ -38,7 +38,10 @@ LengthChunk::LengthChunk(int64_t length) :
 
 std::shared_ptr<Chunk> LengthChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
-    return std::make_shared<LengthChunk>(length == -1 ? chunk->getChunkLength() : length);
+    int64_t chunkLength = chunk->getChunkLength();
+    int64_t resultLength = length == -1 ? chunkLength - offset : length;
+    assert(0 <= resultLength && resultLength <= chunkLength);
+    return std::make_shared<LengthChunk>(resultLength);
 }
 
 void LengthChunk::setLength(int64_t length)
@@ -76,7 +79,7 @@ bool LengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 bool LengthChunk::removeFromBeginning(int64_t length)
 {
-    assert(length <= this->length);
+    assert(0 <= length && length <= this->length);
     assertMutable();
     handleChange();
     this->length -= length;
@@ -85,7 +88,7 @@ bool LengthChunk::removeFromBeginning(int64_t length)
 
 bool LengthChunk::removeFromEnd(int64_t length)
 {
-    assert(length <= this->length);
+    assert(0 <= length && length <= this->length);
     assertMutable();
     handleChange();
     this->length -= length;
@@ -94,7 +97,7 @@ bool LengthChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> LengthChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && length == getChunkLength())
+    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
         return const_cast<LengthChunk *>(this)->shared_from_this();
     else
         return std::make_shared<LengthChunk>(length == -1 ? getChunkLength() - iterator.getPosition() : length);
