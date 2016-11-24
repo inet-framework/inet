@@ -243,11 +243,15 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /**
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk. The designated part starts at the provided offset
-     * and has the provided length, both measured in bytes.
+     * and has the provided length, both measured in bytes. This function isn't
+     * a constructor to allow creating instances of message compiler generated
+     * field based chunk classes.
      */
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
     Chunk();
     Chunk(const Chunk& other);
     virtual ~Chunk();
@@ -256,12 +260,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Returns a mutable copy of this chunk in a shared pointer.
      */
     virtual std::shared_ptr<Chunk> dupShared() const { return std::shared_ptr<Chunk>(static_cast<Chunk *>(dup())); };
-
-    /**
-     * Returns the type of this chunk as an enum member. This can be used to
-     * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.
-     */
-    virtual Type getChunkType() const { return TYPE_FIELD; }
+    //@}
 
     /** @name Mutability related functions */
     //@{
@@ -335,6 +334,12 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /** @name Chunk querying related functions */
     //@{
     /**
+     * Returns the type of this chunk as an enum member. This can be used to
+     * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.
+     */
+    virtual Type getChunkType() const { return TYPE_FIELD; }
+
+    /**
      * Returns the length of data measured in bytes represented by this chunk.
      */
     virtual int64_t getChunkLength() const = 0;
@@ -372,13 +377,13 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         else
             return nullptr;
     }
-    //@}
 
     /**
      * Returns a human readable string representation of the data present in
      * this chunk.
      */
     virtual std::string str() const override;
+    //@}
 
   public:
     /** @name Chunk serialization related functions */
