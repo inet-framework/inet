@@ -59,12 +59,8 @@ void Chunk::handleChange()
 std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
     ByteOutputStream outputStream;
-    serialize(outputStream, chunk);
-    auto& outputBytes = outputStream.getBytes();
-    auto begin = outputBytes.begin() + offset;
-    auto end = length == -1 ? outputBytes.end() : outputBytes.begin() + offset + length;
-    std::vector<uint8_t> inputBytes(begin, end);
-    ByteInputStream inputStream(inputBytes);
+    serialize(outputStream, chunk, offset, length);
+    ByteInputStream inputStream(outputStream.getBytes());
     return deserialize(inputStream, typeInfo);
 }
 
