@@ -14,12 +14,13 @@
 //
 
 cplusplus {{
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/common/packet/SequenceChunk.h"
 }}
 
 namespace inet;
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 class SequenceChunk extends cObject;
 
 class CompoundHeader extends SequenceChunk
@@ -28,7 +29,7 @@ class CompoundHeader extends SequenceChunk
     string serializerClassName = "inet::CompoundHeaderSerializer";
 }
 
-class TlvHeader extends Chunk
+class TlvHeader extends FieldsChunk
 {
     int8_t type = -1;
     int64_t chunkLength = -1;

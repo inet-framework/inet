@@ -29,7 +29,7 @@ Register_Serializer(TlvHeader1Serializer);
 Register_Serializer(TlvHeader2Serializer);
 Define_Module(UnitTest);
 
-std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
 {
     auto compoundHeader = std::make_shared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;

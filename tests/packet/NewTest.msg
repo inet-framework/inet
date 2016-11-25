@@ -14,12 +14,12 @@
 //
 
 cplusplus {{
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 class SequenceChunk extends cObject;
 
 enum Protocol
@@ -36,7 +36,7 @@ enum BitError
     BIT_ERROR_CRC = 2;
 }
 
-class ApplicationHeader extends Chunk
+class ApplicationHeader extends FieldsChunk
 {
     @str;
     string serializerClassName = "inet::ApplicationHeaderSerializer";
@@ -44,7 +44,7 @@ class ApplicationHeader extends Chunk
     int16_t someData = -1;
 }
 
-class TcpHeader extends Chunk
+class TcpHeader extends FieldsChunk
 {
     @str;
     string serializerClassName = "inet::TcpHeaderSerializer";
@@ -56,7 +56,7 @@ class TcpHeader extends Chunk
     int bitError @enum(BitError) = -1;
 }
 
-class IpHeader extends Chunk
+class IpHeader extends FieldsChunk
 {
     @str;
     string serializerClassName = "inet::IpHeaderSerializer";
@@ -64,7 +64,7 @@ class IpHeader extends Chunk
     int16_t protocol @enum(Protocol) = -1;
 }
 
-class EthernetHeader extends Chunk
+class EthernetHeader extends FieldsChunk
 {
     @str;
     string serializerClassName = "inet::EthernetHeaderSerializer";
