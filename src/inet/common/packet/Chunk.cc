@@ -42,27 +42,18 @@ Chunk::Iterator::Iterator(const Iterator& other) :
 }
 
 Chunk::Chunk() :
-    flags(0),
-    serializedBytes(nullptr)
+    flags(0)
 {
 }
 
 Chunk::Chunk(const Chunk& other) :
-    flags(other.flags & ~FLAG_IMMUTABLE),
-    serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
+    flags(other.flags & ~FLAG_IMMUTABLE)
 {
-}
-
-Chunk::~Chunk()
-{
-    delete serializedBytes;
 }
 
 void Chunk::handleChange()
 {
     assertMutable();
-    delete serializedBytes;
-    serializedBytes = nullptr;
 }
 
 std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
@@ -77,40 +68,28 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
     return deserialize(inputStream, typeInfo);
 }
 
-void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk)
+void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
-    if (chunk->serializedBytes != nullptr)
-        stream.writeBytes(*chunk->serializedBytes);
-    else {
-        auto streamPosition = stream.getPosition();
-        auto serializerClassName = chunk->getSerializerClassName();
-        if (serializerClassName == nullptr)
-            throw cRuntimeError("Serializer class is unspecified");
-        auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
-        if (serializer == nullptr)
-            throw cRuntimeError("Serializer class not found");
-        serializer->serialize(stream, chunk);
-        delete serializer;
-        auto length = stream.getPosition() - streamPosition;
-        chunk->serializedBytes = stream.copyBytes(streamPosition, length);
-        ChunkSerializer::totalSerializedLength += length;
-    }
+    auto serializerClassName = chunk->getSerializerClassName();
+    if (serializerClassName == nullptr)
+        throw cRuntimeError("Serializer class is unspecified");
+    auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
+    if (serializer == nullptr)
+        throw cRuntimeError("Serializer class not found");
+    serializer->serialize(stream, chunk, offset, length);
+    delete serializer;
 }
 
 std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
 {
-    auto streamPosition = stream.getPosition();
     auto serializerClassName = std::string(opp_demangle_typename(typeInfo.name())) + std::string("Serializer");
     auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName.c_str()));
     if (serializer == nullptr)
         throw cRuntimeError("Serializer class not found");
-    auto chunk = serializer->deserialize(stream);
+    auto chunk = serializer->deserialize(stream, typeInfo);
     delete serializer;
     if (stream.isReadBeyondEnd())
         chunk->makeIncomplete();
-    auto length = stream.getPosition() - streamPosition;
-    chunk->serializedBytes = stream.copyBytes(streamPosition, length);
-    ChunkSerializer::totalDeserializedLength += length;
     return chunk;
 }
 

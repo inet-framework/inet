@@ -50,6 +50,7 @@ class cPacketChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
+    virtual Type getChunkType() const override { return TYPE_CPACKET; }
     virtual int64_t getChunkLength() const override { return packet->getByteLength(); }
 
     virtual std::string str() const override;

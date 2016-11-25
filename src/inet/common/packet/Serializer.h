@@ -35,36 +35,46 @@ class ChunkSerializer : public cObject
   public:
     virtual ~ChunkSerializer() { }
 
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const = 0;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const = 0;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const = 0;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
 class BytesChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 class LengthChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 class SliceChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 class SequenceChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
+};
+
+class FieldsChunkSerializer : public ChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const = 0;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const = 0;
+
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 } // namespace

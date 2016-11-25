@@ -148,8 +148,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         TYPE_LENGTH,
         TYPE_BYTES,
         TYPE_SLICE,
+        TYPE_CPACKET,
         TYPE_SEQUENCE,
-        TYPE_FIELD
+        TYPE_FIELDS
     };
 
     class Iterator
@@ -217,15 +218,10 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     static bool enableImplicitChunkSerialization;
 
   protected:
-    uint16_t flags;
     /**
-     * The serialized representation of this chunk or nullptr if not available.
-     * When a chunk is serialized, the result is stored here for fast subsequent
-     * serializations. Moreover, if a chunk is created by deserialization, then
-     * the original bytes are also stored here. The serialized representation
-     * is deleted if a chunk is modified.
+     * TODO
      */
-    std::vector<uint8_t> *serializedBytes;
+    uint16_t flags;
 
   protected:
     /**
@@ -254,7 +250,6 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     //@{
     Chunk();
     Chunk(const Chunk& other);
-    virtual ~Chunk();
 
     /**
      * Returns a mutable copy of this chunk in a shared pointer.
@@ -337,7 +332,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Returns the type of this chunk as an enum member. This can be used to
      * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.
      */
-    virtual Type getChunkType() const { return TYPE_FIELD; }
+    virtual Type getChunkType() const = 0;
 
     /**
      * Returns the length of data measured in bytes represented by this chunk.
@@ -396,7 +391,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
      */
-    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk); // TODO: serialize a part only?
+    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
 
     /**
      * Deserializes a chunk from the given stream. The returned chunk will be
