@@ -363,7 +363,7 @@ void PingApp::sendPingRequest()
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
             const auto& request = std::make_shared<ICMPMessage>();
-            request->setByteLength(4);
+            request->setChunkLength(4);
             request->setType(ICMP_ECHO_REQUEST);
             outPacket->prepend(request);
             outPacket->append(std::make_shared<cPacketChunk>(msg));
@@ -390,7 +390,7 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
             const auto& request = std::make_shared<EchoPacket>();
-            request->setByteLength(4);
+            request->setChunkLength(4);
             request->setType(ECHO_PROTOCOL_REQUEST);
             outPacket->prepend(request);
             outPacket->append(std::make_shared<cPacketChunk>(msg));

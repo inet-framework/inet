@@ -55,7 +55,7 @@ class PppHeader extends FieldsChunk
 
 class PppTrailer extends FieldsChunk
 {
-    int64_t byteLength = 2; //FIXME correct value is 3
+    int64_t chunkLength = 2; //FIXME correct value is 3, but old inet was used 2 bytes
     short fcs = 0;      // frame check sequence, 2 byte
     short flag = 0x7e;  // 1 byte, omitted for successive PPP packets
 }

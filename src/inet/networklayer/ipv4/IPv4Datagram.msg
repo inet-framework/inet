@@ -19,14 +19,14 @@
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 class noncobject TLVOptionBase;
 class noncobject TLVOptions;
 
@@ -172,7 +172,7 @@ class IPv4OptionUnknown extends IPv4Option
 //
 // Only one of the option fields can exist at a time.
 //
-class IPv4Datagram extends Chunk
+class IPv4Datagram extends FieldsChunk
 {
     @customize(true);
 
@@ -188,7 +188,7 @@ class IPv4Datagram extends Chunk
     bool moreFragments;
     bool dontFragment;
     int fragmentOffset;         // bytes, must be multiple of 8
-    int totalLengthField = -1;       // -1 means: getTotalLengthField() uses getByteLength()
+    int totalLengthField;
     unsigned char typeOfService;  // ToS byte
     abstract int diffServCodePoint;  // maps to bits 0-5 of ToS
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of ToS

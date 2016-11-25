@@ -208,7 +208,7 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
     if (packet->hasBitError()) {
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getByteLength();
+        double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getChunkLength();
         if (dblrand() <= relativeHeaderLength) {
             EV_WARN << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             sendIcmpError(packet, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);

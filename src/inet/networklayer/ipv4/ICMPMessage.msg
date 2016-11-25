@@ -19,12 +19,12 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 //
 // The real ICMP codes
 //
@@ -121,10 +121,10 @@ inline bool isIcmpInfoType(int type)
 // in a "length became negative" error; use getEncapsulatedMsg() instead.
 //
 // TODO: add originator id and sequence number and create an ICMPControlInfo
-class ICMPMessage extends Chunk
+class ICMPMessage extends FieldsChunk
 {
     int type = -1 @enum(ICMPType);   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
-    int64_t byteLength = 4;
+    int64_t chunkLength = 4;
 }

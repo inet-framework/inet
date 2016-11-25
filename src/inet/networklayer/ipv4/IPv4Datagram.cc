@@ -25,7 +25,7 @@ Register_Class(IPv4Datagram);
 
 int IPv4Datagram::getTotalLengthField() const
 {
-    return totalLengthField == -1 ? getByteLength() : totalLengthField;
+    return totalLengthField;
 }
 
 TLVOptionBase *IPv4Datagram::findOptionByType(short int optionType, int index)
