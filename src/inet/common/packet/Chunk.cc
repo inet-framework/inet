@@ -20,27 +20,6 @@ namespace inet {
 
 bool Chunk::enableImplicitChunkSerialization = true;
 
-Chunk::Iterator::Iterator(int64_t position) :
-    isForward_(true),
-    position(position),
-    index(position == 0 ? 0 : -1)
-{
-}
-
-Chunk::Iterator::Iterator(bool isForward, int64_t position, int index) :
-    isForward_(isForward),
-    position(position),
-    index(index)
-{
-}
-
-Chunk::Iterator::Iterator(const Iterator& other) :
-    isForward_(other.isForward_),
-    position(other.position),
-    index(other.index)
-{
-}
-
 Chunk::Chunk() :
     flags(0)
 {

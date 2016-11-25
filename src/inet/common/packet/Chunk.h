@@ -163,9 +163,9 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         int index;
 
       public:
-        Iterator(int64_t position);
-        explicit Iterator(bool isForward = true, int64_t position = 0, int index = 0);
-        Iterator(const Iterator& other);
+        Iterator(int64_t position) : isForward_(true), position(position), index(position == 0 ? 0 : -1) { }
+        explicit Iterator(bool isForward = true, int64_t position = 0, int index = 0) : isForward_(isForward), position(position), index(index) { }
+        Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { }
 
         bool isForward() const { return isForward_; }
         bool isBackward() const { return !isForward_; }
@@ -183,15 +183,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class ForwardIterator : public Iterator
     {
       public:
-        ForwardIterator(int64_t position) :
-            Iterator(true, position, -1)
-        {
-        }
-
-        explicit ForwardIterator(int64_t position = 0, int index = 0) :
-            Iterator(true, position, index)
-        {
-        }
+        ForwardIterator(int64_t position) : Iterator(true, position, -1) { }
+        explicit ForwardIterator(int64_t position = 0, int index = 0) : Iterator(true, position, index) { }
     };
 
     /**
@@ -200,15 +193,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     class BackwardIterator : public Iterator
     {
       public:
-        BackwardIterator(int64_t position) :
-            Iterator(false, position, -1)
-        {
-        }
-
-        explicit BackwardIterator(int64_t position = 0, int index = 0) :
-            Iterator(false, position, index)
-        {
-        }
+        BackwardIterator(int64_t position) : Iterator(false, position, -1) { }
+        explicit BackwardIterator(int64_t position = 0, int index = 0) : Iterator(false, position, index) { }
     };
 
   public:
