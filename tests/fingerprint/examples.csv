@@ -35,6 +35,7 @@
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           fd0f-6c4c/tplx
 /examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            5db5-ee70/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            00bb-3a7f/tplx
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            baea-6c2a/tplx
 
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             6f98-b9d9/tplx
