@@ -21,6 +21,8 @@
 
 namespace inet {
 
+class ChunkSerializer;
+
 /**
  * This class represents a piece of data that is usually part of a packet or
  * some other data such as a protocol buffer. The chunk interface is designed
@@ -244,6 +246,8 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * field based chunk classes.
      */
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
+
+    static ChunkSerializer *createSerializer(const char *serializerClassName);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
