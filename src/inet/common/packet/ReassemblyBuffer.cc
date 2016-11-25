@@ -80,12 +80,16 @@ void NewReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegio
 {
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
-        if (previousRegion.data->isMutable() && previousRegion.data->insertToEnd(nextRegion.data))
+        if (previousRegion.data->isMutable() && previousRegion.data->insertToEnd(nextRegion.data)) {
             // merge into previous
+            previousRegion.data = previousRegion.data->peek(0);
             nextRegion.data = nullptr;
-        else if (nextRegion.data->isMutable() && nextRegion.data->insertToBeginning(previousRegion.data))
+        }
+        else if (nextRegion.data->isMutable() && nextRegion.data->insertToBeginning(previousRegion.data)) {
             // merge into next
             previousRegion.data = nullptr;
+            nextRegion.data = nextRegion.data->peek(0);
+        }
         else {
             // merge as a sequence
             auto sequenceChunk = std::make_shared<SequenceChunk>();

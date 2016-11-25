@@ -131,15 +131,16 @@ bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
         auto& firstChunk = chunks.front();
         if (firstChunk->isImmutable() && chunk->isImmutable()) {
             auto mergedChunk = firstChunk->dupShared();
-            if (mergedChunk->insertToBeginning(chunk)) {
-                if (mergedChunk->getChunkType() == TYPE_SLICE) {
-                    auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
-                    if (sliceChunk->getOffset() == 0 && sliceChunk->getChunkLength() == sliceChunk->getChunk()->getChunkLength()) {
-                        chunks.front() = sliceChunk->getChunk();
-                        return true;
-                    }
-                }
-            }
+            if (mergedChunk->insertToBeginning(chunk)) // {
+                chunks.front() = mergedChunk->peek(0);
+//                if (mergedChunk->getChunkType() == TYPE_SLICE) {
+//                    auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
+//                    if (sliceChunk->getOffset() == 0 && sliceChunk->getChunkLength() == sliceChunk->getChunk()->getChunkLength()) {
+//                        chunks.front() = sliceChunk->getChunk();
+//                        return true;
+//                    }
+//                }
+//            }
         }
     }
     return false;
@@ -151,15 +152,16 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
         auto& lastChunk = chunks.back();
         if (lastChunk->isImmutable() && chunk->isImmutable()) {
             auto mergedChunk = lastChunk->dupShared();
-            if (mergedChunk->insertToEnd(chunk)) {
-                if (mergedChunk->getChunkType() == TYPE_SLICE) {
-                    auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
-                    if (sliceChunk->getOffset() == 0 && sliceChunk->getChunkLength() == sliceChunk->getChunk()->getChunkLength()) {
-                        chunks.back() = sliceChunk->getChunk();
-                        return true;
-                    }
-                }
-            }
+            if (mergedChunk->insertToEnd(chunk)) // {
+                chunks.back() = mergedChunk->peek(0);
+//                if (mergedChunk->getChunkType() == TYPE_SLICE) {
+//                    auto sliceChunk = std::static_pointer_cast<SliceChunk>(mergedChunk);
+//                    if (sliceChunk->getOffset() == 0 && sliceChunk->getChunkLength() == sliceChunk->getChunk()->getChunkLength()) {
+//                        chunks.back() = sliceChunk->getChunk();
+//                        return true;
+//                    }
+//                }
+//            }
         }
     }
     return false;
