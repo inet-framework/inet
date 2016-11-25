@@ -25,6 +25,10 @@ namespace omnetpp { }  // so "using namespace omnetpp" in INETDefs.h doesn't cau
 
 namespace inet {
 
+#if OMNETPP_BUILDNUM < 1008
+#define Register_Figure(x, y)   Register_Class(y)
+#endif
+
 #if OMNETPP_VERSION < 0x501
 #define cResultFilterType cResultFilterDescriptor
 #endif

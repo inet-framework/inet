@@ -22,7 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Class(CounterFigure);
+Register_Figure(counter, CounterFigure);
 
 static const int PADDING = 4;
 static const int DIGIT_PADDING = 2;

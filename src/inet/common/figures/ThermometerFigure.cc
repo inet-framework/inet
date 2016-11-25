@@ -22,7 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Class(ThermometerFigure);
+Register_Figure(thermometer, ThermometerFigure);
 
 static const double CONTAINER_LINE_WIDTH_PERCENT = 0.05;
 static const double TICK_LINE_WIDTH_PERCENT = 0.01;

@@ -24,7 +24,7 @@ using namespace inet;
 static const char *PKEY_TEXT_FORMAT = "textFormat";
 static const char *PKEY_INITIAL_VALUE = "initialValue";
 
-Register_Class(IndicatorLabelFigure);
+Register_Figure(indicatorLabel, IndicatorLabelFigure);
 
 const char **IndicatorLabelFigure::getAllowedPropertyKeys() const
 {

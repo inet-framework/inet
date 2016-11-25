@@ -22,7 +22,7 @@
 using namespace inet;
 // namespace inet {
 
-Register_Class(PlotFigure);
+Register_Figure(Plot, PlotFigure);
 
 #define M_PI    3.14159265358979323846
 static const char *INIT_PLOT_COLOR = "blue";
