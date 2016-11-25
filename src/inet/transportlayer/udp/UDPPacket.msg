@@ -19,7 +19,7 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
@@ -28,7 +28,7 @@ enum UdpConstants{
     UDP_HEADER_BYTES = 8;
 };
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 
 enum BitError
 {
@@ -40,7 +40,7 @@ enum BitError
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //
-class UDPHeader extends Chunk
+class UDPHeader extends FieldsChunk
 {
     @customize(true);
     unsigned short srcPort;

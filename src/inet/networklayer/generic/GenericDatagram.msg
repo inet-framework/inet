@@ -17,7 +17,7 @@
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
@@ -25,7 +25,7 @@ cplusplus {{
 
 namespace inet;
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 class noncobject L3Address;
 class noncobject TLVOptions;
 
@@ -46,7 +46,7 @@ enum GenericTLVOptionTypes
 //
 // Represents a generic network datagram with generic network addresses. 
 //
-class GenericDatagramHeader extends Chunk
+class GenericDatagramHeader extends FieldsChunk
 {
     @customize(true);
     int64_t chunkLength = 10;    //FIXME //KLUDGE set to -1, and should reading from ned parameter

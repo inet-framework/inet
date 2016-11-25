@@ -25,6 +25,7 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
@@ -33,7 +34,7 @@ cplusplus {{
 const int PPP_OVERHEAD_BYTES = 7;
 }}
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 
 
 //
@@ -43,7 +44,7 @@ class Chunk extends cObject;
 // Flag (=0x7e), address (=0xff), control (=0x03), CRC (bitError())
 //
 // CRC is modelled only via cMessage's bit error attribute.
-class PppHeader extends Chunk
+class PppHeader extends FieldsChunk
 {
     int64_t chunkLength = 5;
     short flag = 0x7e;      //1 byte
@@ -52,7 +53,7 @@ class PppHeader extends Chunk
     int protocol = -1;      //2 byte
 }
 
-class PppTrailer extends Chunk
+class PppTrailer extends FieldsChunk
 {
     int64_t chunkLength = 3;
     short fcs = 0;      // frame check sequence, 2 byte
