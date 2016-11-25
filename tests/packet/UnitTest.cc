@@ -443,9 +443,9 @@ static void testReassembly()
     // TODO: dup is needed to make the chunk mutable and to be able to merge it
     buffer3.setData(0, applicationHeader1->peek(0, 5)->dupShared());
     buffer3.setData(5, applicationHeader1->peek(5, 5)->dupShared());
-    const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(buffer2.getData());
+    const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(buffer3.getData());
     assert(buffer3.isComplete());
-    // TODO: assert(applicationHeader2 != nullptr);
+    assert(applicationHeader2 != nullptr);
     // 4. out of order consecutive chunks
     NewReassemblyBuffer buffer4;
     buffer4.setData(0, std::make_shared<LengthChunk>(10));
