@@ -53,6 +53,12 @@ void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
     this->bytes = bytes;
 }
 
+void BytesChunk::setByte(int index, uint8_t byte)
+{
+    assertMutable();
+    bytes[index] = byte;
+}
+
 bool BytesChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     assertMutable();

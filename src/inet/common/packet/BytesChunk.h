@@ -56,6 +56,9 @@ class BytesChunk : public Chunk
     //@{
     const std::vector<uint8_t>& getBytes() const { return bytes; }
     void setBytes(const std::vector<uint8_t>& bytes);
+
+    uint8_t getByte(int index) const { return bytes[index]; }
+    void setByte(int index, uint8_t byte);
     //@}
 
     /** @name Overridden chunk functions */
