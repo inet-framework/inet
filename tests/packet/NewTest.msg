@@ -71,3 +71,12 @@ class EthernetHeader extends FieldsChunk
     int64_t chunkLength = 14;
     int16_t protocol @enum(Protocol) = -1;
 }
+
+class EthernetTrailer extends FieldsChunk
+{
+    @str;
+    string serializerClassName = "inet::EthernetTrailerSerializer";
+    int64_t chunkLength = 4;
+    int32_t crc = 0;
+    int bitError @enum(BitError) = -1;
+}

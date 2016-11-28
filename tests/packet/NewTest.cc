@@ -89,7 +89,10 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(ByteInputStream& stream) 
 {
     auto ipHeader = std::make_shared<IpHeader>();
     int64_t position = stream.getPosition();
-    ipHeader->setProtocol((Protocol)stream.readUint16());
+    Protocol protocol = (Protocol)stream.readUint16();
+    if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
+        ipHeader->makeIncorrect();
+    ipHeader->setProtocol(protocol);
     stream.readByteRepeatedly(0, ipHeader->getChunkLength() - stream.getPosition() + position);
     return ipHeader;
 }
@@ -136,6 +139,13 @@ std::string EthernetHeader::str() const
 {
     std::ostringstream os;
     os << "EthernetHeader, length = " << getChunkLength() << ", protocol = " << protocol;
+    return os.str();
+}
+
+std::string EthernetTrailer::str() const
+{
+    std::ostringstream os;
+    os << "EthernetTrailer, length = " << getChunkLength() << ", crc = " << crc;
     return os.str();
 }
 
