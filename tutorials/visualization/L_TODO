@@ -2,12 +2,30 @@
 			MediumOSGVisualizer.cc		line 325: auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
 			No source available for "0x72657a" 
 			
-- InfoVisualizerBase Question: module-nak tetszoleges valtozojat ki lehet iratni? (CObjectet pl)
+- InfoVisualizerBase Question: module-nak tetszőleges változóját ki lehet iratni? (CObjectet pl)
 	SOLUTION: *.visualizer.*.ieee80211Visualizer.nodeFilter = "**" legyen rajta cimke: ssid, jelerösség
-- egymasra lognak a 3dben a ip-cim es a signal
-- 2dben nem jelenik meg a transmission/reception ikon
-- nodeFilter, interfaceFilter list legyen vagy expression
-- amikor 2 célhoz megy videoStreamPk, networkRouteVisualizer.lineColor="red" nem lesz mindig piros
-- 3d-ben nem lehet valtoztatni a packetdropVisualizer.iconTintColor-t
-- linkBreakVisualizer pozicioja nem jo 3dben
+- egymásra lógnak a 3dben az interfaceTableVisualizer és a ieee80211Visualizer
 
+- amelyik node-nál nincs bekapcsolva interfaceTableVisualizer, ott a ieee80211Visualizer es a mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymásra lóg
+
+- 2dben nem jelenik meg a transmission/reception ikon
+
+- nodeFilter, interfaceFilter list legyen vagy expression
+
+- amikor 2 célhoz megy videoStreamPk, networkRouteVisualizer.lineColor="red" nem lesz mindig piros
+
+- 3d-ben nem lehet változtatni a packetdropVisualizer.iconTintColor-t
+
+- linkBreakVisualizer pozíciója nem jó 3dben
+
+- mediumVisualizer.communicationRangeColor & mediumVisualizer.interferenceRangeColor 2d-ben működik, 3d-ben nem
+
+- PhysicalLinkCanvasVisualizer & PhysicalLinkOsgVisualizer default lineColor és lineStyle megegyezhetne
+
+- PhysicalLinkVisualizer nyilai 3d-ben nem látszanak, indulhatnának a source node szélétől, mehetnének a destination node széléig, nem a közepéig
+
+- 3d-ben PhysicalLinkVisualizer.lineStyle csak "solid" lehet. "Dotted" vagy "dashed" csak 2d-ben látszik
+
+- 3d-ben infoVisualizer és mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymáson van
+
+- obstacleLossVisualizer.displayIntersectionTrail & obstacleLossVisualizer.displayFaceNormalVectorTrail 2d-ben és 3d-ben ellentétes színnel van jelölve: egyikben pirossal, másikban feketével. Vagy 2d-ben vagy 3d-ben ki kéne cserélni a színeket.

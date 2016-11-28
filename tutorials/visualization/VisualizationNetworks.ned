@@ -148,7 +148,7 @@ network VisualizationE extends VisualizationD
 network VisualizationF extends VisualizationE
 {
     submodules:
-        car[1]: WirelessHost {
+        car: WirelessHost {
             @display("p=215,122");
         }
         accessPoint2: AccessPoint {
