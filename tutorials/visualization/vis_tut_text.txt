@@ -82,7 +82,7 @@
 				- setting their movement direction with the changeAngleBy, and how often they change that with the changeInterval parameter
 				- we can set their speed
 			- adding visualizer parameters
-				- we can visualize the nodes velocity, orientation and we can display their movement trail with these settings
+				- we can visualize the nodes velocity and their movement trail with these settings
 	- Results:
 		- The ap is on its place
 		- In 3d the peds are moving in random directon, leaving a movement trail behind

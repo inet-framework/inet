@@ -4,4 +4,10 @@
 			
 - InfoVisualizerBase Question: module-nak tetszoleges valtozojat ki lehet iratni? (CObjectet pl)
 	SOLUTION: *.visualizer.*.ieee80211Visualizer.nodeFilter = "**" legyen rajta cimke: ssid, jelerösség
+- egymasra lognak a 3dben a ip-cim es a signal
+- 2dben nem jelenik meg a transmission/reception ikon
+- nodeFilter, interfaceFilter list legyen vagy expression
+- amikor 2 célhoz megy videoStreamPk, networkRouteVisualizer.lineColor="red" nem lesz mindig piros
+- 3d-ben nem lehet valtoztatni a packetdropVisualizer.iconTintColor-t
+- linkBreakVisualizer pozicioja nem jo 3dben
 

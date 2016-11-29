@@ -1,10 +1,8 @@
 /**
 @mainpage Visualization Tutorial for the INET Framework -- Part 1
 In this tutorial we show you, how to use the visualization module in the INET Framework. The tutorial contains a series of simulation models,
-numbered from 1 through 22. The communication is the same for the whole simulation.
-There are two servers, that send video stream to two cars through access points. In the park there are two pedestrians,
-who speak with each other by phone, also through access points. Three routers make the routing in the network statically.
-It doesn't seem too complicated, but in this tutorial our main focus is on the visualization, not on the operation of the network.
+numbered from 1 through 22. The models are of increasing complexity – they start from the basics and in each step,
+they introduce new INET features and concepts related to visualization module.
 Our goal is show the working of the visualization module and its submodules in INET.
 
 This is an advanced tutorial, and it assumes that you are familiar with creating
@@ -84,12 +82,13 @@ With the axis length we can change the axis' size on the map.
 
 @section s1results Results
 
-When we start the simulation we can see what we expected. There's the map of Boston downtown with the axis in that size, what we configure.
+When we start the simulation we can see what we expected. There's the map of Boston downtown with the axis in that size, that we configure.
 
 <img src="step1_result1.png" width="850">
 
 If we hold down the left mouse button, we can navigate on the map. Holding down the mouse wheel we can rotate the camera,
 and if we scroll up and down we can zoom out and in. If we click with the right mouse button, we can change between camera modes.
+In the top right corner of the playground, we can change between 3D Scene view mode and Module view.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -132,11 +131,11 @@ To achieve our goals, we have to modify our network.
 @skip network VisualizationB
 @until ####
 
-We add two pedestrians, and an access point to the configuration. To communicate with each other, we need an IPv4NetworkConfigurator and
+We need to add two pedestrians, and an access point to the network. To communicate with each other, we need an IPv4NetworkConfigurator and
 an Ieee80211ScalarRadioMedium submodule. The configurator prepares the network nodes to the communication, the radioMedium manages the media.
 
 In the ini file, we adjust the transmission power of the network nodes.
-We set two visualizer parameters the first one display the communication ranges, and the second one shows the interference ranges.
+We set two visualizer parameters: the first one display the communication ranges, and the second one shows the interference ranges.
 Below, there is the appropriate part of the ini file.
 
 @dontinclude omnetpp.ini
@@ -145,7 +144,7 @@ Below, there is the appropriate part of the ini file.
 
 @section s3results Results
 
-If we run the simulation in the 3D Scene view mode, we can see the three nodes and three blue circles around them. Each node is in a circle's center,
+If we run the simulation in the 3D Scene view mode, we can see the three nodes and three blue circles around them. Each node is in the center of a circle,
 that circle is the node's communication range.
 
 <img src="step3_result1.png">
@@ -156,7 +155,8 @@ The communication and interference ranges seem in the Module view mode too.
 
 <img src="step3_result2.png">
 
-We can verify the operation of the network, if we run the simulation. The pedestrians associate with the access point, so it works right.
+When we run the simulation, the pedestrians associate with the access point.
+In Module view mode there's a bubble message when it happens.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -203,7 +203,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s5goals Goals
 
-In this step we want to show how the pedestrians' move. To achieve our goal, we have to use the mobility visualizer submodule.
+In this step we want to show how the pedestrians move. To achieve our goal, we need to use the mobility visualizer submodule.
 
 @section s5model The model
 
@@ -213,18 +213,24 @@ Here is the configuration:
 @skipline [Config Visualization05]
 @until ####
 
-We have to adjust the nodes' mobility settings. The pedestrians move with "MassMobility", which means they move like people. We set their initial position,
-and a border, to they couldn't go out from the access point's communication range. We have more ways to set the nodes initial position.
-We can adjust that in meter, in this case the origin position counts, and we can add that in degree.
+We have to adjust the nodes' mobility settings. The pedestrians movement is calculated using "MassMobility".
+This is a random mobility model for a mobile host with a mass.
+We set their initial position, and a border, because we don't want to let them go out from the access point's communication range.
+We have more ways to set the nodes initial position.
+We can set that in meter, in this case the origin position counts, and we can add that in degree.
 The pedestrians' movement based on three parameters. The changing interval is the frequency of changing speed and angle,
 the change angle by change the direction of the movement, and the speed means the movement speed.
 
-After these settings we can display the movement of the pedestrians. We display a trail, that shows where the pedestrians come from, and we can show an arrow,
+After that we need to add some visualizer parameters. We can display the movement of the pedestrians. We display a trail,
+that shows where the pedestrians come from, and we can show an arrow,
 that shows us the velocity of the pedestrians, but we can see that in Module view mode only.
 
 @section s5results Results
 
-WIP
+If we run the simulation, here's what happens. The pedestrians move between borders that we adjust to them.
+<img src="step5_result1.gif">
+
+<img src="step5_result3.gif" width="850">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 

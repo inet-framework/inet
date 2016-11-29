@@ -11,10 +11,11 @@ All steps:
 	- waypoint files changed: point 1 --> last point
 		
 	Q:
-	- 2d-ben jol elfer a ieee80211Visualizer es a interfaceTableVisualizer, de 3d-ben egymason vannak
-	- amikor 2 célhoz megy videoStreamPk, akkor az egyiknél nem marad piros
-	- 2d-ben lehet valtoztatni a packetdropVisualizer.iconTintColor-t, 3d-ben nem valtozik
-	- linkBreakVisualizer 3dben
+	- 7: 2d-ben jol elfer a ieee80211Visualizer es a interfaceTableVisualizer, de 3d-ben egymason vannak
+	- 13: routingTable
+	- 18: amikor 2 célhoz megy videoStreamPk, akkor az egyiknél nem (sem?) marad piros
+	- 18: 3d-ben lehet valtoztatni a packetdropVisualizer.iconTintColor-t, 3d-ben nem valtozik
+	- 20: linkBreakVisualizer 3dben
 
 
 Step 1:
@@ -112,7 +113,6 @@ Step 16:
 Step 17:
 	- all accessPoints and routers Z position is negative!!! It counts at displayObstacleLoss
 		SOLVED
-	- Q: VisualizationF???
 
 
 Step 18:
@@ -120,6 +120,7 @@ Step 18:
 		SOLVED
 	- handover problem
 		SOLVED
+		- fadeout
 		
 		
 Step 19:

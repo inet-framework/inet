@@ -114,7 +114,7 @@ network VisualizationC extends VisualizationB
         switch0.ethg++ <--> Eth100M <--> router0.ethg++;
         videoStreamServer.ethg++ <--> Eth100M <--> switch0.ethg++;
 }
-
+//#### doxygen marker
 
 network VisualizationD extends VisualizationC
 {
@@ -133,7 +133,7 @@ network VisualizationD extends VisualizationC
         router0.pppg++ <--> Eth100M <--> router1.pppg++;
         accessPoint1.ethg++ <--> Eth100M <--> router1.ethg++;
 }
-
+//#### doxygen marker
 
 network VisualizationE extends VisualizationD
 {
@@ -143,7 +143,7 @@ network VisualizationE extends VisualizationD
                 @display("p=100,450");
         }
 }
-
+//#### doxygen marker
 
 network VisualizationF extends VisualizationE
 {
@@ -178,3 +178,4 @@ network VisualizationF extends VisualizationE
         router0.pppg++ <--> Eth100M <--> router3.pppg++;
         accessPoint3.ethg++ <--> Eth100M <--> router3.ethg++;
 }
+//#### doxygen marker
