@@ -21,7 +21,7 @@
 #include <map>
 #include <vector>
 #include "inet/common/INETDefs.h"
-#include "inet/common/ReassemblyBuffer.h"
+#include "inet/common/OldReassemblyBuffer.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
@@ -56,7 +56,7 @@ class INET_API IPv6FragBuf
     //
     struct DatagramBuffer
     {
-        ReassemblyBuffer buf;    // reassembly buffer
+        OldReassemblyBuffer buf;    // reassembly buffer
         IPv6Datagram *datagram = nullptr;    // the actual datagram
         simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };

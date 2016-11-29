@@ -20,23 +20,23 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/ReassemblyBuffer.h"
+#include "inet/common/OldReassemblyBuffer.h"
 
 namespace inet {
 
-ReassemblyBuffer::ReassemblyBuffer()
+OldReassemblyBuffer::OldReassemblyBuffer()
 {
     main.beg = main.end = 0;
     main.islast = false;
     fragments = nullptr;
 }
 
-ReassemblyBuffer::~ReassemblyBuffer()
+OldReassemblyBuffer::~OldReassemblyBuffer()
 {
     delete fragments;
 }
 
-bool ReassemblyBuffer::addFragment(ushort beg, ushort end, bool islast)
+bool OldReassemblyBuffer::addFragment(ushort beg, ushort end, bool islast)
 {
     merge(beg, end, islast);
 
@@ -44,7 +44,7 @@ bool ReassemblyBuffer::addFragment(ushort beg, ushort end, bool islast)
     return main.beg == 0 && main.islast;
 }
 
-void ReassemblyBuffer::merge(ushort beg, ushort end, bool islast)
+void OldReassemblyBuffer::merge(ushort beg, ushort end, bool islast)
 {
     if (main.end == beg) {
         // most typical case (<95%): new fragment follows last one
@@ -76,7 +76,7 @@ void ReassemblyBuffer::merge(ushort beg, ushort end, bool islast)
     }
 }
 
-void ReassemblyBuffer::mergeFragments()
+void OldReassemblyBuffer::mergeFragments()
 {
     RegionVector& frags = *fragments;
 

@@ -29,7 +29,7 @@ namespace inet {
  *
  * Currently used in IPv4FragBuf and IPv6FragBuf.
  */
-class INET_API ReassemblyBuffer
+class INET_API OldReassemblyBuffer
 {
   protected:
     // stores an offset range
@@ -62,12 +62,12 @@ class INET_API ReassemblyBuffer
     /**
      * Ctor.
      */
-    ReassemblyBuffer();
+    OldReassemblyBuffer();
 
     /**
      * Dtor.
      */
-    ~ReassemblyBuffer();
+    ~OldReassemblyBuffer();
 
     /**
      * Add a fragment, and returns true if reassembly has completed
