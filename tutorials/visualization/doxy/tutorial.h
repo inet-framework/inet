@@ -75,10 +75,10 @@ The ini file contains the parameters of these submodules.
 @until ####
 
 In this part of the file, there are some coordinate system and the scene visualizer parameters.
-At coordinate system parameters we set the longitude, latitude and altitude coordinate of the playground origin and we set the heading of it.
-At scene visualizer parameters we set the visualizer type and we add a mapfile to the simulation.
+Coordinate system parameters set the longitude, latitude and altitude coordinate of the playground origin and the heading of it.
+Scene visualizer parameters set the visualizer type. We add a map to the simulation with the mapFile parameter.
 Besides these options we turn off the playground shading and configure the opacity and the color of it.
-With the axis length we can change the axis' size on the map.
+With the axisLength we can change the axis' size on the map.
 
 @section s1results Results
 
@@ -86,7 +86,7 @@ When we start the simulation we can see what we expected. There's the map of Bos
 
 <img src="step1_result1.png" width="850">
 
-If we hold down the left mouse button, we can navigate on the map. Holding down the mouse wheel we can rotate the camera,
+If we hold down the left mouse button, we can navigate on the map. Holding down the mouse wheel or both mouse button at the same time we can rotate the camera,
 and if we scroll up and down we can zoom out and in. If we click with the right mouse button, we can change between camera modes.
 In the top right corner of the playground, we can change between 3D Scene view mode and Module view.
 
@@ -125,17 +125,20 @@ so we have to place them in each other's communication range. Our goal is the vi
 
 @section s3model The model
 
-To achieve our goals, we have to modify our network.
+This is our extended network file:
 
 @dontinclude VisualizationNetworks.ned
 @skip network VisualizationB
 @until ####
 
-We need to add two pedestrians, and an access point to the network. To communicate with each other, we need an IPv4NetworkConfigurator and
+To achieve our goal, we need to add two pedestrians, and an access point to the network. To communicate with each other, we need an IPv4NetworkConfigurator and
 an Ieee80211ScalarRadioMedium submodule. The configurator prepares the network nodes to the communication, the radioMedium manages the media.
 
-In the ini file, we adjust the transmission power of the network nodes.
-We set two visualizer parameters: the first one display the communication ranges, and the second one shows the interference ranges.
+In the ini file, we adjust the transmission power of the network nodes. The access point's transmission power is bigger. We have to do that,
+because by using the default transmission power parameter, the ranges will be too big by.
+Then we turn on the ranges.
+We can modify their color with the communicationRangeColor and interferenceRangeColor parameters.
+Now we set the communication ranges' color to red (by default it's blue), and the interference ranges' color to black (by default it's gray).
 Below, there is the appropriate part of the ini file.
 
 @dontinclude omnetpp.ini
@@ -144,7 +147,7 @@ Below, there is the appropriate part of the ini file.
 
 @section s3results Results
 
-If we run the simulation in the 3D Scene view mode, we can see the three nodes and three blue circles around them. Each node is in the center of a circle,
+If we run the simulation in the 3D Scene view mode, we can see the three nodes and three circles around them. Each node is in the center of a circle,
 that circle is the node's communication range.
 
 <img src="step3_result1.png">

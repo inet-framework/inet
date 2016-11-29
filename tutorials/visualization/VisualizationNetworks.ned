@@ -107,7 +107,7 @@ network VisualizationC extends VisualizationB
         }
         videoStreamServer: StandardHost {
             parameters:
-                @display("p=487,403");
+                @display("p=487,470");
         }
     connections:
         accessPoint0.ethg++ <--> Eth100M <--> router0.ethg++;
@@ -161,7 +161,7 @@ network VisualizationF extends VisualizationE
             @display("p=215,298");
         }
         tcpHost[2]: StandardHost {
-            @display("p=621,403");
+            @display("p=650,431");
         }
         switch1: EtherSwitch {
             @display("p=660,250");
@@ -178,4 +178,3 @@ network VisualizationF extends VisualizationE
         router0.pppg++ <--> Eth100M <--> router3.pppg++;
         accessPoint3.ethg++ <--> Eth100M <--> router3.ethg++;
 }
-//#### doxygen marker
