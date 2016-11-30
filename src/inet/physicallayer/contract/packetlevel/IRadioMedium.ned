@@ -27,4 +27,12 @@ moduleinterface IRadioMedium
 {
     parameters:
         @display("i=misc/sun_s");
+        @signal[radioAdded];
+        @signal[radioRemoved];
+        @signal[transmissionAdded];
+        @signal[transmissionRemoved];
+        @signal[transmissionStarted];
+        @signal[transmissionEnded];
+        @signal[receptionStarted];
+        @signal[receptionEnded];
 }
