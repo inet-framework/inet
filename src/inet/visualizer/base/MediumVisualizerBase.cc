@@ -22,6 +22,22 @@ namespace inet {
 
 namespace visualizer {
 
+MediumVisualizerBase::~MediumVisualizerBase()
+{
+    // NOTE: lookup the medium module again because it may have been deleted first
+    auto radioMediumModule = getModuleFromPar<cModule>(par("mediumModule"), this, false);
+    if (radioMediumModule != nullptr) {
+        radioMediumModule->unsubscribe(IRadioMedium::radioAddedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::radioRemovedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::transmissionAddedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::transmissionRemovedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::transmissionStartedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::transmissionEndedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::receptionStartedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::receptionEndedSignal, this);
+    }
+}
+
 void MediumVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
