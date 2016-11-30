@@ -51,19 +51,17 @@ using namespace inet::physicalenvironment;
 class INET_API IRadioMedium : public IPrintableObject
 {
   public:
-    class INET_API IMediumListener {
-      public:
-        virtual void radioAdded(const IRadio *radio) = 0;
-        virtual void radioRemoved(const IRadio *radio) = 0;
+    static simsignal_t radioAddedSignal;
+    static simsignal_t radioRemovedSignal;
 
-        virtual void transmissionAdded(const ITransmission *transmission) = 0;
-        virtual void transmissionRemoved(const ITransmission *transmission) = 0;
+    static simsignal_t transmissionAddedSignal;
+    static simsignal_t transmissionRemovedSignal;
 
-        virtual void transmissionStarted(const ITransmission *transmission) = 0;
-        virtual void transmissionEnded(const ITransmission *transmission) = 0;
-        virtual void receptionStarted(const IReception *reception) = 0;
-        virtual void receptionEnded(const IReception *reception) = 0;
-    };
+    static simsignal_t transmissionStartedSignal;
+    static simsignal_t transmissionEndedSignal;
+
+    static simsignal_t receptionStartedSignal;
+    static simsignal_t receptionEndedSignal;
 
   public:
     /**
@@ -214,10 +212,6 @@ class INET_API IRadioMedium : public IPrintableObject
      * result of the reception process.
      */
     virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const = 0;
-
-    // TODO: replace these with signals when global signals without subscribers optimization is done in omnetpp
-    virtual void addListener(IMediumListener *listener) = 0;
-    virtual void removeListener(IMediumListener *listener) = 0;
 };
 
 } // namespace physicallayer
