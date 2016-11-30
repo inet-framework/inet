@@ -26,7 +26,6 @@ class SequenceChunk extends cObject;
 class CompoundHeader extends SequenceChunk
 {
     @customize();
-    string serializerClassName = "inet::CompoundHeaderSerializer";
 }
 
 class TlvHeader extends FieldsChunk
@@ -37,18 +36,14 @@ class TlvHeader extends FieldsChunk
 
 class TlvHeader1 extends TlvHeader
 {
-    string serializerClassName = "inet::TlvHeader1Serializer";
-    bool boolValue = false;
-
     type = 1;
     chunkLength = 3;
+    bool boolValue = false;
 }
 
 class TlvHeader2 extends TlvHeader
 {
-    string serializerClassName = "inet::TlvHeader2Serializer";
-    int16_t int16Value = -1;
-
     type = 2;
     chunkLength = 4;
+    int16_t int16Value = -1;
 }

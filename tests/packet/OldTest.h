@@ -16,7 +16,7 @@
 #ifndef __NEWTEST_H_
 #define __NEWTEST_H_
 
-#include "inet/common/packet/Defs.h"
+#include "inet/common/INETDefs.h"
 #include "OldTest_m.h"
 
 namespace inet {

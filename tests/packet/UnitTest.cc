@@ -17,16 +17,17 @@
 #include "inet/common/packet/LengthChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
+#include "inet/common/packet/SerializerRegistry.h"
 #include "NewTest.h"
 #include "UnitTest_m.h"
 #include "UnitTest.h"
 
 namespace inet {
 
-Register_Serializer(CompoundHeaderSerializer);
-Register_Serializer(TlvHeaderSerializer);
-Register_Serializer(TlvHeader1Serializer);
-Register_Serializer(TlvHeader2Serializer);
+Register_Serializer(CompoundHeader, CompoundHeaderSerializer);
+Register_Serializer(TlvHeader, TlvHeaderSerializer);
+Register_Serializer(TlvHeader1, TlvHeader1Serializer);
+Register_Serializer(TlvHeader2, TlvHeader2Serializer);
 Define_Module(UnitTest);
 
 std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
@@ -34,7 +35,7 @@ std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& st
     auto compoundHeader = std::make_shared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
     auto ipHeader = ipHeaderSerializer.deserialize(stream);
-    compoundHeader->insertToEnd(ipHeader);
+    compoundHeader->insertAtEnd(ipHeader);
     return compoundHeader;
 }
 
@@ -100,6 +101,7 @@ static void testMutable()
     auto lengthChunk1 = std::make_shared<LengthChunk>(10);
     assert(lengthChunk1->isMutable());
     // 3. packet and chunk are still mutable after appending
+    // TODO: do not allow appending mutable chunks?
     packet1.append(lengthChunk1);
     assert(packet1.isMutable());
     assert(lengthChunk1->isMutable());
@@ -129,17 +131,19 @@ static void testComplete()
 
 static void testIncomplete()
 {
+    // TODO: how does one get a variable length incomplete chunk?
     // 1. packet doesn't provide incomplete header if complete is requested but there's not enough data
     Packet packet1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     packet1.append(applicationHeader1);
     packet1.makeImmutable();
     Packet fragment1;
-    fragment1.append(packet1.peekHeaderAt(0, 5));
+    fragment1.append(packet1.peekAt(0, 5));
     fragment1.makeImmutable();
     assert(!fragment1.hasHeader<ApplicationHeader>());
     const auto& applicationHeader2 = fragment1.peekHeader<ApplicationHeader>();
     assert(applicationHeader2 == nullptr);
+    // TODO: what does getChunkLength() return internally for an incomplete header?
     // 2. packet provides incomplete header if requested
     Packet packet2;
     auto tcpHeader1 = std::make_shared<TcpHeader>();
@@ -154,6 +158,7 @@ static void testIncomplete()
     assert(tcpHeader2->getChunkLength() == 8);
     assert(tcpHeader2->getBitError() == BIT_ERROR_CRC);
     assert(tcpHeader2->getSrcPort() == 1000);
+    // TODO: check length field and fields out of 8 bytes
 }
 
 static void testCorrect()
@@ -165,34 +170,54 @@ static void testCorrect()
 
 static void testIncorrect()
 {
-    // 1. chunk is incorrect after deserialization of erroneous packet
+    // 1. chunk is incorrect after going through lossy channel
+    Packet packet1;
+    auto applicationHeader1 = std::make_shared<ApplicationHeader>();
+    packet1.append(applicationHeader1);
+    packet1.makeImmutable();
+    applicationHeader1->makeIncorrect();
+    assert(applicationHeader1->isIncorrect());
+}
+
+static void testRepresented()
+{
+    // 1. chunk is represented after construction
+    auto lengthChunk1 = std::make_shared<LengthChunk>(10);
+    assert(lengthChunk1->isRepresented());
+}
+
+static void testMisrepresented()
+{
+    // 1. chunk is misrepresented after deserialization of erroneous packet
     Packet packet1;
     auto ipHeader1 = std::make_shared<IpHeader>();
     packet1.append(ipHeader1);
     packet1.makeImmutable();
-    assert(ipHeader1->isCorrect());
-    auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peek<BytesChunk>()->dupShared());
+    assert(ipHeader1->isRepresented());
+    auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peekAt<BytesChunk>(0)->dupShared());
     bytesChunk1->setByte(0, 42);
-    Packet packet2(bytesChunk1);
+    Packet packet2(nullptr, bytesChunk1);
     const auto& ipHeader2 = packet2.peekHeader<IpHeader>();
-    assert(ipHeader2->isIncorrect());
+    assert(ipHeader2->isMisrepresented());
+    // TODO: somewhat dubious
 }
 
 static void testHeader()
 {
     // 1. packet contains header after chunk is appended
     Packet packet1;
-    packet1.append(std::make_shared<LengthChunk>(10));
+    packet1.pushHeader(std::make_shared<LengthChunk>(10));
+    // TODO: peek default representation too
     const auto& lengthChunk1 = packet1.peekHeader<LengthChunk>();
     assert(lengthChunk1 != nullptr);
     // 2. packet moves header pointer after pop
-    packet1.popHeader<LengthChunk>();
-    assert(packet1.getHeaderPosition() == 10);
-    assert(packet1.getHeaderLength() + packet1.getDataLength() + packet1.getTrailerLength() == packet1.getPacketLength());
-    // 3. packet provides headers in normal order
+    // TODO: check return value
+    const auto& xxx = packet1.popHeader<LengthChunk>();
+    assert(packet1.getHeaderPopOffset() == 10);
+    // 3. packet provides headers in reverse prepend order
     Packet packet2;
-    packet2.append(std::make_shared<LengthChunk>(10));
-    packet2.append(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    packet2.pushHeader(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    packet2.pushHeader(std::make_shared<LengthChunk>(10));
     const auto& lengthChunk2 = packet2.popHeader<LengthChunk>();
     const auto& bytesChunk1 = packet2.popHeader<BytesChunk>();
     assert(lengthChunk2 != nullptr);
@@ -203,19 +228,19 @@ static void testHeader()
 
 static void testTrailer()
 {
+    // TODO: repeat as above
     // 1. packet contains trailer after chunk is appended
     Packet packet1;
-    packet1.append(std::make_shared<LengthChunk>(10));
+    packet1.pushTrailer(std::make_shared<LengthChunk>(10));
     const auto& lengthChunk1 = packet1.peekTrailer<LengthChunk>();
     assert(lengthChunk1 != nullptr);
     // 2. packet moves trailer pointer after pop
     packet1.popTrailer<LengthChunk>();
-    assert(packet1.getTrailerPosition() == 10);
-    assert(packet1.getHeaderLength() + packet1.getDataLength() + packet1.getTrailerLength() == packet1.getPacketLength());
+    assert(packet1.getTrailerPopOffset() == 0);
     // 3. packet provides trailers in reverse order
     Packet packet2;
-    packet2.append(std::make_shared<LengthChunk>(10));
-    packet2.append(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    packet2.pushTrailer(std::make_shared<LengthChunk>(10));
+    packet2.pushTrailer(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
     const auto& bytesChunk1 = packet2.popTrailer<BytesChunk>();
     const auto& lengthChunk2 = packet2.popTrailer<LengthChunk>();
     assert(bytesChunk1 != nullptr);
@@ -226,17 +251,18 @@ static void testTrailer()
 
 static void testEncapsulation()
 {
-    // 1. packet contains all chunks of encapsulated packet as appended
+    // 1. packet contains all chunks of encapsulated packet as is
     Packet packet1;
     packet1.append(std::make_shared<LengthChunk>(10));
     packet1.append(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
     // encapsulation packet with header and trailer
     auto& packet2 = packet1;
-    packet2.prepend(std::make_shared<EthernetHeader>());
-    packet2.append(std::make_shared<EthernetTrailer>());
+    packet2.pushHeader(std::make_shared<EthernetHeader>());
+    packet2.pushTrailer(std::make_shared<EthernetTrailer>());
     packet2.makeImmutable();
     const auto& ethernetHeader1 = packet2.popHeader<EthernetHeader>();
     const auto& ethernetTrailer1 = packet2.popTrailer<EthernetTrailer>();
+    // TODO: this test uses the default representation
     const auto& lengthChunk1 = std::dynamic_pointer_cast<LengthChunk>(packet2.peekDataAt(0, 10));
     const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(packet2.peekDataAt(10, 10));
     assert(ethernetHeader1 != nullptr);
@@ -249,7 +275,7 @@ static void testEncapsulation()
 
 static void testAggregation()
 {
-    // 1. packet contains all chunks of aggregated packets as appended
+    // 1. packet contains all chunks of aggregated packets as is
     Packet packet1;
     packet1.append(std::make_shared<LengthChunk>(10));
     packet1.makeImmutable();
@@ -259,8 +285,9 @@ static void testAggregation()
     Packet packet3;
     packet3.append(std::make_shared<IpHeader>());
     // aggregate other packets
-    packet3.append(packet1.peek());
-    packet3.append(packet2.peek());
+    // TODO: in generic version no default offset please
+    packet3.append(packet1.peekAt(0, packet2.getPacketLength()));
+    packet3.append(packet2.peekAt(0, packet2.getPacketLength()));
     packet3.makeImmutable();
     const auto& ipHeader1 = packet3.popHeader<IpHeader>();
     const auto& lengthChunk1 = std::dynamic_pointer_cast<LengthChunk>(packet3.peekDataAt(0, 10));
@@ -285,7 +312,8 @@ static void testFragmentation()
     packet2.append(packet1.peekAt(5, 10));
     packet2.makeImmutable();
     const auto& ipHeader1 = packet2.popHeader<IpHeader>();
-    const auto& fragment1 = packet2.peekData();
+    const auto& fragment1 = packet2.peekDataAt(0, packet2.getDataLength());
+    // TODO: dynamic cast default representation and check contents
     const auto& lengthChunk1 = fragment1->peek(0, 5);
     const auto& bytesChunk1 = fragment1->peek(5, 5);
     assert(ipHeader1 != nullptr);
@@ -307,14 +335,15 @@ static void testPolymorphism()
     tlvHeader2->setInt16Value(42);
     packet1.append(tlvHeader2);
     packet1.makeImmutable();
+    // TODO: move dynamic cast to a separate assert
     const auto& tlvHeader3 = std::dynamic_pointer_cast<TlvHeader1>(packet1.popHeader<TlvHeader>());
     assert(tlvHeader3 != nullptr);
     assert(tlvHeader3->getBoolValue());
     const auto& tlvHeader4 = std::dynamic_pointer_cast<TlvHeader2>(packet1.popHeader<TlvHeader>());
     assert(tlvHeader4 != nullptr);
     assert(tlvHeader4->getInt16Value() == 42);
-    // 2. packet provides serialized headers in a polymorphic way after deserialization
-    Packet packet2(packet1.peek<BytesChunk>());
+    // 2. packet provides deserialized headers in a polymorphic way after serialization
+    Packet packet2(nullptr, packet1.peekAt<BytesChunk>(0, packet1.getPacketLength()));
     const auto& tlvHeader5 = std::dynamic_pointer_cast<TlvHeader1>(packet2.popHeader<TlvHeader>());
     assert(tlvHeader5 != nullptr);
     assert(tlvHeader5->getBoolValue());
@@ -328,33 +357,36 @@ static void testSerialization()
     // 1. serialized bytes is cached after serialization
     ByteOutputStream stream1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
-    auto totalSerializedLength = ChunkSerializer::totalSerializedLength;
+    auto totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
     Chunk::serialize(stream1, applicationHeader1);
     auto size = stream1.getSize();
     assert(size != 0);
-    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
-    totalSerializedLength = ChunkSerializer::totalSerializedLength;
+    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
     Chunk::serialize(stream1, applicationHeader1);
     assert(stream1.getSize() == 2 * size);
-    assert(totalSerializedLength == ChunkSerializer::totalSerializedLength);
+    assert(totalSerializedBytes == ChunkSerializer::totalSerializedBytes);
+    // TODO: separate subtests with a new line
+
     // 2. serialized bytes is cached after deserialization
     ByteInputStream stream2(stream1.getBytes());
-    auto totalDeserializedLength = ChunkSerializer::totalDeserializedLength;
+    auto totalDeserializedBytes = ChunkSerializer::totalDeserializedBytes;
     auto applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(Chunk::deserialize(stream2, typeid(ApplicationHeader)));
-    assert(totalDeserializedLength + size == ChunkSerializer::totalDeserializedLength);
-    totalSerializedLength = ChunkSerializer::totalSerializedLength;
+    assert(totalDeserializedBytes + size == ChunkSerializer::totalDeserializedBytes);
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
     Chunk::serialize(stream1, applicationHeader2);
     assert(stream1.getSize() == 3 * size);
-    assert(totalSerializedLength == ChunkSerializer::totalSerializedLength);
+    assert(totalSerializedBytes == ChunkSerializer::totalSerializedBytes);
+
     // 3. serialized bytes is deleted after change
     applicationHeader1->setSomeData(42);
-    totalSerializedLength = ChunkSerializer::totalSerializedLength;
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
     Chunk::serialize(stream1, applicationHeader1);
-    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
+    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
     applicationHeader2->setSomeData(42);
-    totalSerializedLength = ChunkSerializer::totalSerializedLength;
+    totalSerializedBytes = ChunkSerializer::totalSerializedBytes;
     Chunk::serialize(stream1, applicationHeader2);
-    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
+    assert(totalSerializedBytes + size == ChunkSerializer::totalSerializedBytes);
 }
 
 static void testDuality()
@@ -365,19 +397,20 @@ static void testDuality()
     packet1.append(applicationHeader1);
     packet1.makeImmutable();
     const auto& applicationHeader2 = packet1.peekHeader<ApplicationHeader>();
-    const auto& bytesChunk1 = packet1.peekHeader<BytesChunk>();
+    const auto& bytesChunk1 = packet1.peekHeader<BytesChunk>(10);
     assert(applicationHeader2 != nullptr);
     assert(applicationHeader2->getChunkLength() == 10);
     assert(bytesChunk1 != nullptr);
     assert(bytesChunk1->getChunkLength() == 10);
     // 2. packet provides header in both fields and bytes representation after serialization
-    Packet packet2(packet1.peek<BytesChunk>());
+    Packet packet2(nullptr, packet1.peekAt<BytesChunk>(0, packet1.getPacketLength()));
     const auto& applicationHeader3 = packet2.peekHeader<ApplicationHeader>();
-    const auto& bytesChunk2 = packet2.peekHeader<BytesChunk>();
+    const auto& bytesChunk2 = packet2.peekHeader<BytesChunk>(10);
     assert(applicationHeader3 != nullptr);
     assert(applicationHeader3->getChunkLength() == 10);
     assert(bytesChunk2 != nullptr);
     assert(bytesChunk2->getChunkLength() == 10);
+    // TODO: compare chunks in all combinations
 }
 
 static void testMerging()
@@ -387,12 +420,14 @@ static void testMerging()
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     packet1.append(applicationHeader1);
     packet1.makeImmutable();
-    const auto& header1 = packet1.peekHeaderAt(0, 5);
-    const auto& header2 = packet1.peekHeaderAt(5, 5);
+    const auto& header1 = packet1.peekAt(0, 5);
+    const auto& header2 = packet1.peekAt(5, 5);
     Packet packet2;
     packet2.append(header1);
     packet2.append(header2);
     packet2.makeImmutable();
+    // TODO: default representation
+//    const auto& applicationHeader2 = packet2.peekHeader();
     const auto& applicationHeader2 = packet2.peekHeader<ApplicationHeader>();
     assert(applicationHeader2->isComplete());
     assert(applicationHeader2->getChunkLength() == 10);
@@ -401,7 +436,7 @@ static void testMerging()
     packet3.append(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
     packet3.append(std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
     packet3.makeImmutable();
-    const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(packet3.peek());
+    const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(packet3.peekAt(0, packet3.getPacketLength()));
     assert(bytesChunk1 != nullptr);
     assert(bytesChunk1->getChunkLength());
     assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}).begin()));
@@ -414,16 +449,18 @@ static void testNesting()
     auto ipHeader1 = std::make_shared<IpHeader>();
     ipHeader1->setProtocol(Protocol::Tcp);
     auto compoundHeader1 = std::make_shared<CompoundHeader>();
-    compoundHeader1->insertToEnd(ipHeader1);
+    compoundHeader1->insertAtEnd(ipHeader1);
     packet1.append(compoundHeader1);
     packet1.makeImmutable();
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
     assert(compoundHeader2 != nullptr);
     // 2. packet provides compound header after serialization
-    Packet packet2(packet1.peek<BytesChunk>());
+    // TODO: packet peek is misleading with BytesChunk and default length
+    // TODO: consider introducing an enum to replace -1 length values: UNTIL_END, INTERNAL_REP
+    Packet packet2(nullptr, packet1.peekAt<BytesChunk>(0, packet1.getPacketLength())); // TODO: 0, packet1.getPacketLength()));
     const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
     assert(compoundHeader3 != nullptr);
-    auto it = compoundHeader3->createForwardIterator();
+    auto it = Chunk::ForwardIterator(0, 0);
     const auto& ipHeader2 = compoundHeader3->Chunk::peek<IpHeader>(it);
     assert(ipHeader2 != nullptr);
     assert(ipHeader2->getProtocol() == Protocol::Tcp);
@@ -453,9 +490,9 @@ static void testPeekChunk()
     assert(sliceChunk1->getChunk() == sliceChunk2->getChunk());
     // 4a. SequenceChunk may return an element chunk
     auto sequenceChunk1 = std::make_shared<SequenceChunk>();
-    sequenceChunk1->insertToEnd(lengthChunk1);
-    sequenceChunk1->insertToEnd(bytesChunk1);
-    sequenceChunk1->insertToEnd(applicationHeader1);
+    sequenceChunk1->insertAtEnd(lengthChunk1);
+    sequenceChunk1->insertAtEnd(bytesChunk1);
+    sequenceChunk1->insertAtEnd(applicationHeader1);
     sequenceChunk1->makeImmutable();
     const auto& lengthChunk3 = std::dynamic_pointer_cast<LengthChunk>(sequenceChunk1->peek(0, 10));
     const auto& bytesChunk3 = std::dynamic_pointer_cast<BytesChunk>(sequenceChunk1->peek(10, 10));
@@ -472,6 +509,7 @@ static void testPeekChunk()
     assert(sliceChunk5 != nullptr);
     // 4c. SequenceChunk may return a SliceChunk using the original SequenceChunk
     const auto& sliceChunk6 = std::dynamic_pointer_cast<SliceChunk>(sequenceChunk1->peek(5, 20));
+    // TODO: check chunk in slice is the original sequence
     assert(sliceChunk6 != nullptr);
     // 5. any other chunk returns a SliceChunk
     auto applicationHeader3 = std::make_shared<ApplicationHeader>();
@@ -512,6 +550,7 @@ static void testDuplication()
     packet1.makeImmutable();
     auto packet2 = packet1.dup();
     assert(packet2->getPacketLength() == 10);
+    // 1 in the chunk + 2 in the packets
     assert(lengthChunk1.use_count() == 3);
     delete packet2;
     // 2. copy of mutable packet copies data
@@ -521,6 +560,7 @@ static void testDuplication()
     auto packet4 = packet3.dup();
     lengthChunk2->setLength(20);
     assert(packet4->getPacketLength() == 10);
+    // 1 in the chunk + 1 in the original packet
     assert(lengthChunk2.use_count() == 2);
     delete packet4;
     // 3. copy of immutable chunk in mutable packet shares data
@@ -530,6 +570,7 @@ static void testDuplication()
     lengthChunk3->makeImmutable();
     auto packet6 = packet5.dup();
     assert(packet6->getPacketLength() == 10);
+    // 1 in the chunk + 2 in the packets
     assert(lengthChunk3.use_count() == 3);
     delete packet6;
 }
@@ -554,62 +595,64 @@ static void testPeekBuffer()
     const auto& lengthChunk4 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
     assert(lengthChunk3 != nullptr);
     assert(lengthChunk4 != nullptr);
+    // TODO: more complete, use ApplicationHeader and slices
 }
 
 static void testReassemblyBuffer()
 {
     // 1. single chunk
-    NewReassemblyBuffer buffer1;
-    buffer1.setData(0, std::make_shared<LengthChunk>(10));
-    assert(buffer1.isComplete());
-    assert(buffer1.getData() != nullptr);
+    ReassemblyBuffer buffer1;
+    buffer1.replace(0, std::make_shared<LengthChunk>(10));
+    // TODO: rename to isContiguous()
+    assert(buffer1.getNumRegions() == 1);
+    assert(buffer1.getRegionData(0) != nullptr);
     // 2. consecutive chunks
-    NewReassemblyBuffer buffer2;
-    buffer2.setData(0, std::make_shared<LengthChunk>(10));
-    buffer2.setData(10, std::make_shared<LengthChunk>(10));
-    const auto& lengthChunk1 = std::dynamic_pointer_cast<LengthChunk>(buffer2.getData());
-    assert(buffer2.isComplete());
+    ReassemblyBuffer buffer2;
+    buffer2.replace(0, std::make_shared<LengthChunk>(10));
+    buffer2.replace(10, std::make_shared<LengthChunk>(10));
+    const auto& lengthChunk1 = std::dynamic_pointer_cast<LengthChunk>(buffer2.getRegionData(0));
+    assert(buffer2.getNumRegions() == 1);
     assert(lengthChunk1 != nullptr);
     // 3. consecutive slice chunks
-    NewReassemblyBuffer buffer3;
+    ReassemblyBuffer buffer3;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->makeImmutable();
     // TODO: dup is needed to make the chunk mutable and to be able to merge it
-    buffer3.setData(0, applicationHeader1->peek(0, 5)->dupShared());
-    buffer3.setData(5, applicationHeader1->peek(5, 5)->dupShared());
-    const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(buffer3.getData());
-    assert(buffer3.isComplete());
+    buffer3.replace(0, applicationHeader1->peek(0, 5)->dupShared());
+    buffer3.replace(5, applicationHeader1->peek(5, 5)->dupShared());
+    const auto& applicationHeader2 = std::dynamic_pointer_cast<ApplicationHeader>(buffer3.getRegionData(0));
+    assert(buffer3.getNumRegions() == 1);
     assert(applicationHeader2 != nullptr);
     // 4. out of order consecutive chunks
-    NewReassemblyBuffer buffer4;
-    buffer4.setData(0, std::make_shared<LengthChunk>(10));
-    buffer4.setData(20, std::make_shared<LengthChunk>(10));
-    buffer4.setData(10, std::make_shared<LengthChunk>(10));
-    const auto& lengthChunk2 = std::dynamic_pointer_cast<LengthChunk>(buffer4.getData());
-    assert(buffer4.isComplete());
+    ReassemblyBuffer buffer4;
+    buffer4.replace(0, std::make_shared<LengthChunk>(10));
+    buffer4.replace(20, std::make_shared<LengthChunk>(10));
+    buffer4.replace(10, std::make_shared<LengthChunk>(10));
+    const auto& lengthChunk2 = std::dynamic_pointer_cast<LengthChunk>(buffer4.getRegionData(0));
+    assert(buffer4.getNumRegions() == 1);
     assert(lengthChunk2 != nullptr);
     // 5. heterogeneous chunks
-    NewReassemblyBuffer buffer5;
-    buffer5.setData(0, std::make_shared<LengthChunk>(10));
-    buffer5.setData(10, std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
-    assert(buffer5.isComplete());
-    assert(buffer5.getData() != nullptr);
+    ReassemblyBuffer buffer5;
+    buffer5.replace(0, std::make_shared<LengthChunk>(10));
+    buffer5.replace(10, std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    assert(buffer5.getNumRegions() == 1);
+    assert(buffer5.getRegionData(0) != nullptr);
     // 6. completely overwriting a chunk
-    NewReassemblyBuffer buffer6;
-    buffer6.setData(1, std::make_shared<LengthChunk>(8));
-    buffer6.setData(0, std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
-    const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(buffer6.getData());
-    assert(buffer6.isComplete());
+    ReassemblyBuffer buffer6;
+    buffer6.replace(1, std::make_shared<LengthChunk>(8));
+    buffer6.replace(0, std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(buffer6.getRegionData(0));
+    assert(buffer6.getNumRegions() == 1);
     assert(bytesChunk1 != nullptr);
     // 7. partially overwriting multiple chunks
-    NewReassemblyBuffer buffer7;
-    buffer7.setData(0, std::make_shared<LengthChunk>(10));
-    buffer7.setData(10, std::make_shared<LengthChunk>(10));
-    buffer7.setData(5, std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
-    const auto& sequenceChunk1 = std::dynamic_pointer_cast<SequenceChunk>(buffer7.getData());
+    ReassemblyBuffer buffer7;
+    buffer7.replace(0, std::make_shared<LengthChunk>(10));
+    buffer7.replace(10, std::make_shared<LengthChunk>(10));
+    buffer7.replace(5, std::make_shared<BytesChunk>(std::vector<uint8_t>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})));
+    const auto& sequenceChunk1 = std::dynamic_pointer_cast<SequenceChunk>(buffer7.getRegionData(0));
     sequenceChunk1->makeImmutable();
     const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(sequenceChunk1->peek(5, 10));
-    assert(buffer7.isComplete());
+    assert(buffer7.getNumRegions() == 1);
     assert(sequenceChunk1 != nullptr);
     assert(bytesChunk2 != nullptr);
 }
@@ -622,6 +665,8 @@ void UnitTest::initialize()
     testIncomplete();
     testCorrect();
     testIncorrect();
+    testRepresented();
+    testMisrepresented();
     testHeader();
     testTrailer();
     testEncapsulation();
@@ -637,6 +682,8 @@ void UnitTest::initialize()
     testPeekPacket();
     testPeekBuffer();
     testReassemblyBuffer();
+
+    // TODO: error model example (think MPDU aggregation)
 }
 
 } // namespace

@@ -16,8 +16,6 @@
 #ifndef __UNITTEST_H_
 #define __UNITTEST_H_
 
-#include "inet/common/packet/Defs.h"
-
 namespace inet {
 
 class CompoundHeader : public CompoundHeader_Base

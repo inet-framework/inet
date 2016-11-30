@@ -39,7 +39,6 @@ enum BitError
 class ApplicationHeader extends FieldsChunk
 {
     @str;
-    string serializerClassName = "inet::ApplicationHeaderSerializer";
     int64_t chunkLength = 10;
     int16_t someData = -1;
 }
@@ -47,7 +46,6 @@ class ApplicationHeader extends FieldsChunk
 class TcpHeader extends FieldsChunk
 {
     @str;
-    string serializerClassName = "inet::TcpHeaderSerializer";
     int64_t chunkLength = -1;
     int16_t lengthField = -1;
     int16_t srcPort = -1;
@@ -59,7 +57,6 @@ class TcpHeader extends FieldsChunk
 class IpHeader extends FieldsChunk
 {
     @str;
-    string serializerClassName = "inet::IpHeaderSerializer";
     int64_t chunkLength = 20;
     int16_t protocol @enum(Protocol) = -1;
 }
@@ -67,7 +64,6 @@ class IpHeader extends FieldsChunk
 class EthernetHeader extends FieldsChunk
 {
     @str;
-    string serializerClassName = "inet::EthernetHeaderSerializer";
     int64_t chunkLength = 14;
     int16_t protocol @enum(Protocol) = -1;
 }
@@ -75,7 +71,6 @@ class EthernetHeader extends FieldsChunk
 class EthernetTrailer extends FieldsChunk
 {
     @str;
-    string serializerClassName = "inet::EthernetTrailerSerializer";
     int64_t chunkLength = 4;
     int32_t crc = 0;
     int bitError @enum(BitError) = -1;

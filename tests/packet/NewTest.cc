@@ -13,14 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+#include "inet/common/packet/SerializerRegistry.h"
 #include "NewTest.h"
 
 namespace inet {
 
-Register_Serializer(ApplicationHeaderSerializer);
-Register_Serializer(TcpHeaderSerializer);
-Register_Serializer(IpHeaderSerializer);
-Register_Serializer(EthernetHeaderSerializer);
+Register_Serializer(ApplicationHeader, ApplicationHeaderSerializer);
+Register_Serializer(TcpHeader, TcpHeaderSerializer);
+Register_Serializer(IpHeader, IpHeaderSerializer);
+Register_Serializer(EthernetHeader, EthernetHeaderSerializer);
 Define_Module(NewTest);
 
 static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_ptr<BytesChunk>& tcpSegment)
@@ -91,7 +92,7 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(ByteInputStream& stream) 
     int64_t position = stream.getPosition();
     Protocol protocol = (Protocol)stream.readUint16();
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
-        ipHeader->makeIncorrect();
+        ipHeader->makeMisrepresented();
     ipHeader->setProtocol(protocol);
     stream.readByteRepeatedly(0, ipHeader->getChunkLength() - stream.getPosition() + position);
     return ipHeader;
@@ -239,7 +240,7 @@ void NewSender::sendTcp(Packet *packet)
         }
     }
     else
-        tcpSegment->append(packet->peek());
+        tcpSegment->append(packet->peekAt(0));
     delete packet;
 }
 
@@ -272,22 +273,22 @@ void NewSender::sendPackets()
 
 void NewReceiver::receiveApplication(Packet *packet)
 {
-    const auto& chunk = packet->peekData();
+    const auto& chunk = packet->peekDataAt(0);
     EV_DEBUG << "Collecting application data: " << chunk << std::endl;
     applicationData.push(chunk);
     EV_DEBUG << "Buffered application data: " << applicationData << std::endl;
-    if (applicationData.getPoppedLength() == 0 && applicationData.has<BytesChunk>(10))
+    if (applicationData.getPoppedByteCount() == 0 && applicationData.has<BytesChunk>(10))
         EV_DEBUG << "Receiving application data: " << applicationData.pop<BytesChunk>(10) << std::endl;
-    if (applicationData.getPoppedLength() == 10 && applicationData.has<ApplicationHeader>())
+    if (applicationData.getPoppedByteCount() == 10 && applicationData.has<ApplicationHeader>())
         EV_DEBUG << "Receiving application data: " << applicationData.pop<ApplicationHeader>() << std::endl;
-    if (applicationData.getPoppedLength() == 20 && applicationData.has<LengthChunk>(10))
+    if (applicationData.getPoppedByteCount() == 20 && applicationData.has<LengthChunk>(10))
         EV_DEBUG << "Receiving application data: " << applicationData.pop<LengthChunk>(10) << std::endl;
     delete packet;
 }
 
 void NewReceiver::receiveTcp(Packet *packet)
 {
-    int tcpHeaderPosition = packet->getHeaderPosition();
+    int tcpHeaderPopOffset = packet->getHeaderPopOffset();
     auto tcpSegment = packet;
     const auto& tcpHeader = tcpSegment->popHeader<TcpHeader>();
     auto srcPort = tcpHeader->getSrcPort();
@@ -302,8 +303,8 @@ void NewReceiver::receiveTcp(Packet *packet)
         case BIT_ERROR_NO:
             break;
         case BIT_ERROR_CRC: {
-            int64_t length = packet->getPacketLength() - tcpHeaderPosition - packet->getTrailerPosition();
-            if (crc != computeTcpCrc(BytesChunk(), packet->peekHeaderAt<BytesChunk>(tcpHeaderPosition, length))) {
+            int64_t length = packet->getPacketLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
+            if (crc != computeTcpCrc(BytesChunk(), packet->peekAt<BytesChunk>(tcpHeaderPopOffset, length))) {
                 delete packet;
                 return;
             }
