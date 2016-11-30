@@ -253,7 +253,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         auto newPacket = new Packet(datagram->getName());
         auto newHeader = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
         newPacket->append(newHeader);
-        newPacket->append(datagram->peekData());
+        newPacket->append(datagram->peekDataAt(0, datagram->getDataLength()));
         delete datagram;
         datagram = newPacket;
         header = newHeader;

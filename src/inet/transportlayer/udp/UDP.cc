@@ -363,7 +363,7 @@ void UDP::processPacketFromApp(cPacket *appData)
     uint16_t crc = 0;
     if (udpHeader->getBitError() == BIT_ERROR_CRC) {
         BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
-        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<BytesChunk>(0)));
+        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, udpPacket->getDataLength())));
     }
     udpHeader->setCrc(crc);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
@@ -395,7 +395,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
     ASSERT(udpPacket->getControlInfo() == nullptr);
     emit(rcvdPkSignal, udpPacket);
 
-    int64_t udpHeaderPosition = udpPacket->getHeaderPosition();
+    int64_t udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
     const auto& udpHeader = udpPacket->popHeader<UDPHeader>();
     if (udpHeader == nullptr)
         throw cRuntimeError("not an udp header");
@@ -420,13 +420,13 @@ void UDP::processUDPPacket(Packet *udpPacket)
             bitError = false;
             break;
         case BIT_ERROR_CRC: {
-            if (totalLength > udpPacket->getByteLength() - udpHeaderPosition - udpPacket->getTrailerPosition())
+            if (totalLength > udpPacket->getDataLength())
                 bitError = true;
             else if (crc == 0)
                 bitError = false;
             else {
                 BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
-                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekHeaderAt<BytesChunk>(udpHeaderPosition, totalLength)));
+                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, totalLength)));
             }
             break;
         }
@@ -449,7 +449,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
         SockDesc *sd = findSocketForUnicastPacket(destAddr, destPort, srcAddr, srcPort);
         if (!sd) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            udpPacket->setHeaderPosition(udpHeaderPosition);
+            udpPacket->setHeaderPopOffset(udpHeaderPopPosition);
             processUndeliverablePacket(udpPacket);
             return;
         }
@@ -466,7 +466,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
         std::vector<SockDesc *> sds = findSocketsForMcastBcastPacket(destAddr, destPort, srcAddr, srcPort, isMulticast, isBroadcast);
         if (sds.empty()) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            udpPacket->setHeaderPosition(udpHeaderPosition);
+            udpPacket->setHeaderPopOffset(udpHeaderPopPosition);
             processUndeliverablePacket(udpPacket);
             return;
         }
