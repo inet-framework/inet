@@ -74,6 +74,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual void receptionEnded(const IReception *reception) = 0;
 
   public:
+    virtual ~MediumVisualizerBase();
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
