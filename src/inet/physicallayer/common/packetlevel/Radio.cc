@@ -364,7 +364,7 @@ void Radio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
     EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireTransmissionStarted(transmission);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void Radio::continueTransmission()
@@ -390,7 +390,7 @@ void Radio::endTransmission()
     EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireTransmissionEnded(transmission);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void Radio::abortTransmission()
@@ -432,7 +432,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     scheduleAt(arrival->getEndTime(part), timer);
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireReceptionStarted(reception);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::receptionStartedSignal, check_and_cast<const cObject *>(reception));
 }
 
 void Radio::continueReception(cMessage *timer)
@@ -483,7 +483,7 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireReceptionEnded(reception);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::receptionEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }
 
