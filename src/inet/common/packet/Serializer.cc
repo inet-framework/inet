@@ -15,47 +15,54 @@
 
 #include "inet/common/packet/FieldsChunk.h"
 #include "inet/common/packet/Serializer.h"
+#include "inet/common/packet/SerializerRegistry.h"
 
 namespace inet {
 
-Register_Serializer(BytesChunkSerializer);
-Register_Serializer(LengthChunkSerializer);
-Register_Serializer(SliceChunkSerializer);
-Register_Serializer(SequenceChunkSerializer);
+Register_Serializer(BytesChunk, BytesChunkSerializer);
+Register_Serializer(LengthChunk, LengthChunkSerializer);
+Register_Serializer(SliceChunk, SliceChunkSerializer);
+Register_Serializer(SequenceChunk, SequenceChunkSerializer);
 
-int64_t ChunkSerializer::totalSerializedLength = 0;
-int64_t ChunkSerializer::totalDeserializedLength = 0;
-
-void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
-{
-    const auto& byteArrayChunk = std::static_pointer_cast<const BytesChunk>(chunk);
-    stream.writeBytes(byteArrayChunk->getBytes(), offset, length);
-}
-
-std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
-{
-    auto byteArrayChunk = std::make_shared<BytesChunk>();
-    int length = stream.getRemainingSize();
-    std::vector<uint8_t> chunkBytes;
-    for (int64_t i = 0; i < length; i++)
-        chunkBytes.push_back(stream.readByte());
-    byteArrayChunk->setBytes(chunkBytes);
-    return byteArrayChunk;
-}
+int64_t ChunkSerializer::totalSerializedBytes = 0;
+int64_t ChunkSerializer::totalDeserializedBytes = 0;
 
 void LengthChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
 {
     const auto& lengthChunk = std::static_pointer_cast<const LengthChunk>(chunk);
-    stream.writeByteRepeatedly('?', length == -1 ? lengthChunk->getChunkLength() - offset: length);
+    int64_t serializedLength = length == -1 ? lengthChunk->getChunkLength() - offset: length;
+    stream.writeByteRepeatedly('?', serializedLength);
+    ChunkSerializer::totalSerializedBytes += serializedLength;
 }
 
 std::shared_ptr<Chunk> LengthChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
 {
     auto lengthChunk = std::make_shared<LengthChunk>();
-    int length = stream.getRemainingSize();
+    int64_t length = stream.getRemainingSize();
     stream.readByteRepeatedly('?', length);
     lengthChunk->setLength(length);
+    ChunkSerializer::totalDeserializedBytes += length;
     return lengthChunk;
+}
+
+void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
+{
+    const auto& byteArrayChunk = std::static_pointer_cast<const BytesChunk>(chunk);
+    int64_t serializedLength = length == -1 ? byteArrayChunk->getChunkLength() - offset: length;
+    stream.writeBytes(byteArrayChunk->getBytes(), offset, serializedLength);
+    ChunkSerializer::totalSerializedBytes += serializedLength;
+}
+
+std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+{
+    auto byteArrayChunk = std::make_shared<BytesChunk>();
+    int64_t length = stream.getRemainingSize();
+    std::vector<uint8_t> chunkBytes;
+    for (int64_t i = 0; i < length; i++)
+        chunkBytes.push_back(stream.readByte());
+    byteArrayChunk->setBytes(chunkBytes);
+    ChunkSerializer::totalDeserializedBytes += length;
+    return byteArrayChunk;
 }
 
 void SliceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
@@ -103,14 +110,14 @@ void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::share
         auto streamPosition = stream.getPosition();
         serialize(stream, fieldsChunk);
         int64_t serializedLength = stream.getPosition() - streamPosition;
-        ChunkSerializer::totalSerializedLength += serializedLength;
+        ChunkSerializer::totalSerializedBytes += serializedLength;
         fieldsChunk->setSerializedBytes(stream.copyBytes(streamPosition, serializedLength));
     }
     else {
         ByteOutputStream chunkStream;
         serialize(chunkStream, fieldsChunk);
         stream.writeBytes(chunkStream.getBytes(), offset, length);
-        ChunkSerializer::totalSerializedLength += chunkStream.getSize();
+        ChunkSerializer::totalSerializedBytes += chunkStream.getSize();
         fieldsChunk->setSerializedBytes(chunkStream.copyBytes());
     }
 }
@@ -120,7 +127,7 @@ std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(ByteInputStream& strea
     auto streamPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));
     auto length = stream.getPosition() - streamPosition;
-    ChunkSerializer::totalDeserializedLength += length;
+    ChunkSerializer::totalDeserializedBytes += length;
     fieldsChunk->setSerializedBytes(stream.copyBytes(streamPosition, length));
     return fieldsChunk;
 }

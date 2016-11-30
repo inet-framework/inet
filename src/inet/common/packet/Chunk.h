@@ -97,6 +97,7 @@ class ChunkSerializer;
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
+// TODO: how does an error model make a chunk erroneous without actually serializing it?
 // TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
 // - message compiler could support @optional fields, inspectors could hide them, etc.
 // TODO: how do we represent the random subfield sequences (options) right after mandatory header part?
@@ -130,16 +131,17 @@ class ChunkSerializer;
 // - TcpHeader
 // - TcpOption1
 // - TcpOption2
-class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
+class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   protected:
     /**
      * This enum specifies bitmasks for the flags field.
      */
     enum Flag {
-        FLAG_IMMUTABLE  = 1,
-        FLAG_INCOMPLETE = 2,
-        FLAG_INCORRECT  = 4,
+        FLAG_IMMUTABLE      = 1,
+        FLAG_INCOMPLETE     = 2,
+        FLAG_INCORRECT      = 4,
+        FLAG_MISREPRESENTED = 8,
     };
 
   public:
@@ -155,7 +157,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
         TYPE_FIELDS
     };
 
-    class Iterator
+    class INET_API Iterator
     {
       protected:
         const bool isForward_;
@@ -164,7 +166,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
       public:
         Iterator(int64_t position) : isForward_(true), position(position), index(position == 0 ? 0 : -1) { }
-        explicit Iterator(bool isForward = true, int64_t position = 0, int index = 0) : isForward_(isForward), position(position), index(index) { }
+        explicit Iterator(bool isForward, int64_t position, int index) : isForward_(isForward), position(position), index(index) { }
         Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { }
 
         bool isForward() const { return isForward_; }
@@ -180,44 +182,37 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     /**
      * Position and index are measured from the beginning.
      */
-    class ForwardIterator : public Iterator
+    class INET_API ForwardIterator : public Iterator
     {
       public:
         ForwardIterator(int64_t position) : Iterator(true, position, -1) { }
-        explicit ForwardIterator(int64_t position = 0, int index = 0) : Iterator(true, position, index) { }
+        explicit ForwardIterator(int64_t position, int index) : Iterator(true, position, index) { }
     };
 
     /**
      * Position and index are measured from the end.
      */
-    class BackwardIterator : public Iterator
+    class INET_API BackwardIterator : public Iterator
     {
       public:
         BackwardIterator(int64_t position) : Iterator(false, position, -1) { }
-        explicit BackwardIterator(int64_t position = 0, int index = 0) : Iterator(false, position, index) { }
+        explicit BackwardIterator(int64_t position, int index) : Iterator(false, position, index) { }
     };
 
   public:
     /**
      * Peeking some part into a chunk that requires automatic serialization
      * will throw an exception when implicit chunk serialization is disabled.
-     * Implicit chunk serialization is enabled by default.
      */
     static bool enableImplicitChunkSerialization;
 
   protected:
     /**
-     * TODO
+     * The boolean flags merged into a single integer.
      */
     uint16_t flags;
 
   protected:
-    /**
-     * Returns the class name of the serializer that can be used to serialize
-     * and deserialize this type of chunk.
-     */
-    virtual const char *getSerializerClassName() const { return nullptr; }
-
     virtual void handleChange() override;
 
     virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length = -1) const { return nullptr; }
@@ -232,8 +227,6 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * field based chunk classes.
      */
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
-
-    static ChunkSerializer *createSerializer(const char *serializerClassName);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -255,6 +248,7 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
     virtual void makeImmutable() { flags |= FLAG_IMMUTABLE; }
+    // TODO: consider renaming to freeze/frozen/modifiable
     //@}
 
     /** @name Completeness related functions */
@@ -275,13 +269,22 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
     void assertCorrect() const { assert(isCorrect()); }
     void assertIncorrect() const { assert(isIncorrect()); }
     void makeIncorrect() { flags |= FLAG_INCORRECT; }
+    // TODO: consider renaming to corrupt/correct/erroneous
+    //@}
+
+    /** @name Misrepresentation related functions */
+    //@{
+    // NOTE: there is no makeRepresented() intentionally
+    bool isRepresented() const { return !(flags & FLAG_MISREPRESENTED); }
+    bool isMisrepresented() const { return flags & FLAG_MISREPRESENTED; }
+    void assertRepresented() const { assert(isRepresented()); }
+    void assertMisrepresented() const { assert(isMisrepresented()); }
+    void makeMisrepresented() { flags |= FLAG_MISREPRESENTED; }
+    // TODO: consider renaming to correctlyrepresented, incorrectlyrepresented
     //@}
 
     /** @name Iteration related functions */
     //@{
-    Iterator createForwardIterator() const { return Iterator(true); }
-    Iterator createBackwardIterator() const { return Iterator(false); }
-
     virtual void moveIterator(Iterator& iterator, int64_t length) const { iterator.setPosition(iterator.getPosition() + length); }
     virtual void seekIterator(Iterator& iterator, int64_t offset) const { iterator.setPosition(offset); }
     //@}
@@ -292,13 +295,13 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
      * Inserts the provided chunk at the beginning of this chunk and returns
      * true if the insertion was successful.
      */
-    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
+    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
 
     /**
      * Inserts the provided chunk at the end of this chunk and returns true if
      * the insertion was successful.
      */
-    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
+    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
     //@}
 
     /** @name Removing data related functions */
@@ -331,17 +334,19 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 
     /**
      * Returns the designated part of the data represented by this chunk in its
-     * default representation. The returned chunk is mutable if and only if the
-     * requested part is directly represented in this chunk by a mutable chunk,
-     * otherwise the returned chunk is immutable.
+     * default representation. If the length is unspecified, then the length of
+     * the result is chosen according to the internal representation. The result
+     * is mutable iff the designated part is directly represented in this chunk
+     * by a mutable chunk, otherwise the result is immutable.
      */
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const;
 
     /**
      * Returns the designated part of the data represented by this chunk in the
-     * requested representation. The returned chunk is mutable if and only if the
-     * requested part is directly represented in this chunk by a mutable chunk,
-     * otherwise the returned chunk is immutable.
+     * requested representation. If the length is unspecified, then the length of
+     * the result is chosen according to the internal representation. The result
+     * is mutable iff the designated part is directly represented in this chunk
+     * by a mutable chunk, otherwise the result is immutable.
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
@@ -355,8 +360,6 @@ class Chunk : public cObject, public std::enable_shared_from_this<Chunk>
             if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, length)))
                 return tChunk;
         }
-        if (!enableImplicitChunkSerialization)
-            throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
         // TODO: prevents easy access for application buffer
         // assertImmutable();
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);

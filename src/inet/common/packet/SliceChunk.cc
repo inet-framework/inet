@@ -69,9 +69,8 @@ void SliceChunk::setLength(int64_t length)
     this->length = length;
 }
 
-bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
@@ -87,9 +86,8 @@ bool SliceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
@@ -107,7 +105,6 @@ bool SliceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool SliceChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= this->length);
-    assertMutable();
     handleChange();
     this->offset += length;
     this->length -= length;
@@ -117,7 +114,6 @@ bool SliceChunk::removeFromBeginning(int64_t length)
 bool SliceChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= this->length);
-    assertMutable();
     handleChange();
     this->length -= length;
     return true;

@@ -23,39 +23,48 @@ namespace inet {
 /**
  * This class represents application or protocol buffers.
  */
-class Buffer : public cObject
+class INET_API Buffer : public cNamedObject
 {
   protected:
-    int64_t pushedLength = 0;
-    int64_t poppedLength = 0;
-    std::shared_ptr<Chunk> data = nullptr;
+    int64_t pushedByteCount = 0;
+    int64_t poppedByteCount = 0;
+    std::shared_ptr<Chunk> contents = nullptr;
     Chunk::Iterator iterator;
 
     void remove(int64_t length);
 
   public:
-    Buffer();
+    /** @name Constructors, destructors and duplication related functions */
+    //@{
+    Buffer(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = nullptr);
     Buffer(const Buffer& other);
-    Buffer(const std::shared_ptr<Chunk>& data);
 
     virtual Buffer *dup() const override { return new Buffer(*this); }
+    //@}
 
-    int64_t getPushedLength() const { return pushedLength; }
-    int64_t getPoppedLength() const { return poppedLength; }
+    /** @name Length querying related functions */
+    //@{
+    /**
+     * Returns the number of available bytes in the buffer.
+     */
+    int64_t getBufferLength() const { return contents->getChunkLength() - iterator.getPosition(); }
+
+    int64_t getPushedByteCount() const { return pushedByteCount; }
+
+    int64_t getPoppedByteCount() const { return poppedByteCount; }
+    //@}
 
     /** @name Mutability related functions */
     //@{
-    bool isImmutable() const { return data != nullptr && data->isImmutable(); }
-    bool isMutable() const { return data == nullptr && !data->isMutable(); }
+    bool isImmutable() const { return contents != nullptr && contents->isImmutable(); }
+    bool isMutable() const { return contents == nullptr && !contents->isMutable(); }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    void makeImmutable() { data->makeImmutable(); }
+    void makeImmutable() { contents->makeImmutable(); }
     //@}
 
-    /** @name Data querying related functions */
+    /** @name Querying data related functions */
     //@{
-    int64_t getLength() const { return data->getChunkLength() - iterator.getPosition(); }
-
     std::shared_ptr<Chunk> peek(int64_t length = -1) const;
 
     std::shared_ptr<Chunk> peekAt(int64_t offset, int64_t length) const;
@@ -66,10 +75,17 @@ class Buffer : public cObject
     bool has(int64_t length = -1) const {
         return peek<T>(length) != nullptr;
     }
+
     template <typename T>
     std::shared_ptr<T> peek(int64_t length = -1) const {
-        return data->peek<T>(iterator, length);
+        return contents->peek<T>(iterator, length);
     }
+
+    template <typename T>
+    std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
+        return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
+    }
+
     template <typename T>
     std::shared_ptr<T> pop(int64_t length = -1) {
         const auto& chunk = peek<T>(length);
@@ -84,7 +100,7 @@ class Buffer : public cObject
     void push(const std::shared_ptr<Chunk>& chunk);
     //@}
 
-    virtual std::string str() const override { return data->str(); }
+    virtual std::string str() const override { return contents->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Buffer *buffer) { return os << buffer->str(); }

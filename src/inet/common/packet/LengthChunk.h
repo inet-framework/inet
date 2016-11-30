@@ -24,7 +24,8 @@ namespace inet {
  * This class represents data using a length field only. This can be useful
  * when the actual data is irrelevant and memory efficiency is high priority.
  */
-class LengthChunk : public Chunk
+// TODO: rename to ByteCountChunk?
+class INET_API LengthChunk : public Chunk
 {
   friend Chunk;
 
@@ -35,10 +36,7 @@ class LengthChunk : public Chunk
     int64_t length;
 
   protected:
-    virtual const char *getSerializerClassName() const override { return "inet::LengthChunkSerializer"; }
-
-  protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -62,8 +60,8 @@ class LengthChunk : public Chunk
     virtual Type getChunkType() const override { return TYPE_LENGTH; }
     virtual int64_t getChunkLength() const override { return length; }
 
-    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
     virtual bool removeFromBeginning(int64_t length) override;
     virtual bool removeFromEnd(int64_t length) override;

@@ -24,13 +24,11 @@
 
 namespace inet {
 
-#define Register_Serializer(CLASSNAME) Register_Class(CLASSNAME)
-
-class ChunkSerializer : public cObject
+class INET_API ChunkSerializer : public cObject
 {
   public:
-    static int64_t totalSerializedLength;
-    static int64_t totalDeserializedLength;
+    static int64_t totalSerializedBytes;
+    static int64_t totalDeserializedBytes;
 
   public:
     virtual ~ChunkSerializer() { }
@@ -39,35 +37,35 @@ class ChunkSerializer : public cObject
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
-class BytesChunkSerializer : public ChunkSerializer
+class INET_API LengthChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
-class LengthChunkSerializer : public ChunkSerializer
+class INET_API BytesChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
-class SliceChunkSerializer : public ChunkSerializer
+class INET_API SliceChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
-class SequenceChunkSerializer : public ChunkSerializer
+class INET_API SequenceChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
-class FieldsChunkSerializer : public ChunkSerializer
+class INET_API FieldsChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const = 0;

@@ -26,7 +26,7 @@ namespace inet {
  * with other components using plain cPackets. The packet is owned by this
  * chunk and it shouldn't be deleted or modified in any way.
  */
-class cPacketChunk : public Chunk
+class INET_API cPacketChunk : public Chunk
 {
   protected:
     cPacket *packet;

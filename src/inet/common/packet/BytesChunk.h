@@ -25,7 +25,7 @@ namespace inet {
  * when the actual data is important because. For example, when an external
  * program sends or receives the data, or in hardware in the loop simulations.
  */
-class BytesChunk : public Chunk
+class INET_API BytesChunk : public Chunk
 {
   friend Chunk;
 
@@ -34,9 +34,6 @@ class BytesChunk : public Chunk
      * The data bytes as is.
      */
     std::vector<uint8_t> bytes;
-
-  protected:
-    virtual const char *getSerializerClassName() const override { return "inet::BytesChunkSerializer"; }
 
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
@@ -66,8 +63,8 @@ class BytesChunk : public Chunk
     virtual Type getChunkType() const override { return TYPE_BYTES; }
     virtual int64_t getChunkLength() const override { return bytes.size(); }
 
-    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
     virtual bool removeFromBeginning(int64_t length) override;
     virtual bool removeFromEnd(int64_t length) override;

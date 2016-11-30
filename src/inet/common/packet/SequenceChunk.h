@@ -26,7 +26,7 @@ namespace inet {
  * used by the Chunk API implementation internally to manage compound data.
  * User code should not directly instantiate this class.
  */
-class SequenceChunk : public Chunk
+class INET_API SequenceChunk : public Chunk
 {
   friend Chunk;
 
@@ -37,15 +37,13 @@ class SequenceChunk : public Chunk
     std::deque<std::shared_ptr<Chunk>> chunks;
 
   protected:
-    virtual const char *getSerializerClassName() const override { return "inet::SequenceChunkSerializer"; }
-
     int getStartIndex(const Iterator& iterator) const { return iterator.isForward() ? 0 : chunks.size() - 1; }
     int getEndIndex(const Iterator& iterator) const { return iterator.isForward() ? chunks.size() - 1 : 0; }
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
-    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length = -1) const override;
-    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length = -1) const override;
+    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length) const override;
+    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length) const override;
 
     bool mergeToBeginning(const std::shared_ptr<Chunk>& chunk);
     bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
@@ -58,10 +56,10 @@ class SequenceChunk : public Chunk
     void doInsertToEnd(const std::shared_ptr<SliceChunk>& chunk);
     void doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
 
-    std::deque<std::shared_ptr<Chunk> > dupChunks() const;
+    std::deque<std::shared_ptr<Chunk>> dupChunks() const;
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -92,8 +90,8 @@ class SequenceChunk : public Chunk
 
     /** @name Filling with data related functions */
     //@{
-    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
     //@}
 
     /** @name Removing data related functions */
@@ -105,10 +103,9 @@ class SequenceChunk : public Chunk
     /** @name Querying data related functions */
     //@{
     virtual Type getChunkType() const override { return TYPE_SEQUENCE; }
-
     virtual int64_t getChunkLength() const override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
     //@}
 
     virtual std::string str() const override;

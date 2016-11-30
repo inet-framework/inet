@@ -13,14 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __DEFS_H_
-#define __DEFS_H_
+#include "inet/common/packet/SerializerRegistry.h"
 
-#include <omnetpp.h>
+namespace inet {
 
-using namespace omnetpp;
+SerializerRegistry SerializerRegistry::globalRegistry;
 
-// #define COMPILETIME_LOGLEVEL omnetpp::LOGLEVEL_INFO
+void SerializerRegistry::registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer)
+{
+    assert(serializer != nullptr);
+    serializers[&typeInfo] = serializer;
+}
 
-#endif // #ifndef __DEFS_H_
+const ChunkSerializer *SerializerRegistry::getSerializer(const std::type_info& typeInfo) const
+{
+    auto it = serializers.find(&typeInfo);
+    if (it != serializers.end())
+        return it->second;
+    else
+        throw cRuntimeError("Cannot find serializer for %s", typeInfo.name());
+}
 
+} // namespace

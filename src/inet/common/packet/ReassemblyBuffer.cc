@@ -14,78 +14,83 @@
 //
 
 #include <algorithm>
+#include "inet/common/packet/LengthChunk.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/common/packet/SequenceChunk.h"
 
 namespace inet {
 
-NewReassemblyBuffer::Region::Region(int64_t offset, const std::shared_ptr<Chunk>& data) :
+ReassemblyBuffer::Region::Region(int64_t offset, const std::shared_ptr<Chunk>& data) :
     offset(offset),
     data(data)
 {
 }
 
-NewReassemblyBuffer::NewReassemblyBuffer(const NewReassemblyBuffer& other) :
+ReassemblyBuffer::ReassemblyBuffer(const char *name) :
+    cNamedObject(name)
+{
+}
+
+ReassemblyBuffer::ReassemblyBuffer(const ReassemblyBuffer& other) :
+    cNamedObject(other),
     regions(other.regions)
 {
 }
 
-int64_t NewReassemblyBuffer::getLength() const
-{
-    int64_t startOffset = 0;
-    int64_t endOffset = 0;
-    for (const auto& region : regions) {
-        startOffset = std::max(startOffset, region.getStartOffset());
-        endOffset = std::max(endOffset, region.getEndOffset());
-    }
-    return endOffset - startOffset;
-}
-
-void NewReassemblyBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end)
+void ReassemblyBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end)
 {
     regions.erase(std::remove_if(begin, end, [](const Region& region) { return region.data == nullptr; }), regions.end());
 }
 
-void NewReassemblyBuffer::sliceRegions(Region& newRegion)
+void ReassemblyBuffer::sliceRegions(Region& newRegion)
 {
-    for (auto it = regions.begin(); it != regions.end(); it++) {
-        auto& oldRegion = *it;
-        if (newRegion.getEndOffset() <= oldRegion.getStartOffset() || oldRegion.getEndOffset() <= newRegion.getStartOffset())
-            // no intersection
-            continue;
-        else if (newRegion.getStartOffset() <= oldRegion.getStartOffset() && oldRegion.getEndOffset() <= newRegion.getEndOffset()) {
-            // new totally covers old
-            oldRegion.data = nullptr;
-            regions.erase(it--);
-        }
-        else if (oldRegion.getStartOffset() < newRegion.getStartOffset() && newRegion.getEndOffset() < oldRegion.getEndOffset()) {
-            // new splits old into two parts
-            Region previousRegin(oldRegion.getStartOffset(), oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset()));
-            Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset()));
-            oldRegion.offset = nextRegion.offset;
-            oldRegion.data = nextRegion.data;
-            regions.insert(it, previousRegin);
-            return;
-        }
-        else {
-            // new cuts beginning or end of old
-            int64_t peekStartOffset = std::min(newRegion.getStartOffset(), oldRegion.getStartOffset());
-            int64_t peekEndOffset = std::min(newRegion.getEndOffset(), oldRegion.getEndOffset());
-            oldRegion.data = oldRegion.data->peek(peekStartOffset, peekEndOffset - peekStartOffset);
+    if (!regions.empty()) {
+        auto lowerit = std::lower_bound(regions.begin(), regions.end(), newRegion, Region::compareStartOffset);
+        if (lowerit != regions.begin())
+            lowerit--;
+        auto upperit = std::upper_bound(regions.begin(), regions.end(), newRegion, Region::compareEndOffset);
+        if (upperit != regions.end())
+            upperit++;
+        for (auto it = lowerit; it < upperit; it++) {
+            auto& oldRegion = *it;
+            if (newRegion.getEndOffset() <= oldRegion.getStartOffset() || oldRegion.getEndOffset() <= newRegion.getStartOffset())
+                // no intersection
+                continue;
+            else if (newRegion.getStartOffset() <= oldRegion.getStartOffset() && oldRegion.getEndOffset() <= newRegion.getEndOffset()) {
+                // new totally covers old
+                oldRegion.data = nullptr;
+                regions.erase(it--);
+                upperit--;
+            }
+            else if (oldRegion.getStartOffset() < newRegion.getStartOffset() && newRegion.getEndOffset() < oldRegion.getEndOffset()) {
+                // new splits old into two parts
+                Region previousRegin(oldRegion.getStartOffset(), oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset()));
+                Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset()));
+                oldRegion.offset = nextRegion.offset;
+                oldRegion.data = nextRegion.data;
+                regions.insert(it, previousRegin);
+                return;
+            }
+            else {
+                // new cuts beginning or end of old
+                int64_t peekStartOffset = std::min(newRegion.getStartOffset(), oldRegion.getStartOffset());
+                int64_t peekEndOffset = std::min(newRegion.getEndOffset(), oldRegion.getEndOffset());
+                oldRegion.data = oldRegion.data->peek(peekStartOffset, peekEndOffset - peekStartOffset);
+            }
         }
     }
 }
 
-void NewReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
+void ReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 {
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
-        if (previousRegion.data->isMutable() && previousRegion.data->insertToEnd(nextRegion.data)) {
+        if (previousRegion.data->isMutable() && previousRegion.data->insertAtEnd(nextRegion.data)) {
             // merge into previous
             previousRegion.data = previousRegion.data->peek(0);
             nextRegion.data = nullptr;
         }
-        else if (nextRegion.data->isMutable() && nextRegion.data->insertToBeginning(previousRegion.data)) {
+        else if (nextRegion.data->isMutable() && nextRegion.data->insertAtBeginning(previousRegion.data)) {
             // merge into next
             previousRegion.data = nullptr;
             nextRegion.data = nextRegion.data->peek(0);
@@ -93,15 +98,15 @@ void NewReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegio
         else {
             // merge as a sequence
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->insertToEnd(previousRegion.data);
-            sequenceChunk->insertToEnd(nextRegion.data);
+            sequenceChunk->insertAtEnd(previousRegion.data);
+            sequenceChunk->insertAtEnd(nextRegion.data);
             previousRegion.data = sequenceChunk;
             nextRegion.data = nullptr;
         }
     }
 }
 
-void NewReassemblyBuffer::setData(int64_t offset, const std::shared_ptr<Chunk>& chunk)
+void ReassemblyBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
 {
     Region newRegion(offset, chunk);
     sliceRegions(newRegion);
@@ -129,9 +134,18 @@ void NewReassemblyBuffer::setData(int64_t offset, const std::shared_ptr<Chunk>& 
     }
 }
 
-std::shared_ptr<Chunk> NewReassemblyBuffer::getData()
+void ReassemblyBuffer::clear(int64_t offset, int64_t length)
 {
-    return isComplete() ? regions[0].data : nullptr;
+    for (auto it = regions.begin(); it != regions.end(); it++) {
+        auto region = *it;
+        if (region.offset == offset && region.data->getChunkLength() == length) {
+            regions.erase(it);
+            return;
+        }
+    }
+    auto data = std::make_shared<LengthChunk>(length);
+    Region clearedRegion(offset, data);
+    sliceRegions(clearedRegion);
 }
 
 } // namespace

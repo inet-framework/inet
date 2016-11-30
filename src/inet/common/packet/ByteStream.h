@@ -19,11 +19,11 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <vector>
-#include "inet/common/packet/Defs.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
-class ByteOutputStream {
+class INET_API ByteOutputStream {
   protected:
     std::vector<uint8_t> bytes;
 
@@ -62,7 +62,7 @@ class ByteOutputStream {
     }
 };
 
-class ByteInputStream {
+class INET_API ByteInputStream {
   protected:
     std::vector<uint8_t> bytes;
     int64_t position = -1;

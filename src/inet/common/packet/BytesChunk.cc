@@ -59,9 +59,8 @@ void BytesChunk::setByte(int index, uint8_t byte)
     bytes[index] = byte;
 }
 
-bool BytesChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_BYTES) {
         const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
@@ -72,9 +71,8 @@ bool BytesChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-bool BytesChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_BYTES) {
         const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
@@ -88,7 +86,6 @@ bool BytesChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool BytesChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= bytes.size());
-    assertMutable();
     handleChange();
     bytes.erase(bytes.begin(), bytes.begin() + length);
     return true;
@@ -97,7 +94,6 @@ bool BytesChunk::removeFromBeginning(int64_t length)
 bool BytesChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= bytes.size());
-    assertMutable();
     handleChange();
     bytes.erase(bytes.end() - length, bytes.end());
     return true;

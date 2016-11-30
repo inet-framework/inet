@@ -27,7 +27,7 @@ namespace inet {
  * efficiently represent slices of other chunks. User code should not directly
  * instantiate this class.
  */
-class SliceChunk : public Chunk
+class INET_API SliceChunk : public Chunk
 {
   friend Chunk;
 
@@ -46,17 +46,14 @@ class SliceChunk : public Chunk
     int64_t length;
 
   protected:
-    virtual const char *getSerializerClassName() const override { return "inet::SliceChunkSerializer"; }
-
-  protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     SliceChunk();
     SliceChunk(const SliceChunk& other);
-    SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
+    SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
     virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
@@ -80,8 +77,8 @@ class SliceChunk : public Chunk
     virtual Type getChunkType() const override { return TYPE_SLICE; }
     virtual int64_t getChunkLength() const override { return length; }
 
-    virtual bool insertToBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool insertToEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
     virtual bool removeFromBeginning(int64_t length) override;
     virtual bool removeFromEnd(int64_t length) override;

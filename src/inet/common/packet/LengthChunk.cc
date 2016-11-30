@@ -51,9 +51,8 @@ void LengthChunk::setLength(int64_t length)
     this->length = length;
 }
 
-bool LengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+bool LengthChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_LENGTH) {
         const auto& lengthChunk = std::static_pointer_cast<LengthChunk>(chunk);
@@ -64,9 +63,8 @@ bool LengthChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-bool LengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+bool LengthChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_LENGTH) {
         const auto& lengthChunk = std::static_pointer_cast<LengthChunk>(chunk);
@@ -80,7 +78,6 @@ bool LengthChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool LengthChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= this->length);
-    assertMutable();
     handleChange();
     this->length -= length;
     return true;
@@ -89,7 +86,6 @@ bool LengthChunk::removeFromBeginning(int64_t length)
 bool LengthChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= this->length);
-    assertMutable();
     handleChange();
     this->length -= length;
     return true;

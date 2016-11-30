@@ -18,41 +18,39 @@
 
 namespace inet {
 
-Buffer::Buffer() :
-    data(nullptr)
+Buffer::Buffer(const char *name, const std::shared_ptr<Chunk>& contents) :
+    cNamedObject(name),
+    contents(contents),
+    iterator(Chunk::ForwardIterator(0, 0))
 {
 }
 
 Buffer::Buffer(const Buffer& other) :
-    data(other.isImmutable() ? other.data : other.data->dupShared()),
+    cNamedObject(other),
+    contents(other.isImmutable() ? other.contents : other.contents->dupShared()),
     iterator(other.iterator)
-{
-}
-
-Buffer::Buffer(const std::shared_ptr<Chunk>& data) :
-    data(data)
 {
 }
 
 void Buffer::remove(int64_t length)
 {
-    data->moveIterator(iterator, length);
-    poppedLength += length;
+    contents->moveIterator(iterator, length);
+    poppedByteCount += length;
     auto position = iterator.getPosition();
-    if (position > data->getChunkLength() / 2) {
-        data->removeFromBeginning(position);
-        data->seekIterator(iterator, 0);
+    if (position > contents->getChunkLength() / 2) {
+        contents->removeFromBeginning(position);
+        contents->seekIterator(iterator, 0);
     }
 }
 
 std::shared_ptr<Chunk> Buffer::peek(int64_t length) const
 {
-    return data->peek(iterator, length);
+    return contents->peek(iterator, length);
 }
 
 std::shared_ptr<Chunk> Buffer::peekAt(int64_t offset, int64_t length) const
 {
-    return data->peek(Chunk::Iterator(true, offset), length);
+    return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
 }
 
 std::shared_ptr<Chunk> Buffer::pop(int64_t length)
@@ -65,24 +63,17 @@ std::shared_ptr<Chunk> Buffer::pop(int64_t length)
 
 void Buffer::push(const std::shared_ptr<Chunk>& chunk)
 {
-    if (data == nullptr) {
-        if (chunk->getChunkType() == Chunk::TYPE_SLICE) {
-            auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->insertToEnd(chunk);
-            data = sequenceChunk;
-        }
-        else
-            data = chunk;
-    }
+    if (contents == nullptr)
+        contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
-        if (!data->insertToEnd(chunk)) {
+        if (!contents->insertAtEnd(chunk)) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
-            sequenceChunk->insertToEnd(data);
-            sequenceChunk->insertToEnd(chunk);
-            data = sequenceChunk;
+            sequenceChunk->insertAtEnd(contents);
+            sequenceChunk->insertAtEnd(chunk);
+            contents = sequenceChunk;
         }
     }
-    pushedLength += chunk->getChunkLength();
+    pushedByteCount += chunk->getChunkLength();
 }
 
 } // namespace

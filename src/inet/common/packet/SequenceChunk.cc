@@ -37,7 +37,7 @@ SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
 std::shared_ptr<Chunk> SequenceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
     auto sequenceChunk = std::make_shared<SequenceChunk>();
-    sequenceChunk->insertToEnd(std::make_shared<SliceChunk>(chunk, offset, length));
+    sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));
     return sequenceChunk;
 }
 
@@ -131,7 +131,7 @@ bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
         auto& firstChunk = chunks.front();
         if (firstChunk->isImmutable() && chunk->isImmutable()) {
             auto mergedChunk = firstChunk->dupShared();
-            if (mergedChunk->insertToBeginning(chunk))
+            if (mergedChunk->insertAtBeginning(chunk))
                 chunks.front() = mergedChunk->peek(0);
         }
     }
@@ -144,7 +144,7 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
         auto& lastChunk = chunks.back();
         if (lastChunk->isImmutable() && chunk->isImmutable()) {
             auto mergedChunk = lastChunk->dupShared();
-            if (mergedChunk->insertToEnd(chunk))
+            if (mergedChunk->insertAtEnd(chunk))
                 chunks.back() = mergedChunk->peek(0);
         }
     }
@@ -188,9 +188,8 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SequenceChunk>& ch
         doInsertToBeginning(*it);
 }
 
-bool SequenceChunk::insertToBeginning(const std::shared_ptr<Chunk>& chunk)
+bool SequenceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE)
         doInsertToBeginning(std::static_pointer_cast<SliceChunk>(chunk));
@@ -237,9 +236,8 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk)
         doInsertToEnd(chunk);
 }
 
-bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
+bool SequenceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assertMutable();
     handleChange();
     if (chunk->getChunkType() == TYPE_SLICE)
         doInsertToEnd(std::static_pointer_cast<SliceChunk>(chunk));
@@ -253,7 +251,6 @@ bool SequenceChunk::insertToEnd(const std::shared_ptr<Chunk>& chunk)
 bool SequenceChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= getChunkLength());
-    assertMutable();
     handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
@@ -277,7 +274,6 @@ bool SequenceChunk::removeFromBeginning(int64_t length)
 bool SequenceChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= getChunkLength());
-    assertMutable();
     handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {

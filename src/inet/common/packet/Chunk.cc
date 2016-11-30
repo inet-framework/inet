@@ -15,9 +15,11 @@
 
 #include "inet/common/packet/Chunk.h"
 #include "inet/common/packet/Serializer.h"
+#include "inet/common/packet/SerializerRegistry.h"
 
 namespace inet {
 
+// TODO: disable it by default
 bool Chunk::enableImplicitChunkSerialization = true;
 
 Chunk::Chunk() :
@@ -37,38 +39,12 @@ void Chunk::handleChange()
 
 std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
+    if (!enableImplicitChunkSerialization)
+        throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
     ByteOutputStream outputStream;
     serialize(outputStream, chunk, offset, length);
     ByteInputStream inputStream(outputStream.getBytes());
     return deserialize(inputStream, typeInfo);
-}
-
-ChunkSerializer *Chunk::createSerializer(const char *serializerClassName)
-{
-    if (serializerClassName == nullptr)
-        throw cRuntimeError("Serializer class is unspecified");
-    auto serializer = dynamic_cast<ChunkSerializer *>(omnetpp::createOne(serializerClassName));
-    if (serializer == nullptr)
-        throw cRuntimeError("Serializer class not found");
-    return serializer;
-}
-
-void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
-{
-    auto serializer = createSerializer(chunk->getSerializerClassName());
-    serializer->serialize(stream, chunk, offset, length);
-    delete serializer;
-}
-
-std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
-{
-    auto serializerClassName = std::string(opp_demangle_typename(typeInfo.name())) + std::string("Serializer");
-    auto serializer = createSerializer(serializerClassName.c_str());
-    auto chunk = serializer->deserialize(stream, typeInfo);
-    delete serializer;
-    if (stream.isReadBeyondEnd())
-        chunk->makeIncomplete();
-    return chunk;
 }
 
 std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t length) const
@@ -84,6 +60,22 @@ std::string Chunk::str() const
     std::ostringstream os;
     os << "Chunk, length = " << getChunkLength();
     return os.str();
+}
+
+void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+{
+    Chunk *chunkPointer = chunk.get();
+    auto serializer = SerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
+    serializer->serialize(stream, chunk, offset, length);
+}
+
+std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
+{
+    auto serializer = SerializerRegistry::globalRegistry.getSerializer(typeInfo);
+    auto chunk = serializer->deserialize(stream, typeInfo);
+    if (stream.isReadBeyondEnd())
+        chunk->makeIncomplete();
+    return chunk;
 }
 
 } // namespace

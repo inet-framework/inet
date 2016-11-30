@@ -49,12 +49,12 @@ namespace inet {
  *  - copy to a new mutable packet
  *  - convert to a human readable string
  */
-class Packet : public cPacket
+class INET_API Packet : public cPacket
 {
   friend class PacketDescriptor;
 
   protected:
-    std::shared_ptr<Chunk> data;
+    std::shared_ptr<Chunk> contents;
     Chunk::ForwardIterator headerIterator;
     Chunk::BackwardIterator trailerIterator;
 
@@ -64,18 +64,19 @@ class Packet : public cPacket
 
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
+    Packet(const char *name, const std::shared_ptr<Chunk>& contents);
     Packet(const Packet& other);
-    Packet(const std::shared_ptr<Chunk>& data, const char *name = nullptr, short kind = 0);
 
     virtual Packet *dup() const override { return new Packet(*this); }
 
     /** @name Mutability related functions */
     //@{
-    bool isImmutable() const { return data != nullptr && data->isImmutable(); }
-    bool isMutable() const { return data == nullptr || data->isMutable(); }
+    // TODO: rename to freezeContents()?
+    bool isImmutable() const { return contents != nullptr && contents->isImmutable(); }
+    bool isMutable() const { return contents == nullptr || contents->isMutable(); }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    void makeImmutable() { data->makeImmutable(); }
+    void makeImmutable() { contents->makeImmutable(); }
     //@}
 
     /** @name Length querying related functions */
@@ -84,7 +85,7 @@ class Packet : public cPacket
      * Returns the packet length in bytes ignoring header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    virtual int64_t getPacketLength() const { return data->getChunkLength(); }
+    virtual int64_t getPacketLength() const { return contents->getChunkLength(); }
 
     /**
      * Returns the length in bits between the header and trailer iterators.
@@ -93,28 +94,33 @@ class Packet : public cPacket
     virtual int64_t getBitLength() const override { return getDataLength() << 3; }
     //@}
 
+    /** @name Unsupported cPacket functions */
+    //@{
+    virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
+
+    virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
+    //@}
+
     /** @name Header querying related functions */
     //@{
     /**
-     * Returns the current header iterator position measured in bytes from the
-     * beginning of the packet. The returned value is in the range [0, getPacketLength()].
+     * Returns the header pop offset measured in bytes from the beginning of
+     * the packet. The returned value is in the range [0, getPacketLength()].
      */
-    int64_t getHeaderPosition() const { return headerIterator.getPosition(); }
+    int64_t getHeaderPopOffset() const { return headerIterator.getPosition(); }
 
     /**
-     * Changes the current header iterator position measured in bytes from the
-     * beginning of the packet. The value must be in the range [0, getPacketLength()].
+     * Changes the header pop offset measured in bytes from the beginning of
+     * the packet. The value must be in the range [0, getPacketLength()].
      */
-    void setHeaderPosition(int64_t offset) { data->seekIterator(headerIterator, offset); }
+    void setHeaderPopOffset(int64_t offset);
 
     /**
-     * Returns the total byte length of the packet headers processed so far.
+     * Returns the total byte count of popped packet headers.
      */
-    int64_t getHeaderLength() const { return headerIterator.getPosition(); }      // TODO: rename getProcessedHeaderLength to avoid confusion?
+    int64_t getHeaderPoppedByteCount() const { return headerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekHeader(int64_t length = -1) const;
-
-    std::shared_ptr<Chunk> peekHeaderAt(int64_t offset, int64_t length) const;
 
     std::shared_ptr<Chunk> popHeader(int64_t length = -1);
 
@@ -122,24 +128,20 @@ class Packet : public cPacket
 
     template <typename T>
     bool hasHeader(int64_t length = -1) const {
+        // TODO: could and should be implemented more efficiently
         return peekHeader<T>(length) != nullptr;
     }
 
     template <typename T>
     std::shared_ptr<T> peekHeader(int64_t length = -1) const {
-        return data->peek<T>(headerIterator, length);
-    }
-
-    template <typename T>
-    std::shared_ptr<T> peekHeaderAt(int64_t offset, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, offset), length);
+        return contents->peek<T>(headerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> popHeader(int64_t length = -1) {
         const auto& chunk = peekHeader<T>(length);
         if (chunk != nullptr)
-            data->moveIterator(headerIterator, chunk->getChunkLength());
+            contents->moveIterator(headerIterator, chunk->getChunkLength());
         return chunk;
     }
     //@}
@@ -147,25 +149,23 @@ class Packet : public cPacket
     /** @name Trailer querying related functions */
     //@{
     /**
-     * Returns the current trailer iterator position measured in bytes from the
-     * end of the packet. The returned value is in the range [0, getPacketLength()].
+     * Returns the trailer pop offset measured in bytes from the beginning of
+     * the packet. The returned value is in the range [0, getPacketLength()].
      */
-    int64_t getTrailerPosition() const { return trailerIterator.getPosition(); }
+    int64_t getTrailerPopOffset() const { return getPacketLength() - trailerIterator.getPosition(); }
 
     /**
-     * Changes the current trailer iterator position measured in bytes from the
-     * end of the packet. The value must be in the range [0, getPacketLength()].
+     * Changes the trailer pop offset measured in bytes from the beginning of
+     * the packet. The value must be in the range [0, getPacketLength()].
      */
-    void setTrailerPosition(int64_t offset) { data->seekIterator(trailerIterator, offset); }
+    void setTrailerPopOffset(int64_t offset);
 
     /**
-     * Returns the total byte length of the packet trailers processed so far.
+     * Returns the total byte count of popped packet trailers.
      */
-    int64_t getTrailerLength() const { return trailerIterator.getPosition(); }
+    int64_t getTrailerPoppedByteCount() const { return trailerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekTrailer(int64_t length = -1) const;
-
-    std::shared_ptr<Chunk> peekTrailerAt(int64_t offset, int64_t length) const;
 
     std::shared_ptr<Chunk> popTrailer(int64_t length = -1);
 
@@ -173,24 +173,20 @@ class Packet : public cPacket
 
     template <typename T>
     bool hasTrailer(int64_t length = -1) const {
+        // TODO: could and should be implemented more efficiently
         return peekTrailer<T>(length) != nullptr;
     }
 
     template <typename T>
     std::shared_ptr<T> peekTrailer(int64_t length = -1) const {
-        return data->peek<T>(trailerIterator, length);
-    }
-
-    template <typename T>
-    std::shared_ptr<T> peekTrailerAt(int64_t offset, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(false, offset), length);
+        return contents->peek<T>(trailerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> popTrailer(int64_t length = -1) {
         const auto& chunk = peekTrailer<T>(length);
         if (chunk != nullptr)
-            data->moveIterator(trailerIterator, chunk->getChunkLength());
+            contents->moveIterator(trailerIterator, chunk->getChunkLength());
         return chunk;
     }
     //@}
@@ -198,56 +194,36 @@ class Packet : public cPacket
     /** @name Data querying related functions */
     //@{
     /**
-     * Returns the current data position measured in bytes from the beginning
-     * of the packet. The returned value is in the range [0, getPacketLength()].
-     */
-    int64_t getDataPosition() const { return headerIterator.getPosition(); }
-
-    /**
      * Returns the current data size measured in bytes. The returned value is
      * in the range [0, getPacketLength()].
      */
     int64_t getDataLength() const { return getPacketLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peekData(int64_t length = -1) const;
-
-    std::shared_ptr<Chunk> peekDataAt(int64_t offset = 0, int64_t length = -1) const;
+    std::shared_ptr<Chunk> peekDataAt(int64_t offset, int64_t length = -1) const;
 
     template <typename T>
-    bool hasData(int64_t length = -1) const {
-        return peekData<T>(length) != nullptr;
+    bool hasDataAt(int64_t offset, int64_t length = -1) const {
+        return peekDataAt<T>(offset, length) != nullptr;
     }
 
     template <typename T>
-    std::shared_ptr<T> peekData(int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, getDataPosition()), length);
-    }
-
-    template <typename T>
-    std::shared_ptr<T> peekDataAt(int64_t offset = 0, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, getDataPosition() + offset), length);
+    std::shared_ptr<T> peekDataAt(int64_t offset, int64_t length = -1) const {
+        return contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
     }
     //@}
 
     /** @name Querying related functions */
     //@{
-    std::shared_ptr<Chunk> peek(int64_t length = -1) const;
-
-    std::shared_ptr<Chunk> peekAt(int64_t offset = 0, int64_t length = -1) const;
+    std::shared_ptr<Chunk> peekAt(int64_t offset, int64_t length = -1) const;
 
     template <typename T>
-    bool has(int64_t length = -1) const {
-        return peek<T>(length) != nullptr;
+    bool hasAt(int64_t offset, int64_t length = -1) const {
+        return peekAt<T>(offset, length) != nullptr;
     }
 
     template <typename T>
-    std::shared_ptr<T> peek(int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, 0), length);
-    }
-
-    template <typename T>
-    std::shared_ptr<T> peekAt(int64_t offset = 0, int64_t length = -1) const {
-        return data->peek<T>(Chunk::Iterator(true, offset), length);
+    std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
+        return contents->peek<T>(Chunk::Iterator(true, offset, -1), length);
     }
     //@}
 
@@ -263,7 +239,7 @@ class Packet : public cPacket
     void removeFromEnd(int64_t length);
     //@}
 
-    virtual std::string str() const override { return data->str(); }
+    virtual std::string str() const override { return contents->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
