@@ -27,9 +27,6 @@ void MediumVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
-        if (radioMedium != nullptr)
-            radioMedium->addListener(this);
         displaySignals = par("displaySignals");
         signalPropagationUpdateInterval = par("signalPropagationUpdateInterval");
         displayTransmissions = par("displayTransmissions");
@@ -40,6 +37,18 @@ void MediumVisualizerBase::initialize(int stage)
         interferenceRangeColor = cFigure::Color(par("interferenceRangeColor"));
         displayCommunicationRanges = par("displayCommunicationRanges");
         communicationRangeColor = cFigure::Color(par("communicationRangeColor"));
+        radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
+        if (radioMedium != nullptr) {
+            cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
+            radioMediumModule->subscribe(IRadioMedium::radioAddedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::radioRemovedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::transmissionAddedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::transmissionRemovedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::transmissionStartedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::transmissionEndedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::receptionStartedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::receptionEndedSignal, this);
+        }
     }
 }
 
@@ -70,6 +79,26 @@ simtime_t MediumVisualizerBase::getNextSignalPropagationUpdateTime(const ITransm
     }
     else
         return SimTime::getMaxTime();
+}
+
+void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    if (signal == IRadioMedium::radioAddedSignal)
+        radioAdded(check_and_cast<IRadio *>(object));
+    else if (signal == IRadioMedium::radioRemovedSignal)
+        radioRemoved(check_and_cast<IRadio *>(object));
+    else if (signal == IRadioMedium::transmissionAddedSignal)
+        transmissionAdded(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::transmissionRemovedSignal)
+        transmissionRemoved(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::transmissionStartedSignal)
+        transmissionStarted(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::transmissionEndedSignal)
+        transmissionEnded(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::receptionStartedSignal)
+        receptionStarted(check_and_cast<IReception *>(object));
+    else if (signal == IRadioMedium::receptionEndedSignal)
+        receptionEnded(check_and_cast<IReception *>(object));
 }
 
 } // namespace visualizer

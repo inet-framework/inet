@@ -92,9 +92,6 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 
     virtual void scheduleSignalPropagationUpdateTimer();
 
-  public:
-    virtual ~MediumCanvasVisualizer();
-
     virtual void radioAdded(const IRadio *radio) override;
     virtual void radioRemoved(const IRadio *radio) override;
 
@@ -105,6 +102,9 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     virtual void transmissionEnded(const ITransmission *transmission) override;
     virtual void receptionStarted(const IReception *reception) override;
     virtual void receptionEnded(const IReception *reception) override;
+
+  public:
+    virtual ~MediumCanvasVisualizer();
 };
 
 } // namespace visualizer
