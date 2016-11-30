@@ -88,9 +88,6 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListen
 
     virtual void scheduleSignalPropagationUpdateTimer();
 
-  public:
-    virtual ~MediumOsgVisualizer();
-
     virtual void radioAdded(const IRadio *radio) override;
     virtual void radioRemoved(const IRadio *radio) override;
 
@@ -102,9 +99,12 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListen
     virtual void receptionStarted(const IReception *reception) override;
     virtual void receptionEnded(const IReception *reception) override;
 
+  public:
+    virtual ~MediumOsgVisualizer();
+
 #else // ifdef WITH_OSG
 
-  public:
+  protected:
     virtual void radioAdded(const IRadio *radio) override {}
     virtual void radioRemoved(const IRadio *radio) override {}
 

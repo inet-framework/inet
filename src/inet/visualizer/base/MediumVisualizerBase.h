@@ -27,7 +27,7 @@ namespace visualizer {
 
 using namespace inet::physicallayer;
 
-class INET_API MediumVisualizerBase : public VisualizerBase, public IRadioMedium::IMediumListener
+class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
     enum SignalShape
@@ -61,6 +61,20 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public IRadioMedium
     virtual void initialize(int stage) override;
 
     virtual simtime_t getNextSignalPropagationUpdateTime(const ITransmission *transmission);
+
+    virtual void radioAdded(const IRadio *radio) = 0;
+    virtual void radioRemoved(const IRadio *radio) = 0;
+
+    virtual void transmissionAdded(const ITransmission *transmission) = 0;
+    virtual void transmissionRemoved(const ITransmission *transmission) = 0;
+
+    virtual void transmissionStarted(const ITransmission *transmission) = 0;
+    virtual void transmissionEnded(const ITransmission *transmission) = 0;
+    virtual void receptionStarted(const IReception *reception) = 0;
+    virtual void receptionEnded(const IReception *reception) = 0;
+
+  public:
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace visualizer
