@@ -107,7 +107,7 @@ Review 1
 		- GIF: the access point and the moving pedestrians with their IP addresses
 
 
-7. Showing wifi association - DOESN'T WORK PROPERLY YET!!!
+7. Showing wifi association
 	- Goals:
 		- Displaying the pedestrians to which access point connect. We want to see a signal and a label with the wireless network's ssid
 	- Model:

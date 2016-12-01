@@ -150,13 +150,13 @@ Below, there is the appropriate part of the ini file.
 If we run the simulation in the 3D Scene view mode, we can see the three nodes and three circles around them. Each node is in the center of a circle,
 that circle is the node's communication range.
 
-<img src="step3_result1.png">
+<img src="step3_result1.png"> WIP
 
 We configured the visualization of interference ranges too. They're also on the map, but they're very big, so we have to zoom out
 or move to any direction to see these ranges.
 The communication and interference ranges seem in the Module view mode too.
 
-<img src="step3_result2.png">
+<img src="step3_result2.png"> WIP
 
 When we run the simulation, the pedestrians associate with the access point.
 In Module view mode there's a bubble message when it happens.
@@ -178,7 +178,7 @@ Pedestrians are WirelessHost type, so by default their icon is a cellphone. Our 
 
 @section s4model The model
 
-In INET Framework we have an opportunity to change device appearance to an external 3D osg model. The osgModel's first attribute is the boxman.osgb.
+In INET Framework it's possible to change device appearance to an external 3D osg model. The osgModel's first attribute is the boxman.osgb.
 It's the 3D model name. In addition we can set the size and the rotation of the model. The "(0.06).scale" means the model size is 6% of the original.
 The three numbers are in for the rot key word mean the rotation of the 3D model around x, y and z axis.
 
@@ -190,7 +190,7 @@ The three numbers are in for the rot key word mean the rotation of the 3D model 
 
 In Module view mode there's no difference compared to the simulation before this. But in 3D view mode instead of phones we see boxmans.
 
-<img src="step4_result1.gif">
+<img src="step4_result1.gif"> WIP
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -206,7 +206,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s5goals Goals
 
-In this step we want to show how the pedestrians move. To achieve our goal, we need to use the mobility visualizer submodule.
+In this step we want to show how can mobile network nodes move. To achieve our goal, we need to use the mobility visualizer submodule.
 
 @section s5model The model
 
@@ -221,19 +221,20 @@ This is a random mobility model for a mobile host with a mass.
 We set their initial position, and a border, because we don't want to let them go out from the access point's communication range.
 We have more ways to set the nodes initial position.
 We can set that in meter, in this case the origin position counts, and we can add that in degree.
-The pedestrians' movement based on three parameters. The changing interval is the frequency of changing speed and angle,
+The pedestrians' movement based on three parameters. EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEThe changing interval is the frequency of changing speed and angle,
 the change angle by change the direction of the movement, and the speed means the movement speed.
 
 After that we need to add some visualizer parameters. We can display the movement of the pedestrians. We display a trail,
 that shows where the pedestrians come from, and we can show an arrow,
-that shows us the velocity of the pedestrians, but we can see that in Module view mode only.
+that shows the velocity of the pedestrians, but we can see that in Module view mode only.
 
 @section s5results Results
 
-If we run the simulation, here's what happens. The pedestrians move between borders that we adjust to them.
-<img src="step5_result1.gif">
+If we run the simulation, here's what happens. The pedestrians walk between borders that we adjust to them.
 
-<img src="step5_result3.gif" width="850">
+<img src="step5_result1.gif"> WIP
+
+<img src="step5_result3.gif" width="850"> WIP
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -242,15 +243,43 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step6 Step 6 -
+@page step6 Step 6 - Showing IP adresses
 
 @nav{step5,step7}
 
 @section s6goals Goals
 
+In this step we want to show the wireless hosts IP addresses.
+
 @section s6model The model
 
+If we want to see the network nodes' IP addresses we have set the parameters of the interfaceTableVisualizer. Here is the configuration:
+
+@dontinclude omnetpp.ini
+@skipline [Config Visualization06]
+@until ####
+
+With the nodeFilter parameter we can define the nodes list, that are considered. If we want to see any IP address, we have to set it,
+because by default that list is empty. Then we can set an interface list. That specifies what interfaces are considered at each node.
+Besides of these parameters we can change the font color, the background color, and the opacity of the text.  These are optional looking parameters,
+that make the IP addresses clearly visible.
+
+With interfaceTableVisualizer we can display not only the IP address of an interface, but the MAC address too.
+To that we need to change the content parameter to "macAddress".
+
 @section s6results Results
+
+If we run the simulation, we can see a yellow bubble above each pedestrian with its wlan0 network interface card (NIC) IP address.
+
+<img src="step6_result1.png">
+
+<img src="step6_result2.png">
+
+If we set the content parameter to "macAddress", we can see the given NIC MAC (layer 2) address.
+
+<img src="step6_result3.png" width="850">
+
+<img src="step6_result4.gif" width="850">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -259,15 +288,22 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step7 Step 7 -
+@page step7 Step 7 - Showing wifi association
 
 @nav{step6,step8}
 
 @section s7goals Goals
 
+The pedestrians are in the access point communication range, but they need to associate with that, if they want to talk to each other.
+When do they associate with the access point? We'll show that in this step.
+
 @section s7model The model
 
+In the ini file we need to set only the ieee80211Visualizer's parameters. This visualizer will display us information about the association.
+
 @section s7results Results
+
+
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 

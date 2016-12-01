@@ -2,8 +2,8 @@
 			MediumOSGVisualizer.cc		line 325: auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
 			No source available for "0x72657a" 
 			
-- InfoVisualizerBase Question: module-nak tetszőleges változóját ki lehet iratni? (CObjectet pl)
-	SOLUTION: *.visualizer.*.ieee80211Visualizer.nodeFilter = "**" legyen rajta cimke: ssid, jelerösség
+- ieee80211Visualizer: Lehetne rajta cimke: ssid, jelerösség
+
 - egymásra lógnak a 3dben az interfaceTableVisualizer és a ieee80211Visualizer
 
 - amelyik node-nál nincs bekapcsolva interfaceTableVisualizer, ott a ieee80211Visualizer es a mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymásra lóg
