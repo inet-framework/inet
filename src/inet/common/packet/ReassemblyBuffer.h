@@ -26,7 +26,8 @@ namespace inet {
  * segments in connection oriented transport layer protocols or reassembling
  * fragmented datagrams in network layer protocols.
  */
-// TODO: add keep old or overwrite with new flag
+// TODO: add flag to decide between keeping or overwriting old data when replacing with new data
+// TODO RENAME: RandomAccessBuffer?
 class INET_API ReassemblyBuffer : public cNamedObject
 {
   protected:
@@ -36,7 +37,8 @@ class INET_API ReassemblyBuffer : public cNamedObject
         std::shared_ptr<Chunk> data;
 
       public:
-        Region(int64_t offset, const std::shared_ptr<Chunk>& data);
+        Region(int64_t offset, const std::shared_ptr<Chunk>& data) : offset(offset), data(data) { }
+        Region(const Region& other) : offset(other.offset), data(other.data) { }
 
         int64_t getStartOffset() const { return offset; }
         int64_t getEndOffset() const { return offset + data->getChunkLength(); }
@@ -74,14 +76,14 @@ class INET_API ReassemblyBuffer : public cNamedObject
     //@}
 
     /**
-     * Replaces the stored data at the offset with the provided data in the
+     * Replaces the stored data at the provided offset with the data in the
      * chunk. Already existing data gets overwritten, and connecting data gets
      * merged with the provided chunk.
      */
     void replace(int64_t offset, const std::shared_ptr<Chunk>& chunk);
 
     /**
-     * Removed the stored data at the provided offset and length.
+     * Erases the stored data at the provided offset and length.
      */
     void clear(int64_t offset, int64_t length);
 
@@ -89,6 +91,7 @@ class INET_API ReassemblyBuffer : public cNamedObject
 };
 
 // TODO: move to the network layer
+// TODO RENAME: ReassemblyBuffer?
 class INET_API DatagramReassemblyBuffer : public ReassemblyBuffer
 {
   protected:
@@ -96,10 +99,7 @@ class INET_API DatagramReassemblyBuffer : public ReassemblyBuffer
 
   public:
     DatagramReassemblyBuffer(int64_t expectedLength = -1) : expectedLength() { }
-    DatagramReassemblyBuffer(const DatagramReassemblyBuffer& other) :
-        ReassemblyBuffer(other),
-        expectedLength(other.expectedLength)
-    { }
+    DatagramReassemblyBuffer(const DatagramReassemblyBuffer& other) : ReassemblyBuffer(other), expectedLength(other.expectedLength) { }
 
     int64_t getExpectedLength() const { return expectedLength; }
     void setExpectedLength(int64_t expectedLength) { this->expectedLength = expectedLength; }
@@ -114,6 +114,7 @@ class INET_API DatagramReassemblyBuffer : public ReassemblyBuffer
 };
 
 // TODO: move to the transport layer
+// TODO RENAME: ReorderBuffer?
 class INET_API SegmentReassemblyBuffer : public ReassemblyBuffer
 {
   protected:
@@ -121,10 +122,7 @@ class INET_API SegmentReassemblyBuffer : public ReassemblyBuffer
 
   public:
     SegmentReassemblyBuffer(int64_t expectedOffset = -1) : expectedOffset(expectedOffset) { }
-    SegmentReassemblyBuffer(const SegmentReassemblyBuffer& other) :
-        ReassemblyBuffer(other),
-        expectedOffset(other.expectedOffset)
-    { }
+    SegmentReassemblyBuffer(const SegmentReassemblyBuffer& other) : ReassemblyBuffer(other), expectedOffset(other.expectedOffset) { }
 
     int64_t getExpectedOffset() const { return expectedOffset; }
     void setExpectedOffset(int64_t expectedOffset) { this->expectedOffset = expectedOffset; }

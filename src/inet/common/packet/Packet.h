@@ -71,7 +71,7 @@ class INET_API Packet : public cPacket
 
     /** @name Mutability related functions */
     //@{
-    // TODO: rename to freezeContents()?
+    // TODO RENAME: freezeContents()?
     bool isImmutable() const { return contents != nullptr && contents->isImmutable(); }
     bool isMutable() const { return contents == nullptr || contents->isMutable(); }
     void assertMutable() const { assert(isMutable()); }

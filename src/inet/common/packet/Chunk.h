@@ -36,7 +36,7 @@ class ChunkSerializer;
  * message compiler. In any case, chunks can always be converted to and from a
  * sequence of bytes using the corresponding serializer.
  *
- * TODO: polymorphism, nesting, compacting
+ * TODO: polymorphism, nesting, compacting, crc, lossy channels
  *
  * Chunks can represent data in different ways:
  *  - LengthChunk contains a length field only
@@ -48,11 +48,13 @@ class ChunkSerializer;
  *
  * Chunks are initially:
  *  - mutable, then may become immutable (but never the other way around)
- *    immutable chunks cannot be changed anymore
+ *    immutable chunks cannot be changed anymore (sharing data)
  *  - complete, then may become incomplete (but never the other way around)
- *    incomplete chunks are not totally filled in (e.g. due to deserialization)
+ *    incomplete chunks are not totally filled in (deserializing insufficient data)
  *  - correct, then may become incorrect (but never the other way around)
- *    incorrect chunks contain bit errors
+ *    incorrect chunks contain bit errors (using lossy channels)
+ *  - proper, then may become improper (but never the other way around)
+ *    improper chunks misrepresent their data (deserializing data)
  *
  * Chunks can be safely shared using std::shared_ptr. In fact, the reason for
  * having immutable chunks is to allow for efficient sharing using shared
@@ -97,6 +99,22 @@ class ChunkSerializer;
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
+// TODO: document user invariants, there's no
+//  - sequence chunk in another sequence chunk
+//  - slice chunk in another slice chunk
+// TODO: document automatic invariants, there's no
+//  - slice chunk that refers to a whole chunk
+//  - slice chunk of a bytes chunk
+//  - slice chunk of a length chunk
+//  - connecting length chunks within a sequence chunk
+//  - connection bytes chunks within a sequence chunk
+//  - sequence chunk with one element
+// TODO: consider not allowing appending mutable chunks?
+// TODO: consider adding a simplify function as peek(0, getChunkLength())?
+// TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
+// TODO: consider peeking an incomplete fixed size header, what does getChunkLength() return for such a header?
+// TODO: peek is misleading with BytesChunk and default length
+//       consider introducing an enum to replace -1 length values: UNTIL_END, INTERNAL_REP
 // TODO: how does an error model make a chunk erroneous without actually serializing it?
 // TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
 // - message compiler could support @optional fields, inspectors could hide them, etc.
@@ -138,10 +156,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * This enum specifies bitmasks for the flags field.
      */
     enum Flag {
-        FLAG_IMMUTABLE      = 1,
-        FLAG_INCOMPLETE     = 2,
-        FLAG_INCORRECT      = 4,
-        FLAG_MISREPRESENTED = 8,
+        FLAG_IMMUTABLE  = 1,
+        FLAG_INCOMPLETE = 2,
+        FLAG_INCORRECT  = 4,
+        FLAG_IMPROPER   = 8,
     };
 
   public:
@@ -248,7 +266,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
     virtual void makeImmutable() { flags |= FLAG_IMMUTABLE; }
-    // TODO: consider renaming to freeze/frozen/modifiable
+    // TODO RENAME: freeze/frozen/modifiable?
     //@}
 
     /** @name Completeness related functions */
@@ -258,7 +276,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     bool isIncomplete() const { return flags & FLAG_INCOMPLETE; }
     void assertComplete() const { assert(isComplete()); }
     void assertIncomplete() const { assert(isIncomplete()); }
-    void makeIncomplete() { flags |= FLAG_INCOMPLETE; }
+    virtual void makeIncomplete() { flags |= FLAG_INCOMPLETE; }
     //@}
 
     /** @name Correctness related functions */
@@ -268,19 +286,19 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     bool isIncorrect() const { return flags & FLAG_INCORRECT; }
     void assertCorrect() const { assert(isCorrect()); }
     void assertIncorrect() const { assert(isIncorrect()); }
-    void makeIncorrect() { flags |= FLAG_INCORRECT; }
-    // TODO: consider renaming to corrupt/correct/erroneous
+    virtual void makeIncorrect() { flags |= FLAG_INCORRECT; }
+    // TODO RENAME: corrupt/correct/erroneous?
     //@}
 
     /** @name Misrepresentation related functions */
     //@{
-    // NOTE: there is no makeRepresented() intentionally
-    bool isRepresented() const { return !(flags & FLAG_MISREPRESENTED); }
-    bool isMisrepresented() const { return flags & FLAG_MISREPRESENTED; }
-    void assertRepresented() const { assert(isRepresented()); }
-    void assertMisrepresented() const { assert(isMisrepresented()); }
-    void makeMisrepresented() { flags |= FLAG_MISREPRESENTED; }
-    // TODO: consider renaming to correctlyrepresented, incorrectlyrepresented
+    // NOTE: there is no makeProper() intentionally
+    bool isProper() const { return !(flags & FLAG_IMPROPER); }
+    bool isImproper() const { return flags & FLAG_IMPROPER; }
+    void assertProper() const { assert(isProper()); }
+    void assertImproper() const { assert(isImproper()); }
+    virtual void makeImproper() { flags |= FLAG_IMPROPER; }
+    // TODO RENAME: correctlyRepresented, incorrectlyRepresented?
     //@}
 
     /** @name Iteration related functions */
@@ -350,7 +368,11 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
-        if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength())) {
+        int64_t chunkLength = getChunkLength();
+        if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+            return nullptr;
+        assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+        if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength)) {
             if (auto tChunk = std::dynamic_pointer_cast<T>(const_cast<Chunk *>(this)->shared_from_this()))
                 return tChunk;
         }

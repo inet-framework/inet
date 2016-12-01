@@ -24,7 +24,7 @@ namespace inet {
  * This class represents data using a length field only. This can be useful
  * when the actual data is irrelevant and memory efficiency is high priority.
  */
-// TODO: rename to ByteCountChunk?
+// TODO RENAME: ByteCountChunk?
 class INET_API LengthChunk : public Chunk
 {
   friend Chunk;

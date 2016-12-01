@@ -118,21 +118,31 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& itera
     int increment = getIndexIncrement(iterator);
     for (int i = startIndex; i != endIndex + increment; i += increment) {
         auto& chunk = chunks[i];
+        int64_t chunkLength = chunk->getChunkLength();
         if (iterator.getPosition() == position && (length == -1 || length == chunk->getChunkLength()))
             return chunk;
-        position += chunk->getChunkLength();
+        else if (position <= iterator.getPosition() && iterator.getPosition() < position + chunkLength &&
+                 (length == -1 || iterator.getPosition() + length <= position + chunkLength))
+            return chunk->peek(ForwardIterator(iterator.getPosition() - position, -1), length);
+        position += chunkLength;
     }
     return nullptr;
 }
 
 bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    if (chunks.size() != 0) {
+    if (!chunks.empty()) {
         auto& firstChunk = chunks.front();
-        if (firstChunk->isImmutable() && chunk->isImmutable()) {
+        if (firstChunk->isImmutable()) {
             auto mergedChunk = firstChunk->dupShared();
-            if (mergedChunk->insertAtBeginning(chunk))
-                chunks.front() = mergedChunk->peek(0);
+            if (mergedChunk->insertAtBeginning(chunk)) {
+                chunks.front() = mergedChunk->peek(0, mergedChunk->getChunkLength());
+                return true;
+            }
+        }
+        else if (firstChunk->insertAtBeginning(chunk)) {
+            chunks.front() = firstChunk->peek(0, firstChunk->getChunkLength());
+            return true;
         }
     }
     return false;
@@ -140,12 +150,18 @@ bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
 
 bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    if (chunks.size() != 0) {
+    if (!chunks.empty()) {
         auto& lastChunk = chunks.back();
-        if (lastChunk->isImmutable() && chunk->isImmutable()) {
+        if (lastChunk->isImmutable()) {
             auto mergedChunk = lastChunk->dupShared();
-            if (mergedChunk->insertAtEnd(chunk))
-                chunks.back() = mergedChunk->peek(0);
+            if (mergedChunk->insertAtEnd(chunk)) {
+                chunks.back() = mergedChunk->peek(0, mergedChunk->getChunkLength());
+                return true;
+            }
+        }
+        else if (lastChunk->insertAtEnd(chunk)) {
+            chunks.back() = lastChunk->peek(0, lastChunk->getChunkLength());
+            return true;
         }
     }
     return false;
@@ -173,9 +189,9 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& slice
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToBeginning(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertToBeginning(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+                doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
+                doInsertToBeginning(elementChunk->peek(0, chunkEnd - sliceChunkEnd));
         }
     }
     else
@@ -220,9 +236,9 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertToEnd(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertToEnd(std::make_shared<SliceChunk>(elementChunk, sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
+                doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(std::make_shared<SliceChunk>(elementChunk, 0, chunkEnd - sliceChunkEnd));
+                doInsertToEnd(elementChunk->peek(0, chunkEnd - sliceChunkEnd));
             offset += elementChunk->getChunkLength();
         }
     }
@@ -296,7 +312,7 @@ bool SequenceChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
+    if (iterator.getPosition() == 0 && length == getChunkLength())
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else {
         if (auto chunk = peekWithIterator(iterator, length))

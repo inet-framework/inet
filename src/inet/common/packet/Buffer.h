@@ -23,6 +23,7 @@ namespace inet {
 /**
  * This class represents application or protocol buffers.
  */
+// TODO RENAME: SerialAccessBuffer?
 class INET_API Buffer : public cNamedObject
 {
   protected:

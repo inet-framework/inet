@@ -20,12 +20,6 @@
 
 namespace inet {
 
-ReassemblyBuffer::Region::Region(int64_t offset, const std::shared_ptr<Chunk>& data) :
-    offset(offset),
-    data(data)
-{
-}
-
 ReassemblyBuffer::ReassemblyBuffer(const char *name) :
     cNamedObject(name)
 {
@@ -85,15 +79,15 @@ void ReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 {
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
-        if (previousRegion.data->isMutable() && previousRegion.data->insertAtEnd(nextRegion.data)) {
+        if (previousRegion.data->insertAtEnd(nextRegion.data)) {
             // merge into previous
-            previousRegion.data = previousRegion.data->peek(0);
+            previousRegion.data = previousRegion.data->peek(0, previousRegion.data->getChunkLength());
             nextRegion.data = nullptr;
         }
-        else if (nextRegion.data->isMutable() && nextRegion.data->insertAtBeginning(previousRegion.data)) {
+        else if (nextRegion.data->insertAtBeginning(previousRegion.data)) {
             // merge into next
             previousRegion.data = nullptr;
-            nextRegion.data = nextRegion.data->peek(0);
+            nextRegion.data = nextRegion.data->peek(0, previousRegion.data->getChunkLength());
         }
         else {
             // merge as a sequence
@@ -108,7 +102,7 @@ void ReassemblyBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 
 void ReassemblyBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
 {
-    Region newRegion(offset, chunk);
+    Region newRegion(offset, chunk->isImmutable() ? chunk->dupShared() : chunk);
     sliceRegions(newRegion);
     if (regions.empty())
         regions.push_back(newRegion);

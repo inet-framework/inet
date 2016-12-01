@@ -31,6 +31,7 @@ class Chunk extends cObject
     bool mutable @getter("isMutable");
     bool complete @getter("isComplete");
     bool correct @getter("isCorrect");
+    bool proper @getter("isProper");
     int64_t chunkLength;
 }
 
@@ -45,9 +46,9 @@ packet Packet
 {
     @existingClass(true);
     @descriptor(readonly);
-//    int64_t headerLength;
-//    int64_t dataLength;
-//    int64_t trailerLength;
+    int64_t headerPopOffset;
+    int64_t trailerPopOffset;
+    int64_t dataLength;
     Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
 }
 

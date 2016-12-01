@@ -122,16 +122,13 @@ bool SliceChunk::removeFromEnd(int64_t length)
 std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length) const
 {
     if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength())) {
-        if (offset == 0 && this->length == chunk->getChunkLength())
+        if (offset == 0 && getChunkLength() == chunk->getChunkLength())
             return chunk;
         else
             return const_cast<SliceChunk *>(this)->shared_from_this();
     }
-    else {
-        Iterator sliceIterator(iterator);
-        moveIterator(sliceIterator, offset);
-        return chunk->peek(sliceIterator, length);
-    }
+    else
+        return chunk->peek(ForwardIterator(iterator.getPosition() + offset, -1), length);
 }
 
 std::string SliceChunk::str() const
