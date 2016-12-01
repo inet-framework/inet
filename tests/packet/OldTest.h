@@ -42,6 +42,7 @@ class OldMedium
 
   protected:
     cPacket *serializePacket(cPacket *packet);
+    cPacket *deserializePacket(cPacket *packet);
 
   public:
     OldMedium(bool serialize) : serialize(serialize) { }

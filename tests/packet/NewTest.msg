@@ -71,7 +71,7 @@ class EthernetHeader extends FieldsChunk
 class EthernetTrailer extends FieldsChunk
 {
     @str;
-    int64_t chunkLength = 4;
-    int32_t crc = 0;
+    int64_t chunkLength = 2;
+    int16_t crc = 0;
     int bitError @enum(BitError) = -1;
 }

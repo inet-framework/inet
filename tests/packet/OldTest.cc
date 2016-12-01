@@ -50,13 +50,19 @@ const std::vector<cPacket *> OldMedium::receivePackets()
 {
     std::vector<cPacket *> receivedPackets;
     for (auto packet : packets)
-        receivedPackets.push_back(packet->dup());
+        receivedPackets.push_back(serialize ? deserializePacket(packet) : packet->dup());
     return receivedPackets;
 }
 
 cPacket *OldMedium::serializePacket(cPacket *packet)
 {
     // TODO: serialize
+    return packet;
+}
+
+cPacket *OldMedium::deserializePacket(cPacket *packet)
+{
+    // TODO: deserialize
     return packet;
 }
 

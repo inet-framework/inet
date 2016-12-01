@@ -22,6 +22,7 @@ Register_Serializer(ApplicationHeader, ApplicationHeaderSerializer);
 Register_Serializer(TcpHeader, TcpHeaderSerializer);
 Register_Serializer(IpHeader, IpHeaderSerializer);
 Register_Serializer(EthernetHeader, EthernetHeaderSerializer);
+Register_Serializer(EthernetTrailer, EthernetTrailerSerializer);
 Define_Module(NewTest);
 
 static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_ptr<BytesChunk>& tcpSegment)
@@ -92,7 +93,7 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(ByteInputStream& stream) 
     int64_t position = stream.getPosition();
     Protocol protocol = (Protocol)stream.readUint16();
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
-        ipHeader->makeMisrepresented();
+        ipHeader->makeImproper();
     ipHeader->setProtocol(protocol);
     stream.readByteRepeatedly(0, ipHeader->getChunkLength() - stream.getPosition() + position);
     return ipHeader;
@@ -113,6 +114,23 @@ std::shared_ptr<Chunk> EthernetHeaderSerializer::deserialize(ByteInputStream& st
     ethernetHeader->setProtocol((Protocol)stream.readUint16());
     stream.readByteRepeatedly(0, ethernetHeader->getChunkLength() - stream.getPosition() + position);
     return ethernetHeader;
+}
+
+void EthernetTrailerSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+{
+    const auto& ethernetTrailer = std::static_pointer_cast<const EthernetTrailer>(chunk);
+    int64_t position = stream.getPosition();
+    stream.writeUint16(ethernetTrailer->getCrc());
+    stream.writeByteRepeatedly(0, ethernetTrailer->getChunkLength() - stream.getPosition() + position);
+}
+
+std::shared_ptr<Chunk> EthernetTrailerSerializer::deserialize(ByteInputStream& stream) const
+{
+    auto ethernetTrailer = std::make_shared<EthernetTrailer>();
+    int64_t position = stream.getPosition();
+    ethernetTrailer->setCrc(stream.readUint16());
+    stream.readByteRepeatedly(0, ethernetTrailer->getChunkLength() - stream.getPosition() + position);
+    return ethernetTrailer;
 }
 
 std::string ApplicationHeader::str() const

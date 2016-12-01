@@ -51,6 +51,13 @@ class EthernetHeaderSerializer : public FieldsChunkSerializer
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
+class EthernetTrailerSerializer : public FieldsChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+};
+
 class NewMedium
 {
   protected:

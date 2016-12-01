@@ -34,14 +34,14 @@ class TlvHeader extends FieldsChunk
     int64_t chunkLength = -1;
 }
 
-class TlvHeader1 extends TlvHeader
+class TlvHeaderBool extends TlvHeader
 {
     type = 1;
     chunkLength = 3;
     bool boolValue = false;
 }
 
-class TlvHeader2 extends TlvHeader
+class TlvHeaderInt extends TlvHeader
 {
     type = 2;
     chunkLength = 4;

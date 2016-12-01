@@ -48,14 +48,14 @@ class TlvHeaderSerializer : public FieldsChunkSerializer
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
-class TlvHeader1Serializer : public FieldsChunkSerializer
+class TlvHeaderBoolSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 };
 
-class TlvHeader2Serializer : public FieldsChunkSerializer
+class TlvHeaderIntSerializer : public FieldsChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
