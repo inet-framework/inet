@@ -66,7 +66,6 @@ Here is the NED file of the network:
 @skip network VisualizationA
 @until ####
 
-
 This is a very simple model, contains an IntegratedVisualizer and an OsgGeographicCoordinateSystem submodule.
 The ini file contains the parameters of these submodules.
 
@@ -77,7 +76,7 @@ The ini file contains the parameters of these submodules.
 In this part of the file, there are some coordinate system and the scene visualizer parameters.
 Coordinate system parameters set the longitude, latitude and altitude coordinate of the playground origin and the heading of it.
 Scene visualizer parameters set the visualizer type. We add a map to the simulation with the mapFile parameter.
-Besides these options we turn off the playground shading and configure the opacity and the color of it.
+Besides these options we turn off the playground shading and configure the opacity and the color of the playground.
 With the axisLength we can change the axis' size on the map.
 
 @section s1results Results
@@ -114,7 +113,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step3 Step 3 - Displaying communiation/interference range
+@page step3 Step 3 - Displaying communication/interference range
 
 @nav{step2,step4}
 
@@ -150,13 +149,13 @@ Below, there is the appropriate part of the ini file.
 If we run the simulation in the 3D Scene view mode, we can see the three nodes and three circles around them. Each node is in the center of a circle,
 that circle is the node's communication range.
 
-<img src="step3_result1.png"> WIP
+<img src="step3_result1.png">
 
 We configured the visualization of interference ranges too. They're also on the map, but they're very big, so we have to zoom out
 or move to any direction to see these ranges.
 The communication and interference ranges seem in the Module view mode too.
 
-<img src="step3_result2.png"> WIP
+<img src="step3_result2.png">
 
 When we run the simulation, the pedestrians associate with the access point.
 In Module view mode there's a bubble message when it happens.
@@ -188,9 +187,9 @@ The three numbers are in for the rot key word mean the rotation of the 3D model 
 
 @section s4results Results
 
-In Module view mode there's no difference compared to the simulation before this. But in 3D view mode instead of phones we see boxmans.
+In Module view mode there's no difference compared to the simulation before this. But in 3D view mode instead of phones we see boxmen.
 
-<img src="step4_result1.gif"> WIP
+<img src="step4_result1.gif">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -220,9 +219,9 @@ We have to adjust the nodes' mobility settings. The pedestrians movement is calc
 This is a random mobility model for a mobile host with a mass.
 We set their initial position, and a border, because we don't want to let them go out from the access point's communication range.
 We have more ways to set the nodes initial position.
-We can set that in meter, in this case the origin position counts, and we can add that in degree.
-The pedestrians' movement based on three parameters. EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEThe changing interval is the frequency of changing speed and angle,
-the change angle by change the direction of the movement, and the speed means the movement speed.
+We can set that in meter or we can add that in degree.
+The pedestrians' movement based on three parameters. The changeInterval is the frequency of changing speed and angle,
+the changeAngleBy change the direction of the movement, and the speed means the movement speed.
 
 After that we need to add some visualizer parameters. We can display the movement of the pedestrians. We display a trail,
 that shows where the pedestrians come from, and we can show an arrow,
@@ -231,10 +230,15 @@ that shows the velocity of the pedestrians, but we can see that in Module view m
 @section s5results Results
 
 If we run the simulation, here's what happens. The pedestrians walk between borders that we adjust to them.
+These animations created in fast run mode, because the normal speed is too slow to see the pedestrians movement.
 
-<img src="step5_result1.gif"> WIP
+Here's that in Module view mode:
 
-<img src="step5_result3.gif" width="850"> WIP
+<img src="step5_result1.gif">
+
+That's what we can see in 3D Scene view mode:
+
+<img src="step5_result3.gif" width="850">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -249,7 +253,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s6goals Goals
 
-In this step we want to show the wireless hosts IP addresses.
+In this step we want to show given hosts given network interface card IP address.
 
 @section s6model The model
 
@@ -272,8 +276,6 @@ To that we need to change the content parameter to "macAddress".
 If we run the simulation, we can see a yellow bubble above each pedestrian with its wlan0 network interface card (NIC) IP address.
 
 <img src="step6_result1.png">
-
-<img src="step6_result2.png">
 
 If we set the content parameter to "macAddress", we can see the given NIC MAC (layer 2) address.
 
@@ -300,9 +302,20 @@ When do they associate with the access point? We'll show that in this step.
 @section s7model The model
 
 In the ini file we need to set only the ieee80211Visualizer's parameters. This visualizer will display us information about the association.
+We can set which node's and which interfaces are considered, like at interfaceTableVisualizer.
+
+Here is the appropriate configuration:
+
+@dontinclude omnetpp.ini
+@skipline [Config Visualization07]
+@until ####
 
 @section s7results Results
 
+In the Module view mode we can monitor the association process, we can see all messages between the nodes. When a pedestrian send an Assoc message,
+the access point in its communication range receive that, and a signal sign appear above the access point. In response to this Assoc message, the access point
+reply with an AssocResp- message. If the association is successful it's AssocResp-OK and a signal sign appear above that pedestrian
+who wants to associate with the access point.
 
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
@@ -312,7 +325,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step8 Step 8 -
+@page step8 Step 8 - Displaying transmissions and receptions
 
 @nav{step7,step9}
 
