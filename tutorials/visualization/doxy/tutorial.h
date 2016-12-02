@@ -150,7 +150,7 @@ that circle is the node's communication range.
 
 We configured the visualization of interference ranges too. They're also on the map, but they're very big, so we have to zoom out
 or move to any direction to see these ranges.
-The communication and interference ranges seem in the Module view mode too.
+The communication and interference ranges seen in the Module view mode too.
 <img src="step3_result2.png">
 
 When we run the simulation, the pedestrians associate with the access point.
@@ -391,8 +391,14 @@ Next to the ring, there is a label, that shows the message type.
 There's an animation of a VoIP message, that goes from the pedestrian0 to the pedestrian1 through the accessPoint0:
 <img src="step9_result1.gif">
 
-And there's a similar message in 3D view mode:
+And there's a similar message in 3D view mode, with <i>both</i> option:
 <img src="step9_result2.gif">
+
+Ring signal propagation:
+<img src="step9_result3.gif">
+
+Sphere signal propagation:
+<img src="step9_result4.gif">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
