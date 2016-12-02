@@ -29,3 +29,5 @@
 - 3d-ben infoVisualizer és mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymáson van
 
 - obstacleLossVisualizer.displayIntersectionTrail & obstacleLossVisualizer.displayFaceNormalVectorTrail 2d-ben és 3d-ben ellentétes színnel van jelölve: egyikben pirossal, másikban feketével. Vagy 2d-ben vagy 3d-ben ki kéne cserélni a színeket.
+
+- mediumVisualizer.transmissionImage-nek és mediumVisualizer.receptionImage-nek, nem lehetne default-ból valami képe?

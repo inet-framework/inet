@@ -15,10 +15,6 @@
 
 package inet.tutorials.visualization;
 
-import inet.examples.adhoc.hostautoconf.Host;
-import inet.node.inet.AdhocHost;
-import inet.node.dymo.DYMORouter;
-import inet.node.aodv.AODVRouter;
 //networkA
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.common.geometry.common.OsgGeographicCoordinateSystem;
@@ -178,3 +174,4 @@ network VisualizationF extends VisualizationE
         router0.pppg++ <--> Eth100M <--> router3.pppg++;
         accessPoint3.ethg++ <--> Eth100M <--> router3.ethg++;
 }
+//#### doxygen marker
