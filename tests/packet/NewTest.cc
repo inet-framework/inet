@@ -51,7 +51,7 @@ void TcpHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
     int64_t position = stream.getPosition();
-    if (tcpHeader->getBitError() != BIT_ERROR_CRC)
+    if (tcpHeader->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize TCP header");
     stream.writeUint16(tcpHeader->getLengthField());
     stream.writeUint16(tcpHeader->getSrcPort());
@@ -73,7 +73,7 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(ByteInputStream& stream)
     tcpHeader->setLengthField(lengthField);
     tcpHeader->setSrcPort(stream.readUint16());
     tcpHeader->setDestPort(stream.readUint16());
-    tcpHeader->setBitError(BIT_ERROR_CRC);
+    tcpHeader->setCrcMode(CRC_COMPUTED);
     tcpHeader->setCrc(stream.readUint16());
     stream.readByteRepeatedly(0, length - stream.getPosition() + position);
     return tcpHeader;
@@ -234,13 +234,13 @@ void NewSender::sendTcp(Packet *packet)
         int64_t length = tcpSegmentSizeLimit - tcpSegment->getPacketLength();
         tcpSegment->append(packet->peekAt(0, length));
         const auto& tcpHeader = tcpSegment->peekHeader<TcpHeader>();
-        auto bitError = medium.getSerialize() ? BIT_ERROR_CRC : BIT_ERROR_NO;
-        tcpHeader->setBitError(bitError);
-        switch (bitError) {
-            case BIT_ERROR_YES:
-            case BIT_ERROR_NO:
+        auto crcMode = medium.getSerialize() ? CRC_COMPUTED : CRC_DECLARED_CORRECT;
+        tcpHeader->setCrcMode(crcMode);
+        switch (crcMode) {
+            case CRC_DECLARED_INCORRECT:
+            case CRC_DECLARED_CORRECT:
                 break;
-            case BIT_ERROR_CRC: {
+            case CRC_COMPUTED: {
                 tcpHeader->setCrc(0);
                 tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpSegment->peekAt<BytesChunk>(0, tcpSegment->getPacketLength())));
                 break;
@@ -314,13 +314,13 @@ void NewReceiver::receiveTcp(Packet *packet)
     auto crc = tcpHeader->getCrc();
     if (srcPort != 1000 || destPort != 2000)
         throw cRuntimeError("Invalid TCP port");
-    switch (tcpHeader->getBitError()) {
-        case BIT_ERROR_YES:
+    switch (tcpHeader->getCrcMode()) {
+        case CRC_DECLARED_INCORRECT:
             delete packet;
             return;
-        case BIT_ERROR_NO:
+        case CRC_DECLARED_CORRECT:
             break;
-        case BIT_ERROR_CRC: {
+        case CRC_COMPUTED: {
             int64_t length = packet->getPacketLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
             if (crc != computeTcpCrc(BytesChunk(), packet->peekAt<BytesChunk>(tcpHeaderPopOffset, length))) {
                 delete packet;

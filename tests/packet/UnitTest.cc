@@ -158,7 +158,7 @@ static void testIncomplete()
     auto tcpHeader1 = std::make_shared<TcpHeader>();
     tcpHeader1->setChunkLength(16);
     tcpHeader1->setLengthField(16);
-    tcpHeader1->setBitError(BIT_ERROR_CRC);
+    tcpHeader1->setCrcMode(CRC_COMPUTED);
     tcpHeader1->setSrcPort(1000);
     tcpHeader1->setDestPort(1000);
     packet2.append(tcpHeader1);
@@ -166,7 +166,7 @@ static void testIncomplete()
     const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(4);
     assert(tcpHeader2->isIncomplete());
     assert(tcpHeader2->getChunkLength() == 4);
-    assert(tcpHeader2->getBitError() == BIT_ERROR_CRC);
+    assert(tcpHeader2->getCrcMode() == CRC_COMPUTED);
     assert(tcpHeader2->getSrcPort() == 1000);
     assert(tcpHeader2->getDestPort() != 1000);
 }

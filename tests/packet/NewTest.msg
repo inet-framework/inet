@@ -29,11 +29,11 @@ enum Protocol
     Ethernet = 2;
 }
 
-enum BitError
+enum CrcMode
 {
-    BIT_ERROR_YES = 0;
-    BIT_ERROR_NO  = 1;
-    BIT_ERROR_CRC = 2;
+    CRC_DECLARED_CORRECT = 0;
+    CRC_DECLARED_INCORRECT  = 1;
+    CRC_COMPUTED = 2;
 }
 
 class ApplicationHeader extends FieldsChunk
@@ -51,7 +51,7 @@ class TcpHeader extends FieldsChunk
     int16_t srcPort = -1;
     int16_t destPort = -1;
     int16_t crc = 0;
-    int bitError @enum(BitError) = -1;
+    int crcMode @enum(CrcMode) = -1;
 }
 
 class IpHeader extends FieldsChunk
@@ -73,5 +73,5 @@ class EthernetTrailer extends FieldsChunk
     @str;
     int64_t chunkLength = 2;
     int16_t crc = 0;
-    int bitError @enum(BitError) = -1;
+    int crcMode @enum(CrcMode) = -1;
 }
