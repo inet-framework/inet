@@ -73,7 +73,7 @@ class INET_API FifoChunkBuffer : public cNamedObject
 
     template <typename T>
     bool has(int64_t length = -1) const {
-        return peek<T>(length) != nullptr;
+        return contents->has<T>(iterator, length);
     }
 
     template <typename T>

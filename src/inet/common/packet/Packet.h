@@ -127,8 +127,7 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasHeader(int64_t length = -1) const {
-        // TODO: could and should be implemented more efficiently
-        return peekHeader<T>(length) != nullptr;
+        return contents->has<T>(headerIterator, length);
     }
 
     template <typename T>
@@ -172,8 +171,7 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasTrailer(int64_t length = -1) const {
-        // TODO: could and should be implemented more efficiently
-        return peekTrailer<T>(length) != nullptr;
+        return contents->has<T>(trailerIterator, length);
     }
 
     template <typename T>

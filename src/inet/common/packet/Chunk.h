@@ -267,7 +267,6 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
     virtual void markImmutable() { flags |= FLAG_IMMUTABLE; }
-    // TODO RENAME: freeze/frozen/modifiable?
     //@}
 
     /** @name Completeness related functions */
@@ -358,6 +357,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const;
 
+    template <typename T>
+    bool has(const Iterator& iterator, int64_t length = -1) const {
+        // TODO: should be more efficient
+        return peek<T>(iterator, length) != nullptr;
+    }
+
     /**
      * Returns the designated part of the data represented by this chunk in the
      * requested representation. If the length is unspecified, then the length of
@@ -367,6 +372,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
+        // TODO: separate implicit serialization part from the rest
         int64_t chunkLength = getChunkLength();
         if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
             return nullptr;
