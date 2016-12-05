@@ -13,26 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/Buffer.h"
+#include "inet/common/packet/FifoChunkBuffer.h"
 #include "inet/common/packet/SequenceChunk.h"
 
 namespace inet {
 
-Buffer::Buffer(const char *name, const std::shared_ptr<Chunk>& contents) :
+FifoChunkBuffer::FifoChunkBuffer(const char *name, const std::shared_ptr<Chunk>& contents) :
     cNamedObject(name),
     contents(contents),
     iterator(Chunk::ForwardIterator(0, 0))
 {
 }
 
-Buffer::Buffer(const Buffer& other) :
+FifoChunkBuffer::FifoChunkBuffer(const FifoChunkBuffer& other) :
     cNamedObject(other),
     contents(other.isImmutable() ? other.contents : other.contents->dupShared()),
     iterator(other.iterator)
 {
 }
 
-void Buffer::remove(int64_t length)
+void FifoChunkBuffer::remove(int64_t length)
 {
     contents->moveIterator(iterator, length);
     poppedByteCount += length;
@@ -43,17 +43,17 @@ void Buffer::remove(int64_t length)
     }
 }
 
-std::shared_ptr<Chunk> Buffer::peek(int64_t length) const
+std::shared_ptr<Chunk> FifoChunkBuffer::peek(int64_t length) const
 {
     return contents->peek(iterator, length);
 }
 
-std::shared_ptr<Chunk> Buffer::peekAt(int64_t offset, int64_t length) const
+std::shared_ptr<Chunk> FifoChunkBuffer::peekAt(int64_t offset, int64_t length) const
 {
     return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
 }
 
-std::shared_ptr<Chunk> Buffer::pop(int64_t length)
+std::shared_ptr<Chunk> FifoChunkBuffer::pop(int64_t length)
 {
     const auto& chunk = peek(length);
     if (chunk != nullptr)
@@ -61,7 +61,7 @@ std::shared_ptr<Chunk> Buffer::pop(int64_t length)
     return chunk;
 }
 
-void Buffer::push(const std::shared_ptr<Chunk>& chunk)
+void FifoChunkBuffer::push(const std::shared_ptr<Chunk>& chunk)
 {
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;

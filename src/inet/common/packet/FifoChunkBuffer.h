@@ -23,8 +23,7 @@ namespace inet {
 /**
  * This class represents application or protocol buffers.
  */
-// TODO RENAME: SerialAccessBuffer?
-class INET_API Buffer : public cNamedObject
+class INET_API FifoChunkBuffer : public cNamedObject
 {
   protected:
     int64_t pushedByteCount = 0;
@@ -37,10 +36,10 @@ class INET_API Buffer : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    Buffer(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = nullptr);
-    Buffer(const Buffer& other);
+    FifoChunkBuffer(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = nullptr);
+    FifoChunkBuffer(const FifoChunkBuffer& other);
 
-    virtual Buffer *dup() const override { return new Buffer(*this); }
+    virtual FifoChunkBuffer *dup() const override { return new FifoChunkBuffer(*this); }
     //@}
 
     /** @name Length querying related functions */
@@ -104,9 +103,9 @@ class INET_API Buffer : public cNamedObject
     virtual std::string str() const override { return contents->str(); }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Buffer *buffer) { return os << buffer->str(); }
+inline std::ostream& operator<<(std::ostream& os, const FifoChunkBuffer *buffer) { return os << buffer->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const Buffer& buffer) { return os << buffer.str(); }
+inline std::ostream& operator<<(std::ostream& os, const FifoChunkBuffer& buffer) { return os << buffer.str(); }
 
 } // namespace
 
