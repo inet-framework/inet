@@ -116,6 +116,7 @@ class ChunkSerializer;
 // TODO: peek is misleading with BytesChunk and default length
 //       consider introducing an enum to replace -1 length values: UNTIL_END, INTERNAL_REP
 // TODO: how does an error model make a chunk erroneous without actually serializing it?
+// TODO: chunks may be incorrect/incomplete/improper, this is inconvenient for each protocol to check all chunks in the data part of the packet
 // TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
 // - message compiler could support @optional fields, inspectors could hide them, etc.
 // TODO: how do we represent the random subfield sequences (options) right after mandatory header part?
