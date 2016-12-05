@@ -15,28 +15,28 @@
 
 #include <algorithm>
 #include "inet/common/packet/ByteCountChunk.h"
-#include "inet/common/packet/RandomAccessBuffer.h"
+#include "inet/common/packet/RegionedChunkBuffer.h"
 #include "inet/common/packet/SequenceChunk.h"
 
 namespace inet {
 
-RandomAccessBuffer::RandomAccessBuffer(const char *name) :
+RegionedChunkBuffer::RegionedChunkBuffer(const char *name) :
     cNamedObject(name)
 {
 }
 
-RandomAccessBuffer::RandomAccessBuffer(const RandomAccessBuffer& other) :
+RegionedChunkBuffer::RegionedChunkBuffer(const RegionedChunkBuffer& other) :
     cNamedObject(other),
     regions(other.regions)
 {
 }
 
-void RandomAccessBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end)
+void RegionedChunkBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end)
 {
     regions.erase(std::remove_if(begin, end, [](const Region& region) { return region.data == nullptr; }), regions.end());
 }
 
-void RandomAccessBuffer::sliceRegions(Region& newRegion)
+void RegionedChunkBuffer::sliceRegions(Region& newRegion)
 {
     if (!regions.empty()) {
         auto lowerit = std::lower_bound(regions.begin(), regions.end(), newRegion, Region::compareStartOffset);
@@ -75,7 +75,7 @@ void RandomAccessBuffer::sliceRegions(Region& newRegion)
     }
 }
 
-void RandomAccessBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
+void RegionedChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 {
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
@@ -100,7 +100,7 @@ void RandomAccessBuffer::mergeRegions(Region& previousRegion, Region& nextRegion
     }
 }
 
-void RandomAccessBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
+void RegionedChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
 {
     Region newRegion(offset, chunk->isImmutable() ? chunk->dupShared() : chunk);
     sliceRegions(newRegion);
@@ -128,7 +128,7 @@ void RandomAccessBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& c
     }
 }
 
-void RandomAccessBuffer::clear(int64_t offset, int64_t length)
+void RegionedChunkBuffer::clear(int64_t offset, int64_t length)
 {
     for (auto it = regions.begin(); it != regions.end(); it++) {
         auto region = *it;

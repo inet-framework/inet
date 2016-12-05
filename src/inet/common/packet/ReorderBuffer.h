@@ -16,7 +16,7 @@
 #ifndef __INET_REORDERBUFFER_H_
 #define __INET_REORDERBUFFER_H_
 
-#include "inet/common/packet/RandomAccessBuffer.h"
+#include "inet/common/packet/RegionedChunkBuffer.h"
 
 namespace inet {
 
@@ -27,7 +27,7 @@ namespace inet {
  * reordered data as a continuous data chunk at the expected offset as soon
  * as it becomes available.
  */
-class INET_API ReorderBuffer : public RandomAccessBuffer
+class INET_API ReorderBuffer : public RegionedChunkBuffer
 {
   protected:
     /**
@@ -37,7 +37,7 @@ class INET_API ReorderBuffer : public RandomAccessBuffer
 
   public:
     ReorderBuffer(int64_t expectedOffset = -1) : expectedOffset(expectedOffset) { }
-    ReorderBuffer(const ReorderBuffer& other) : RandomAccessBuffer(other), expectedOffset(other.expectedOffset) { }
+    ReorderBuffer(const ReorderBuffer& other) : RegionedChunkBuffer(other), expectedOffset(other.expectedOffset) { }
 
     int64_t getExpectedOffset() const { return expectedOffset; }
     void setExpectedOffset(int64_t expectedOffset) { this->expectedOffset = expectedOffset; }

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_RANDOMACCESSBUFFER_H_
-#define __INET_RANDOMACCESSBUFFER_H_
+#ifndef __INET_REGIONEDCHUNKBUFFER_H_
+#define __INET_REGIONEDCHUNKBUFFER_H_
 
 #include "inet/common/packet/Chunk.h"
 
@@ -24,7 +24,7 @@ namespace inet {
  * This class provides basic functionality for merging large data chunks from
  * out of order smaller data chunks.
  */
-class INET_API RandomAccessBuffer : public cNamedObject
+class INET_API RegionedChunkBuffer : public cNamedObject
 {
   protected:
     class INET_API Region {
@@ -57,10 +57,10 @@ class INET_API RandomAccessBuffer : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    RandomAccessBuffer(const char *name = nullptr);
-    RandomAccessBuffer(const RandomAccessBuffer& other);
+    RegionedChunkBuffer(const char *name = nullptr);
+    RegionedChunkBuffer(const RegionedChunkBuffer& other);
 
-    virtual RandomAccessBuffer *dup() const override { return new RandomAccessBuffer(*this); }
+    virtual RegionedChunkBuffer *dup() const override { return new RegionedChunkBuffer(*this); }
     //@}
 
     /** @name Content accessor functions */
@@ -87,11 +87,11 @@ class INET_API RandomAccessBuffer : public cNamedObject
     virtual std::string str() const override { return ""; }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const RandomAccessBuffer *buffer) { return os << buffer->str(); }
+inline std::ostream& operator<<(std::ostream& os, const RegionedChunkBuffer *buffer) { return os << buffer->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const RandomAccessBuffer& buffer) { return os << buffer.str(); }
+inline std::ostream& operator<<(std::ostream& os, const RegionedChunkBuffer& buffer) { return os << buffer.str(); }
 
 } // namespace
 
-#endif // #ifndef __INET_RANDOMACCESSBUFFER_H_
+#endif // #ifndef __INET_REGIONEDCHUNKBUFFER_H_
 
