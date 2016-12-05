@@ -248,6 +248,18 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
+    template <typename T>
+    std::shared_ptr<T> doPeek(const Iterator& iterator, int64_t length = -1) const {
+        // TODO: prevents easy access for application buffer
+        // assertImmutable();
+        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
+        chunk->markImmutable();
+        if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
+            return std::dynamic_pointer_cast<T>(chunk);
+        else
+            return nullptr;
+    }
+
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
@@ -373,11 +385,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
-        // TODO: separate implicit serialization part from the rest
         int64_t chunkLength = getChunkLength();
+        assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
         if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
             return nullptr;
-        assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
         if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength)) {
             if (auto tChunk = std::dynamic_pointer_cast<T>(const_cast<Chunk *>(this)->shared_from_this()))
                 return tChunk;
@@ -388,14 +399,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
             if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, length)))
                 return tChunk;
         }
-        // TODO: prevents easy access for application buffer
-        // assertImmutable();
-        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
-        chunk->markImmutable();
-        if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
-            return std::dynamic_pointer_cast<T>(chunk);
-        else
-            return nullptr;
+        return doPeek<T>(iterator, length);
     }
 
     /**

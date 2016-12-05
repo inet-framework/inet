@@ -312,14 +312,19 @@ bool SequenceChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && length == getChunkLength())
+    int64_t chunkLength = getChunkLength();
+    assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+        return nullptr;
+    // NOTE: if length is -1 we return the child chunk instead of this
+    else if (iterator.getPosition() == 0 && length == chunkLength)
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else {
         if (auto chunk = peekWithIterator(iterator, length))
             return chunk;
         if (auto chunk = peekWithLinearSearch(iterator, length))
             return chunk;
-        return Chunk::peek<SliceChunk>(iterator, length);
+        return doPeek<SliceChunk>(iterator, length);
     }
 }
 

@@ -93,7 +93,10 @@ bool ByteCountChunk::removeFromEnd(int64_t length)
 
 std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
+    assert(0 <= iterator.getPosition() && iterator.getPosition() <= this->length);
+    if (length == 0 || (iterator.getPosition() == this->length && length == -1))
+        return nullptr;
+    else if (iterator.getPosition() == 0 && (length == -1 || length == this->length))
         return const_cast<ByteCountChunk *>(this)->shared_from_this();
     else
         return std::make_shared<ByteCountChunk>(length == -1 ? getChunkLength() - iterator.getPosition() : length);

@@ -49,10 +49,14 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
 
 std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t length) const
 {
-    if (iterator.getPosition() == 0 && (length == -1 || length == getChunkLength()))
+    int64_t chunkLength = getChunkLength();
+    assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+        return nullptr;
+    else if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength))
         return const_cast<Chunk *>(this)->shared_from_this();
     else
-        return peek<SliceChunk>(iterator, length);
+        return doPeek<SliceChunk>(iterator, length);
 }
 
 std::string Chunk::str() const
