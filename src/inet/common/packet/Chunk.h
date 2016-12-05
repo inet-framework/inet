@@ -37,7 +37,7 @@ class ChunkSerializer;
  * message compiler. In any case, chunks can always be converted to and from a
  * sequence of bytes using the corresponding serializer.
  *
- * TODO: polymorphism, nesting, compacting, crc, lossy channels
+ * TODO: document polymorphism, nesting, automatic compacting, crc handling, implementing lossy channels
  *
  * Chunks can represent data in different ways:
  *  - ByteCountChunk contains a length field only
@@ -119,22 +119,19 @@ class ChunkSerializer;
 // TODO: how does an error model make a chunk erroneous without actually serializing it?
 // TODO: chunks may be incorrect/incomplete/improper, this is inconvenient for each protocol to check all chunks in the data part of the packet
 // TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
-// - message compiler could support @optional fields, inspectors could hide them, etc.
-// TODO: how do we represent the random subfield sequences (options) right after mandatory header part?
+//       message compiler could support @optional fields, inspectors could hide them, etc.
+// TODO: how do we represent the random subfield sequences (options) right after mandatory header part?, possible alternatives:
 // packet
 // - IpHeader
-//   - IpHeaderNonOptionalPartForFun
+//   - IpHeaderMandatory
 //   - IpOption1
 //   - IpOption2
 // - TcpHeader
-//   - TcpHeader
+//   - TcpHeaderMandatory
 //   - TcpOption1
 //   - TcpOption2
 //
 // packet
-// - Ieee80211PhyHeader
-// - Ieee80211MacHeader
-//   - QosField
 // - IpHeader
 // - IpOptions
 //   - IpOption1
@@ -302,7 +299,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual void markIncorrect() { flags |= FLAG_INCORRECT; }
     //@}
 
-    /** @name Misrepresentation related functions */
+    /** @name Proper representation related functions */
     //@{
     // NOTE: there is no markProperlyRepresented() intentionally
     bool isProperlyRepresented() const { return !(flags & FLAG_IMPROPERLY_REPRESENTED); }
@@ -370,10 +367,16 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const;
 
+    /**
+     * Returns whether if the designated part of the data is available in the
+     * requested representation.
+     */
     template <typename T>
     bool has(const Iterator& iterator, int64_t length = -1) const {
-        // TODO: should be more efficient
-        return peek<T>(iterator, length) != nullptr;
+        if (length != -1 && getChunkLength() < iterator.getPosition() + length)
+            return false;
+        else
+            return peek<T>(iterator, length) != nullptr;
     }
 
     /**
