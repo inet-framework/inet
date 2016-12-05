@@ -18,7 +18,7 @@
 
 #include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/ByteStream.h"
-#include "inet/common/packet/LengthChunk.h"
+#include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/SequenceChunk.h"
 #include "inet/common/packet/SliceChunk.h"
 
@@ -37,7 +37,7 @@ class INET_API ChunkSerializer : public cObject
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
-class INET_API LengthChunkSerializer : public ChunkSerializer
+class INET_API ByteCountChunkSerializer : public ChunkSerializer
 {
   public:
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;

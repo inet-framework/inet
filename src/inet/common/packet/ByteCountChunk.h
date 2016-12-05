@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_LENGTHCHUNK_H_
-#define __INET_LENGTHCHUNK_H_
+#ifndef __INET_BYTECOUNTCHUNK_H_
+#define __INET_BYTECOUNTCHUNK_H_
 
 #include "inet/common/packet/Chunk.h"
 
@@ -24,8 +24,7 @@ namespace inet {
  * This class represents data using a length field only. This can be useful
  * when the actual data is irrelevant and memory efficiency is high priority.
  */
-// TODO RENAME: ByteCountChunk?
-class INET_API LengthChunk : public Chunk
+class INET_API ByteCountChunk : public Chunk
 {
   friend Chunk;
 
@@ -41,12 +40,12 @@ class INET_API LengthChunk : public Chunk
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    LengthChunk();
-    LengthChunk(const LengthChunk& other);
-    LengthChunk(int64_t length);
+    ByteCountChunk();
+    ByteCountChunk(const ByteCountChunk& other);
+    ByteCountChunk(int64_t length);
 
-    virtual LengthChunk *dup() const override { return new LengthChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<LengthChunk>(*this); }
+    virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
@@ -74,5 +73,5 @@ class INET_API LengthChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_LENGTHCHUNK_H_
+#endif // #ifndef __INET_BYTECOUNTCHUNK_H_
 

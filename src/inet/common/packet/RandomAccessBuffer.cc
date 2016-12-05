@@ -14,7 +14,7 @@
 //
 
 #include <algorithm>
-#include "inet/common/packet/LengthChunk.h"
+#include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/RandomAccessBuffer.h"
 #include "inet/common/packet/SequenceChunk.h"
 
@@ -137,7 +137,7 @@ void RandomAccessBuffer::clear(int64_t offset, int64_t length)
             return;
         }
     }
-    auto data = std::make_shared<LengthChunk>(length);
+    auto data = std::make_shared<ByteCountChunk>(length);
     Region clearedRegion(offset, data);
     sliceRegions(clearedRegion);
 }

@@ -20,29 +20,29 @@
 namespace inet {
 
 Register_Serializer(BytesChunk, BytesChunkSerializer);
-Register_Serializer(LengthChunk, LengthChunkSerializer);
+Register_Serializer(ByteCountChunk, ByteCountChunkSerializer);
 Register_Serializer(SliceChunk, SliceChunkSerializer);
 Register_Serializer(SequenceChunk, SequenceChunkSerializer);
 
 int64_t ChunkSerializer::totalSerializedBytes = 0;
 int64_t ChunkSerializer::totalDeserializedBytes = 0;
 
-void LengthChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
+void ByteCountChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
 {
-    const auto& lengthChunk = std::static_pointer_cast<const LengthChunk>(chunk);
-    int64_t serializedLength = length == -1 ? lengthChunk->getChunkLength() - offset: length;
+    const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
+    int64_t serializedLength = length == -1 ? byteCountChunk->getChunkLength() - offset: length;
     stream.writeByteRepeatedly('?', serializedLength);
     ChunkSerializer::totalSerializedBytes += serializedLength;
 }
 
-std::shared_ptr<Chunk> LengthChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+std::shared_ptr<Chunk> ByteCountChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto lengthChunk = std::make_shared<LengthChunk>();
+    auto byteCountChunk = std::make_shared<ByteCountChunk>();
     int64_t length = stream.getRemainingSize();
     stream.readByteRepeatedly('?', length);
-    lengthChunk->setLength(length);
+    byteCountChunk->setLength(length);
     ChunkSerializer::totalDeserializedBytes += length;
-    return lengthChunk;
+    return byteCountChunk;
 }
 
 void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const

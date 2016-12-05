@@ -39,7 +39,7 @@ class ChunkSerializer;
  * TODO: polymorphism, nesting, compacting, crc, lossy channels
  *
  * Chunks can represent data in different ways:
- *  - LengthChunk contains a length field only
+ *  - ByteCountChunk contains a length field only
  *  - ByteArrayChunk contains a sequence of bytes
  *  - SliceChunk contains a slice of another chunk
  *  - SequenceChunk contains a sequence of other chunks
@@ -77,7 +77,7 @@ class ChunkSerializer;
  * 1) Peeking without providing a return type for a
  *    a) ByteArrayChunk always returns a ByteArrayChunk containing the bytes
  *       of the requested part
- *    b) LengthChunk always returns a LengthChunk containing the requested length
+ *    b) ByteCountChunk always returns a ByteCountChunk containing the requested length
  *    c) SliceChunk always returns a SliceChunk containing the requested slice
  *       of the chunk that is used by the original SliceChunk
  *    d) SequenceChunk may return
@@ -87,8 +87,8 @@ class ChunkSerializer;
  *    e) any other chunk returns a SliceChunk
  * 2) Peeking with providing a return type always returns a chunk of the
  *    requested type (or a subtype thereof)
- *    a) Peeking with a LengthChunk return type for any chunk returns a
- *       LengthChunk containing the requested byte length
+ *    a) Peeking with a ByteCountChunk return type for any chunk returns a
+ *       ByteCountChunk containing the requested byte length
  *    b) Peeking with a ByteArrayChunk return type for any chunk returns a
  *       ByteArrayChunk containing a part of the serialized bytes of the
  *       original chunk
