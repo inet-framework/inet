@@ -25,6 +25,7 @@ namespace inet {
  * This class provides an efficient in memory byte output stream.
  *
  * Most functions are implemented in the header to allow inlining.
+ * TODO: review efficiency
  */
 class INET_API ByteOutputStream {
   protected:
@@ -61,7 +62,25 @@ class INET_API ByteOutputStream {
 
     void writeUint16(uint16_t value) {
         bytes.push_back((uint8_t)(value >> 8));
-        bytes.push_back((uint8_t)value);
+        bytes.push_back((uint8_t)(value >> 0));
+    }
+
+    void writeUint32(uint32_t value) {
+        bytes.push_back((uint8_t)(value >> 24));
+        bytes.push_back((uint8_t)(value >> 16));
+        bytes.push_back((uint8_t)(value >> 8));
+        bytes.push_back((uint8_t)(value >> 0));
+    }
+
+    void writeUint64(uint64_t value) {
+        bytes.push_back((uint8_t)(value >> 56));
+        bytes.push_back((uint8_t)(value >> 48));
+        bytes.push_back((uint8_t)(value >> 40));
+        bytes.push_back((uint8_t)(value >> 32));
+        bytes.push_back((uint8_t)(value >> 24));
+        bytes.push_back((uint8_t)(value >> 16));
+        bytes.push_back((uint8_t)(value >> 8));
+        bytes.push_back((uint8_t)(value >> 0));
     }
 };
 

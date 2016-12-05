@@ -25,12 +25,20 @@ namespace inet {
  * This class provides an efficient in memory byte input stream.
  *
  * Most functions are implemented in the header to allow inlining.
+ * TODO: review efficiency
  */
 class INET_API ByteInputStream {
   protected:
     std::vector<uint8_t> bytes;
     int64_t position = -1;
     bool isReadBeyondEnd_ = false;
+
+  protected:
+    bool checkReadBeyondEnd() {
+        if (position == bytes.size())
+            isReadBeyondEnd_ = true;
+        return isReadBeyondEnd_;
+    }
 
   public:
     ByteInputStream(const std::vector<uint8_t>& bytes, int64_t position = 0) :
@@ -75,10 +83,7 @@ class INET_API ByteInputStream {
         if (length == -1)
             length = bytes.size();
         for (int64_t i = 0; i < length; i++) {
-            if (position == bytes.size()) {
-                isReadBeyondEnd_ = true;
-                return;
-            }
+            if (checkReadBeyondEnd()) return;
             bytes[offset + i] = bytes[position++];
         }
     }
@@ -89,16 +94,44 @@ class INET_API ByteInputStream {
 
     uint16_t readUint16() {
         uint16_t value = 0;
-        if (position == bytes.size()) {
-            isReadBeyondEnd_ = true;
-            return 0;
-        }
-        value += ((uint16_t)(bytes[position++]) << 8);
-        if (position == bytes.size()) {
-            isReadBeyondEnd_ = true;
-            return 0;
-        }
-        value += ((uint16_t)(bytes[position++]));
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint16_t)(bytes[position++]) << 8);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint16_t)(bytes[position++]) << 0);
+        return value;
+    }
+
+    uint32_t readUint32() {
+        uint32_t value = 0;
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint32_t)(bytes[position++]) << 24);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint32_t)(bytes[position++]) << 16);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint32_t)(bytes[position++]) << 8);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint32_t)(bytes[position++]) << 0);
+        return value;
+    }
+
+    uint64_t readUint64() {
+        uint64_t value = 0;
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 56);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 48);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 40);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 32);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 24);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 16);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 8);
+        if (checkReadBeyondEnd()) return 0;
+        value |= ((uint64_t)(bytes[position++]) << 0);
         return value;
     }
 };
