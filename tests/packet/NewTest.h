@@ -16,7 +16,7 @@
 #ifndef __NEWTEST_H_
 #define __NEWTEST_H_
 
-#include "inet/common/packet/Buffer.h"
+#include "inet/common/packet/FifoChunkBuffer.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/Serializer.h"
 #include "NewTest_m.h"
@@ -100,7 +100,7 @@ class NewReceiver
 {
   protected:
     NewMedium& medium;
-    Buffer applicationData;
+    FifoChunkBuffer applicationData;
 
   protected:
     void receiveApplication(Packet *packet);

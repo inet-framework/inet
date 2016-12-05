@@ -13,10 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/RandomAccessBuffer.h"
+#include "inet/common/packet/RegionedChunkBuffer.h"
 #include "inet/common/packet/SerializerRegistry.h"
 #include "NewTest.h"
 #include "UnitTest_m.h"
@@ -828,10 +828,10 @@ static void testSequence()
     assert(std::dynamic_pointer_cast<ApplicationHeader>(chunk2) != nullptr);
 }
 
-static void testBuffer()
+static void testFifoChunkBuffer()
 {
     // 1. buffer provides ByteCountChunks by default if it contains a ByteCountChunk only
-    Buffer buffer1;
+    FifoChunkBuffer buffer1;
     buffer1.push(std::make_shared<ByteCountChunk>(10));
     buffer1.push(std::make_shared<ByteCountChunk>(10));
     buffer1.push(std::make_shared<ByteCountChunk>(10));
@@ -841,7 +841,7 @@ static void testBuffer()
     assert(byteCountChunk2 != nullptr);
 
     // 2. buffer provides BytesChunks by default if it contains a BytesChunk only
-    Buffer buffer2;
+    FifoChunkBuffer buffer2;
     buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
     buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
     buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
@@ -851,7 +851,7 @@ static void testBuffer()
     assert(byteCountChunk4 != nullptr);
 
     // 3. buffer provides reassembled header
-    Buffer buffer3;
+    FifoChunkBuffer buffer3;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->setSomeData(42);
     applicationHeader1->makeImmutable();
@@ -863,16 +863,16 @@ static void testBuffer()
     assert(applicationHeader2->getSomeData() == 42);
 }
 
-static void testRandomAccessBuffer()
+static void testRegionedChunkBuffer()
 {
     // 1. single chunk
-    RandomAccessBuffer buffer1;
+    RegionedChunkBuffer buffer1;
     buffer1.replace(0, std::make_shared<ByteCountChunk>(10));
     assert(buffer1.getNumRegions() == 1);
     assert(buffer1.getRegionData(0) != nullptr);
 
     // 2. consecutive chunks
-    RandomAccessBuffer buffer2;
+    RegionedChunkBuffer buffer2;
     buffer2.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer2.replace(10, std::make_shared<ByteCountChunk>(10));
     const auto& byteCountChunk1 = std::dynamic_pointer_cast<ByteCountChunk>(buffer2.getRegionData(0));
@@ -880,7 +880,7 @@ static void testRandomAccessBuffer()
     assert(byteCountChunk1 != nullptr);
 
     // 3. consecutive slice chunks
-    RandomAccessBuffer buffer3;
+    RegionedChunkBuffer buffer3;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->setSomeData(42);
     applicationHeader1->makeImmutable();
@@ -892,7 +892,7 @@ static void testRandomAccessBuffer()
     assert(applicationHeader2->getSomeData() == 42);
 
     // 4. out of order consecutive chunks
-    RandomAccessBuffer buffer4;
+    RegionedChunkBuffer buffer4;
     buffer4.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer4.replace(20, std::make_shared<ByteCountChunk>(10));
     buffer4.replace(10, std::make_shared<ByteCountChunk>(10));
@@ -901,7 +901,7 @@ static void testRandomAccessBuffer()
     assert(byteCountChunk2 != nullptr);
 
     // 5. out of order consecutive chunks
-    RandomAccessBuffer buffer5;
+    RegionedChunkBuffer buffer5;
     buffer5.replace(0, applicationHeader1->peek(0, 3));
     buffer5.replace(7, applicationHeader1->peek(7, 3));
     buffer5.replace(3, applicationHeader1->peek(3, 4));
@@ -911,14 +911,14 @@ static void testRandomAccessBuffer()
     assert(applicationHeader3->getSomeData() == 42);
 
     // 6. heterogeneous chunks
-    RandomAccessBuffer buffer6;
+    RegionedChunkBuffer buffer6;
     buffer6.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer6.replace(10, std::make_shared<BytesChunk>(makeVector(10)));
     assert(buffer6.getNumRegions() == 1);
     assert(buffer6.getRegionData(0) != nullptr);
 
     // 7. completely overwriting a chunk
-    RandomAccessBuffer buffer7;
+    RegionedChunkBuffer buffer7;
     buffer7.replace(1, std::make_shared<ByteCountChunk>(8));
     buffer7.replace(0, std::make_shared<BytesChunk>(makeVector(10)));
     const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(buffer7.getRegionData(0));
@@ -926,7 +926,7 @@ static void testRandomAccessBuffer()
     assert(bytesChunk1 != nullptr);
 
     // 8. partially overwriting multiple chunks
-    RandomAccessBuffer buffer8;
+    RegionedChunkBuffer buffer8;
     buffer8.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer8.replace(10, std::make_shared<ByteCountChunk>(10));
     buffer8.replace(5, std::make_shared<BytesChunk>(makeVector(10)));
@@ -965,8 +965,8 @@ void UnitTest::initialize()
     testNesting();
     testPeeking();
     testSequence();
-    testBuffer();
-    testRandomAccessBuffer();
+    testFifoChunkBuffer();
+    testRegionedChunkBuffer();
 }
 
 } // namespace
