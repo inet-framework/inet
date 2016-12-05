@@ -79,7 +79,7 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Mutability related functions */
     //@{
-    virtual void makeImmutable() override;
+    virtual void markImmutable() override;
     //@}
 
     /** @name Iteration related functions */

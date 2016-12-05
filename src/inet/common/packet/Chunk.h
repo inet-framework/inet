@@ -260,44 +260,45 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     /** @name Mutability related functions */
     //@{
-    // NOTE: there is no makeMutable() intentionally
+    // NOTE: there is no markMutable() intentionally
     bool isMutable() const { return !(flags & FLAG_IMMUTABLE); }
     bool isImmutable() const { return flags & FLAG_IMMUTABLE; }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    virtual void makeImmutable() { flags |= FLAG_IMMUTABLE; }
+    virtual void markImmutable() { flags |= FLAG_IMMUTABLE; }
     // TODO RENAME: freeze/frozen/modifiable?
     //@}
 
     /** @name Completeness related functions */
     //@{
-    // NOTE: there is no makeComplete() intentionally
+    // NOTE: there is no markComplete() intentionally
     bool isComplete() const { return !(flags & FLAG_INCOMPLETE); }
     bool isIncomplete() const { return flags & FLAG_INCOMPLETE; }
     void assertComplete() const { assert(isComplete()); }
     void assertIncomplete() const { assert(isIncomplete()); }
-    virtual void makeIncomplete() { flags |= FLAG_INCOMPLETE; }
+    virtual void markIncomplete() { flags |= FLAG_INCOMPLETE; }
     //@}
 
     /** @name Correctness related functions */
     //@{
-    // NOTE: there is no makeCorrect() intentionally
+    // NOTE: there is no markCorrect() intentionally
     bool isCorrect() const { return !(flags & FLAG_INCORRECT); }
     bool isIncorrect() const { return flags & FLAG_INCORRECT; }
     void assertCorrect() const { assert(isCorrect()); }
     void assertIncorrect() const { assert(isIncorrect()); }
-    virtual void makeIncorrect() { flags |= FLAG_INCORRECT; }
+    virtual void markIncorrect() { flags |= FLAG_INCORRECT; }
     // TODO RENAME: corrupt/correct/erroneous?
     //@}
 
     /** @name Misrepresentation related functions */
     //@{
-    // NOTE: there is no makeProper() intentionally
+    // NOTE: there is no markProper() intentionally
+    // TODO: add represented
     bool isProper() const { return !(flags & FLAG_IMPROPER); }
     bool isImproper() const { return flags & FLAG_IMPROPER; }
     void assertProper() const { assert(isProper()); }
     void assertImproper() const { assert(isImproper()); }
-    virtual void makeImproper() { flags |= FLAG_IMPROPER; }
+    virtual void markImproper() { flags |= FLAG_IMPROPER; }
     // TODO RENAME: correctlyRepresented, incorrectlyRepresented?
     //@}
 
@@ -385,7 +386,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         // TODO: prevents easy access for application buffer
         // assertImmutable();
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
-        chunk->makeImmutable();
+        chunk->markImmutable();
         if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
             return std::dynamic_pointer_cast<T>(chunk);
         else

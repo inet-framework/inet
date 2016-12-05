@@ -76,7 +76,7 @@ class INET_API Packet : public cPacket
     bool isMutable() const { return contents == nullptr || contents->isMutable(); }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    void makeImmutable() { contents->makeImmutable(); }
+    void markImmutable() { contents->markImmutable(); }
     //@}
 
     /** @name Length querying related functions */

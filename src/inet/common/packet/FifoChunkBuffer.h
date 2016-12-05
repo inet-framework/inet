@@ -60,7 +60,7 @@ class INET_API FifoChunkBuffer : public cNamedObject
     bool isMutable() const { return contents == nullptr && !contents->isMutable(); }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    void makeImmutable() { contents->makeImmutable(); }
+    void markImmutable() { contents->markImmutable(); }
     //@}
 
     /** @name Querying data related functions */

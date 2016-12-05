@@ -67,7 +67,7 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(ByteInputStream& stream)
     int64_t remainingSize = stream.getRemainingSize();
     int16_t lengthField = stream.readUint16();
     if (lengthField > remainingSize)
-        tcpHeader->makeIncomplete();
+        tcpHeader->markIncomplete();
     int16_t length = std::min(lengthField, (int16_t)remainingSize);
     tcpHeader->setChunkLength(length);
     tcpHeader->setLengthField(lengthField);
@@ -93,7 +93,7 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(ByteInputStream& stream) 
     int64_t position = stream.getPosition();
     Protocol protocol = (Protocol)stream.readUint16();
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
-        ipHeader->makeImproper();
+        ipHeader->markImproper();
     ipHeader->setProtocol(protocol);
     stream.readByteRepeatedly(0, ipHeader->getChunkLength() - stream.getPosition() + position);
     return ipHeader;
@@ -171,7 +171,7 @@ std::string EthernetTrailer::str() const
 void NewMedium::sendPacket(Packet *packet)
 {
     EV_DEBUG << "Sending packet: " << packet << std::endl;
-    packet->makeImmutable();
+    packet->markImmutable();
     packets.push_back(serialize ? serializePacket(packet) : packet);
 }
 
@@ -188,7 +188,7 @@ Packet *NewMedium::serializePacket(Packet *packet)
     const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getPacketLength());
     auto serializedPacket = new Packet();
     serializedPacket->append(bytesChunk);
-    serializedPacket->makeImmutable();
+    serializedPacket->markImmutable();
     return serializedPacket;
 }
 
@@ -197,7 +197,7 @@ void NewSender::sendEthernet(Packet *packet)
     auto ethernetFrame = packet;
     auto ethernetHeader = std::make_shared<EthernetHeader>();
     ethernetHeader->setProtocol(Protocol::Ip);
-    ethernetHeader->makeImmutable();
+    ethernetHeader->markImmutable();
     ethernetFrame->prepend(ethernetHeader);
     medium.sendPacket(ethernetFrame);
 }
@@ -207,7 +207,7 @@ void NewSender::sendIp(Packet *packet)
     auto ipDatagram = packet;
     auto ipHeader = std::make_shared<IpHeader>();
     ipHeader->setProtocol(Protocol::Tcp);
-    ipHeader->makeImmutable();
+    ipHeader->markImmutable();
     ipDatagram->prepend(ipHeader);
     sendEthernet(ipDatagram);
 }
@@ -226,7 +226,7 @@ Packet *NewSender::createTcpSegment()
 
 void NewSender::sendTcp(Packet *packet)
 {
-    packet->makeImmutable();
+    packet->markImmutable();
     if (tcpSegment == nullptr)
         tcpSegment = createTcpSegment();
     int64_t tcpSegmentSizeLimit = 35;
@@ -266,7 +266,7 @@ void NewSender::sendPackets()
 {
     auto bytesChunk = std::make_shared<BytesChunk>();
     bytesChunk->setBytes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-    bytesChunk->makeImmutable();
+    bytesChunk->markImmutable();
     EV_DEBUG << "Sending application data: " << bytesChunk << std::endl;
     auto packet1 = new Packet();
     packet1->append(bytesChunk);
@@ -274,7 +274,7 @@ void NewSender::sendPackets()
 
     auto applicationHeader = std::make_shared<ApplicationHeader>();
     applicationHeader->setSomeData(42);
-    applicationHeader->makeImmutable();
+    applicationHeader->markImmutable();
     EV_DEBUG << "Sending application data: " << applicationHeader << std::endl;
     auto packet2 = new Packet();
     packet2->append(applicationHeader);
@@ -282,7 +282,7 @@ void NewSender::sendPackets()
 
     auto byteSizeChunk = std::make_shared<ByteCountChunk>();
     byteSizeChunk->setLength(10);
-    byteSizeChunk->makeImmutable();
+    byteSizeChunk->markImmutable();
     EV_DEBUG << "Sending application data: " << byteSizeChunk << std::endl;
     auto packet3 = new Packet();
     packet3->append(byteSizeChunk);

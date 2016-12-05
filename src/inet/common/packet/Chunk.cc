@@ -74,7 +74,7 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
     auto serializer = SerializerRegistry::globalRegistry.getSerializer(typeInfo);
     auto chunk = serializer->deserialize(stream, typeInfo);
     if (stream.isReadBeyondEnd())
-        chunk->makeIncomplete();
+        chunk->markIncomplete();
     return chunk;
 }
 

@@ -55,11 +55,11 @@ void SequenceChunk::setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks)
     this->chunks = chunks;
 }
 
-void SequenceChunk::makeImmutable()
+void SequenceChunk::markImmutable()
 {
-    Chunk::makeImmutable();
+    Chunk::markImmutable();
     for (auto& chunk : chunks)
-        chunk->makeImmutable();
+        chunk->markImmutable();
 }
 
 int64_t SequenceChunk::getChunkLength() const
