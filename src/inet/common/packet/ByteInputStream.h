@@ -13,55 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __BYTESTREAM_H_
-#define __BYTESTREAM_H_
+#ifndef __INET_BYTEINPUTSTREAM_H_
+#define __INET_BYTEINPUTSTREAM_H_
 
 #include <assert.h>
-#include <inttypes.h>
-#include <vector>
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-class INET_API ByteOutputStream {
-  protected:
-    std::vector<uint8_t> bytes;
-
-  public:
-    uint8_t operator[](int64_t i) { return bytes[i]; }
-    int64_t getSize() const { return bytes.size(); }
-    int64_t getPosition() const { return bytes.size(); }
-    const std::vector<uint8_t>& getBytes() { return bytes; }
-    std::vector<uint8_t> *copyBytes(int64_t offset = 0, int64_t length = -1) {
-        return new std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
-    }
-
-    void writeByte(uint8_t byte) {
-        bytes.push_back(byte);
-    }
-
-    void writeByteRepeatedly(uint8_t byte, int64_t count) {
-        for (int64_t i = 0; i < count; i++)
-            bytes.push_back(byte);
-    }
-
-    void writeBytes(const std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
-        if (length == -1)
-            length = bytes.size();
-        for (int64_t i = 0; i < length; i++)
-            this->bytes.push_back(bytes[offset + i]);
-    }
-
-    void writeUint8(uint8_t byte) {
-        writeByte(byte);
-    }
-
-    void writeUint16(uint16_t value) {
-        bytes.push_back((uint8_t)(value >> 8));
-        bytes.push_back((uint8_t)value);
-    }
-};
-
+/**
+ * This class provides an efficient in memory byte input stream.
+ *
+ * Most functions are implemented in the header to allow inlining.
+ */
 class INET_API ByteInputStream {
   protected:
     std::vector<uint8_t> bytes;
@@ -141,5 +105,5 @@ class INET_API ByteInputStream {
 
 } // namespace
 
-#endif // #ifndef __BYTESTREAM_H_
+#endif // #ifndef __INET_BYTEINPUTSTREAM_H_
 

@@ -16,9 +16,10 @@
 #ifndef __INET_SERIALIZER_H_
 #define __INET_SERIALIZER_H_
 
-#include "inet/common/packet/BytesChunk.h"
-#include "inet/common/packet/ByteStream.h"
 #include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/ByteInputStream.h"
+#include "inet/common/packet/ByteOutputStream.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/SequenceChunk.h"
 #include "inet/common/packet/SliceChunk.h"
 
