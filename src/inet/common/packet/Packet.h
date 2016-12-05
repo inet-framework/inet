@@ -71,12 +71,11 @@ class INET_API Packet : public cPacket
 
     /** @name Mutability related functions */
     //@{
-    // TODO RENAME: freezeContents()?
-    bool isImmutable() const { return contents != nullptr && contents->isImmutable(); }
-    bool isMutable() const { return contents == nullptr || contents->isMutable(); }
-    void assertMutable() const { assert(isMutable()); }
-    void assertImmutable() const { assert(isImmutable()); }
-    void markImmutable() { contents->markImmutable(); }
+    bool isContentsImmutable() const { return contents != nullptr && contents->isImmutable(); }
+    bool isContentsMutable() const { return contents == nullptr || contents->isMutable(); }
+    void assertContentsMutable() const { assert(isContentsMutable()); }
+    void assertContentsImmutable() const { assert(isContentsImmutable()); }
+    void markContentsImmutable() { contents->markImmutable(); }
     //@}
 
     /** @name Length querying related functions */

@@ -38,7 +38,7 @@ Packet::Packet(const char *name, const std::shared_ptr<Chunk>& contents) :
 
 Packet::Packet(const Packet& other) :
     cPacket(other),
-    contents(other.isImmutable() ? other.contents : other.contents->dupShared()),
+    contents(other.isContentsImmutable() ? other.contents : other.contents->dupShared()),
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator)
 {

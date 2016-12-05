@@ -171,7 +171,7 @@ std::string EthernetTrailer::str() const
 void NewMedium::sendPacket(Packet *packet)
 {
     EV_DEBUG << "Sending packet: " << packet << std::endl;
-    packet->markImmutable();
+    packet->markContentsImmutable();
     packets.push_back(serialize ? serializePacket(packet) : packet);
 }
 
@@ -188,7 +188,7 @@ Packet *NewMedium::serializePacket(Packet *packet)
     const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getPacketLength());
     auto serializedPacket = new Packet();
     serializedPacket->append(bytesChunk);
-    serializedPacket->markImmutable();
+    serializedPacket->markContentsImmutable();
     return serializedPacket;
 }
 
@@ -226,7 +226,7 @@ Packet *NewSender::createTcpSegment()
 
 void NewSender::sendTcp(Packet *packet)
 {
-    packet->markImmutable();
+    packet->markContentsImmutable();
     if (tcpSegment == nullptr)
         tcpSegment = createTcpSegment();
     int64_t tcpSegmentSizeLimit = 35;

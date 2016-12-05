@@ -104,7 +104,7 @@ static void testMutable()
 {
     // 1. packet is mutable after construction
     Packet packet1;
-    assert(packet1.isMutable());
+    assert(packet1.isContentsMutable());
 
     // 2. chunk is mutable after construction
     auto byteCountChunk1 = std::make_shared<ByteCountChunk>(10);
@@ -112,7 +112,7 @@ static void testMutable()
 
     // 3. packet and chunk are still mutable after appending
     packet1.append(byteCountChunk1);
-    assert(packet1.isMutable());
+    assert(packet1.isContentsMutable());
     assert(byteCountChunk1->isMutable());
 }
 
@@ -127,8 +127,8 @@ static void testImmutable()
     Packet packet2;
     auto byteCountChunk2 = std::make_shared<ByteCountChunk>(10);
     packet2.append(byteCountChunk2);
-    packet2.markImmutable();
-    assert(packet2.isImmutable());
+    packet2.markContentsImmutable();
+    assert(packet2.isContentsImmutable());
     assert(byteCountChunk2->isImmutable());
 }
 
@@ -145,10 +145,10 @@ static void testIncomplete()
     Packet packet1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     packet1.append(applicationHeader1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     Packet fragment1;
     fragment1.append(packet1.peekAt(0, 5));
-    fragment1.markImmutable();
+    fragment1.markContentsImmutable();
     assert(!fragment1.hasHeader<ApplicationHeader>());
     const auto& applicationHeader2 = fragment1.peekHeader<ApplicationHeader>();
     assert(applicationHeader2 == nullptr);
@@ -162,7 +162,7 @@ static void testIncomplete()
     tcpHeader1->setSrcPort(1000);
     tcpHeader1->setDestPort(1000);
     packet2.append(tcpHeader1);
-    packet2.markImmutable();
+    packet2.markContentsImmutable();
     const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(4);
     assert(tcpHeader2->isIncomplete());
     assert(tcpHeader2->getChunkLength() == 4);
@@ -184,7 +184,7 @@ static void testIncorrect()
     Packet packet1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     packet1.append(applicationHeader1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     applicationHeader1->markIncorrect();
     assert(applicationHeader1->isIncorrect());
 }
@@ -202,7 +202,7 @@ static void testImproper()
     Packet packet1;
     auto ipHeader1 = std::make_shared<IpHeader>();
     packet1.append(ipHeader1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     assert(ipHeader1->isProper());
     auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peekAt<BytesChunk>(0, packet1.getPacketLength())->dupShared());
     bytesChunk1->setByte(0, 42);
@@ -296,7 +296,7 @@ static void testEncapsulation()
     auto& packet2 = packet1;
     packet2.pushHeader(std::make_shared<EthernetHeader>());
     packet2.pushTrailer(std::make_shared<EthernetTrailer>());
-    packet2.markImmutable();
+    packet2.markContentsImmutable();
     const auto& ethernetHeader1 = packet2.popHeader<EthernetHeader>();
     const auto& ethernetTrailer1 = packet2.popTrailer<EthernetTrailer>();
     const auto& byteCountChunk1 = packet2.peekDataAt(0, 10);
@@ -318,16 +318,16 @@ static void testAggregation()
     // 1. packet contains all chunks of aggregated packets as is
     Packet packet1;
     packet1.append(std::make_shared<ByteCountChunk>(10));
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     Packet packet2;
     packet2.append(std::make_shared<BytesChunk>(makeVector(10)));
-    packet2.markImmutable();
+    packet2.markContentsImmutable();
     Packet packet3;
     packet3.append(std::make_shared<IpHeader>());
     // aggregate other packets
     packet3.append(packet1.peekAt(0, packet2.getPacketLength()));
     packet3.append(packet2.peekAt(0, packet2.getPacketLength()));
-    packet3.markImmutable();
+    packet3.markContentsImmutable();
     const auto& ipHeader1 = packet3.popHeader<IpHeader>();
     const auto& chunk1 = packet3.peekDataAt(0, 10);
     const auto& chunk2 = packet3.peekDataAt(10, 10);
@@ -348,12 +348,12 @@ static void testFragmentation()
     Packet packet1;
     packet1.append(std::make_shared<ByteCountChunk>(10));
     packet1.append(std::make_shared<BytesChunk>(makeVector(10)));
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     Packet packet2;
     packet2.append(std::make_shared<IpHeader>());
     // append fragment of another packet
     packet2.append(packet1.peekAt(5, 10));
-    packet2.markImmutable();
+    packet2.markContentsImmutable();
     const auto& ipHeader1 = packet2.popHeader<IpHeader>();
     const auto& fragment1 = packet2.peekDataAt(0, packet2.getDataLength());
     const auto& chunk1 = fragment1->peek(0, 5);
@@ -382,7 +382,7 @@ static void testPolymorphism()
     auto tlvHeader2 = std::make_shared<TlvHeaderInt>();
     tlvHeader2->setInt16Value(42);
     packet1.append(tlvHeader2);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     const auto& tlvHeader3 = packet1.popHeader<TlvHeader>();
     assert(tlvHeader3 != nullptr);
     assert(tlvHeader3->getChunkLength() == 3);
@@ -459,7 +459,7 @@ static void testIteration()
     packet1.append(std::make_shared<ByteCountChunk>(10));
     packet1.append(std::make_shared<BytesChunk>(makeVector(10)));
     packet1.append(std::make_shared<ApplicationHeader>());
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     int index1 = 0;
     auto chunk1 = packet1.popHeader();
     while (chunk1 != nullptr) {
@@ -527,7 +527,7 @@ static void testCorruption()
     packet1.append(chunk1);
     packet1.append(chunk2);
     packet1.append(chunk3);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     int index = 0;
     auto chunk = packet1.popHeader();
     while (chunk != nullptr) {
@@ -547,7 +547,7 @@ static void testDuplication()
     Packet packet1;
     std::shared_ptr<ByteCountChunk> byteCountChunk1 = std::make_shared<ByteCountChunk>(10);
     packet1.append(byteCountChunk1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     auto packet2 = packet1.dup();
     assert(packet2->getPacketLength() == 10);
     assert(byteCountChunk1.use_count() == 3); // 1 in the chunk + 2 in the packets
@@ -581,7 +581,7 @@ static void testDuality()
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->setSomeData(42);
     packet1.append(applicationHeader1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     const auto& applicationHeader2 = packet1.peekHeader<ApplicationHeader>();
     const auto& bytesChunk1 = packet1.peekHeader<BytesChunk>(10);
     assert(applicationHeader2 != nullptr);
@@ -607,13 +607,13 @@ static void testMerging()
     Packet packet1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     packet1.append(applicationHeader1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     const auto& header1 = packet1.peekAt(0, 5);
     const auto& header2 = packet1.peekAt(5, 5);
     Packet packet2;
     packet2.append(header1);
     packet2.append(header2);
-    packet2.markImmutable();
+    packet2.markContentsImmutable();
     const auto& chunk1 = packet2.peekHeader();
     assert(chunk1 != nullptr);
     assert(chunk1->isComplete());
@@ -628,7 +628,7 @@ static void testMerging()
     Packet packet3;
     packet3.append(std::make_shared<ByteCountChunk>(5));
     packet3.append(std::make_shared<ByteCountChunk>(5));
-    packet3.markImmutable();
+    packet3.markContentsImmutable();
     const auto& chunk3 = packet3.peekAt(0, packet3.getPacketLength());
     const auto& chunk4 = packet3.peekAt<ByteCountChunk>(0, packet3.getPacketLength());
     assert(chunk3 != nullptr);
@@ -642,7 +642,7 @@ static void testMerging()
     Packet packet4;
     packet4.append(std::make_shared<BytesChunk>(makeVector(5)));
     packet4.append(std::make_shared<BytesChunk>(makeVector(5)));
-    packet4.markImmutable();
+    packet4.markContentsImmutable();
     const auto& chunk5 = packet4.peekAt(0, packet4.getPacketLength());
     const auto& chunk6 = packet4.peekAt<BytesChunk>(0, packet4.getPacketLength());
     assert(chunk5 != nullptr);
@@ -763,7 +763,7 @@ static void testNesting()
     auto compoundHeader1 = std::make_shared<CompoundHeader>();
     compoundHeader1->insertAtEnd(ipHeader1);
     packet1.append(compoundHeader1);
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
     assert(compoundHeader2 != nullptr);
 
@@ -784,7 +784,7 @@ static void testPeeking()
     packet1.append(std::make_shared<ByteCountChunk>(10));
     packet1.append(std::make_shared<ByteCountChunk>(10));
     packet1.append(std::make_shared<ByteCountChunk>(10));
-    packet1.markImmutable();
+    packet1.markContentsImmutable();
     const auto& chunk1 = packet1.popHeader(15);
     const auto& chunk2 = packet1.popHeader(15);
     assert(chunk1 != nullptr);
