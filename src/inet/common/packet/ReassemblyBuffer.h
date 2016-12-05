@@ -16,133 +16,49 @@
 #ifndef __INET_REASSEMBLYBUFFER_H_
 #define __INET_REASSEMBLYBUFFER_H_
 
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/RandomAccessBuffer.h"
 
 namespace inet {
 
 /**
- * This class provides functionality for reassembling large data chunks from
- * out of order smaller data chunks. This can be useful for reassembling data
- * segments in connection oriented transport layer protocols or reassembling
- * fragmented datagrams in network layer protocols.
+ * This class provides functionality for reassembling out of order data chunks
+ * for protocols supporting fragmentation. The reassembling algorithm requires
+ * the expected length of the non-fragmented data chunk measured in bytes. It
+ * assumes that the non-fragmented data chunk starts at 0 offset. If all data
+ * becomes available up to the expected length, then the defregmentation is
+ * considered complete.
  */
-// TODO: add flag to decide between keeping or overwriting old data when replacing with new data
-// TODO RENAME: RandomAccessBuffer?
-class INET_API ReassemblyBuffer : public cNamedObject
+class INET_API ReassemblyBuffer : public RandomAccessBuffer
 {
   protected:
-    class INET_API Region {
-      public:
-        int64_t offset;
-        std::shared_ptr<Chunk> data;
-
-      public:
-        Region(int64_t offset, const std::shared_ptr<Chunk>& data) : offset(offset), data(data) { }
-        Region(const Region& other) : offset(other.offset), data(other.data) { }
-
-        int64_t getStartOffset() const { return offset; }
-        int64_t getEndOffset() const { return offset + data->getChunkLength(); }
-
-        static bool compareStartOffset(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
-        static bool compareEndOffset(const Region& a, const Region& b) { return a.getEndOffset() < b.getEndOffset(); }
-    };
-
-  protected:
     /**
-     * The list of non-overlapping, non-connecting but contiguous regions.
+     * The total length of the reassembled data chunk.
      */
-    std::vector<Region> regions;
-
-  protected:
-    void eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end);
-    void sliceRegions(Region& newRegion);
-    void mergeRegions(Region& previousRegion, Region& nextRegion);
-
-  public:
-    /** @name Constructors, destructors and duplication related functions */
-    //@{
-    ReassemblyBuffer(const char *name = nullptr);
-    ReassemblyBuffer(const ReassemblyBuffer& other);
-
-    virtual ReassemblyBuffer *dup() const override { return new ReassemblyBuffer(*this); }
-    //@}
-
-    /** @name Content accessor functions */
-    //@{
-    int getNumRegions() const { return regions.size(); }
-    int64_t getRegionOffset(int index) const { return regions[index].offset; }
-    int64_t getRegionLength(int index) const { return regions[index].data->getChunkLength(); }
-    const std::shared_ptr<Chunk>& getRegionData(int index) const { return regions[index].data; }
-    //@}
-
-    /**
-     * Replaces the stored data at the provided offset with the data in the
-     * chunk. Already existing data gets overwritten, and connecting data gets
-     * merged with the provided chunk.
-     */
-    void replace(int64_t offset, const std::shared_ptr<Chunk>& chunk);
-
-    /**
-     * Erases the stored data at the provided offset and length.
-     */
-    void clear(int64_t offset, int64_t length);
-
-    virtual std::string str() const override { return ""; }
-};
-
-// TODO: move to the network layer
-// TODO RENAME: ReassemblyBuffer?
-class INET_API DatagramReassemblyBuffer : public ReassemblyBuffer
-{
-  protected:
     int64_t expectedLength;
 
   public:
-    DatagramReassemblyBuffer(int64_t expectedLength = -1) : expectedLength() { }
-    DatagramReassemblyBuffer(const DatagramReassemblyBuffer& other) : ReassemblyBuffer(other), expectedLength(other.expectedLength) { }
+    ReassemblyBuffer(int64_t expectedLength = -1) : expectedLength() { }
+    ReassemblyBuffer(const ReassemblyBuffer& other) : RandomAccessBuffer(other), expectedLength(other.expectedLength) { }
 
     int64_t getExpectedLength() const { return expectedLength; }
     void setExpectedLength(int64_t expectedLength) { this->expectedLength = expectedLength; }
 
+    /**
+     * Returns true if all data is present for reassemling the data chunk.
+     */
     bool isComplete() const {
         return regions.size() == 1 && regions[0].offset == 0 && regions[0].data->getChunkLength() == expectedLength;
     }
 
+    /**
+     * Returns the reassembled data chunk if all data is present in the buffer,
+     * otherwise returns a nullptr.
+     */
     std::shared_ptr<Chunk> getData() const {
         return isComplete() ? regions[0].data : nullptr;
     }
 };
 
-// TODO: move to the transport layer
-// TODO RENAME: ReorderBuffer?
-class INET_API SegmentReassemblyBuffer : public ReassemblyBuffer
-{
-  protected:
-    int64_t expectedOffset;
-
-  public:
-    SegmentReassemblyBuffer(int64_t expectedOffset = -1) : expectedOffset(expectedOffset) { }
-    SegmentReassemblyBuffer(const SegmentReassemblyBuffer& other) : ReassemblyBuffer(other), expectedOffset(other.expectedOffset) { }
-
-    int64_t getExpectedOffset() const { return expectedOffset; }
-    void setExpectedOffset(int64_t expectedOffset) { this->expectedOffset = expectedOffset; }
-
-    std::shared_ptr<Chunk> popData() {
-        if (regions.size() > 0 && regions[0].offset == expectedOffset) {
-            const auto& data = regions[0].data;
-            int64_t length = data->getChunkLength();
-            clear(expectedOffset, length);
-            expectedOffset += length;
-            return data;
-        }
-        else
-            return nullptr;
-    }
-};
-
-inline std::ostream& operator<<(std::ostream& os, const ReassemblyBuffer *buffer) { return os << buffer->str(); }
-
-inline std::ostream& operator<<(std::ostream& os, const ReassemblyBuffer& buffer) { return os << buffer.str(); }
 
 } // namespace
 

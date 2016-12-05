@@ -13,4 +13,4 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/ReassemblyBuffer.h"
+#include "inet/common/packet/ReorderBuffer.h"
