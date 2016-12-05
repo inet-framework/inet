@@ -189,26 +189,26 @@ static void testIncorrect()
     assert(applicationHeader1->isIncorrect());
 }
 
-static void testProper()
+static void testProperlyRepresented()
 {
     // 1. chunk is proper after construction
     auto byteCountChunk1 = std::make_shared<ByteCountChunk>(10);
-    assert(byteCountChunk1->isProper());
+    assert(byteCountChunk1->isProperlyRepresented());
 }
 
-static void testImproper()
+static void testImproperlyRepresented()
 {
-    // 1. chunk is improper after deserialization of a non-representable packet
+    // 1. chunk is improperly represented after deserialization of a non-representable packet
     Packet packet1;
     auto ipHeader1 = std::make_shared<IpHeader>();
     packet1.append(ipHeader1);
     packet1.markContentsImmutable();
-    assert(ipHeader1->isProper());
+    assert(ipHeader1->isProperlyRepresented());
     auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peekAt<BytesChunk>(0, packet1.getPacketLength())->dupShared());
     bytesChunk1->setByte(0, 42);
     Packet packet2(nullptr, bytesChunk1);
     const auto& ipHeader2 = packet2.peekHeader<IpHeader>();
-    assert(ipHeader2->isImproper());
+    assert(ipHeader2->isImproperlyRepresented());
 }
 
 static void testHeader()
@@ -957,8 +957,8 @@ void UnitTest::initialize()
     testIncomplete();
     testCorrect();
     testIncorrect();
-    testProper();
-    testImproper();
+    testProperlyRepresented();
+    testImproperlyRepresented();
     testHeader();
     testTrailer();
     testEncapsulation();

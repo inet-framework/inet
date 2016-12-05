@@ -53,8 +53,8 @@ class ChunkSerializer;
  *    incomplete chunks are not totally filled in (deserializing insufficient data)
  *  - correct, then may become incorrect (but never the other way around)
  *    incorrect chunks contain bit errors (using lossy channels)
- *  - proper, then may become improper (but never the other way around)
- *    improper chunks misrepresent their data (deserializing data)
+ *  - properly represented, then may become improperly represented (but never the other way around)
+ *    improperly represented chunks misrepresent their data (deserializing data)
  *
  * Chunks can be safely shared using std::shared_ptr. In fact, the reason for
  * having immutable chunks is to allow for efficient sharing using shared
@@ -160,7 +160,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         FLAG_IMMUTABLE  = 1,
         FLAG_INCOMPLETE = 2,
         FLAG_INCORRECT  = 4,
-        FLAG_IMPROPER   = 8,
+        FLAG_IMPROPERLY_REPRESENTED = 8,
     };
 
   public:
@@ -288,19 +288,16 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     void assertCorrect() const { assert(isCorrect()); }
     void assertIncorrect() const { assert(isIncorrect()); }
     virtual void markIncorrect() { flags |= FLAG_INCORRECT; }
-    // TODO RENAME: corrupt/correct/erroneous?
     //@}
 
     /** @name Misrepresentation related functions */
     //@{
-    // NOTE: there is no markProper() intentionally
-    // TODO: add represented
-    bool isProper() const { return !(flags & FLAG_IMPROPER); }
-    bool isImproper() const { return flags & FLAG_IMPROPER; }
-    void assertProper() const { assert(isProper()); }
-    void assertImproper() const { assert(isImproper()); }
-    virtual void markImproper() { flags |= FLAG_IMPROPER; }
-    // TODO RENAME: correctlyRepresented, incorrectlyRepresented?
+    // NOTE: there is no markProperlyRepresented() intentionally
+    bool isProperlyRepresented() const { return !(flags & FLAG_IMPROPERLY_REPRESENTED); }
+    bool isImproperlyRepresented() const { return flags & FLAG_IMPROPERLY_REPRESENTED; }
+    void assertProperlyRepresented() const { assert(isProperlyRepresented()); }
+    void assertImproperlyRepresented() const { assert(isImproperlyRepresented()); }
+    virtual void markImproperlyRepresented() { flags |= FLAG_IMPROPERLY_REPRESENTED; }
     //@}
 
     /** @name Iteration related functions */

@@ -93,7 +93,7 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(ByteInputStream& stream) 
     int64_t position = stream.getPosition();
     Protocol protocol = (Protocol)stream.readUint16();
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
-        ipHeader->markImproper();
+        ipHeader->markImproperlyRepresented();
     ipHeader->setProtocol(protocol);
     stream.readByteRepeatedly(0, ipHeader->getChunkLength() - stream.getPosition() + position);
     return ipHeader;

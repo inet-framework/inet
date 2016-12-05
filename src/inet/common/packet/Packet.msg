@@ -31,7 +31,7 @@ class Chunk extends cObject
     bool mutable @getter("isMutable");
     bool complete @getter("isComplete");
     bool correct @getter("isCorrect");
-    bool proper @getter("isProper");
+    bool properlyRepresented @getter("isProperlyRepresented");
     int64_t chunkLength;
 }
 
