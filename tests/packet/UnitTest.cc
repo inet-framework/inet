@@ -939,6 +939,16 @@ static void testRegionedChunkBuffer()
     assert(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
 }
 
+static void testReassemblyBuffer()
+{
+    // TODO:
+}
+
+static void testReorderBuffer()
+{
+    // TODO:
+}
+
 void UnitTest::initialize()
 {
     testMutable();
@@ -967,6 +977,8 @@ void UnitTest::initialize()
     testSequence();
     testFifoChunkBuffer();
     testRegionedChunkBuffer();
+    testReassemblyBuffer();
+    testReorderBuffer();
 }
 
 } // namespace
