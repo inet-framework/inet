@@ -1,16 +1,21 @@
 /**
 @mainpage Visualization Tutorial for the INET Framework -- Part 1
-In this tutorial we show you, how to use the visualization module in the INET Framework. The tutorial contains a series of simulation models,
-numbered from 1 through 22. The models are of increasing complexity – they start from the basics and in each step,
+In this tutorial we show you, how to use the visualization module in the
+INET Framework. The tutorial contains a series of simulation models,
+numbered from 1 through 22. The models are of increasing complexity –
+they start from the basics and in each step,
 they introduce new INET features and concepts related to visualization module.
 Our goal is show the working of the visualization module and its submodules in INET.
 
 This is an advanced tutorial, and it assumes that you are familiar with creating
 and running simulations in @opp and  INET. If you aren't, you can check out
-the <a href="https://omnetpp.org/doc/omnetpp/tictoc-tutorial/" target="_blank">TicToc Tutorial</a> to get started with using @opp.
-The <a href="../../../doc/walkthrough/tutorial.html" target="_blank">INET Walkthrough</a> is an introduction to INET and working with protocols.
+the <a href="https://omnetpp.org/doc/omnetpp/tictoc-tutorial/" target="_blank">
+TicToc Tutorial</a> to get started with using @opp.
+The <a href="../../../doc/walkthrough/tutorial.html" target="_blank">
+INET Walkthrough</a> is an introduction to INET and working with protocols.
 
-If you need more information at any time, feel free to refer to the @opp and INET documentation:
+If you need more information at any time, feel free to refer to the @opp
+and INET documentation:
 
 - <a href="https://omnetpp.org/doc/omnetpp/manual/usman.html" target="_blank">@opp User Manual</a>
 - <a href="https://omnetpp.org/doc/omnetpp/api/index.html" target="_blank">@opp API Reference</a>
@@ -18,8 +23,8 @@ If you need more information at any time, feel free to refer to the @opp and INE
 - <a href="https://omnetpp.org/doc/inet/api-current/neddoc/index.html" target="_blank">INET Reference</a>
 
 In the tutorial, each step is a separate configuration in the same omnetpp.ini file.
-Steps build on each other, they extend the configuration of the previous step by adding a few new lines. Consecutive steps mostly share the same network,
-defined in NED.
+Steps build on each other, they extend the configuration of the previous step
+by adding a few new lines. Consecutive steps mostly share the same network, defined in NED.
 
 @section contents Contents
 
@@ -57,7 +62,8 @@ defined in NED.
 @nav{index,step2}
 
 @section s1goals Goals
-In the first step we want to show how the scene visualizer works. We'll display a real map of Boston.
+In the first step we want to show how the scene visualizer works.
+We'll display a real map of Boston. This will be the basis of all subsequent steps.
 
 @section s1model The model
 
@@ -66,17 +72,26 @@ Here is the NED file of the network:
 @skip network VisualizationA
 @until ####
 
-This is a very simple model, contains an IntegratedVisualizer and an OsgGeographicCoordinateSystem submodule.
+This is a very simple model, contains an IntegratedVisualizer and an
+OsgGeographicCoordinateSystem submodule.
+The visualizer is responsible all of phenomenon, that we can see on the playground.
+We can change their parameters in the `omnetpp.ini` file.
 The ini file contains the parameters of these submodules.
 
 @dontinclude omnetpp.ini
 @skipline [Config Visualization01]
 @until ####
 
-In this part of the file, there are some coordinate system and the scene visualizer parameters.
-Coordinate system parameters set the longitude, latitude and altitude coordinate of the playground origin and the heading of it.
-Scene visualizer parameters set the visualizer type. We add a map to the simulation with the mapFile parameter.
-Besides these options we turn off the playground shading and configure the opacity and the color of the playground.
+In this part of the file, there are some coordinate system
+and the scene visualizer parameters.
+Coordinate system parameters set the longitude, latitude and altitude coordinate
+of the playground origin and the heading of it.
+Scene visualizer parameters set the visualizer type. We add a map to the simulation
+with the mapFile parameter.
+Besides these options we turn off the playground shading and configure the opacity
+and the color of the playground. We need to make the playground transparent,
+because it's over the map, and later if we place a node, we can't see the map
+under of the area from the origin to the node.
 With the axisLength we can change the axis' size on the map.
 
 @section s1results Results
@@ -84,7 +99,7 @@ With the axisLength we can change the axis' size on the map.
 When we start the simulation we can see what we expected. There's the map of Boston downtown with the axis in that size, that we configure.
 <img src="step1_result1.png" width="850">
 
-If we hold down the left mouse button, we can navigate on the map. Holding down the mouse wheel or both mouse button at the same time we can rotate the camera,
+Using the mouse, we can move and rotate the camera. If we hold down the left mouse button, we can navigate on the map. Holding down the mouse wheel or both mouse button at the same time we can rotate the camera,
 and if we scroll up and down we can zoom out and in. If we click with the right mouse button, we can change between camera modes.
 In the top right corner of the playground, we can change between 3D Scene view mode and Module view.
 
@@ -118,8 +133,10 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s3goals Goals
 
-In this step we extend our model with two pedestrians, and an access point. Later we want to see communication between them,
-so we have to place them in each other's communication range. Our goal is the visualization of these ranges.
+In this step we extend our model with two pedestrians, and an access point.
+Later we want to see communication between them,
+so we have to place them in each other's communication range.
+Our goal is the visualization of these ranges to make the placing easier.
 
 @section s3model The model
 
@@ -129,14 +146,18 @@ This is our extended network file:
 @skip network VisualizationB
 @until ####
 
-To achieve our goal, we need to add two pedestrians, and an access point to the network. To communicate with each other, we need an IPv4NetworkConfigurator and
-an Ieee80211ScalarRadioMedium submodule. The configurator prepares the network nodes to the communication, the radioMedium manages the media.
+To achieve our goal, we need to add two pedestrians, and an access point to the network.
+To communicate with each other, we need an IPv4NetworkConfigurator and
+an Ieee80211ScalarRadioMedium submodule. The configurator prepares the network nodes
+to the communication, the radioMedium manages the media.
 
-In the ini file, we adjust the transmission power of the network nodes. We have to do that, because by using the default transmission power parameter,
-the ranges will be too big. The access point's transmission power is bigger. Then we turn on the ranges.
-We can modify their color with the communicationRangeColor and interferenceRangeColor parameters.
-Now we leave them on the default value: the communication range is blue and the interference range color is grey.
-Below, there is the appropriate part of the ini file.
+In the ini file, we adjust the transmission power of the network nodes.
+We have to do that, because by using the default transmission power parameter,
+the ranges will be too big. The access point's transmission power is bigger.
+We can modify the ranges' color with the communicationRangeColor and interferenceRangeColor parameters.
+Now we leave them on the default value: the communication range is blue
+and the interference range color is grey.
+Below, there is the appropriate part of the ini file:
 
 @dontinclude omnetpp.ini
 @skipline [Config Visualization03]
@@ -144,11 +165,13 @@ Below, there is the appropriate part of the ini file.
 
 @section s3results Results
 
-If we run the simulation in the 3D Scene view mode, we can see the three nodes and three circles around them. Each node is in the center of a circle,
+If we run the simulation in the 3D Scene view mode, we can see the three nodes
+and three circles around them. Each node is in the center of a circle,
 that circle is the node's communication range.
 <img src="step3_result1.png">
 
-We configured the visualization of interference ranges too. They're also on the map, but they're very big, so we have to zoom out
+We configured the visualization of interference ranges too. They're also on the map,
+but they're very big, so we have to zoom out
 or move to any direction to see these ranges.
 The communication and interference ranges seen in the Module view mode too.
 <img src="step3_result2.png">
