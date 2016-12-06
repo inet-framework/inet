@@ -55,6 +55,18 @@ std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, c
     return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
 }
 
+std::shared_ptr<Chunk> SliceChunk::peekSliceChunk(const Iterator& iterator, int64_t length) const
+{
+    if (iterator.getPosition() == 0 && (length == -1 || length == this->length)) {
+        if (offset == 0 && this->length == chunk->getChunkLength())
+            return chunk;
+        else
+            return const_cast<SliceChunk *>(this)->shared_from_this();
+    }
+    else
+        return chunk->peek(ForwardIterator(iterator.getPosition() + offset, -1), length);
+}
+
 void SliceChunk::setOffset(int64_t offset)
 {
     assertMutable();
@@ -124,14 +136,8 @@ std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length
     assert(0 <= iterator.getPosition() && iterator.getPosition() <= this->length);
     if (length == 0 || (iterator.getPosition() == this->length && length == -1))
         return nullptr;
-    else if (iterator.getPosition() == 0 && (length == -1 || length == this->length)) {
-        if (offset == 0 && this->length == chunk->getChunkLength())
-            return chunk;
-        else
-            return const_cast<SliceChunk *>(this)->shared_from_this();
-    }
     else
-        return chunk->peek(ForwardIterator(iterator.getPosition() + offset, -1), length);
+        return peekSliceChunk(iterator, length);
 }
 
 std::string SliceChunk::str() const

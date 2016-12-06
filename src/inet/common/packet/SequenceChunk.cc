@@ -100,7 +100,7 @@ void SequenceChunk::moveIterator(Iterator& iterator, int64_t length) const
         iterator.setIndex(-1);
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> SequenceChunk::peekSequenceChunk1(const Iterator& iterator, int64_t length) const
 {
     if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
         const auto& chunk = getElementChunk(iterator);
@@ -110,7 +110,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekWithIterator(const Iterator& iterator,
     return nullptr;
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekWithLinearSearch(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> SequenceChunk::peekSequenceChunk2(const Iterator& iterator, int64_t length) const
 {
     int position = 0;
     int startIndex = getStartIndex(iterator);
@@ -320,9 +320,9 @@ std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t len
     else if (iterator.getPosition() == 0 && length == chunkLength)
         return const_cast<SequenceChunk *>(this)->shared_from_this();
     else {
-        if (auto chunk = peekWithIterator(iterator, length))
+        if (auto chunk = peekSequenceChunk1(iterator, length))
             return chunk;
-        if (auto chunk = peekWithLinearSearch(iterator, length))
+        if (auto chunk = peekSequenceChunk2(iterator, length))
             return chunk;
         return doPeek<SliceChunk>(iterator, length);
     }

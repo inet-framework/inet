@@ -42,8 +42,8 @@ class INET_API SequenceChunk : public Chunk
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
-    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length) const override;
-    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length) const override;
+    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, int64_t length) const override;
+    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, int64_t length) const override;
 
     bool mergeToBeginning(const std::shared_ptr<Chunk>& chunk);
     bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);

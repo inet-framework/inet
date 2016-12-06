@@ -207,6 +207,7 @@ static void testImproperlyRepresented()
     auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peekAt<BytesChunk>(0, packet1.getPacketLength())->dupShared());
     bytesChunk1->setByte(0, 42);
     Packet packet2(nullptr, bytesChunk1);
+    packet2.markContentsImmutable();
     const auto& ipHeader2 = packet2.peekHeader<IpHeader>();
     assert(ipHeader2->isImproperlyRepresented());
 }
@@ -291,7 +292,6 @@ static void testEncapsulation()
     Packet packet1;
     packet1.append(std::make_shared<ByteCountChunk>(10));
     packet1.append(std::make_shared<BytesChunk>(makeVector(10)));
-    const auto& dataChunk1 = packet1.peekDataAt<BytesChunk>(0, packet1.getDataLength());
     // encapsulation packet with header and trailer
     auto& packet2 = packet1;
     packet2.pushHeader(std::make_shared<EthernetHeader>());
@@ -310,7 +310,6 @@ static void testEncapsulation()
     assert(std::dynamic_pointer_cast<BytesChunk>(bytesChunk1) != nullptr);
     assert(byteCountChunk1->getChunkLength() == 10);
     assert(bytesChunk1->getChunkLength() == 10);
-    assert(std::equal(dataChunk1->getBytes().begin(), dataChunk1->getBytes().end(), dataChunk2->getBytes().begin()));
 }
 
 static void testAggregation()

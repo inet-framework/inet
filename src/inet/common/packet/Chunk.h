@@ -22,8 +22,6 @@
 
 namespace inet {
 
-class ChunkSerializer;
-
 /**
  * This class represents a piece of data that is usually part of a packet or
  * some other data such as a protocol buffer. The chunk interface is designed
@@ -232,8 +230,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
   protected:
     virtual void handleChange() override;
 
-    virtual std::shared_ptr<Chunk> peekWithIterator(const Iterator& iterator, int64_t length = -1) const { return nullptr; }
-    virtual std::shared_ptr<Chunk> peekWithLinearSearch(const Iterator& iterator, int64_t length = -1) const { return nullptr; }
+    virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, int64_t length = -1) const { assert(false); }
+    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, int64_t length = -1) const { assert(false); }
+    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, int64_t length = -1) const { assert(false); }
 
   protected:
     /**
@@ -247,14 +246,16 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     template <typename T>
     std::shared_ptr<T> doPeek(const Iterator& iterator, int64_t length = -1) const {
-        // TODO: prevents easy access for application buffer
-        // assertImmutable();
-        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
-        chunk->markImmutable();
-        if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
-            return std::dynamic_pointer_cast<T>(chunk);
-        else
+        if (isMutable())
             return nullptr;
+        else {
+            const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
+            chunk->markImmutable();
+            if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
+                return std::dynamic_pointer_cast<T>(chunk);
+            else
+                return nullptr;
+        }
     }
 
   public:
@@ -392,15 +393,24 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
         if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
             return nullptr;
-        if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength)) {
+        else if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength)) {
             if (auto tChunk = std::dynamic_pointer_cast<T>(const_cast<Chunk *>(this)->shared_from_this()))
                 return tChunk;
         }
-        if (getChunkType() == TYPE_SEQUENCE) {
-            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithIterator(iterator, length)))
-                return tChunk;
-            if (auto tChunk = std::dynamic_pointer_cast<T>(peekWithLinearSearch(iterator, length)))
-                return tChunk;
+        switch (getChunkType()) {
+            case TYPE_SLICE: {
+                if (auto tChunk = std::dynamic_pointer_cast<T>(peekSliceChunk(iterator, length)))
+                    return tChunk;
+                break;
+            }
+            case TYPE_SEQUENCE:
+                if (auto tChunk = std::dynamic_pointer_cast<T>(peekSequenceChunk1(iterator, length)))
+                    return tChunk;
+                if (auto tChunk = std::dynamic_pointer_cast<T>(peekSequenceChunk2(iterator, length)))
+                    return tChunk;
+                break;
+            default:
+                break;
         }
         return doPeek<T>(iterator, length);
     }

@@ -48,6 +48,8 @@ class INET_API SliceChunk : public Chunk
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
 
+    virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, int64_t length = -1) const override;
+
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
