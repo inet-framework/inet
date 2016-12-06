@@ -192,13 +192,16 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s4goals Goals
 
-Pedestrians are WirelessHost node type, so by default their icon is a cellphone. We want to show, how to change network nodes appearance to a 3D model.
+Pedestrians are WirelessHost node type, so by default their icon is a cellphone.
+We want to show, how to change network nodes' default icon.
 
 @section s4model The model
 
-In INET Framework it's possible to change device appearance to an external 3D osg model. It's really simple. We have to change only the network node's
+In INET Framework it's possible to change device appearance to an external 3D osg model.
+It's really simple. We have to change only the network node's
 osgModel attribute. We set that option to boxman.osgb.
-It's the 3D model name. In addition we can set the size and the rotation of the model. The "(0.06).scale" means the model size is 6% of the original.
+It's the 3D model name. In addition we can set the size and the rotation of the model.
+The "(0.06).scale" means the model size is 6% of the original.
 The three numbers are in for the rot keyword mean the rotation of the 3D model around x, y and z axis.
 
 @dontinclude omnetpp.ini
@@ -207,7 +210,8 @@ The three numbers are in for the rot keyword mean the rotation of the 3D model a
 
 @section s4results Results
 
-In Module view mode there's no difference compared to the simulation before this. But in 3D view mode instead of phones we see walker boxmen.
+In Module view mode there's no difference compared to the simulation before this.
+But in 3D view mode instead of phones we see walker boxmans.
 <img src="step4_result1.gif">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
@@ -224,7 +228,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s5goals Goals
 
-In this step we want to show how can mobile network nodes move. The pedestrians' movement handled by the mobility submodule.
+In this step we want to show how can visualize mobile network nodes' movement.
+The pedestrians' movement handled by the mobility submodule.
 To visualize that, we need to use the mobility visualizer.
 
 @section s5model The model
@@ -235,21 +240,24 @@ Here is the configuration:
 @skipline [Config Visualization05]
 @until ####
 
-We need to adjust the nodes' mobility settings. The pedestrians movement is calculated using "MassMobility".
-This is a random mobility model for a mobile host with a mass.
-We set their initial position, and a border, because we don't want to let them go out from the access point's communication range.
+We need to adjust the nodes' mobility settings. The pedestrians movement
+is calculated using "MassMobility". This is a random mobility model for a mobile host with a mass.
+We set their initial position, and a border, because we don't want to let them go out
+from the access point's communication range.
 We have more ways to set the nodes initial position.
 We can set that in meter or we can add that in degree.
-The pedestrians' movement based on three parameters. The changeInterval is the frequency of changing speed and angle,
-the changeAngleBy change the direction of the movement, and the speed means the movement speed.
+The pedestrians' movement based on three parameters. The changeInterval is the frequency
+of changing speed and angle, the changeAngleBy change the direction of the movement,
+and the speed means the movement speed.
 
-After that we need to add some visualizer parameters. We can display the movement of the pedestrians. We display a trail,
-that shows where the pedestrians come from, and we show an arrow,
+After that we need to add some visualizer parameters. We can display the movement of the pedestrians.
+We display a trail, that shows where the pedestrians came from, and we show an arrow,
 that shows the velocity of the pedestrians, but it seems that in Module view mode only.
 
 @section s5results Results
 
-If we run the simulation, here's what happens. The pedestrians roam in the park between invisible borders that we adjust to them.
+If we run the simulation, here's what happens. The pedestrians roam in the park between
+invisible borders that we adjust to them.
 
 Here's that in Module view mode:
 <img src="step5_result1.gif">
