@@ -473,8 +473,8 @@ we can monitor which network node transmits VoIP message and which node receives
 The communication is given, we need to handle the visualizer only.
 We can turn off some visualizer, that can confuse us.
 Now we have to use the physicalLinkVisualizer. We need to filter
-which packets are considered to determine active links, in this case we add
-VoIP packets. This visualizer display an arrow from the sender to the receiver.
+which packets are considered to determine active links, in this case we are curious about
+VoIP messages. This visualizer display an arrow from the sender to the receiver.
 We can change the color, the width and the style of the arrow, and we can adjust how quickly
 inactive links fade away. With the <i>fadeOutMode</i> we can set the base
 of the elapsed time.
@@ -488,7 +488,7 @@ Here is the configuration:
 @section s10results Results
 
 The VoIP application starts at 1s. Then the pedestrian0 sends the first VoIP message. Because only
-the accessPoint0 is in its communication range, only between them appears an arrow. But When the sender
+the accessPoint0 is in its communication range, only between them appears an arrow. But when the sender
 is the accessPoint0, and the destination is the pedestrian1, an array turns up towards
 the pedestrian0 too. This happens, because the pedestrian0 is in the accessPoint0's communication
 range too, so its wlan NIC also can receive the VoIP packet.The array always points
@@ -539,15 +539,50 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step12 Step 12 -
+@page step12 Step 12 - Displaying statistic
 
 @nav{step11,step13}
 
 @section s12goals Goals
 
+The VoIP application is working right now. We want to create a statistic from that,
+and print it out to the screen. Our statistic will be the playout delay.
+
+@note When a router receives a Real-Time Protocol (RTP) audio stream for Voice over IP (VoIP),
+it must compensate for the jitter that is encountered. The mechanism that handles this function
+is the playout delay buffer. The playout delay buffer must buffer these packets and then play
+ them out in a steady stream to the digital signal processors (DSPs) to be converted back
+ to an analog audio stream. The playout delay buffer is also sometimes referred to as the de-jitter buffer.
+
 @section s12model The model
 
+Communication is still the same. Pedestrian0 sends VoIP stream to pedestrian1 through accessPoint0.
+We need to configure only the <i>statisticVisualizer</i>, because we set the adaptive playout true,
+when we adjust the VoIP application in step 8. <i>StatisticVisualizer</i> keeps track of the last value of a statistic
+for multiple network nodes. <br>
+We can look, what kind of signals contain the VoIP application, accurately the SimpleVoIPReceiver,
+because the SimpleVoIPSender doesn't contain any signal, so we have to set the
+pedestrian1's udp application to the source path. Now we select the playout delay.
+It has a signal name and a statistic name. The statisticVisualizer needs these data.
+Optional we can set a prefix, that display a string as the prefix of the value. We can add other unit
+to the statistic, it is also optional. Because the milliseconds represents better the delay, rather than
+the seconds, we add that. We can change the text color, the background and the opacity. They are optional
+settings too.
+
+The configuration:
+@dontinclude omnetpp.ini
+@skipline [Config Visualization12]
+@until ####
+
 @section s12results Results
+
+When we start the simulation here's what happens:
+
+[gif]
+
+After 1 second the VoIP application starts. After each talk spurt <i>SimpleVoIPReceiver</i> recalculate the playout
+because of the adaptive playout setting. After that, the visualizer display the statistic above the pedestrian1
+with that font and background color, that we set.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
