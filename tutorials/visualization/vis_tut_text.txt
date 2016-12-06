@@ -191,7 +191,7 @@ Review 1
 		GIF: for the appearing and fading links, both in 2d and 3d view mode
 
 
-12. Displaying playout delay statistics
+12. Displaying statistics
 	- Goals:
 		- Displaying some statistics about the network, playout delay statistic in this case
 	- Model:

@@ -62,7 +62,7 @@ by adding a few new lines. Consecutive steps mostly share the same network, defi
 @nav{index,step2}
 
 @section s1goals Goals
-In the first step we want to show how the scene visualizer works.
+In the first step we want to show how the sceneVisualizer works.
 We'll display a real map of Boston. This will be the basis of all subsequent steps.
 
 @section s1model The model
@@ -86,7 +86,7 @@ In this part of the file, there are some coordinate system
 and the scene visualizer parameters.
 Coordinate system parameters set the longitude, latitude and altitude coordinate
 of the playground origin and the heading of it.
-Scene visualizer parameters set the visualizer type. We add a map to the simulation
+SceneVisualizer parameters set the visualizer type. We add a map to the simulation
 with the mapFile parameter.
 Besides these options we turn off the playground shading and configure the opacity
 and the color of the playground. We need to make the playground transparent,
@@ -442,13 +442,13 @@ Next to the ring, there is a label, that shows the message type.
 There's an animation of a VoIP message, that goes from the pedestrian0 to the pedestrian1 through the accessPoint0:
 <img src="step9_result1.gif">
 
-And there's a similar message in 3D view mode, with <i>both</i> option:
+And there's a similar message in 3D view mode, with both option:
 <img src="step9_result2.gif">
 
-<i>Ring</i> signal propagation:
+Ring signal propagation:
 <img src="step9_result3.gif">
 
-<i>Sphere</i> signal propagation:
+Sphere signal propagation:
 <img src="step9_result4.gif">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
@@ -476,7 +476,7 @@ Now we have to use the physicalLinkVisualizer. We need to filter
 which packets are considered to determine active links, in this case we are curious about
 VoIP messages. This visualizer display an arrow from the sender to the receiver.
 We can change the color, the width and the style of the arrow, and we can adjust how quickly
-inactive links fade away. With the <i>fadeOutMode</i> we can set the base
+inactive links fade away. With the fadeOutMode we can set the base
 of the elapsed time.
 
 Here is the configuration:
@@ -516,7 +516,7 @@ the device has to switch towards the destination.
 
 The configuration is similar as the physical link visualizer's settings.
 We can adjust the same parameters, such as lineColor, lineWidth, lineStyle,
-the only difference is, we set the <i>dataLinkVisualizer</i> submodule now.
+the only difference is, we set the dataLinkVisualizer submodule now.
 
 @note This is because all link visualizer have a common parent class.
 
@@ -557,8 +557,8 @@ is the playout delay buffer. The playout delay buffer must buffer these packets 
 @section s12model The model
 
 Communication is still the same. Pedestrian0 sends VoIP stream to pedestrian1 through accessPoint0.
-We need to configure only the <i>statisticVisualizer</i>, because we set the adaptive playout true,
-when we adjust the VoIP application in step 8. <i>StatisticVisualizer</i> keeps track of the last value of a statistic
+We need to configure only the statisticVisualizer, because we set the adaptive playout true,
+when we adjust the VoIP application in step 8. StatisticVisualizer keeps track of the last value of a statistic
 for multiple network nodes. <br>
 We can look, what kind of signals contain the VoIP application, accurately the SimpleVoIPReceiver,
 because the SimpleVoIPSender doesn't contain any signal, so we have to set the
@@ -580,7 +580,7 @@ When we start the simulation here's what happens:
 
 [gif]
 
-After 1 second the VoIP application starts. After each talk spurt <i>SimpleVoIPReceiver</i> recalculate the playout
+After 1 second the VoIP application starts. After each talk spurt SimpleVoIPReceiver recalculate the playout
 because of the adaptive playout setting. After that, the visualizer display the statistic above the pedestrian1
 with that font and background color, that we set.
 
@@ -591,13 +591,21 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step13 Step 13 -
+@page step13 Step 13 - Showing configured routing tables
 
 @nav{step12,step14}
 
 @section s13goals Goals
 
+After so many steps we extend our network. We add a pedestrian, who watch a video stream in the park.
+To this we need a Server on another network. To find ways between video stream server and the
+pedestrian, who want to watch video, we need a router. We want to see how can the devices reach the server.<br>
+To this, in this step we will show routing tables.
+
 @section s13model The model
+
+The video streamed by a server. The server connect to a switch. The switch and the access point connect to
+the router.
 
 @section s13results Results
 
