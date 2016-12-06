@@ -501,15 +501,36 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step11 Step 11 -
+@page step11 Step 11 - Showing active data links
 
 @nav{step10,step12}
 
 @section s11goals Goals
 
+In this step we want to display the active data links. Data links are shown,
+when a network node receives a packet and it has to do something with it.
+For example its Layer 2 address is the packet's destination or
+the device has to switch towards the destination.
+
 @section s11model The model
 
+The configuration is similar as the physical link visualizer's settings.
+We can adjust the same parameters, such as lineColor, lineWidth, lineStyle,
+the only difference is, we set the <i>dataLinkVisualizer</i> submodule now.
+
+@note This is because all link visualizer have a common parent class.
+
+Configuration:
+@dontinclude omnetpp.ini
+@skipline [Config Visualization11]
+@until ####
+
 @section s11results Results
+
+We hide the physicalLinkVisualizer, because it's confusing. When the VoIP
+communications starts, and a packet reach the destination an arrow appears
+from the sender, towards the receiver. It fades away the same way as physical
+links.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
