@@ -280,33 +280,39 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s6goals Goals
 
-In this step we want to show how to print out any given host's any given network interface card's (NIC) IP address.
+In this step we want to show how to print out data of any given host's
+any given network interface card (NIC).
 
 @section s6model The model
 
-If we want to see the network nodes' IP addresses we have set the parameters of the interfaceTableVisualizer. Here is the configuration:
+If we want to see the network nodes' IP addresses we have to set
+the parameters of the interfaceTableVisualizer. Here is the configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Visualization06]
 @until ####
 
-With the nodeFilter parameter we can define the nodes list, that are considered. If we want to see any IP address, we have to set it,
-because by default that list is empty. Then we can set an interface list. That specifies which interfaces are considered at each node.
-Besides of these parameters we can change the font color, the background color, and the opacity of the text.  These settings are optional,
+With the nodeFilter parameter we can define the nodes list, that are considered.
+By default that list is empty, so we need to set it.
+Then we can set an interface list. That specifies which interfaces are considered
+at each node. Besides of these parameters we can change the font color,
+the background color, and the opacity of the text. These settings are optional,
 that may make the IP addresses clearly visible.
 
-With interfaceTableVisualizer we can display not only the IP address of an interface, but the MAC address too.
-To that we need to change the content parameter to "macAddress".
+With interfaceTableVisualizer we can display not only the IP address of an interface,
+but the MAC address too. To that we need to change the content parameter to "macAddress".
 
 @section s6results Results
 
-If we run the simulation, we can see a yellow bubble above each pedestrian with its wlan NIC IP address.
+If we run the simulation, we can see a yellow bubble above each pedestrian
+with its wlan NIC IP address.
 <img src="step6_result5.gif">
 
 In 3D view mode the text is a little bit fainter.
 <img src="step6_result4.gif"  width="850">
 
-If we set the content parameter to "macAddress", we can see the given NIC MAC (layer 2) address.
+If we set the content parameter to "macAddress", we can see
+the given NIC MAC (layer 2) address.
 <img src="step6_result3.png" width="850">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
@@ -322,11 +328,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s7goals Goals
 
-The pedestrians are in the access point's communication range, so they can associate with that.
+The pedestrians are in the access point's communication range,
+so they can associate with that.
 
 @section s7model The model
 
-In the ini file we need to set only the ieee80211Visualizer's parameters. This visualizer will display us information about the association.
+In the ini file we need to set only the ieee80211Visualizer's parameters.
+This visualizer will display us information about the association.
 We can set which node's and which interfaces are considered, like at interfaceTableVisualizer.
 
 Here is the appropriate configuration:
@@ -337,13 +345,17 @@ Here is the appropriate configuration:
 
 @section s7results Results
 
-In the Module view mode we can monitor the association process, we can see all messages between the nodes. When a pedestrian send an Assoc message,
-the access point in its communication range receive that, and a signal sign appear above the access point. In response to this Assoc message, the access point
-reply with an AssocResp- message. If the association is successful it's AssocResp-OK and a signal sign appear above that pedestrian
+In the Module view mode we can monitor the association process,
+we can see all messages between the nodes. When a pedestrian send an Assoc message,
+the access point in its communication range receive that,
+and a signal sign appear above the access point. In response to this Assoc message,
+the access point reply with an AssocResp- message. If the association is successful
+it's AssocResp-OK and a signal sign appear above that pedestrian
 who wants to associate with the access point.
 <img src="step7_result1.gif">
 
-In 3D view mode as a result of the association process the signal sing appears above the appropriate network node.
+In 3D view mode as a result of the association process the signal sing appears
+above the appropriate network node.
 <img src="step7_result2.gif">
 
 
@@ -360,17 +372,22 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s8goals Goals
 
-We know that, pedestrians are associate with the access point. But in 3D view mode, we can't see any communication.
+We know that, pedestrians are associate with the access point.
+We want to simulate a VoIP communication between them,
+but in 3D view mode, we can't see any communication.
 We want to show, how can display, who transmits, and who receives signals at a given moment.
 
 @section s8model The model
 
-After the successful association process we can start the VoIP application between the pedestrians, so we need to add one udp application to them.
-The pedestrian0 will be the sender and the pedestrian1 will be the receiver. They communicate with udp over port 5000. The application starts at 1 second.
-We leave all other options at their default values at the sender side. At the receiver side we need to set the port to 5000, and we turn on the adaptive
-playout setting. It will be used later.
+After the successful association process we can start the VoIP application between the pedestrians,
+so we need to add one udp application to them.
+The pedestrian0 will be the sender and the pedestrian1 will be the receiver.
+They communicate with udp over port 5000. The application starts at 1 second.
+We leave all other options at their default values at the sender side. At the receiver side
+we need to set the port to 5000, and we turn on the adaptive playout setting. It will be used later.
 
-We need to turn on some mediumVisualizer parameters. We set to true the displayTransmissions and the displayReceptions options.
+We need to turn on some mediumVisualizer parameters.
+We set true the displayTransmissions and the displayReceptions options.
 We have to set an image to these options to display them.
 
 Configuration:
@@ -381,8 +398,8 @@ Configuration:
 
 @section s8results Results
 
-If we start the simulation, we can see clearly, who is the transmitter, and who are the receivers. The signs appear,
-when a signal arrives to or leaves the wlan NIC.
+If we start the simulation, we can see clearly, who is the transmitter, and who are the receivers.
+The signs appear, when a signal arrives or leaves the wlan NIC.
 
 <img src="step8_result1.gif">
 
