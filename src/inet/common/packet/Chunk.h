@@ -39,7 +39,7 @@ namespace inet {
  *
  * Chunks can represent data in different ways:
  *  - ByteCountChunk contains a length field only
- *  - ByteArrayChunk contains a sequence of bytes
+ *  - BytesChunk contains a sequence of bytes
  *  - SliceChunk contains a slice of another chunk
  *  - SequenceChunk contains a sequence of other chunks
  *  - cPacketChunk contains a cPacket for compatibility
@@ -69,12 +69,21 @@ namespace inet {
  *  - convert to a human readable string
  *
  * General rules for peeking into a chunk:
- * 1) Peeking (various special cases)
- *    a) an empty part of the chunk returns an empty chunk
+ * 1) Peeking never returns
+ *    a) a SliceChunk containing another SliceChunk
+ *    b) a SliceChunk containing the whole of another chunk
+ *    c) a SliceChunk containing a BytesChunk
+ *    d) a SliceChunk containing a ByteCountChunk
+ *    e) a SequenceChunk containing connecting BytesChunks
+ *    f) a SequenceChunk containing connecting ByteCountChunks
+ *    g) a SequenceChunk containing another SequenceChunk
+ *    h) a SequenceChunk containing only one chunk
+ * 2) Peeking (various special cases)
+ *    a) an empty part of the chunk returns nullptr
  *    b) the whole of the chunk returns the chunk
- *    c) any part that is directly represented by a chunk returns that chunk
- * 1) Peeking without providing a return type for a
- *    a) ByteArrayChunk always returns a ByteArrayChunk containing the bytes
+ *    c) any part that is directly represented by another chunk returns that chunk
+ * 3) Peeking without providing a return type for a
+ *    a) BytesChunk always returns a BytesChunk containing the bytes
  *       of the requested part
  *    b) ByteCountChunk always returns a ByteCountChunk containing the requested length
  *    c) SliceChunk always returns a SliceChunk containing the requested slice
@@ -84,12 +93,12 @@ namespace inet {
  *       - a SliceChunk of an element chunk
  *       - a SliceChunk using the original SequenceChunk
  *    e) any other chunk returns a SliceChunk
- * 2) Peeking with providing a return type always returns a chunk of the
+ * 4) Peeking with providing a return type always returns a chunk of the
  *    requested type (or a subtype thereof)
  *    a) Peeking with a ByteCountChunk return type for any chunk returns a
  *       ByteCountChunk containing the requested byte length
- *    b) Peeking with a ByteArrayChunk return type for any chunk returns a
- *       ByteArrayChunk containing a part of the serialized bytes of the
+ *    b) Peeking with a BytesChunk return type for any chunk returns a
+ *       BytesChunk containing a part of the serialized bytes of the
  *       original chunk
  *    c) Peeking with a SliceChunk return type for any chunk returns a
  *       SliceChunk containing the original chunk
@@ -98,23 +107,11 @@ namespace inet {
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
-// TODO: document user invariants, there's no
-//  - sequence chunk in another sequence chunk
-//  - slice chunk in another slice chunk
-// TODO: document automatic invariants, there's no
-//  - slice chunk that refers to a whole chunk
-//  - slice chunk of a bytes chunk
-//  - slice chunk of a length chunk
-//  - connecting length chunks within a sequence chunk
-//  - connection bytes chunks within a sequence chunk
-//  - sequence chunk with one element
 // TODO: consider not allowing appending mutable chunks?
 // TODO: consider adding a simplify function as peek(0, getChunkLength())?
 // TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
-// TODO: consider peeking an incomplete fixed size header, what does getChunkLength() return for such a header?
-// TODO: peek is misleading with BytesChunk and default length
-//       consider introducing an enum to replace -1 length values: UNTIL_END, INTERNAL_REP
-// TODO: how does an error model make a chunk erroneous without actually serializing it?
+// TODO: when peeking an incomplete fixed size header, what does getChunkLength() return for such a header?
+// TODO: peek is misleading with BytesChunk and default length, consider introducing an enum to replace -1 length values
 // TODO: chunks may be incorrect/incomplete/improper, this is inconvenient for each protocol to check all chunks in the data part of the packet
 // TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
 //       message compiler could support @optional fields, inspectors could hide them, etc.
