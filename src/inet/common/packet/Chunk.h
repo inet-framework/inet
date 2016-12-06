@@ -230,6 +230,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
   protected:
     virtual void handleChange() override;
 
+    // NOTE: these peek functions are only used to support the peek template functions
     virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, int64_t length = -1) const { assert(false); }
     virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, int64_t length = -1) const { assert(false); }
     virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, int64_t length = -1) const { assert(false); }
