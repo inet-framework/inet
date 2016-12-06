@@ -16,7 +16,7 @@
 #include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/RegionedChunkBuffer.h"
+#include "inet/common/packet/ChunkBuffer.h"
 #include "inet/common/packet/SerializerRegistry.h"
 #include "NewTest.h"
 #include "UnitTest_m.h"
@@ -862,16 +862,16 @@ static void testChunkQueue()
     assert(applicationHeader2->getSomeData() == 42);
 }
 
-static void testRegionedChunkBuffer()
+static void testChunkBuffer()
 {
     // 1. single chunk
-    RegionedChunkBuffer buffer1;
+    ChunkBuffer buffer1;
     buffer1.replace(0, std::make_shared<ByteCountChunk>(10));
     assert(buffer1.getNumRegions() == 1);
     assert(buffer1.getRegionData(0) != nullptr);
 
     // 2. consecutive chunks
-    RegionedChunkBuffer buffer2;
+    ChunkBuffer buffer2;
     buffer2.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer2.replace(10, std::make_shared<ByteCountChunk>(10));
     const auto& byteCountChunk1 = std::dynamic_pointer_cast<ByteCountChunk>(buffer2.getRegionData(0));
@@ -879,7 +879,7 @@ static void testRegionedChunkBuffer()
     assert(byteCountChunk1 != nullptr);
 
     // 3. consecutive slice chunks
-    RegionedChunkBuffer buffer3;
+    ChunkBuffer buffer3;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->setSomeData(42);
     applicationHeader1->markImmutable();
@@ -891,7 +891,7 @@ static void testRegionedChunkBuffer()
     assert(applicationHeader2->getSomeData() == 42);
 
     // 4. out of order consecutive chunks
-    RegionedChunkBuffer buffer4;
+    ChunkBuffer buffer4;
     buffer4.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer4.replace(20, std::make_shared<ByteCountChunk>(10));
     buffer4.replace(10, std::make_shared<ByteCountChunk>(10));
@@ -900,7 +900,7 @@ static void testRegionedChunkBuffer()
     assert(byteCountChunk2 != nullptr);
 
     // 5. out of order consecutive chunks
-    RegionedChunkBuffer buffer5;
+    ChunkBuffer buffer5;
     buffer5.replace(0, applicationHeader1->peek(0, 3));
     buffer5.replace(7, applicationHeader1->peek(7, 3));
     buffer5.replace(3, applicationHeader1->peek(3, 4));
@@ -910,14 +910,14 @@ static void testRegionedChunkBuffer()
     assert(applicationHeader3->getSomeData() == 42);
 
     // 6. heterogeneous chunks
-    RegionedChunkBuffer buffer6;
+    ChunkBuffer buffer6;
     buffer6.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer6.replace(10, std::make_shared<BytesChunk>(makeVector(10)));
     assert(buffer6.getNumRegions() == 1);
     assert(buffer6.getRegionData(0) != nullptr);
 
     // 7. completely overwriting a chunk
-    RegionedChunkBuffer buffer7;
+    ChunkBuffer buffer7;
     buffer7.replace(1, std::make_shared<ByteCountChunk>(8));
     buffer7.replace(0, std::make_shared<BytesChunk>(makeVector(10)));
     const auto& bytesChunk1 = std::dynamic_pointer_cast<BytesChunk>(buffer7.getRegionData(0));
@@ -925,7 +925,7 @@ static void testRegionedChunkBuffer()
     assert(bytesChunk1 != nullptr);
 
     // 8. partially overwriting multiple chunks
-    RegionedChunkBuffer buffer8;
+    ChunkBuffer buffer8;
     buffer8.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer8.replace(10, std::make_shared<ByteCountChunk>(10));
     buffer8.replace(5, std::make_shared<BytesChunk>(makeVector(10)));
@@ -975,7 +975,7 @@ void UnitTest::initialize()
     testPeeking();
     testSequence();
     testChunkQueue();
-    testRegionedChunkBuffer();
+    testChunkBuffer();
     testReassemblyBuffer();
     testReorderBuffer();
 }

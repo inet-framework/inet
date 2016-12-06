@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_REGIONEDCHUNKBUFFER_H_
-#define __INET_REGIONEDCHUNKBUFFER_H_
+#ifndef __INET_CHUNKBUFFER_H_
+#define __INET_CHUNKBUFFER_H_
 
 #include "inet/common/packet/Chunk.h"
 
@@ -24,7 +24,7 @@ namespace inet {
  * This class provides basic functionality for merging large data chunks from
  * out of order smaller data chunks.
  */
-class INET_API RegionedChunkBuffer : public cNamedObject
+class INET_API ChunkBuffer : public cNamedObject
 {
   protected:
     class INET_API Region {
@@ -57,10 +57,10 @@ class INET_API RegionedChunkBuffer : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    RegionedChunkBuffer(const char *name = nullptr);
-    RegionedChunkBuffer(const RegionedChunkBuffer& other);
+    ChunkBuffer(const char *name = nullptr);
+    ChunkBuffer(const ChunkBuffer& other);
 
-    virtual RegionedChunkBuffer *dup() const override { return new RegionedChunkBuffer(*this); }
+    virtual ChunkBuffer *dup() const override { return new ChunkBuffer(*this); }
     //@}
 
     /** @name Content accessor functions */
@@ -87,11 +87,11 @@ class INET_API RegionedChunkBuffer : public cNamedObject
     virtual std::string str() const override { return ""; }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const RegionedChunkBuffer *buffer) { return os << buffer->str(); }
+inline std::ostream& operator<<(std::ostream& os, const ChunkBuffer *buffer) { return os << buffer->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const RegionedChunkBuffer& buffer) { return os << buffer.str(); }
+inline std::ostream& operator<<(std::ostream& os, const ChunkBuffer& buffer) { return os << buffer.str(); }
 
 } // namespace
 
-#endif // #ifndef __INET_REGIONEDCHUNKBUFFER_H_
+#endif // #ifndef __INET_CHUNKBUFFER_H_
 

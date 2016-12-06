@@ -16,7 +16,7 @@
 #ifndef __INET_REASSEMBLYBUFFER_H_
 #define __INET_REASSEMBLYBUFFER_H_
 
-#include "inet/common/packet/RegionedChunkBuffer.h"
+#include "inet/common/packet/ChunkBuffer.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ namespace inet {
  * becomes available up to the expected length, then the defregmentation is
  * considered complete.
  */
-class INET_API ReassemblyBuffer : public RegionedChunkBuffer
+class INET_API ReassemblyBuffer : public ChunkBuffer
 {
   protected:
     /**
@@ -38,7 +38,7 @@ class INET_API ReassemblyBuffer : public RegionedChunkBuffer
 
   public:
     ReassemblyBuffer(int64_t expectedLength = -1) : expectedLength() { }
-    ReassemblyBuffer(const ReassemblyBuffer& other) : RegionedChunkBuffer(other), expectedLength(other.expectedLength) { }
+    ReassemblyBuffer(const ReassemblyBuffer& other) : ChunkBuffer(other), expectedLength(other.expectedLength) { }
 
     int64_t getExpectedLength() const { return expectedLength; }
     void setExpectedLength(int64_t expectedLength) { this->expectedLength = expectedLength; }
