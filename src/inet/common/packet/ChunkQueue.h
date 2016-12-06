@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BUFFER_H_
-#define __INET_BUFFER_H_
+#ifndef __INET_CHUNKQUEUE_H_
+#define __INET_CHUNKQUEUE_H_
 
 #include "inet/common/packet/Chunk.h"
 
@@ -23,7 +23,7 @@ namespace inet {
 /**
  * This class represents application or protocol buffers.
  */
-class INET_API FifoChunkBuffer : public cNamedObject
+class INET_API ChunkQueue : public cNamedObject
 {
   protected:
     int64_t pushedByteCount = 0;
@@ -36,10 +36,10 @@ class INET_API FifoChunkBuffer : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    FifoChunkBuffer(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = nullptr);
-    FifoChunkBuffer(const FifoChunkBuffer& other);
+    ChunkQueue(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = nullptr);
+    ChunkQueue(const ChunkQueue& other);
 
-    virtual FifoChunkBuffer *dup() const override { return new FifoChunkBuffer(*this); }
+    virtual ChunkQueue *dup() const override { return new ChunkQueue(*this); }
     //@}
 
     /** @name Length querying related functions */
@@ -103,11 +103,11 @@ class INET_API FifoChunkBuffer : public cNamedObject
     virtual std::string str() const override { return contents->str(); }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const FifoChunkBuffer *buffer) { return os << buffer->str(); }
+inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *buffer) { return os << buffer->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const FifoChunkBuffer& buffer) { return os << buffer.str(); }
+inline std::ostream& operator<<(std::ostream& os, const ChunkQueue& buffer) { return os << buffer.str(); }
 
 } // namespace
 
-#endif // #ifndef __INET_BUFFER_H_
+#endif // #ifndef __INET_CHUNKQUEUE_H_
 

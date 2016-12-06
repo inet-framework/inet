@@ -827,10 +827,10 @@ static void testSequence()
     assert(std::dynamic_pointer_cast<ApplicationHeader>(chunk2) != nullptr);
 }
 
-static void testFifoChunkBuffer()
+static void testChunkQueue()
 {
     // 1. buffer provides ByteCountChunks by default if it contains a ByteCountChunk only
-    FifoChunkBuffer buffer1;
+    ChunkQueue buffer1;
     buffer1.push(std::make_shared<ByteCountChunk>(10));
     buffer1.push(std::make_shared<ByteCountChunk>(10));
     buffer1.push(std::make_shared<ByteCountChunk>(10));
@@ -840,7 +840,7 @@ static void testFifoChunkBuffer()
     assert(byteCountChunk2 != nullptr);
 
     // 2. buffer provides BytesChunks by default if it contains a BytesChunk only
-    FifoChunkBuffer buffer2;
+    ChunkQueue buffer2;
     buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
     buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
     buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
@@ -850,7 +850,7 @@ static void testFifoChunkBuffer()
     assert(byteCountChunk4 != nullptr);
 
     // 3. buffer provides reassembled header
-    FifoChunkBuffer buffer3;
+    ChunkQueue buffer3;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->setSomeData(42);
     applicationHeader1->markImmutable();
@@ -974,7 +974,7 @@ void UnitTest::initialize()
     testNesting();
     testPeeking();
     testSequence();
-    testFifoChunkBuffer();
+    testChunkQueue();
     testRegionedChunkBuffer();
     testReassemblyBuffer();
     testReorderBuffer();
