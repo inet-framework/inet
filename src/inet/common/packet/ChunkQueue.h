@@ -56,11 +56,11 @@ class INET_API ChunkQueue : public cNamedObject
 
     /** @name Mutability related functions */
     //@{
-    bool isImmutable() const { return contents != nullptr && contents->isImmutable(); }
-    bool isMutable() const { return contents == nullptr && !contents->isMutable(); }
-    void assertMutable() const { assert(isMutable()); }
-    void assertImmutable() const { assert(isImmutable()); }
-    void markImmutable() { contents->markImmutable(); }
+    bool isContentsImmutable() const { return contents != nullptr && contents->isImmutable(); }
+    bool isContentsMutable() const { return contents == nullptr && !contents->isMutable(); }
+    void assertContentsMutable() const { assert(isContentsMutable()); }
+    void assertContentsImmutable() const { assert(isContentsImmutable()); }
+    void markContentsImmutable() { contents->markImmutable(); }
     //@}
 
     /** @name Querying data related functions */

@@ -27,7 +27,7 @@ ChunkQueue::ChunkQueue(const char *name, const std::shared_ptr<Chunk>& contents)
 
 ChunkQueue::ChunkQueue(const ChunkQueue& other) :
     cNamedObject(other),
-    contents(other.isImmutable() ? other.contents : other.contents->dupShared()),
+    contents(other.isContentsImmutable() ? other.contents : other.contents->dupShared()),
     iterator(other.iterator)
 {
 }
