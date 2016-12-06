@@ -50,7 +50,7 @@ class INET_API ReorderBuffer : public ChunkBuffer
      */
     std::shared_ptr<Chunk> popData() {
         if (regions.size() > 0 && regions[0].offset == expectedOffset) {
-            const auto& data = regions[0].data;
+            auto data = regions[0].data;
             int64_t length = data->getChunkLength();
             clear(expectedOffset, length);
             expectedOffset += length;

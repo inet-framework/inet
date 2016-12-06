@@ -15,8 +15,10 @@
 
 #include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/BytesChunk.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/ChunkBuffer.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/ReassemblyBuffer.h"
+#include "inet/common/packet/ReorderBuffer.h"
 #include "inet/common/packet/SerializerRegistry.h"
 #include "NewTest.h"
 #include "UnitTest_m.h"
@@ -899,7 +901,7 @@ static void testChunkBuffer()
     assert(buffer4.getNumRegions() == 1);
     assert(byteCountChunk2 != nullptr);
 
-    // 5. out of order consecutive chunks
+    // 5. out of order consecutive slice chunks
     ChunkBuffer buffer5;
     buffer5.replace(0, applicationHeader1->peek(0, 3));
     buffer5.replace(7, applicationHeader1->peek(7, 3));
@@ -940,12 +942,72 @@ static void testChunkBuffer()
 
 static void testReassemblyBuffer()
 {
-    // TODO:
+    // 1. single chunk
+    ReassemblyBuffer buffer1(10);
+    buffer1.replace(0, std::make_shared<ByteCountChunk>(10));
+    assert(buffer1.isComplete());
+    const auto& data1 = buffer1.getData();
+    assert(data1 != nullptr);
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(data1) != nullptr);
+    assert(data1->getChunkLength() == 10);
+
+    // 2. consecutive chunks
+    ReassemblyBuffer buffer2(20);
+    buffer2.replace(0, std::make_shared<ByteCountChunk>(10));
+    assert(!buffer2.isComplete());
+    buffer2.replace(10, std::make_shared<ByteCountChunk>(10));
+    assert(buffer2.isComplete());
+    const auto& data2 = buffer2.getData();
+    assert(data2 != nullptr);
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(data2) != nullptr);
+    assert(data2->getChunkLength() == 20);
+
+    // 3. out of order consecutive chunks
+    ReassemblyBuffer buffer3(30);
+    buffer3.replace(0, std::make_shared<ByteCountChunk>(10));
+    assert(!buffer3.isComplete());
+    buffer3.replace(20, std::make_shared<ByteCountChunk>(10));
+    assert(!buffer3.isComplete());
+    buffer3.replace(10, std::make_shared<ByteCountChunk>(10));
+    assert(buffer3.isComplete());
+    const auto& data3 = buffer3.getData();
+    assert(data3 != nullptr);
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(data3) != nullptr);
+    assert(data3->getChunkLength() == 30);
 }
 
 static void testReorderBuffer()
 {
-    // TODO:
+    // 1. single chunk
+    ReorderBuffer buffer1(1000);
+    buffer1.replace(1000, std::make_shared<ByteCountChunk>(10));
+    const auto& data1 = buffer1.popData();
+    assert(data1 != nullptr);
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(data1) != nullptr);
+    assert(data1->getChunkLength() == 10);
+    assert(buffer1.getExpectedOffset() == 1010);
+
+    // 2. consecutive chunks
+    ReorderBuffer buffer2(1000);
+    buffer2.replace(1000, std::make_shared<ByteCountChunk>(10));
+    buffer2.replace(1010, std::make_shared<ByteCountChunk>(10));
+    const auto& data2 = buffer2.popData();
+    assert(data2 != nullptr);
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(data2) != nullptr);
+    assert(data2->getChunkLength() == 20);
+    assert(buffer2.getExpectedOffset() == 1020);
+
+    // 3. out of order consecutive chunks
+    ReorderBuffer buffer3(1000);
+    buffer3.replace(1020, std::make_shared<ByteCountChunk>(10));
+    assert(buffer2.popData() == nullptr);
+    buffer3.replace(1000, std::make_shared<ByteCountChunk>(10));
+    buffer3.replace(1010, std::make_shared<ByteCountChunk>(10));
+    const auto& data3 = buffer3.popData();
+    assert(data3 != nullptr);
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(data3) != nullptr);
+    assert(data3->getChunkLength() == 30);
+    assert(buffer3.getExpectedOffset() == 1030);
 }
 
 void UnitTest::initialize()

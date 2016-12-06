@@ -37,7 +37,7 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
     int64_t expectedLength;
 
   public:
-    ReassemblyBuffer(int64_t expectedLength = -1) : expectedLength() { }
+    ReassemblyBuffer(int64_t expectedLength = -1) : expectedLength(expectedLength) { }
     ReassemblyBuffer(const ReassemblyBuffer& other) : ChunkBuffer(other), expectedLength(other.expectedLength) { }
 
     int64_t getExpectedLength() const { return expectedLength; }
