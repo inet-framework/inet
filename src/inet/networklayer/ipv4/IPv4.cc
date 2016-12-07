@@ -715,7 +715,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     EV_DETAIL << "Breaking datagram into " << noOfFragments << " fragments\n";
 
     // create and send fragments
-    std::string fragMsgName = ipv4Header->getName();
+    std::string fragMsgName = packet->getName();
     fragMsgName += "-frag";
 
     int offset = 0;
@@ -726,18 +726,30 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
         Packet *fragment = new Packet(fragMsgName.c_str());     //TODO add offset or index to fragment name
 
-        //FIXME copy Tags from packet to fragment
+        //copy Tags from packet to fragment     //FIXME optimizing needed
+        {
+            Packet *tmp = packet->dup();
+            fragment->transferTagsFrom(tmp);
+            delete tmp;
+        }
 
-        const auto& fraghdr = std::make_shared<IPv4Datagram>(*ipv4Header.get());
+        ASSERT(fragment->getByteLength() == 0);
+        const auto& fraghdr = std::make_shared<IPv4Datagram>(*ipv4Header.get()->dup());
         fragment->append(fraghdr);
-        fragment->append(packet->peekDataAt(offset, thisFragmentLength));
+        ASSERT(fragment->getByteLength() == headerLength);
+        const auto& fragData = packet->peekDataAt(offset, thisFragmentLength);
+        ASSERT(fragData->getChunkLength() == thisFragmentLength);
+        fragment->append(fragData);
+        ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
 
         // "more fragments" bit is unchanged in the last fragment, otherwise true
         if (!lastFragment)
             fraghdr->setMoreFragments(true);
 
         fraghdr->setFragmentOffset(offsetBase + offset);
+        fraghdr->setTotalLengthField(thisFragmentLength);
 
+        int bl = fragment->getByteLength();
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
 
         sendDatagramToOutput(fragment, destIe, nextHopAddr);
