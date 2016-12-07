@@ -84,7 +84,7 @@ class INET_API Packet : public cPacket
      * Returns the packet length in bytes ignoring header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    virtual int64_t getPacketLength() const { return contents->getChunkLength(); }
+    virtual int64_t getPacketLength() const { return contents == nullptr ? 0 : contents->getChunkLength(); }
 
     /**
      * Returns the length in bits between the header and trailer iterators.
