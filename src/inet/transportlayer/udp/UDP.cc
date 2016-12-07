@@ -602,7 +602,7 @@ void UDP::processUndeliverablePacket(Packet *udpPacket)
     }
 
     //seek to network protocol header
-    udpPacket->setHeaderPosition(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getPosition());
+    udpPacket->setHeaderPopOffset(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getPosition());
     auto inIe = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {

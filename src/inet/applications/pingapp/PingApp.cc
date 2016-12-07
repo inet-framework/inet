@@ -217,7 +217,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (const auto& icmpMessage = packet->popHeader<ICMPMessage>()) {
             if (icmpMessage->getType() == ICMP_ECHO_REPLY) {
 //                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekData())->getPacket()->dup());
+                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(0, packet->getDataLength()))->getPacket()->dup());
                 processPingResponse(pingPayload);
             }
             else {
@@ -245,7 +245,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (const auto& icmpMessage = packet->popHeader<EchoPacket>()) {
             if (icmpMessage->getType() == ECHO_PROTOCOL_REPLY) {
 //                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekData())->getPacket()->dup());
+                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(0, packet->getDataLength()))->getPacket()->dup());
                 processPingResponse(pingPayload);
             }
             else {

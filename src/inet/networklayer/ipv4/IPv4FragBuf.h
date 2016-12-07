@@ -23,6 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/common/OldReassemblyBuffer.h"
 
@@ -57,7 +58,7 @@ class INET_API IPv4FragBuf
     //
     struct DatagramBuffer
     {
-        ReassemblyBuffer buf;    // reassembly buffer
+        OldReassemblyBuffer buf;    // reassembly buffer
         Packet *packet;          // the packet
         simtime_t lastupdate;    // last time a new fragment arrived
     };

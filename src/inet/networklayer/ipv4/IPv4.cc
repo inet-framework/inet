@@ -234,7 +234,7 @@ Packet *toMutable(Packet *packet)
     auto newPacket = new Packet(packet->getName());
     auto newHeader = std::static_pointer_cast<IPv4Datagram>(header->dupShared());
     newPacket->append(newHeader);
-    newPacket->append(packet->peekData());
+    newPacket->append(packet->peekDataAt(0, packet->getDataLength()));
     delete packet;
     return newPacket;
 }
@@ -611,7 +611,7 @@ void IPv4::reassembleAndDeliver(Packet *packet, const InterfaceEntry *fromIE)
 
 void IPv4::reassembleAndDeliverFinish(Packet *packet, const InterfaceEntry *fromIE)
 {
-    auto ipv4HeaderPosition = packet->getHeaderPosition();
+    auto ipv4HeaderPosition = packet->getHeaderPopOffset();
     const auto& datagram = packet->peekHeader<IPv4Datagram>();
     int protocol = datagram->getTransportProtocol();
     decapsulate(packet);
@@ -634,7 +634,7 @@ void IPv4::reassembleAndDeliverFinish(Packet *packet, const InterfaceEntry *from
     }
     else {
         EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
-        packet->setHeaderPosition(ipv4HeaderPosition);
+        packet->setHeaderPopOffset(ipv4HeaderPosition);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
@@ -642,7 +642,7 @@ void IPv4::reassembleAndDeliverFinish(Packet *packet, const InterfaceEntry *from
 void IPv4::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
-    auto ipv4HeaderPos = packet->getHeaderPosition();
+    auto ipv4HeaderPos = packet->getHeaderPopOffset();
     const auto& datagram = packet->popHeader<IPv4Datagram>();
 
     // create and fill in control info
@@ -702,7 +702,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         return;
     }
 
-    packet->makeImmutable();
+    packet->markContentsImmutable();
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
     int payloadLength = packet->getDataLength() - headerLength;

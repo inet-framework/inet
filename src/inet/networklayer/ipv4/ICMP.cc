@@ -87,7 +87,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // do not reply with error message to error message
     if (origDatagram->getTransportProtocol() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekHeaderAt<ICMPMessage>(packet->getHeaderPosition() + origDatagram->getHeaderLength());
+        const auto& recICMPMsg = packet->peekDataAt<ICMPMessage>(origDatagram->getHeaderLength());
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -111,7 +111,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     errorPacket->append(icmpHeader);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
-    errorPacket->append(packet->peekData(origDatagram->getHeaderLength() + 8));
+    errorPacket->append(packet->peekDataAt(0, origDatagram->getHeaderLength() + 8));
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
@@ -220,7 +220,7 @@ void ICMP::processEchoRequest(Packet *request)
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
     const auto& icmpReply = std::make_shared<ICMPMessage>();
     reply->append(icmpReply);
-    reply->append(request->peekData());
+    reply->append(request->peekDataAt(0, request->getDataLength()));
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv4Address src = addressInd->getSrcAddress().toIPv4();
     IPv4Address dest = addressInd->getDestAddress().toIPv4();

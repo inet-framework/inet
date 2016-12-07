@@ -65,7 +65,7 @@ void EchoProtocol::processEchoRequest(Packet *request)
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
     const auto& echoReply = std::make_shared<EchoPacket>();
     reply->append(echoReply);
-    reply->append(request->peekData());
+    reply->append(request->peekDataAt(0, request->getDataLength()));
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     echoReply->setType(ECHO_PROTOCOL_REPLY);
 
