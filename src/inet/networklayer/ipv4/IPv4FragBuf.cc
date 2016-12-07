@@ -20,8 +20,8 @@
 
 #include "inet/networklayer/ipv4/IPv4FragBuf.h"
 
-#include "inet/common/RawPacket.h"
-#include "inet/common/serializer/SerializerBase.h"
+//#include "inet/common/RawPacket.h"
+//#include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/ipv4/ICMP.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 
@@ -51,13 +51,13 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     key.dest = datagram->getDestAddress();
 
     auto i = bufs.find(key);
-#if 0   //FIXME reimplement it
+
     DatagramBuffer *buf = nullptr;
 
     if (i == bufs.end()) {
         // this is the first fragment of that datagram, create reassembly buffer for it
         buf = &bufs[key];
-        buf->datagram = nullptr;
+        buf->packet = nullptr;
     }
     else {
         // use existing buffer
@@ -65,86 +65,40 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     }
 
     // add fragment into reassembly buffer
-    int bytes = datagram->getByteLength() - datagram->getHeaderLength();
-    bool isComplete = buf->buf.addFragment(datagram->getFragmentOffset(),
-                datagram->getFragmentOffset() + bytes,
-                !datagram->getMoreFragments());
-
-    // store datagram. Only one fragment carries the actual modelled
-    // content (getEncapsulatedPacket()), other (empty) ones are only
-    // preserved so that we can send them in ICMP if reassembly times out.
-    if (buf->datagram == nullptr) {
-        if (dynamic_cast<RawPacket *>(datagram->getEncapsulatedPacket())) {
-            RawPacket * rp = static_cast<RawPacket *>(datagram->getEncapsulatedPacket());
-            // move raw bytes to its offset in RawPacket
-            if (datagram->getFragmentOffset()) {
-                rp->getByteArray().expandData(datagram->getFragmentOffset(), 0);
-                rp->addByteLength(datagram->getFragmentOffset());
-            }
-        }
-
-        buf->datagram = datagram;
-    }
-    else if (buf->datagram->getEncapsulatedPacket() == nullptr && datagram->getEncapsulatedPacket() != nullptr) {
-        delete buf->datagram;
-
-        if (dynamic_cast<RawPacket *>(datagram->getEncapsulatedPacket())) {
-            RawPacket *rp = static_cast<RawPacket *>(datagram->getEncapsulatedPacket());
-            // move raw bytes to its offset in RawPacket
-            if (datagram->getFragmentOffset()) {
-                rp->getByteArray().expandData(datagram->getFragmentOffset(), 0);
-                rp->setByteLength(rp->getByteArray().getDataArraySize());
-            }
-        }
-
-        buf->datagram = datagram;
+    int bytes = datagram->getTotalLengthField() - datagram->getHeaderLength();
+    buf->buf.replace(datagram->getFragmentOffset(), packet->peekDataAt(datagram->getHeaderLength(), bytes));
+    if (datagram->getFragmentOffset() == 0 || buf->packet == nullptr) {
+        delete buf->packet;
+        buf->packet = packet;
     }
     else {
-        RawPacket *brp = dynamic_cast<RawPacket *>(buf->datagram->getEncapsulatedPacket());
-        RawPacket *rp = dynamic_cast<RawPacket *>(datagram->getEncapsulatedPacket());
-        if (brp && rp) {
-            // merge encapsulated raw data
-            brp->getByteArray().copyDataFromBuffer(datagram->getFragmentOffset(), rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
-            brp->setByteLength(rp->getByteArray().getDataArraySize());
-        }
-        delete datagram;
+        delete packet;
+    }
+    if (!datagram->getMoreFragments()) {
+        buf->buf.setExpectedLength(datagram->getFragmentOffset() + bytes);
     }
 
     // do we have the complete datagram?
-    if (isComplete) {
+    if (buf->buf.isComplete()) {
         // datagram complete: deallocate buffer and return complete datagram
-        IPv4Datagram *ret = buf->datagram;
-        ret->setByteLength(ret->getHeaderLength() + buf->buf.getTotalLength());
-        ret->setFragmentOffset(0);
-        ret->setMoreFragments(false);
+        Packet *pk = new Packet(buf->packet->getName());
+        pk->transferTagsFrom(buf->packet);
+        auto hdr = std::shared_ptr<IPv4Datagram>(buf->packet->peekHeader<IPv4Datagram>()->dup());
+        const auto& payload = buf->buf.getData();
+        hdr->setTotalLengthField(hdr->getHeaderLength() + payload->getChunkLength());
+        hdr->setFragmentOffset(0);
+        hdr->setMoreFragments(false);
+        pk->pushHeader(hdr);
+        pk->pushTrailer(payload);
+        delete buf->packet;
         bufs.erase(i);
-        if (dynamic_cast<RawPacket *>(ret->getEncapsulatedPacket())) {
-            using namespace serializer;
-            RawPacket *rp = static_cast<RawPacket *>(ret->getEncapsulatedPacket());
-            char ipv4addresses[8];    // 2 * 4 bytes for 2 IPv4 addresses
-            Buffer hdr(ipv4addresses, sizeof(ipv4addresses));
-            hdr.writeIPv4Address(ret->getSrcAddress());
-            hdr.writeIPv4Address(ret->getDestAddress());
-            Buffer b(rp->getByteArray().getDataPtr(), rp->getByteArray().getDataArraySize());
-            Context c;
-            c.l3AddressesPtr = ipv4addresses;
-            c.l3AddressesLength = sizeof(ipv4addresses);
-            cPacket *enc = SerializerBase::lookupAndDeserialize(b, c, IP_PROT, ret->getTransportProtocol());
-            if (enc) {
-                delete ret->decapsulate();
-                ret->encapsulate(enc);
-            }
-        }
-        return ret;
+        return pk;
     }
     else {
         // there are still missing fragments
         buf->lastupdate = now;
         return nullptr;
     }
-#else
-    return nullptr;
-#endif
 }
 
 void IPv4FragBuf::purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate)
@@ -163,7 +117,10 @@ void IPv4FragBuf::purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate)
             // because its length (being a fragment) is smaller than the encapsulated
             // packet, resulting in "length became negative" error. Use getEncapsulatedPacket().
             EV_WARN << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
-            icmpModule->sendErrorMessage(buf.packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+            if (buf.packet != nullptr)
+                icmpModule->sendErrorMessage(buf.packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+            else
+                delete buf.packet;
 
             // delete
             auto oldi = i++;

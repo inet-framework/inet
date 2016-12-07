@@ -25,7 +25,6 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/common/OldReassemblyBuffer.h"
 
 namespace inet {
 
@@ -43,7 +42,7 @@ class INET_API IPv4FragBuf
     //
     struct Key
     {
-        ushort id;
+        ushort id = (ushort)-1;
         IPv4Address src;
         IPv4Address dest;
 
@@ -58,8 +57,8 @@ class INET_API IPv4FragBuf
     //
     struct DatagramBuffer
     {
-        OldReassemblyBuffer buf;    // reassembly buffer
-        Packet *packet;          // the packet
+        ReassemblyBuffer buf;    // reassembly buffer
+        Packet *packet = nullptr;          // the packet
         simtime_t lastupdate;    // last time a new fragment arrived
     };
 
