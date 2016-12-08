@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,33 +14,27 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
+// @author Zoltan Bojthe
+//
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/networklayer/common/L3Address.h"
 }}
 
 namespace inet;
 
-enum UdpConstants{
-    UDP_HEADER_BYTES = 8;
-};
-
 class FieldsChunk extends cObject;
-enum CrcMode;
+class noncobject L3Address;
 //
-// Represents an UDP packet, to be used with the ~UDP module.
+// Represents a TCP/UDP pseudo header, used for crc calculation.
 //
-class UDPHeader extends FieldsChunk
+class TransportPseudoHeader
 {
-    @customize(true);
-    unsigned short srcPort;
-    unsigned short destPort;
-    int64_t chunkLength @overridegetter = UDP_HEADER_BYTES;
-    int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
-    uint16_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    L3Address srcAddress;
+    L3Address destAddress;
+    int reserved = 0;
+    int protocolId = -1;    // TCP: 6, UDP: 17
+    int64_t packetLength = -1;
 }
 

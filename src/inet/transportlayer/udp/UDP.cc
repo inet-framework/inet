@@ -363,8 +363,12 @@ void UDP::processPacketFromApp(cPacket *appData)
     udpHeader->setCrcMode(CRC_DECLARED_CORRECT);       //FIXME choose CRC_DECLARED_CORRECT, CRC_DECLARED_INCORRECT, CRC_COMPUTED
     uint16_t crc = 0;
     if (udpHeader->getCrcMode() == CRC_COMPUTED) {
-        BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
-        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, udpPacket->getDataLength())));
+        TransportPseudoHeader pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
+        pseudoHeader.setSrcAddress(srcAddr);
+        pseudoHeader.setDestAddress(destAddr);
+        pseudoHeader.setProtocolId(17);
+        pseudoHeader.setPacketLength(udpPacket->getByteLength());
+        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, udpPacket->getByteLength())));
     }
     udpHeader->setCrc(crc);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
@@ -426,7 +430,11 @@ void UDP::processUDPPacket(Packet *udpPacket)
             else if (crc == 0)
                 bitError = false;
             else {
-                BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
+                TransportPseudoHeader pseudoHeader;
+                pseudoHeader.setSrcAddress(srcAddr);
+                pseudoHeader.setDestAddress(destAddr);
+                pseudoHeader.setProtocolId(17);
+                pseudoHeader.setPacketLength(totalLength);
                 bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, totalLength)));
             }
             break;
@@ -1255,7 +1263,7 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
     delete membership;
 }
 
-uint16_t computeUdpCrc(const BytesChunk& pseudoHeader, const BytesChunk& udpPacket)
+uint16_t computeUdpCrc(const TransportPseudoHeader& pseudoHeader, const BytesChunk& udpPacket)
 {
     return 0;   //FIXME add implementation
 }

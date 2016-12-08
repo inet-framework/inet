@@ -23,8 +23,9 @@
 #include <list>
 
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/BytesChunk.h"
+#include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 
 namespace inet {
@@ -188,7 +189,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
 };
 
-uint16_t computeUdpCrc(const BytesChunk& pseudoHeader, const BytesChunk& udpPacket);
+uint16_t computeUdpCrc(const TransportPseudoHeader& pseudoHeader, const BytesChunk& udpPacket);
 
 } // namespace inet
 
