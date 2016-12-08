@@ -23,7 +23,7 @@ import inet.transportlayer.contract.IUDP;
 //
 // UDP protocol implementation, for IPv4 and IPv6.
 //
-// The UDP protocol header is represented by the class ~UDPPacket.
+// The UDP protocol header is represented by the class ~UdpHeader.
 //
 // <b>Communication with clients (applications)</b>
 //
@@ -45,9 +45,9 @@ import inet.transportlayer.contract.IUDP;
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
 //
 // The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
-// objects attached to ~UDPPacket objects as control info.
+// objects attached to ~UdpHeader objects as control info.
 //
-// @see ~UDPPacket, ~UDPControlInfo, ~UDPCommandCode
+// @see ~UdpHeader, ~UDPControlInfo, ~UDPCommandCode
 //
 simple UDP like IUDP
 {
@@ -69,7 +69,7 @@ simple UDP like IUDP
 
     gates:
         input appIn @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket,IPv4ControlInfo/up,IPv6ControlInfo/up);
+        input ipIn @labels(UdpHeader,IPv4ControlInfo/up,IPv6ControlInfo/up);
         output appOut @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket,IPv4ControlInfo/down,IPv6ControlInfo/down);
+        output ipOut @labels(UdpHeader,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }

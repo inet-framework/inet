@@ -53,7 +53,7 @@ namespace inet { namespace tcp { class TcpHeader; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/udp/UdpHeader.h"
 #else // ifdef WITH_UDP
 namespace inet { class UDPHeader; }
 #endif // ifdef WITH_UDP

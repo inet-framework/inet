@@ -19,7 +19,7 @@
 #define __INET_UDPPACKET_H
 
 #include "inet/transportlayer/contract/ITransportPacket.h"
-#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 

@@ -21,7 +21,7 @@ package inet.transportlayer.contract;
 //
 // UDP protocol interface.
 //
-// The UDP protocol header is represented by the class ~UDPPacket.
+// The UDP protocol header is represented by the class ~UdpHeader.
 //
 // <b>Communication with clients (applications)</b>
 //
@@ -42,10 +42,10 @@ package inet.transportlayer.contract;
 // <b>Communication with the IPv4 (IPv4/IPv6) layer</b>
 //
 // The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
-// objects attached to ~UDPPacket objects as control info
+// objects attached to ~UdpHeader objects as control info
 // (see cMessage::setControlInfo()).
 //
-// @see ~UDP, ~UDPPacket, ~UDPControlInfo, ~UDPCommandCode
+// @see ~UDP, ~UdpHeader, ~UDPControlInfo, ~UDPCommandCode
 //
 moduleinterface IUDP
 {
@@ -54,7 +54,7 @@ moduleinterface IUDP
 
     gates:
         input appIn @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket,IPv4ControlInfo/up,IPv6ControlInfo/up);
+        input ipIn @labels(UdpHeader,IPv4ControlInfo/up,IPv6ControlInfo/up);
         output appOut @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket,IPv4ControlInfo/down,IPv6ControlInfo/down);
+        output ipOut @labels(UdpHeader,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }

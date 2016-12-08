@@ -173,7 +173,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     // process commands from application
     virtual void processCommandFromApp(cMessage *msg);
 
-    // create a blank UDP packet; override to subclass UDPPacket
+    // create a blank UDP packet; override to subclass UdpHeader
     virtual UDPHeader *createUDPPacket();
 
     // ILifeCycle:

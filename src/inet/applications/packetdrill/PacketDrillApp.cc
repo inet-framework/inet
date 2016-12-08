@@ -26,7 +26,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "PacketDrillUtils.h"
 #include "PacketDrillInfo_m.h"
-#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/networklayer/ipv4/IPv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"

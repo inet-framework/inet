@@ -34,8 +34,8 @@ simple GenericNetworkProtocol
         int headerLength @unit("B") = default(10B);
         @display("i=block/routing");
     gates:
-        input transportIn @labels(TCPSegment,UDPPacket);
-        output transportOut @labels(TCPSegment,UDPPacket);
+        input transportIn @labels(TCPSegment,UdpHeader);
+        output transportOut @labels(TCPSegment,UdpHeader);
         input arpIn;
         output arpOut;
         input queueIn @labels(GenericDatagram);

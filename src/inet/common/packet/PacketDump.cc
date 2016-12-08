@@ -24,7 +24,7 @@
 #include "inet/common/packet/PacketDump.h"
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/udp/UdpHeader.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP

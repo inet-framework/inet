@@ -27,7 +27,7 @@
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4

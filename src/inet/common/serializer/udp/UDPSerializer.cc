@@ -28,7 +28,7 @@
 #include "inet/common/RawPacket.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/udp/UdpHeader.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...

@@ -25,7 +25,7 @@
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
-#include "inet/transportlayer/udp/UDPPacket_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/applications/tcpapp/TCPSessionApp.h"

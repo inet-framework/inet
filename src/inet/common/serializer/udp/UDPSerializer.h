@@ -26,7 +26,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between UDPPacket and binary (network byte order) UDP header.
+ * Converts between UdpHeader and binary (network byte order) UDP header.
  */
 class INET_API UDPSerializer : public SerializerBase
 {
