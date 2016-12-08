@@ -704,15 +704,52 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step15 Step 15 -
+@page step15 Step 15 - Showing active network routes
 
 @nav{step14,step16}
 
 @section s15goals Goals
 
+In this step we want to show active network routes. It's similar to
+showing active physical links, and active data links, but network routes
+active when the packet pass the destination' network layer.
+
+In furthermore we make the model more interesting by adding more nodes,
+change the routing protocol to RIP, and assign address via DHCP protocol
+to the wireless nodes.
+
 @section s15model The model
 
+Firstly we have to edit the configurator. We make an xml file (in this case configurationD.xml),
+to set the static ip addresses. Static addresses are the routers' interfaces and
+the videoStreamServer's IP address.
+
+@dontinclude configurationD.xml
+@skip config
+@until /config
+
+The routers assign addresses to wireless nodes via DHCP.
+To that we have to turn on the hasDHCP parameter. Then we adjust the
+other settings of that service. We have to set which interface assign the addresses.
+In our simulation it's the "eth0" on both router. MaxNumClients parameter adjusts
+maximum number of clients (IPs) allowed to be leased (in our simulation we set to 10)
+and numReservedAddresses define number of addresses to skip
+at the start of the network's address range. To gateway we add that interface's IP address,
+that run the DHCP service. Finally we have to add the lease time.
+We can adjust the start time, but usually we want that, DHCP service run the
+beginning, so we leave it on 0s.
+
+If we want RIP routing protocol work, we have to set true the routers' hasRIP parameter,
+and set to false the configurator.optimizeRoutes parameter.
+
+The configuration:
+@dontinclude omnetpp.ini
+@skipline [Config Visualization15]
+@until ####
+
 @section s15results Results
+
+
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
