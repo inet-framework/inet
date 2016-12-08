@@ -716,7 +716,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
     // create and send fragments
     std::string fragMsgName = packet->getName();
-    fragMsgName += "-frag";
+    fragMsgName += "-frag-";
 
     int offset = 0;
     while (offset < payloadLength) {
@@ -724,7 +724,10 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         // length equal to fragmentLength, except for last fragment;
         int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
 
-        Packet *fragment = new Packet(fragMsgName.c_str());     //TODO add offset or index to fragment name
+        std::string curFragName = fragMsgName + std::to_string(offset);
+        if (lastFragment)
+            curFragName += "-last";
+        Packet *fragment = new Packet(curFragName.c_str());     //TODO add offset or index to fragment name
 
         //copy Tags from packet to fragment     //FIXME optimizing needed
         {
@@ -737,7 +740,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         const auto& fraghdr = std::make_shared<IPv4Datagram>(*ipv4Header.get()->dup());
         fragment->append(fraghdr);
         ASSERT(fragment->getByteLength() == headerLength);
-        const auto& fragData = packet->peekDataAt(offset, thisFragmentLength);
+        const auto& fragData = packet->peekDataAt(headerLength + offset, thisFragmentLength);
         ASSERT(fragData->getChunkLength() == thisFragmentLength);
         fragment->append(fragData);
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
@@ -747,7 +750,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
             fraghdr->setMoreFragments(true);
 
         fraghdr->setFragmentOffset(offsetBase + offset);
-        fraghdr->setTotalLengthField(thisFragmentLength);
+        fraghdr->setTotalLengthField(headerLength + thisFragmentLength);
 
         int bl = fragment->getByteLength();
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);

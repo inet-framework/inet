@@ -81,7 +81,11 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     // do we have the complete datagram?
     if (buf->buf.isComplete()) {
         // datagram complete: deallocate buffer and return complete datagram
-        Packet *pk = new Packet(buf->packet->getName());
+        std::string pkName(buf->packet->getName());
+        std::size_t found = pkName.find("-frag-");
+        if (found != std::string::npos)
+            pkName.resize(found);
+        Packet *pk = new Packet(pkName.c_str());
         pk->transferTagsFrom(buf->packet);
         auto hdr = std::shared_ptr<IPv4Datagram>(buf->packet->peekHeader<IPv4Datagram>()->dup());
         const auto& payload = buf->buf.getData();
@@ -119,8 +123,6 @@ void IPv4FragBuf::purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate)
             EV_WARN << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
             if (buf.packet != nullptr)
                 icmpModule->sendErrorMessage(buf.packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
-            else
-                delete buf.packet;
 
             // delete
             auto oldi = i++;
