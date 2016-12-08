@@ -353,24 +353,25 @@ static void testFragmentation()
     Packet packet2;
     packet2.append(std::make_shared<IpHeader>());
     // append fragment of another packet
-    packet2.append(packet1.peekAt(5, 10));
+    packet2.append(packet1.peekAt(7, 10));
     packet2.markContentsImmutable();
     const auto& ipHeader1 = packet2.popHeader<IpHeader>();
     const auto& fragment1 = packet2.peekDataAt(0, packet2.getDataLength());
-    const auto& chunk1 = fragment1->peek(0, 5);
-    const auto& chunk2 = fragment1->peek(5, 5);
+    const auto& chunk1 = fragment1->peek(0, 3);
+    const auto& chunk2 = fragment1->peek(3, 7);
+    assert(packet2.getPacketLength() == 30);
     assert(ipHeader1 != nullptr);
     assert(std::dynamic_pointer_cast<IpHeader>(ipHeader1) != nullptr);
     assert(fragment1 != nullptr);
     assert(fragment1->getChunkLength() == 10);
     assert(chunk1 != nullptr);
-    assert(chunk1->getChunkLength() == 5);
+    assert(chunk1->getChunkLength() == 3);
     assert(std::dynamic_pointer_cast<ByteCountChunk>(chunk1) != nullptr);
     assert(chunk2 != nullptr);
-    assert(chunk2->getChunkLength() == 5);
+    assert(chunk2->getChunkLength() == 7);
     assert(std::dynamic_pointer_cast<BytesChunk>(chunk2) != nullptr);
     const auto& bytesChunk1 = std::static_pointer_cast<BytesChunk>(chunk2);
-    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(5).begin()));
+    assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(7).begin()));
 }
 
 static void testPolymorphism()
