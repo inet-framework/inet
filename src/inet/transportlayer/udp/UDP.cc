@@ -360,9 +360,9 @@ void UDP::processPacketFromApp(cPacket *appData)
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
     udpHeader->setTotalLengthField(udpPacket->getByteLength());
-    udpHeader->setBitError(BIT_ERROR_NO);       //FIXME choose BIT_ERROR_NO, BIT_ERROR_YES, BIT_ERROR_CRC
+    udpHeader->setCrcMode(CRC_DECLARED_CORRECT);       //FIXME choose CRC_DECLARED_CORRECT, CRC_DECLARED_INCORRECT, CRC_COMPUTED
     uint16_t crc = 0;
-    if (udpHeader->getBitError() == BIT_ERROR_CRC) {
+    if (udpHeader->getCrcMode() == CRC_COMPUTED) {
         BytesChunk pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
         crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, udpPacket->getDataLength())));
     }
@@ -413,14 +413,14 @@ void UDP::processUDPPacket(Packet *udpPacket)
     auto crc = udpHeader->getCrc();
 
     bool bitError = false;
-    switch (udpHeader->getBitError()) {
-        case BIT_ERROR_YES:
+    switch (udpHeader->getCrcMode()) {
+        case CRC_DECLARED_INCORRECT:
             bitError = true;
             break;
-        case BIT_ERROR_NO:
+        case CRC_DECLARED_CORRECT:
             bitError = false;
             break;
-        case BIT_ERROR_CRC: {
+        case CRC_COMPUTED: {
             if (totalLength > udpPacket->getDataLength())
                 bitError = true;
             else if (crc == 0)

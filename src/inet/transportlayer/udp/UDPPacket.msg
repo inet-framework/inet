@@ -30,11 +30,11 @@ enum UdpConstants{
 
 class FieldsChunk extends cObject;
 
-enum BitError
+enum CrcMode
 {
-    BIT_ERROR_YES = 0;
-    BIT_ERROR_NO  = 1;
-    BIT_ERROR_CRC = 2;
+    CRC_DECLARED_CORRECT = 0;
+    CRC_DECLARED_INCORRECT  = 1;
+    CRC_COMPUTED = 2;
 }
 
 //
@@ -48,6 +48,6 @@ class UDPHeader extends FieldsChunk
     int64_t chunkLength = UDP_HEADER_BYTES;
     int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
     uint16_t crc = 0;
-    short bitError @enum(BitError) = -1;
+    int crcMode @enum(CrcMode) = -1;
 }
 
