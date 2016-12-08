@@ -23,17 +23,17 @@
 
 namespace inet {
 
-class INET_API UDPHeader : public UDPHeader_Base, public ITransportPacket
+class INET_API UdpHeader : public UdpHeader_Base, public ITransportPacket
 {
   private:
-    void copy(const UDPHeader& other) {}
+    void copy(const UdpHeader& other) {}
 
   public:
-    UDPHeader() : UDPHeader_Base() {}
-    UDPHeader(const UDPHeader& other) : UDPHeader_Base(other) {copy(other);}
-    UDPHeader& operator=(const UDPHeader& other) {if (this==&other) return *this; UDPHeader_Base::operator=(other); copy(other); return *this;}
+    UdpHeader() : UdpHeader_Base() {}
+    UdpHeader(const UdpHeader& other) : UdpHeader_Base(other) {copy(other);}
+    UdpHeader& operator=(const UdpHeader& other) {if (this==&other) return *this; UdpHeader_Base::operator=(other); copy(other); return *this;}
 
-    virtual UDPHeader *dup() const override { return new UDPHeader(*this); }
+    virtual UdpHeader *dup() const override { return new UdpHeader(*this); }
 
     /**
      * getter/setter for totalLength field of UDP packet
@@ -41,10 +41,10 @@ class INET_API UDPHeader : public UDPHeader_Base, public ITransportPacket
      */
     //int getTotalLengthField() const override { if (totalLengthField == -1) throw cRuntimeError("invalid totalLength field value=-1 in UDP header"); return totalLengthField; }
 
-    virtual unsigned int getSourcePort() const override { return UDPHeader_Base::getSrcPort(); }
-    virtual void setSourcePort(unsigned int port) override { UDPHeader_Base::setSrcPort(port); }
-    virtual unsigned int getDestinationPort() const override { return UDPHeader_Base::getDestPort(); }
-    virtual void setDestinationPort(unsigned int port) override { UDPHeader_Base::setDestPort(port); }
+    virtual unsigned int getSourcePort() const override { return UdpHeader_Base::getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { UdpHeader_Base::setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return UdpHeader_Base::getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { UdpHeader_Base::setDestPort(port); }
 };
 
 } // namespace inet

@@ -207,7 +207,7 @@ void GPSR::sendUDPPacket(Packet *packet, double delay)
 
 void GPSR::processUDPPacket(Packet *packet)
 {
-    const auto& udpHeader = packet->popHeader<UDPHeader>();
+    const auto& udpHeader = packet->popHeader<UdpHeader>();
     auto pk = packet->popHeader<cPacketChunk>();
     cPacket *encapsulatedPacket = pk->getPacket()->dup();
     if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket)) {
@@ -236,7 +236,7 @@ void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     Packet *udpPacket = new Packet(beacon->getName());
-    auto udpHeader = std::make_shared<UDPHeader>();
+    auto udpHeader = std::make_shared<UdpHeader>();
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);

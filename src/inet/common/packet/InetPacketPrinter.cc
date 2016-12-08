@@ -44,7 +44,7 @@ namespace inet { namespace tcp { class TcpHeader; } }
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader.h"
 #else // ifdef WITH_UDP
-namespace inet { class UDPHeader; }
+namespace inet { class UdpHeader; }
 #endif // ifdef WITH_UDP
 
 namespace inet {
@@ -53,7 +53,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
     void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TcpHeader *tcpSeg) const;
-    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpHeader) const;
+    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UdpHeader *udpHeader) const;
     void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
 
   public:
@@ -93,7 +93,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-        else if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(pk)) {
+        else if (UdpHeader *udpHeader = dynamic_cast<UdpHeader *>(pk)) {
             printUDPPacket(os, srcAddr, destAddr, udpHeader);
             return;
         }
@@ -163,7 +163,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Ad
 #endif // ifdef WITH_TCP_COMMON
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpHeader) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UdpHeader *udpHeader) const
 {
 #ifdef WITH_UDP
 

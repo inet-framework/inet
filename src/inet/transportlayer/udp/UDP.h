@@ -35,7 +35,7 @@ class IPv4ControlInfo;
 class IPv6ControlInfo;
 class ICMP;
 class ICMPv6;
-class UDPHeader;
+class UdpHeader;
 class InterfaceEntry;
 
 const bool DEFAULT_MULTICAST_LOOP = true;
@@ -174,7 +174,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void processCommandFromApp(cMessage *msg);
 
     // create a blank UDP packet; override to subclass UdpHeader
-    virtual UDPHeader *createUDPPacket();
+    virtual UdpHeader *createUDPPacket();
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

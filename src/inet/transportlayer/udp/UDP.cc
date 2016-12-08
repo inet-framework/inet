@@ -345,7 +345,7 @@ void UDP::processPacketFromApp(cPacket *appData)
 
     Packet *udpPacket = new Packet(appData->getName());
     udpPacket->transferTagsFrom(appData);
-    auto udpHeader = std::make_shared<UDPHeader>();
+    auto udpHeader = std::make_shared<UdpHeader>();
     udpPacket->prepend(udpHeader);
     udpPacket->append(std::make_shared<cPacketChunk>(appData)); //TODO
 
@@ -401,7 +401,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
     emit(rcvdPkSignal, udpPacket);
 
     int64_t udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
-    const auto& udpHeader = udpPacket->popHeader<UDPHeader>();
+    const auto& udpHeader = udpPacket->popHeader<UdpHeader>();
     if (udpHeader == nullptr)
         throw cRuntimeError("not an udp header");
 
@@ -509,7 +509,7 @@ void UDP::processICMPv4Error(Packet *packet)
     code = icmpMsg->getCode();
     const auto& ipv4Header = packet->popHeader<IPv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
-        if (const auto& udpHeader = packet->peekHeader<UDPHeader>(8)) {
+        if (const auto& udpHeader = packet->peekHeader<UdpHeader>(8)) {
             localAddr = ipv4Header->getSrcAddress();
             remoteAddr = ipv4Header->getDestAddress();
             localPort = udpHeader->getSourcePort();
@@ -558,7 +558,7 @@ void UDP::processICMPv6Error(Packet *packet)
         IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
         if (!fh || fh->getFragmentOffset() == 0) {
             if (Packet *packet = dynamic_cast<Packet *>(datagram->getEncapsulatedPacket())) {
-                if (const auto& udpHeader = packet->peekHeader<UDPHeader>()) {
+                if (const auto& udpHeader = packet->peekHeader<UdpHeader>()) {
                     localAddr = datagram->getSrcAddress();
                     remoteAddr = datagram->getDestAddress();
                     localPort = udpHeader->getSourcePort();
@@ -594,7 +594,7 @@ void UDP::processICMPv6Error(Packet *packet)
 
 void UDP::processUndeliverablePacket(Packet *udpPacket)
 {
-    const auto& udpHeader = udpPacket->peekHeader<UDPHeader>();
+    const auto& udpHeader = udpPacket->peekHeader<UdpHeader>();
     emit(droppedPkWrongPortSignal, udpPacket);
     numDroppedWrongPort++;
 
@@ -866,9 +866,9 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     send(notifyMsg, "appOut");
 }
 
-UDPHeader *UDP::createUDPPacket()
+UdpHeader *UDP::createUDPPacket()
 {
-    return new UDPHeader();
+    return new UdpHeader();
 }
 
 UDP::SockDesc *UDP::getSocketById(int sockId)

@@ -34,7 +34,7 @@ enum CrcMode;
 //
 // Represents an UDP packet, to be used with the ~UDP module.
 //
-class UDPHeader extends FieldsChunk
+class UdpHeader extends FieldsChunk
 {
     @customize(true);
     unsigned short srcPort;

@@ -38,7 +38,7 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(UDPHeader, IP_PROT, IP_PROT_UDP, UDPSerializer);
+Register_Serializer(UdpHeader, IP_PROT, IP_PROT_UDP, UDPSerializer);
 
 /*
  * Udp protocol header.
@@ -59,7 +59,7 @@ void UDPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 #if 0
     ASSERT(b.getPos() == 0);
     const FlatPacket *pkt = check_and_cast<const FlatPacket *>(_pkt);
-    const UDPHeader *header = check_and_cast<const UDPHeader *>(pkt->peekHeader());
+    const UdpHeader *header = check_and_cast<const UdpHeader *>(pkt->peekHeader());
     int packetLength = header->getTotalLengthField();
 
     ASSERT(packetLength == pkt->getByteLength());       //FIXME error occured when serialize a corrupt packet
@@ -88,7 +88,7 @@ cPacket *UDPSerializer::deserialize(const Buffer &b, Context& c)
 #if 0
     ASSERT(b.getPos() == 0);
     FlatPacket *pkt = new FlatPacket("parsed-udp");
-    UDPHeader *header = new UDPHeader("parsed-udp");
+    UdpHeader *header = new UdpHeader("parsed-udp");
     header->setSourcePort(b.readUint16());
     header->setDestinationPort(b.readUint16());
     unsigned int length = b.readUint16();

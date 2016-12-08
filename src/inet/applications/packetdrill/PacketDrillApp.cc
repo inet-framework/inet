@@ -1543,8 +1543,8 @@ bool PacketDrillApp::compareDatagram(IPv4Header *storedDatagram, IPv4Header *liv
     }
     switch (storedDatagram->getTransportProtocol()) {
         case IP_PROT_UDP: {
-            UDPHeader *storedUdp = check_and_cast<UDPHeader *>(storedDatagram->getEncapsulatedPacket());
-            UDPHeader *liveUdp = check_and_cast<UDPHeader *>(liveDatagram->getEncapsulatedPacket());
+            UdpHeader *storedUdp = check_and_cast<UdpHeader *>(storedDatagram->getEncapsulatedPacket());
+            UdpHeader *liveUdp = check_and_cast<UdpHeader *>(liveDatagram->getEncapsulatedPacket());
             if (!(compareUdpPacket(storedUdp, liveUdp))) {
                 return false;
             }
@@ -1581,7 +1581,7 @@ bool PacketDrillApp::compareDatagram(IPv4Header *storedDatagram, IPv4Header *liv
     return true;
 }
 
-bool PacketDrillApp::compareUdpPacket(UDPHeader *storedUdp, UDPHeader *liveUdp)
+bool PacketDrillApp::compareUdpPacket(UdpHeader *storedUdp, UdpHeader *liveUdp)
 {
     return (storedUdp->getSourcePort() == liveUdp->getSourcePort()) &&
         (storedUdp->getDestinationPort() == liveUdp->getDestinationPort());

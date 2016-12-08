@@ -77,7 +77,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 
 #ifdef WITH_UDP
     if (FlatPacket *udpPacket = dynamic_cast<FlatPacket*>(ipData->getEncapsulatedPacket())) {
-        if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(udpPacket->peekHeader())) {
+        if (UdpHeader *udpHeader = dynamic_cast<UdpHeader *>(udpPacket->peekHeader())) {
             unsigned int srcPort = udpHeader->getSourcePort();
             unsigned int destPort = udpHeader->getDestinationPort();
             if (destPort == 21 || srcPort == 21)
