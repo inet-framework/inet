@@ -54,14 +54,14 @@ network UdpClientServer
             parameters:
                 @display("p=361,67;i=device/pc2");
         }
-//        configurator: IPv4NetworkConfigurator {
-//            parameters:
-//                @display("p=53,134");
-//        }
-        configurator: GenericNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=53,134");
         }
+//        configurator: GenericNetworkConfigurator {
+//            parameters:
+//                @display("p=53,134");
+//        }
         netAnimTrace: NetAnimTrace {
             @display("p=184,142");
         }
