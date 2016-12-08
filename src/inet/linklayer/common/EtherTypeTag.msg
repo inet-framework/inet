@@ -22,6 +22,7 @@ enum EtherType
     ETHERTYPE_RARP = 0x8035;
     ETHERTYPE_IPv6 = 0x86DD;
     ETHERTYPE_INET_GENERIC = 0x86FF;    // not in standard, INET spceific value for @GenericNetworkProtocol
+    ETHERTYPE_MAC_CONTROL = 0x8808;
     ETHERTYPE_MPLS_UNICAST = 0x8847;
     ETHERTYPE_MPLS_MULTICAST = 0x8848;
 }

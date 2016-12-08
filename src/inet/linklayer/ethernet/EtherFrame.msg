@@ -141,8 +141,10 @@ packet EtherFrameWithSNAP extends EtherFrameWithLLC
 //
 // Ethernet frame used by the PAUSE protocol
 //
-packet EtherPauseFrame extends EtherFrame
+packet EtherPauseFrame extends EthernetIIFrame
 {
+    etherType = ETHERTYPE_MAC_CONTROL;
+    int opCode = 1; // PAUSE
     int pauseTime; // in 512 bit-time units
 }
 
