@@ -191,7 +191,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& slice
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 doInsertToBeginning(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(elementChunk->peek(0, chunkEnd - sliceChunkEnd));
+                doInsertToBeginning(elementChunk->peek(0, sliceChunkEnd - chunkBegin));
         }
     }
     else
@@ -238,7 +238,7 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
                 doInsertToEnd(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(elementChunk->peek(0, chunkEnd - sliceChunkEnd));
+                doInsertToEnd(elementChunk->peek(0, sliceChunkEnd - chunkBegin));
             offset += elementChunk->getChunkLength();
         }
     }
