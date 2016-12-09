@@ -103,7 +103,7 @@ packet EtherFrameWithSNAP extends EtherFrameWithLLC
 //
 packet EtherPauseFrame extends EthernetIIFrame
 {
-    etherType = ETHERTYPE_MAC_CONTROL;
+    etherType = ETHERTYPE_FLOW_CONTROL;
     int opCode = 1; // PAUSE
     int pauseTime; // in 512 bit-time units
 }
