@@ -178,16 +178,18 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s4goals Goals
 
-Pedestrians are WirelessHost node type, so by default their icon is a cellphone.
+Pedestrians are <tt>WirelessHost</tt> node type, so by default their icon is a cellphone.
 We want to show, how to change network nodes' default icon.
 
 @section s4model The model
 
 In INET Framework it's possible to change device appearance to an external 3D osg model.
-It's really simple. We have to change only the network node's
-osgModel attribute. We set that option to boxman.osgb.
-It's the 3D model name. In addition we can set the size and the rotation of the model.
-The "(0.06).scale" means the model size is 6% of the original.
+It's really simple.
+We have to change only the network node's <tt>osgModel</tt> attribute.
+We set that to <tt>boxman.osgb</tt>.
+That's the file name of the 3D model.
+In addition we can set the size and the rotation of the model.
+The <tt>(0.06).scale</tt> means the model size is 6% of the original.
 The three numbers are in for the rot keyword mean the rotation of the 3D model around x, y and z axis.
 
 @dontinclude omnetpp.ini
@@ -196,8 +198,8 @@ The three numbers are in for the rot keyword mean the rotation of the 3D model a
 
 @section s4results Results
 
-In Module view mode there's no difference compared to the simulation before this.
-But in 3D view mode instead of phones we see walker boxmans.
+In <tt>Module</tt> view mode there's no difference compared to the simulation before this.
+But in 3D Scene view mode instead of phones we see walker boxmans.
 <img src="step4_result1.gif">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
@@ -214,9 +216,9 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s5goals Goals
 
-In this step we want to show how can visualize mobile network nodes' movement.
-The pedestrians' movement handled by the mobility submodule.
-To visualize that, we need to use the mobility visualizer.
+In this step we want to show how to visualize mobile network nodes' movement.
+The pedestrians' movement handled by the <tt>Mobility</tt> submodule.
+To visualize that, we need to use <tt>MobilityVisualizer</tt>.
 
 @section s5model The model
 
@@ -226,32 +228,28 @@ Here is the configuration:
 @skipline [Config Visualization05]
 @until ####
 
-We need to adjust the nodes' mobility settings. The pedestrians movement
-is calculated using "MassMobility". This is a random mobility model for a mobile host with a mass.
-We set their initial position, and a border, because we don't want to let them go out
-from the access point's communication range.
+We have to adjust the nodes' mobility settings. The pedestrians movement is calculated using "MassMobility".
+This is a random mobility model for a mobile host with a mass.
+We set their initial position, and a border, because we don't want to let them go out from the <i>accessPoint</i>'s communication range.
 We have more ways to set the nodes initial position.
 We can set that in meter or we can add that in degree.
-The pedestrians' movement based on three parameters. The changeInterval is the frequency
-of changing speed and angle, the changeAngleBy change the direction of the movement,
-and the speed means the movement speed.
+The pedestrians' movement based on three parameters.
+The <tt>changeInterval</tt> is the frequency of changing speed and angle, the <tt>changeAngleBy</tt> change the direction of the movement, and the <tt>speed</tt> means the movement speed.
 
-After that we need to add some visualizer parameters. We can display the movement of the pedestrians.
-We display a trail, that shows where the pedestrians came from, and we show an arrow,
-that shows the velocity of the pedestrians, but it seems that in Module view mode only.
+After that we need to add some visualizer parameters, that display the movement of the pedestrians.
+We display a trail, that shows the route of the pedestrians, and we visualize an arrow, that represents the velocity of the pedestrians.
 
 @section s5results Results
 
-If we run the simulation, here's what happens. The pedestrians roam in the park between
-invisible borders that we adjust to them.
+It is advisable to run the simulation in Fast mode, because the nodes move very slowly if viewed in Normal mode.
+
+It can be seen in the animation below the pedestrians roam in the park between invisible borders that we adjust to them.
 
 Here's that in Module view mode:
 <img src="step5_result1.gif">
 
-That's what we can see in 3D Scene view mode:
+And here's that in 3D Scene view mode:
 <img src="step5_result3.gif" width="850">
-
-These animations created in fast run mode, because the normal speed is too slow to see the pedestrians movement.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -266,39 +264,36 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s6goals Goals
 
-In this step we want to show how to print out data of any given host's
-any given network interface card (NIC).
+In this step we want to show how to print out information from any network interface card(s) (NIC) of any host(s).
 
 @section s6model The model
 
-If we want to see the network nodes' IP addresses we have to set
-the parameters of the interfaceTableVisualizer. Here is the configuration:
+If we want to see the network nodes' IP addresses we have to set the parameters of the <tt>InterfaceTableVisualizer</tt>.
+Here is the configuration:
 
 @dontinclude omnetpp.ini
 @skipline [Config Visualization06]
 @until ####
 
-With the nodeFilter parameter we can define the nodes list, that are considered.
-By default that list is empty, so we need to set it.
-Then we can set an interface list. That specifies which interfaces are considered
-at each node. Besides of these parameters we can change the font color,
-the background color, and the opacity of the text. These settings are optional,
-that may make the IP addresses clearly visible.
+With the <tt>nodeFilter</tt> parameter we can define the nodes list, that are considered.
+By default that list is empty, so we must set it.
+Then we can set an interface list.
+That specifies which interfaces are considered at each node.
+Besides of these parameters we can change the font color, the background color, and the opacity of the text.
+These settings are optional, that may make the IP addresses clearly visible.
 
-With interfaceTableVisualizer we can display not only the IP address of an interface,
-but the MAC address too. To that we need to change the content parameter to "macAddress".
+With <tt>InterfaceTableVisualizer</tt> we can display not only the IP address of an interface, but the MAC address too.
+To that we need to change the content parameter to <tt>macAddress</tt>.
 
 @section s6results Results
 
-If we run the simulation, we can see a yellow bubble above each pedestrian
-with its wlan NIC IP address.
+If we run the simulation, we can see a yellow bubble above each pedestrian with its wlan NIC IP address.
 <img src="step6_result5.gif">
 
 In 3D view mode the text is a little bit fainter.
 <img src="step6_result4.gif"  width="850">
 
-If we set the content parameter to "macAddress", we can see
-the given NIC MAC (layer 2) address.
+If we set the content parameter to <tt>macAddress</tt>, we can see the given NIC MAC (layer 2) address.
 <img src="step6_result3.png" width="850">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
