@@ -35,3 +35,5 @@
 - mediumVisualizer.transmissionImage-nek és mediumVisualizer.receptionImage-nek, nem lehetne default-ból valami képe?
 
 - RouteVisualizerBase.lineStyle paraméter direkt nincs?
+
+- a playground hol latszik, hol meg nem, a kamera allasatol es a zoomtol fuggoen
