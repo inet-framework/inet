@@ -17,10 +17,13 @@
 
 #include "inet/applications/tcpapp/TCPSessionApp.h"
 
-#include "inet/common/RawPacket.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/BytesChunk.h"
+#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 
@@ -144,30 +147,35 @@ void TCPSessionApp::sendData()
 
 cPacket *TCPSessionApp::createDataPacket(long sendBytes)
 {
+    Packet *packet = new Packet("data1");
     switch (socket.getDataTransferMode()) {
-        case TCP_TRANSFER_BYTECOUNT:
+        case TCP_TRANSFER_BYTECOUNT: {
+            const auto& payload = std::make_shared<ByteCountChunk>(sendBytes);
+            packet->append(payload);
+            break;
+        }
         case TCP_TRANSFER_OBJECT: {
-            cPacket *msg = nullptr;
-            msg = new cPacket("data1");
+            cPacket *msg = new cPacket("data1");
             msg->setByteLength(sendBytes);
-            return msg;
+            const auto& payload = std::make_shared<cPacketChunk>(msg);
+            packet->append(payload);
+            break;
         }
 
         case TCP_TRANSFER_BYTESTREAM: {
-            RawPacket *msg = new RawPacket("data1");
-            unsigned char *ptr = new unsigned char[sendBytes];
+            const auto& payload = std::make_shared<BytesChunk>();
 
             for (int i = 0; i < sendBytes; i++)
-                ptr[i] = (bytesSent + i) & 0xFF;
+                payload->setByte(i, (bytesSent + i) & 0xFF);
 
-            msg->getByteArray().assignBuffer(ptr, sendBytes);
-            msg->setByteLength(sendBytes);
-            return msg;
+            packet->append(payload);
+            break;
         }
 
         default:
             throw cRuntimeError("Invalid TCP data transfer mode: %d", socket.getDataTransferMode());
     }
+    return packet;
 }
 
 void TCPSessionApp::socketEstablished(int connId, void *ptr)
