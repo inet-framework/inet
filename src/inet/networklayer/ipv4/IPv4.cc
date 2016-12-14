@@ -823,6 +823,7 @@ void IPv4::encapsulate(Packet *transportPacket)
     ipv4Header->setTimeToLive(ttl);
 
     transportPacket->prepend(ipv4Header);
+    ipv4Header->setTotalLengthField(transportPacket->getByteLength());
 
     // setting IPv4 options is currently not supported
 }
