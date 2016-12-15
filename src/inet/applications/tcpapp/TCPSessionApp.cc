@@ -165,8 +165,11 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
         case TCP_TRANSFER_BYTESTREAM: {
             const auto& payload = std::make_shared<BytesChunk>();
 
+            std::vector<uint8_t> vec;
+            vec.resize(sendBytes);
             for (int i = 0; i < sendBytes; i++)
-                payload->setByte(i, (bytesSent + i) & 0xFF);
+                vec[i] = (bytesSent + i) & 0xFF;
+            payload->setBytes(vec);
 
             packet->append(payload);
             break;

@@ -96,6 +96,7 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32_t seq)
     Packet *msg = nullptr;
 
     if (chunk) {
+        //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", RECEIVER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << chunk << std::endl;
         Packet *msg = new Packet("data");
         msg->append(chunk);
         return msg;

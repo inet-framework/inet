@@ -17,12 +17,11 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TCPEchoApp.h"
-
-#include "inet/common/RawPacket.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/Packet_m.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {
 
@@ -58,8 +57,9 @@ void TCPEchoApp::initialize(int stage)
 void TCPEchoApp::sendDown(cMessage *msg)
 {
     if (msg->isPacket()) {
-        bytesSent += ((cPacket *)msg)->getByteLength();
-        emit(sentPkSignal, (cPacket *)msg);
+        cPacket *pk = static_cast<cPacket *>(msg);
+        bytesSent += pk->getByteLength();
+        emit(sentPkSignal, pk);
     }
 
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
@@ -87,44 +87,38 @@ void TCPEchoAppThread::established()
 
 void TCPEchoAppThread::dataArrived(cMessage *msg, bool urgent)
 {
-    cPacket *pkt = check_and_cast<cPacket *>(msg);
-    echoAppModule->emit(echoAppModule->rcvdPkSignal, pkt);
-    echoAppModule->bytesRcvd += pkt->getByteLength();
+    Packet *rcvdPkt = check_and_cast<Packet *>(msg);
+    echoAppModule->emit(echoAppModule->rcvdPkSignal, rcvdPkt);
+    int64_t rcvdBytes = rcvdPkt->getByteLength();
+    echoAppModule->bytesRcvd += rcvdBytes;
 
-    if (echoAppModule->echoFactor == 0) {
-        delete pkt;
-    }
-    else {
+    if (echoAppModule->echoFactor > 0) {
+        Packet *outPkt = new Packet(rcvdPkt->getName());
         // reverse direction, modify length, and send it back
-        pkt->setKind(TCP_C_SEND);
-        int socketId = pkt->getMandatoryTag<SocketInd>()->getSocketId();
-        pkt->clearTags();
-        pkt->ensureTag<SocketReq>()->setSocketId(socketId);
+        outPkt->setKind(TCP_C_SEND);
+        int socketId = rcvdPkt->getMandatoryTag<SocketInd>()->getSocketId();
+        outPkt->ensureTag<SocketReq>()->setSocketId(socketId);
 
-        long byteLen = pkt->getByteLength() * echoAppModule->echoFactor;
+        long outByteLen = rcvdPkt->getByteLength() * echoAppModule->echoFactor;
 
-        if (byteLen < 1)
-            byteLen = 1;
+        if (outByteLen < 1)
+            outByteLen = 1;
 
-        pkt->setByteLength(byteLen);
-
-        RawPacket *baMsg = dynamic_cast<RawPacket *>(pkt);
-
-        // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
-        if (baMsg) {
-            ByteArray& outdata = baMsg->getByteArray();
-            ByteArray indata = outdata;
-            outdata.setDataArraySize(byteLen);
-
-            for (long i = 0; i < byteLen; i++)
-                outdata.setData(i, indata.getData(i / echoAppModule->echoFactor));
+        int64_t len = 0;
+        for ( ; len + rcvdBytes <= outByteLen; len += rcvdBytes) {
+            outPkt->append(rcvdPkt->peekDataAt(0, rcvdBytes)->dupShared());
         }
+        if (len < outByteLen)
+            outPkt->append(rcvdPkt->peekDataAt(0, outByteLen - len)->dupShared());
+
+        ASSERT(outPkt->getByteLength() == outByteLen);
 
         if (echoAppModule->delay == 0)
-            echoAppModule->sendDown(pkt);
+            echoAppModule->sendDown(outPkt);
         else
-            scheduleAt(simTime() + echoAppModule->delay, pkt); // send after a delay
+            scheduleAt(simTime() + echoAppModule->delay, outPkt); // send after a delay
     }
+    delete rcvdPkt;
 }
 
   /*
