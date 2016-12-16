@@ -91,7 +91,7 @@ class INET_API ChunkBuffer : public cNamedObject
      */
     void clear() { regions.clear(); }
 
-    virtual std::string str() const override { return ""; }
+    virtual std::string str() const override;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkBuffer *buffer) { return os << buffer->str(); }

@@ -153,4 +153,20 @@ void ChunkBuffer::clear(int64_t offset, int64_t length)
     sliceRegions(clearedRegion);
 }
 
+std::string ChunkBuffer::str() const
+{
+    std::ostringstream os;
+    os << "ChunkBuffer, regions = {";
+    bool first = true;
+    for (auto& region : regions) {
+        if (!first)
+            os << " | ";
+        else
+            first = false;
+        os << "offset = " << region.offset << ", chunk = " << region.data;
+    }
+    os << "}";
+    return os.str();
+}
+
 } // namespace
