@@ -145,14 +145,14 @@ PIPA	- A többi networkot hátrébb kell tolni
 PIPA	- iniben a networkok nevét eltolni
 
 - Step07
-	- gif movement trail nélkül hogy confusing legyen
+PIPA	- gif movement trail nélkül hogy confusing legyen
 PIPA	- velocityArrowScale-t belőni
 
 - Step17 ini
-PIPA- configurationD --> configurationF
+PIPA	- configurationD --> configurationF
 
 - Step20 ini
-PIPA- configurationF --> configurationH
+PIPA	- configurationF --> configurationH
 
 - Goals
 PIPA	- Step1
@@ -164,8 +164,8 @@ WIP	- Step6
 WIP	- Step7
 WIP	- Step8
 WIP	- Step9
-WIP	- Step10
-	- Step11
+WIP	- Step10: eeeez nagyon sántít
+WIP	- Step11: még nincs kész
 	- Step12
 	- Step13
 	- Step14

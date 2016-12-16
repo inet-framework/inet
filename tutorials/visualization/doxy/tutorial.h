@@ -235,7 +235,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @nav{step5, step7}
 
 @section s6goals Goals
+ad1:
+However it doesn't directly affect the outcome of the simulation, but it is 
+more understandable if the appearance of nodes is similar as in real world.
+The default icon for the pedestrians is a cellphone. In this step we replace 
+the default icon with an 3D animated model.
 
+ad2:
 The simulation is more understandable if the appearance of nodes is similar as in real world.
 The default icon for the pedestrians is a cellphone. In this step we replace 
 the default icon with an 3D animated model. It doesn't directly affect the 
@@ -286,10 +292,12 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s7goals Goals
 
-When nodes move around in a network, it's often difficult to follow their movement. 
+When wireless nodes roam in a network, it's often difficult to follow their movement. 
 In this step we visualize the recent movement trajectory of network nodes.
 
 @section s7model The model
+
+<img src="step7_without_movement_trails.gif">
 <!--
 The network nodes movement handled by the <tt>Mobility</tt> submodule.
 To visualize that, we need to use <tt>MobilityVisualizer</tt>.
@@ -312,7 +320,7 @@ After that we need to add some visualizer parameters.
 We display a trail, that shows the passed route, and we visualize an arrow, that represents the velocity of the pedestrians.
 -->
 @section s7results Results
-<img src="step7_without_movement_trails.gif">
+
 <img src="step5_result1.gif">
 <img src="step5_result3.gif" width="850">
 <!--
@@ -432,16 +440,17 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s10goals Goals
 
-Understanding network traffic we need to know, who is the sender and who is 
-the receiver. In this step we display transmitters and receivers in communication.
+
+In this step we visualize the transmissions and receptions to identifies the 
+role of network nodes in wireless communication.
 
 <!--
-A hálózati forgalom megértéséhez tudnunk kell, hogy ki az adó és ki a vevő.
-Ebben a lépésben megjelenítjük, hogy a vezeték nélküli kommunikációban ki ad és ki vesz.
+Ebben a lépésben megjelenítjük, az adásokat és vételeket, hogy azonosítsuk a 
+node-ok szerepét a vezeték nélküli kommunikációban.
 -->
 
 @section s10model The model
-
+<!--
 After the successful association process we can start the VoIP application between the pedestrians, so we need to add one udp application to them.
 The pedestrian0 will be the sender and the pedestrian1 will be the receiver.
 They communicate with udp over port 5000. 
@@ -459,13 +468,14 @@ Configuration:
 @dontinclude omnetpp.ini
 @skipline [Config Visualization08]
 @until ####
-
+-->
 @section s10results Results
 
+<img src="step8_result1.gif">
+<!--
 If we start the simulation, we can see clearly, who is the transmitter, and who are the receivers.
 The signs appear, when a signal arrives or leaves the wlan NIC.
-
-<img src="step8_result1.gif">
+-->
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -480,10 +490,21 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s11goals Goals
 
-The communication works, we can see who is the sender and the receiver, but we don't see the signal.
-In this step we want to display the signal propagation.
+Understanding working of simulation, we need to know that how the network nodes 
+communicate with each other on the wireless channel. To this we should see
+wireless signals. In this step we enable displaying the messages between wireless nodes.
+
+<!--
+A szimuláció működésének megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
+hogyan kommunikálnak egymás között a vezeték nélküli csatornán. Ehhez látnunk kell 
+a vezeték nélküli jeleket. Ebben a lépésben megmutatjuk, hogy a wireless node-ok milyen üzeneteket
+továbbítanak egymás között a hálózaton.
+-->
 
 @section s11model The model
+<!--
+The communication works, we can see who is the sender and the receiver, but we don't see the signal.
+In this step we want to display the signal propagation.
 
 in the previous step we configured the communication already, so now we only have to show that.
 To this we need to turn on the mediumVisualizer's displaySignals parameter,
@@ -497,24 +518,26 @@ If we set both, we can see a ring on the ground, and a sphere in the air. This i
 @dontinclude omnetpp.ini
 @skipline [Config Visualization09]
 @until ####
-
+-->
 @section s11results Results
 
+<img src="step9_result1.gif">
+<img src="step9_result2.gif">
+<img src="step9_result3.gif">
+<img src="step9_result4.gif">
+<!--
 When we start the simulation in Module view mode, we can see how the signals propagate. We can see each signal has a beginning and an end.
 Next to the ring, there is a label, that shows the message type.
 
 There's an animation of a VoIP message, that goes from the pedestrian0 to the pedestrian1 through the accessPoint0:
-<img src="step9_result1.gif">
 
 And there's a similar message in 3D view mode, with both option:
-<img src="step9_result2.gif">
 
 Ring signal propagation:
-<img src="step9_result3.gif">
 
 Sphere signal propagation:
-<img src="step9_result4.gif">
 
+-->
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @nav{step10,step12}
