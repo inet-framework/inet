@@ -175,10 +175,12 @@ void TCPConnection::printSegmentBrief(TcpHeader *tcpseg)
     if (tcpseg->getPshBit())
         EV_INFO << "PSH ";
 
+#if 0   // KLUDGE
     if (tcpseg->getPayloadLength() > 0 || tcpseg->getSynBit()) {
         EV_INFO << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo() + tcpseg->getPayloadLength()) << ") ";
         EV_INFO << "(l=" << tcpseg->getPayloadLength() << ") ";
     }
+#endif
 
     if (tcpseg->getAckBit())
         EV_INFO << "ack " << tcpseg->getAckNo() << " ";
@@ -236,23 +238,22 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     return conn;
 }
 
-void TCPConnection::sendToIP(TcpHeader *tcpseg)
+void TCPConnection::sendToIP(Packet *packet, TcpHeader *tcpseg)
 {
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && tcpseg->getPayloadLength() != 0)
+    if (sndNxtVector && packet->getByteLength() > tcpseg->getChunkLength())
         sndNxtVector->record(tcpseg->getSequenceNo());
 
     if (sndAckVector)
         sndAckVector->record(tcpseg->getAckNo());
 
     // final touches on the segment before sending
-    FlatPacket *pkt = tcpseg->getMandatoryOwnerPacket();
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
     ASSERT(tcpseg->getHeaderLength() >= TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20 (without options)
     ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_OCTETS);    // TCP_MAX_HEADER_OCTETS = 60
-    ASSERT(tcpseg->getChunkByteLength() == tcpseg->getHeaderLength() + tcpseg->getPayloadLength());
-    state->sentBytes = tcpseg->getPayloadLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
+    ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
+    state->sentBytes = packet->getByteLength() - tcpseg->getHeaderLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
@@ -260,24 +261,23 @@ void TCPConnection::sendToIP(TcpHeader *tcpseg)
     // TBD reuse next function for sending
 
     IL3AddressType *addressType = remoteAddr.getAddressType();
-    pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
-    pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
-    pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    auto addresses = pkt->ensureTag<L3AddressReq>();
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
+    packet->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
-    tcpMain->send(pkt, "ipOut");
+    tcpMain->send(packet, "ipOut");
 }
 
-void TCPConnection::sendToIP(TcpHeader *tcpseg, L3Address src, L3Address dest)
+void TCPConnection::sendToIP(Packet *pkt, TcpHeader *tcpseg, L3Address src, L3Address dest)
 {
     EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
 
-    FlatPacket *pkt = tcpseg->getMandatoryOwnerPacket();
     IL3AddressType *addressType = dest.getAddressType();
-    ASSERT(tcpseg->getChunkByteLength() == (tcpseg->getHeaderLength() + tcpseg->getPayloadLength()));
+    ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
     pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
@@ -285,11 +285,6 @@ void TCPConnection::sendToIP(TcpHeader *tcpseg, L3Address src, L3Address dest)
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
-}
-
-TcpHeader *TCPConnection::createTCPSegment(const char *name)
-{
-    return new TcpHeader(name);
 }
 
 void TCPConnection::signalConnectionTimeout()
@@ -448,7 +443,7 @@ void TCPConnection::selectInitialSeqNum()
     rexmitQueue->init(state->iss + 1);    // + 1 is for SYN
 }
 
-bool TCPConnection::isSegmentAcceptable(TcpHeader *tcpseg) const
+bool TCPConnection::isSegmentAcceptable(Packet *packet, TcpHeader *tcpseg) const
 {
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
@@ -461,7 +456,7 @@ bool TCPConnection::isSegmentAcceptable(TcpHeader *tcpseg) const
     //      >0       0     not acceptable
     //      >0      >0     RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND
     //                  or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND"
-    uint32 len = tcpseg->getPayloadLength();
+    uint32 len = packet->getByteLength() - tcpseg->getHeaderLength();
     uint32 seqNo = tcpseg->getSequenceNo();
     uint32 ackNo = tcpseg->getAckNo();
     uint32 rcvWndEnd = state->rcv_nxt + state->rcv_wnd;
@@ -509,7 +504,7 @@ void TCPConnection::sendSyn()
         throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: local port unspecified");
 
     // create segment
-    TcpHeader *tcpseg = createTCPSegment("SYN");
+    const auto& tcpseg = std::make_shared<TcpHeader>();
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setSynBit(true);
     updateRcvWnd();
@@ -518,18 +513,18 @@ void TCPConnection::sendSyn()
     state->snd_max = state->snd_nxt = state->iss + 1;
 
     // write header options
-    writeHeaderOptions(tcpseg);
-    FlatPacket *fp = new FlatPacket("SYN");
+    writeHeaderOptions(tcpseg.get());
+    Packet *fp = new Packet("SYN");
     fp->pushHeader(tcpseg);
 
     // send it
-    sendToIP(tcpseg);
+    sendToIP(fp, tcpseg.get());
 }
 
 void TCPConnection::sendSynAck()
 {
     // create segment
-    TcpHeader *tcpseg = createTCPSegment("SYN+ACK");
+    const auto& tcpseg = std::make_shared<TcpHeader>();
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSynBit(true);
@@ -540,13 +535,13 @@ void TCPConnection::sendSynAck()
     state->snd_max = state->snd_nxt = state->iss + 1;
 
     // write header options
-    writeHeaderOptions(tcpseg);
+    writeHeaderOptions(tcpseg.get());
 
-    FlatPacket *fp = new FlatPacket("SYN+ACK");
+    Packet *fp = new Packet("SYN+ACK");
     fp->pushHeader(tcpseg);
 
     // send it
-    sendToIP(tcpseg);
+    sendToIP(fp, tcpseg.get());
 
     // notify
     tcpAlgorithm->ackSent();
@@ -559,7 +554,7 @@ void TCPConnection::sendRst(uint32 seqNo)
 
 void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
 {
-    TcpHeader *tcpseg = createTCPSegment("RST");
+    const auto& tcpseg = std::make_shared<TcpHeader>();
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -567,16 +562,16 @@ void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
     tcpseg->setRstBit(true);
     tcpseg->setSequenceNo(seq);
 
-    FlatPacket *fp = new FlatPacket("RST");
+    Packet *fp = new Packet("RST");
     fp->pushHeader(tcpseg);
 
     // send it
-    sendToIP(tcpseg, src, dest);
+    sendToIP(fp, tcpseg.get(), src, dest);
 }
 
 void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
 {
-    TcpHeader *tcpseg = createTCPSegment("RST+ACK");
+    const auto& tcpseg = std::make_shared<TcpHeader>();
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -586,11 +581,11 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
     tcpseg->setSequenceNo(seq);
     tcpseg->setAckNo(ack);
 
-    FlatPacket *fp = new FlatPacket("RST+ACK");
+    Packet *fp = new Packet("RST+ACK");
     fp->pushHeader(tcpseg);
 
     // send it
-    sendToIP(tcpseg, src, dest);
+    sendToIP(fp, tcpseg.get(), src, dest);
 
     // notify
     if (tcpAlgorithm)
@@ -599,7 +594,7 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
 
 void TCPConnection::sendAck()
 {
-    TcpHeader *tcpseg = createTCPSegment("ACK");
+    const auto& tcpseg = std::make_shared<TcpHeader>();
 
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(state->snd_nxt);
@@ -607,12 +602,12 @@ void TCPConnection::sendAck()
     tcpseg->setWindow(updateRcvWnd());
 
     // write header options
-    writeHeaderOptions(tcpseg);
-    FlatPacket *fp = new FlatPacket("ACK");
+    writeHeaderOptions(tcpseg.get());
+    Packet *fp = new Packet("ACK");
     fp->pushHeader(tcpseg);
 
     // send it
-    sendToIP(tcpseg);
+    sendToIP(fp, tcpseg.get());
 
     // notify
     tcpAlgorithm->ackSent();
@@ -620,7 +615,7 @@ void TCPConnection::sendAck()
 
 void TCPConnection::sendFin()
 {
-    TcpHeader *tcpseg = createTCPSegment("FIN");
+    const auto& tcpseg = std::make_shared<TcpHeader>();
 
     // Note: ACK bit *must* be set for both FIN and FIN+ACK. What makes
     // the difference for FIN+ACK is that its ackNo acks the remote TCP's FIN.
@@ -629,11 +624,11 @@ void TCPConnection::sendFin()
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSequenceNo(state->snd_nxt);
     tcpseg->setWindow(updateRcvWnd());
-    FlatPacket *fp = new FlatPacket("FIN");
+    Packet *fp = new Packet("FIN");
     fp->pushHeader(tcpseg);
 
     // send it
-    sendToIP(tcpseg);
+    sendToIP(fp, tcpseg.get());
 
     // notify
     tcpAlgorithm->ackSent();
@@ -661,9 +656,9 @@ void TCPConnection::sendSegment(uint32 bytes)
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
-    TcpHeader *tcpseg_temp = createTCPSegment(nullptr);
+    const auto& tcpseg_temp = std::make_shared<TcpHeader>();
     tcpseg_temp->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
-    writeHeaderOptions(tcpseg_temp);
+    writeHeaderOptions(tcpseg_temp.get());
     uint options_len = tcpseg_temp->getHeaderLength() - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
 
     ASSERT(options_len < state->snd_mss);
@@ -674,12 +669,9 @@ void TCPConnection::sendSegment(uint32 bytes)
     state->sentBytes = bytes;
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
-    TcpHeader *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
-    if (tcpseg->getOwnerPacket() == nullptr) {
-        //FIXME hack: createSegmentWithBytes should create FlatPackets
-        FlatPacket *fp = new FlatPacket(tcpseg->getName());
-        fp->pushHeader(tcpseg);
-    }
+    Packet *packet = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
+    const auto& tcpseg = packet->peekHeader<TcpHeader>();
+    ASSERT(tcpseg != nullptr);
 
     // if sack_enabled copy region of tcpseg to rexmitQueue
     if (state->sack_enabled)
@@ -691,7 +683,7 @@ void TCPConnection::sendSegment(uint32 bytes)
 
     // TBD when to set PSH bit?
     // TBD set URG bit if needed
-    ASSERT(bytes == tcpseg->getPayloadLength());
+    ASSERT(bytes == packet->getByteLength() - tcpseg->getChunkLength());
 
     state->snd_nxt += bytes;
 
@@ -710,10 +702,9 @@ void TCPConnection::sendSegment(uint32 bytes)
         tcpseg->addHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
 
     ASSERT(tcpseg->getHeaderLength() == tcpseg_temp->getHeaderLength());
-    delete tcpseg_temp;
 
     // send it
-    sendToIP(tcpseg);
+    sendToIP(packet, tcpseg.get());
 
     // let application fill queue again, if there is space
     const uint32 alreadyQueued = sendQueue->getBytesAvailable(sendQueue->getBufferStartSeq());

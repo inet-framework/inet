@@ -410,12 +410,12 @@ class INET_API TCPConnection : public cObject
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TCPEventCode process_RCV_SEGMENT(TcpHeader *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInListen(TcpHeader *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInSynSent(TcpHeader *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegment1stThru8th(TcpHeader *tcpseg);
+    virtual TCPEventCode process_RCV_SEGMENT(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInListen(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInSynSent(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegment1stThru8th(Packet *packet, TcpHeader *tcpseg);
     virtual TCPEventCode processRstInSynReceived(TcpHeader *tcpseg);
-    virtual bool processAckInEstabEtc(TcpHeader *tcpseg);
+    virtual bool processAckInEstabEtc(Packet *packet, TcpHeader *tcpseg);
     //@}
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
@@ -448,7 +448,7 @@ class INET_API TCPConnection : public cObject
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(TcpHeader *tcpseg) const;
+    virtual bool isSegmentAcceptable(Packet *packet, TcpHeader *tcpseg) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -511,13 +511,7 @@ class INET_API TCPConnection : public cObject
     virtual void sendSegment(uint32 bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
-    virtual void sendToIP(TcpHeader *tcpseg);
-
-    /**
-     * Utility: This factory method gets invoked throughout the TCP model to
-     * create a TCPSegment. Override it if you need to subclass TCPSegment.
-     */
-    virtual TcpHeader *createTCPSegment(const char *name);
+    virtual void sendToIP(Packet *packet, TcpHeader *tcpseg);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();
@@ -534,7 +528,7 @@ class INET_API TCPConnection : public cObject
     cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
 
     /** Utility: send IP packet */
-    static void sendToIP(TcpHeader *tcpseg, L3Address src, L3Address dest);
+    static void sendToIP(Packet *pkt, TcpHeader *tcpseg, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);
@@ -568,7 +562,7 @@ class INET_API TCPConnection : public cObject
     virtual void updateRcvQueueVars();
 
     /** Utility: returns true when receive queue has enough space for store the tcpseg */
-    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(TcpHeader *tcpseg);
+    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, TcpHeader *tcpseg);
 
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
@@ -607,7 +601,7 @@ class INET_API TCPConnection : public cObject
      * connection object so that it can call this method, then immediately
      * deletes it.
      */
-    virtual void segmentArrivalWhileClosed(TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
 
     /** @name Various getters **/
     //@{
@@ -632,7 +626,7 @@ class INET_API TCPConnection : public cObject
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    virtual bool processTCPSegment(TcpHeader *tcpSeg, L3Address srcAddr, L3Address destAddr);
+    virtual bool processTCPSegment(Packet *packet, TcpHeader *tcpSeg, L3Address srcAddr, L3Address destAddr);
 
     /**
      * Process commands from the application.

@@ -16,6 +16,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -29,7 +30,7 @@ namespace tcp {
 class INET_API TCPSpoof : public cSimpleModule
 {
   protected:
-    virtual void sendToIP(FlatPacket *pk, L3Address src, L3Address dest);
+    virtual void sendToIP(Packet *pk, L3Address src, L3Address dest);
     virtual unsigned long chooseInitialSeqNum();
     virtual void sendSpoofPacket();
 

@@ -20,14 +20,15 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -37,10 +38,6 @@
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/transportlayer/tcp/queues/TCPByteStreamRcvQueue.h"
-#include "inet/transportlayer/tcp/queues/TCPByteStreamSendQueue.h"
-#include "inet/transportlayer/tcp/queues/TCPMsgBasedRcvQueue.h"
-#include "inet/transportlayer/tcp/queues/TCPMsgBasedSendQueue.h"
 #include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
 #include "inet/transportlayer/tcp/queues/TCPVirtualDataSendQueue.h"
 
@@ -132,39 +129,32 @@ void TCP::handleMessage(cMessage *msg)
             removeConnection(conn);
     }
     else if (msg->arrivedOn("ipIn")) {
-        if (false
-#ifdef WITH_IPv4
-            || dynamic_cast<ICMPMessage *>(msg)
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-            || dynamic_cast<ICMPv6Message *>(msg)
-#endif // ifdef WITH_IPv6
-            )
-        {
+        Packet *packet = check_and_cast<Packet *>(msg);
+        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6)  {
             EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
             delete msg;
         }
         else {
             // must be a TCPSegment
-            FlatPacket *pkt = check_and_cast<FlatPacket *>(msg);
-            TcpHeader *tcpseg = check_and_cast<TcpHeader *>(pkt->peekHeader());
+            TcpHeader *tcpseg = packet->peekHeader<TcpHeader>().get();
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;
 
-            srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress();
-            destAddr = pkt->getMandatoryTag<L3AddressInd>()->getDestAddress();
+            srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
             //interfaceId = controlInfo->getInterfaceId();
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
             if (conn) {
-                bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
+                bool ret = conn->processTCPSegment(packet, tcpseg, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
             else {
-                segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
+                segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
             }
         }
     }
@@ -195,12 +185,12 @@ TCPConnection *TCP::createConnection(int socketId)
     return new TCPConnection(this, socketId);
 }
 
-void TCP::segmentArrivalWhileClosed(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr)
+void TCP::segmentArrivalWhileClosed(Packet *packet, TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
-    tmp->segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
+    tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
     delete tmp;
-    delete tcpseg->getMandatoryOwnerPacket();
+    delete packet;
 }
 
 void TCP::refreshDisplay() const
@@ -488,13 +478,11 @@ TCPSendQueue *TCP::createSendQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP) {
         case TCP_TRANSFER_BYTECOUNT:
-            return new TCPVirtualDataSendQueue();
-
         case TCP_TRANSFER_OBJECT:
-            return new TCPMsgBasedSendQueue();
-
         case TCP_TRANSFER_BYTESTREAM:
-            return new TCPByteStreamSendQueue();
+            return new TCPVirtualDataSendQueue();
+//            return new TCPMsgBasedSendQueue();
+//            return new TCPByteStreamSendQueue();
 
         default:
             throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
@@ -505,13 +493,11 @@ TCPReceiveQueue *TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
     switch (transferModeP) {
         case TCP_TRANSFER_BYTECOUNT:
-            return new TCPVirtualDataRcvQueue();
-
         case TCP_TRANSFER_OBJECT:
-            return new TCPMsgBasedRcvQueue();
-
         case TCP_TRANSFER_BYTESTREAM:
-            return new TCPByteStreamRcvQueue();
+            return new TCPVirtualDataRcvQueue();
+//            return new TCPMsgBasedRcvQueue();
+//            return new TCPByteStreamRcvQueue();
 
         default:
             throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);

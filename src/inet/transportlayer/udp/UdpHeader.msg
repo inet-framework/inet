@@ -32,7 +32,7 @@ enum UdpConstants{
 class FieldsChunk extends cObject;
 enum CrcMode;
 //
-// Represents an UDP packet, to be used with the ~UDP module.
+// Represents an UDP header, to be used with the ~UDP module.
 //
 class UdpHeader extends FieldsChunk
 {

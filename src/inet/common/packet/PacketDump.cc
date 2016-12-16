@@ -656,10 +656,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg,
     }
 
     // data-seqno
-    if (tcpseg->getPayloadLength() > 0 || tcpseg->getSynBit()) {
-        out << tcpseg->getSequenceNo() << ":" << tcpseg->getSequenceNo() + tcpseg->getPayloadLength();
-        out << "(" << tcpseg->getPayloadLength() << ") ";
-    }
+    out << "seq " << tcpseg->getSequenceNo();
 
     // ack
     if (tcpseg->getAckBit())

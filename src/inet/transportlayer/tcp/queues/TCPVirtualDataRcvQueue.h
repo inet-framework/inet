@@ -23,6 +23,7 @@
 #include <list>
 #include <string>
 
+#include "inet/common/packet/ReorderBuffer.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/tcp/TCPReceiveQueue.h"
 
@@ -39,54 +40,16 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
 {
   protected:
     uint32 rcv_nxt = 0;
+    ReorderBuffer reorderBuffer;
 
-    class Region
+    uint32_t offsetToSeq(int64_t offs) const { return (uint32_t)offs; }
+
+    int64_t seqToOffset(uint32_t seq) const
     {
-      protected:
-        uint32 begin;
-        uint32 end;
-
-      public:
-        enum CompareStatus { BEFORE = 1, BEFORE_TOUCH, OVERLAP, AFTER_TOUCH, AFTER };
-        Region(uint32 _begin, uint32 _end) : begin(_begin), end(_end) {};
-        virtual ~Region() {};
-        uint32 getBegin() const { return begin; }
-        uint32 getEnd() const { return end; }
-        unsigned long getLength() const { return (ulong)(end - begin); }
-        unsigned long getLengthTo(uint32 seq) const;
-
-        /** Compare self and other */
-        CompareStatus compare(const TCPVirtualDataRcvQueue::Region& other) const;
-
-        // Virtual functions:
-
-        /** Merge other region to self */
-        virtual bool merge(const TCPVirtualDataRcvQueue::Region *other);
-
-        /** Copy self to msg */
-        virtual void copyTo(cPacket *msg) const;
-
-        /**
-         * Returns an allocated new Region object with filled with [begin..seq) and set self to [seq..end)
-         */
-        virtual TCPVirtualDataRcvQueue::Region *split(uint32 seq);
-    };
-
-    typedef std::list<Region *> RegionList;
-
-    RegionList regionList;
-
-    /** Merge segment byte range into regionList, the parameter region must created by 'new' operator. */
-    void merge(TCPVirtualDataRcvQueue::Region *region);
-
-    // Returns number of bytes extracted
-    TCPVirtualDataRcvQueue::Region *extractTo(uint32 toSeq);
-
-    /**
-     * Create a new Region from tcpseg.
-     * Called from insertBytesFromSegment()
-     */
-    virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TcpHeader *tcpseg);
+        int64_t expOffs = reorderBuffer.getExpectedOffset();
+        uint32_t expSeq = offsetToSeq(expOffs);
+        return (seqGE(seq, expSeq)) ? expOffs + (seq - expSeq) : expOffs - (expSeq - seq);
+    }
 
   public:
     /**
@@ -106,7 +69,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     virtual std::string info() const override;
 
     /** Method inherited from TCPReceiveQueue */
-    virtual uint32 insertBytesFromSegment(TcpHeader *tcpseg) override;
+    virtual uint32 insertBytesFromSegment(Packet *packet, TcpHeader *tcpseg) override;
 
     /** Method inherited from TCPReceiveQueue */
     virtual cPacket *extractBytesUpTo(uint32 seq) override;

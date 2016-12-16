@@ -21,7 +21,8 @@ cplusplus {{
 #include <iostream>
 #include "inet/common/INETDefs.h"
 #include "inet/common/ByteArray.h"
-#include "inet/common/packet/FlatPacket.h"
+#include "inet/common/packet/FieldsChunk.h"
+#include "inet/transportlayer/common/CRC_m.h"
 
 namespace inet {
 namespace tcp {
@@ -33,7 +34,9 @@ typedef TCPOption *TCPOptionPtr;
 
 }}
 
-class inet::FlatChunk extends cOwnedObject;
+namespace inet;
+class FieldsChunk extends cObject;
+enum CrcMode;
 
 namespace inet::tcp;
 
@@ -201,10 +204,10 @@ class TCPOptionUnknown extends TCPOption
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-packet TcpHeader extends FlatChunk
+packet TcpHeader extends FieldsChunk
 {
     @customize(true);
-    chunkByteLength = TCP_HEADER_OCTETS;
+    int64_t chunkLength @overridegetter = TCP_HEADER_OCTETS;
 
     // Source Port
     unsigned short srcPort;
@@ -246,29 +249,10 @@ packet TcpHeader extends FlatChunk
     // the URG control bit set.
     unsigned short urgentPointer;
 
+    uint16_t crc = 0;
+    int crcMode @enum(CrcMode) = -1;
+
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
     abstract TCPOptionPtr headerOption[];
-
-    //TODO: next fields represents the body content, should be removed from TCP Header
-
-    // Payload length in octets (not an actual TCP header field).
-    // This may not always be the same as encapsulatedPacket()->getByteLength();
-    // e.g. when simulating a virtual data stream there's no encapsulated
-    // packet at all.
-    unsigned long payloadLength;
-
-    // Message objects (cMessages) that travel in this segment as data.
-    // This field is used only when the ~TCPDataTransferMode is TCP_TRANSFER_OBJECT.
-    // Every message object is put into the TCPSegment that would (in real life)
-    // carry its first octet. That is, if message object 'msg' with length=100 bytes
-    // occupies stream offset number range 10000..10099, it will travel in the
-    // TCPSegment which carries the octet 10000. This way it is easily achieved
-    // that the receiving TCP passes up the message object to its client
-    // when the last byte of the message has arrived.
-    abstract TCPPayloadMessage payload[];
-
-    // Message bytes that travel in this segment as data.
-    // This field is used only when the ~TCPDataTransferMode is TCP_TRANSFER_BYTESTREAM.
-    ByteArray byteArray;
 }

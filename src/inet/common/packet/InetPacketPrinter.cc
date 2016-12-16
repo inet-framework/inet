@@ -143,10 +143,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Ad
     }
 
     // data-seqno
-    if (tcpSeg->getPayloadLength() > 0 || tcpSeg->getSynBit()) {
-        os << tcpSeg->getSequenceNo() << ":" << tcpSeg->getSequenceNo() + tcpSeg->getPayloadLength();
-        os << "(" << tcpSeg->getPayloadLength() << ") ";
-    }
+    os << tcpSeg->getSequenceNo() << " ";
 
     // ack
     if (tcpSeg->getAckBit())

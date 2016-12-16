@@ -36,6 +36,7 @@ void TCPVirtualDataSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
+    dataBuffer.clear();          // clear dataBuffer
 }
 
 std::string TCPVirtualDataSendQueue::info() const
@@ -45,9 +46,10 @@ std::string TCPVirtualDataSendQueue::info() const
     return out.str();
 }
 
-void TCPVirtualDataSendQueue::enqueueAppData(cPacket *msg)
+void TCPVirtualDataSendQueue::enqueueAppData(Packet *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
+    dataBuffer.push(msg->peekDataAt(0, msg->getByteLength()));
     end += msg->getByteLength();
     if (seqLess(end, begin))
         throw cRuntimeError("Send queue is full");
@@ -64,7 +66,7 @@ uint32 TCPVirtualDataSendQueue::getBufferEndSeq()
     return end;
 }
 
-TcpHeader *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+Packet *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
 
@@ -73,11 +75,13 @@ TcpHeader *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong
     char msgname[32];
     sprintf(msgname, "tcpseg(l=%lu)", numBytes);
 
-    TcpHeader *tcpseg = conn->createTCPSegment(msgname);
+    Packet *packet = new Packet(msgname);
+    const auto& tcpseg = std::make_shared<TcpHeader>();
     tcpseg->setSequenceNo(fromSeq);
-    tcpseg->setPayloadLength(numBytes);
-    tcpseg->addChunkByteLength(numBytes);
-    return tcpseg;
+    const auto& payload = dataBuffer.peekAt(fromSeq-begin, numBytes);   //get data from buffer
+    packet->pushHeader(tcpseg);
+    packet->pushTrailer(payload);
+    return packet;
 }
 
 void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
@@ -86,7 +90,10 @@ void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
 
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
-    begin = seqNum;
+    if (seqNum != begin) {
+        dataBuffer.pop(seqNum - begin);
+        begin = seqNum;
+    }
 }
 
 } // namespace tcp

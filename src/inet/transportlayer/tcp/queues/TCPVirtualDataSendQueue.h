@@ -18,6 +18,7 @@
 #ifndef __INET_TCPVIRTUALDATASENDQUEUE_H
 #define __INET_TCPVIRTUALDATASENDQUEUE_H
 
+#include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"
 
 namespace inet {
@@ -36,6 +37,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
   protected:
     uint32 begin;    // 1st sequence number stored
     uint32 end;    // last sequence number stored +1
+    ChunkQueue dataBuffer;      // dataBuffer
 
   public:
     /**
@@ -61,7 +63,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
     /**
      *
      */
-    virtual void enqueueAppData(cPacket *msg) override;
+    virtual void enqueueAppData(Packet *msg) override;
 
     /**
      *
@@ -76,7 +78,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
     /**
      *
      */
-    virtual TcpHeader *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
+    virtual Packet *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
 
     /**
      *

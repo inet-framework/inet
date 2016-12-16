@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
@@ -118,7 +119,7 @@ class INET_API TCPSendQueue : public cObject
      * The msg object should not be referenced after this point (sendQueue may
      * delete it.)
      */
-    virtual void enqueueAppData(cPacket *msg) = 0;
+    virtual void enqueueAppData(Packet *msg) = 0;
 
     /**
      * Returns the sequence number of the first byte stored in the buffer.
@@ -148,7 +149,7 @@ class INET_API TCPSendQueue : public cObject
      * maxNumBytes bytes if the subclass wants to reproduce the original
      * segment boundaries when retransmitting.
      */
-    virtual TcpHeader *createSegmentWithBytes(uint32 fromSeq, ulong maxNumBytes) = 0;
+    virtual Packet *createSegmentWithBytes(uint32 fromSeq, ulong maxNumBytes) = 0;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been

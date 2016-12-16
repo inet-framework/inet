@@ -24,6 +24,10 @@
 #undef WITH_IPv4  //FIXME //KLUDGE
 #endif
 
+#ifdef WITH_UDP
+#undef WITH_UDP  //FIXME //KLUDGE
+#endif
+
 #ifdef WITH_IPv4
 #  include "inet/networklayer/ipv4/IPv4Header.h"
 #  include "inet/networklayer/ipv4/ICMPMessage_m.h"

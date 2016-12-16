@@ -128,6 +128,7 @@ void TCPSerializer::serializeOption(const TCPOption *option, Buffer &b, Context&
 
 void TCPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
+#if 0
     ASSERT(b.getPos() == 0);
     const FlatPacket *pkt = check_and_cast<const FlatPacket *>(_pkt);
     const TcpHeader *tcpseg = check_and_cast<const TcpHeader *>(pkt->peekHeader());
@@ -193,6 +194,7 @@ void TCPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
     }
     writtenbytes = b.getPos();
     b.writeUint16To(16, TCPIPchecksum::checksum(IP_PROT_TCP, b._getBuf(), writtenbytes, c.l3AddressesPtr, c.l3AddressesLength));
+#endif
 }
 
 TCPOption *TCPSerializer::deserializeOption(Buffer &b, Context& c)
@@ -281,14 +283,19 @@ TCPOption *TCPSerializer::deserializeOption(Buffer &b, Context& c)
 
 TcpHeader *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bufsize, bool withBytes)
 {
+#if 0
     Buffer b(const_cast<unsigned char *>(buf), bufsize);
     Context c;
     FlatPacket *pk = check_and_cast_nullable<FlatPacket *>(deserialize(b, c));
     return pk ? check_and_cast_nullable<TcpHeader *>(pk->peekHeader()) : nullptr;
+#else
+    throw cRuntimeError("not implemented yet");
+#endif
 }
 
 cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
 {
+#if 0
     struct tcphdr tcp;
     memset(&tcp, 0, sizeof(tcp));
     ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
@@ -343,6 +350,9 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
     if (tcp.th_sum != 0 && c.l3AddressesPtr && c.l3AddressesLength && TCPIPchecksum::checksum(IP_PROT_TCP, b._getBuf(), b._getBufSize(), c.l3AddressesPtr, c.l3AddressesLength))
         pkt->setBitError(true);
     return pkt;
+#else
+    throw cRuntimeError("not implemented yet");
+#endif
 }
 
 } // namespace inet

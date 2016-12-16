@@ -120,6 +120,7 @@ int InetPacketPrinter2::getScoreFor(cMessage *msg) const
 
 void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
 {
+#if 0
     std::string outs;
 
     //reset mutable variables
@@ -198,6 +199,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         outs = out.str();
     }
     os << outs;
+#endif
 }
 
 std::string InetPacketPrinter2::formatARPPacket(ARPPacket *packet) const
@@ -382,10 +384,7 @@ std::string InetPacketPrinter2::formatTCPPacket(tcp::TcpHeader *tcpSeg) const
     }
 
     // data-seqno
-    if (tcpSeg->getPayloadLength() > 0 || tcpSeg->getSynBit()) {
-        os << " " << tcpSeg->getSequenceNo() << ":" << tcpSeg->getSequenceNo() + tcpSeg->getPayloadLength();
-        os << "(" << tcpSeg->getPayloadLength() << ")";
-    }
+    os << " seq " << tcpSeg->getSequenceNo();
 
     // ack
     if (tcpSeg->getAckBit())

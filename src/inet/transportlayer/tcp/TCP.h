@@ -25,6 +25,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
@@ -143,7 +144,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     // utility methods
     virtual TCPConnection *findConnForSegment(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr);
     virtual TCPConnection *findConnForApp(int socketId);
-    virtual void segmentArrivalWhileClosed(TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
     virtual void removeConnection(TCPConnection *conn);
     virtual void refreshDisplay() const override;
 

@@ -292,7 +292,7 @@ bool TCPConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TCPConnection::processTCPSegment(TcpHeader *tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
+bool TCPConnection::processTCPSegment(Packet *packet, TcpHeader *tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
 {
     printConnBrief();
     if (!localAddr.isUnspecified()) {
@@ -309,7 +309,7 @@ bool TCPConnection::processTCPSegment(TcpHeader *tcpseg, L3Address segSrcAddr, L
         return true;
 
     // first do actions
-    TCPEventCode event = process_RCV_SEGMENT(tcpseg, segSrcAddr, segDestAddr);
+    TCPEventCode event = process_RCV_SEGMENT(packet, tcpseg, segSrcAddr, segDestAddr);
 
     // then state transitions
     return performStateTransition(event);
