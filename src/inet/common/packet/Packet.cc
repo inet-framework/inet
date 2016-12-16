@@ -56,6 +56,8 @@ int Packet::getNumChunks() const
 
 Chunk *Packet::getChunk(int i) const
 {
+    assert(contents != nullptr);
+    assert(0 <= i < getNumChunks());
     if (contents->getChunkType() == Chunk::TYPE_SEQUENCE)
         return std::static_pointer_cast<SequenceChunk>(contents)->getChunks()[i].get();
     else
@@ -65,18 +67,20 @@ Chunk *Packet::getChunk(int i) const
 void Packet::setHeaderPopOffset(int64_t offset)
 {
     assert(contents != nullptr);
-    assert(getPacketLength() - trailerIterator.getPosition() >= offset);
+    assert(0 <= offset && offset <= getPacketLength() - trailerIterator.getPosition());
     contents->seekIterator(headerIterator, offset);
+    assert(getDataLength() > 0);
 }
 
 std::shared_ptr<Chunk> Packet::peekHeader(int64_t length) const
 {
+    assert(-1 <= length && length <= getDataLength());
     return contents == nullptr ? nullptr : contents->peek(headerIterator, length);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
 {
-    assert(length <= getDataLength());
+    assert(-1 <= length && length <= getDataLength());
     const auto& chunk = peekHeader(length);
     if (chunk != nullptr)
         contents->moveIterator(headerIterator, chunk->getChunkLength());
@@ -85,6 +89,7 @@ std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
 
 void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(chunk != nullptr);
     assert(headerIterator.getPosition() == 0);
     prepend(chunk);
 }
@@ -92,19 +97,20 @@ void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
 void Packet::setTrailerPopOffset(int64_t offset)
 {
     assert(contents != nullptr);
-    assert(offset >= headerIterator.getPosition());
+    assert(headerIterator.getPosition() <= offset);
     contents->seekIterator(trailerIterator, getPacketLength() - offset);
     assert(getDataLength() > 0);
 }
 
 std::shared_ptr<Chunk> Packet::peekTrailer(int64_t length) const
 {
+    assert(-1 <= length && length <= getDataLength());
     return contents == nullptr ? nullptr : contents->peek(trailerIterator, length);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
 {
-    assert(length <= getDataLength());
+    assert(-1 <= length && length <= getDataLength());
     const auto& chunk = peekTrailer(length);
     if (chunk != nullptr)
         contents->moveIterator(trailerIterator, -chunk->getChunkLength());
@@ -113,12 +119,15 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
 
 void Packet::pushTrailer(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(chunk != nullptr);
     assert(trailerIterator.getPosition() == 0);
     append(chunk);
 }
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t offset, int64_t length) const
 {
+    assert(0 <= offset && offset <= getDataLength());
+    assert(-1 <= length && length <= getDataLength());
     if (contents == nullptr)
         return nullptr;
     else {
@@ -130,6 +139,8 @@ std::shared_ptr<Chunk> Packet::peekDataAt(int64_t offset, int64_t length) const
 
 std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
 {
+    assert(0 <= offset && offset <= getPacketLength());
+    assert(-1 <= length && length <= getPacketLength());
     if (contents == nullptr)
         return nullptr;
     else {
@@ -140,6 +151,7 @@ std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(chunk != nullptr);
     assert(headerIterator.getPosition() == 0);
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
@@ -155,6 +167,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 
 void Packet::append(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(chunk != nullptr);
     assert(trailerIterator.getPosition() == 0);
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
@@ -170,12 +183,16 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
 
 void Packet::removeFromBeginning(int64_t length)
 {
+    assert(0 <= length && length <= getPacketLength());
+    assert(headerIterator.getPosition() == 0);
     if (!contents->removeFromBeginning(length))
         contents = contents->peek(length, contents->getChunkLength() - length);
 }
 
 void Packet::removeFromEnd(int64_t length)
 {
+    assert(0 <= length && length <= getPacketLength());
+    assert(trailerIterator.getPosition() == 0);
     if (!contents->removeFromEnd(length))
         contents = contents->peek(0, contents->getChunkLength() - length);
 }

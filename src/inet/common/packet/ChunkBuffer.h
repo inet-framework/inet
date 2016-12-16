@@ -67,10 +67,10 @@ class INET_API ChunkBuffer : public cNamedObject
     //@{
     bool isEmpty() const { return regions.empty(); }
     int getNumRegions() const { return regions.size(); }
-    int64_t getRegionLength(int index) const { return regions[index].data->getChunkLength(); }
-    int64_t getRegionStartOffset(int index) const { return regions[index].offset; }
-    int64_t getRegionEndOffset(int index) const { return regions[index].getEndOffset(); }
-    const std::shared_ptr<Chunk>& getRegionData(int index) const { return regions[index].data; }
+    int64_t getRegionLength(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data->getChunkLength(); }
+    int64_t getRegionStartOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].offset; }
+    int64_t getRegionEndOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].getEndOffset(); }
+    const std::shared_ptr<Chunk>& getRegionData(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data; }
     //@}
 
     /**

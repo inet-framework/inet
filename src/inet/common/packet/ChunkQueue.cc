@@ -45,16 +45,20 @@ void ChunkQueue::remove(int64_t length)
 
 std::shared_ptr<Chunk> ChunkQueue::peek(int64_t length) const
 {
+    assert(-1 <= length && length <= getBufferLength());
     return contents == nullptr ? nullptr : contents->peek(iterator, length);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::peekAt(int64_t offset, int64_t length) const
 {
+    assert(0 <= offset && offset <= getBufferLength());
+    assert(-1 <= length && length <= getBufferLength());
     return contents == nullptr ? nullptr : contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::pop(int64_t length)
 {
+    assert(-1 <= length && length <= getBufferLength());
     const auto& chunk = peek(length);
     if (chunk != nullptr)
         remove(chunk->getChunkLength());
@@ -72,6 +76,7 @@ void ChunkQueue::clear()
 
 void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(chunk != nullptr);
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {

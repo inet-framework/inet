@@ -107,6 +107,8 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 
 void ChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
 {
+    assert(offset >= 0);
+    assert(chunk != nullptr);
     Region newRegion(offset, chunk->isImmutable() ? chunk->dupShared() : chunk);
     sliceRegions(newRegion);
     if (regions.empty())
@@ -137,6 +139,8 @@ void ChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
 
 void ChunkBuffer::clear(int64_t offset, int64_t length)
 {
+    assert(offset >= 0);
+    assert(length >= 0);
     for (auto it = regions.begin(); it != regions.end(); it++) {
         auto region = *it;
         if (region.offset == offset && region.data->getChunkLength() == length) {

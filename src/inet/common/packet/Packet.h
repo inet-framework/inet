@@ -128,16 +128,19 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasHeader(int64_t length = -1) const {
+        assert(-1 <= length && length <= getDataLength());
         return contents == nullptr ? false : contents->has<T>(headerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> peekHeader(int64_t length = -1) const {
+        assert(-1 <= length && length <= getDataLength());
         return contents == nullptr ? nullptr : contents->peek<T>(headerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> popHeader(int64_t length = -1) {
+        assert(-1 <= length && length <= getDataLength());
         const auto& chunk = peekHeader<T>(length);
         if (chunk != nullptr)
             contents->moveIterator(headerIterator, chunk->getChunkLength());
@@ -172,16 +175,19 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasTrailer(int64_t length = -1) const {
+        assert(-1 <= length && length <= getDataLength());
         return contents == nullptr ? nullptr : contents->has<T>(trailerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> peekTrailer(int64_t length = -1) const {
+        assert(-1 <= length && length <= getDataLength());
         return contents == nullptr ? nullptr : contents->peek<T>(trailerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> popTrailer(int64_t length = -1) {
+        assert(-1 <= length && length <= getDataLength());
         const auto& chunk = peekTrailer<T>(length);
         if (chunk != nullptr)
             contents->moveIterator(trailerIterator, chunk->getChunkLength());
@@ -216,11 +222,15 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasAt(int64_t offset, int64_t length = -1) const {
+        assert(0 <= offset && offset <= getPacketLength());
+        assert(-1 <= length && length <= getPacketLength());
         return peekAt<T>(offset, length) != nullptr;
     }
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
+        assert(0 <= offset && offset <= getPacketLength());
+        assert(-1 <= length && length <= getPacketLength());
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, offset, -1), length);
     }
     //@}
