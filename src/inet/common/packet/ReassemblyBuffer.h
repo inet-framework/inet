@@ -25,7 +25,7 @@ namespace inet {
  * for protocols supporting fragmentation. The reassembling algorithm requires
  * the expected length of the non-fragmented data chunk measured in bytes. It
  * assumes that the non-fragmented data chunk starts at 0 offset. If all data
- * becomes available up to the expected length, then the defregmentation is
+ * becomes available up to the expected length, then the defragmentation is
  * considered complete.
  */
 class INET_API ReassemblyBuffer : public ChunkBuffer
@@ -44,7 +44,7 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
     void setExpectedLength(int64_t expectedLength) { this->expectedLength = expectedLength; }
 
     /**
-     * Returns true if all data is present for reassemling the data chunk.
+     * Returns true if all data is present for reassembling the data chunk.
      */
     bool isComplete() const {
         return regions.size() == 1 && regions[0].offset == 0 && regions[0].data->getChunkLength() == expectedLength;
