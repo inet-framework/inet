@@ -63,11 +63,13 @@ class INET_API ChunkBuffer : public cNamedObject
     virtual ChunkBuffer *dup() const override { return new ChunkBuffer(*this); }
     //@}
 
-    /** @name Content accessor functions */
+    /** @name Content querying functions */
     //@{
+    bool isEmpty() const { return regions.empty(); }
     int getNumRegions() const { return regions.size(); }
-    int64_t getRegionOffset(int index) const { return regions[index].offset; }
     int64_t getRegionLength(int index) const { return regions[index].data->getChunkLength(); }
+    int64_t getRegionStartOffset(int index) const { return regions[index].offset; }
+    int64_t getRegionEndOffset(int index) const { return regions[index].getEndOffset(); }
     const std::shared_ptr<Chunk>& getRegionData(int index) const { return regions[index].data; }
     //@}
 
@@ -83,6 +85,11 @@ class INET_API ChunkBuffer : public cNamedObject
      * Erases the stored data at the provided offset and length.
      */
     void clear(int64_t offset, int64_t length);
+
+    /**
+     * Erases all of the stored data.
+     */
+    void clear() { regions.clear(); }
 
     virtual std::string str() const override { return ""; }
 };
