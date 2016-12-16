@@ -55,6 +55,9 @@ class INET_API Packet : public cPacket
   friend class PacketDescriptor;
 
   protected:
+    /**
+     * While this chunk is mutable, it allows efficient merging with newly added chunks.
+     */
     std::shared_ptr<Chunk> contents;
     Chunk::ForwardIterator headerIterator;
     Chunk::BackwardIterator trailerIterator;

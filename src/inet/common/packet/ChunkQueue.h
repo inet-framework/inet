@@ -21,13 +21,18 @@
 namespace inet {
 
 /**
- * This class represents application or protocol buffers.
+ * This class represents a first in, first out queue of chunks. It is mainly
+ * useful for application and protocol buffers where the incoming chunks are
+ * guaranteed to be in order.
  */
 class INET_API ChunkQueue : public cNamedObject
 {
   protected:
     int64_t pushedByteCount = 0;
     int64_t poppedByteCount = 0;
+    /**
+     * This chunk is always mutable to allow efficient merging with newly added chunks.
+     */
     std::shared_ptr<Chunk> contents = nullptr;
     Chunk::Iterator iterator;
 

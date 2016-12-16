@@ -30,6 +30,9 @@ class INET_API ChunkBuffer : public cNamedObject
     class INET_API Region {
       public:
         int64_t offset;
+        /**
+         * This chunk is always mutable to allow efficient merging with newly added chunks.
+         */
         std::shared_ptr<Chunk> data;
 
       public:
