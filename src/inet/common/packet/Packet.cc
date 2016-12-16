@@ -38,7 +38,7 @@ Packet::Packet(const char *name, const std::shared_ptr<Chunk>& contents) :
 
 Packet::Packet(const Packet& other) :
     cPacket(other),
-    contents(other.isContentsImmutable() ? other.contents : other.contents->dupShared()),
+    contents(other.contents == nullptr || other.isContentsImmutable() ? other.contents : other.contents->dupShared()),
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator)
 {
@@ -46,7 +46,9 @@ Packet::Packet(const Packet& other) :
 
 int Packet::getNumChunks() const
 {
-    if (contents->getChunkType() == Chunk::TYPE_SEQUENCE)
+    if (contents == nullptr)
+        return 0;
+    else if (contents->getChunkType() == Chunk::TYPE_SEQUENCE)
         return std::static_pointer_cast<SequenceChunk>(contents)->getChunks().size();
     else
         return 1;
@@ -62,13 +64,14 @@ Chunk *Packet::getChunk(int i) const
 
 void Packet::setHeaderPopOffset(int64_t offset)
 {
+    assert(contents != nullptr);
     assert(getPacketLength() - trailerIterator.getPosition() >= offset);
     contents->seekIterator(headerIterator, offset);
 }
 
 std::shared_ptr<Chunk> Packet::peekHeader(int64_t length) const
 {
-    return contents->peek(headerIterator, length);
+    return contents == nullptr ? nullptr : contents->peek(headerIterator, length);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
@@ -88,6 +91,7 @@ void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
 
 void Packet::setTrailerPopOffset(int64_t offset)
 {
+    assert(contents != nullptr);
     assert(offset >= headerIterator.getPosition());
     contents->seekIterator(trailerIterator, getPacketLength() - offset);
     assert(getDataLength() > 0);
@@ -95,7 +99,7 @@ void Packet::setTrailerPopOffset(int64_t offset)
 
 std::shared_ptr<Chunk> Packet::peekTrailer(int64_t length) const
 {
-    return contents->peek(trailerIterator, length);
+    return contents == nullptr ? nullptr : contents->peek(trailerIterator, length);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
@@ -115,15 +119,23 @@ void Packet::pushTrailer(const std::shared_ptr<Chunk>& chunk)
 
 std::shared_ptr<Chunk> Packet::peekDataAt(int64_t offset, int64_t length) const
 {
-    int64_t peekOffset = headerIterator.getPosition() + offset;
-    int64_t peekLength = length == -1 ? getDataLength() - offset : length;
-    return contents->peek(Chunk::Iterator(true, peekOffset, -1), peekLength);
+    if (contents == nullptr)
+        return nullptr;
+    else {
+        int64_t peekOffset = headerIterator.getPosition() + offset;
+        int64_t peekLength = length == -1 ? getDataLength() - offset : length;
+        return contents->peek(Chunk::Iterator(true, peekOffset, -1), peekLength);
+    }
 }
 
 std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
 {
-    int64_t peekLength = length == -1 ? getByteLength() - offset : length;
-    return contents->peek(Chunk::Iterator(true, offset, -1), peekLength);
+    if (contents == nullptr)
+        return nullptr;
+    else {
+        int64_t peekLength = length == -1 ? getByteLength() - offset : length;
+        return contents->peek(Chunk::Iterator(true, offset, -1), peekLength);
+    }
 }
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk)

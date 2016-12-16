@@ -27,7 +27,7 @@ ChunkQueue::ChunkQueue(const char *name, const std::shared_ptr<Chunk>& contents)
 
 ChunkQueue::ChunkQueue(const ChunkQueue& other) :
     cNamedObject(other),
-    contents(other.contents->dupShared()),
+    contents(other.contents == nullptr ? nullptr : other.contents->dupShared()),
     iterator(other.iterator)
 {
 }
@@ -45,12 +45,12 @@ void ChunkQueue::remove(int64_t length)
 
 std::shared_ptr<Chunk> ChunkQueue::peek(int64_t length) const
 {
-    return contents->peek(iterator, length);
+    return contents == nullptr ? nullptr : contents->peek(iterator, length);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::peekAt(int64_t offset, int64_t length) const
 {
-    return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
+    return contents == nullptr ? nullptr : contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::pop(int64_t length)

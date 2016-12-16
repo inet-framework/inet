@@ -62,17 +62,17 @@ class INET_API ChunkQueue : public cNamedObject
 
     template <typename T>
     bool has(int64_t length = -1) const {
-        return contents->has<T>(iterator, length);
+        return contents == nullptr ? false : contents->has<T>(iterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> peek(int64_t length = -1) const {
-        return contents->peek<T>(iterator, length);
+        return contents == nullptr ? nullptr : contents->peek<T>(iterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
-        return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
+        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
     }
     //@}
 
@@ -96,7 +96,7 @@ class INET_API ChunkQueue : public cNamedObject
     void push(const std::shared_ptr<Chunk>& chunk);
     //@}
 
-    virtual std::string str() const override { return contents->str(); }
+    virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *buffer) { return os << buffer->str(); }

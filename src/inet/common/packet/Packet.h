@@ -128,12 +128,12 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasHeader(int64_t length = -1) const {
-        return contents->has<T>(headerIterator, length);
+        return contents == nullptr ? false : contents->has<T>(headerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> peekHeader(int64_t length = -1) const {
-        return contents->peek<T>(headerIterator, length);
+        return contents == nullptr ? nullptr : contents->peek<T>(headerIterator, length);
     }
 
     template <typename T>
@@ -172,12 +172,12 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     bool hasTrailer(int64_t length = -1) const {
-        return contents->has<T>(trailerIterator, length);
+        return contents == nullptr ? nullptr : contents->has<T>(trailerIterator, length);
     }
 
     template <typename T>
     std::shared_ptr<T> peekTrailer(int64_t length = -1) const {
-        return contents->peek<T>(trailerIterator, length);
+        return contents == nullptr ? nullptr : contents->peek<T>(trailerIterator, length);
     }
 
     template <typename T>
@@ -206,7 +206,7 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekDataAt(int64_t offset, int64_t length = -1) const {
-        return contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
+        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
     }
     //@}
 
@@ -221,7 +221,7 @@ class INET_API Packet : public cPacket
 
     template <typename T>
     std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
-        return contents->peek<T>(Chunk::Iterator(true, offset, -1), length);
+        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, offset, -1), length);
     }
     //@}
 
@@ -237,7 +237,7 @@ class INET_API Packet : public cPacket
     void removeFromEnd(int64_t length);
     //@}
 
-    virtual std::string str() const override { return contents->str(); }
+    virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }
