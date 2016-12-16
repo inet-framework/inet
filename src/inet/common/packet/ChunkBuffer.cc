@@ -58,11 +58,11 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
             }
             else if (oldRegion.getStartOffset() < newRegion.getStartOffset() && newRegion.getEndOffset() < oldRegion.getEndOffset()) {
                 // new splits old into two parts
-                Region previousRegin(oldRegion.getStartOffset(), oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset()));
+                Region previousRegion(oldRegion.getStartOffset(), oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset()));
                 Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset()));
                 oldRegion.offset = nextRegion.offset;
                 oldRegion.data = nextRegion.data;
-                regions.insert(it, previousRegin);
+                regions.insert(it, previousRegion);
                 return;
             }
             else {
