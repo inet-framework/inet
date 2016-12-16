@@ -834,23 +834,27 @@ static void testChunkQueue()
 {
     // 1. buffer provides ByteCountChunks by default if it contains a ByteCountChunk only
     ChunkQueue buffer1;
-    buffer1.push(std::make_shared<ByteCountChunk>(10));
-    buffer1.push(std::make_shared<ByteCountChunk>(10));
-    buffer1.push(std::make_shared<ByteCountChunk>(10));
-    const auto& byteCountChunk1 = std::dynamic_pointer_cast<ByteCountChunk>(buffer1.pop(15));
+    auto byteCountChunk1 = std::make_shared<ByteCountChunk>(10);
+    byteCountChunk1->markImmutable();
+    buffer1.push(byteCountChunk1);
+    buffer1.push(byteCountChunk1);
+    buffer1.push(byteCountChunk1);
     const auto& byteCountChunk2 = std::dynamic_pointer_cast<ByteCountChunk>(buffer1.pop(15));
-    assert(byteCountChunk1 != nullptr);
+    const auto& byteCountChunk3 = std::dynamic_pointer_cast<ByteCountChunk>(buffer1.pop(15));
     assert(byteCountChunk2 != nullptr);
+    assert(byteCountChunk3 != nullptr);
 
     // 2. buffer provides BytesChunks by default if it contains a BytesChunk only
     ChunkQueue buffer2;
-    buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
-    buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
-    buffer2.push(std::make_shared<BytesChunk>(makeVector(10)));
-    const auto& byteCountChunk3 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
-    const auto& byteCountChunk4 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
-    assert(byteCountChunk3 != nullptr);
-    assert(byteCountChunk4 != nullptr);
+    auto bytesChunk1 = std::make_shared<BytesChunk>(makeVector(10));
+    bytesChunk1->markImmutable();
+    buffer2.push(bytesChunk1);
+    buffer2.push(bytesChunk1);
+    buffer2.push(bytesChunk1);
+    const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
+    const auto& bytesChunk3 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
+    assert(bytesChunk2 != nullptr);
+    assert(bytesChunk3 != nullptr);
 
     // 3. buffer provides reassembled header
     ChunkQueue buffer3;
