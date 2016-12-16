@@ -65,12 +65,16 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
                 regions.insert(it, previousRegion);
                 return;
             }
-            else {
-                // new cuts beginning or end of old
-                int64_t peekStartOffset = std::min(newRegion.getStartOffset(), oldRegion.getStartOffset());
-                int64_t peekEndOffset = std::min(newRegion.getEndOffset(), oldRegion.getEndOffset());
-                oldRegion.data = oldRegion.data->peek(peekStartOffset, peekEndOffset - peekStartOffset);
+            else if (oldRegion.getEndOffset() <= newRegion.getEndOffset()) {
+                // new cuts end of old
+                oldRegion.data = oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset());
             }
+            else if (newRegion.getStartOffset() <= oldRegion.getStartOffset()) {
+                // new cuts beginning of old
+                oldRegion.data = oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset());
+            }
+            else
+                assert(false);
         }
     }
 }
