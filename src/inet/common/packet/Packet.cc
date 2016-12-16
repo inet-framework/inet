@@ -128,6 +128,7 @@ std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
 
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(headerIterator.getPosition() == 0);
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
@@ -142,6 +143,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 
 void Packet::append(const std::shared_ptr<Chunk>& chunk)
 {
+    assert(trailerIterator.getPosition() == 0);
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
