@@ -127,9 +127,11 @@ void ChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
         auto& previousRegion = *(it - 1);
         auto& region = *it;
         auto& nextRegion = *(it + 1);
-        mergeRegions(previousRegion, region);
-        mergeRegions(region.data != nullptr ? region : previousRegion, nextRegion);
-        eraseEmptyRegions(it - 1, it + 1);
+        if (it != regions.begin())
+            mergeRegions(previousRegion, region);
+        if (it + 1 != regions.end())
+            mergeRegions(region.data != nullptr ? region : previousRegion, nextRegion);
+        eraseEmptyRegions(it != regions.begin() ? it - 1 : it, it + 1 != regions.end() ? it + 1 : it);
     }
 }
 
