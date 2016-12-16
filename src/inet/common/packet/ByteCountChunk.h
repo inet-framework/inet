@@ -59,8 +59,11 @@ class INET_API ByteCountChunk : public Chunk
     virtual Type getChunkType() const override { return TYPE_LENGTH; }
     virtual int64_t getChunkLength() const override { return length; }
 
-    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk) override;
+
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
     virtual bool removeFromBeginning(int64_t length) override;
     virtual bool removeFromEnd(int64_t length) override;

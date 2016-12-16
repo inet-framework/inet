@@ -59,28 +59,30 @@ void BytesChunk::setByte(int index, uint8_t byte)
     bytes[index] = byte;
 }
 
-bool BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk)
 {
-    handleChange();
-    if (chunk->getChunkType() == TYPE_BYTES) {
-        const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
-        bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
-        return true;
-    }
-    else
-        return false;
+    return chunk->getChunkType() == TYPE_BYTES;
 }
 
-bool BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk)
 {
+    return chunk->getChunkType() == TYPE_BYTES;
+}
+
+void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+{
+    assert(chunk->getChunkType() == TYPE_BYTES);
     handleChange();
-    if (chunk->getChunkType() == TYPE_BYTES) {
-        const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
-        bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
-        return true;
-    }
-    else
-        return false;
+    const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
+    bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
+}
+
+void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+{
+    assert(chunk->getChunkType() == TYPE_BYTES);
+    handleChange();
+    const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
+    bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
 bool BytesChunk::removeFromBeginning(int64_t length)

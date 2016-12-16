@@ -81,37 +81,43 @@ void SliceChunk::setLength(int64_t length)
     this->length = length;
 }
 
-bool SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk)
 {
-    handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-        if (this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length) {
-            offset -= otherSliceChunk->length;
-            length += otherSliceChunk->length;
-            return true;
-        }
-        else
-            return false;
+        return this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length;
     }
     else
         return false;
 }
 
-bool SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk)
 {
-    handleChange();
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-        if (this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset) {
-            length += otherSliceChunk->length;
-            return true;
-        }
-        else
-            return false;
+        return this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset;
     }
     else
         return false;
+}
+
+void SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+{
+    assert(chunk->getChunkType() == TYPE_SLICE);
+    handleChange();
+    const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
+    assert(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
+    offset -= otherSliceChunk->length;
+    length += otherSliceChunk->length;
+}
+
+void SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+{
+    assert(chunk->getChunkType() == TYPE_SLICE);
+    handleChange();
+    const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
+    assert(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
+    length += otherSliceChunk->length;
 }
 
 bool SliceChunk::removeFromBeginning(int64_t length)

@@ -90,8 +90,11 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Filling with data related functions */
     //@{
-    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk) override { return true; }
+    virtual bool isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk) override { return true; }
+
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
     //@}
 
     /** @name Removing data related functions */

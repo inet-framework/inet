@@ -312,19 +312,22 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual void seekIterator(Iterator& iterator, int64_t offset) const { iterator.setPosition(offset); }
     //@}
 
+    virtual bool isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk) { return false; }
+
     /** @name Inserting data related functions */
     //@{
     /**
      * Inserts the provided chunk at the beginning of this chunk and returns
      * true if the insertion was successful.
      */
-    virtual bool insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assert(false); }
 
     /**
      * Inserts the provided chunk at the end of this chunk and returns true if
      * the insertion was successful.
      */
-    virtual bool insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assertMutable(); return false; }
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assert(false); }
     //@}
 
     /** @name Removing data related functions */
