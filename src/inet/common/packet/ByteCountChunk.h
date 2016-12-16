@@ -56,7 +56,7 @@ class INET_API ByteCountChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_LENGTH; }
+    virtual Type getChunkType() const override { return TYPE_BYTECOUNT; }
     virtual int64_t getChunkLength() const override { return length; }
 
     virtual bool isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk) override;
