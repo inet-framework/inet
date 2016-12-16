@@ -27,19 +27,19 @@ ChunkQueue::ChunkQueue(const char *name, const std::shared_ptr<Chunk>& contents)
 
 ChunkQueue::ChunkQueue(const ChunkQueue& other) :
     cNamedObject(other),
-    contents(other.contents == nullptr ? nullptr : other.contents->dupShared()),
+    contents(other.contents),
     iterator(other.iterator)
 {
 }
 
 void ChunkQueue::remove(int64_t length)
 {
-    contents->moveIterator(iterator, length);
     poppedByteCount += length;
+    contents->moveIterator(iterator, length);
     auto position = iterator.getPosition();
     if (position > contents->getChunkLength() / 2) {
-        contents->removeFromBeginning(position);
         contents->seekIterator(iterator, 0);
+        contents = contents->peek(position, contents->getChunkLength() - position);
     }
 }
 
@@ -77,17 +77,21 @@ void ChunkQueue::clear()
 void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
+    assert(chunk->isImmutable());
+    pushedByteCount += chunk->getChunkLength();
     if (contents == nullptr)
-        contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
+        contents = chunk;
     else {
+        // TODO: avoid duplication if possible by reusing chunk if referred by this buffer only
+        contents = contents->dupShared();
         if (!contents->insertAtEnd(chunk)) {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
             sequenceChunk->insertAtEnd(contents);
             sequenceChunk->insertAtEnd(chunk);
             contents = sequenceChunk;
         }
+        contents->markImmutable();
     }
-    pushedByteCount += chunk->getChunkLength();
 }
 
 } // namespace

@@ -31,7 +31,8 @@ class INET_API ChunkQueue : public cNamedObject
     int64_t pushedByteCount = 0;
     int64_t poppedByteCount = 0;
     /**
-     * This chunk is always mutable to allow efficient merging with newly added chunks.
+     * This chunk is always immutable to allow arbitrary peeking. Nevertheless
+     * it's reused if possible to allow efficient merging with newly added chunks.
      */
     std::shared_ptr<Chunk> contents = nullptr;
     Chunk::Iterator iterator;
