@@ -47,7 +47,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns the number of available bytes in the buffer.
      */
-    int64_t getBufferLength() const { return contents->getChunkLength() - iterator.getPosition(); }
+    int64_t getBufferLength() const { return contents == nullptr ? 0 : contents->getChunkLength() - iterator.getPosition(); }
 
     int64_t getPushedByteCount() const { return pushedByteCount; }
 
@@ -69,8 +69,6 @@ class INET_API ChunkQueue : public cNamedObject
 
     std::shared_ptr<Chunk> peekAt(int64_t offset, int64_t length) const;
 
-    std::shared_ptr<Chunk> pop(int64_t length = -1);
-
     template <typename T>
     bool has(int64_t length = -1) const {
         return contents->has<T>(iterator, length);
@@ -85,6 +83,11 @@ class INET_API ChunkQueue : public cNamedObject
     std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
         return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
     }
+    //@}
+
+    /** @name Removing data related functions */
+    //@{
+    std::shared_ptr<Chunk> pop(int64_t length = -1);
 
     template <typename T>
     std::shared_ptr<T> pop(int64_t length = -1) {
@@ -93,6 +96,8 @@ class INET_API ChunkQueue : public cNamedObject
             remove(chunk->getChunkLength());
         return chunk;
     }
+
+    void clear();
     //@}
 
     /** @name Filling with data related functions */

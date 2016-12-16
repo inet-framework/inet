@@ -61,6 +61,15 @@ std::shared_ptr<Chunk> ChunkQueue::pop(int64_t length)
     return chunk;
 }
 
+void ChunkQueue::clear()
+{
+    if (contents != nullptr) {
+        poppedByteCount += getBufferLength();
+        contents->seekIterator(iterator, 0);
+        contents = nullptr;
+    }
+}
+
 void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
 {
     if (contents == nullptr)
