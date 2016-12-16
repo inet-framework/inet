@@ -50,7 +50,7 @@ std::string TCPVirtualDataRcvQueue::info() const
     res = buf;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
-        sprintf(buf, " [%u..%u)", reorderBuffer.getRegionOffset(i), reorderBuffer.getRegionEndOffset(i));
+        sprintf(buf, " [%u..%u)", reorderBuffer.getRegionStartOffset(i), reorderBuffer.getRegionEndOffset(i));
         res += buf;
     }
 }
@@ -63,8 +63,8 @@ uint32_t TCPVirtualDataRcvQueue::insertBytesFromSegment(Packet *packet, TcpHeade
     uint32_t seq = tcpseg->getSequenceNo();
 
 #ifndef NDEBUG
-    if (!reorderBuffer.empty()) {
-        uint32_t ob = offsetToSeq(reorderBuffer.getRegionOffset(0));
+    if (!reorderBuffer.isEmpty()) {
+        uint32_t ob = offsetToSeq(reorderBuffer.getRegionStartOffset(0));
         uint32_t oe = offsetToSeq(reorderBuffer.getRegionEndOffset(reorderBuffer.getNumRegions()-1));
         uint32_t nb = seq;
         uint32_t ne = seq + tcpPayloadLength;
@@ -77,8 +77,8 @@ uint32_t TCPVirtualDataRcvQueue::insertBytesFromSegment(Packet *packet, TcpHeade
 #endif // ifndef NDEBUG
     reorderBuffer.replace(seqToOffset(seq), payload);
 
-    if (seqGE(rcv_nxt, offsetToSeq(reorderBuffer.getRegionOffset(0))))
-        rcv_nxt = offsetToSeq(reorderBuffer.getRegionOffset(0) + reorderBuffer.getRegionLength(0));
+    if (seqGE(rcv_nxt, offsetToSeq(reorderBuffer.getRegionStartOffset(0))))
+        rcv_nxt = offsetToSeq(reorderBuffer.getRegionStartOffset(0) + reorderBuffer.getRegionLength(0));
 
     return rcv_nxt;
 }
@@ -87,7 +87,7 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32_t seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 
-    if (reorderBuffer.empty())
+    if (reorderBuffer.isEmpty())
         return nullptr;
 
     auto chunk = reorderBuffer.popData();
@@ -137,8 +137,8 @@ uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
     int64_t fs = seqToOffset(fromSeqNum);
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
-        if (reorderBuffer.getRegionOffset(i) <= fs && fs < reorderBuffer.getRegionEndOffset(i))
-            return offsetToSeq(reorderBuffer.getRegionOffset(i));
+        if (reorderBuffer.getRegionStartOffset(i) <= fs && fs < reorderBuffer.getRegionEndOffset(i))
+            return offsetToSeq(reorderBuffer.getRegionStartOffset(i));
     }
 
     return fromSeqNum;
@@ -149,7 +149,7 @@ uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
     int64_t fs = seqToOffset(toSeqNum);
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
-        if (reorderBuffer.getRegionOffset(i) < fs && fs <= reorderBuffer.getRegionEndOffset(i))
+        if (reorderBuffer.getRegionStartOffset(i) < fs && fs <= reorderBuffer.getRegionEndOffset(i))
             return offsetToSeq(reorderBuffer.getRegionEndOffset(i));
     }
 
@@ -160,7 +160,7 @@ uint32 TCPVirtualDataRcvQueue::getFirstSeqNo()
 {
     if (reorderBuffer.getNumRegions() == 0)
         return rcv_nxt;
-    return seqMin(offsetToSeq(reorderBuffer.getRegionOffset(0)), rcv_nxt);
+    return seqMin(offsetToSeq(reorderBuffer.getRegionStartOffset(0)), rcv_nxt);
 }
 
 } // namespace tcp
