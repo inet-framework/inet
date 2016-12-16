@@ -54,15 +54,6 @@ class INET_API ChunkQueue : public cNamedObject
     int64_t getPoppedByteCount() const { return poppedByteCount; }
     //@}
 
-    /** @name Mutability related functions */
-    //@{
-    bool isContentsImmutable() const { return contents != nullptr && contents->isImmutable(); }
-    bool isContentsMutable() const { return contents == nullptr && !contents->isMutable(); }
-    void assertContentsMutable() const { assert(isContentsMutable()); }
-    void assertContentsImmutable() const { assert(isContentsImmutable()); }
-    void markContentsImmutable() { contents->markImmutable(); }
-    //@}
-
     /** @name Querying data related functions */
     //@{
     std::shared_ptr<Chunk> peek(int64_t length = -1) const;
