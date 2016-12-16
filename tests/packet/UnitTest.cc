@@ -801,6 +801,7 @@ static void testPeeking()
     packet2.append(std::make_shared<BytesChunk>(makeVector(10)));
     packet2.append(std::make_shared<BytesChunk>(makeVector(10)));
     packet2.append(std::make_shared<BytesChunk>(makeVector(10)));
+    packet2.markContentsImmutable();
     const auto& chunk3 = packet2.popHeader(15);
     const auto& chunk4 = packet2.popHeader(15);
     assert(chunk3 != nullptr);
