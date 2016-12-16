@@ -110,6 +110,7 @@ namespace inet {
 // TODO: consider not allowing appending mutable chunks?
 // TODO: consider adding a simplify function as peek(0, getChunkLength())?
 // TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
+// TODO: consider extracting isInsertAtBeginningSupported? from insertAtBeginning and isRemoveAtEndSupported from removeAtEnd, etc.
 // TODO: when peeking an incomplete fixed size header, what does getChunkLength() return for such a header?
 // TODO: peek is misleading with BytesChunk and default length, consider introducing an enum to replace -1 length values
 // TODO: chunks may be incorrect/incomplete/improper, this is inconvenient for each protocol to check all chunks in the data part of the packet
@@ -244,16 +245,13 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     template <typename T>
     std::shared_ptr<T> doPeek(const Iterator& iterator, int64_t length = -1) const {
-        if (isMutable())
+        assertImmutable();
+        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
+        chunk->markImmutable();
+        if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
+            return std::dynamic_pointer_cast<T>(chunk);
+        else
             return nullptr;
-        else {
-            const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
-            chunk->markImmutable();
-            if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
-                return std::dynamic_pointer_cast<T>(chunk);
-            else
-                return nullptr;
-        }
     }
 
   public:
