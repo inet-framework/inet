@@ -128,6 +128,57 @@ Step 19:
 		SOLVED
 	- cars don't know the route to videoStreamServer
 		SOLVED
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+- Step01
+PIPA	- Kell egy uj network
+PIPA	- init megváltoztatni
+PIPA	- A többi networkot hátrébb kell tolni
+PIPA	- iniben a networkok nevét eltolni
 
+- Step02
+PIPA	- új pikcsör a resultsba axis nélkül
+
+- Step03
+PIPA	- Kell egy uj network
+QL	- init megváltoztatni: SceneOsgEarthVisualizer-t használunk, ehhez muszáj coordinateSystemModule
+PIPA	- A többi networkot hátrébb kell tolni
+PIPA	- iniben a networkok nevét eltolni
+
+- Step07
+	- gif movement trail nélkül hogy confusing legyen
+PIPA	- velocityArrowScale-t belőni
+
+- Step17 ini
+PIPA- configurationD --> configurationF
+
+- Step20 ini
+PIPA- configurationF --> configurationH
+
+- Goals
+PIPA	- Step1
+PIPA	- Step2
+PIPA	- Step3
+QL	- Step4: kell ez egyáltalán?
+WIP	- Step5
+WIP	- Step6
+WIP	- Step7
+WIP	- Step8
+WIP	- Step9
+WIP	- Step10
+	- Step11
+	- Step12
+	- Step13
+	- Step14
+	- Step15
+	- Step16
+	- Step17
+	- Step18
+	- Step19
+	- Step20
+	- Step21
+	- Step22
+	- Step23
+	- Step24
+	- StepConclusion
 
 

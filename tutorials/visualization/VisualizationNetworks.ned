@@ -49,14 +49,35 @@ network VisualizationA
             parameters:
                 @display("p=100,50");
         }
-        coordinateSystem: OsgGeographicCoordinateSystem {
-            parameters:
-                @display("p=100,150");
-        }
+        
 }
 //#### doxygen marker
 
 network VisualizationB extends VisualizationA
+{
+    parameters:
+        @display("bgb=0,0");
+    submodules:
+		coordinateSystem: OsgGeographicCoordinateSystem {
+            parameters:
+                @display("p=100,150");
+		}
+}
+//#### doxygen marker
+
+network VisualizationC extends VisualizationB
+{
+    parameters:
+        @display("bgb=0,0");
+//    submodules:
+//		coordinateSystem: OsgGeographicCoordinateSystem {
+//            parameters:
+//                @display("p=100,150");
+//        }
+}
+//#### doxygen marker
+
+network VisualizationD extends VisualizationC
 {
     parameters:
         @display("bgb=0,0");
@@ -84,7 +105,7 @@ network VisualizationB extends VisualizationA
 }
 //#### doxygen marker
 
-network VisualizationC extends VisualizationB
+network VisualizationE extends VisualizationD
 {
     parameters:
         @display("bgb=0,0");
@@ -112,9 +133,9 @@ network VisualizationC extends VisualizationB
 }
 //#### doxygen marker
 
-network VisualizationD extends VisualizationC
+network VisualizationF extends VisualizationE
 {
-    parameters:
+	parameters:
         @display("bgb=0,0");
     submodules:
         accessPoint1: AccessPoint {
@@ -131,8 +152,10 @@ network VisualizationD extends VisualizationC
 }
 //#### doxygen marker
 
-network VisualizationE extends VisualizationD
+network VisualizationG extends VisualizationF
 {
+    parameters:
+        @display("bgb=0,0");
     submodules:
         physicalEnvironment: PhysicalEnvironment {
             parameters:
@@ -141,8 +164,10 @@ network VisualizationE extends VisualizationD
 }
 //#### doxygen marker
 
-network VisualizationF extends VisualizationE
+network VisualizationH extends VisualizationG
 {
+    parameters:
+        @display("bgb=0,0");
     submodules:
         car: WirelessHost {
             @display("p=215,122");

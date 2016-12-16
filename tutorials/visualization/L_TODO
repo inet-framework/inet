@@ -35,5 +35,11 @@
 - mediumVisualizer.transmissionImage-nek és mediumVisualizer.receptionImage-nek, nem lehetne default-ból valami képe?
 
 - RouteVisualizerBase.lineStyle paraméter direkt nincs?
-
+--------------------------------------------------------------------------------------------------------------------------------
 - a playground hol latszik, hol meg nem, a kamera allasatol es a zoomtol fuggoen
+
+- mediumVisualizerBase-ben displayCommunicationRange kommentje nem jó, "...ENABLED by default" --> "... DISABLED by default"
+
+- Step2-ben SceneOsgEarthVisualizer-t használunk, ehhez muszáj coordinateSystemModule. Vagy a SceneOsgEarthVisualizer-t kell átírni, vagy a Step2-t & Step3-t
+
+- .osgModelColor = "red" nem működik a boxman-eken
