@@ -91,7 +91,8 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
         else if (nextRegion.data->insertAtBeginning(previousRegion.data)) {
             // merge into next
             previousRegion.data = nullptr;
-            nextRegion.data = nextRegion.data->peek(0, previousRegion.data->getChunkLength());
+            nextRegion.data = nextRegion.data->peek(0, nextRegion.data->getChunkLength());
+            nextRegion.offset = previousRegion.offset;
         }
         else {
             // merge as a sequence
