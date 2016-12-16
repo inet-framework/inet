@@ -931,12 +931,18 @@ static void testChunkBuffer()
     ChunkBuffer buffer8;
     buffer8.replace(0, std::make_shared<ByteCountChunk>(10));
     buffer8.replace(10, std::make_shared<ByteCountChunk>(10));
-    buffer8.replace(5, std::make_shared<BytesChunk>(makeVector(10)));
+    buffer8.replace(3, std::make_shared<BytesChunk>(makeVector(10)));
+    assert(buffer8.getNumRegions() == 1);
     const auto& sequenceChunk1 = std::dynamic_pointer_cast<SequenceChunk>(buffer8.getRegionData(0));
-    sequenceChunk1->markImmutable();
-    const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(sequenceChunk1->peek(5, 10));
-    assert(buffer7.getNumRegions() == 1);
     assert(sequenceChunk1 != nullptr);
+    sequenceChunk1->markImmutable();
+    const auto& byteCountChunk3 = std::dynamic_pointer_cast<ByteCountChunk>(sequenceChunk1->peek(0, 3));
+    assert(byteCountChunk3 != nullptr);
+    assert(byteCountChunk3->getChunkLength() == 3);
+    const auto& byteCountChunk4 = std::dynamic_pointer_cast<ByteCountChunk>(sequenceChunk1->peek(13, 7));
+    assert(byteCountChunk4 != nullptr);
+    assert(byteCountChunk4->getChunkLength() == 7);
+    const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(sequenceChunk1->peek(3, 10));
     assert(bytesChunk2 != nullptr);
     assert(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
 }
