@@ -100,8 +100,11 @@ std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, int64_t le
         return nullptr;
     else if (iterator.getPosition() == 0 && (length == -1 || length == this->length))
         return const_cast<ByteCountChunk *>(this)->shared_from_this();
-    else
-        return std::make_shared<ByteCountChunk>(length == -1 ? getChunkLength() - iterator.getPosition() : length);
+    else {
+        auto result = std::make_shared<ByteCountChunk>(length == -1 ? getChunkLength() - iterator.getPosition() : length);
+        result->markImmutable();
+        return result;
+    }
 }
 
 std::string ByteCountChunk::str() const

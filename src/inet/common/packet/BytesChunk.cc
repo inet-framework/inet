@@ -108,8 +108,12 @@ std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t length
         return nullptr;
     else if (iterator.getPosition() == 0 && (length == -1 || length == bytes.size()))
         return const_cast<BytesChunk *>(this)->shared_from_this();
-    else
-        return std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition(), length == -1 ? bytes.end() : bytes.begin() + iterator.getPosition() + length));
+    else {
+        assertImmutable();
+        auto result = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition(), length == -1 ? bytes.end() : bytes.begin() + iterator.getPosition() + length));
+        result->markImmutable();
+        return result;
+    }
 }
 
 std::string BytesChunk::str() const
