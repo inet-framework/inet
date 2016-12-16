@@ -1,5 +1,5 @@
 /**
-@mainpage Visualization Tutorial for the INET Framework -- Part 1
+@mainpage Visualization Tutorial for the INET Framework
 In this tutorial we show you, how to use the visualization module in the INET Framework.
 The tutorial contains a series of simulation models, numbered from 1 through 22.
 The models are of increasing complexity – they start from the basics and in each step, they introduce new INET features and concepts related to visualization module.
@@ -71,14 +71,14 @@ for visualizations. In the first step we create a model with INET visualizations
 
 @page step2 Step 2 - Showing Boston downtown
 
-@nav{index,step2}
+@nav{step1,step3}
 
-@section s1goals Goals
+@section s2goals Goals
 In network simulation it's often desirable to have a real world context. Although displaying a map
 doesn't directly affect the outcome of the simulation, nevertheless it still facilitates understanding.
 In this step we display a street map of Boston downtown.
 
-@section s1model The model
+@section s2model The model
 
 Here is the NED file of the network:
 @dontinclude VisualizationNetworks.ned
@@ -101,7 +101,7 @@ Besides these options we turn off the playground shading and configure the opaci
 We need to make the playground transparent, because it's over the map, and later if we place a node, we can't see the map under of the area from the origin to the node. 
 With the <tt>axisLength</tt> parameter we can change the axis' size on the map.
 
-@section s1results Results
+@section s2results Results
 
 When we start the simulation we can see what we expected. 
 There's the map of Boston downtown with axis.
@@ -115,60 +115,60 @@ In the top right corner of the playground, we can change between 3D Scene view m
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{index,step2}
+@nav{step1,step3}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step3 Step 3 - Showing the playground
 
-@nav{index,step3}
+@nav{step2,step4}
 
-@section s1goals Goals
+@section s3goals Goals
 Even though it's possible to express the position of network nodes, the movement of mobile nodes,
 the geometry of physical objects using geographic locations, internally INET uses a Cartesian
 coordinate system called the playground. Such coordinates may appear in the runtime GUI or the
 simulation log or even in the debugger. To help you deal with that, tn this step we show the
 playground along with its coordinate axes.
 
-@section s1model The model
+@section s3model The model
 
-@section s1results Results
+@section s3results Results
 
-@nav{index,step2}
+@nav{step2,step4}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step4 Step 4 - Adding static 3D objects to the scene (WIP)
 
-@nav{step1,step3}
+@nav{step3,step5}
 
-@section s2goals Goals
+@section s4goals Goals
 In tis step we extend the scene with a 3D object model. 
 
-@section s2model The model
+@section s4model The model
 
-@section s2results Results
+@section s4results Results
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step1,step3}
+@nav{step3,step5}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step5 Step 5 - Displaying communication/interference range
 
-@nav{step2,step4}
+@nav{step4, step6}
 
-@section s3goals Goals
+@section s5goals Goals
 In this step we display the communication and interfaces range of wireless nodes in the network.
 
 Later we want to see communication between these network nodes, so we have to place them in each other's communication range.
 In this step we want to visualize these ranges.
 
-@section s3model The model
+@section s5model The model
 
 TODO: Now we extend our model with two pedestrians, and an Access Point.
 
@@ -194,7 +194,7 @@ Below, there is the appropriate part of the ini file:
 @skipline [Config Visualization03]
 @until ####
 
-@section s3results Results
+@section s5results Results
 
 If we run the simulation in the 3D Scene view mode, we can see the three nodes and circles around them.
 Each node is in the center of a circle, that circle is the node's communication range.
@@ -210,16 +210,16 @@ In Module view mode there's a bubble message when its happens.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step2,step4}
+@nav{step4, step6}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step6 Step 6 - Using 3D models for network nodes
 
-@nav{step3,step5}
+@nav{step5, step7}
 
-@section s4goals Goals
+@section s6goals Goals
 
 The default icon for the pedestrians is a cellphone. In this step we replace the default icon with an 3D animated model.
 
@@ -227,7 +227,7 @@ The default icon for the pedestrians is a cellphone. In this step we replace the
 <i>Pedestrian0</i> and <i>pedestrian1</i> are <tt>WirelessHost</tt> node type, so by default their icon is a cellphone.
 We want to show, how to change network nodes' default icon.
 
-@section s4model The model
+@section s6model The model
 
 In INET Framework it's possible to change device appearance to an external 3D osg model.
 It's really simple.
@@ -242,7 +242,7 @@ The three numbers are in for the rot keyword mean the rotation of the 3D model a
 @skipline [Config Visualization04]
 @until ####
 
-@section s4results Results
+@section s6results Results
 
 In Module view mode there's no difference compared to the simulation before this.
 But in 3D Scene view mode instead of phones we see walker boxmans.
@@ -250,7 +250,7 @@ But in 3D Scene view mode instead of phones we see walker boxmans.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step3,step5}
+@nav{step5, step7}
 @fixupini
 
 <!------------------------------------------------------------------------>
@@ -258,14 +258,14 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @page step7 Step 7 - Displaying recent movement
 
-@nav{step4,step6}
+@nav{step6, step8}
 
-@section s5goals Goals
+@section s7goals Goals
 
 When nodes move around in a network, it's often difficult to follow their movement. 
 In this step we visualize the recent movement trajectory of network nodes.
 
-@section s5model The model
+@section s7model The model
 
 The network nodes movement handled by the <tt>Mobility</tt> submodule.
 To visualize that, we need to use <tt>MobilityVisualizer</tt>.
@@ -287,7 +287,7 @@ The <tt>changeInterval</tt> is the frequency of changing speed and angle, the <t
 After that we need to add some visualizer parameters.
 We display a trail, that shows the passed route, and we visualize an arrow, that represents the velocity of the pedestrians.
 
-@section s5results Results
+@section s7results Results
 
 It is advisable to run the simulation in Fast mode, because the nodes move very slowly if viewed in Normal mode.
 
@@ -301,21 +301,21 @@ And here's that in 3D Scene view mode:
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step4,step6}
+@nav{step6, step8}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step8 Step 8 - Showing IP adresses
 
-@nav{step5,step7}
+@nav{step7,step9}
 
-@section s6goals Goals
+@section s8goals Goals
 
 Understanding network traffic often requires indentifying nodes based on their IP addresses.
 In this step we show the IP addresses assigned by the network configurator. 
 
-@section s6model The model
+@section s8model The model
 
 If we want to see the network nodes' IP addresses we have to set the parameters of the <tt>InterfaceTableVisualizer</tt>.
 Here is the configuration:
@@ -334,7 +334,7 @@ These settings are optional, that may make the IP addresses clearly visible.
 With <tt>InterfaceTableVisualizer</tt> we can display not only the IP address of a NIC, but the MAC address too.
 To that we need to change the <tt>content</tt> parameter to <tt>macAddress</tt>.
 
-@section s6results Results
+@section s8results Results
 
 If we run the simulation, we can see a yellow bubble above each pedestrian with its wlan NIC IP address.
 <img src="step6_result5.gif">
@@ -347,23 +347,23 @@ If we set the content parameter to <tt>macAddress</tt>, we can see the given NIC
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step5,step7}
+@nav{step7,step9}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step9 Step 9 - Showing wifi association
 
-@nav{step6,step8}
+@nav{step8,step10}
 
-@section s7goals Goals
+@section s9goals Goals
 
 In infrastructure mode wireless nodes have to associate with access points to be able to communicate.
 The association may change over time, or at any given time there might be several access points for a
 wireless node to associate with. In general, it's difficult to tell which nodes are associated with which access points.
 In this step we enable displaying the association between wireless nodes and access points.
 
-@section s7model The model
+@section s9model The model
 
 The pedestrians are in the access point's communication range, so they can associate with that.
 
@@ -377,7 +377,7 @@ Here is the appropriate configuration:
 @skipline [Config Visualization07]
 @until ####
 
-@section s7results Results
+@section s9results Results
 
 In Module view mode we can monitor the association process, we see all messages between the nodes.
 When a pedestrian send an <tt>Assoc</tt> message, the access point in its communication range receive that, and a signal sign appear above the access point.
@@ -391,22 +391,22 @@ In 3D view mode as a result of the association process the signal sing appears a
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step6,step8}
+@nav{step8,step10}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step10 Step 10 - Displaying transmissions and receptions
 
-@nav{step7,step9}
+@nav{step9,step11}
 
-@section s8goals Goals
+@section s10goals Goals
 
 We know that, pedestrians associate with the accessPoint.
 We want to simulate a VoIP communication between them, but in 3D view mode, we can't see any communication.
 We want to show how to display who transmits and who receives signals at a given moment.
 
-@section s8model The model
+@section s10model The model
 
 After the successful association process we can start the VoIP application between the pedestrians, so we need to add one udp application to them.
 The pedestrian0 will be the sender and the pedestrian1 will be the receiver.
@@ -426,7 +426,7 @@ Configuration:
 @skipline [Config Visualization08]
 @until ####
 
-@section s8results Results
+@section s10results Results
 
 If we start the simulation, we can see clearly, who is the transmitter, and who are the receivers.
 The signs appear, when a signal arrives or leaves the wlan NIC.
@@ -435,21 +435,21 @@ The signs appear, when a signal arrives or leaves the wlan NIC.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step7,step9}
+@nav{step9,step11}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step11 Step 11 - Showing propagating signals
 
-@nav{step8,step10}
+@nav{step10,step12}
 
-@section s9goals Goals
+@section s11goals Goals
 
 The communication works, we can see who is the sender and the receiver, but we don't see the signal.
 In this step we want to display the signal propagation.
 
-@section s9model The model
+@section s11model The model
 
 in the previous step we configured the communication already, so now we only have to show that.
 To this we need to turn on the mediumVisualizer's displaySignals parameter,
@@ -464,7 +464,7 @@ If we set both, we can see a ring on the ground, and a sphere in the air. This i
 @skipline [Config Visualization09]
 @until ####
 
-@section s9results Results
+@section s11results Results
 
 When we start the simulation in Module view mode, we can see how the signals propagate. We can see each signal has a beginning and an end.
 Next to the ring, there is a label, that shows the message type.
@@ -483,22 +483,22 @@ Sphere signal propagation:
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step8,step10}
+@nav{step10,step12}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step12 Step 12 - Showing active physical links
 
-@nav{step9,step11}
+@nav{step11,step13}
 
-@section s10goals Goals
+@section s12goals Goals
 
 In this step we want to show the active physical links of the VoIP communication.
 Physical links appear, when a node receives VoIP message. With this visualizer
 we can monitor which network node transmits VoIP message and which node receives that.
 
-@section s10model The model
+@section s12model The model
 
 The communication is given, we need to handle the visualizer only.
 We can turn off some visualizer, that can confuse us.
@@ -515,7 +515,7 @@ Here is the configuration:
 @skipline [Config Visualization10]
 @until ####
 
-@section s10results Results
+@section s12results Results
 
 The VoIP application starts at 1s. Then the pedestrian0 sends the first VoIP message. Because only
 the accessPoint0 is in its communication range, only between them appears an arrow. But when the sender
@@ -526,23 +526,23 @@ to the receiver.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step9,step11}
+@nav{step11,step13}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step13 Step 13 - Showing active data links
 
-@nav{step10,step12}
+@nav{step12,step14}
 
-@section s11goals Goals
+@section s13goals Goals
 
 In this step we want to display the active data links. Data links are shown,
 when a network node receives a packet and it has to do something with it.
 For example its Layer 2 address is the packet's destination or
 the device has to switch towards the destination.
 
-@section s11model The model
+@section s13model The model
 
 The configuration is similar as the physical link visualizer's settings.
 We can adjust the same parameters, such as lineColor, lineWidth, lineStyle,
@@ -555,7 +555,7 @@ Configuration:
 @skipline [Config Visualization11]
 @until ####
 
-@section s11results Results
+@section s13results Results
 
 We hide the physicalLinkVisualizer, because it's confusing. When the VoIP
 communications starts, and a packet reach the destination an arrow appears
@@ -564,16 +564,16 @@ links.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step10,step12}
+@nav{step12,step14}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step14 Step 14 - Displaying statistic
 
-@nav{step11,step13}
+@nav{step13,step15}
 
-@section s12goals Goals
+@section s14goals Goals
 
 The VoIP application is working right now. We want to create a statistic from that,
 and print it out to the screen. Our statistic will be the playout delay.
@@ -584,7 +584,7 @@ is the playout delay buffer. The playout delay buffer must buffer these packets 
  them out in a steady stream to the digital signal processors (DSPs) to be converted back
  to an analog audio stream. The playout delay buffer is also sometimes referred to as the de-jitter buffer.
 
-@section s12model The model
+@section s14model The model
 
 Communication is still the same. Pedestrian0 sends VoIP stream to pedestrian1 through accessPoint0.
 We need to configure only the statisticVisualizer, because we set the adaptive playout true,
@@ -604,7 +604,7 @@ The configuration:
 @skipline [Config Visualization12]
 @until ####
 
-@section s12results Results
+@section s14results Results
 
 When we start the simulation here's what happens:
 
@@ -616,23 +616,23 @@ with that font and background color, that we set.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step11,step13}
+@nav{step13,step15}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step15 Step 15 - Showing configured routing tables
 
-@nav{step12,step14}
+@nav{step14,step16}
 
-@section s13goals Goals
+@section s15goals Goals
 
 After so many steps we extend our network. We add a pedestrian, who watch a video stream in the park.
 To this we need a Server to another network. To find ways between video stream server and the
 pedestrian, who want to watch video stream, we need a router.<br>
 We want to see how can the devices reach the server. To this, in this step we will show routing table entries.
 
-@section s13model The model
+@section s15model The model
 
 The video streamed by the videoStreamserver, that connects to the router0 through switch0.
 We need the switch, because later we want to add more nodes to that subnetwork.
@@ -664,7 +664,7 @@ The configuration:
 @skipline [Config Visualization13]
 @until ####
 
-@section s13results Results
+@section s15results Results
 
 When we start the simulation we can see that, the routingTableVisualizer draw arrows
 to represent the routes. This is because by default netmask routes, default routes
@@ -680,16 +680,16 @@ and in response the server starts the video stream.
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step12,step14}
+@nav{step14,step16}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step16 Step 16 - Displaying 802.11 channel access state
 
-@nav{step13,step15}
+@nav{step15,step17}
 
-@section s14goals Goals
+@section s16goals Goals
 
 CSMA/CA in computer networking, is a network multiple access method
 in which carrier sensing is used, but nodes attempt to avoid collisions
@@ -700,7 +700,7 @@ Network nodes can be in different channel access states like <i>idle</i>,
 <i>owning</i>, <i>ifs+back off</i>, that show, who transmit on the channel
 and who listen. We want to display that in this step.
 
-@section s14model The model
+@section s16model The model
 
 Firstly we hide some visualizers, because they are distracting.
 The communication is the same as in the previous step, we have to configure only the visualizer.
@@ -714,7 +714,7 @@ The module parameter specifies the submodules of network nodes, and the content
 determines what is displayed on network nodes. In addition we can adjust the
 background color, the font color, and the opacity. These are optional settings.
 
-@section s14results Results
+@section s16results Results
 
 Here's what happens, when the simulation is running:
 [gif simulation is running]
@@ -729,16 +729,16 @@ After that the the network node starts transmitting the data, and it's owning th
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step13,step15}
+@nav{step15,step17}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step17 Step 17 - Showing active network routes
 
-@nav{step14,step16}
+@nav{step16,step18}
 
-@section s15goals Goals
+@section s17goals Goals
 
 In this step we want to show active network routes. It's similar to
 showing active physical links, and active data links, but network routes
@@ -748,7 +748,7 @@ In furthermore we make the model more interesting by adding more nodes,
 change the routing protocol to RIP, and assign address via DHCP protocol
 to the wireless nodes.
 
-@section s15model The model
+@section s17model The model
 
 Firstly we have to edit the configurator. We make an xml file (in this case configurationD.xml),
 to set the static ip addresses. Static addresses are the routers' interfaces and
@@ -777,43 +777,9 @@ The configuration:
 @skipline [Config Visualization15]
 @until ####
 
-@section s15results Results
-
-
-
-Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
-
-@nav{step14,step16}
-@fixupini
-
-<!------------------------------------------------------------------------>
-
-@page step16 Step 16 -
-
-@nav{step15,step17}
-
-@section s16goals Goals
-
-@section s16model The model
-
-@section s16results Results
-
-Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
-
-@nav{step15,step17}
-@fixupini
-
-<!------------------------------------------------------------------------>
-
-@page step17 Step 17 -
-
-@nav{step16,step18}
-
-@section s17goals Goals
-
-@section s17model The model
-
 @section s17results Results
+
+
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -885,14 +851,14 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step12,conclusion}
+@nav{step20,step22}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page step22 Step 22 -
 
-@nav{step21,conclusion}
+@nav{step21,step23}
 
 @section s22goals Goals
 
@@ -902,18 +868,52 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step21,conclusion}
+@nav{step21,step23}
+@fixupini
+
+<!------------------------------------------------------------------------>
+
+@page step23 Step 23 -
+
+@nav{step22,step24}
+
+@section s23goals Goals
+
+@section s23model The model
+
+@section s23results Results
+
+Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
+
+@nav{step22,step24}
+@fixupini
+
+<!------------------------------------------------------------------------>
+
+@page step24 Step 24 -
+
+@nav{step23,conclusion}
+
+@section s24goals Goals
+
+@section s24model The model
+
+@section s24results Results
+
+Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
+
+@nav{step23,conclusion}
 @fixupini
 
 <!------------------------------------------------------------------------>
 
 @page conclusion Conclusion -
 
-@nav{step22,index}
+@nav{step24,index}
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
-@nav{step22,index}
+@nav{step24,index}
 @fixupini
 
 <!------------------------------------------------------------------------>*/
