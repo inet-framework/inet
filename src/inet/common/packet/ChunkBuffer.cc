@@ -33,7 +33,10 @@ ChunkBuffer::ChunkBuffer(const ChunkBuffer& other) :
 
 void ChunkBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end)
 {
-    regions.erase(std::remove_if(begin, end, [](const Region& region) { return region.data == nullptr; }), regions.end());
+    // NOTE: begin and end are inclusive
+    assert(begin != regions.end());
+    assert(end != regions.end());
+    regions.erase(std::remove_if(begin, end + 1, [](const Region& region) { return region.data == nullptr; }), end + 1);
 }
 
 void ChunkBuffer::sliceRegions(Region& newRegion)
@@ -81,6 +84,8 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
 
 void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 {
+    assert(previousRegion.data != nullptr);
+    assert(nextRegion.data != nullptr);
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
         if (previousRegion.data->canInsertAtEnd(nextRegion.data)) {
@@ -130,12 +135,12 @@ void ChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
     else if (regions.back().getEndOffset() <= offset) {
         regions.push_back(newRegion);
         mergeRegions(regions[regions.size() - 2], regions[regions.size() - 1]);
-        eraseEmptyRegions(regions.end() - 2, regions.end());
+        eraseEmptyRegions(regions.end() - 2, regions.end() - 1);
     }
     else if (offset + chunk->getChunkLength() <= regions.front().getStartOffset()) {
         regions.insert(regions.begin(), newRegion);
         mergeRegions(regions[0], regions[1]);
-        eraseEmptyRegions(regions.begin(), regions.begin() + 2);
+        eraseEmptyRegions(regions.begin(), regions.begin() + 1);
     }
     else {
         auto it = std::upper_bound(regions.begin(), regions.end(), newRegion, Region::compareStartOffset);
@@ -177,7 +182,11 @@ std::string ChunkBuffer::str() const
             os << " | ";
         else
             first = false;
-        os << "offset = " << region.offset << ", chunk = " << region.data;
+        os << "offset = " << region.offset << ", chunk = ";
+        if (region.data == nullptr)
+            os << "<nullptr>";
+        else
+            os << region.data;
     }
     os << "}";
     return os.str();
