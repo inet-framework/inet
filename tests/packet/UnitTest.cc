@@ -959,6 +959,45 @@ static void testChunkBuffer()
     const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(sequenceChunk1->peek(3, 10));
     assert(bytesChunk2 != nullptr);
     assert(std::equal(bytesChunk2->getBytes().begin(), bytesChunk2->getBytes().end(), makeVector(10).begin()));
+
+    // 9. random test
+    cLCG32 random;
+    uint64_t bufferSize = 100;
+    uint64_t maxChunkLength = 10;
+    ChunkBuffer buffer9;
+    uint8_t *buffer10 = new uint8_t[bufferSize];
+    memset(buffer10, 0, bufferSize);
+    for (int c = 0; c < 1000; c++) {
+        int64_t chunkOffset = random.intRand(bufferSize - maxChunkLength);
+        int64_t chunkLength = random.intRand(maxChunkLength) + 1;
+        // set data in buffer9
+        auto chunk = std::make_shared<BytesChunk>();
+        std::vector<uint8_t> bytes;
+        for (int i = 0; i < chunkLength; i++)
+            bytes.push_back(i & 0xFF);
+        chunk->setBytes(bytes);
+        chunk->markImmutable();
+        std::cout << "Replace " << c << ": offset = " << chunkOffset << ", chunk = " << chunk << std::endl;
+        if (c == 13)
+            std::cout << "";
+        buffer9.replace(chunkOffset, chunk);
+        // set data in buffer10
+        for (int i = 0; i < chunkLength; i++)
+            *(buffer10 + chunkOffset + i) = i & 0xFF;
+        // compare buffers
+        std::cout << "ChunkBuffer: " << buffer9 << std::endl;
+        std::cout << "PlainBuffer: ";
+        for (int i = 0; i < bufferSize; i++)
+            printf("%d", *(buffer10 + i));
+        std::cout << std::endl << std::endl;
+        for (int i = 0; i < buffer9.getNumRegions(); i++) {
+            auto data = std::dynamic_pointer_cast<BytesChunk>(buffer9.getRegionData(i));
+            auto offset = buffer9.getRegionStartOffset(i);
+            for (int j = 0; j < data->getChunkLength(); j++)
+                assert(data->getByte(j) == *(buffer10 + offset + j));
+        }
+    }
+    delete [] buffer10;
 }
 
 static void testReassemblyBuffer()
