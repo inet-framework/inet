@@ -31,7 +31,8 @@ class INET_API ChunkBuffer : public cNamedObject
       public:
         int64_t offset;
         /**
-         * This chunk is always mutable to allow efficient merging with newly added chunks.
+         * This chunk is always immutable to allow arbitrary peeking. Nevertheless
+         * it's reused if possible to allow efficient merging with newly added chunks.
          */
         std::shared_ptr<Chunk> data;
 
