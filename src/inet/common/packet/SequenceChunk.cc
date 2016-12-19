@@ -134,6 +134,7 @@ bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     if (!chunks.empty()) {
         auto& firstChunk = chunks.front();
+        // TODO: simplify
         if (firstChunk->isImmutable()) {
             auto mergedChunk = firstChunk->dupShared();
             if (mergedChunk->canInsertAtBeginning(chunk)) {
@@ -155,6 +156,7 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
 {
     if (!chunks.empty()) {
         auto& lastChunk = chunks.back();
+        // TODO: simplify
         if (lastChunk->isImmutable()) {
             auto mergedChunk = lastChunk->dupShared();
             if (mergedChunk->canInsertAtEnd(chunk)) {

@@ -153,6 +153,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
     assert(headerIterator.getPosition() == 0);
+    // TODO: require chunk to be immutable
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
@@ -171,6 +172,7 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
     assert(trailerIterator.getPosition() == 0);
+    // TODO: require chunk to be immutable
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
