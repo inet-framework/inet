@@ -36,6 +36,7 @@ SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
 
 std::shared_ptr<Chunk> SequenceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
+    assert(chunk->isImmutable());
     auto sequenceChunk = std::make_shared<SequenceChunk>();
     sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));
     return sequenceChunk;

@@ -39,7 +39,7 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset, int6
     offset(offset),
     length(length == -1 ? chunk->getChunkLength() - offset : length)
 {
-    chunk->assertImmutable();
+    assert(chunk->isImmutable());
     int64_t chunkLength = chunk->getChunkLength();
     assert(0 <= this->offset && this->offset <= chunkLength);
     assert(0 <= this->length && this->offset + this->length <= chunkLength);
@@ -47,7 +47,7 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset, int6
 
 std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
 {
-    chunk->assertImmutable();
+    assert(chunk->isImmutable());
     int64_t chunkLength = chunk->getChunkLength();
     int64_t sliceLength = length == -1 ? chunkLength - offset : length;
     assert(0 <= offset && offset <= chunkLength);
