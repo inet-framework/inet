@@ -834,39 +834,39 @@ static void testSequence()
 
 static void testChunkQueue()
 {
-    // 1. buffer provides ByteCountChunks by default if it contains a ByteCountChunk only
-    ChunkQueue buffer1;
+    // 1. queue provides ByteCountChunks by default if it contains a ByteCountChunk only
+    ChunkQueue queue1;
     auto byteCountChunk1 = std::make_shared<ByteCountChunk>(10);
     byteCountChunk1->markImmutable();
-    buffer1.push(byteCountChunk1);
-    buffer1.push(byteCountChunk1);
-    buffer1.push(byteCountChunk1);
-    const auto& byteCountChunk2 = std::dynamic_pointer_cast<ByteCountChunk>(buffer1.pop(15));
-    const auto& byteCountChunk3 = std::dynamic_pointer_cast<ByteCountChunk>(buffer1.pop(15));
+    queue1.push(byteCountChunk1);
+    queue1.push(byteCountChunk1);
+    queue1.push(byteCountChunk1);
+    const auto& byteCountChunk2 = std::dynamic_pointer_cast<ByteCountChunk>(queue1.pop(15));
+    const auto& byteCountChunk3 = std::dynamic_pointer_cast<ByteCountChunk>(queue1.pop(15));
     assert(byteCountChunk2 != nullptr);
     assert(byteCountChunk3 != nullptr);
 
-    // 2. buffer provides BytesChunks by default if it contains a BytesChunk only
-    ChunkQueue buffer2;
+    // 2. queue provides BytesChunks by default if it contains a BytesChunk only
+    ChunkQueue queue2;
     auto bytesChunk1 = std::make_shared<BytesChunk>(makeVector(10));
     bytesChunk1->markImmutable();
-    buffer2.push(bytesChunk1);
-    buffer2.push(bytesChunk1);
-    buffer2.push(bytesChunk1);
-    const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
-    const auto& bytesChunk3 = std::dynamic_pointer_cast<BytesChunk>(buffer2.pop(15));
+    queue2.push(bytesChunk1);
+    queue2.push(bytesChunk1);
+    queue2.push(bytesChunk1);
+    const auto& bytesChunk2 = std::dynamic_pointer_cast<BytesChunk>(queue2.pop(15));
+    const auto& bytesChunk3 = std::dynamic_pointer_cast<BytesChunk>(queue2.pop(15));
     assert(bytesChunk2 != nullptr);
     assert(bytesChunk3 != nullptr);
 
-    // 3. buffer provides reassembled header
-    ChunkQueue buffer3;
+    // 3. queue provides reassembled header
+    ChunkQueue queue3;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     applicationHeader1->setSomeData(42);
     applicationHeader1->markImmutable();
-    buffer3.push(applicationHeader1->peek(0, 5));
-    buffer3.push(applicationHeader1->peek(5, 5));
-    assert(buffer3.has<ApplicationHeader>());
-    const auto& applicationHeader2 = buffer3.pop<ApplicationHeader>();
+    queue3.push(applicationHeader1->peek(0, 5));
+    queue3.push(applicationHeader1->peek(5, 5));
+    assert(queue3.has<ApplicationHeader>());
+    const auto& applicationHeader2 = queue3.pop<ApplicationHeader>();
     assert(applicationHeader2 != nullptr);
     assert(applicationHeader2->getSomeData() == 42);
 }
