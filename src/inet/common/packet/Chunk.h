@@ -272,6 +272,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     bool isImmutable() const { return flags & FLAG_IMMUTABLE; }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
+    virtual void markMutableIfExclusivelyOwned() { assert(shared_from_this().use_count() <= 2); flags &= ~FLAG_IMMUTABLE; }
     virtual void markImmutable() { flags |= FLAG_IMMUTABLE; }
     //@}
 

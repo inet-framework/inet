@@ -83,9 +83,12 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
         contents = chunk;
     else {
         if (contents->canInsertAtEnd(chunk)) {
-            // TODO: avoid duplication if possible by reusing chunk if referred by this buffer only
-            contents = contents->dupShared();
+            if (contents.use_count() <= 2)
+                contents->markMutableIfExclusivelyOwned();
+            else
+                contents = contents->dupShared();
             contents->insertAtEnd(chunk);
+            contents = contents->peek(0, contents->getChunkLength());
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
