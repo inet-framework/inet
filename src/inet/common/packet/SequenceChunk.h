@@ -45,9 +45,6 @@ class INET_API SequenceChunk : public Chunk
     virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, int64_t length) const override;
     virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, int64_t length) const override;
 
-    bool mergeToBeginning(const std::shared_ptr<Chunk>& chunk);
-    bool mergeToEnd(const std::shared_ptr<Chunk>& chunk);
-
     void doInsertToBeginning(const std::shared_ptr<Chunk>& chunk);
     void doInsertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
     void doInsertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
