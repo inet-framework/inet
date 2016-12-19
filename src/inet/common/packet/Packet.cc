@@ -57,7 +57,7 @@ int Packet::getNumChunks() const
 Chunk *Packet::getChunk(int i) const
 {
     assert(contents != nullptr);
-    assert(0 <= i < getNumChunks());
+    assert(0 <= i && i < getNumChunks());
     if (contents->getChunkType() == Chunk::TYPE_SEQUENCE)
         return std::static_pointer_cast<SequenceChunk>(contents)->getChunks()[i].get();
     else
