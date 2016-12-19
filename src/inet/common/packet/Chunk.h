@@ -110,7 +110,6 @@ namespace inet {
 // TODO: consider not allowing appending mutable chunks?
 // TODO: consider adding a simplify function as peek(0, getChunkLength())?
 // TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
-// TODO: consider extracting isInsertAtBeginningSupported? from insertAtBeginning and isRemoveAtEndSupported from removeAtEnd, etc.
 // TODO: when peeking an incomplete fixed size header, what does getChunkLength() return for such a header?
 // TODO: peek is misleading with BytesChunk and default length, consider introducing an enum to replace -1 length values
 // TODO: chunks may be incorrect/incomplete/improper, this is inconvenient for each protocol to check all chunks in the data part of the packet
@@ -327,27 +326,37 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assert(false); }
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assertMutable(); assert(false); }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assert(false); }
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assertMutable(); assert(false); }
     //@}
 
     /** @name Removing data related functions */
     //@{
     /**
+     * Returns true if this chunk is capable of representing the result.
+     */
+    virtual bool canRemoveFromBeginning(int64_t length) { return false; }
+
+    /**
+     * Returns true if this chunk is capable of representing the result.
+     */
+    virtual bool canRemoveFromEnd(int64_t length) { return false; }
+
+    /**
      * Removes the requested number of bytes from the beginning of this chunk
      * and returns true if the removal was successful.
      */
-    virtual bool removeFromBeginning(int64_t length) { assertMutable(); return false; }
+    virtual void removeFromBeginning(int64_t length) { assertMutable(); assert(false); }
 
     /**
      * Removes the requested number of bytes from the end of this chunk and
      * returns true if the removal was successful.
      */
-    virtual bool removeFromEnd(int64_t length) { assertMutable(); return false; }
+    virtual void removeFromEnd(int64_t length) { assertMutable(); assert(false); }
     //@}
 
     /** @name Chunk querying related functions */

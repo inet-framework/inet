@@ -189,7 +189,9 @@ void Packet::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= getPacketLength());
     assert(headerIterator.getPosition() == 0);
-    if (!contents->removeFromBeginning(length))
+    if (contents->canRemoveFromBeginning(length))
+        contents->removeFromBeginning(length);
+    else
         contents = contents->peek(length, contents->getChunkLength() - length);
 }
 
@@ -197,7 +199,9 @@ void Packet::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= getPacketLength());
     assert(trailerIterator.getPosition() == 0);
-    if (!contents->removeFromEnd(length))
+    if (contents->canRemoveFromEnd(length))
+        contents->removeFromEnd(length);
+    else
         contents = contents->peek(0, contents->getChunkLength() - length);
 }
 

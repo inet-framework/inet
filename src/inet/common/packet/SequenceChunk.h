@@ -99,8 +99,11 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Removing data related functions */
     //@{
-    virtual bool removeFromBeginning(int64_t length) override;
-    virtual bool removeFromEnd(int64_t length) override;
+    virtual bool canRemoveFromBeginning(int64_t length) override { return true; }
+    virtual bool canRemoveFromEnd(int64_t length) override { return true; }
+
+    virtual void removeFromBeginning(int64_t length) override;
+    virtual void removeFromEnd(int64_t length) override;
     //@}
 
     /** @name Querying data related functions */

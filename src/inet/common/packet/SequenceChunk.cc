@@ -266,7 +266,7 @@ void SequenceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
         doInsertToEnd(chunk);
 }
 
-bool SequenceChunk::removeFromBeginning(int64_t length)
+void SequenceChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= getChunkLength());
     handleChange();
@@ -286,10 +286,9 @@ bool SequenceChunk::removeFromBeginning(int64_t length)
             break;
     }
     chunks.erase(chunks.begin(), it);
-    return true;
 }
 
-bool SequenceChunk::removeFromEnd(int64_t length)
+void SequenceChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= getChunkLength());
     handleChange();
@@ -309,7 +308,6 @@ bool SequenceChunk::removeFromEnd(int64_t length)
             break;
     }
     chunks.erase((++it).base(), chunks.end());
-    return true;
 }
 
 std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t length) const

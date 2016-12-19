@@ -120,21 +120,19 @@ void SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
     length += otherSliceChunk->length;
 }
 
-bool SliceChunk::removeFromBeginning(int64_t length)
+void SliceChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= this->length);
     handleChange();
     this->offset += length;
     this->length -= length;
-    return true;
 }
 
-bool SliceChunk::removeFromEnd(int64_t length)
+void SliceChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= this->length);
     handleChange();
     this->length -= length;
-    return true;
 }
 
 std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length) const

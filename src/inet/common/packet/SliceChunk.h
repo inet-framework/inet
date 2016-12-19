@@ -85,8 +85,11 @@ class INET_API SliceChunk : public Chunk
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool removeFromBeginning(int64_t length) override;
-    virtual bool removeFromEnd(int64_t length) override;
+    virtual bool canRemoveFromBeginning(int64_t length) override { return false; }
+    virtual bool canRemoveFromEnd(int64_t length) override { return false; }
+
+    virtual void removeFromBeginning(int64_t length) override;
+    virtual void removeFromEnd(int64_t length) override;
 
     virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
 

@@ -85,20 +85,18 @@ void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-bool BytesChunk::removeFromBeginning(int64_t length)
+void BytesChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= bytes.size());
     handleChange();
     bytes.erase(bytes.begin(), bytes.begin() + length);
-    return true;
 }
 
-bool BytesChunk::removeFromEnd(int64_t length)
+void BytesChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= bytes.size());
     handleChange();
     bytes.erase(bytes.end() - length, bytes.end());
-    return true;
 }
 
 std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t length) const

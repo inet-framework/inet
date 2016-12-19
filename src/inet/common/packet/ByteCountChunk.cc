@@ -77,20 +77,18 @@ void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
     length += byteCountChunk->length;
 }
 
-bool ByteCountChunk::removeFromBeginning(int64_t length)
+void ByteCountChunk::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= this->length);
     handleChange();
     this->length -= length;
-    return true;
 }
 
-bool ByteCountChunk::removeFromEnd(int64_t length)
+void ByteCountChunk::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= this->length);
     handleChange();
     this->length -= length;
-    return true;
 }
 
 std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, int64_t length) const
