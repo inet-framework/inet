@@ -295,12 +295,18 @@ void NewReceiver::receiveApplication(Packet *packet)
     EV_DEBUG << "Collecting application data: " << chunk << std::endl;
     applicationData.push(chunk);
     EV_DEBUG << "Buffered application data: " << applicationData << std::endl;
-    if (applicationData.getPoppedByteCount() == 0 && applicationData.has<BytesChunk>(10))
-        EV_DEBUG << "Receiving application data: " << applicationData.pop<BytesChunk>(10) << std::endl;
-    if (applicationData.getPoppedByteCount() == 10 && applicationData.has<ApplicationHeader>())
-        EV_DEBUG << "Receiving application data: " << applicationData.pop<ApplicationHeader>() << std::endl;
-    if (applicationData.getPoppedByteCount() == 20 && applicationData.has<ByteCountChunk>(10))
-        EV_DEBUG << "Receiving application data: " << applicationData.pop<ByteCountChunk>(10) << std::endl;
+    if (applicationData.getPoppedByteCount() == 0 && applicationData.has<BytesChunk>(10)) {
+        const auto& chunk = applicationData.pop<BytesChunk>(10);
+        EV_DEBUG << "Receiving application data: " << chunk << std::endl;
+    }
+    if (applicationData.getPoppedByteCount() == 10 && applicationData.has<ApplicationHeader>()) {
+        const auto& chunk = applicationData.pop<ApplicationHeader>();
+        EV_DEBUG << "Receiving application data: " << chunk << std::endl;
+    }
+    if (applicationData.getPoppedByteCount() == 20 && applicationData.has<ByteCountChunk>(10)) {
+        const auto& chunk = applicationData.pop<ByteCountChunk>(10);
+        EV_DEBUG << "Receiving application data: " << chunk << std::endl;
+    }
     delete packet;
 }
 
