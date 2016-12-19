@@ -193,6 +193,7 @@ void TCPSessionApp::socketEstablished(int connId, void *ptr)
 
 void TCPSessionApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
 {
+#if 0
     // TODO: delete this temp
     Packet *packet = check_and_cast<Packet *>(msg);
     auto chunk = std::dynamic_pointer_cast<BytesChunk>(packet->peekDataAt(0, packet->getDataLength()));
@@ -202,6 +203,7 @@ void TCPSessionApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool 
             if (bytes[i] != (uint8_t)(bytesRcvd + i))
                 throw cRuntimeError("kutyyy");
     }
+#endif
     TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
 }
 
