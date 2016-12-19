@@ -107,6 +107,7 @@ namespace inet {
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
+// TODO: review insert functions for the chunk->insert(chunk) case
 // TODO: consider not allowing appending mutable chunks?
 // TODO: consider adding a simplify function as peek(0, getChunkLength())?
 // TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
@@ -272,7 +273,11 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     bool isImmutable() const { return flags & FLAG_IMMUTABLE; }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    virtual void markMutableIfExclusivelyOwned() { assert(shared_from_this().use_count() <= 2); flags &= ~FLAG_IMMUTABLE; }
+    virtual void markMutableIfExclusivelyOwned() {
+        // NOTE: one for external reference, one for shared_from_this, and one for local variable
+        assert(shared_from_this().use_count() <= 3);
+        flags &= ~FLAG_IMMUTABLE;
+    }
     virtual void markImmutable() { flags |= FLAG_IMMUTABLE; }
     //@}
 
