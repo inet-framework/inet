@@ -147,6 +147,16 @@ PIPA	- iniben a networkok nevét eltolni
 - Step07
 PIPA	- gif movement trail nélkül hogy confusing legyen
 PIPA	- velocityArrowScale-t belőni
+PIPA	- velocity nyíl miatt újra kell 2d gif result
+
+- Step08
+PIPA	- velocity nyíl miatt újra kell 2d gif result
+
+- Step09
+QL	- velocity nyíl miatt újra kell 2d gif result VAGY le is lehetne venni akár
+
+- Step11
+	- átírni a goalt
 
 - Step17 ini
 PIPA	- configurationD --> configurationF
@@ -165,12 +175,12 @@ WIP	- Step7
 WIP	- Step8
 WIP	- Step9
 WIP	- Step10: eeeez nagyon sántít
-WIP	- Step11: még nincs kész
-	- Step12
-	- Step13
-	- Step14
-	- Step15
-	- Step16
+WIP	- Step11
+WIP	- Step12
+WIP	- Step13
+WIP	- Step14
+WIP	- Step15
+WIP	- Step16
 	- Step17
 	- Step18
 	- Step19
@@ -181,4 +191,5 @@ WIP	- Step11: még nincs kész
 	- Step24
 	- StepConclusion
 
-
+- All steps
+	- címeket beírni

@@ -236,7 +236,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s6goals Goals
 ad1:
-However it doesn't directly affect the outcome of the simulation, but it is 
+However it doesn't directly affect the outcome of the simulation, it is 
 more understandable if the appearance of nodes is similar as in real world.
 The default icon for the pedestrians is a cellphone. In this step we replace 
 the default icon with an 3D animated model.
@@ -321,7 +321,7 @@ We display a trail, that shows the passed route, and we visualize an arrow, that
 -->
 @section s7results Results
 
-<img src="step5_result1.gif">
+<img src="step07_moving_2d.gif">
 <img src="step5_result3.gif" width="850">
 <!--
 It is advisable to run the simulation in Fast mode, because the nodes move very slowly if viewed in Normal mode.
@@ -371,7 +371,7 @@ To that we need to change the <tt>content</tt> parameter to <tt>macAddress</tt>.
 -->
 @section s8results Results
 
-<img src="step6_result5.gif">
+<img src="step08_ipaddress_2d.gif">
 <img src="step6_result4.gif"  width="850">
 <img src="step6_result3.png" width="850">
 <!--
@@ -441,7 +441,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s10goals Goals
 
 
-In this step we visualize the transmissions and receptions to identifies the 
+In this step we visualize the transmissions and receptions to identify the 
 role of network nodes in wireless communication.
 
 <!--
@@ -490,12 +490,12 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s11goals Goals
 
-Understanding working of simulation, we need to know that how the network nodes 
-communicate with each other on the wireless channel. To this we should see
-wireless signals. In this step we enable displaying the messages between wireless nodes.
+Understanding network communication, we need to know that how the nodes 
+communicate with each other on the wireless channel. To this we should see propagation 
+signals. In this step we display propagating signals between wireless nodes.
 
 <!--
-A szimuláció működésének megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
+A hálózati kommunikáció megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
 hogyan kommunikálnak egymás között a vezeték nélküli csatornán. Ehhez látnunk kell 
 a vezeték nélküli jeleket. Ebben a lépésben megmutatjuk, hogy a wireless node-ok milyen üzeneteket
 továbbítanak egymás között a hálózaton.
@@ -551,12 +551,26 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s12goals Goals
 
+In this step we show active physical links in VoIP communication.
+Physical links show which nodes received packets from the sender
+device. Visualizing these links we can verify whether a packet
+arrives at the destination node.
+
+<!--
+Ebben a lépésben megmutatjuk a fizikai linkeket a VoIP kommunikációban.
+Ezek azt mutatják meg, hogy mely eszközök fogadták egy adott node csomagjait. 
+Ezzel ellenőrizhetjük, hogy a csomag megerékezik-e a cél node-hoz. 
+-->
+
+<!--
 In this step we want to show the active physical links of the VoIP communication.
 Physical links appear, when a node receives VoIP message. With this visualizer
 we can monitor which network node transmits VoIP message and which node receives that.
+-->
 
 @section s12model The model
 
+<!--
 The communication is given, we need to handle the visualizer only.
 We can turn off some visualizer, that can confuse us.
 Now we have to use the physicalLinkVisualizer. We need to filter
@@ -571,15 +585,20 @@ Here is the configuration:
 @dontinclude omnetpp.ini
 @skipline [Config Visualization10]
 @until ####
+-->
 
 @section s12results Results
 
+<img src="step12_phys_link_3d.gif">
+<img src="step12_phys_link_2d.gif">
+<!--
 The VoIP application starts at 1s. Then the pedestrian0 sends the first VoIP message. Because only
 the accessPoint0 is in its communication range, only between them appears an arrow. But when the sender
 is the accessPoint0, and the destination is the pedestrian1, an array turns up towards
 the pedestrian0 too. This happens, because the pedestrian0 is in the accessPoint0's communication
 range too, so its wlan NIC also can receive the VoIP packet.The array always points
 to the receiver.
+-->
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -594,13 +613,29 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s13goals Goals
 
+In this step we show the VoIP communication's data links. Data links are 
+established, if packet's destination MAC address matches with the receiver's MAC address,
+or the message is broadcast or multicast and the receiver of the packet is 
+in the appropriate broadcast or multicast domain. This will help to verify whether
+the packet arrives at the destinantion.
+
+<!--
+Ebben a lépésben a VoIP kommunikáció data linkjeit jelenítjük meg. Data link akkor létesül 
+két node között, ha a csomag cél MAC címe megegyezik a fogadó MAC címével, vagy 
+az üzenet szórásos vagy multicast, és a csomag fogadója benne van a szórási vagy 
+multicast tartományban. Ezzel ellenőrizni tudjuk, hogy a csomag megérkezik-e a 
+kívánt célhoz.
+-->
+
+<!--
 In this step we want to display the active data links. Data links are shown,
 when a network node receives a packet and it has to do something with it.
 For example its Layer 2 address is the packet's destination or
 the device has to switch towards the destination.
-
+-->
 @section s13model The model
 
+<!--
 The configuration is similar as the physical link visualizer's settings.
 We can adjust the same parameters, such as lineColor, lineWidth, lineStyle,
 the only difference is, we set the dataLinkVisualizer submodule now.
@@ -611,13 +646,18 @@ Configuration:
 @dontinclude omnetpp.ini
 @skipline [Config Visualization11]
 @until ####
+-->
 
 @section s13results Results
 
+<img src="step13_data_link_2d.gif">
+<img src="step13_data_link_3d.gif">
+<!--
 We hide the physicalLinkVisualizer, because it's confusing. When the VoIP
 communications starts, and a packet reach the destination an arrow appears
 from the sender, towards the receiver. It fades away the same way as physical
 links.
+-->
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -632,17 +672,28 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s14goals Goals
 
-The VoIP application is working right now. We want to create a statistic from that,
-and print it out to the screen. Our statistic will be the playout delay.
+We need precise data to improve working of simulation. These can
+be obtained from statistics. In this step we make statistic about VoIP playout delay,
+this shows information about VoIP communication.
 
 @note When a router receives a Real-Time Protocol (RTP) audio stream for Voice over IP (VoIP),
 it must compensate for the jitter that is encountered. The mechanism that handles this function
 is the playout delay buffer. The playout delay buffer must buffer these packets and then play
- them out in a steady stream to the digital signal processors (DSPs) to be converted back
- to an analog audio stream. The playout delay buffer is also sometimes referred to as the de-jitter buffer.
+them out in a steady stream to the digital signal processors (DSPs) to be converted back
+to an analog audio stream. The playout delay buffer is also sometimes referred to as the de-jitter buffer.
+<!--
+A hálózat működésének javításához/monitorozásához pontos adatokra van szükség.
+Ezeket statisztikákból tudjuk kinyerni. Ebben a lépésben a playout delayről készítünk
+statisztikát, amiből információt kapunk a VoIP kommunikációról.
+-->
 
+<!--
+The VoIP application is working right now. We want to create a statistic from that,
+and print it out to the screen. Our statistic will be the playout delay.
+-->
 @section s14model The model
 
+<!--
 Communication is still the same. Pedestrian0 sends VoIP stream to pedestrian1 through accessPoint0.
 We need to configure only the statisticVisualizer, because we set the adaptive playout true,
 when we adjust the VoIP application in step 8. StatisticVisualizer keeps track of the last value of a statistic
@@ -660,16 +711,18 @@ The configuration:
 @dontinclude omnetpp.ini
 @skipline [Config Visualization12]
 @until ####
+-->
 
 @section s14results Results
 
+<img src="step14_statistic_3d.gif">
+<!--
 When we start the simulation here's what happens:
-
-[gif]
 
 After 1 second the VoIP application starts. After each talk spurt SimpleVoIPReceiver recalculate the playout
 because of the adaptive playout setting. After that, the visualizer display the statistic above the pedestrian1
 with that font and background color, that we set.
+-->
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -684,13 +737,29 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s15goals Goals
 
+In packet switching networks, routing is the higher-level decision making that 
+directs network packets from their source towards their destination through 
+intermediate network nodes. 
+The routing process usually directs forwarding on the basis of routing tables, 
+which maintain a record of the routes to various network destinations. 
+In this step we show routes from all nodes towards videoStreamServer.
+
+<!--
+Csomagkapcsolt hálózatokban a routing határozza meg a csomagtovábbítást, azaz az IP címmel ellátott
+csomagok átvitelét a forrás irányából a cél irányába, köztes node-okon keresztül. 
+A routing process általában a routing tábla alapján továbbítja a célok felé a csomagokat.
+A routing tábla az egyes route-okról tartalmaz információt. 
+-->
+<!--
 After so many steps we extend our network. We add a pedestrian, who watch a video stream in the park.
 To this we need a Server to another network. To find ways between video stream server and the
 pedestrian, who want to watch video stream, we need a router.<br>
 We want to see how can the devices reach the server. To this, in this step we will show routing table entries.
+-->
 
 @section s15model The model
 
+<!--
 The video streamed by the videoStreamserver, that connects to the router0 through switch0.
 We need the switch, because later we want to add more nodes to that subnetwork.
 
@@ -720,9 +789,11 @@ The configuration:
 @dontinclude omnetpp.ini
 @skipline [Config Visualization13]
 @until ####
+-->
 
 @section s15results Results
 
+<!--
 When we start the simulation we can see that, the routingTableVisualizer draw arrows
 to represent the routes. This is because by default netmask routes, default routes
 and static routes added to routing table. Later we change that.<br>
@@ -734,6 +805,7 @@ request to the videoStreamServer and the application starts.
 In the Module view mode we can follow the progress. The client send the request,
 and in response the server starts the video stream.
 [gif: video stream start]
+-->
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -748,6 +820,25 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s16goals Goals
 
+In this step we display how wireless nodes gain access to the channel using
+CSMA/CA access method. Visualizing this, we get a clear picture of that,
+which node owns the channel, which nodes are waiting to start transmission 
+and which nodes are idle.
+
+<!--
+Ebben a lépésben azt mutatjuk meg, hogy hogyan történik a vezeték nélküli
+csatorna lefoglalása a node-ok részéről. Ennek a vizualizálásával 
+pontos képet kaphatunk arról, hogy melyik node foglalja a csatornát, 
+melyik várakozik, hogy adhasson és melyik az, amelyik csak veszi az adást.
+
+Az eszközök CSMA/CA közeghozzáférési módot alkalmaznak, 
+aminek az a célja, hogy node-ok ne küldjenek egyszerre csomagokat, ezzel 
+ütközést okozva a hálózatban.
+A node először "belehallgat" a csatornába és ha úgy érzékeli, hogy éppen 
+nincs adás, akkor elkezdi küldeni a saját üzenetét. Ha éppen ad valamelyik 
+eszköz a csatornán, akkor véletlenszerű időtartam után
+-->
+<!--
 CSMA/CA in computer networking, is a network multiple access method
 in which carrier sensing is used, but nodes attempt to avoid collisions
 by transmitting only when the channel is sensed to be <i>"idle"</i>. That operates in
@@ -756,9 +847,11 @@ data link layer (Layer 2).
 Network nodes can be in different channel access states like <i>idle</i>,
 <i>owning</i>, <i>ifs+back off</i>, that show, who transmit on the channel
 and who listen. We want to display that in this step.
+-->
 
 @section s16model The model
 
+<!--
 Firstly we hide some visualizers, because they are distracting.
 The communication is the same as in the previous step, we have to configure only the visualizer.
 To display the channel access states, we use infoVisualizer. <br>
@@ -770,9 +863,12 @@ Here is the configuration:
 The module parameter specifies the submodules of network nodes, and the content
 determines what is displayed on network nodes. In addition we can adjust the
 background color, the font color, and the opacity. These are optional settings.
+-->
 
 @section s16results Results
 
+<img src="step16_channel_access_2d.gif">
+<!--
 Here's what happens, when the simulation is running:
 [gif simulation is running]
 
@@ -783,6 +879,7 @@ It depends on the priority of the packet.
 In addition to having a different IFS, a station will add a "random backoff"
 to its waiting period, to reduce the collision probability.
 After that the the network node starts transmitting the data, and it's owning the channel.
+-->
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -845,7 +942,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step18 Step 18 -
+@page step18 Step 18 - Displaying physical environment
 
 @nav{step17,step19}
 
@@ -862,7 +959,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step19 Step 19 -
+@page step19 Step 19 - Displaying obstacle loss
 
 @nav{step18,step20}
 
@@ -879,7 +976,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step20 Step 20 -
+@page step20 Step 20 - Showing packet drops
 
 @nav{step19,step21}
 
@@ -896,7 +993,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step21 Step 21 -
+@page step21 Step 21 - Displaying transport connections
 
 @nav{step20,step22}
 
@@ -913,7 +1010,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step22 Step 22 -
+@page step22 Step 22 - Showing link breaks
 
 @nav{step21,step23}
 
@@ -930,7 +1027,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step23 Step 23 -
+@page step23 Step 23 - Visualizing handovers
 
 @nav{step22,step24}
 
@@ -947,7 +1044,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page step24 Step 24 -
+@page step24 Step 24 - Displaying changing routes
 
 @nav{step23,conclusion}
 
@@ -964,7 +1061,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 <!------------------------------------------------------------------------>
 
-@page conclusion Conclusion -
+@page conclusion Conclusion
 
 @nav{step24,index}
 
