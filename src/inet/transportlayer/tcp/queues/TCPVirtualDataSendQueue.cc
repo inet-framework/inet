@@ -81,7 +81,7 @@ Packet *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong nu
     const auto& payload = dataBuffer.peekAt(fromSeq-begin, numBytes);   //get data from buffer
     //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
     packet->pushHeader(tcpseg);
-    packet->pushTrailer(payload->dupShared()); // TODO: don't duplicate
+    packet->append(payload);
     return packet;
 }
 
