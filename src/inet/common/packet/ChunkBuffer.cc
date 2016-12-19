@@ -75,6 +75,7 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
             else if (newRegion.getStartOffset() <= oldRegion.getStartOffset()) {
                 // new cuts beginning of old
                 oldRegion.data = oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset());
+                oldRegion.offset = newRegion.getEndOffset();
             }
             else
                 assert(false);
