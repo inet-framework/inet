@@ -81,7 +81,7 @@ void SliceChunk::setLength(int64_t length)
     this->length = length;
 }
 
-bool SliceChunk::isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
@@ -91,7 +91,7 @@ bool SliceChunk::isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk
         return false;
 }
 
-bool SliceChunk::isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
     if (chunk->getChunkType() == TYPE_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);

@@ -79,8 +79,8 @@ class INET_API SliceChunk : public Chunk
     virtual Type getChunkType() const override { return TYPE_SLICE; }
     virtual int64_t getChunkLength() const override { return length; }
 
-    virtual bool isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;

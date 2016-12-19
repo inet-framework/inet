@@ -315,14 +315,14 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /** @name Inserting data related functions */
     //@{
     /**
-     * Returns true if this chunk is capable of representing the merged result.
+     * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) { return false; }
 
     /**
-     * Returns true if this chunk is capable of representing the merged result.
+     * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) { return false; }
 
     /**
      * Inserts the provided chunk at the beginning of this chunk.

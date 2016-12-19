@@ -156,7 +156,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
-        if (contents->isInsertAtBeginningPossible(chunk))
+        if (contents->canInsertAtBeginning(chunk))
             contents->insertAtBeginning(chunk);
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
@@ -174,7 +174,7 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
     if (contents == nullptr)
         contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
     else {
-        if (contents->isInsertAtEndPossible(chunk))
+        if (contents->canInsertAtEnd(chunk))
             contents->insertAtEnd(chunk);
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();

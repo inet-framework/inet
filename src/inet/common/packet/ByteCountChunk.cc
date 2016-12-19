@@ -51,12 +51,12 @@ void ByteCountChunk::setLength(int64_t length)
     this->length = length;
 }
 
-bool ByteCountChunk::isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk)
+bool ByteCountChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == TYPE_BYTECOUNT;
 }
 
-bool ByteCountChunk::isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk)
+bool ByteCountChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == TYPE_BYTECOUNT;
 }

@@ -59,12 +59,12 @@ void BytesChunk::setByte(int index, uint8_t byte)
     bytes[index] = byte;
 }
 
-bool BytesChunk::isInsertAtBeginningPossible(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == TYPE_BYTES;
 }
 
-bool BytesChunk::isInsertAtEndPossible(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == TYPE_BYTES;
 }

@@ -135,13 +135,13 @@ bool SequenceChunk::mergeToBeginning(const std::shared_ptr<Chunk>& chunk)
         auto& firstChunk = chunks.front();
         if (firstChunk->isImmutable()) {
             auto mergedChunk = firstChunk->dupShared();
-            if (mergedChunk->isInsertAtBeginningPossible(chunk)) {
+            if (mergedChunk->canInsertAtBeginning(chunk)) {
                 mergedChunk->insertAtBeginning(chunk);
                 chunks.front() = mergedChunk->peek(0, mergedChunk->getChunkLength());
                 return true;
             }
         }
-        else if (firstChunk->isInsertAtBeginningPossible(chunk)) {
+        else if (firstChunk->canInsertAtBeginning(chunk)) {
             firstChunk->insertAtBeginning(chunk);
             chunks.front() = firstChunk->peek(0, firstChunk->getChunkLength());
             return true;
@@ -156,13 +156,13 @@ bool SequenceChunk::mergeToEnd(const std::shared_ptr<Chunk>& chunk)
         auto& lastChunk = chunks.back();
         if (lastChunk->isImmutable()) {
             auto mergedChunk = lastChunk->dupShared();
-            if (mergedChunk->isInsertAtEndPossible(chunk)) {
+            if (mergedChunk->canInsertAtEnd(chunk)) {
                 mergedChunk->insertAtEnd(chunk);
                 chunks.back() = mergedChunk->peek(0, mergedChunk->getChunkLength());
                 return true;
             }
         }
-        else if (lastChunk->isInsertAtEndPossible(chunk)) {
+        else if (lastChunk->canInsertAtEnd(chunk)) {
             lastChunk->insertAtEnd(chunk);
             chunks.back() = lastChunk->peek(0, lastChunk->getChunkLength());
             return true;

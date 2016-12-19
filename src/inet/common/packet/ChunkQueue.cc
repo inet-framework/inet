@@ -82,7 +82,7 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
     if (contents == nullptr)
         contents = chunk;
     else {
-        if (contents->isInsertAtEndPossible(chunk)) {
+        if (contents->canInsertAtEnd(chunk)) {
             // TODO: avoid duplication if possible by reusing chunk if referred by this buffer only
             contents = contents->dupShared();
             contents->insertAtEnd(chunk);
