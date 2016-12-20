@@ -106,10 +106,10 @@ void TCPEchoAppThread::dataArrived(cMessage *msg, bool urgent)
 
         int64_t len = 0;
         for ( ; len + rcvdBytes <= outByteLen; len += rcvdBytes) {
-            outPkt->append(rcvdPkt->peekDataAt(0, rcvdBytes)->dupShared());
+            outPkt->append(rcvdPkt->peekDataAt(0, rcvdBytes));
         }
         if (len < outByteLen)
-            outPkt->append(rcvdPkt->peekDataAt(0, outByteLen - len)->dupShared());
+            outPkt->append(rcvdPkt->peekDataAt(0, outByteLen - len));
 
         ASSERT(outPkt->getByteLength() == outByteLen);
 
