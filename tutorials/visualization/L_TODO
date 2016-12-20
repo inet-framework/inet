@@ -43,3 +43,5 @@
 - Step2-ben SceneOsgEarthVisualizer-t használunk, ehhez muszáj coordinateSystemModule. Vagy a SceneOsgEarthVisualizer-t kell átírni, vagy a Step2-t & Step3-t
 
 - .osgModelColor = "red" nem működik a boxman-eken
+
+- transportConnectionVisualizer nem tünteti el a jeleit, ha a kapcsolat lezárul

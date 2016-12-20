@@ -157,30 +157,42 @@ QL	- velocity nyíl miatt újra kell 2d gif result VAGY le is lehetne venni aká
 
 - Step11
 	- átírni a goalt
+	
+- Step12
+	- Resultsba leírni, hogy akkor is van physical link, ha nem neki szól az üzenet
 
 - Step17 ini
 PIPA	- configurationD --> configurationF
 
+- Step18
+QL	- logikailag nem összevonható a Step17-tel?
+
 - Step20 ini
 PIPA	- configurationF --> configurationH
+	
+- Step21 ini
+	- connectionre valami szinonimát találni, esetleg átfogalmazni
+	
+- Step22
+	
 
 - Goals
 PIPA	- Step1
 PIPA	- Step2
 PIPA	- Step3
 QL	- Step4: kell ez egyáltalán?
-WIP	- Step5
-WIP	- Step6
-WIP	- Step7
-WIP	- Step8
-WIP	- Step9
-WIP	- Step10: eeeez nagyon sántít
-WIP	- Step11
-WIP	- Step12
-WIP	- Step13
-WIP	- Step14
-WIP	- Step15
-WIP	- Step16
+	- Step5
+	- Step6
+	- Step7
+	- Step8
+	- Step9
+	- Step10: eeeez nagyon sántít
+	- Step11
+	- Step12
+	- Step13
+	- Step14
+	- Step15
+	- Step16
 	- Step17
 	- Step18
 	- Step19

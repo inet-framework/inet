@@ -552,14 +552,15 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s12goals Goals
 
 In this step we show active physical links in VoIP communication.
-Physical links show which nodes received packets from the sender
-device. Visualizing these links we can verify whether a packet
-arrives at the destination node.
+These visualize which nodes can receive a packet from the sender device. 
+With this visualizer, we verify whether there's physical connection 
+between two devices. The link can be wired or wireless too.
 
 <!--
-Ebben a lépésben megmutatjuk a fizikai linkeket a VoIP kommunikációban.
-Ezek azt mutatják meg, hogy mely eszközök fogadták egy adott node csomagjait. 
-Ezzel ellenőrizhetjük, hogy a csomag megerékezik-e a cél node-hoz. 
+Ebben a lépésben megmutatjuk a VoIP kommunikáció aktív fizikai linkjeit.
+Ezek azt mutatják meg, hogy mely eszközök fogadták a forrás node csomagját. 
+Ezzel a visualizer-rel ellenőrizzük, hogy van-e fizikai kapcsolat két eszköz között.
+A link lehet vezetékes és vezeték nélküli is.
 -->
 
 <!--
@@ -613,26 +614,14 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s13goals Goals
 
-In this step we show the VoIP communication's data links. Data links are 
-established, if packet's destination MAC address matches with the receiver's MAC address,
-or the message is broadcast or multicast and the receiver of the packet is 
-in the appropriate broadcast or multicast domain. This will help to verify whether
-the packet arrives at the destinantion.
+In this step we display the VoIP communication's data links. Visualizing 
+data links we check that the VoIP packet arrived correctly at the receiver.
 
 <!--
-Ebben a lépésben a VoIP kommunikáció data linkjeit jelenítjük meg. Data link akkor létesül 
-két node között, ha a csomag cél MAC címe megegyezik a fogadó MAC címével, vagy 
-az üzenet szórásos vagy multicast, és a csomag fogadója benne van a szórási vagy 
-multicast tartományban. Ezzel ellenőrizni tudjuk, hogy a csomag megérkezik-e a 
-kívánt célhoz.
+Ebben a lépésben a VoIP kommunikáció data linkjeit mutatjuk meg. A data linkek 
+vizualizálásával ellenőrizzük, hogy a VoIP csomag hibátlanul megérkezett-e a receiverhez.
 -->
 
-<!--
-In this step we want to display the active data links. Data links are shown,
-when a network node receives a packet and it has to do something with it.
-For example its Layer 2 address is the packet's destination or
-the device has to switch towards the destination.
--->
 @section s13model The model
 
 <!--
@@ -672,7 +661,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s14goals Goals
 
-We need precise data to improve working of simulation. These can
+We need precise data to monitor working of simulation. These can
 be obtained from statistics. In this step we make statistic about VoIP playout delay,
 this shows information about VoIP communication.
 
@@ -681,16 +670,13 @@ it must compensate for the jitter that is encountered. The mechanism that handle
 is the playout delay buffer. The playout delay buffer must buffer these packets and then play
 them out in a steady stream to the digital signal processors (DSPs) to be converted back
 to an analog audio stream. The playout delay buffer is also sometimes referred to as the de-jitter buffer.
+
 <!--
 A hálózat működésének javításához/monitorozásához pontos adatokra van szükség.
 Ezeket statisztikákból tudjuk kinyerni. Ebben a lépésben a playout delayről készítünk
 statisztikát, amiből információt kapunk a VoIP kommunikációról.
 -->
 
-<!--
-The VoIP application is working right now. We want to create a statistic from that,
-and print it out to the screen. Our statistic will be the playout delay.
--->
 @section s14model The model
 
 <!--
@@ -750,6 +736,7 @@ csomagok átvitelét a forrás irányából a cél irányába, köztes node-okon
 A routing process általában a routing tábla alapján továbbítja a célok felé a csomagokat.
 A routing tábla az egyes route-okról tartalmaz információt. 
 -->
+
 <!--
 After so many steps we extend our network. We add a pedestrian, who watch a video stream in the park.
 To this we need a Server to another network. To find ways between video stream server and the
@@ -821,9 +808,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s16goals Goals
 
 In this step we display how wireless nodes gain access to the channel using
-CSMA/CA access method. Visualizing this, we get a clear picture of that,
-which node owns the channel, which nodes are waiting to start transmission 
-and which nodes are idle.
+CSMA/CA access method. Visualizing this, we get a clear picture of the state 
+of nodes.
 
 <!--
 Ebben a lépésben azt mutatjuk meg, hogy hogyan történik a vezeték nélküli
@@ -894,6 +880,23 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s17goals Goals
 
+In this step we enable displaying active network routes for video stream. 
+In network devices, applications handle the UDP based traffic, for example video stream. 
+When a video stream packet leaves the network layer in the destination node, 
+network route becomes active between the source node and the destination. 
+With this visualizer we check, whether the videostream packet arrived at the 
+destination's client application.
+
+<!--
+Ebben a lépésben az aktív hálózati útvonalakat jelenítjük meg.
+Az eszközökben alkalmazások kezelik a TCP, illetve UDP alapú forgalmat, mint
+pl a videoStream-et vagy a VoIP-ot. Amikor a video vagy VoIP csomag elhagyja 
+a fogadó eszközben a hálózati réteget, a két eszköz között aktívvá válik 
+a hálózati útvonal. Ezzel a visualizer-rel megnézhetjük, hogy a csomag 
+eljut-e a célállomás megfelelő alkalmazásához.
+-->
+
+<!--
 In this step we want to show active network routes. It's similar to
 showing active physical links, and active data links, but network routes
 active when the packet pass the destination' network layer.
@@ -901,9 +904,10 @@ active when the packet pass the destination' network layer.
 In furthermore we make the model more interesting by adding more nodes,
 change the routing protocol to RIP, and assign address via DHCP protocol
 to the wireless nodes.
-
+-->
 @section s17model The model
 
+<!--
 Firstly we have to edit the configurator. We make an xml file (in this case configurationD.xml),
 to set the static ip addresses. Static addresses are the routers' interfaces and
 the videoStreamServer's IP address.
@@ -930,6 +934,7 @@ The configuration:
 @dontinclude omnetpp.ini
 @skipline [Config Visualization15]
 @until ####
+-->
 
 @section s17results Results
 
@@ -948,6 +953,16 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s18goals Goals
 
+In the real world the objects on the map, such as buildings or trees constitute 
+3 dimensional barriers which affects the wireless communication. In this step 
+we add 3 dimensional obstacles to our simulation.
+
+<!--
+A valós környezetben a tárgyak a térképen (épületek, fák) 3 dimenziós   
+akadályokat képeznek, amiknek hatása van a vezeték nélküli kommunikációra. 
+Ebben a lépésben akadályokat adunk hozzá a szimulációhoz.
+-->
+
 @section s18model The model
 
 @section s18results Results
@@ -964,6 +979,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @nav{step18,step20}
 
 @section s19goals Goals
+
+Impediments shield the signals of wireless communication. In this step we 
+show the obstacle loss.
+<!--
+Az akadályok árnyékolják a vezeték nélküli kommunikáció jeleit.
+Ebben a lépésben az akadályokon eső veszteségeket mutatjuk meg.
+-->
 
 @section s19model The model
 
@@ -982,6 +1004,21 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s20goals Goals
 
+In this step we visualize packet drops. Packet drops occurs when one or more 
+packets of data travelling across a computer network fail to reach their destination. 
+Packet loss is typically caused by network congestion but it can be caused by 
+a number of other factors such as radio signals that are too weak due to distance or 
+faulty networking hardware. If there are natural or artifical obstacles are in 
+the environment, then it helps if we see where packets drop.
+
+<!--
+Ebben a lépésben a packet dropot vizualizáljuk.
+A packet drop akkor történik, amikor egy vagy több csomag nem ér oda a célhoz. 
+Általában hálózati torlódás okozza, de gyenge rádiójel vagy hibás hw is okozhatja. 
+Ha természeti vagy mesterséges akadályok vannak a környezetben, akkor segítheti a
+wireless AP-k megfelelő helyre telepítését, ha látjuk, hogy hol történik csomag vesztés.
+-->
+
 @section s20model The model
 
 @section s20results Results
@@ -998,6 +1035,18 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @nav{step20,step22}
 
 @section s21goals Goals
+
+In this step we show transport connections. To establish a link, TCP uses 
+three-way handshake. It's open until one of the participants initiate closing the 
+connection. Displaying these, it will be easy to understand which hosts are the 
+participants of a transport connection.
+
+<!--
+Ebben a lépésben a nyitott hálózati kapcsolatokat jelenítjük meg.
+A TCP kapcsolatok háromfázisú kézfogással épülnek ki. Ezután amíg az egyik fél 
+nem kezdeményezi a kapcsolat lezárását, addig nyitva marad. A megjelenítésükkel 
+a hálózat könnyen átlátható, hogy melyik nyitott kapcsolatnak melyik node-ok a résztvevői.
+-->
 
 @section s21model The model
 
