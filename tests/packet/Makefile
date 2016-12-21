@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for inet-master
 #
 # This file was generated with the command:
-#  opp_makemake -I../../src -f -L../../src -lINET
+#  opp_makemake -I../../src -f -L../../out/$(CONFIGNAME)/src -lINET
 #
 
 # Name of target to be created (-o option)
@@ -21,7 +21,7 @@ INCLUDE_PATH = -I../../src
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = $(LDFLAG_LIBPATH)../../src  -lINET
+LIBS = $(LDFLAG_LIBPATH)../../out/$(CONFIGNAME)/src  -lINET
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../../out
@@ -69,7 +69,7 @@ include $(CONFIGFILE)
 # Simulation kernel and user interface libraries
 OMNETPP_LIBS = $(OPPMAIN_LIB) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 ifneq ($(TOOLCHAIN_NAME),clangc2)
-LIBS += -Wl,-rpath,$(abspath ../../src)
+LIBS += -Wl,-rpath,$(abspath ../../out/$(CONFIGNAME)/src)
 endif
 
 COPTS = $(CFLAGS) $(IMPORT_DEFINES)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
