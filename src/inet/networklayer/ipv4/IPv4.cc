@@ -703,7 +703,6 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
         return;
     }
 
-    packet->markContentsImmutable();
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
     int payloadLength = packet->getDataLength() - headerLength;
