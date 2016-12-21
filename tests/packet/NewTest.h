@@ -87,7 +87,7 @@ class NewSender
     void sendEthernet(Packet *packet);
     void sendIp(Packet *packet);
     void sendTcp(Packet *packet);
-    Packet *createTcpSegment();
+    std::shared_ptr<TcpHeader> createTcpHeader();
 
   public:
     NewSender(NewMedium& medium) : medium(medium) { }

@@ -25,7 +25,7 @@ Register_Serializer(EthernetHeader, EthernetHeaderSerializer);
 Register_Serializer(EthernetTrailer, EthernetTrailerSerializer);
 Define_Module(NewTest);
 
-static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_ptr<BytesChunk>& tcpSegment)
+static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_ptr<TcpHeader>& tcpHeader, const std::shared_ptr<BytesChunk>& tcpSegment)
 {
     return 42;
 }
@@ -171,7 +171,6 @@ std::string EthernetTrailer::str() const
 void NewMedium::sendPacket(Packet *packet)
 {
     EV_DEBUG << "Sending packet: " << packet << std::endl;
-    packet->markContentsImmutable();
     packets.push_back(serialize ? serializePacket(packet) : packet);
 }
 
@@ -188,7 +187,6 @@ Packet *NewMedium::serializePacket(Packet *packet)
     const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getPacketLength());
     auto serializedPacket = new Packet();
     serializedPacket->append(bytesChunk);
-    serializedPacket->markContentsImmutable();
     return serializedPacket;
 }
 
@@ -212,28 +210,25 @@ void NewSender::sendIp(Packet *packet)
     sendEthernet(ipDatagram);
 }
 
-Packet *NewSender::createTcpSegment()
+std::shared_ptr<TcpHeader> NewSender::createTcpHeader()
 {
-    auto tcpSegment = new Packet();
     auto tcpHeader = std::make_shared<TcpHeader>();
     tcpHeader->setChunkLength(20);
     tcpHeader->setLengthField(20);
     tcpHeader->setSrcPort(1000);
     tcpHeader->setDestPort(2000);
-    tcpSegment->prepend(tcpHeader);
-    return tcpSegment;
+    return tcpHeader;
 }
 
 void NewSender::sendTcp(Packet *packet)
 {
-    packet->markContentsImmutable();
     if (tcpSegment == nullptr)
-        tcpSegment = createTcpSegment();
-    int64_t tcpSegmentSizeLimit = 35;
+        tcpSegment = new Packet();
+    int64_t tcpSegmentSizeLimit = 15;
     if (tcpSegment->getPacketLength() + packet->getPacketLength() >= tcpSegmentSizeLimit) {
         int64_t length = tcpSegmentSizeLimit - tcpSegment->getPacketLength();
         tcpSegment->append(packet->peekAt(0, length));
-        const auto& tcpHeader = tcpSegment->peekHeader<TcpHeader>();
+        auto tcpHeader = createTcpHeader();
         auto crcMode = medium.getSerialize() ? CRC_COMPUTED : CRC_DECLARED_CORRECT;
         tcpHeader->setCrcMode(crcMode);
         switch (crcMode) {
@@ -242,18 +237,20 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case CRC_COMPUTED: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpSegment->peekAt<BytesChunk>(0, tcpSegment->getPacketLength())));
+                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpHeader, tcpSegment->peekAt<BytesChunk>(0, tcpSegment->getPacketLength())));
                 break;
             }
             default:
                 throw cRuntimeError("Unknown bit error value");
         }
+        tcpHeader->markImmutable();
+        tcpSegment->prepend(tcpHeader);
         sendIp(tcpSegment);
         int64_t remainingLength = packet->getPacketLength() - length;
         if (remainingLength == 0)
             tcpSegment = nullptr;
         else {
-            tcpSegment = createTcpSegment();
+            tcpSegment = new Packet();
             tcpSegment->append(packet->peekAt(length, remainingLength));
         }
     }
@@ -328,7 +325,7 @@ void NewReceiver::receiveTcp(Packet *packet)
             break;
         case CRC_COMPUTED: {
             int64_t length = packet->getPacketLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
-            if (crc != computeTcpCrc(BytesChunk(), packet->peekAt<BytesChunk>(tcpHeaderPopOffset, length))) {
+            if (crc != computeTcpCrc(BytesChunk(), tcpHeader, packet->peekAt<BytesChunk>(tcpHeaderPopOffset, length))) {
                 delete packet;
                 return;
             }
