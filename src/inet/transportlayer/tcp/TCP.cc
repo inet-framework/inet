@@ -474,32 +474,14 @@ void TCP::finish()
     EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
-TCPSendQueue *TCP::createSendQueue(TCPDataTransferMode transferModeP)
+TCPSendQueue *TCP::createSendQueue()
 {
-    switch (transferModeP) {
-        case TCP_TRANSFER_BYTECOUNT:
-        case TCP_TRANSFER_OBJECT:
-        case TCP_TRANSFER_BYTESTREAM:
-            return new TCPSendQueue();
-//            return new TCPMsgBasedSendQueue();
-//            return new TCPByteStreamSendQueue();
-
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
-    }
+    return new TCPSendQueue();
 }
 
-TCPReceiveQueue *TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
+TCPReceiveQueue *TCP::createReceiveQueue()
 {
-    switch (transferModeP) {
-        case TCP_TRANSFER_BYTECOUNT:
-        case TCP_TRANSFER_OBJECT:
-        case TCP_TRANSFER_BYTESTREAM:
-            return new TCPReceiveQueue();
-
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
-    }
+    return new TCPReceiveQueue();
 }
 
 bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

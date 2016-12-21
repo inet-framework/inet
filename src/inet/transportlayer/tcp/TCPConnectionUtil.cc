@@ -206,7 +206,6 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 {
     TCPConnection *conn = new TCPConnection(tcpMain, socketId);
 
-    conn->transferMode = transferMode;
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
     conn->sendQueue = check_and_cast<TCPSendQueue *>(inet::utils::createOne(sendQueueClass));
@@ -371,13 +370,12 @@ void TCPConnection::sendAvailableDataToApp()
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)
 {
-    transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
     // create send queue
-    sendQueue = tcpMain->createSendQueue(transferMode);
+    sendQueue = tcpMain->createSendQueue();
     sendQueue->setConnection(this);
 
     // create receive queue
-    receiveQueue = tcpMain->createReceiveQueue(transferMode);
+    receiveQueue = tcpMain->createReceiveQueue();
     receiveQueue->setConnection(this);
 
     // create SACK retransmit queue

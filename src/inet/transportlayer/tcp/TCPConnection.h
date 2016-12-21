@@ -349,7 +349,6 @@ class INET_API TCPConnection : public cObject
     TCPSendQueue *getSendQueue() const { return sendQueue; }
     TCPReceiveQueue *receiveQueue = nullptr;
     TCPReceiveQueue *getReceiveQueue() const { return receiveQueue; }
-    TCPDataTransferMode transferMode = TCP_TRANSFER_UNDEFINED;    // TCP transfer mode: bytecount, object, bytestream
 
   public:
     TCPSACKRexmitQueue *rexmitQueue = nullptr;

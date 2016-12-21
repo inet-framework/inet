@@ -172,7 +172,6 @@ TCPConnection::TCPConnection()
 {
     // Note: this ctor is NOT used to create live connections, only
     // temporary ones to invoke segmentArrivalWhileClosed() on
-    transferMode = TCP_TRANSFER_BYTECOUNT;
 }
 
 //

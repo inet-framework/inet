@@ -194,12 +194,12 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCPSendQueue *createSendQueue(TCPDataTransferMode transferModeP);
+    virtual TCPSendQueue *createSendQueue();
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCPReceiveQueue *createReceiveQueue(TCPDataTransferMode transferModeP);
+    virtual TCPReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
