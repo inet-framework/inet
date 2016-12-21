@@ -96,6 +96,22 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     Packet *msg = nullptr;
 
     if (chunk) {
+        // TODO: KLUDGE: to match fingerprints with packet containing objects
+        kludgeQueue.push(chunk);
+        auto data = kludgeQueue.peekAt(0, kludgeQueue.getBufferLength());
+        if (data->getChunkType() == Chunk::TYPE_SLICE)
+            return nullptr;
+        else if (data->getChunkType() == Chunk::TYPE_SEQUENCE) {
+            auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(data);
+            for (auto chunk : sequenceChunk->getChunks())
+                if (chunk->getChunkType() == Chunk::TYPE_SLICE)
+                    return nullptr;
+        }
+        else
+            kludgeQueue.clear();
+        chunk = data;
+        // TODO: KLDUGE: end
+
         //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", RECEIVER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << chunk << std::endl;
         Packet *msg = new Packet("data");
         msg->append(chunk);

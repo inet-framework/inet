@@ -25,7 +25,8 @@
 
 #include "inet/common/INETDefs.h"
 
-
+#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/ReorderBuffer.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
@@ -50,6 +51,7 @@ class INET_API TCPReceiveQueue : public cObject
     TCPConnection *conn = nullptr;    // the connection that owns this queue
     uint32 rcv_nxt = 0;
     ReorderBuffer reorderBuffer;
+    ChunkQueue kludgeQueue;
 
     uint32_t offsetToSeq(int64_t offs) const { return (uint32_t)offs; }
 
