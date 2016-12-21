@@ -107,6 +107,7 @@ namespace inet {
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
+// TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque?
 // TODO: review insert functions for the chunk->insert(chunk) case
 // TODO: consider not allowing appending mutable chunks?
 // TODO: consider adding a simplify function as peek(0, getChunkLength())?
@@ -273,7 +274,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     bool isImmutable() const { return flags & FLAG_IMMUTABLE; }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
-    virtual void markMutableIfExclusivelyOwned() {
+    void markMutableIfExclusivelyOwned() {
         // NOTE: one for external reference, one for shared_from_this, and one for local variable
         assert(shared_from_this().use_count() <= 3);
         flags &= ~FLAG_IMMUTABLE;
