@@ -38,7 +38,7 @@ Packet::Packet(const char *name, const std::shared_ptr<Chunk>& contents) :
 
 Packet::Packet(const Packet& other) :
     cPacket(other),
-    contents(other.contents == nullptr || other.isContentsImmutable() ? other.contents : other.contents->dupShared()),
+    contents(other.contents),
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator)
 {
@@ -152,38 +152,46 @@ std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
 void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
+    assert(chunk->isImmutable());
     assert(headerIterator.getPosition() == 0);
-    // TODO: require chunk to be immutable
     if (contents == nullptr)
-        contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
+        contents = chunk;
     else {
-        if (contents->canInsertAtBeginning(chunk))
+        if (contents->canInsertAtBeginning(chunk)) {
+            makeContentsMutable();
             contents->insertAtBeginning(chunk);
+            contents = contents->peek(0, contents->getChunkLength());
+        }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
             sequenceChunk->insertAtBeginning(contents);
             sequenceChunk->insertAtBeginning(chunk);
             contents = sequenceChunk;
         }
+        contents->markImmutable();
     }
 }
 
 void Packet::append(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
+    assert(chunk->isImmutable());
     assert(trailerIterator.getPosition() == 0);
-    // TODO: require chunk to be immutable
     if (contents == nullptr)
-        contents = chunk->isImmutable() ? chunk->dupShared() : chunk;
+        contents = chunk;
     else {
-        if (contents->canInsertAtEnd(chunk))
+        if (contents->canInsertAtEnd(chunk)) {
+            makeContentsMutable();
             contents->insertAtEnd(chunk);
+            contents = contents->peek(0, contents->getChunkLength());
+        }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
             sequenceChunk->insertAtEnd(contents);
             sequenceChunk->insertAtEnd(chunk);
             contents = sequenceChunk;
         }
+        contents->markImmutable();
     }
 }
 
@@ -191,20 +199,26 @@ void Packet::removeFromBeginning(int64_t length)
 {
     assert(0 <= length && length <= getPacketLength());
     assert(headerIterator.getPosition() == 0);
-    if (contents->canRemoveFromBeginning(length))
+    if (contents->canRemoveFromBeginning(length)) {
+        makeContentsMutable();
         contents->removeFromBeginning(length);
+    }
     else
         contents = contents->peek(length, contents->getChunkLength() - length);
+    contents->markImmutable();
 }
 
 void Packet::removeFromEnd(int64_t length)
 {
     assert(0 <= length && length <= getPacketLength());
     assert(trailerIterator.getPosition() == 0);
-    if (contents->canRemoveFromEnd(length))
+    if (contents->canRemoveFromEnd(length)) {
+        makeContentsMutable();
         contents->removeFromEnd(length);
+    }
     else
         contents = contents->peek(0, contents->getChunkLength() - length);
+    contents->markImmutable();
 }
 
 } // namespace

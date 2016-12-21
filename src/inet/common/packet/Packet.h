@@ -66,6 +66,13 @@ class INET_API Packet : public cPacket
     int getNumChunks() const;
     Chunk *getChunk(int i) const;
 
+    void makeContentsMutable() {
+        if (contents.use_count() <= 2)
+            contents->markMutableIfExclusivelyOwned();
+        else
+            contents = contents->dupShared();
+    }
+
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
     Packet(const char *name, const std::shared_ptr<Chunk>& contents);
