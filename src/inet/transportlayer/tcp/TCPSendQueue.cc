@@ -75,11 +75,8 @@ Packet *TCPSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
     sprintf(msgname, "tcpseg(l=%lu)", numBytes);
 
     Packet *packet = new Packet(msgname);
-    const auto& tcpseg = std::make_shared<TcpHeader>();
-    tcpseg->setSequenceNo(fromSeq);
     const auto& payload = dataBuffer.peekAt(fromSeq-begin, numBytes);   //get data from buffer
     //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
-    packet->pushHeader(tcpseg);
     packet->append(payload);
     return packet;
 }

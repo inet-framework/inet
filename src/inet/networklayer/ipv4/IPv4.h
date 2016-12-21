@@ -129,7 +129,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * the given control info. Override if you subclassed controlInfo and/or
      * want to add options etc to the datagram.
      */
-    virtual void encapsulate(Packet *transportPacket);
+    virtual std::shared_ptr<IPv4Header> encapsulate(Packet *transportPacket);
 
     /**
      * Handle IPv4Header messages arriving from lower layer.
@@ -150,22 +150,22 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Routes and sends datagram received from higher layers.
      * Invokes datagramLocalOutHook(), then routePacket().
      */
-    virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
+    virtual void datagramLocalOut(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
 
     /**
      * Performs unicast routing. Based on the routing decision, it sends the
      * datagram through the outgoing interface.
      */
-    virtual void routeUnicastPacket(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress);
+    virtual void routeUnicastPacket(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress);
 
     // called after FORWARD Hook (used for reinject, too)
-    void routeUnicastPacketFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
+    void routeUnicastPacketFinish(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
 
     /**
      * Broadcasts the datagram on the specified interface.
      * When destIE is nullptr, the datagram is broadcasted on each interface.
      */
-    virtual void routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destIE);
+    virtual void routeLocalBroadcastPacket(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIE);
 
     /**
      * Determines the output interface for the given multicast datagram.
@@ -175,7 +175,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE);
+    virtual void forwardMulticastPacket(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *fromIE);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
@@ -194,13 +194,13 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Call PostRouting Hook and continue with fragmentAndSend() if accepted
      */
-    virtual void fragmentPostRouting(Packet *datagram, const InterfaceEntry *destIe, IPv4Address nextHopAddr);
+    virtual void fragmentPostRouting(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIe, IPv4Address nextHopAddr);
 
     /**
      * Fragment packet if needed, then send it to the selected interface using
      * sendDatagramToOutput().
      */
-    virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr);
+    virtual void fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>&, const InterfaceEntry *destIe, IPv4Address nextHopAddr);
 
     /**
      * Send datagram on the given interface.

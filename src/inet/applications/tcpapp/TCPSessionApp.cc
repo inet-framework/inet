@@ -151,6 +151,7 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
     switch (socket.getDataTransferMode()) {
         case TCP_TRANSFER_BYTECOUNT: {
             const auto& payload = std::make_shared<ByteCountChunk>(sendBytes);
+            payload->markImmutable();
             packet->append(payload);
             break;
         }
@@ -158,6 +159,7 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
             cPacket *msg = new cPacket("data1");
             msg->setByteLength(sendBytes);
             const auto& payload = std::make_shared<cPacketChunk>(msg);
+            payload->markImmutable();
             packet->append(payload);
             break;
         }
@@ -171,6 +173,7 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
                 vec[i] = (bytesSent + i) & 0xFF;
             payload->setBytes(vec);
 
+            payload->markImmutable();
             packet->append(payload);
             break;
         }

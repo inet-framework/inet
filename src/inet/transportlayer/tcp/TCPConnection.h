@@ -511,7 +511,7 @@ class INET_API TCPConnection : public cObject
     virtual void sendSegment(uint32 bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
-    virtual void sendToIP(Packet *packet, TcpHeader *tcpseg);
+    virtual void sendToIP(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();
@@ -528,7 +528,7 @@ class INET_API TCPConnection : public cObject
     cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
 
     /** Utility: send IP packet */
-    static void sendToIP(Packet *pkt, TcpHeader *tcpseg, L3Address src, L3Address dest);
+    static void sendToIP(Packet *pkt, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);

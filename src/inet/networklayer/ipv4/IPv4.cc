@@ -230,10 +230,7 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
 namespace {
 Packet *toMutable(Packet *packet)
 {
-    const auto& header = packet->popHeader<IPv4Header>();
     auto newPacket = new Packet(packet->getName());
-    auto newHeader = std::static_pointer_cast<IPv4Header>(header->dupShared());
-    newPacket->append(newHeader);
     newPacket->append(packet->peekDataAt(0, packet->getDataLength()));
     delete packet;
     return newPacket;
@@ -274,8 +271,9 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             delete packet;
         }
         else {
+            auto newHeader = std::static_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
             // needed a mutable copy for forwarding
-            forwardMulticastPacket(toMutable(packet), fromIE);
+            forwardMulticastPacket(toMutable(packet), newHeader, fromIE);
         }
     }
     else {
@@ -289,8 +287,9 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
+                auto newHeader = std::static_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
                 // needed a mutable copy for forwarding
-                fragmentPostRouting(toMutable(packet->dup()), broadcastIE, IPv4Address::ALLONES_ADDRESS);
+                fragmentPostRouting(toMutable(packet->dup()), newHeader, broadcastIE, IPv4Address::ALLONES_ADDRESS);
             }
 
             EV_INFO << "Broadcast received\n";
@@ -302,8 +301,9 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             delete packet;
         }
         else {
+            auto newHeader = std::static_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
             // needed a mutable copy for forwarding
-            routeUnicastPacket(toMutable(packet), fromIE, destIE, nextHopAddr);
+            routeUnicastPacket(toMutable(packet), newHeader, fromIE, destIE, nextHopAddr);
         }
     }
 }
@@ -322,7 +322,7 @@ void IPv4::handlePacketFromHL(Packet *packet)
     }
 
     // encapsulate
-    encapsulate(packet);
+    const auto& ipv4Header = encapsulate(packet);
 
     // extract requested interface and next hop
     auto ifTag = packet->getTag<InterfaceReq>();
@@ -331,12 +331,12 @@ void IPv4::handlePacketFromHL(Packet *packet)
     // TODO:
     L3Address nextHopAddr(IPv4Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet, destIE, nextHopAddr) == INetfilter::IHook::ACCEPT)
-        datagramLocalOut(packet, destIE, nextHopAddr.toIPv4());
+        datagramLocalOut(packet, ipv4Header, destIE, nextHopAddr.toIPv4());
 }
 
-void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
+void IPv4::datagramLocalOut(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
 {
-    const auto& datagram = packet->peekHeader<IPv4Header>();
+//    const auto& datagram = packet->peekHeader<IPv4Header>();
     bool multicastLoop = false;
     MulticastReq *mcr = packet->getTag<MulticastReq>();
     if (mcr != nullptr) {
@@ -344,23 +344,23 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
     }
 
     // send
-    IPv4Address& destAddr = datagram->getDestAddress();
+    IPv4Address& destAddr = ipv4Header->getDestAddress();
 
-    EV_DETAIL << "Sending datagram " << datagram << " with destination = " << destAddr << "\n";
+    EV_DETAIL << "Sending datagram " << packet << " with destination = " << destAddr << "\n";
 
-    if (datagram->getDestAddress().isMulticast()) {
-        destIE = determineOutgoingInterfaceForMulticastDatagram(datagram.get(), destIE);
+    if (ipv4Header->getDestAddress().isMulticast()) {
+        destIE = determineOutgoingInterfaceForMulticastDatagram(ipv4Header.get(), destIE);
 
         // loop back a copy
         if (multicastLoop && (!destIE || !destIE->isLoopback())) {
             const InterfaceEntry *loopbackIF = ift->getFirstLoopbackInterface();
             if (loopbackIF)
-                fragmentPostRouting(packet->dup(), loopbackIF, destAddr);
+                fragmentPostRouting(packet->dup(), ipv4Header, loopbackIF, destAddr);
         }
 
         if (destIE) {
             numMulticast++;
-            fragmentPostRouting(packet, destIE, destAddr);
+            fragmentPostRouting(packet, ipv4Header, destIE, destAddr);
         }
         else {
             EV_ERROR << "No multicast interface, packet dropped\n";
@@ -371,7 +371,7 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
     else {    // unicast and broadcast
               // check for local delivery
         if (rt->isLocalAddress(destAddr)) {
-            EV_INFO << "Delivering " << datagram << " locally.\n";
+            EV_INFO << "Delivering " << packet << " locally.\n";
             if (destIE && !destIE->isLoopback()) {
                 EV_DETAIL << "datagram destination address is local, ignoring destination interface specified in the control info\n";
                 destIE = nullptr;
@@ -379,12 +379,12 @@ void IPv4::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv4Ad
             if (!destIE)
                 destIE = ift->getFirstLoopbackInterface();
             ASSERT(destIE);
-            routeUnicastPacket(packet, nullptr, destIE, destAddr);
+            routeUnicastPacket(packet, ipv4Header, nullptr, destIE, destAddr);
         }
         else if (destAddr.isLimitedBroadcastAddress() || rt->isLocalBroadcastAddress(destAddr))
-            routeLocalBroadcastPacket(packet, destIE);
+            routeLocalBroadcastPacket(packet, ipv4Header, destIE);
         else
-            routeUnicastPacket(packet, nullptr, destIE, requestedNextHopAddress);
+            routeUnicastPacket(packet, ipv4Header, nullptr, destIE, requestedNextHopAddress);
     }
 }
 
@@ -421,11 +421,11 @@ const InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(const
     return ie;
 }
 
-void IPv4::routeUnicastPacket(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
+void IPv4::routeUnicastPacket(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address requestedNextHopAddress)
 {
-    const auto& datagram = packet->peekHeader<IPv4Header>();
-    IPv4Address destAddr = datagram->getDestAddress();
-    EV_INFO << "Routing " << datagram << " with destination = " << destAddr << ", ";
+//    const auto& datagram = packet->peekHeader<IPv4Header>();
+    IPv4Address destAddr = ipv4Header->getDestAddress();
+    EV_INFO << "Routing " << packet << " with destination = " << destAddr << ", ";
 
     IPv4Address nextHopAddr;
     // if output port was explicitly requested, use that, otherwise use IPv4 routing
@@ -464,30 +464,30 @@ void IPv4::routeUnicastPacket(Packet *packet, const InterfaceEntry *fromIE, cons
             nextHopAddr = nextHop.toIPv4();
         }
 
-        routeUnicastPacketFinish(packet, fromIE, destIE, nextHopAddr);
+        routeUnicastPacketFinish(packet, ipv4Header, fromIE, destIE, nextHopAddr);
     }
 }
 
-void IPv4::routeUnicastPacketFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
+void IPv4::routeUnicastPacketFinish(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
 {
     EV_INFO << "output interface = " << destIE->getName() << ", next hop address = " << nextHopAddr << "\n";
     numForwarded++;
-    fragmentPostRouting(packet, destIE, nextHopAddr);
+    fragmentPostRouting(packet, ipv4Header, destIE, nextHopAddr);
 }
 
-void IPv4::routeLocalBroadcastPacket(Packet *packet, const InterfaceEntry *destIE)
+void IPv4::routeLocalBroadcastPacket(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIE)
 {
     // The destination address is 255.255.255.255 or local subnet broadcast address.
     // We always use 255.255.255.255 as nextHopAddress, because it is recognized by ARP,
     // and mapped to the broadcast MAC address.
     if (destIE != nullptr) {
-        fragmentPostRouting(packet, destIE, IPv4Address::ALLONES_ADDRESS);
+        fragmentPostRouting(packet, ipv4Header, destIE, IPv4Address::ALLONES_ADDRESS);
     }
     else if (forceBroadcast) {
         // forward to each interface including loopback
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             const InterfaceEntry *ie = ift->getInterface(i);
-            fragmentPostRouting(packet->dup(), ie, IPv4Address::ALLONES_ADDRESS);
+            fragmentPostRouting(packet->dup(), ipv4Header, ie, IPv4Address::ALLONES_ADDRESS);
         }
         delete packet;
     }
@@ -502,7 +502,7 @@ const InterfaceEntry *IPv4::getShortestPathInterfaceToSource(IPv4Header *datagra
     return rt->getInterfaceForDestAddr(datagram->getSrcAddress());
 }
 
-void IPv4::forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE)
+void IPv4::forwardMulticastPacket(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *fromIE)
 {
     ASSERT(fromIE);
     auto datagram = packet->peekHeader<IPv4Header>();
@@ -562,7 +562,7 @@ void IPv4::forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE)
                     EV_WARN << "Not forwarding to " << destIE->getName() << " (no listeners)\n";
                 else {
                     EV_DETAIL << "Forwarding to " << destIE->getName() << "\n";
-                    fragmentPostRouting(packet->dup(), destIE, destAddr);
+                    fragmentPostRouting(packet->dup(), ipv4Header, destIE, destAddr);
                 }
             }
         }
@@ -662,16 +662,15 @@ void IPv4::decapsulate(Packet *packet)
     packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getTimeToLive());
 }
 
-void IPv4::fragmentPostRouting(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
+void IPv4::fragmentPostRouting(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
     L3Address nextHop(nextHopAddr);
     if (datagramPostRoutingHook(packet, getSourceInterfaceFrom(packet), destIe, nextHop) == INetfilter::IHook::ACCEPT)
-        fragmentAndSend(packet, destIe, nextHop.toIPv4());
+        fragmentAndSend(packet, ipv4Header, destIe, nextHop.toIPv4());
 }
 
-void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
+void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     // fill in source address
     if (ipv4Header->getSrcAddress().isUnspecified())
         ipv4Header->setSrcAddress(destIe->ipv4Data()->getIPAddress());
@@ -689,6 +688,8 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
     if (mtu == 0 || packet->getByteLength() <= mtu) {
+        ipv4Header->markImmutable();
+        packet->prepend(ipv4Header);
         sendDatagramToOutput(packet, destIe, nextHopAddr);
         return;
     }
@@ -755,6 +756,8 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         int bl = fragment->getByteLength();
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
 
+        ipv4Header->markImmutable();
+        fragment->prepend(ipv4Header);
         sendDatagramToOutput(fragment, destIe, nextHopAddr);
         offset += thisFragmentLength;
     }
@@ -762,7 +765,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     delete packet;
 }
 
-void IPv4::encapsulate(Packet *transportPacket)
+std::shared_ptr<IPv4Header> IPv4::encapsulate(Packet *transportPacket)
 {
     const auto& ipv4Header = std::make_shared<IPv4Header>();
 
@@ -821,11 +824,11 @@ void IPv4::encapsulate(Packet *transportPacket)
     else
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
-
-    transportPacket->prepend(ipv4Header);
-    ipv4Header->setTotalLengthField(transportPacket->getByteLength());
-
+    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + transportPacket->getByteLength());
+//    ipv4Header->markImmutable();
+    //transportPacket->prepend(ipv4Header);
     // setting IPv4 options is currently not supported
+    return ipv4Header;
 }
 
 void IPv4::sendDatagramToOutput(Packet *packet, const InterfaceEntry *ie, IPv4Address nextHopAddr)
@@ -972,9 +975,10 @@ void IPv4::reinjectQueuedDatagram(const Packet *datagram)
         if (iter->datagram == datagram) {
             auto *datagram = iter->datagram;
             take(datagram);
+            const auto& ipv4Header = datagram->peekHeader<IPv4Header>();
             switch (iter->hookType) {
                 case INetfilter::IHook::LOCALOUT:
-                    datagramLocalOut(datagram, iter->outIE, iter->nextHopAddr);
+                    datagramLocalOut(datagram, ipv4Header, iter->outIE, iter->nextHopAddr);
                     break;
 
                 case INetfilter::IHook::PREROUTING:
@@ -982,7 +986,7 @@ void IPv4::reinjectQueuedDatagram(const Packet *datagram)
                     break;
 
                 case INetfilter::IHook::POSTROUTING:
-                    fragmentAndSend(datagram, iter->outIE, iter->nextHopAddr);
+                    fragmentAndSend(datagram, ipv4Header, iter->outIE, iter->nextHopAddr);
                     break;
 
                 case INetfilter::IHook::LOCALIN:
@@ -990,7 +994,7 @@ void IPv4::reinjectQueuedDatagram(const Packet *datagram)
                     break;
 
                 case INetfilter::IHook::FORWARD:
-                    routeUnicastPacketFinish(datagram, iter->inIE, iter->outIE, iter->nextHopAddr);
+                    routeUnicastPacketFinish(datagram, ipv4Header, iter->inIE, iter->outIE, iter->nextHopAddr);
                     break;
 
                 default:

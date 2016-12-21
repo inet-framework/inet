@@ -346,8 +346,9 @@ void UDP::processPacketFromApp(cPacket *appData)
     Packet *udpPacket = new Packet(appData->getName());
     udpPacket->transferTagsFrom(appData);
     auto udpHeader = std::make_shared<UdpHeader>();
-    udpPacket->prepend(udpHeader);
-    udpPacket->append(std::make_shared<cPacketChunk>(appData)); //TODO
+    auto udpData = std::make_shared<cPacketChunk>(appData); // TODO
+    udpData->markImmutable();
+    udpPacket->append(udpData);
 
     if (udpPacket->getTag<MulticastReq>() == nullptr)
         udpPacket->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
@@ -371,6 +372,8 @@ void UDP::processPacketFromApp(cPacket *appData)
         crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, udpPacket->getByteLength())));
     }
     udpHeader->setCrc(crc);
+    udpHeader->markImmutable();
+    udpPacket->prepend(udpHeader);
     udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
     udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
 

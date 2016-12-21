@@ -359,9 +359,11 @@ Packet *PPP::encapsulate(cPacket *msg)
 {
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = std::make_shared<PppHeader>();
-    auto pppTrailer = std::make_shared<PppTrailer>();
     pppHeader->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pppHeader->markImmutable();
     packet->prepend(pppHeader);
+    auto pppTrailer = std::make_shared<PppTrailer>();
+    pppTrailer->markImmutable();
     packet->append(pppTrailer);
     return packet;
 }
