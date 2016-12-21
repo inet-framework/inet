@@ -383,6 +383,7 @@ void NewTest::initialize()
     }
     clock_t end = clock();
     runtime = (double)(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "Runtime: " << runtime << std::endl;
 }
 
 void NewTest::finish()
