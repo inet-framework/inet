@@ -80,15 +80,6 @@ class INET_API Packet : public cPacket
 
     virtual Packet *dup() const override { return new Packet(*this); }
 
-    /** @name Mutability related functions */
-    //@{
-    bool isContentsImmutable() const { return contents != nullptr && contents->isImmutable(); }
-    bool isContentsMutable() const { return contents == nullptr || contents->isMutable(); }
-    void assertContentsMutable() const { assert(isContentsMutable()); }
-    void assertContentsImmutable() const { assert(isContentsImmutable()); }
-    void markContentsImmutable() { contents->markImmutable(); }
-    //@}
-
     /** @name Length querying related functions */
     //@{
     /**
