@@ -124,9 +124,15 @@ bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, TcpHe
     //TODO must rewrite it
     //return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
 
-    int payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    long int payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    uint32_t payloadSeq = tcpseg->getSequenceNo();
     uint32 firstSeq = receiveQueue->getFirstSeqNo();
-    return seqLE(firstSeq, tcpseg->getSequenceNo()) && seqLE(tcpseg->getSequenceNo() + payloadLength, firstSeq + state->maxRcvBuffer);
+    if (seqLess(payloadSeq, firstSeq)) {
+        long delta = firstSeq - payloadSeq;
+        payloadSeq += delta;
+        payloadLength -= delta;
+    }
+    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + state->maxRcvBuffer);
 }
 
 TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, TcpHeader *tcpseg)
@@ -481,8 +487,6 @@ TCPEventCode TCPConnection::processSegment1stThru8th(Packet *packet, TcpHeader *
             // check for persist probe
             if (payloadLength == 1)
                 state->ack_now = true; // TODO how to check if it is really a persist probe?
-
-            // tcpseg->truncateSegment(state->rcv_nxt, state->rcv_nxt + state->rcv_wnd);        //FIXME KLUDGE - but why did we do it? where is it in RFCs?
 
             updateRcvQueueVars();
 

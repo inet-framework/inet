@@ -59,8 +59,15 @@ uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, TcpHeader *tcps
 {
     int64_t tcpHeaderLength = tcpseg->getHeaderLength();
     int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;
-    const auto& payload = packet->peekDataAt(tcpHeaderLength, tcpPayloadLength);
     uint32_t seq = tcpseg->getSequenceNo();
+    uint32_t offs = 0;
+    uint32_t buffSeq = offsetToSeq(reorderBuffer.getExpectedOffset());
+    if (seqLess(seq, buffSeq)) {
+        offs = buffSeq - seq;
+        seq = buffSeq;
+        tcpPayloadLength -= offs;
+    }
+    const auto& payload = packet->peekDataAt(tcpHeaderLength + offs, tcpPayloadLength);
 
 #ifndef NDEBUG
     if (!reorderBuffer.isEmpty()) {
