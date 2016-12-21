@@ -326,9 +326,9 @@ class INET_API TCPConnection : public cObject
 
     // socket pair
     L3Address localAddr;
-    L3Address getLocalAddr() const { return localAddr; }
+    const L3Address& getLocalAddr() const { return localAddr; }
     L3Address remoteAddr;
-    L3Address getRemoteAddr() const { return remoteAddr; }
+    const L3Address& getRemoteAddr() const { return remoteAddr; }
     int localPort = -1;
     int getLocalPort() const { return localPort; }
     int remotePort = -1;

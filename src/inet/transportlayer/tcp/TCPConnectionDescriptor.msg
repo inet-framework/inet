@@ -26,6 +26,7 @@ cplusplus {{
 #include "inet/transportlayer/tcp/TCPAlgorithm.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 #include "inet/transportlayer/tcp/TCPReceiveQueue.h"
+#include "inet/transportlayer/tcp/TCPSACKRexmitQueue.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 }}
@@ -35,7 +36,7 @@ namespace inet::tcp;
 class noncobject L3Address;
 class TCPSendQueue extends cObject;
 class TCPReceiveQueue extends cObject;
-class TCPSACKRexmitQueue extends cObject;
+class noncobject TCPSACKRexmitQueue;
 class TCPAlgorithm extends cObject;
 
 struct TCPStateVariables
@@ -174,7 +175,6 @@ class TCPConnection extends cObject
     // TCP queues
     TCPSendQueue *sendQueue;
     TCPReceiveQueue *receiveQueue;
-    int transferMode; //FIXME    TCPDataTransferMode transferMode;    // TCP transfer mode: bytecount, object, bytestream
     TCPSACKRexmitQueue *rexmitQueue;
 
     TCPAlgorithm *tcpAlgorithm;
