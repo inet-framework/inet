@@ -34,6 +34,7 @@ Packet::Packet(const char *name, const std::shared_ptr<Chunk>& contents) :
     headerIterator(Chunk::ForwardIterator(0, 0)),
     trailerIterator(Chunk::BackwardIterator(0, 0))
 {
+    assert(contents->isImmutable());
 }
 
 Packet::Packet(const Packet& other) :
