@@ -27,7 +27,7 @@
 							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1843986175" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1544720771" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.preprocessor.def.33891026" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.33891026" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
@@ -62,13 +62,13 @@
 									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.include.paths.1304941279" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.1304941279" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1163034331" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.892294620" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.193803687" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.193803687" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
@@ -103,7 +103,7 @@
 									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
 								</option>
-								<option id="gnu.c.compiler.option.include.paths.552444216" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.552444216" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1458844290" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -239,7 +239,7 @@
 							<builder id="org.omnetpp.cdt.gnu.builder.release.1176677325" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1643927787" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1039888888" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.preprocessor.def.655304152" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.655304152" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
@@ -274,13 +274,13 @@
 									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.include.paths.1086707691" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.1086707691" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.958073850" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.419916163" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1241715501" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1241715501" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
 									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
 									<listOptionValue builtIn="false" value="WITH_IPv4"/>
@@ -315,7 +315,7 @@
 									<listOptionValue builtIn="false" value="WITH_CSMA"/>
 									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
 								</option>
-								<option id="gnu.c.compiler.option.include.paths.951413942" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.951413942" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.406690453" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -656,4 +656,5 @@
 			<resource resourceType="PROJECT" workspacePath="/inet"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
