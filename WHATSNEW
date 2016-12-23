@@ -1,6 +1,57 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.5.0 (Dec, 2016) - stable
+-------------------------------
+
+This release contains mostly bug fixes and compatibility changes. It requires 
+OMNeT++ 5.0 or 5.1 Preview 2. Earlier versions of OMNeT++ are *not* compatible.
+
+Highligts in this release:
+
+Build:
+
+  - The build process is now using precompiled headers. This can speed up the 
+    build process considerably.
+
+  - Feature macros (WITH_*) that show the enablement of features are now placed 
+    into a header file (src/inet/features.h) instead of passed on the command line. 
+    The build process adds the WITH_OSG and WITH_OSGEARTH macro to the opp_defines.h 
+    file when WITH_OSG/WITH_OSGEARTH is set to yes. This allows the IDE to properly 
+    highlight/disable the appropriate code fragments.
+
+  - 64-bit builds are now supported on Windows.
+
+Visualizers:
+
+  - Added a Plot figure (see InstrumentsExample).
+
+DHCP:
+
+  - DHCP fixes.
+
+  - DHCP can now activated in a Router by setting hasDHCP=true
+
+  - Added new WirelessNetWith2DHCP example.
+
+Radio:
+
+  - Added two-ray interference model.
+
+Fixes:
+
+  - Small SimpleEnergyStorage, Antenna initialization
+
+  - Calling IPv6RoutingTable::getInterfaceByAddress(const L3Address& address) or
+    findGpsrOptionFromNetworkDatagram() function caused infinite recursion.
+
+  - Radio: Fixed FreeSpacePathLoss bug in the loss forumula for alpha != 2 case,
+    reported by Benjamin Sliwa.
+
+  - SimpleVoIPServer should resolve the destAddress at startTime (instead 
+    of initialization)
+
+
 INET-3.4.0 (Jun, 2016) - stable
 -------------------------------
 
