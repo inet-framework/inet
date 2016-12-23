@@ -553,7 +553,7 @@ static void testDuplication()
     packet1.markContentsImmutable();
     auto packet2 = packet1.dup();
     assert(packet2->getPacketLength() == 10);
-    assert(byteCountChunk1.use_count() == 3); // 1 in the chunk + 2 in the packets
+    assert(byteCountChunk1.use_count() == 3); // 1 here + 2 in the packets
     delete packet2;
 
     // 2. copy of mutable packet copies data

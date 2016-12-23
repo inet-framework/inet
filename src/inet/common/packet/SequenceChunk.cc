@@ -140,7 +140,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
         if (!firstChunk->canInsertAtBeginning(chunk))
             chunks.push_front(chunk);
         else {
-            if (firstChunk.use_count() <= 2)
+            if (firstChunk.use_count() == 1)
                 firstChunk->markMutableIfExclusivelyOwned();
             else
                 firstChunk = firstChunk->dupShared();
@@ -202,7 +202,7 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
         if (!lastChunk->canInsertAtEnd(chunk))
             chunks.push_back(chunk);
         else {
-            if (lastChunk.use_count() <= 2)
+            if (lastChunk.use_count() == 1)
                 lastChunk->markMutableIfExclusivelyOwned();
             else
                 lastChunk = lastChunk->dupShared();

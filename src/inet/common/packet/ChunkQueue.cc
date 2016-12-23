@@ -83,7 +83,7 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
         contents = chunk;
     else {
         if (contents->canInsertAtEnd(chunk)) {
-            if (contents.use_count() <= 2)
+            if (contents.use_count() == 1)
                 contents->markMutableIfExclusivelyOwned();
             else
                 contents = contents->dupShared();

@@ -67,7 +67,7 @@ class INET_API Packet : public cPacket
     Chunk *getChunk(int i) const;
 
     void makeContentsMutable() {
-        if (contents.use_count() <= 2)
+        if (contents.use_count() == 1)
             contents->markMutableIfExclusivelyOwned();
         else
             contents = contents->dupShared();

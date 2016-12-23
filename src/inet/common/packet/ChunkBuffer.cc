@@ -91,7 +91,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
         // consecutive regions
         if (previousRegion.data->canInsertAtEnd(nextRegion.data)) {
             // merge into previous
-            if (previousRegion.data.use_count() <= 2)
+            if (previousRegion.data.use_count() == 1)
                 previousRegion.data->markMutableIfExclusivelyOwned();
             else
                 previousRegion.data = previousRegion.data->dupShared();
@@ -102,7 +102,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
         }
         else if (nextRegion.data->canInsertAtBeginning(previousRegion.data)) {
             // merge into next
-            if (nextRegion.data.use_count() <= 2)
+            if (nextRegion.data.use_count() == 1)
                 nextRegion.data->markMutableIfExclusivelyOwned();
             else
                 nextRegion.data = nextRegion.data->dupShared();
