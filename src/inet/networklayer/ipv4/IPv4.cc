@@ -1080,12 +1080,12 @@ void IPv4::stop()
 void IPv4::flush()
 {
     delete cancelService();
-    EV_DEBUG << "IPv4::flush(): packets in queue: " << queue.info() << endl;
+    EV_DEBUG << "IPv4::flush(): packets in queue: " << queue.STR_COMPAT() << endl;
     queue.clear();
 
     EV_DEBUG << "IPv4::flush(): pending packets:\n";
     for (auto & elem : pendingPackets) {
-        EV_DEBUG << "IPv4::flush():    " << elem.first << ": " << elem.second.info() << endl;
+        EV_DEBUG << "IPv4::flush():    " << elem.first << ": " << elem.second.STR_COMPAT() << endl;
         elem.second.clear();
     }
     pendingPackets.clear();

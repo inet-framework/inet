@@ -26,11 +26,16 @@ namespace omnetpp { }  // so "using namespace omnetpp" in INETDefs.h doesn't cau
 namespace inet {
 
 #if OMNETPP_BUILDNUM < 1008
-#define Register_Figure(x, y)   Register_Class(y)
+  #define Register_Figure(x, y)   Register_Class(y)
 #endif
 
 #if OMNETPP_VERSION < 0x501
-#define cResultFilterType cResultFilterDescriptor
+  #define cResultFilterType cResultFilterDescriptor
+  #define STR_COMPAT info
+  #define STR_COMPAT_OVERRIDE
+#else
+  #define STR_COMPAT str
+  #define STR_COMPAT_OVERRIDE override
 #endif
 
     typedef uint64_t uint64;
