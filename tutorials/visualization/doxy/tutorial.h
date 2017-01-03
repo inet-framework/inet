@@ -43,6 +43,8 @@ Consecutive steps mostly share the same network, defined in NED.
 - @ref step20
 - @ref step21
 - @ref step22
+- @ref step23
+- @ref step24
 - @ref conclusion
 
 @nav{index,step1}
@@ -63,6 +65,8 @@ for visualizations. In the first step we create a model with INET visualizations
 @section s1model The model
 
 @section s1results Results
+
+Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @nav{index,step2}
 @fixupini
@@ -138,6 +142,8 @@ playground along with its coordinate axes.
 @section s3results Results
 
 <img src="step1_map_with_axes.png" width="850">
+
+Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @nav{step2,step4}
 @fixupini
@@ -241,12 +247,13 @@ more understandable if the appearance of nodes is similar as in real world.
 The default icon for the pedestrians is a cellphone. In this step we replace 
 the default icon with an 3D animated model.
 
+<!--
 ad2:
 The simulation is more understandable if the appearance of nodes is similar as in real world.
 The default icon for the pedestrians is a cellphone. In this step we replace 
 the default icon with an 3D animated model. It doesn't directly affect the 
 outcome of the simulation.
-
+-->
 <!--
 A szimuláció sokkal érthetőbb, ha a node-ok hasonlóan néznek ki, mint ahogy a valóságban.
 A pedestrian-ok default ikonja egy mobil. Ebben a lépésben kicseréljük egy 
@@ -416,7 +423,7 @@ Here is the appropriate configuration:
 -->
 @section s9results Results
 
-<img src="step7_result1.gif">
+<img src="step09_wifi_assoc_2d.gif">
 <img src="step7_result2.gif">
 <!--
 In Module view mode we can monitor the association process, we see all messages between the nodes.
@@ -440,13 +447,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s10goals Goals
 
-
-In this step we visualize the transmissions and receptions to identify the 
-role of network nodes in wireless communication.
+In this step we display transmissions and receptions to identify the participants of communication.
+Data communication refers to the exchange of data between a source and a receiver. 
+The meanings of source and receiver are very simple. The device that transmits the data 
+is known as source and the device that receives the transmitted data is known as receiver.
 
 <!--
-Ebben a lépésben megjelenítjük, az adásokat és vételeket, hogy azonosítsuk a 
-node-ok szerepét a vezeték nélküli kommunikációban.
+---
 -->
 
 @section s10model The model
@@ -494,11 +501,19 @@ Understanding network communication, we need to know that how the nodes
 communicate with each other on the wireless channel. To this we should see propagation 
 signals. In this step we display propagating signals between wireless nodes.
 
+In this step we display propagating signals. When we turn on this visualizer we can 
+see the communication through wireless channel. It helps to monitoring network 
+communication.
+
 <!--
 A hálózati kommunikáció megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
 hogyan kommunikálnak egymás között a vezeték nélküli csatornán. Ehhez látnunk kell 
 a vezeték nélküli jeleket. Ebben a lépésben megmutatjuk, hogy a wireless node-ok milyen üzeneteket
 továbbítanak egymás között a hálózaton.
+
+Ebben a lépésben a jelek terjedését mutatjuk meg. Ha bekapcsoljuk ezt a visualizert, akkor 
+láthatjuk az egyes packet-ek terjedését a vezeték nélküli közegben. Ez nagy segítség a hálózati 
+kommunikáció monitorozásában.
 -->
 
 @section s11model The model
@@ -552,15 +567,14 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s12goals Goals
 
 In this step we show active physical links in VoIP communication.
-These visualize which nodes can receive a packet from the sender device. 
+These visualize which node receives VoIP packets from the sender device. 
 With this visualizer, we verify whether there's physical connection 
-between two devices. The link can be wired or wireless too.
+between two devices.
 
 <!--
 Ebben a lépésben megmutatjuk a VoIP kommunikáció aktív fizikai linkjeit.
-Ezek azt mutatják meg, hogy mely eszközök fogadták a forrás node csomagját. 
+Ezek azt mutatják meg, hogy mely eszköz fogad VoIP csomagot a küldő eszköztől. 
 Ezzel a visualizer-rel ellenőrizzük, hogy van-e fizikai kapcsolat két eszköz között.
-A link lehet vezetékes és vezeték nélküli is.
 -->
 
 <!--
@@ -1007,9 +1021,9 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 In this step we visualize packet drops. Packet drops occurs when one or more 
 packets of data travelling across a computer network fail to reach their destination. 
 Packet loss is typically caused by network congestion but it can be caused by 
-a number of other factors such as radio signals that are too weak due to distance or 
-faulty networking hardware. If there are natural or artifical obstacles are in 
-the environment, then it helps if we see where packets drop.
+a number of other factors such as radio signals that are too weak due to distance, 
+natural or artifical obstacles in the environment or faulty networking hardware. 
+It helps to put wireless access points to the right place, if we see where the packets dropped.
 
 <!--
 Ebben a lépésben a packet dropot vizualizáljuk.
@@ -1045,7 +1059,7 @@ participants of a transport connection.
 Ebben a lépésben a nyitott hálózati kapcsolatokat jelenítjük meg.
 A TCP kapcsolatok háromfázisú kézfogással épülnek ki. Ezután amíg az egyik fél 
 nem kezdeményezi a kapcsolat lezárását, addig nyitva marad. A megjelenítésükkel 
-a hálózat könnyen átlátható, hogy melyik nyitott kapcsolatnak melyik node-ok a résztvevői.
+könnyen átlátható lesz, hogy melyik nyitott kapcsolatnak melyik node-ok a résztvevői.
 -->
 
 @section s21model The model
@@ -1065,6 +1079,18 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s22goals Goals
 
+In this step we display link breaks between network devices. When a mobile node 
+exits from an access point's communication range the link breaks up and the devices 
+can't communicate with each other. This may results packet loss when the mobile 
+node receives any stream.
+
+<!--
+Ebben a lépésben a link break-eket mutatjuk meg. 
+Ha egy mozgó node kimegy egy access point communication range-éből, akkor a kapcsolat 
+megszakad az eszközök között és nem lesznek képesek a kommunikációra egymással. Ennek 
+csomagvesztés lehet a következménye, ha pl. a mozgó eszköz valamilyen stream-et fogad.
+-->
+
 @section s22model The model
 
 @section s22results Results
@@ -1082,6 +1108,21 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s23goals Goals
 
+
+
+<!--
+Ebben a lépésben a wireless handover-t (hand off-ot) fogjuk szimulálni. A vezeték 
+nélküli hálózatokban gyakran fedik egymást az AP-k communication range-ei, hogy a 
+mozgó endpoint-ok minél nagyobb területen használhassák a hálózatot.
+A hálózat működésének megértését könnyíti, ha látjuk az átkapcsolásokat az access 
+pointok között.
+
+@note Ez a jelenség akkor történik, amikor egy mozgó wireless eszköz access point-ok egymást fedő 
+communication range-ében van. Ha annak az AP-nek amelyikhez a node csatlakozva van 
+a jele túl gyenge a kommunikációhoz és egy másik AP-é elég erős, akkor az eszköz 
+át fog csatlakozni a másik AP-re.
+-->
+
 @section s23model The model
 
 @section s23results Results
@@ -1098,6 +1139,14 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @nav{step23,conclusion}
 
 @section s24goals Goals
+
+
+
+<!--
+Amikor az eszközök mozognak, gyakran változhat két node között a csomagok útja. 
+A változások megjelenítésével bármelyik pillanatban meg tudjuk állapítani, hogy az 
+eszközök milyen útvonalat használnak a kommunikációra.
+-->
 
 @section s24model The model
 
