@@ -27,6 +27,10 @@ namespace inet {
 
 #if OMNETPP_BUILDNUM < 1008
   #define Register_Figure(x, y)   Register_Class(y)
+#elif OMNETPP_BUILDNUM < 1010
+  #undef Register_Figure
+  #define Register_Figure(NAME, CLASSNAME)  \
+      __REGISTER_CLASS_X(CLASSNAME, omnetpp::cFigure, "figure", figureTypes[NAME] = omnetpp::opp_typename(typeid(CLASSNAME)))
 #endif
 
 #if OMNETPP_VERSION < 0x501

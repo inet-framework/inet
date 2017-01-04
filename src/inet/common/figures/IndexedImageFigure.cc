@@ -22,7 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Figure(indexedImage, IndexedImageFigure);
+Register_Figure("indexedImage", IndexedImageFigure);
 
 static const char *PKEY_IMAGES = "images";
 static const char *PKEY_TINT_AMOUNT = "tintAmount";

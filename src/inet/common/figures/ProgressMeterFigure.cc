@@ -22,7 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Figure(progressMeter, ProgressMeterFigure);
+Register_Figure("progressMeter", ProgressMeterFigure);
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_STRIP_COLOR = "stripColor";

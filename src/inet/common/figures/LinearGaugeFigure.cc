@@ -22,7 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Figure(linearGauge, LinearGaugeFigure);
+Register_Figure("linearGauge", LinearGaugeFigure);
 
 static const double BORDER_WIDTH_PERCENT = 0.05;
 static const double AXIS_WIDTH_PERCENT = 0.03;
