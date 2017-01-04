@@ -57,10 +57,8 @@ sim-time-limit = 10500s
 cmdenv-express-mode = false
 
 **.dhcpServer.udpApp[0].typename = "DHCPServer"
-**.dhcpServer.udpApp[0].subnetMask = "255.255.255.0"        # netmask to assign
-**.dhcpServer.udpApp[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.dhcpServer.udpApp[0].numReservedAddresses = 100    # ip to start to lease
 **.dhcpServer.udpApp[0].maxNumClients = 100     # number of ip to lease
-**.dhcpServer.udpApp[0].gateway = "192.168.1.1"     # gateway to assign
 **.dhcpServer.udpApp[0].dns = ""         # dns to assign
 **.dhcpServer.udpApp[0].leaseTime = 1000s     # lease time in seconds
 
