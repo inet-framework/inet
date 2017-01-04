@@ -67,7 +67,7 @@ Sending ping request #0 to lower layer\.
 Sending ping request #3 to lower layer\.
 .*
 
-<!> No more events -- simulation ended at event #\d+, t=6\.
+<!> No more events
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

@@ -66,7 +66,7 @@ Test\.host shutting down
 .*
 Test\.host shut down
 
-<!> No more events -- simulation ended at event #\d+, t=3
+<!> No more events
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
