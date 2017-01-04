@@ -1,7 +1,7 @@
 /**
 @mainpage Visualization Tutorial for the INET Framework
 In this tutorial we show you, how to use the visualization module in the INET Framework.
-The tutorial contains a series of simulation models, numbered from 1 through 22.
+The tutorial contains a series of simulation models, numbered from 1 through 24.
 The models are of increasing complexity – they start from the basics and in each step, they introduce new INET features and concepts related to visualization module.
 Our goal is show the working of the visualization module and its submodules in INET.
 
@@ -497,9 +497,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s11goals Goals
 
-Understanding network communication, we need to know that how the nodes 
-communicate with each other through wireless channel. To this we should see propagation 
-signals. In this step we display propagating signals between wireless nodes.
+Understanding communication between network devices, we need to know how the nodes communicate 
+with each other through wireless channel. To this we display propagating signals between wireless nodes.
 
 <!--
 A hálózati kommunikáció megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
@@ -563,8 +562,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s12goals Goals
 
 In this step we show active physical links in VoIP communication.
-These visualize which node receives VoIP packets from the sender device. 
-With this visualizer we verify whether there's physical connection 
+These display which node receives VoIP packets from the sender device. 
+Using this visualizer we verify whether there's physical connection 
 between communication devices.
 
 <!--
@@ -625,7 +624,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s13goals Goals
 
 In this step we display the VoIP communication's data links. By visualizing 
-data links we check that the VoIP packet arrived correctly at the receiver.
+data links we check that the VoIP packet correctly arrived at the destination node.
 
 <!--
 Ebben a lépésben a VoIP kommunikáció data linkjeit mutatjuk meg. A data linkek 
@@ -939,7 +938,7 @@ The configuration:
 
 @section s17results Results
 
-
+<img src="step17_networkroute_3d.gif">
 
 Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
@@ -954,8 +953,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s18goals Goals
 
-In the real world the objects on the map, such as buildings or trees constitute 
-3 dimensional barriers which affects the wireless communication. In this step 
+In the real world, the objects on the map, such as buildings or trees constitute 
+3 dimensional barriers which affect on the wireless communication. In this step 
 we add 3 dimensional obstacles to our simulation.
 
 <!--
