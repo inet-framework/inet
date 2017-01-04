@@ -7,7 +7,7 @@ ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
     CFLAGS += -I../3rdparty/nsc-$(NSC_VERSION)/sim -DHAVE_NSC
-    LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
+    LIBS += -Wl,-rpath,$(abspath ../3rdparty/nsc-$(NSC_VERSION))
   endif
 endif
 
