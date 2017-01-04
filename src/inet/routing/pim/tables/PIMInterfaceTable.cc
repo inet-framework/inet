@@ -108,7 +108,7 @@ PIMInterface *PIMInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement
         throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
 
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
-    bool stateRefreshFlag = stateRefreshAttr && strcmp(stateRefreshAttr, "true");
+    bool stateRefreshFlag = stateRefreshAttr && !strcmp(stateRefreshAttr, "true");
 
     return new PIMInterface(ie, mode, stateRefreshFlag);
 }
