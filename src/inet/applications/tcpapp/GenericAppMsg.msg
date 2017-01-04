@@ -18,9 +18,12 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 //
 // Message class for generic request-reply style applications.
@@ -33,8 +36,9 @@ namespace inet;
 //
 // @see ~TCPGenericSrvApp, TCPGenericCliAppBase (C++ only)
 //
-packet GenericAppMsg
+class GenericAppMsg extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter;
     int expectedReplyLength; // in bytes
     double replyDelay;       // reply after this many seconds
     bool serverClose;        // with TCP: if true, server should close the
