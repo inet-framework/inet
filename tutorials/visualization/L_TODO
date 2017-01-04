@@ -47,3 +47,4 @@
 - transportConnectionVisualizer nem tünteti el a jeleit, ha a kapcsolat lezárul
 
 - mediumVisualizer.displaySignals: 3D-ben látszik a jel gyengülése (halványodik a szín), 2D-ben nem látszik
+

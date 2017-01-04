@@ -144,6 +144,9 @@ QL	- init megváltoztatni: SceneOsgEarthVisualizer-t használunk, ehhez muszáj 
 PIPA	- A többi networkot hátrébb kell tolni
 PIPA	- iniben a networkok nevét eltolni
 
+- Step05
+	- img range-ek nélkül
+
 - Step07
 PIPA	- gif movement trail nélkül hogy confusing legyen
 PIPA	- velocityArrowScale-t belőni

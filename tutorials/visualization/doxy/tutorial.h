@@ -241,11 +241,11 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @nav{step5, step7}
 
 @section s6goals Goals
-ad1:
+
 However it doesn't directly affect the outcome of the simulation, it is 
 more understandable if the appearance of nodes is similar as in real world.
 The default icon for the pedestrians is a cellphone. In this step we replace 
-the default icon with an 3D animated model.
+the default icon with a 3D animated model.
 
 <!--
 ad2:
@@ -498,12 +498,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s11goals Goals
 
 Understanding network communication, we need to know that how the nodes 
-communicate with each other on the wireless channel. To this we should see propagation 
+communicate with each other through wireless channel. To this we should see propagation 
 signals. In this step we display propagating signals between wireless nodes.
-
-In this step we display propagating signals. When we turn on this visualizer we can 
-see the communication through wireless channel. It helps to monitoring network 
-communication.
 
 <!--
 A hálózati kommunikáció megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
@@ -568,8 +564,8 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 In this step we show active physical links in VoIP communication.
 These visualize which node receives VoIP packets from the sender device. 
-With this visualizer, we verify whether there's physical connection 
-between two devices.
+With this visualizer we verify whether there's physical connection 
+between communication devices.
 
 <!--
 Ebben a lépésben megmutatjuk a VoIP kommunikáció aktív fizikai linkjeit.
@@ -628,7 +624,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s13goals Goals
 
-In this step we display the VoIP communication's data links. Visualizing 
+In this step we display the VoIP communication's data links. By visualizing 
 data links we check that the VoIP packet arrived correctly at the receiver.
 
 <!--
@@ -895,11 +891,11 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s17goals Goals
 
 In this step we enable displaying active network routes for video stream. 
-In network devices, applications handle the UDP based traffic, for example video stream. 
-When a video stream packet leaves the network layer in the destination node, 
-network route becomes active between the source node and the destination. 
 With this visualizer we check, whether the videostream packet arrived at the 
-destination's client application.
+destination's client application. In network nodes, applications handle the 
+UDP based traffic, for example video stream. 
+When a video stream packet leaves the destination's network layer, 
+network route becomes active between the source node and the destination. 
 
 <!--
 Ebben a lépésben az aktív hálózati útvonalakat jelenítjük meg.
@@ -910,15 +906,6 @@ a hálózati útvonal. Ezzel a visualizer-rel megnézhetjük, hogy a csomag
 eljut-e a célállomás megfelelő alkalmazásához.
 -->
 
-<!--
-In this step we want to show active network routes. It's similar to
-showing active physical links, and active data links, but network routes
-active when the packet pass the destination' network layer.
-
-In furthermore we make the model more interesting by adding more nodes,
-change the routing protocol to RIP, and assign address via DHCP protocol
-to the wireless nodes.
--->
 @section s17model The model
 
 <!--
@@ -1023,7 +1010,7 @@ packets of data travelling across a computer network fail to reach their destina
 Packet loss is typically caused by network congestion but it can be caused by 
 a number of other factors such as radio signals that are too weak due to distance, 
 natural or artifical obstacles in the environment or faulty networking hardware. 
-It helps to put wireless access points to the right place, if we see where the packets dropped.
+Visualizing packet drops helps to put wireless access points to the right place.
 
 <!--
 Ebben a lépésben a packet dropot vizualizáljuk.
@@ -1052,7 +1039,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 In this step we show transport connections. To establish a link, TCP uses 
 three-way handshake. It's open until one of the participants initiate closing the 
-connection. Displaying these, it will be easy to understand which hosts are the 
+connection. By displaying these, it will be easy to understand which hosts are the 
 participants of a transport connection.
 
 <!--
@@ -1081,14 +1068,14 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 In this step we display link breaks between network devices. When a mobile node 
 exits from an access point's communication range the link breaks up and the devices 
-can't communicate with each other. This may results packet loss when the mobile 
-node receives any stream.
+can't communicate with each other. This leads to packet loss when the mobile 
+node distributes data on the network.
 
 <!--
 Ebben a lépésben a link break-eket mutatjuk meg. 
 Ha egy mozgó node kimegy egy access point communication range-éből, akkor a kapcsolat 
 megszakad az eszközök között és nem lesznek képesek a kommunikációra egymással. Ennek 
-csomagvesztés lehet a következménye, ha pl. a mozgó eszköz valamilyen stream-et fogad.
+csomagvesztés lehet a következménye, ha a mozgó eszköz adatokat forgalmaz a hálózaton.
 -->
 
 @section s22model The model
@@ -1108,19 +1095,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s23goals Goals
 
-
+A handoff occurs when a client moves beyond the radio range of one access point, 
+and into the range of another access point. In general, it's difficult to tell 
+which nodes are associated with which access points. In this step we display 
+handovers.
 
 <!--
-Ebben a lépésben a wireless handover-t (hand off-ot) fogjuk szimulálni. A vezeték 
-nélküli hálózatokban gyakran fedik egymást az AP-k communication range-ei, hogy a 
-mozgó endpoint-ok minél nagyobb területen használhassák a hálózatot.
-A hálózat működésének megértését könnyíti, ha látjuk az átkapcsolásokat az access 
-pointok között.
-
-@note Ez a jelenség akkor történik, amikor egy mozgó wireless eszköz access point-ok egymást fedő 
-communication range-ében van. Ha annak az AP-nek amelyikhez a node csatlakozva van 
-a jele túl gyenge a kommunikációhoz és egy másik AP-é elég erős, akkor az eszköz 
-át fog csatlakozni a másik AP-re.
+-----
 -->
 
 @section s23model The model
@@ -1140,12 +1121,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s24goals Goals
 
-
+When devices roam in the network, routes may change between two nodes. Displaying 
+changes we always know the actual network route between communicating devices.
 
 <!--
 Amikor az eszközök mozognak, gyakran változhat két node között a csomagok útja. 
 A változások megjelenítésével bármelyik pillanatban meg tudjuk állapítani, hogy az 
-eszközök milyen útvonalat használnak a kommunikációra.
+eszközök között milyen úton folyik a kommunikáció.
 -->
 
 @section s24model The model
