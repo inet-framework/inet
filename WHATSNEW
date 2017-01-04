@@ -38,6 +38,11 @@ Radio:
 
   - Added two-ray interference model.
 
+
+SCTP:
+
+   - Added StreamReconfig support for SCTP (by Irene Ruengeler)
+
 Fixes:
 
   - Small SimpleEnergyStorage, Antenna initialization

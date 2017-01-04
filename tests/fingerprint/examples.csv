@@ -147,7 +147,7 @@
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             dbcf-43c2/tplx
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,          458d-5335/tplx
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,          0958-258f/tplx
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,          8aec-4a8d/tplx
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           f042-928b/tplx
 
@@ -352,7 +352,7 @@
 # /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           0000-0000    # unstable fingerprint
 # /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
 
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,             93e9-5083/tplx
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,             d8a5-9857/tplx
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,             7fd4-8fbe/tplx
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,             96c9-198d/tplx
 

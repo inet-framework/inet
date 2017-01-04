@@ -66,6 +66,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     int64 bufferSize;
     bool timer;
     bool sendAllowed;
+    const char *stateNameStr;
 
     // statistics
     unsigned long int packetsSent;
@@ -87,7 +88,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-    virtual void refreshDisplay(const char *s) const;
+    virtual void refreshDisplay() const override;
 
     void connect();
     void close();
