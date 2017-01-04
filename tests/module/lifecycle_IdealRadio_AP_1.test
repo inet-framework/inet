@@ -12,6 +12,12 @@ cmdenv-express-mode = false
 record-eventlog = true
 sim-time-limit = 3s
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 *.host.numRadios=2

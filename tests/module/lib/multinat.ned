@@ -69,7 +69,4 @@ network multinat
 
 }
 
-channel natline extends DatarateChannel
-{
-    datarate = 100 Mbps;
-}
+

@@ -16,6 +16,12 @@ network Test
 ned-path = .;../../../../src;../../lib
 debug-on-errors = true
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.objectCacheType = ""
 
 **.polyhedron.points = "94 1 39 20 33 35 58 21 41 16 5 52 13 19 80 53 64 51 83 66 55 8 15 10 67 84 5 95 25 84"

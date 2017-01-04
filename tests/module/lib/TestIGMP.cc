@@ -226,7 +226,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
     if (!strcmp(what, "groups"))
     {
         if (!ie)
-            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.detailedInfo().c_str());
+            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.STR_COMPAT().c_str());
         IPv4AddressVector joinedGroups;
         const int count = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
         for (int i = 0; i < count; ++i)
@@ -236,7 +236,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
     else if (!strcmp(what, "listeners"))
     {
         if (!ie)
-            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.detailedInfo().c_str());
+            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.STR_COMPAT().c_str());
         IPv4AddressVector reportedGroups;
         const int count = ie->ipv4Data()->getNumOfReportedMulticastGroups();
         for (int i = 0; i < count; ++i)

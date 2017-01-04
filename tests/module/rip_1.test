@@ -104,6 +104,12 @@ ned-path = .;../../../../src;../../lib
 tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 250s
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.rip.ripConfig = xmldoc("RIPConfig.xml")
 
 **.numUdpApps = 2
