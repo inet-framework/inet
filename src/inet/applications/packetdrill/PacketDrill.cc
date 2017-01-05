@@ -1518,7 +1518,7 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
             free (rs);
             return STATUS_ERR;
         }
-        printf("srs_number_streams = %lld\n", rs->srs_number_streams->getNum());
+        printf("srs_number_streams = %" INT64_PRINTF_FORMAT "d\n", rs->srs_number_streams->getNum());
         if (rs->srs_number_streams->getNum() > 0) {
             rs->srs_stream_list = new PacketDrillExpression(in->getResetStreams()->srs_stream_list->getType());
             if (evaluate(in->getResetStreams()->srs_stream_list, rs->srs_stream_list, error)) {
@@ -1545,7 +1545,7 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
         struct sctp_add_streams_expr *as = (struct sctp_add_streams_expr *) malloc(sizeof(struct sctp_add_streams_expr));
         as->sas_assoc_id = new PacketDrillExpression(in->getAddStreams()->sas_assoc_id->getType());
         if (evaluate(in->getAddStreams()->sas_assoc_id, as->sas_assoc_id, error)) {
-        printf("add streams assoc id=%lld\n", as->sas_assoc_id->getNum());
+        printf("add streams assoc id=%" INT64_PRINTF_FORMAT "d\n", as->sas_assoc_id->getNum());
             delete (as->sas_assoc_id);
             free (as);
             return STATUS_ERR;
