@@ -105,9 +105,9 @@
 /examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            5b36-f82f/tplx
 /examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             7349-3e4f/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             9d93-9160/tplx
-/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             96bb-654a/tplx
-/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             f3f1-9633/tplx
-/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        2567-d386/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             8535-4fac/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             57fc-bc65/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        5947-e5e5/tplx
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            049f-3c69/tplx
 
@@ -337,7 +337,7 @@
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            4037-93cf/tplx
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            1306-177a/tplx
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            5437-2061/tplx
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f5b4-8b3d/tplx
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            9c21-f898/tplx
 /examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,          0389-dd1d/tplx
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,          0b75-0a6b/tplx
