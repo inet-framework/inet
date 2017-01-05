@@ -91,6 +91,30 @@ extern const struct ip_addr ip_addr_broadcast;
    On subnets, host and network parts are found according to
    the subnet mask, not these masks.  */
 
+//KLUDGE:
+#ifdef IN_CLASSA
+#undef IN_CLASSA
+#endif
+#ifdef IN_CLASSB
+#undef IN_CLASSB
+#endif
+#ifdef IN_CLASSC
+#undef IN_CLASSC
+#endif
+#ifdef IN_CLASSD
+#undef IN_CLASSD
+#endif
+#ifdef IN_BADCLASS
+#undef IN_BADCLASS
+#endif
+#ifdef IN_EXPERIMENTAL
+#undef IN_EXPERIMENTAL
+#endif
+#ifdef IN_MULTICAST
+#undef IN_MULTICAST
+#endif
+
+
 #define IN_CLASSA(a)        ((((u32_t)(a)) & 0x80000000UL) == 0)
 #define IN_CLASSA_NET       0xff000000
 #define IN_CLASSA_NSHIFT    24
