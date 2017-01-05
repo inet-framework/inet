@@ -2,16 +2,17 @@
 #include <fstream>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/scenario/IScriptable.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/networklayer/common/IPSocket.h"
-#include "inet/networklayer/ipv4/IGMPMessage.h"
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/scenario/IScriptable.h"
+#include "inet/networklayer/common/IPSocket.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/networklayer/ipv4/IGMPMessage.h"
+#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 
 using namespace std;
 
@@ -25,10 +26,10 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
 
   protected:
     typedef IPv4InterfaceData::IPv4AddressVector IPv4AddressVector;
-    virtual int numInitStages() const { return 2; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
-    virtual void processCommand(const cXMLElement &node);
+    virtual int numInitStages() const override { return 2; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void processCommand(const cXMLElement &node) override;
   private:
     void processSendCommand(const cXMLElement &node);
     void processJoinCommand(IPv4Address group, const IPv4AddressVector &sources, InterfaceEntry* ie);

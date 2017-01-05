@@ -134,9 +134,9 @@ void RoutingTableLogger::processCommand(const cXMLElement &command)
 
 IRoutingTable *RoutingTableLogger::findRoutingTableInNode(cModule *node)
 {
-    for (cModule::SubmoduleIterator i(node); !i.end(); i++)
+    for (cModule::SubmoduleIterator i(node); !i.end(); ++i)
     {
-        IRoutingTable *rt = dynamic_cast<IRoutingTable*>(i());
+        IRoutingTable *rt = dynamic_cast<IRoutingTable*>(*i);
         if (rt)
             return rt;
     }
