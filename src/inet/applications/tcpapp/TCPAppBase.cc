@@ -112,7 +112,7 @@ void TCPAppBase::socketEstablished(int, void *)
     EV_INFO << "connected\n";
 }
 
-void TCPAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
+void TCPAppBase::socketDataArrived(int, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;

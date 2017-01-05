@@ -71,7 +71,7 @@ class INET_API TCPEchoAppThread : public TCPServerThreadBase
     /*
      * Called when a data packet arrives. To be redefined.
      */
-    virtual void dataArrived(cMessage *msg, bool urgent) override;
+    virtual void dataArrived(Packet *msg, bool urgent) override;
 
     /*
      * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.

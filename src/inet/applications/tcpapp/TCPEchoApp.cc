@@ -85,9 +85,8 @@ void TCPEchoAppThread::established()
 {
 }
 
-void TCPEchoAppThread::dataArrived(cMessage *msg, bool urgent)
+void TCPEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 {
-    Packet *rcvdPkt = check_and_cast<Packet *>(msg);
     echoAppModule->emit(echoAppModule->rcvdPkSignal, rcvdPkt);
     int64_t rcvdBytes = rcvdPkt->getByteLength();
     echoAppModule->bytesRcvd += rcvdBytes;

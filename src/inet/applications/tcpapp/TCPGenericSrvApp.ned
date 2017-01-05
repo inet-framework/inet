@@ -45,8 +45,8 @@ simple TCPGenericSrvApp like IApp
         int localPort = default(1000);     // localPort number to listen on
         double replyDelay @unit(s) = default(0s);
         @display("i=block/app");
-        @signal[sentPk](type=GenericAppMsg);
-        @signal[rcvdPk](type=GenericAppMsg);
+        @signal[sentPk](type=Packet);
+        @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);

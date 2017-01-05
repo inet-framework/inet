@@ -74,7 +74,7 @@ class INET_API TCPServerThreadBase : public cSimpleModule, public TCPSocket::Cal
     TCPSocket *sock;    // ptr into socketMap managed by TCPSrvHostApp
 
     // internal: TCPSocket::CallbackInterface methods
-    virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) override { dataArrived(msg, urgent); }
+    virtual void socketDataArrived(int, void *, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
     virtual void socketEstablished(int, void *) override { established(); }
     virtual void socketPeerClosed(int, void *) override { peerClosed(); }
     virtual void socketClosed(int, void *) override { closed(); }
@@ -109,7 +109,7 @@ class INET_API TCPServerThreadBase : public cSimpleModule, public TCPSocket::Cal
     /*
      * Called when a data packet arrives. To be redefined.
      */
-    virtual void dataArrived(cMessage *msg, bool urgent) = 0;
+    virtual void dataArrived(Packet *msg, bool urgent) = 0;
 
     /*
      * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.

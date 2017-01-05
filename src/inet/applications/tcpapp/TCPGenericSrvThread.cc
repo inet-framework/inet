@@ -18,6 +18,7 @@
 #include "inet/applications/tcpapp/TCPGenericSrvThread.h"
 
 #include "GenericAppMsg_m.h"
+#include "inet/common/packet/ByteCountChunk.h"
 
 namespace inet {
 
@@ -28,9 +29,9 @@ void TCPGenericSrvThread::established()
     // no initialization needed
 }
 
-void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
+void TCPGenericSrvThread::dataArrived(Packet *msg, bool)
 {
-    GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
+    const auto& appmsg = msg->peekDataAt<GenericAppMsg>(0, msg->getByteLength());
 
     if (!appmsg)
         throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
@@ -48,14 +49,14 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     // connection if that was requested too
     long requestedBytes = appmsg->getExpectedReplyLength();
     bool doClose = appmsg->getServerClose();
+    delete msg;
 
-    if (requestedBytes == 0) {
-        delete appmsg;
-    }
-    else {
-        appmsg->setByteLength(requestedBytes);
-        delete appmsg->removeControlInfo();
-        getSocket()->send(appmsg);
+    if (requestedBytes > 0) {
+        Packet *outPacket = new Packet(msg->getName());
+        const auto& payload = std::make_shared<ByteCountChunk>(requestedBytes);
+        payload->markImmutable();
+        outPacket->append(payload);
+        getSocket()->send(outPacket);
     }
 
     if (doClose)

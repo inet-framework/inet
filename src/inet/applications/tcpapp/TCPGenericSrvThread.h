@@ -33,7 +33,7 @@ class INET_API TCPGenericSrvThread : public TCPServerThreadBase
     TCPGenericSrvThread() {}
 
     virtual void established() override;
-    virtual void dataArrived(cMessage *msg, bool urgent) override;
+    virtual void dataArrived(Packet *msg, bool urgent) override;
     virtual void timerExpired(cMessage *timer) override;
 };
 

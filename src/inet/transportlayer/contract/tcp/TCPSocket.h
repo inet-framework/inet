@@ -20,8 +20,9 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {
 
@@ -137,7 +138,7 @@ class INET_API TCPSocket
     {
       public:
         virtual ~CallbackInterface() {}
-        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) = 0;
+        virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) = 0;
         virtual void socketAvailable(int connId, void *yourPtr, TCPAvailableInfo *availableInfo) {}
         virtual void socketEstablished(int connId, void *yourPtr) {}
         virtual void socketPeerClosed(int connId, void *yourPtr) {}

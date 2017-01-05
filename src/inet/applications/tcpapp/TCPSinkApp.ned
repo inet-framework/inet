@@ -59,7 +59,7 @@ simple TCPSinkApp like IApp
         int localPort = default(1000); // port number to listen on
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/sink");
-        @signal[rcvdPk](type=cPacket);
+        @signal[rcvdPk](type=Packet);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:

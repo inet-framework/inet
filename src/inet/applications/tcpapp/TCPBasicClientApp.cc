@@ -17,9 +17,10 @@
 
 #include "inet/applications/tcpapp/TCPBasicClientApp.h"
 
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
-#include "GenericAppMsg_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 
 namespace inet {
 
@@ -102,15 +103,18 @@ void TCPBasicClientApp::sendRequest()
     if (replyLength < 1)
         replyLength = 1;
 
-    GenericAppMsg *msg = new GenericAppMsg("data");
-    msg->setByteLength(requestLength);
-    msg->setExpectedReplyLength(replyLength);
-    msg->setServerClose(false);
+    const auto& payload = std::make_shared<GenericAppMsg>();
+    Packet *packet = new Packet("data");
+    payload->setChunkLength(requestLength);
+    payload->setExpectedReplyLength(replyLength);
+    payload->setServerClose(false);
+    payload->markImmutable();
+    packet->append(payload);
 
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
             << "remaining " << numRequestsToSend - 1 << " request\n";
 
-    sendPacket(msg);
+    sendPacket(packet);
 }
 
 void TCPBasicClientApp::handleTimer(cMessage *msg)
@@ -168,7 +172,7 @@ void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
     }
 }
 
-void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
 {
     TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
 

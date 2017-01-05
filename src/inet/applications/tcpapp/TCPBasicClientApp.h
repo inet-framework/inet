@@ -46,7 +46,7 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
     virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
     virtual bool isNodeUp();

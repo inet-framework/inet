@@ -269,7 +269,7 @@ void TCPSocket::processMessage(cMessage *msg)
     switch (msg->getKind()) {
         case TCP_I_DATA:
             if (cb)
-                cb->socketDataArrived(connId, yourPtr, PK(msg), false);
+                cb->socketDataArrived(connId, yourPtr, check_and_cast<Packet*>(msg), false);
             else
                 delete msg;
 
@@ -277,7 +277,7 @@ void TCPSocket::processMessage(cMessage *msg)
 
         case TCP_I_URGENT_DATA:
             if (cb)
-                cb->socketDataArrived(connId, yourPtr, PK(msg), true);
+                cb->socketDataArrived(connId, yourPtr, check_and_cast<Packet*>(msg), true);
             else
                 delete msg;
 

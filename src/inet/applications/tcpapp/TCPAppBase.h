@@ -62,7 +62,7 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     /* TCPSocket::CallbackInterface callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
     virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
     virtual void socketPeerClosed(int connId, void *yourPtr) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;

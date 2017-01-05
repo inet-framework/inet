@@ -15,15 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/tcpapp/TCPGenericSrvApp.h"
 
-#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "GenericAppMsg_m.h"
 
 namespace inet {
 
@@ -87,10 +88,7 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
         EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
-    int socketId = msg->getMandatoryTag<SocketInd>()->getSocketId();
-    msg->clearTags();
     msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    msg->ensureTag<SocketReq>()->setSocketId(socketId);
     send(msg, "socketOut");
 }
 
@@ -107,7 +105,8 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         sendOrSchedule(msg, delay + maxMsgDelay);
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
-        GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
+        Packet *packet = check_and_cast<Packet *>(msg);
+        const auto& appmsg = packet->peekDataAt<GenericAppMsg>(0, packet->getByteLength());
         if (!appmsg)
             throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
                                 "probably wrong client app, or wrong setting of TCP's "
@@ -116,8 +115,8 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                     msg->getClassName(), msg->getName());
 
         msgsRcvd++;
-        bytesRcvd += appmsg->getByteLength();
-        emit(rcvdPkSignal, appmsg);
+        bytesRcvd += appmsg->getChunkLength();
+        emit(rcvdPkSignal, packet);
 
         long requestedBytes = appmsg->getExpectedReplyLength();
 
@@ -126,20 +125,20 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             maxMsgDelay = msgDelay;
 
         bool doClose = appmsg->getServerClose();
-        int connId = appmsg->getMandatoryTag<SocketInd>()->getSocketId();
+        int connId = packet->getMandatoryTag<SocketInd>()->getSocketId();
 
-        if (requestedBytes == 0) {
-            delete msg;
-        }
-        else {
-            delete appmsg->removeControlInfo();
-            appmsg->ensureTag<SocketReq>()->setSocketId(connId);
+        if (requestedBytes > 0) {
+            packet = new Packet(msg->getName());
+            packet->ensureTag<SocketReq>()->setSocketId(connId);
 
             // set length and send it back
-            appmsg->setKind(TCP_C_SEND);
-            appmsg->setByteLength(requestedBytes);
-            sendOrSchedule(appmsg, delay + msgDelay);
+            packet->setKind(TCP_C_SEND);
+            const auto& payload = std::make_shared<ByteCountChunk>(requestedBytes);
+            payload->markImmutable();
+            packet->append(payload);
+            sendOrSchedule(packet, delay + msgDelay);
         }
+        delete msg;
 
         if (doClose) {
             cMessage *msg = new cMessage("close");

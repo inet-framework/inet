@@ -17,10 +17,11 @@
 
 #include "inet/applications/tcpapp/TelnetApp.h"
 
+#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "GenericAppMsg_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -139,11 +140,15 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 {
     EV_INFO << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
 
-    GenericAppMsg *msg = new GenericAppMsg("data");
-    msg->setByteLength(numBytes);
-    msg->setExpectedReplyLength(expectedReplyBytes);
-    msg->setServerClose(false);
-    sendPacket(msg);
+    const auto& payload = std::make_shared<GenericAppMsg>();
+    Packet *packet = new Packet("data");
+    payload->setChunkLength(numBytes);
+    payload->setExpectedReplyLength(expectedReplyBytes);
+    payload->setServerClose(false);
+    payload->markImmutable();
+    packet->append(payload);
+
+    sendPacket(packet);
 }
 
 void TelnetApp::socketEstablished(int connId, void *ptr)
@@ -157,7 +162,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
     checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
 }
 
-void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+void TelnetApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
 {
     int len = msg->getByteLength();
     TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);

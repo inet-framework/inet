@@ -194,7 +194,7 @@ void TCPSessionApp::socketEstablished(int connId, void *ptr)
     scheduleAt(std::max(tSend, simTime()), timeoutMsg);
 }
 
-void TCPSessionApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+void TCPSessionApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
 {
 #if 0
     // TODO: delete this temp
