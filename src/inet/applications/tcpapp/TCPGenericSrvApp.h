@@ -20,6 +20,7 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
 namespace inet {
@@ -41,6 +42,8 @@ class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
     long msgsSent;
     long bytesRcvd;
     long bytesSent;
+
+    std::map<int, ChunkQueue> socketQueue;
 
     // statistics:
     static simsignal_t rcvdPkSignal;

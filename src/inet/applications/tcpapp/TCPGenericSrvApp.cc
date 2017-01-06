@@ -106,47 +106,44 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
-        const auto& appmsg = packet->peekDataAt<GenericAppMsg>(0, packet->getByteLength());
-        if (!appmsg)
-            throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
-                                "probably wrong client app, or wrong setting of TCP's "
-                                "dataTransferMode parameters "
-                                "(try \"object\")",
-                    msg->getClassName(), msg->getName());
-
-        msgsRcvd++;
-        bytesRcvd += appmsg->getChunkLength();
+        int connId = packet->getMandatoryTag<SocketInd>()->getSocketId();
+        ChunkQueue &queue = socketQueue[connId];
+        auto chunk = packet->peekDataAt(0);
+        queue.push(chunk);
         emit(rcvdPkSignal, packet);
 
-        long requestedBytes = appmsg->getExpectedReplyLength();
+        bool doClose = false;
+        while(const auto& appmsg = queue.pop<GenericAppMsg>()) {
+            msgsRcvd++;
+            bytesRcvd += appmsg->getChunkLength();
+            long requestedBytes = appmsg->getExpectedReplyLength();
+            simtime_t msgDelay = appmsg->getReplyDelay();
+            if (msgDelay > maxMsgDelay)
+                maxMsgDelay = msgDelay;
 
-        simtime_t msgDelay = appmsg->getReplyDelay();
-        if (msgDelay > maxMsgDelay)
-            maxMsgDelay = msgDelay;
-
-        bool doClose = appmsg->getServerClose();
-        int connId = packet->getMandatoryTag<SocketInd>()->getSocketId();
-
-        if (requestedBytes > 0) {
-            packet = new Packet(msg->getName());
-            packet->ensureTag<SocketReq>()->setSocketId(connId);
-
-            // set length and send it back
-            packet->setKind(TCP_C_SEND);
-            const auto& payload = std::make_shared<ByteCountChunk>(requestedBytes);
-            payload->markImmutable();
-            packet->append(payload);
-            sendOrSchedule(packet, delay + msgDelay);
+            if (requestedBytes > 0) {
+                Packet *outPacket = new Packet(msg->getName());
+                outPacket->ensureTag<SocketReq>()->setSocketId(connId);
+                outPacket->setKind(TCP_C_SEND);
+                const auto& payload = std::make_shared<ByteCountChunk>(requestedBytes);
+                payload->markImmutable();
+                outPacket->append(payload);
+                sendOrSchedule(outPacket, delay + msgDelay);
+            }
+            if (appmsg->getServerClose()) {
+                doClose = true;
+                break;
+            }
         }
         delete msg;
 
         if (doClose) {
-            cMessage *msg = new cMessage("close");
-            msg->setKind(TCP_C_CLOSE);
+            cMessage *outMsg = new cMessage("close");
+            outMsg->setKind(TCP_C_CLOSE);
             TCPCommand *cmd = new TCPCommand();
-            msg->ensureTag<SocketReq>()->setSocketId(connId);
-            msg->setControlInfo(cmd);
-            sendOrSchedule(msg, delay + maxMsgDelay);
+            outMsg->ensureTag<SocketReq>()->setSocketId(connId);
+            outMsg->setControlInfo(cmd);
+            sendOrSchedule(outMsg, delay + maxMsgDelay);
         }
     }
     else if (msg->getKind() == TCP_I_AVAILABLE)
