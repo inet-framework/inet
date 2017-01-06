@@ -42,9 +42,8 @@
 
 - Step2-ben SceneOsgEarthVisualizer-t használunk, ehhez muszáj coordinateSystemModule. Vagy a SceneOsgEarthVisualizer-t kell átírni, vagy a Step2-t & Step3-t
 
-- .osgModelColor = "red" nem működik a boxman-eken
+- 3D-ben: .osgModelColor = "red" nem működik a boxman-eken
 
 - transportConnectionVisualizer nem tünteti el a jeleit, ha a kapcsolat lezárul
 
-- mediumVisualizer.displaySignals: 3D-ben látszik a jel gyengülése (halványodik a szín), 2D-ben nem látszik
-
+- 2D-ben: transmission/reception: ha 1x-es zoomnál van jó helyen az ikon, ha zoomolok, akkor arréb kerül a node-tól

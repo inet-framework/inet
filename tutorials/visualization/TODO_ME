@@ -151,6 +151,7 @@ PIPA	- iniben a networkok nevét eltolni
 PIPA	- gif movement trail nélkül hogy confusing legyen
 PIPA	- velocityArrowScale-t belőni
 PIPA	- velocity nyíl miatt újra kell 2d gif result
+	- orientation-t megmutatni
 
 - Step08
 PIPA	- velocity nyíl miatt újra kell 2d gif result
@@ -164,11 +165,14 @@ PIPA	- velocity nyíl miatt újra kell 2d gif result VAGY le is lehetne venni ak
 - Step12
 	- Resultsba leírni, hogy akkor is van physical link, ha nem neki szól az üzenet
 
+- Step15
+	- Túl egyszerű a network, hogy ez látványos legyen?
+	
 - Step17 ini
 PIPA	- configurationD --> configurationF
 
 - Step18
-QL	- logikailag nem összevonható a Step17-tel?
+PIPA	- logikailag nem összevonható a Step17-tel? Nem
 
 - Step20 ini
 PIPA	- configurationF --> configurationH

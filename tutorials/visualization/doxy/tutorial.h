@@ -173,14 +173,15 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @nav{step4, step6}
 
 @section s5goals Goals
-For wireless networks to work, communicating devices have to be
-within each other's communication range.  In this step we display
-these areas to help putting nodes to the right place on the map.
+
+For wireless networks to work, devices have to be within each other's communication range. 
+In this step we display communication ranges to help place nodes.
 
 <!--
-A wireless hálózatok működéséhez szükséges, hogy az eszközök egymás communication range-ben legyenek.
-Ebben a lépésben megjelenítjük ezeket a range-ket, hogy megfelelően el tudjuk
-helyezni az eszközöket a térképen.
+Ebben a lépésben a wireless node-ok communication range-eit fogjuk megjeleníteni. 
+A wireless hálózatok működéséhez szükséges, hogy az eszközök egymás communication 
+range-ében legyenek. A node-ok elhelyezésekor erre figyelnünk kell, a range-ek 
+vizualizálása segíti ezt.
 -->
 
 @section s5model The model
@@ -354,7 +355,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s8goals Goals
 
-Understanding network traffic often requires indentifying nodes based on their IP addresses.
+Understanding network traffic often requires identifying nodes based on their IP addresses.
 In this step we show the IP addresses assigned by the network configurator. 
 
 @section s8model The model
@@ -497,18 +498,12 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s11goals Goals
 
-Understanding communication between network devices, we need to know how the nodes communicate 
-with each other through wireless channel. To this we display propagating signals between wireless nodes.
+It's often important to see wireless signals, thus we can monitor the network traffic. 
+In this step we visualize propagating signals.
 
 <!--
-A hálózati kommunikáció megértéséhez szükségünk van arra, hogy tudjuk, hogy a network node-ok
-hogyan kommunikálnak egymás között a vezeték nélküli csatornán. Ehhez látnunk kell 
-a vezeték nélküli jeleket. Ebben a lépésben megmutatjuk, hogy a wireless node-ok milyen üzeneteket
-továbbítanak egymás között a hálózaton.
-
-Ebben a lépésben a jelek terjedését mutatjuk meg. Ha bekapcsoljuk ezt a visualizert, akkor 
-láthatjuk az egyes packet-ek terjedését a vezeték nélküli közegben. Ez nagy segítség a hálózati 
-kommunikáció monitorozásában.
+Sokszor fontos, hogy lássuk a vezeték nélküli jeleket, mert így monitorozhatjuk 
+a hálózat forgalmát. Ebben a lépésben a jelek terjedését vizualizáljuk.
 -->
 
 @section s11model The model
@@ -624,7 +619,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 @section s13goals Goals
 
 In this step we display the VoIP communication's data links. By visualizing 
-data links we check that the VoIP packet correctly arrived at the destination node.
+data links we check that, the VoIP packet correctly arrived at the destination node.
 
 <!--
 Ebben a lépésben a VoIP kommunikáció data linkjeit mutatjuk meg. A data linkek 
@@ -889,12 +884,12 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s17goals Goals
 
-In this step we enable displaying active network routes for video stream. 
-With this visualizer we check, whether the videostream packet arrived at the 
+In this step we enable displaying active network routes for videostream. 
+With this visualizer we check, whether the videostream packets arrived at the 
 destination's client application. In network nodes, applications handle the 
 UDP based traffic, for example video stream. 
 When a video stream packet leaves the destination's network layer, 
-network route becomes active between the source node and the destination. 
+network route becomes active between the source and the destination node. 
 
 <!--
 Ebben a lépésben az aktív hálózati útvonalakat jelenítjük meg.
@@ -953,14 +948,13 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s18goals Goals
 
-In the real world, the objects on the map, such as buildings or trees constitute 
-3 dimensional barriers which affect on the wireless communication. In this step 
-we add 3 dimensional obstacles to our simulation.
+We can place obstacles into our simulation, which are in effect on the operation 
+of the network. In this step we display the physical environment.
 
 <!--
-A valós környezetben a tárgyak a térképen (épületek, fák) 3 dimenziós   
-akadályokat képeznek, amiknek hatása van a vezeték nélküli kommunikációra. 
-Ebben a lépésben akadályokat adunk hozzá a szimulációhoz.
+A szimulációba egyszerűen beépíthetjük azokat az akadályokat, amik valóban 
+hatással vannak a hálózat működésére. Ebben a lépésben a fizikai környezetet 
+jelenítjük meg.
 -->
 
 @section s18model The model
@@ -983,7 +977,7 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 Impediments shield the signals of wireless communication. In this step we 
 show the obstacle loss.
 <!--
-Az akadályok árnyékolják a vezeték nélküli kommunikáció jeleit.
+Az akadályok árnyékolják a vezeték nélküli kommunikáció jeleit. 
 Ebben a lépésben az akadályokon eső veszteségeket mutatjuk meg.
 -->
 
@@ -1004,14 +998,19 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s20goals Goals
 
-In this step we visualize packet drops. Packet drops occurs when one or more 
+In packet switching networks sometimes packets may fail to reach their destination.
+WIP
+
+In this step we visualize packet drops. Packet drops occure when one or more 
 packets of data travelling across a computer network fail to reach their destination. 
-Packet loss is typically caused by network congestion but it can be caused by 
+Packet drops are typically caused by network congestion but it can be caused by 
 a number of other factors such as radio signals that are too weak due to distance, 
 natural or artifical obstacles in the environment or faulty networking hardware. 
 Visualizing packet drops helps to put wireless access points to the right place.
 
 <!--
+A hálózatokban előfordulhat hogy a csomagok eldobódnak.
+
 Ebben a lépésben a packet dropot vizualizáljuk.
 A packet drop akkor történik, amikor egy vagy több csomag nem ér oda a célhoz. 
 Általában hálózati torlódás okozza, de gyenge rádiójel vagy hibás hw is okozhatja. 
@@ -1120,8 +1119,9 @@ Sources: @ref omnetpp.ini, @ref VisualizationNetworks.ned
 
 @section s24goals Goals
 
-When devices roam in the network, routes may change between two nodes. Displaying 
-changes we always know the actual network route between communicating devices.
+In this step we visualize changing routes between videoStreamServer and video clients.
+When devices roam in the network, routes may change between two nodes. By displaying 
+changes we always know the actual network routes between communicating devices.
 
 <!--
 Amikor az eszközök mozognak, gyakran változhat két node között a csomagok útja. 
