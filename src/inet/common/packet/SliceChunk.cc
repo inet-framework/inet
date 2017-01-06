@@ -147,7 +147,7 @@ std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length
 std::string SliceChunk::str() const
 {
     std::ostringstream os;
-    os << "SliceChunk, chunk = {" << chunk << "}, offset = " << offset << ", length = " << length;
+    os << "SliceChunk, offset = " << offset << ", length = " << length << ", chunk = {" << chunk << "}";
     return os.str();
 }
 
