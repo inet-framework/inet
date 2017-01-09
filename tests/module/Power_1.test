@@ -21,7 +21,7 @@ network Test
 [General]
 network = Test
 ned-path = .;../../../../src
-sim-time-limit = 10s
+sim-time-limit = 11s
 cmdenv-express-mode = false
 
 **.energyStorage.nominalCapacity = 10 J
