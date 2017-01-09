@@ -143,7 +143,7 @@ bool SendDataWithAckFsmBasedFrameExchange::isAck(Ieee80211Frame *frame)
 SendDataWithAckFrameExchange::SendDataWithAckFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
     StepBasedFrameExchange(context, callback, txIndex, accessCategory), dataFrame(dataFrame)
 {
-    dataFrame->setDuration(params->getSifsTime() + utils->getAckDuration());
+    dataFrame->setDuration(params->getSifsTime() + utils->getAckDuration(dataFrame));
 }
 
 SendDataWithAckFrameExchange::~SendDataWithAckFrameExchange()
@@ -168,7 +168,7 @@ void SendDataWithAckFrameExchange::doStep(int step)
         case 1: transmitFrame(dupPacketAndControlInfo(dataFrame)); break;
         case 2: {
             if (params->getUseFullAckTimeout())
-                expectFullReplyWithin(utils->getAckFullTimeout());
+                expectFullReplyWithin(utils->getAckFullTimeout(dataFrame));
             else
                 expectReplyRxStartWithin(utils->getAckEarlyTimeout());
             break;
@@ -264,7 +264,7 @@ void SendDataWithAckFrameExchange::retry()
 SendDataWithRtsCtsFrameExchange::SendDataWithRtsCtsFrameExchange(FrameExchangeContext *context, IFinishedCallback *callback, Ieee80211DataOrMgmtFrame *dataFrame, int txIndex, AccessCategory accessCategory) :
     StepBasedFrameExchange(context, callback, txIndex, accessCategory), dataFrame(dataFrame)
 {
-    dataFrame->setDuration(params->getSifsTime() + utils->getAckDuration());
+    dataFrame->setDuration(params->getSifsTime() + utils->getAckDuration(dataFrame));
 }
 
 SendDataWithRtsCtsFrameExchange::~SendDataWithRtsCtsFrameExchange()

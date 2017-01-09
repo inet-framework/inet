@@ -70,5 +70,20 @@ void GroupCountRecorder::finish(cResultFilter *prev) {
     }
 }
 
+Register_ResultRecorder("elapsedTime", ElapsedTimeRecorder);
+
+ElapsedTimeRecorder::ElapsedTimeRecorder()
+{
+    startTime = clock();
+}
+
+void ElapsedTimeRecorder::finish(cResultFilter* prev)
+{
+    clock_t t = clock();
+    double elapsedTime = (t - startTime) / (double)CLOCKS_PER_SEC;
+    opp_string_map attributes = getStatisticAttributes();
+    getEnvir()->recordScalar(getComponent(), getResultName().c_str(), elapsedTime, &attributes);
+}
+
 } // namespace inet
 
