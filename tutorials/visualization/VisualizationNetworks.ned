@@ -68,7 +68,7 @@ network VisualizationB extends VisualizationA
 network VisualizationC extends VisualizationB
 {
     parameters:
-        @display("bgb=0,0");
+        @display("bgb=700,700");
 //    submodules:
 //		coordinateSystem: OsgGeographicCoordinateSystem {
 //            parameters:
