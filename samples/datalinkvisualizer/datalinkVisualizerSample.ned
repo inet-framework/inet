@@ -16,7 +16,8 @@
 package inet.samples.datalinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.dymo.DYMORouter;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 //
@@ -24,6 +25,7 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 //
 network SimpleDatalinkVisualizerNetwork
 {
+    @display("bgb=771,311");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
@@ -37,13 +39,14 @@ network SimpleDatalinkVisualizerNetwork
             parameters:
                 @display("p=100,250");
         }
-        source: DYMORouter {
-            parameters:
-                @display("p=100,900");
+        accessPoint: AccessPoint {
+            @display("p=510,40");
         }
-        destination: DYMORouter {
-            parameters:
-                @display("p=900,300");
+        source: WirelessHost {
+            @display("p=288,155");
+        }
+        destination: WirelessHost {
+            @display("p=704,155");
         }
 }
 
