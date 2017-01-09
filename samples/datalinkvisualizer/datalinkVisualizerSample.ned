@@ -23,13 +23,13 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 //
 // TODO documentation
 //
-network SimpleDatalinkVisualizerNetwork
+network DatalinkVisualizerSampleNet
 {
     @display("bgb=771,311");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
-                @display("p=100,50;is=n");
+                @display("p=100,50");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
