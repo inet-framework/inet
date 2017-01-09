@@ -1,0 +1,41 @@
+This example demonstrates a simple hypothetical layered radio. The network
+contains two wireless nodes, and one of them is pinging the other.
+
+The simulation produces a diagram that can be open in the IDE using the anf file.
+The diagram shows the packet loss as a function of the distance between the two
+nodes in a number of different configurations. There are three parameter axes,
+and the simulation is run for all parameter combinations resulting in 24
+different curves.
+
+The first axis is the simulated level of detail in the physical layer. The
+example is run with the following different level of details:
+
+ - packet domain (bits are not computed, error model computes packet error)
+ - bit domain (bits are computed, error model computes erroneous bits)
+ - symbol domain (symbols are computed, error model computes erroneous symbols)
+
+The different level of details are expected to produce very similar curves. One
+exception is that the symbol domain curves are different from the curves of the
+other domains when forward error correction is used. For modulations that have
+more than one bits per symbol, the demodulation process results in a different
+(non-independent and non-uniform) distribution of bit errors, which in turn is
+decoded differently.
+
+The second axis is about the forward error correction that is used in the bit
+domain. The simulation is run with and without using forward error correction.
+The used convolutional code has a code rate R = 1 / 2, and memory m = 1 with
+generator matrix G(D) = (1 1 + D). When forward error correction is used it is
+expected to increase the communication range. Note that in this example the net
+bit rate is constant, therefore the gross bit rate is increased when using
+forward error correction.
+
+The third axis is about the modulation that is used in the symbol domain. The
+simulation is run with the following modulations:
+
+ - BPSK
+ - QPSK
+ - QAM-16
+ - QAM-64
+
+In general, modulations with more bits per symbol tend to have smaller
+communication range.

@@ -1,0 +1,140 @@
+<html>
+<head>
+	<title>Power Consumption Example</title>
+	<link rel="stylesheet" type="text/css" href="../../etc/samples.css">
+</head>
+<body>
+	<h1><center>Power Consumption Example</center></h1>
+
+	<p><h2>Goals</h2></p>
+
+	<p>
+	This example is about the effect of wireless communication on the power consumption of mobile devices. It models the power consumption
+	associated with the physical layer of wireless hosts. It demonstrates energy consumption, storage and generation.
+	The hosts will send out ping requests, which will deplete their power storage, while their power generators will charge them.
+	</p>
+
+	<p><h2>The model</h2></p>
+
+	<p><b>The network</b></p>
+
+	<p>
+		The network contains mobile hosts (type <tt>AdhocHost</tt>), the number of which can be specified in <i>omnetpp.ini</i>.
+		The default number specified is 20. They are randomly placed on the playground, and they're static (they don't move around).
+	</p>
+
+	<p><center><img src="network2.png"></center></p>
+
+	<p><b>Configuration and behavior</b></p>
+
+	<p>
+		All hosts will send ping requests to Host 0. Host 0 doesn't send ping requests, just replies to the requests that it receives. The radio transmissions will deplete the hosts' energy storage.
+	</p>
+
+	<p>
+		Each host has a nominal energy storage capacity of 0.05 Joules. The charge they contain at the beginning of the simulation is randomly selected between
+		0 and the nominal capacity. Hosts shut down when their energy storage reaches 0, and restart when their energy storage charges to half of the nominal capacity,
+		that is 0.025 Joules.
+	</p>
+
+	<p>
+		The hosts contain an <tt>AlternatingEnergyGenerator</tt>. This alternates between generation and sleep modes. It starts in generation mode, and generates the amount of power
+		that is specified by its <i>powerGeneration</i> parameter (now set to 4 mW). In sleep mode, it generates no power. It stays in each mode for the duration specified by the
+		<i>generationInterval</i> and <i>sleepInterval</i> parameters. These are set to a random value with a mean of 25s.
+	</p>
+
+	<p>
+		The <tt>SimpleEnergyStorage</tt> models energy storage by integrating the difference of absorbed and provided power over time.
+		It does not simulate other effects that real batteries have, such as temperature dependency and hysteresis. It is used in this model because the emphasis is on the energy that transmissions use, not how the batteries
+		store the energy.
+	</p>
+
+	<p><b>Radio modes and states</b></p>
+
+	<p>
+		In the <tt>Ieee80211ScalarRadio</tt> model used in this simulation (and in other radio models), there are different modes in which radios operate, such as off, sleep, receiver, transmitter. The mode is set by the model, and does not depend on external effects. In addition to mode, radios have states, which depend on what they are doing in the given mode - ie. 
+		listening, receiving a transmission, or transmitting. This depends on external factors, such as if there are transmissions going on in the medium.
+	</p>
+
+	<p><b>Energy consumption of radios</b></p>
+
+	<p>
+		Radios in the simulation have the <tt>StateBasedEnergyConsumer</tt> module. In this model, energy consumption is based on power consumption values for various
+		radio modes and states, and the time the radio spends in these states. For example, radios consume a small amount of power when they are idle in receive mode. This is when they are listening for transmissions. They consume more when they are receiving a transmission, and even more when they are transmitting.
+	</p>
+
+	<p><h2>Results</h2></p>
+
+	<p>
+		Each host (except host 0) transmits a ping request frame every second. The time when they start sending them is a random value for each host, between 0 and 1 seconds. 
+		This means that they don't start sending the requests simultaneously. Also, ping packets are short, and hosts send them very infrequently. This greatly decreases the 
+		probability of collisions. Host 0 acts as the target for the ping requests of all the other hosts.
+		Host 0 replies to ping requests with a ping reply frame. Both the ping request and the ping reply frames are followed by an ACK from the receiving host.
+	</p>
+
+	<p>
+		After a while, the energy storage of hosts get depleted, and the hosts shut down. This is indicated by a red x on the host's symbol.
+		The energy generator charges hosts regardless of whether they are depleted or not (as if they were charged by a solar panel).
+	</p>
+
+	<p><center><img src="depleted.png"></center></p>
+
+	<p>
+		The following chart shows the energy storage levels (<i>residualCapacity</i>) of all the hosts through the course of the simulation.
+		In general, hosts start from a given charge level, and their energy storage level depletes, and reaches zero.
+		When that happens, the hosts shut down. Then they start to charge, and when their charge level reaches the 0.025J threshold, they turn back on.
+		They continue sending ping requests, until they get depleted again. The generator generates more power than hosts consume when they are idle, but not when they are receiving or transmitting.
+		This appears on the graph as increasing curves when the generator is charging, with tiny zigzags associated with receptions and transmissions. When hosts get
+		fully charged, they maintain the maximum charge level while the generator is charging.
+	</p>
+
+	<p><center><img src="residualcapacity.png"></center></p>
+
+	<p>
+		The chart below shows the energy storage level (red curve) and the energy generator output (blue curve) of Host 12. The intervals when the generator is charging the energy storage
+		can be discerned on the energy storage graph as increasing slopes. When the host is transmitting and the generator is charging, the energy levels don't increase as fast.
+		The generator generates 4 mW of power, and radios consume 2 mW when they are idle in receiver mode. Radios are in idle state most of the time, thus their power
+		consumption is roughly 2 mW. When the host is turned on and it is being charged, the net charge is 2 mW (4 mW provided by the generator and 2 mW consumed by the radio).
+		When the host is turned off and being charged, the net charge is 4 mW. The latter corresponds to the most steeply increasing curve sections.
+		When the host is turned on but not charging, the consumption is 2 mW, and the curve is decreasing.
+	</p>
+
+	<p>
+		When hosts are turned on, they occasionally transmit. This results in tiny zigzags in the graph because of temporary increase in power consumption associated with
+		transmissions (the power requirement of transmissions is 100 mW). In the intervals when the host is turned off, the host doesn't transmit, and the curve is smooth (note
+		that there are drawing artifacts due to multiple line segments).
+	</p>
+
+	<p><center><img src="host12.png"></center></p>
+
+	<p>
+		The following chart shows how the energy level of host 12 changes during some transmission (the host is currently charging).
+	</p>
+
+	<p><center><img src="host12-2.png"></center></p>
+
+	<p>
+		Host 0 is different from the other hosts in that it doesn't generate ping requests, but sends replies to all the ping requests it receives. Therefore it consumes energy
+		faster. As other hosts just send one ping request every second, Host 0 has to reply to 20 ping request each second. This increased consumption can be seen on the following energy level graph
+		as more rapidly decreasing curve (host 0 is the blue curve).
+	</p>
+
+	<p>
+		Host 0 transmits around 20 times more than the other hosts, thus it consumes 20 times more energy when it is transmitting. The curve doesn't decrease 20 times as fast
+		because most of the time the hosts are listening. Transmissions are rare, and the time hosts spend transmitting is far less than they spend listening. Energy consumtion is
+		dominated by reception.
+	</p>
+
+	<p><center><img src="consumption3.png"></center></p>
+
+	<p>
+		The following chart shows a ping request-ping reply exchange (with the associated ACKs) between hosts 0 and 3 on the sequence chart and the corresponding changes in energy levels of host 0.
+		Note that host 0 consumes less energy receiving than transmitting. In the intervals between the transmissions, the curve is increasing, because the
+		generator is charging host 0. This image shows that hosts indeed consume more power when transmitting than the generator generates. However, transmissions are very short and
+		very rare, so one needs to zoom in on the graph to see this effect.
+	</p>
+
+	<p><center><img src="ping-ack2.png"></center></p>
+
+
+</body>

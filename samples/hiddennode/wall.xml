@@ -1,0 +1,3 @@
+<environment>
+    <object position="min 450 200 0" orientation="0 0 0" shape="cuboid 5 200 4" material="concrete" fill-color="203 65 84" opacity="0.8"/>
+</environment>

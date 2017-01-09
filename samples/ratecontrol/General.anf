@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/samples/ratecontrol/results/General-*.vec"/>
+    <inputs name="/inet/samples/ratecontrol/results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="AARFRateControl">
+      <items xsi:type="scave:Add" filterPattern="name(databitrate:vector) AND file(/inet/samples/ratecontrol/results/General-1.vec) AND module(*.Host[*].*)  " type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="name(throughput:vector) AND file(/inet/samples/ratecontrol/results/General-1.vec)  " type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="AARFRateControl" lineNameFormat="">
+        <properties name="Graph.Title" value="AARFRateControl"/>
+        <properties name="Y.Axis.Max" value="7.0E7"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="25.0"/>
+        <properties name="Line.Type/RateControlExample.Host[0].wlan[0].mac.rateControl databitrate:vector" value="SampleHold"/>
+        <properties name="Line.Type/RateControlExample.sinkHost.udpApp[0] throughput:vector" value="Linear"/>
+        <properties name="Symbols.Type" value="Dot"/>
+        <properties name="Symbols.Size" value="2"/>
+        <properties name="Symbols.Type/RateControlExample.Host[0].wlan[0].mac.rateControl databitrate:vector" value="Dot"/>
+        <properties name="Symbols.Size/RateControlExample.Host[0].wlan[0].mac.rateControl databitrate:vector" value="2"/>
+        <properties name="Line.Name/RateControlExample.Host[0].wlan[0].mac.rateControl databitrate:vector" value="Bitrate"/>
+        <properties name="Symbols.Type/RateControlExample.sinkHost.udpApp[0] throughput:vector" value="Dot"/>
+        <properties name="Symbols.Size/RateControlExample.sinkHost.udpApp[0] throughput:vector" value="2"/>
+        <properties name="Line.Name/RateControlExample.sinkHost.udpApp[0] throughput:vector" value="Throughput"/>
+      </items>
+    </datasets>
+    <datasets name="No rate control">
+      <items xsi:type="scave:Add" filterPattern="name(throughput:vector) AND file(/inet/samples/ratecontrol/results/General-0.vec) " type="VECTOR"/>
+      <items xsi:type="scave:Compute" operation="expression">
+        <params name="expression" value="54000000"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="No rate control" lineNameFormat="">
+        <properties name="Graph.Title" value="No rate control"/>
+        <properties name="Y.Axis.Max" value="7.0E7"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="25.0"/>
+        <properties name="Line.Name//home/adam/omnetpp-5.0/samples/inet/.computed/computed8103903968427536440.vec expression(throughput:vector)" value="Bitrate"/>
+        <properties name="Line.Name//inet/samples/ratecontrol/results/General-0.vec throughput:vector" value="Throughput"/>
+        <properties name="Symbols.Type" value="Dot"/>
+        <properties name="Symbols.Size" value="2"/>
+        <properties name="Line.Type" value="Linear"/>
+        <properties name="Line.Color" value="red"/>
+        <properties name="Symbols.Type//home/adam/omnetpp-5.0/samples/inet/.computed/computed8103903968427536440.vec expression(throughput:vector)" value="Dot"/>
+        <properties name="Symbols.Size//home/adam/omnetpp-5.0/samples/inet/.computed/computed8103903968427536440.vec expression(throughput:vector)" value="2"/>
+        <properties name="Line.Type//home/adam/omnetpp-5.0/samples/inet/.computed/computed8103903968427536440.vec expression(throughput:vector)" value="Linear"/>
+        <properties name="Line.Color//home/adam/omnetpp-5.0/samples/inet/.computed/computed8103903968427536440.vec expression(throughput:vector)" value="blue"/>
+      </items>
+    </datasets>
+    <datasets name="Throughput">
+      <items xsi:type="scave:Add" filterPattern="name(throughput:vector)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Throughput" lineNameFormat="">
+        <properties name="Graph.Title" value="Throughput"/>
+        <properties name="Y.Axis.Max" value="7.0E7"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="25.0"/>
+        <properties name="Line.Name//inet/samples/ratecontrol/results/General-0.vec General-0-20160805-11:06:07-3968 0 $rateControl=&quot;&quot;" value="No rate control"/>
+        <properties name="Line.Name//inet/samples/ratecontrol/results/General-1.vec General-1-20160805-11:06:38-3968 1 $rateControl=&quot;AARFRateControl&quot;" value="AARFRateControl"/>
+        <properties name="Symbols.Type" value="Dot"/>
+        <properties name="Symbols.Size" value="2"/>
+        <properties name="Line.Type" value="Linear"/>
+      </items>
+    </datasets>
+    <datasets name="Databitrate">
+      <items xsi:type="scave:Add" filterPattern="name(databitrate:vector) AND module(*.Host[*].*) " type="VECTOR"/>
+      <items xsi:type="scave:Compute" operation="expression">
+        <params name="expression" value="54000000"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="Bitrate" lineNameFormat="">
+        <properties name="Graph.Title" value="Bitrate"/>
+        <properties name="Y.Axis.Max" value="7.0E7"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Max" value="25.0"/>
+        <properties name="Line.Name//home/adam/omnetpp-5.0/samples/inet/.computed/computed4144546638020510221.vec expression(databitrate:vector)" value="No rate control"/>
+        <properties name="Line.Name//inet/samples/ratecontrol/results/General-1.vec databitrate:vector" value="AARFRateControl"/>
+        <properties name="Symbols.Type" value="Dot"/>
+        <properties name="Symbols.Size" value="2"/>
+        <properties name="Line.Type" value="SampleHold"/>
+      </items>
+    </datasets>
+    <datasets name="Packetcount">
+      <items xsi:type="scave:Add" filterPattern="module(*.sinkHost.udpApp[0]) AND name(rcvdPk:count)"/>
+      <items xsi:type="scave:BarChart"/>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.2 //@datasets/@datasets.1/@items.2 //@datasets/@datasets.2/@items.1 //@datasets/@datasets.3/@items.2 //@datasets/@datasets.4/@items.1"/>
+    <chartSheets name="Throughput vs databitrate" charts="//@datasets/@datasets.0/@items.2 //@datasets/@datasets.1/@items.2"/>
+  </chartSheets>
+</scave:Analysis>

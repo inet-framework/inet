@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/samples/throughput/results/General-*.vec"/>
+    <inputs name="/inet/samples/throughput/results/General-*.sca"/>
+    <inputs name="/inet/samples/throughput/results/General-computed-throughput-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="computed">
+      <items xsi:type="scave:Add" filterPattern="file(/inet/samples/throughput/results/General-computed-throughput-8.sca) "/>
+      <items xsi:type="scave:Add" filterPattern="name(bitrate) "/>
+      <items xsi:type="scave:Add" filterPattern="name(throughput:mean) AND module(*.destinationHost.*) "/>
+      <items xsi:type="scave:ComputeScalar" scalarName="computedthroughput_mbps" valueExpr="'computedthroughput'/1000000" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:ComputeScalar" scalarName="throughput_mbps" valueExpr="'throughput:mean'/1000000" moduleExpr="" groupByExpr=""/>
+      <items xsi:type="scave:ScatterChart" name="Computed vs Simulated" xDataPattern="module(.) AND name(bitrate)" averageReplications="false">
+        <filters xsi:type="scave:Select" filterPattern="name(computedthroughput_mbps) OR name(throughput_mbps) OR name(bitrate)   "/>
+        <properties name="Graph.Title" value="Computed vs simulated throughput"/>
+        <properties name="X.Axis.Title" value="Bitrate [Mbps]"/>
+        <properties name="Y.Axis.Title" value="Throughput [Mbps]"/>
+        <properties name="Y.Axis.Max" value="28.0"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Line.Name/Throughput.destinationHost.udpApp[0] computedthroughput_mbps - configname=Computed" value="Computed"/>
+        <properties name="Line.Name/Throughput.destinationHost.udpApp[0] throughput_mbps - configname=General" value="Simulated"/>
+        <isoDataPattern>attr:configname(*)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.5"/>
+  </chartSheets>
+</scave:Analysis>

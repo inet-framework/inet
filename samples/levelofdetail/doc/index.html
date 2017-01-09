@@ -1,0 +1,60 @@
+<html>
+<head>
+	<title>Level of Detail Example</title>
+	<link rel="stylesheet" type="text/css" href="../../../etc/samples.css">
+</head>
+
+<body>
+
+	<h1><center>Level of Detail Example</center></h1>
+
+	<h2>Goals</h2>
+
+	<p>
+		This example demonstrates a hypotetical layered radio. The radio can simulate transmissions at multiple
+		levels of detail. These are 'packet', 'bit' and 'symbol' level. The example examines packet loss as a function
+		of distance when using various modulations and levels of detail.
+	</p>
+
+	<h2>The model</h2>
+
+	<p><strong>Layered radio</strong></p>
+
+	<p>
+		The model uses <tt>APSKScalarRadio</tt> with <tt>APSKLayeredTransmitter</tt> and <tt>APSKLayeredReceiver</tt>. The latter two
+		implements the layered radio features. When operating in 'packet' domain, the error model computes packet errors, bits are not computed.
+		In 'bit' domain, the error model computes erroneous bits. In the 'symbol' domain, the encoding and decoding of symbols are simulated,
+		the error model computes erroneous symbols. Simulations with different levels of detail are expected to produce similar curves.
+	</p>
+
+	<p><strong>Configuration</strong></p>
+
+	<p>
+		There are two hosts, and one host is pinging the other. The there are 4 axes in the parameter study, resulting in 24 different curves:
+
+		<ul>
+			<li><strong>Distance</strong> runs from 210m to 710m in steps of 5m</li>
+			<li><strong>Level of detail</strong> for the transmissions are 'packet', 'bit' and 'symbol'</li>
+			<li><strong>Forward error correction</strong> (FEC) is either <tt>ConvolutionalCoder</tt> or not using forward error correction</li>
+			<li><strong>Modulations</strong> used are 'BPSK', 'QPSK', 'QAM-16' and 'QAM-64'</li>
+		</ul>
+	</p>
+
+	<p><strong>Forward error correction</strong></p>
+
+	<p>
+		The used convolutional code has a code rate R = 1 / 2, memory m = 1, and generator matrix G(D) = (1 1+D). To keep the net bitrate constant
+		across all simulations, the gross bitrate is increased two-fold when using forward error correction (36 Mbps instead of 18 Mbps).
+	</p>
+
+	<h2>Results</h2>
+
+	<p>
+		Packet loss vs distance is displayed on the following chart. In general, the three detail levels produce similar curves for the same modulation and forward error correction. Except when using forward error correction and the modulation has more than 1 bits
+		per symbol, the symbol domain curves are different from the packet and bit domain ones. In these cases, the demodulation process results in
+		a non-independent distribution of bit errors, which is decoded differently. Simpler modulations and the use of forward error correction increase the communication range.
+	</p>
+
+	<p><center><a href="General.svg" target="_blank"><img src="results.png"></center></p>
+
+</body>

@@ -1,0 +1,78 @@
+<html>
+<head>
+	<title>Error Rate Example</title>
+	<link rel="stylesheet" type="text/css" href="../../../etc/samples.css">
+</head>
+
+<body>
+
+	<h1><center>Error Rate Example</center></h1>
+
+	<h2>Goals</h2>
+
+	<p>This example tests the <tt>Ieee80211NistErrorModel</tt> in a 802.11a wireless network, and analizes how packet
+		error rate changes as a function of distance.</p>
+
+	<h2>The model</h2>
+
+	<p><b>Configuration</b></p>
+
+	<p>The network contains 2 hosts. The <i>sourceHost</i> sends a single UDP packet to <i>destinationHost</i>.
+		The configuration is a parameter study, where the variables are the distance between the hosts and the bitrate.
+		The distance runs between 10 and 550 meters, in 2 meter steps. The bitrate takes all the modes present in 802.11a:
+		6, 9, 12, 18, 24, 36, 48 and 54 mbps. This results in about 2100 short simulation runs.</p>
+
+	<p>
+		The hosts operate in 802.11a ad-hoc mode. The transmission power is 10mW. The channel model is free space path loss.
+	</p>
+
+	<p><b>Packet error rate</b></p>
+
+	<p>Packet error rate is the number of incorrectly received packets divided by the total number of received packets. The <i>sourceHost</i> sends
+		one UDP packet. The error model computes bit error rate (BER) from the signal-to-noise-plus-interference-ratio (SNIR) present at packet
+		reception. PER is computed from BER.</p>
+
+	<h2>Results</h2>
+
+	<p>SNIR, BER and PER are recorded from the simulation runs. Throughput in this simulation is the gross bitrate, but takes
+	bit errors into account, it is computed with the following formula:</p>
+	<p><code>throughput = (1-PER) * nominal bitrate</code></p>
+	It is equal to the nominal data bitrate unless it is decreased because of bit errors as the distance increases. </p>
+
+	<p>
+		SNIR is plotted against distance on the following chart. SNIR is measured at the receiver, and depends on the power of the noise and the power of the signal. The signal power decreases exponentially
+		with distance, but the noise power is uniform everywhere (<tt>IsotropicScalarBackgroundNoise</tt>). Thus SNIR decreases exponentially with
+		distance. It is also independent of modulations and coding schemes, so it is the same for all bitrates.
+	</p>
+
+	<p><center><img src="SNIR_distance_v2.png"></center></p>
+
+
+	<p>
+		The next chart shows how packet error rate decreases with SNIR. After a certain SNIR value, the packet error rate is very small, about 10^-14, which can be taken as 0. Slower bitrates use simpler modulation like binary phase shift keying, which is more tolerant to noise than more complex
+		modulations used by faster bitrates, hence the difference on the graph between the different bitrates.
+	</p>
+
+	<p><center><img src="PER_SNIR_v2.png"></center></p>
+
+	<p>The following chart shows the packet error rate vs distance. Note that the scale is logarithmic. 
+		Again, slower bitrates show less packet errors as the distance increases because of the simpler modulation.</p>
+
+	<p><center><img src="PER_distance_v2.png"></center></p>
+
+	<p>Throughput vs distance is plotted on the next chart. Higher bitrates are more sensitive to increases in distance, as the throughput drops rapidly after a critical distance.
+		This critical distance is farther for slower bitrates, and the decrease is not as rapid. 
+	</p>
+
+	<p><center><img src="throughput_distance_v2.png"></center></p>
+
+	<p><b>Conclusion</b></p>
+
+	<p>Packet error rate increases quickly as the distance approaches the critical point. Slower bitrates are less sensitive to increasing distance, because they use simpler modulation. Faster bitrate modes
+		are advantageous in short distances because of the increased throughput, but slower modes work better at longer distances. Furthermode, using rate adaptation, a host can use fast modes
+		for short distances and slower modes for larger ones. When the number of lost packets increases and throughput drops, it becomes more
+		viable to change to a slower bitrate mode. For example, the rate control algorithm could change to the slower bitrate at around the critical point,
+		about where the curves for two adjacent bitrate modes intersect.
+	</p>
+
+</body>

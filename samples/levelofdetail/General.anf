@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/samples/levelofdetail/results/*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Packet loss">
+      <items xsi:type="scave:Add" filterPattern="distance"/>
+      <items xsi:type="scave:Add" filterPattern="&quot;ping loss rate (%)&quot;"/>
+      <items xsi:type="scave:ScatterChart" name="Packet loss vs distance" xDataPattern="module(.) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance OR &quot;ping loss rate (%)&quot;"/>
+        <properties name="X.Axis.Title" value="distance [m]"/>
+        <properties name="Y.Axis.Title" value="Packet loss [%]"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="X.Axis.Min" value="110.0"/>
+        <properties name="X.Axis.Max" value="610.0"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="bit - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="bit - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="bit - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="bit - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="bit - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="bit - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="bit - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;bit&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="bit - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="packet - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="packet - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="packet - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="packet - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="packet - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="packet - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="packet - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;packet&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="packet - conv.coder - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;BPSK&quot;" value="symbol - no FEC - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-16&quot;" value="symbol - no FEC - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QAM-64&quot;" value="symbol - no FEC - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;&quot; modulation=&quot;QPSK&quot;" value="symbol - no FEC - QPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;BPSK&quot;" value="symbol - conv.coder - BPSK"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-16&quot;" value="symbol - conv.coder - QAM-16"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QAM-64&quot;" value="symbol - conv.coder - QAM-64"/>
+        <properties name="Line.Name/LevelofDetail.host[1].pingApp[0] ping loss rate (%) - detail=&quot;symbol&quot; fecType=&quot;ConvolutionalCoder&quot; modulation=&quot;QPSK&quot;" value="symbol - conv.coder - QPSK"/>
+        <isoDataPattern>detail(*)</isoDataPattern>
+        <isoDataPattern>fecType(*)</isoDataPattern>
+        <isoDataPattern>modulation(*)</isoDataPattern>
+      </items>
+      <items xsi:type="scave:ScatterChart" name="" xDataPattern="module(.) AND name(distance)">
+        <filters xsi:type="scave:Select" filterPattern="distance or &quot;ping loss rate (%)&quot; or attr:modulation(&quot;\&quot;BPSK\&quot;&quot;)  "/>
+      </items>
+      <items xsi:type="scave:BarChart" name="">
+        <filters xsi:type="scave:Select" filterPattern="a:elapsedtime OR attr:detail(*) OR attr:fecType(*) OR attr:modulation(*) OR attr:distance(110)     "/>
+        <groupByFields>module</groupByFields>
+        <barFields>measurement</barFields>
+      </items>
+      <items xsi:type="scave:BarChart" name="">
+        <filters xsi:type="scave:Select" filterPattern="name(a:elapsedTime) OR attr:distance(110)  "/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.2 //@datasets/@datasets.0/@items.3 //@datasets/@datasets.0/@items.4 //@datasets/@datasets.0/@items.5"/>
+  </chartSheets>
+</scave:Analysis>
