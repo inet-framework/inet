@@ -502,7 +502,7 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 t
         SCTPSimpleMessage* msg = new SCTPSimpleMessage("payload");
         uint32 sendBytes = len - SCTP_DATA_CHUNK_LENGTH;
         msg->setDataArraySize(sendBytes);
-        for (int i = 0; i < sendBytes; i++)
+        for (uint32 i = 0; i < sendBytes; i++)
             msg->setData(i, 'a');
         msg->setDataLen(sendBytes);
         msg->setEncaps(false);

@@ -72,12 +72,12 @@ struct int_symbol platform_symbols_table[] = {
 
     { SPP_HB_DISABLE,                   "SPP_HB_DISABLE"                  },
     { SPP_HB_ENABLE,                    "SPP_HB_ENABLE"                   },
-    /* Sentinel marking the end of the table. */
     { SHUT_WR,                          "SHUT_WR"                         },
     { SCTP_STATUS,                      "SCTP_STATUS"                     },
     { F_GETFL,                          "F_GETFL"                         },
     { F_SETFL,                          "F_SETFL"                         },
     { O_RDWR,                           "PD_O_RDWR"                       },
+    /* Sentinel marking the end of the table. */
     { 0, NULL },
 };
 

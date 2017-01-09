@@ -289,7 +289,7 @@ static PacketDrillExpression *new_integer_expression(int64 num, const char *form
 %token <reserved> SASOC_ASOCMAXRXT SASOC_ASSOC_ID SASOC_NUMBER_PEER_DESTINATIONS SASOC_PEER_RWND
 %token <reserved> SASOC_LOCAL_RWND SASOC_COOKIE_LIFE
 %token <reserved> SAS_ASSOC_ID SAS_INSTRMS SAS_OUTSTRMS
-%token <reserved> MYINVALID_STREAM_IDENTIFIER SID
+%token <reserved> MYINVALID_STREAM_IDENTIFIER ISID
 %token <floating> MYFLOAT
 %token <integer> INTEGER HEX_INTEGER
 %token <string> MYWORD MYSTRING

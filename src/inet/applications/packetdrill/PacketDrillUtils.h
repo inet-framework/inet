@@ -43,6 +43,14 @@ struct int_symbol {
 #define IPPROTO_SCTP 132
 #endif
 
+/* On Windows we don't have these macros defined (values copyed from fcntl.h) */
+#ifndef F_GETFL
+#define F_GETFL 3
+#endif
+#ifndef F_SETFL
+#define F_SETFL 4
+#endif
+
 /* TCP option numbers and lengths. */
 #define TCPOPT_EOL                0
 #define TCPOPT_NOP                1
