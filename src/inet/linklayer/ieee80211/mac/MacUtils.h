@@ -51,12 +51,12 @@ class INET_API MacUtils
         MacUtils(IMacParameters *params, IRateSelection *rateSelection);
         virtual ~MacUtils() {};
 
-        virtual simtime_t getAckDuration() const;
-        virtual simtime_t getCtsDuration() const;
+        virtual simtime_t getAckDuration(Ieee80211Frame *dataFrame) const;
+        virtual simtime_t getCtsDuration(Ieee80211Frame *rtsFrame) const;
         virtual simtime_t getAckEarlyTimeout() const;  // reception of ACK should begin within this timeout period
-        virtual simtime_t getAckFullTimeout() const;  // ACK should be fully received within this timeout period
+        virtual simtime_t getAckFullTimeout(Ieee80211Frame *dataFrame) const;  // ACK should be fully received within this timeout period
         virtual simtime_t getCtsEarlyTimeout() const;
-        virtual simtime_t getCtsFullTimeout() const;
+        virtual simtime_t getCtsFullTimeout(Ieee80211Frame *rtsFrame) const;
 
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame) const;
         virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataFrame, const IIeee80211Mode *dataFrameMode) const;

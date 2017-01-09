@@ -351,7 +351,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numCollision++;
                 resetStateVariables();
             );
-            FSMA_Event_Transition(Receive-Unknown-Ack,
+            FSMA_Event_Transition(Receive-Unexpected-Ack,
                                   isLowerMessage(msg) && isAck(frame),
                                   IDLE,
                 delete frame;
@@ -537,7 +537,7 @@ void CsmaCaMac::cancelBackoffTimer()
  */
 void CsmaCaMac::sendDataFrame(CsmaCaMacDataFrame *frameToSend)
 {
-    EV << "sending Data frame\n";
+    EV << "sending Data frame " << frameToSend->getName() << endl;
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frameToSend->dup());
 }

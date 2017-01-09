@@ -28,9 +28,11 @@ simple AARFRateControl like IRateControl
     parameters:
         double interval @unit("s") = default(50ms); // The rate (unconditionally) increases after each time interval (the default interval is unspecified [2]).
         int increaseThreshold = default(10); // Number of successful transmissions needed to increase the rate
-        int decreaseThreshold = default(2); // Number of consecutive unsuccessful transmissions (in the sense that ACK does not arrive within timeout) 
+        int decreaseThreshold = default(2); // Number of consecutive unsuccessful transmissions (in the sense that ACK does not arrive within timeout)
                                             // needed to increase the rate
         double increaseThresholdFactor = default(2); // When the transmission of probing packet fails, we multiply by "increaseThresholdFactor" the increaseThreshold.
         int maxIncreaseThreshold = default(50); // Upper bound for increaseThreshold.
         @display("i=block/control");
+        @signal [databitrate];
+        @statistic[databitrate](record=vector);
 }
