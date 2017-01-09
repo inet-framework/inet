@@ -252,6 +252,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     template <typename T>
     std::shared_ptr<T> doPeek(const Iterator& iterator, int64_t length = -1) const {
         assertImmutable();
+        // TODO: what if it's a backward iterator??? wtf?
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
         chunk->markImmutable();
         if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
