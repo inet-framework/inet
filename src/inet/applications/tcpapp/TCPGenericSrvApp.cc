@@ -100,9 +100,13 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
-        msg->setName("close");
-        msg->setKind(TCP_C_CLOSE);
-        sendOrSchedule(msg, delay + maxMsgDelay);
+        int connId = msg->getMandatoryTag<SocketInd>()->getSocketId();
+        delete msg;
+        cMessage *outMsg = new cMessage("close");
+        outMsg->setName("close");
+        outMsg->setKind(TCP_C_CLOSE);
+        outMsg->ensureTag<SocketReq>()->setSocketId(connId);
+        sendOrSchedule(outMsg, delay + maxMsgDelay);
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         Packet *packet = check_and_cast<Packet *>(msg);
@@ -125,7 +129,10 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                 Packet *outPacket = new Packet(msg->getName());
                 outPacket->ensureTag<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
-                const auto& payload = std::make_shared<ByteCountChunk>(requestedBytes);
+                const auto& payload = std::make_shared<GenericAppMsg>();
+                payload->setChunkLength(requestedBytes);
+                payload->setExpectedReplyLength(0);
+                payload->setReplyDelay(0);
                 payload->markImmutable();
                 outPacket->append(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);

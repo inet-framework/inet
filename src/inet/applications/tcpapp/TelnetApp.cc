@@ -181,13 +181,17 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgen
 
         if (numLinesToType == 0) {
             EV_INFO << "user has no more commands to type\n";
+            if (timeoutMsg->isScheduled())
+                cancelEvent(timeoutMsg);
             timeoutMsg->setKind(MSGKIND_CLOSE);
             checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
         }
         else {
             EV_INFO << "user looks at output, then starts typing next command\n";
-            timeoutMsg->setKind(MSGKIND_SEND);
-            checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
+            if (!timeoutMsg->isScheduled()) {
+                timeoutMsg->setKind(MSGKIND_SEND);
+                checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
+            }
         }
     }
 }
