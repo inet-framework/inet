@@ -44,7 +44,7 @@ network PhysicallinkVisualizerSampleNet
             @display("p=600,117");
         }
         source: WirelessHost {
-            @display("p=291,50");
+            @display("p=361.8475,49.445");
         }
         destination: WirelessHost {
             @display("p=846,50");
