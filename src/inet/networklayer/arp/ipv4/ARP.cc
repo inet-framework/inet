@@ -17,21 +17,22 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/arp/ipv4/ARP.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/common/EtherTypeTag_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -111,7 +112,7 @@ void ARP::handleMessage(cMessage *msg)
         requestTimedOut(msg);
     }
     else {
-        ARPPacket *arp = check_and_cast<ARPPacket *>(msg);
+        Packet *arp = check_and_cast<Packet *>(msg);
         processARPPacket(arp);
     }
 }
@@ -230,14 +231,16 @@ void ARP::sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress)
     ASSERT(!myIPAddress.isUnspecified());
 
     // fill out everything in ARP Request packet except dest MAC address
-    ARPPacket *arp = new ARPPacket("arpREQ");
-    arp->setByteLength(ARP_HEADER_BYTES);
+    Packet *packet = new Packet("arpREQ");
+    const auto& arp = std::make_shared<ARPPacket>();
     arp->setOpcode(ARP_REQUEST);
     arp->setSrcMACAddress(myMACAddress);
     arp->setSrcIPAddress(myIPAddress);
     arp->setDestIPAddress(ipAddress);
+    arp->markImmutable();
+    packet->pushHeader(arp);
 
-    sendPacketToNIC(arp, ie, MACAddress::BROADCAST_ADDRESS, ETHERTYPE_ARP);
+    sendPacketToNIC(packet, ie, MACAddress::BROADCAST_ADDRESS, ETHERTYPE_ARP);
     numRequestsSent++;
     emit(sentReqSignal, 1L);
 }
@@ -290,14 +293,19 @@ void ARP::dumpARPPacket(ARPPacket *arp)
               << "  dest=" << arp->getDestIPAddress() << " / " << arp->getDestMACAddress() << "\n";
 }
 
-void ARP::processARPPacket(ARPPacket *arp)
+void ARP::processARPPacket(Packet *packet)
 {
-    EV_INFO << "Received " << arp << " from network protocol.\n";
-    dumpARPPacket(arp);
+    EV_INFO << "Received " << packet << " from network protocol.\n";
+    const auto& arp = packet->peekHeader<ARPPacket>();
+    if (arp == nullptr) {
+        EV_ERROR << "ARP received a non-arp packet: " << packet->getName() << endl;
+        delete packet;
+        return;
+    }
+    dumpARPPacket(arp.get());
 
     // extract input port
-    InterfaceEntry *ie = ift->getInterfaceById(arp->getMandatoryTag<InterfaceInd>()->getInterfaceId());
-    delete arp->removeControlInfo();
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     //
     // Recipe a'la RFC 826:
@@ -378,15 +386,17 @@ void ARP::processARPPacket(ARPPacket *arp)
                 IPv4Address myIPAddress = ie->ipv4Data()->getIPAddress();
 
                 // "Swap hardware and protocol fields", etc.
-                arp->setName("arpREPLY");
+                Packet *outPk = new Packet("arpREPLY");
+                const auto& arpReply = std::make_shared<ARPPacket>();
                 IPv4Address origDestAddress = arp->getDestIPAddress();
-                arp->setDestIPAddress(srcIPAddress);
-                arp->setDestMACAddress(srcMACAddress);
-                arp->setSrcIPAddress(origDestAddress);
-                arp->setSrcMACAddress(myMACAddress);
-                arp->setOpcode(ARP_REPLY);
-                delete arp->removeControlInfo();
-                sendPacketToNIC(arp, ie, srcMACAddress, ETHERTYPE_ARP);
+                arpReply->setDestIPAddress(srcIPAddress);
+                arpReply->setDestMACAddress(srcMACAddress);
+                arpReply->setSrcIPAddress(origDestAddress);
+                arpReply->setSrcMACAddress(myMACAddress);
+                arpReply->setOpcode(ARP_REPLY);
+                arpReply->markImmutable();
+                outPk->pushHeader(arpReply);
+                sendPacketToNIC(outPk, ie, srcMACAddress, ETHERTYPE_ARP);
                 numRepliesSent++;
                 emit(sentReplySignal, 1L);
                 break;
@@ -394,7 +404,6 @@ void ARP::processARPPacket(ARPPacket *arp)
 
             case ARP_REPLY: {
                 EV_DETAIL << "Discarding packet\n";
-                delete arp;
                 break;
             }
 
@@ -411,8 +420,8 @@ void ARP::processARPPacket(ARPPacket *arp)
     else {
         // address not recognized
         EV_INFO << "IPv4 address " << arp->getDestIPAddress() << " not recognized, dropping ARP packet\n";
-        delete arp;
     }
+    delete packet;
 }
 
 void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)

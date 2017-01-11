@@ -62,6 +62,7 @@ IPv4Address ARPSerializer::readIPv4Address(const Buffer& b, unsigned int size)
 
 void ARPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
 {
+#if 0
     const ARPPacket *pkt = check_and_cast<const ARPPacket *>(_pkt);
     b.writeUint16(1); //ethernet
     b.writeUint16(ETHERTYPE_IPv4);
@@ -74,10 +75,12 @@ void ARPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
     b.writeIPv4Address(pkt->getDestIPAddress());
     if (pkt->getEncapsulatedPacket())
         throw cRuntimeError("ARPSerializer: encapsulated packet not supported!");
+#endif
 }
 
 cPacket* ARPSerializer::deserialize(const Buffer &b, Context& context)
 {
+#if 0
     ARPPacket *pkt = new ARPPacket("parsed ARP");
 
     uint16_t x;
@@ -97,6 +100,9 @@ cPacket* ARPSerializer::deserialize(const Buffer &b, Context& context)
     pkt->setDestIPAddress(readIPv4Address(b, m));   // ar_tpa
     pkt->setByteLength(b.getPos());
     return pkt;
+#else
+    return nullptr;
+#endif
 }
 
 } // namespace serializer

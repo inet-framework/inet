@@ -54,13 +54,13 @@ class INET_API ARPSerializer : public SerializerBase
          * Returns the length of data written into buffer.
          */
         int serialize(const ARPPacket *pkt, unsigned char *buf, unsigned int bufsize)
-        { Buffer b(buf, bufsize); Context c; serialize(pkt, b, c); return b.getPos(); }
+        { return 0; }
 
         /**
          * Puts a packet sniffed from the wire into an ARPPacket.
          */
         ARPPacket *parse(const unsigned char *buf, unsigned int bufsize)
-        { Buffer b(const_cast<unsigned char *>(buf), bufsize); Context c; return check_and_cast<ARPPacket *>(deserialize(b, c)); }
+        { return nullptr; }
 };
 
 } // namespace serializer

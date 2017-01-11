@@ -24,10 +24,11 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/contract/IARP.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/linklayer/common/MACAddress.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 namespace inet {
 
@@ -115,7 +116,7 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual void sendARPRequest(const InterfaceEntry *ie, IPv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
     virtual bool addressRecognized(IPv4Address destAddr, InterfaceEntry *ie);
-    virtual void processARPPacket(ARPPacket *arp);
+    virtual void processARPPacket(Packet *packet);
     virtual void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 
     virtual void dumpARPPacket(ARPPacket *arp);

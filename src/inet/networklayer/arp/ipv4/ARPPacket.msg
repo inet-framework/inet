@@ -18,11 +18,15 @@
 
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 class noncobject IPv4Address;
 
@@ -58,8 +62,9 @@ enum ARPOpcode
 //   - hardware address length (6)
 //   - protocol address length (4)
 //
-packet ARPPacket
+class ARPPacket extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter = ARP_HEADER_BYTES;
     int opcode @enum(ARPOpcode);
     MACAddress srcMACAddress;
     MACAddress destMACAddress;
