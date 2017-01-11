@@ -13,17 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.samples.datalinkvisualizer;
+package inet.samples.physicallinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
+
 //
 // TODO documentation
 //
-network DatalinkVisualizerSampleNet
+network PhysicallinkVisualizerSampleNet
 {
     @display("bgb=895,311");
     submodules:
@@ -49,4 +50,3 @@ network DatalinkVisualizerSampleNet
             @display("p=846,50");
         }
 }
-
