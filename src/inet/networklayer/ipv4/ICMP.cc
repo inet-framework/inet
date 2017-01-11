@@ -240,6 +240,7 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     ctrl->setInterfaceId(-1);
     ctrl->setSrcAddr(dest);
     ctrl->setDestAddr(src);
+    ctrl->setTimeToLive(0); // if the TTL is set to 0 here, IP resets it to the default TTL
 
     sendToIP(reply);
 }
