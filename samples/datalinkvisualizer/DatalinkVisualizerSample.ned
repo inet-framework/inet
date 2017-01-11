@@ -40,13 +40,13 @@ network DatalinkVisualizerSampleNet
                 @display("p=100,250");
         }
         accessPoint: AccessPoint {
-            @display("p=600,117");
+            @display("p=600,120");
         }
         source: WirelessHost {
-            @display("p=361.8475,49.445");
+            @display("p=360,45");
         }
         destination: WirelessHost {
-            @display("p=846,50");
+            @display("p=840,45");
         }
 }
 
