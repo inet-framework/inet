@@ -147,10 +147,10 @@ void IPv4::endService(cPacket *packet)
     else {    // from network
         EV_INFO << "Received " << packet << " from network.\n";
         const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
-        if (dynamic_cast<ARPPacket *>(packet))
-            handleIncomingARPPacket((ARPPacket *)packet, fromIE);
-        else if (dynamic_cast<IPv4Datagram *>(packet))
-            handleIncomingDatagram((IPv4Datagram *)packet, fromIE);
+        if (auto arpPacket = dynamic_cast<ARPPacket *>(packet))
+            handleIncomingARPPacket(arpPacket, fromIE);
+        else if (auto dgram = dynamic_cast<IPv4Datagram *>(packet))
+            handleIncomingDatagram(dgram, fromIE);
         else
             throw cRuntimeError(packet, "Unexpected packet type");
     }
