@@ -184,6 +184,9 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
         }
     }
 
+    // hop counter decrement
+    datagram->setTimeToLive(datagram->getTimeToLive() - 1);
+
     EV_DETAIL << "Received datagram `" << datagram->getName() << "' with dest=" << datagram->getDestAddress() << "\n";
 
     const InterfaceEntry *destIE = nullptr;
@@ -668,12 +671,8 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     if (datagram->getSrcAddress().isUnspecified())
         datagram->setSrcAddress(ie->ipv4Data()->getIPAddress());
 
-    // hop counter decrement; but not if it will be locally delivered
-    if (!ie->isLoopback())
-        datagram->setTimeToLive(datagram->getTimeToLive() - 1);
-
     // hop counter check
-    if (datagram->getTimeToLive() < 0) {
+    if (datagram->getTimeToLive() <= 0) {
         // drop datagram, destruction responsibility in ICMP
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         icmp->sendErrorMessage(datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
