@@ -256,7 +256,7 @@ parameter tells the visualizer to periodically update the display when
 there's at least one propagating radio signal on the medium.
 
 The visualization of recent successful physical layer transmissions is
-enabled with the `packetNameFilter` parameter of the `physicalLinkVisualizer` submodule.
+enabled with the `packetFilter` parameter of the `physicalLinkVisualizer` submodule.
 Matching successful transmissions are displayed with dotted dark yellow arrows that fade with time.
 When a packet is successfully received by the physical layer, the arrow between
 the transmitter and receiver hosts is created or reinforced. The arrows
@@ -447,7 +447,7 @@ a colored arrow that goes through the visited hosts. The path continually
 fades and then it disappears after a certain amount of time unless it is
 reinforced by another packet.
 
-The route visualizer is activated by specifying in its `packetNameFilter`
+The route visualizer is activated by specifying in its `packetFilter`
 parameter which packets it should take into account. By default it is set
 to the empty string, meaning *none*. Setting `*` would mean all packets.
 Our UDP application generates packets with the name `UDPData-0`,
