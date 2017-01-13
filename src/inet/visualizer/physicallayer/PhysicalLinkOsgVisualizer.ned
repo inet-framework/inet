@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,22 +17,22 @@
 
 package inet.visualizer.physicallayer;
 
-import inet.visualizer.base.LinkVisualizerBase;
+import inet.visualizer.base.PhysicalLinkVisualizerBase;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
 
 //
-// This module visualizes network links on a 3D osg scene. It displays a
-// line for each active link in the network. See the documentation of the base
-// module for what constitutes an active link. Each line fades out over time
-// until the link becomes inactive unless it is reinforced by another packet.
-// The line automatically follows the movement of mobile nodes.
+// This module visualizes physical layer links on a 3D osg scene. It displays an
+// arrow for each active link in the network. See the documentation of the base
+// module for what constitutes an active link. The arrow points from the source
+// towards the destination. If a link is used in both directions then there are
+// separate arrows for them. Each arrow fades out over time as the link becomes
+// inactive unless it is reinforced by another packet. The arrow automatically
+// follows the movement of mobile nodes.
 //
-// @see ~PhysicalLinkCanvasVisualizer, ~PhysicalLinkVisualizer,
-// ~PhysicalLinkVisualizerBase, and ~IPhysicalLinkVisualizer
+// @see ~PhysicalLinkCanvasVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase, ~IPhysicalLinkVisualizer
 //
-simple PhysicalLinkOsgVisualizer extends LinkVisualizerBase like IPhysicalLinkVisualizer
+simple PhysicalLinkOsgVisualizer extends PhysicalLinkVisualizerBase like IPhysicalLinkVisualizer
 {
     parameters:
-        lineColor = default("black"); // link line color, black by default
         @class(PhysicalLinkOsgVisualizer);
 }

@@ -1,0 +1,13 @@
+2D:
+ - zoom in/out breaks layout of network node annotations
+
+3D:
+ - iconTintColor parameters don't work
+ - lineStyle parameters don't work
+ - network node annotations overlap
+   - egymásra lógnak az interfaceTableVisualizer és a ieee80211Visualizer jelzesei
+   - infoVisualizer és mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymáson van
+   - amelyik node-nál nincs bekapcsolva interfaceTableVisualizer, ott a ieee80211Visualizer es a mediumVisualizer.displayTransmissions / mediumVisualizer.displayReceptions egymásra lóg
+ - link break visualization position is wrong
+ - PhysicalLinkVisualizer nyilai nem látszanak rendesen, indulhatnának a source node szélétől, mehetnének a destination node széléig, nem a közepéig
+ 

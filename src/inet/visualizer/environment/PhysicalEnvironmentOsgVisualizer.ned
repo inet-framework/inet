@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -26,8 +26,7 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 // considers all object properties that affect appearance such as position,
 // orientation, shape, colors, opacity, etc.
 //
-// @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, 
-// ~PhysicalEnvironmentVisualizerBase, and ~IPhysicalEnvironmentVisualizer
+// @see ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
 //
 simple PhysicalEnvironmentOsgVisualizer extends PhysicalEnvironmentVisualizerBase like IPhysicalEnvironmentVisualizer
 {

@@ -18,11 +18,11 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different IMediumVisualizer
+// This module interface allows configuring different ~IMediumVisualizer
 // submodules from INI files. Such a visualizer displays transmitting nodes,
-// receiving nodes, and propagating radio signals.
+// receiving nodes, and propagating radio signals on a medium.
 //
-// @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, and ~MediumVisualizerBase
+// @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~MediumVisualizer, ~MediumVisualizerBase
 //
 moduleinterface IMediumVisualizer
 {

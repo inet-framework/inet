@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,12 +21,11 @@ package inet.visualizer.base;
 // This is a base module for node visualizer simple modules. The actual
 // visualization of network nodes is done in derived modules.
 //
-// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer,
-// ~INetworkNodeVisualizer, and ~NetworkNodeVisualizerBase
+// @see ~NetworkNodeCanvasVisualizer, ~NetworkNodeOsgVisualizer, ~INetworkNodeVisualizer, ~VisualizerBase
 //
 simple NetworkNodeVisualizerBase extends VisualizerBase
 {
     parameters:
-        string networkNodePathFilter = default("**"); // determines which network nodes are displayed, all nodes by default 
+        string nodeFilter = default("*"); // determines which network nodes are displayed, all nodes by default 
         @class(NetworkNodeVisualizerBase);
 }

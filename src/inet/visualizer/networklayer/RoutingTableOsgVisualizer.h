@@ -46,7 +46,9 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
 #else // ifdef WITH_OSG
 
   protected:
-    virtual const RouteVisualization *createRouteVisualization(cModule *node, cModule *nextHop) const override { return nullptr; }
+    virtual void initialize(int stage) override {}
+
+    virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const override { return nullptr; }
 
 #endif // ifdef WITH_OSG
 };

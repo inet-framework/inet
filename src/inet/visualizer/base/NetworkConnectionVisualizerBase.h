@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,8 +18,8 @@
 #ifndef __INET_NETWORKCONNECTIONVISUALIZERBASE_H
 #define __INET_NETWORKCONNECTIONVISUALIZERBASE_H
 
-#include "inet/common/PatternMatcher.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/NetworkNodeFilter.h"
 
 namespace inet {
 
@@ -28,14 +28,16 @@ namespace visualizer {
 class INET_API NetworkConnectionVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
-    PatternMatcher networkNodePathMatcher;
+    NetworkNodeFilter nodeFilter;
     cFigure::Color lineColor;
+    cFigure::LineStyle lineStyle = cFigure::LINE_SOLID;
     double lineWidth = NaN;
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
 
-    virtual void createConnection(cModule *startNetworkNode, cModule *endNetworkNode) = 0;
+    virtual void createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode) = 0;
 };
 
 } // namespace visualizer

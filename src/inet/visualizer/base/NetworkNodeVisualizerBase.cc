@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,7 +27,16 @@ void NetworkNodeVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        networkNodePathMatcher.setPattern(par("networkNodePathFilter"), true, true, true);
+        nodeFilter.setPattern(par("nodeFilter"));
+    }
+}
+
+void NetworkNodeVisualizerBase::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "nodeFilter"))
+            nodeFilter.setPattern(par("nodeFilter"));
+        // TODO:
     }
 }
 

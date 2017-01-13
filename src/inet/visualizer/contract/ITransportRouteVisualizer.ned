@@ -18,12 +18,11 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ITransportRouteVisualizer
+// This module interface allows configuring different ~ITransportRouteVisualizer
 // submodules from INI files. Such a visualizer displays active transport routes
 // in a network.
 //
-// @see ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, and
-// ~TransportRouteVisualizerBase
+// @see ~TransportRouteCanvasVisualizer, ~TransportRouteOsgVisualizer, ~TransportRouteVisualizer, ~TransportRouteVisualizerBase
 //
 moduleinterface ITransportRouteVisualizer
 {
