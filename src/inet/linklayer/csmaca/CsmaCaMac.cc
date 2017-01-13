@@ -194,6 +194,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
 {
     if (maxQueueSize != -1 && (int)transmissionQueue.getLength() == maxQueueSize) {
         EV << "message " << msg << " received from higher layer but MAC queue is full, dropping message\n";
+        emit(LayeredProtocolBase::packetFromUpperDroppedSignal, msg);
         delete msg;
         return;
     }
@@ -345,6 +346,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
             FSMA_Event_Transition(Receive-Bit-Error,
                                   isLowerMessage(msg) && frame->hasBitError(),
                                   IDLE,
+                // TODO: reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
                 delete frame;
                 numCollision++;
                 resetStateVariables();
