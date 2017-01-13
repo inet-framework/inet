@@ -610,7 +610,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getDestinationAddress()))
+    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getReceiverAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);
