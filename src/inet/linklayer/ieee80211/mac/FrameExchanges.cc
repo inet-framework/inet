@@ -21,6 +21,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/FSMA.h"
 #include "inet/common/NotifierConsts.h"
+#include "inet/common/LayeredProtocolBase.h"
 #include "IContention.h"
 #include "ITx.h"
 #include "IRx.h"
@@ -249,6 +250,7 @@ void SendDataWithAckFrameExchange::retry()
     else {
         statistics->frameTransmissionUnsuccessfulGivingUp(dataFrame, retryCount);
         fail();
+        ownerModule->emit(LayeredProtocolBase::packetFromUpperDroppedSignal, dataFrame);
         ownerModule->emit(NF_LINK_BREAK, dataFrame);
 
 #ifdef NS3_VALIDATION
