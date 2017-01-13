@@ -216,6 +216,8 @@ simple TCP like ITCP
         string receiveQueueClass = default(""); // Obsolete!!!
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
         @display("i=block/wheelbarrow");
+        @signal[tcpConnectionAdded];
+        @signal[tcpConnectionRemoved];
     gates:
         input appIn[] @labels(TCPCommand/down);
         input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up);

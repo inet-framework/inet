@@ -156,6 +156,7 @@ void TCPConnection::printConnBrief() const
 
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
 {
+    EV_STATICCONTEXT;
     EV_INFO << "." << tcpseg->getSrcPort() << " > ";
     EV_INFO << "." << tcpseg->getDestPort() << ": ";
 
@@ -265,6 +266,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
 {
+    EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
 
