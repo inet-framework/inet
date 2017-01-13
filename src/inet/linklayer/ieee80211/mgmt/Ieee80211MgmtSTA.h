@@ -58,7 +58,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     //
     // Stores AP info received during scanning
     //
-    struct APInfo
+    struct APInfo : public cObject
     {
         int channel;
         MACAddress address;    // alias bssid
