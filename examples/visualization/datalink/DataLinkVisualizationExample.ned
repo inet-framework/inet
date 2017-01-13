@@ -1,22 +1,18 @@
-//
-// This program is property of its copyright holder. All rights reserved.
-//
-
-package inet.examples.visualization.link;
+package inet.examples.visualization.datalink;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.dymo.DYMORouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
-network LinkVisualizationExample
+network DataLinkVisualizationExample
 {
     parameters:
         @figure[description](type=text; pos=300,10; font=Arial,20; text="Displaying dynamically changing active links in a wireless mobile network.\nThe source node pings the destination node every 1 second.\nActive links are eventually displayed as arrows, they fade out over time.\nActive links change as nodes move around and communicate.");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
-                @display("p=100,50");
+                @display("p=100,50;is=n");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:

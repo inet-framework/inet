@@ -1,8 +1,4 @@
-//
-// This program is property of its copyright holder. All rights reserved.
-//
-
-package inet.examples.visualization.route;
+package inet.examples.visualization.networkroute;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.dymo.DYMORouter;
@@ -12,7 +8,7 @@ import inet.node.inet.StandardHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
-network StaticRouteVisualizationExample
+network StaticNetworkRouteVisualizationExample
 {
     parameters:
         @display("bgb=1000,1000");
@@ -47,7 +43,7 @@ network StaticRouteVisualizationExample
         node[5].ethg++ <--> Eth100M <--> destination.ethg++;
 }
 
-network DynamicRouteVisualizationExample
+network DynamicNetworkRouteVisualizationExample
 {
     parameters:
         @display("bgb=1000,1000");
