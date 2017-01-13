@@ -25,25 +25,25 @@ network RoutingTableVisualizer
 {
     @display("bgb=822,636");
     submodules:
-        AODVRouter: AODVRouter {
+        source: AODVRouter {
             @display("p=120,57");
         }
-        AODVRouter1: AODVRouter {
+        host1: AODVRouter {
             @display("p=119.04,148.48");
         }
-        AODVRouter2: AODVRouter {
+        host2: AODVRouter {
             @display("p=119.04,241.92");
         }
-        AODVRouter3: AODVRouter {
+        host3: AODVRouter {
             @display("p=119.04,341.76");
         }
-        AODVRouter4: AODVRouter {
+        host4: AODVRouter {
             @display("p=119.04,451.84");
         }
-        AODVRouter5: AODVRouter {
+        host5: AODVRouter {
             @display("p=119.04,554.24");
         }
-        AODVRouter6: AODVRouter {
+        destination: AODVRouter {
             @display("p=272.64,56.32");
         }
         configurator: IPv4NetworkConfigurator {
