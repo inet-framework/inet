@@ -1,0 +1,58 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
+
+package routingtablevisualizer;
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.aodv.AODVRouter;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
+
+
+network RoutingTableVisualizer
+{
+    @display("bgb=822,636");
+    submodules:
+        AODVRouter: AODVRouter {
+            @display("p=120,57");
+        }
+        AODVRouter1: AODVRouter {
+            @display("p=188,148");
+        }
+        AODVRouter2: AODVRouter {
+            @display("p=256,247");
+        }
+        AODVRouter3: AODVRouter {
+            @display("p=334,358");
+        }
+        AODVRouter4: AODVRouter {
+            @display("p=430,476");
+        }
+        AODVRouter5: AODVRouter {
+            @display("p=510,565");
+        }
+        AODVRouter6: AODVRouter {
+            @display("p=226,52");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=556,101");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=556,179");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=560,255");
+        }
+}
