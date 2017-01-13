@@ -1,7 +1,7 @@
-This example demonstrates how to display active routes in a network. An active
-route is created when a packet gets delivered by the network from one node to
-another. Active routes become inactive over time unless they are reinforced by
-new packets.
+This example demonstrates how to display active network layer routes in a
+network. An active route is created when a packet gets delivered by the network
+from one node to another. Active routes become inactive over time unless they
+are reinforced by new packets.
 
 There are two networks in this example, a static wired network, and a dynamic
 wireless mobile network. The networks contain a source node, a destination node,
