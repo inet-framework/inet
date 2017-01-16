@@ -287,9 +287,10 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
-                auto newHeader = std::static_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
+                auto packet2 = packet->dup();
+                auto newHeader = std::static_pointer_cast<IPv4Header>(packet2->popHeader<IPv4Header>()->dupShared());
                 // needed a mutable copy for forwarding
-                fragmentPostRouting(toMutable(packet->dup()), newHeader, broadcastIE, IPv4Address::ALLONES_ADDRESS);
+                fragmentPostRouting(toMutable(packet2), newHeader, broadcastIE, IPv4Address::ALLONES_ADDRESS);
             }
 
             EV_INFO << "Broadcast received\n";
