@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.samples.routingtablevisualizer;
+package inet.samples.visualizer.routingtablevisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.aodv.AODVRouter;
