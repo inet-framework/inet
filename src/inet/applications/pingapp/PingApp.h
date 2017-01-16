@@ -20,12 +20,12 @@
 #define __INET_PINGAPP_H
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/L3Socket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/L3Socket.h"
 
 namespace inet {
 
@@ -96,7 +96,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual bool isEnabled();
     virtual std::vector<L3Address> getAllAddresses();
     virtual void sendPingRequest();
-    virtual void processPingResponse(PingPayload *msg);
+    virtual void processPingResponse(Packet *packet);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

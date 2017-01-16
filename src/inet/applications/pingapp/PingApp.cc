@@ -33,7 +33,6 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/cPacketChunk.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -216,9 +215,7 @@ void PingApp::handleMessage(cMessage *msg)
 #ifdef WITH_IPv4
         if (const auto& icmpMessage = packet->popHeader<ICMPMessage>()) {
             if (icmpMessage->getType() == ICMP_ECHO_REPLY) {
-//                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(0, packet->getDataLength()))->getPacket()->dup());
-                processPingResponse(pingPayload);
+                processPingResponse(packet);
             }
             else {
                 // process other icmp messages, process icmp errors
@@ -231,8 +228,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (ICMPv6Message *icmpMessage = dynamic_cast<ICMPv6Message *>(msg)) {
             if (icmpMessage->getType() == ICMPv6_ECHO_REPLY) {
                 check_and_cast<ICMPv6EchoReplyMsg *>(msg);
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                processPingResponse(pingPayload);
+                processPingResponse(packet);
             }
             else {
                 // process other icmpv6 messages, process icmpv6 errors
@@ -244,9 +240,7 @@ void PingApp::handleMessage(cMessage *msg)
 #ifdef WITH_GENERIC
         if (const auto& icmpMessage = packet->popHeader<EchoPacket>()) {
             if (icmpMessage->getType() == ECHO_PROTOCOL_REPLY) {
-//                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(0, packet->getDataLength()))->getPacket()->dup());
-                processPingResponse(pingPayload);
+                processPingResponse(packet);
             }
             else {
                 // process other icmp messages, process icmp errors
@@ -365,8 +359,11 @@ void PingApp::sendPingRequest()
             const auto& request = std::make_shared<ICMPMessage>();
             request->setChunkLength(4);
             request->setType(ICMP_ECHO_REQUEST);
+            request->markImmutable();
             outPacket->prepend(request);
-            outPacket->append(std::make_shared<cPacketChunk>(msg));
+            auto payload = std::make_shared<cPacketChunk>(msg);
+            payload->markImmutable();
+            outPacket->append(payload);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
@@ -412,38 +409,37 @@ void PingApp::sendPingRequest()
     l3Socket->send(outPacket);
 }
 
-void PingApp::processPingResponse(PingPayload *msg)
+void PingApp::processPingResponse(Packet *packet)
 {
-    if (msg->getOriginatorId() != pid) {
+    PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(0, packet->getDataLength()))->getPacket());
+    if (pingPayload->getOriginatorId() != pid) {
         EV_WARN << "Received response was not sent by this application, dropping packet\n";
-        delete msg;
         return;
     }
 
     // get src, hopCount etc from packet, and print them
-    L3Address src = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+    L3Address src = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     //L3Address dest = msg->getMandatoryTag<L3AddressInd>()->getDestination();
-    auto msgHopCountTag = msg->getTag<HopLimitInd>();
+    auto msgHopCountTag = packet->getTag<HopLimitInd>();
     int msgHopCount = msgHopCountTag ? msgHopCountTag->getHopLimit() : -1;
 
     // calculate the RTT time by looking up the the send time of the packet
     // if the send time is no longer available (i.e. the packet is very old and the
     // sendTime was overwritten in the circular buffer) then we just return a 0
     // to signal that this value should not be used during the RTT statistics)
-    simtime_t rtt = sendSeqNo - msg->getSeqNo() > PING_HISTORY_SIZE ?
-        0 : simTime() - sendTimeHistory[msg->getSeqNo() % PING_HISTORY_SIZE];
+    simtime_t rtt = sendSeqNo - pingPayload->getSeqNo() > PING_HISTORY_SIZE ?
+        0 : simTime() - sendTimeHistory[pingPayload->getSeqNo() % PING_HISTORY_SIZE];
 
     if (printPing) {
-        cout << getFullPath() << ": reply of " << std::dec << msg->getByteLength()
+        cout << getFullPath() << ": reply of " << std::dec << pingPayload->getByteLength()
              << " bytes from " << src
-             << " icmp_seq=" << msg->getSeqNo() << " ttl=" << msgHopCount
+             << " icmp_seq=" << pingPayload->getSeqNo() << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
-             << " (" << msg->getName() << ")" << endl;
+             << " (" << packet->getName() << ")" << endl;
     }
 
     // update statistics
-    countPingResponse(msg->getByteLength(), msg->getSeqNo(), rtt);
-    delete msg;
+    countPingResponse(pingPayload->getByteLength(), pingPayload->getSeqNo(), rtt);
 }
 
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
