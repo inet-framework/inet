@@ -219,12 +219,13 @@ void ICMP::processEchoRequest(Packet *request)
     const auto& icmpReq = request->popHeader<ICMPMessage>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
     const auto& icmpReply = std::make_shared<ICMPMessage>();
-    reply->append(icmpReply);
-    reply->append(request->peekDataAt(0, request->getDataLength()));
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv4Address src = addressInd->getSrcAddress().toIPv4();
     IPv4Address dest = addressInd->getDestAddress().toIPv4();
     icmpReply->setType(ICMP_ECHO_REPLY);
+    icmpReply->markImmutable();
+    reply->append(icmpReply);
+    reply->append(request->peekDataAt(0, request->getDataLength()));
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
