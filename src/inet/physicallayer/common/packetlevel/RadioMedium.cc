@@ -504,23 +504,19 @@ IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, Packe
     take(macFrame);
     auto transmission = radio->getTransmitter()->createTransmission(radio, check_and_cast<Packet *>(macFrame), simTime());
     auto radioFrame = new RadioFrame(transmission);
-    auto phyFrame = const_cast<Packet *>(transmission->getPhyFrame());
-    auto encapsulatedFrame = phyFrame != nullptr ? phyFrame : macFrame;
-    radioFrame->setName(encapsulatedFrame->getName());
+    radioFrame->setName(macFrame->getName());
     radioFrame->setDuration(transmission->getDuration());
-    radioFrame->encapsulate(encapsulatedFrame);
+    radioFrame->encapsulate(macFrame);
     return radioFrame;
 }
 
 IRadioFrame *RadioMedium::createReceiverRadioFrame(const ITransmission *transmission)
 {
     auto radioFrame = new RadioFrame(transmission);
-    auto phyFrame = const_cast<Packet *>(transmission->getPhyFrame());
     auto macFrame = const_cast<Packet *>(transmission->getMacFrame());
-    auto encapsulatedFrame = phyFrame != nullptr ? phyFrame : macFrame;
-    radioFrame->setName(encapsulatedFrame->getName());
+    radioFrame->setName(macFrame->getName());
     radioFrame->setDuration(transmission->getDuration());
-    radioFrame->encapsulate(encapsulatedFrame->dup());
+    radioFrame->encapsulate(macFrame->dup());
     return radioFrame;
 }
 

@@ -47,12 +47,6 @@ class INET_API IReceptionResult : public IPrintableObject
     virtual const std::vector<const IReceptionDecision *> *getDecisions() const = 0;
 
     /**
-     * Returns the PHY frame corresponding to the reception. This function
-     * may return nullptr.
-     */
-    virtual const Packet *getPhyFrame() const = 0;
-
-    /**
      * Returns the MAC frame corresponding to this reception. This function
      * may return nullptr.
      */

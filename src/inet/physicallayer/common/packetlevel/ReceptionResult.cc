@@ -40,11 +40,6 @@ std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) co
     return stream;
 }
 
-const Packet* ReceptionResult::getPhyFrame() const
-{
-    return nullptr;
-}
-
 const Packet* ReceptionResult::getMacFrame() const
 {
     return macFrame;

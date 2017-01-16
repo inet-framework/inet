@@ -58,12 +58,6 @@ class INET_API ITransmission : public IPrintableObject
     virtual const IRadio *getTransmitter() const = 0;
 
     /**
-     * Returns the PHY frame corresponding to this transmission. This function
-     * may return nullptr.
-     */
-    virtual const Packet *getPhyFrame() const = 0;
-
-    /**
      * Returns the MAC frame corresponding to this transmission. This function
      * never returns nullptr.
      */
