@@ -26,7 +26,7 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 //
 // TODO documentation
 //
-network PhysicallinkVisualizerSampleNet
+network PhysicallinkVisualizerInfrastructure
 {
     @display("bgb=895,311");
     submodules:

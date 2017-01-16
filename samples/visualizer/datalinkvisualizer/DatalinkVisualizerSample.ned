@@ -21,10 +21,12 @@ import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
+
+
 //
 // TODO documentation
 //
-network DatalinkVisualizerSampleNet
+network DatalinkVisualizerInfrastructure
 {
     @display("bgb=895,311");
     submodules:
@@ -58,10 +60,10 @@ network DatalinkVisualizerAdhoc
 {
     @display("bgb=895,311");
     submodules:
-        adhocSource: AdhocHost {
+        source: AdhocHost {
             @display("p=316,80");
         }
-        adhocDestination: AdhocHost {
+        destination: AdhocHost {
             @display("p=630,80");
         }
         configurator: IPv4NetworkConfigurator {
@@ -77,4 +79,3 @@ network DatalinkVisualizerAdhoc
                 @display("p=100,50");
         }
 }
-
