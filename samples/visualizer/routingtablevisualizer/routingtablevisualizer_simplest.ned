@@ -16,8 +16,12 @@
 package inet.samples.visualizer.routingtablevisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.aodv.AODVRouter;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.networklayer.RoutingTableVisualizer;
 
 
 network Simplest
