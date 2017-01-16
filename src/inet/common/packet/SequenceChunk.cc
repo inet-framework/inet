@@ -294,7 +294,7 @@ void SequenceChunk::removeFromEnd(int64_t length)
         if (length == 0)
             break;
     }
-    chunks.erase((++it).base(), chunks.end());
+    chunks.erase(it.base(), chunks.end());
 }
 
 std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t length) const
