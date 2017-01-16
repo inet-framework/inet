@@ -93,6 +93,8 @@ class INET_API Packet : public cPacket
      * The returned value is in the range [0, +infinity).
      */
     virtual int64_t getBitLength() const override { return getDataLength() << 3; }
+
+    virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Unsupported cPacket functions */
