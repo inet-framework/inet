@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,28 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APSKRADIO_H
-#define __INET_APSKRADIO_H
+cplusplus {{
+#include "inet/common/packet/FieldsChunk.h"
+}}
 
-#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
+namespace inet;
 
-namespace inet {
+class FieldsChunk extends cObject;
 
-namespace physicallayer {
-
-class INET_API APSKRadio : public FlatRadioBase
+class APSKPhyHeader extends FieldsChunk
 {
-  protected:
-    virtual void encapsulate(Packet *packet) const override;
-    virtual void decapsulate(Packet *packet) const override;
-
-  public:
-    APSKRadio();
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_APSKRADIO_H
-
+    int64_t chunkLength @overridegetter;
+}

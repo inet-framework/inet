@@ -15,10 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmitter.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKScalarTransmitter.h"
+#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
 
@@ -39,12 +40,14 @@ std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int lev
 
 const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
+    auto phyHeader = packet->peekHeader<APSKPhyHeader>();
+    auto dataBitLength = packet->getBitLength() - phyHeader->getChunkLength() * 8;
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);
     const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
-    const simtime_t dataDuration = packet->getBitLength() / transmissionBitrate.get();
+    const simtime_t dataDuration = dataBitLength / transmissionBitrate.get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();

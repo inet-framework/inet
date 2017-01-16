@@ -15,7 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKRadio.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
 
 namespace inet {
 
@@ -26,6 +30,20 @@ Define_Module(APSKRadio);
 APSKRadio::APSKRadio() :
     FlatRadioBase()
 {
+}
+
+void APSKRadio::encapsulate(Packet *packet) const
+{
+    auto flatTransmitter = check_and_cast<const FlatTransmitterBase *>(transmitter);
+    auto phyHeader = std::make_shared<APSKPhyHeader>();
+    phyHeader->setChunkLength((flatTransmitter->getHeaderBitLength() + 7) / 8);
+    phyHeader->markImmutable();
+    packet->pushHeader(phyHeader);
+}
+
+void APSKRadio::decapsulate(Packet *packet) const
+{
+    packet->popHeader<APSKPhyHeader>();
 }
 
 } // namespace physicallayer
