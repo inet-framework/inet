@@ -21,7 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
 
-#ifdef WITH_OSG
+#if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
 #include <osg/AutoTransform>
 #include <osg/Geode>
 #include <osg/Geometry>
@@ -37,7 +37,7 @@ namespace inet {
 
 namespace osg {
 
-#ifdef WITH_OSG
+#if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
 
 using namespace ::osg;
 
