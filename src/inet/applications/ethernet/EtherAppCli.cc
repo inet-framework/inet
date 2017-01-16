@@ -27,6 +27,7 @@
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -191,15 +192,18 @@ void EtherAppCli::sendPacket()
     sprintf(msgname, "req-%d-%ld", getId(), seqNum);
     EV_INFO << "Generating packet `" << msgname << "'\n";
 
-    EtherAppReq *datapacket = new EtherAppReq(msgname, IEEE802CTRL_DATA);
+    Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
+    const auto& data = std::make_shared<EtherAppReq>();
 
-    datapacket->setRequestId(seqNum);
+    data->setRequestId(seqNum);
 
     long len = reqLength->longValue();
-    datapacket->setByteLength(len);
+    data->setChunkLength(len);
 
     long respLen = respLength->longValue();
-    datapacket->setResponseBytes(respLen);
+    data->setResponseBytes(respLen);
+    data->markImmutable();
+    datapacket->append(data);
 
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
     auto ieee802SapReq = datapacket->ensureTag<Ieee802SapReq>();

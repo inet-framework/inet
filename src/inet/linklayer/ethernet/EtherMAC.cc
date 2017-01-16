@@ -489,8 +489,18 @@ void EtherMAC::startFrameTransmission()
     bool inBurst = frameBursting && framesSentInBurst;
     int64 minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
-    if (frame->getByteLength() < minFrameLength)
-        frame->setByteLength(minFrameLength);
+    if (frame->getByteLength() < minFrameLength) {
+        int64_t paddingLength = minFrameLength - frame->getByteLength();
+        frame->removeFromEnd(ETHER_FCS_BYTES);  // remove old FCS
+        const auto& ethPadding = std::make_shared<EthernetPadding>();
+        ethPadding->setChunkLength(paddingLength);
+        ethPadding->markImmutable();
+        frame->pushTrailer(ethPadding);
+        const auto& ethFcs = std::make_shared<EthernetFcs>();
+        //FIXME calculate Fcs if needed
+        ethFcs->markImmutable();
+        frame->pushTrailer(ethFcs);
+    }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
     EtherPhyFrame *phyFrame = encapsulate(frame);

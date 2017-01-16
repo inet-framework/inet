@@ -23,6 +23,8 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -96,7 +98,7 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         scheduleNextPacket(simTime());
     }
     else
-        receivePacket(check_and_cast<cPacket *>(msg));
+        receivePacket(check_and_cast<Packet *>(msg));
 }
 
 bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -179,11 +181,11 @@ void EtherTrafGen::sendBurstPackets()
         char msgname[40];
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-        cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
-
+        Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = packetLength->longValue();
-        datapacket->setByteLength(len);
-
+        const auto& payload = std::make_shared<ByteCountChunk>(len);
+        payload->markImmutable();
+        datapacket->append(payload);
         datapacket->ensureTag<EtherTypeReq>()->setEtherType(etherType);
         datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
 

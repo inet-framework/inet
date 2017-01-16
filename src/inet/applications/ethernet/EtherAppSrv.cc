@@ -27,6 +27,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -80,12 +81,15 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         throw cRuntimeError("Application is not running");
 
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
-    EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
+    Packet *reqPk = check_and_cast<Packet *>(msg);
+    const auto& req = reqPk->peekDataAt<EtherAppReq>(0);
+    if (req == nullptr)
+        throw cRuntimeError("data type error: not an EtherAppReq arrived in packet %s", reqPk->str().c_str());
     packetsReceived++;
-    emit(rcvdPkSignal, req);
+    emit(rcvdPkSignal, reqPk);
 
-    MACAddress srcAddr = req->getMandatoryTag<MacAddressInd>()->getSrcAddress();
-    int srcSap = req->getMandatoryTag<Ieee802SapInd>()->getSsap();
+    MACAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+    int srcSap = reqPk->getMandatoryTag<Ieee802SapInd>()->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
 
@@ -97,13 +101,16 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         std::ostringstream s;
         s << msg->getName() << "-resp-" << k;
 
-        EtherAppResp *datapacket = new EtherAppResp(s.str().c_str(), IEEE802CTRL_DATA);
-        datapacket->setRequestId(requestId);
-        datapacket->setByteLength(l);
+        Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
+        const auto& outPayload = std::make_shared<EtherAppResp>();
+        outPayload->setRequestId(requestId);
+        outPayload->setChunkLength(l);
+        outPayload->markImmutable();
+        outPacket->append(outPayload);
 
-        EV_INFO << "Send response `" << datapacket->getName() << "' to " << srcAddr << " ssap=" << localSAP << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
+        EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSAP << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
 
-        sendPacket(datapacket, srcAddr, srcSap);
+        sendPacket(outPacket, srcAddr, srcSap);
     }
 
     delete msg;

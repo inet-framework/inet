@@ -137,13 +137,20 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
     frame->setSsap(ieee802SapReq->getSsap());
     frame->setDsap(ieee802SapReq->getDsap());
     frame->setDest(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());    // src address is filled in by MAC
-
+    frame->markImmutable();
     packet->pushHeader(frame);
-    const auto& ethTrailer = std::make_shared<EthernetPaddingAndFcs>();
-    if (packet->getByteLength() + ethTrailer->getChunkLength() < MIN_ETHERNET_FRAME_BYTES)
-        ethTrailer->setChunkLength(MIN_ETHERNET_FRAME_BYTES - packet->getByteLength()); // "padding"
-    ASSERT(ethTrailer->getChunkLength() >= 4);
-    packet->pushTrailer(ethTrailer);
+
+    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
+    if (paddingLength > 0) {
+        const auto& ethPadding = std::make_shared<EthernetPadding>();
+        ethPadding->setChunkLength(paddingLength);
+        ethPadding->markImmutable();
+        packet->pushTrailer(ethPadding);
+    }
+    const auto& ethFcs = std::make_shared<EthernetFcs>();
+    //FIXME calculate Fcs if needed
+    ethFcs->markImmutable();
+    packet->pushTrailer(ethFcs);
 
     send(packet, "lowerLayerOut");
 }
@@ -152,8 +159,14 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
 {
     // decapsulate it and pass up to higher layer
     const auto& ethHeader = packet->popHeader<EtherFrame>();
-    const auto& ethTrailer = packet->popTrailer<EthernetPaddingAndFcs>();
-    //FIXME check Fcs
+    const auto& ethTrailer = packet->popTrailer<EthernetFcs>();
+    //FIXME check the Fcs in ethTrailer
+
+    //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
+    // this code needed for unchanged fingerprints
+    while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
+        packet->popTrailer<EthernetPadding>();
+
 
     EtherFrameWithLLC *frame = dynamic_cast<EtherFrameWithLLC *>(ethHeader.get());
     if (frame == nullptr) {
@@ -254,11 +267,18 @@ void EtherLLC::handleSendPause(cMessage *msg)
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
     frame->setDest(dest);
     packet->pushHeader(frame);
-    const auto& ethTrailer = std::make_shared<EthernetPaddingAndFcs>();
-    if (packet->getByteLength() + ethTrailer->getChunkLength() < MIN_ETHERNET_FRAME_BYTES)
-        ethTrailer->setChunkLength(MIN_ETHERNET_FRAME_BYTES - packet->getByteLength()); // "padding"
-    ASSERT(ethTrailer->getChunkLength() >= 4);
-    packet->pushTrailer(ethTrailer);
+
+    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
+    if (paddingLength > 0) {
+        const auto& ethPadding = std::make_shared<EthernetPadding>();
+        ethPadding->setChunkLength(paddingLength);
+        ethPadding->markImmutable();
+        packet->pushTrailer(ethPadding);
+    }
+    const auto& ethFcs = std::make_shared<EthernetFcs>();
+    //FIXME calculate Fcs if needed
+    ethFcs->markImmutable();
+    packet->pushTrailer(ethFcs);
 
     send(packet, "lowerLayerOut");
     emit(pauseSentSignal, pauseUnits);

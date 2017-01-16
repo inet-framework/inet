@@ -17,6 +17,7 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 
 #define ETHERAPP_CLI_SAP  0xf0
 #define ETHERAPP_SRV_SAP  0xf1
@@ -24,13 +25,16 @@ cplusplus {{
 
 namespace inet;
 
+class FieldsChunk extends cObject;
+
 //
 // Request packet sent by ~EtherAppCli. Contains the number of bytes to be
 // sent back as response; if this value is greater than ~1400, the reply
 // will consist of several Ethernet frames. See also ~EtherAppResp.
 //
-packet EtherAppReq
+class EtherAppReq extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter = 0;
     long requestId;
     long responseBytes;
 }
@@ -38,8 +42,9 @@ packet EtherAppReq
 //
 // Packet sent back by ~EtherAppSrv in response to an ~EtherAppReq.
 //
-packet EtherAppResp
+class EtherAppResp extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter = 0;
     int requestId;
     int numFrames;
 }

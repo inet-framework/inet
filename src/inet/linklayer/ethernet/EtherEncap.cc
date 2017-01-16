@@ -124,12 +124,17 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
         msg->pushHeader(eth2Frame);
     }
 
-    const auto& ethTrailer = std::make_shared<EthernetPaddingAndFcs>();
-    if (msg->getByteLength() + ethTrailer->getChunkLength() < MIN_ETHERNET_FRAME_BYTES)
-        ethTrailer->setChunkLength(MIN_ETHERNET_FRAME_BYTES - msg->getByteLength()); // "padding"
-    ASSERT(ethTrailer->getChunkLength() >= 4);
-    ethTrailer->markImmutable();
-    msg->pushTrailer(ethTrailer);
+    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - msg->getByteLength();
+    if (paddingLength > 0) {
+        const auto& ethPadding = std::make_shared<EthernetPadding>();
+        ethPadding->setChunkLength(paddingLength);
+        ethPadding->markImmutable();
+        msg->pushTrailer(ethPadding);
+    }
+    const auto& ethFcs = std::make_shared<EthernetFcs>();
+    //FIXME calculate Fcs if needed
+    ethFcs->markImmutable();
+    msg->pushTrailer(ethFcs);
 
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     send(msg, "lowerLayerOut");
@@ -139,8 +144,13 @@ void EtherEncap::processFrameFromMAC(Packet *packet)
 {
     // decapsulate and attach control info
     const auto& ethHeader = packet->popHeader<EtherFrame>();
-    const auto& ethTrailer = packet->popTrailer<EthernetPaddingAndFcs>();
+    const auto& ethTrailer = packet->popTrailer<EthernetFcs>();
     //FIXME check the Fcs in ethTrailer
+
+    //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
+    // this code needed for unchanged fingerprints
+    while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
+        packet->popTrailer<EthernetPadding>();
 
     // add Ieee802Ctrl to packet
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
@@ -190,11 +200,18 @@ void EtherEncap::handleSendPause(cMessage *msg)
         dest = MACAddress::MULTICAST_PAUSE_ADDRESS;
     frame->setDest(dest);
     packet->pushHeader(frame);
-    const auto& ethTrailer = std::make_shared<EthernetPaddingAndFcs>();
-    if (packet->getByteLength() + ethTrailer->getChunkLength() < MIN_ETHERNET_FRAME_BYTES)
-        ethTrailer->setChunkLength(MIN_ETHERNET_FRAME_BYTES - packet->getByteLength()); // "padding"
-    ASSERT(ethTrailer->getChunkLength() >= 4);
-    packet->pushTrailer(ethTrailer);
+
+    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
+    if (paddingLength > 0) {
+        const auto& ethPadding = std::make_shared<EthernetPadding>();
+        ethPadding->setChunkLength(paddingLength);
+        ethPadding->markImmutable();
+        packet->pushTrailer(ethPadding);
+    }
+    const auto& ethFcs = std::make_shared<EthernetFcs>();
+    //FIXME calculate Fcs if needed
+    ethFcs->markImmutable();
+    packet->pushTrailer(ethFcs);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");

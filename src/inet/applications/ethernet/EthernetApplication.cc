@@ -13,6 +13,7 @@
 
 #include "inet/applications/ethernet/EthernetApplication.h"
 #include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
@@ -91,18 +92,16 @@ void EthernetApplication::sendPacket()
     sprintf(msgname, "req-%d-%ld", getId(), seqNum);
     EV << "Generating packet `" << msgname << "'\n";
 
-    EtherAppReq *datapacket = new EtherAppReq(msgname, IEEE802CTRL_DATA);
-
-    datapacket->setRequestId(seqNum);
-
+    Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
+    const auto& data = std::make_shared<EtherAppReq>();
+    data->setRequestId(seqNum);
     long len = reqLength->longValue();
-    datapacket->setByteLength(len);
-
+    data->setChunkLength(len);
     long respLen = respLength->longValue();
-    datapacket->setResponseBytes(respLen);
-
+    data->setResponseBytes(respLen);
+    data->markImmutable();
+    datapacket->append(data);
     datapacket->ensureTag<MacAddressReq>()->setDestAddress(destMACAddress);
-
     send(datapacket, "out");
     packetsSent++;
 }
@@ -114,10 +113,12 @@ void EthernetApplication::receivePacket(cMessage *msg)
     packetsReceived++;
     // simtime_t lastEED = simTime() - msg->getCreationTime();
 
-    if (dynamic_cast<EtherAppReq *>(msg)) {
-        EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
-        emit(rcvdPkSignal, req);
-        MACAddress srcAddr = req->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+    Packet *reqPk = check_and_cast<Packet *>(msg);
+    emit(rcvdPkSignal, reqPk);
+    const auto& req = reqPk->peekDataAt<EtherAppReq>(0);
+
+    if (req != nullptr) {
+        MACAddress srcAddr = reqPk->getMandatoryTag<MacAddressInd>()->getSrcAddress();
         long requestId = req->getRequestId();
         long replyBytes = req->getResponseBytes();
 
@@ -129,12 +130,15 @@ void EthernetApplication::receivePacket(cMessage *msg)
             std::ostringstream s;
             s << msg->getName() << "-resp-" << k;
 
-            EV << "Generating packet `" << s.str().c_str() << "'\n";
+            EV << "Generating packet `" << s.str() << "'\n";
+            Packet *outPacket = new Packet(s.str().c_str(), IEEE802CTRL_DATA);
+            const auto& outPayload = std::make_shared<EtherAppResp>();
+            outPayload->setRequestId(requestId);
+            outPayload->setChunkLength(l);
+            outPayload->markImmutable();
+            outPacket->append(outPayload);
 
-            EtherAppResp *datapacket = new EtherAppResp(s.str().c_str(), IEEE802CTRL_DATA);
-            datapacket->setRequestId(requestId);
-            datapacket->setByteLength(l);
-            sendPacket(datapacket, srcAddr);
+            sendPacket(outPacket, srcAddr);
             packetsSent++;
         }
     }

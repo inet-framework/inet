@@ -140,14 +140,19 @@ class Ethernet1ahITag extends FieldsChunk     //FIXME bad design
 }
 
 enum EthernetFcsMode {
-    FCS_GOOD = 1;
-    FCS_BAD = 2;
-    FCS_CALCULATED = 3;
+    FCS_DECLARED_CORRECT = 1;
+    FCS_DECLARED_INCORRECT = 2;
+    FCS_COMPUTED = 3;
 }
 
-class EthernetPaddingAndFcs extends FieldsChunk
+class EthernetPadding extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = 4;
+    int64_t chunkLength @overridegetter = 0;
+}
+
+class EthernetFcs extends FieldsChunk
+{
+    int64_t chunkLength @overridegetter = ETHER_FCS_BYTES;
     int32_t fcs;
-    int fcsMode @enum(EthernetFcsMode) = FCS_GOOD;
+    int fcsMode @enum(EthernetFcsMode) = FCS_DECLARED_CORRECT;
 }

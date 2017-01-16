@@ -25,6 +25,7 @@ Define_Module(EtherFrameClassifier);
 
 void EtherFrameClassifier::handleMessage(cMessage *msg)
 {
+    //FIXME msg is always Packet*, need another way to detect pause frame
     if (dynamic_cast<EtherPauseFrame *>(msg) != nullptr)
         send(msg, "pauseOut");
     else
