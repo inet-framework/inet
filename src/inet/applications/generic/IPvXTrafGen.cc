@@ -23,6 +23,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -179,20 +181,22 @@ void IPvXTrafGen::sendPacket()
     char msgName[32];
     sprintf(msgName, "appData-%d", numSent);
 
-    cPacket *payload = new cPacket(msgName);
-    payload->setByteLength(packetLengthPar->longValue());
+    Packet *packet = new Packet(msgName);
+    const auto& payload = std::make_shared<ByteCountChunk>(packetLengthPar->longValue());
+    payload->markImmutable();
+    packet->append(payload);
 
     L3Address destAddr = chooseDestAddr();
 
     IL3AddressType *addressType = destAddr.getAddressType();
-    payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
-    payload->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    payload->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(protocol));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    packet->ensureTag<L3AddressReq>()->setDestAddress(destAddr);
 
     EV_INFO << "Sending packet: ";
-    printPacket(payload);
-    emit(sentPkSignal, payload);
-    send(payload, "ipOut");
+    printPacket(packet);
+    emit(sentPkSignal, packet);
+    send(packet, "ipOut");
     numSent++;
 }
 
