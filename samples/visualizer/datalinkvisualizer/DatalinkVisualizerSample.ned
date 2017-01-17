@@ -20,7 +20,36 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.linklayer.DataLinkVisualizer;
+
+
+//
+// TODO documentation
+//
+network DatalinkVisualizerAdhoc
+{
+    @display("bgb=895,311");
+    submodules:
+        source: AdhocHost {
+            @display("p=316,80");
+        }
+        destination: AdhocHost {
+            @display("p=630,80");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
+        linkVisualizer: DataLinkVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+}
 
 
 //
@@ -53,29 +82,48 @@ network DatalinkVisualizerInfrastructure
         }
 }
 
+
 //
 // TODO documentation
 //
-network DatalinkVisualizerAdhoc
+network ComplexDataLinkVisualizerInfrastructure
 {
-    @display("bgb=895,311");
+    @display("bgb=895,600");
     submodules:
-        source: AdhocHost {
-            @display("p=316,80");
-        }
-        destination: AdhocHost {
-            @display("p=630,80");
-        }
-        configurator: IPv4NetworkConfigurator {
+        visualizer: IntegratedVisualizer {
             parameters:
-                @display("p=100,150");
+                @display("p=100,450");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,250");
-        }
-        linkVisualizer: DataLinkVisualizer {
+        linkVisualizer1: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
+        linkVisualizer2: DataLinkVisualizer {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,350");
+        }
+        accessPoint: AccessPoint {
+            @display("p=545,266");
+        }
+        source1: WirelessHost {
+            @display("p=305,182");
+        }
+        destination1: WirelessHost {
+            @display("p=785,182");
+        }
+        source2: WirelessHost {
+            @display("p=305,351");
+        }
+        destination2: WirelessHost {
+            @display("p=785,351");
+        }
 }
+
