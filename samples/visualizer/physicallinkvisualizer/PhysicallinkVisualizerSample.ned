@@ -21,6 +21,7 @@ import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 
 
 //
@@ -30,7 +31,7 @@ network PhysicallinkVisualizerInfrastructure
 {
     @display("bgb=895,311");
     submodules:
-        visualizer: IntegratedVisualizer {
+        linkVisualizer: PhysicalLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -74,7 +75,7 @@ network PhysicallinkVisualizerAdhoc
             parameters:
                 @display("p=100,250");
         }
-        visualizer: IntegratedVisualizer {
+        linkVisualizer: PhysicalLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
