@@ -20,7 +20,7 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.linklayer.DataLinkVisualizer;
 
 
 //
@@ -30,7 +30,7 @@ network DatalinkVisualizerInfrastructure
 {
     @display("bgb=895,311");
     submodules:
-        visualizer: IntegratedVisualizer {
+        linkVisualizer: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -74,7 +74,7 @@ network DatalinkVisualizerAdhoc
             parameters:
                 @display("p=100,250");
         }
-        visualizer: IntegratedVisualizer {
+        linkVisualizer: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
