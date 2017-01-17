@@ -106,6 +106,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpHeader = std::make_shared<ICMPMessage>();
+    icmpHeader->setChunkLength(8);      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
     icmpHeader->markImmutable();
