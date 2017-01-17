@@ -92,8 +92,9 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         hdr->setTotalLengthField(hdr->getHeaderLength() + payload->getChunkLength());
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
-        pk->pushHeader(hdr);
-        pk->pushTrailer(payload);
+        hdr->markImmutable();
+        pk->prepend(hdr);
+        pk->append(payload);
         delete buf->packet;
         bufs.erase(i);
         return pk;

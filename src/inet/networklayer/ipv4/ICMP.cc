@@ -108,6 +108,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     const auto& icmpHeader = std::make_shared<ICMPMessage>();
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
+    icmpHeader->markImmutable();
     errorPacket->append(icmpHeader);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
@@ -168,10 +169,11 @@ void ICMP::processICMPMessage(Packet *packet)
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
-            const auto& bogusL3Packet = packet->peekHeader<IPv4Header>();
+            const auto& bogusL3Packet = packet->peekDataAt<IPv4Header>(icmpmsg->getChunkLength());
             int transportProtocol = bogusL3Packet->getTransportProtocol();
             if (transportProtocol == IP_PROT_ICMP) {
                 // received ICMP error answer to an ICMP packet:
+                //FIXME should send up dest unreachable answers to pingapps
                 errorOut(packet);
             }
             else {

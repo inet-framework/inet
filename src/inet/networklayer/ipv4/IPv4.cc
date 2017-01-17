@@ -455,6 +455,8 @@ void IPv4::routeUnicastPacket(Packet *packet, const std::shared_ptr<IPv4Header>&
     if (!destIE) {    // no route found
         EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
         numUnroutable++;
+        ipv4Header->markImmutable();
+        packet->prepend(ipv4Header);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
@@ -680,6 +682,8 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
     if (ipv4Header->getTimeToLive() <= 0) {
         // drop datagram, destruction responsibility in ICMP
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
+        ipv4Header->markImmutable();
+        packet->prepend(ipv4Header);
         sendIcmpError(packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
@@ -688,7 +692,7 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
     int mtu = destIe->getMTU();
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
-    if (mtu == 0 || packet->getByteLength() <= mtu) {
+    if (mtu == 0 || ipv4Header->getHeaderLength() + packet->getByteLength() <= mtu) {
         ipv4Header->markImmutable();
         packet->prepend(ipv4Header);
         sendDatagramToOutput(packet, destIe, nextHopAddr);
@@ -698,6 +702,8 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (ipv4Header->getDontFragment()) {
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
+        ipv4Header->markImmutable();
+        packet->prepend(ipv4Header);
         sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
@@ -706,7 +712,7 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
 
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
-    int payloadLength = packet->getDataLength() - headerLength;
+    int payloadLength = packet->getDataLength();
     int fragmentLength = ((mtu - headerLength) / 8) * 8;    // payload only (without header)
     int offsetBase = ipv4Header->getFragmentOffset();
     if (fragmentLength <= 0)
@@ -739,12 +745,9 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
 
         ASSERT(fragment->getByteLength() == 0);
         const auto& fraghdr = std::make_shared<IPv4Header>(*ipv4Header.get()->dup());
-        fragment->append(fraghdr);
-        ASSERT(fragment->getByteLength() == headerLength);
-        const auto& fragData = packet->peekDataAt(headerLength + offset, thisFragmentLength);
+        const auto& fragData = packet->peekDataAt(offset, thisFragmentLength);
         ASSERT(fragData->getChunkLength() == thisFragmentLength);
         fragment->append(fragData);
-        ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
 
         // "more fragments" bit is unchanged in the last fragment, otherwise true
         if (!lastFragment)
@@ -753,11 +756,11 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
         fraghdr->setFragmentOffset(offsetBase + offset);
         fraghdr->setTotalLengthField(headerLength + thisFragmentLength);
 
+
+        fraghdr->markImmutable();
+        fragment->prepend(fraghdr);
         int bl = fragment->getByteLength();
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
-
-        ipv4Header->markImmutable();
-        fragment->prepend(ipv4Header);
         sendDatagramToOutput(fragment, destIe, nextHopAddr);
         offset += thisFragmentLength;
     }
