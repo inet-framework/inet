@@ -722,13 +722,14 @@ static void testSlicing()
     assert(chunk11->getChunkLength() == 5);
     assert(std::dynamic_pointer_cast<SliceChunk>(chunk11) != nullptr);
 
-    // 4c. SequenceChunk may return a SliceChunk using the original SequenceChunk
-    const auto& chunk12 = sequenceChunk1->peek(5, 20);
+    // 4c. SequenceChunk may return a new SequenceChunk
+    const auto& chunk12 = sequenceChunk1->peek(5, 10);
     assert(chunk12 != nullptr);
-    assert(chunk12->getChunkLength() == 20);
-    assert(std::dynamic_pointer_cast<SliceChunk>(chunk12) != nullptr);
-    const auto& sliceChunk3 = std::static_pointer_cast<SliceChunk>(chunk12);
-    assert(sliceChunk3->getChunk() == sequenceChunk1);
+    assert(chunk12->getChunkLength() == 10);
+    assert(std::dynamic_pointer_cast<SequenceChunk>(chunk12) != nullptr);
+    const auto& sequenceChunk2 = std::static_pointer_cast<SequenceChunk>(chunk12);
+    assert(sequenceChunk1 != sequenceChunk2);
+    assert(sequenceChunk2->getChunks().size() == 2);
 
     // 5. any other chunk returns a SliceChunk
     auto applicationHeader2 = makeImmutableApplicationHeader(42);

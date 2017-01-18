@@ -311,7 +311,7 @@ std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, int64_t len
             return chunk;
         if (auto chunk = peekSequenceChunk2(iterator, length))
             return chunk;
-        return doPeek<SliceChunk>(iterator, length);
+        return doPeek<SequenceChunk>(iterator, length);
     }
 }
 
