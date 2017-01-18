@@ -28,23 +28,20 @@ class INET_API SignalPacketModel : public virtual ISignalPacketModel
 {
   protected:
     const Packet *packet;
-    const BitVector *serializedPacket;
     const bps bitrate;
 
   public:
-    SignalPacketModel(const Packet *packet, const BitVector *serializedPacket, bps bitrate);
-    virtual ~SignalPacketModel();
+    SignalPacketModel(const Packet *packet, bps bitrate);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const Packet *getPacket() const override { return packet; }
-    virtual const BitVector *getSerializedPacket() const override { return serializedPacket; }
     virtual bps getBitrate() const override { return bitrate; }
 };
 
 class INET_API TransmissionPacketModel : public SignalPacketModel, public virtual ITransmissionPacketModel
 {
   public:
-    TransmissionPacketModel(const Packet *packet, const BitVector *serializedPacket, bps bitrate);
+    TransmissionPacketModel(const Packet *packet, bps bitrate);
 };
 
 class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptionPacketModel
@@ -54,7 +51,7 @@ class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptio
     const bool packetErrorless;
 
   public:
-    ReceptionPacketModel(const Packet *packet, const BitVector *serializedPacket, bps bitrate, double per, bool packetErrorless);
+    ReceptionPacketModel(const Packet *packet, bps bitrate, double per, bool packetErrorless);
 
     virtual double getPER() const override { return per; }
     virtual bool isPacketErrorless() const override { return packetErrorless; }

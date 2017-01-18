@@ -36,7 +36,6 @@ class INET_API ISignalPacketModel : public IPrintableObject
 {
   public:
     virtual const Packet *getPacket() const = 0;
-    virtual const BitVector *getSerializedPacket() const = 0;
     /**
      * Returns the net bitrate (datarate) of the packet.
      */
