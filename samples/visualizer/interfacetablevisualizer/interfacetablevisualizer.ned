@@ -9,6 +9,7 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
@@ -32,12 +33,8 @@ network Simple
         configurator: IPv4NetworkConfigurator {
             @display("p=328,93");
         }
-        etherSwitch: EtherSwitch {
-            @display("p=152,111");
-        }
     connections:
         hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
-        hostA.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
 }
 
 network Complex
@@ -70,6 +67,9 @@ network Complex
         }
         visualizer: IntegratedVisualizer {
             @display("p=631,122");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=630,182;b=11,5");
         }
     connections:
         host1.ethg++ <--> Eth100M <--> switch.ethg++;
