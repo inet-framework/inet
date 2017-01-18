@@ -1,2 +1,12 @@
 LinkVisualizerBase:
 - Otlet: FadeOutMode lehetne defaultbol "simulationTime" és/vagy a FadeOutTime tobb ido
+
+InterfaceTableVisualizer:
+- ne legyen kiírva alapból a wired interface-ek neve és IP címe...ezt a visualizernek kéne csinálnia
+- a visualizerrel reprodukálni lehet ugyanezt
+- lehessen paraméterezni
+- lehessen felsorolás a content paraméterben, pl content="networkAddress,macAddress"
+- ha IP-t vizualizálunk akkor a switchnek ne írjon ki semmit
+
+RoutingTableVisualizer:
+- lehessen szöveget írni a nyílra, pl a rule-t
