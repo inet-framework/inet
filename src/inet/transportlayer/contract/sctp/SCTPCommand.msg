@@ -75,6 +75,7 @@ packet SCTPCommand
     int localPort = -1;
     int remotePort = -1;
     int gate = -1;
+    int fd = -1;
 }
 
 //

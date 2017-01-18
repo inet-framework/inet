@@ -265,16 +265,17 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                             }
                             dataChunkReceived = true;
                             state->sackAllowed = true;
-                        }
-                        else if (event == SCTP_E_SEND || event == SCTP_E_IGNORE) {
+                        } else if (event == SCTP_E_SEND || event == SCTP_E_IGNORE) {
                             dataChunkReceived = true;
                             state->sackAllowed = true;
-                        }
-                        else if (event == SCTP_E_DUP_RECEIVED) {
+                        } else if (event == SCTP_E_DUP_RECEIVED) {
                             dupReceived = true;
+                        } else if (event == SCTP_E_ABORT) {
+                            sendAbort();
+                            sctpMain->removeAssociation(this);
+                            return true;
                         }
-                    }
-                    else {
+                    } else {
                         sendAbort();
                         sctpMain->removeAssociation(this);
                         return true;
@@ -523,6 +524,8 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
             assoc = cloneAssociation();
             EV_TRACE << "addForkedAssociation\n";
             sctpMain->addForkedAssociation(this, assoc, localAddr, remoteAddr, srcPort, destPort);
+            assoc->listening = true;
+            this->listening = false;
 
             EV_INFO << "Connection forked: this connection got new assocId=" << assocId << ", "
                                                                                            "spinoff keeps LISTENing with assocId=" << assoc->assocId << "\n";
@@ -638,7 +641,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
                 for (uint32 i = 0; i < initchunk->getSepChunksArraySize(); i++) {
                     if (initchunk->getSepChunks(i) == STREAM_RESET) {
                         state->peerStreamReset = true;
-                        break;
+                        continue;
                     }
                     if (initchunk->getSepChunks(i) == PKTDROP) {
                         state->peerPktDrop = true;
@@ -771,11 +774,11 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
                 for (uint32 i = 0; i < initAckChunk->getSepChunksArraySize(); i++) {
                     if (initAckChunk->getSepChunks(i) == STREAM_RESET) {
                         state->peerStreamReset = true;
-                        break;
+                        continue;
                     }
                     if (initAckChunk->getSepChunks(i) == PKTDROP) {
                         state->peerPktDrop = true;
-                        break;
+                        continue;
                     }
                 }
             }
@@ -2093,8 +2096,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
     state->lastTsnReceived = tsn;
 
     bool found = false;
-    for (auto & elem : state->lastDataSourceList)
-    {
+    for (auto & elem : state->lastDataSourceList) {
         if (elem == path) {
             found = true;
             break;
@@ -2117,6 +2119,10 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
     dataChunk->encapsulate(smsg);
     const uint32 payloadLength = dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH;
     EV_DETAIL << "state->bytesRcvd=" << state->bytesRcvd << endl;
+    if (payloadLength == 0) {
+        EV_DETAIL << "No user data. Send ABORT" << endl;
+        return SCTP_E_ABORT;
+    }
     state->bytesRcvd += payloadLength;
     EV_DETAIL << "state->bytesRcvd now=" << state->bytesRcvd << endl;
     path->numberOfBytesReceived += payloadLength;
@@ -2203,6 +2209,10 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk *dataChunk)
         state->ackState = sackFrequency;
     }
 
+    if (dataChunk->getSid() >= inboundStreams) {
+        sendInvalidStreamError(dataChunk->getSid());
+        return SCTP_E_IGNORE;
+    }
     // ====== Enqueue new chunk ==============================================
     SCTPEventCode event = SCTP_E_SEND;
     if (state->newChunkReceived) {
@@ -2747,8 +2757,7 @@ bool SCTPAssociation::processPacketDropArrived(SCTPPacketDropChunk *packetDropCh
                         const uint32 tsn = dataChunk->getTsn();
                         auto pq = retransmissionQ->payloadQueue.find(tsn);
                         if ((pq != retransmissionQ->payloadQueue.end()) &&
-                            (!chunkHasBeenAcked(pq->second)))
-                        {
+                            (!chunkHasBeenAcked(pq->second))) {
                             EV_DETAIL << simTime() << ": Packet Drop for TSN "
                                       << pq->second->tsn << " on path "
                                       << pq->second->getLastDestination()
@@ -2817,13 +2826,16 @@ bool SCTPAssociation::processPacketDropArrived(SCTPPacketDropChunk *packetDropCh
                             sctpmsg->addChunk(forwardChunk);
                         }
                         break;
-                    }
+                    default:
+                        throw cRuntimeError("unknown chunk type");
+                        break;
+
+                }
                 }
                 delete chunk;
             }
             disposeOf(sctpmsg);
-        }
-        else {
+        } else {
             EV_INFO << "no chunk encapsulated" << endl;
         }
         state->peerRwnd = packetDropChunk->getMaxRwnd()

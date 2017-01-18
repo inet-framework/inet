@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2016-06-01  ------ inet-3.3.0 released ------
+
 2016-04-14  Zoltan Bojthe
 
 	IPv6: fixed issue #196: double deleted controlInfo

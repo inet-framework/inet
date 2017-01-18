@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2016-06-01  ------ inet-3.3.0 released ------
+
 2016-05-04  Levente Mészáros
 
 	Radio: Added a very simple IdealObstacleLoss, power loss is either 0 or 1.

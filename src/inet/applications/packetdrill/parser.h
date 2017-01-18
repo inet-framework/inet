@@ -75,35 +75,37 @@
      TYPE = 291,
      FLAGS = 292,
      LEN = 293,
-     TAG = 294,
-     A_RWND = 295,
-     OS = 296,
-     IS = 297,
-     TSN = 298,
-     MYSID = 299,
-     SSN = 300,
-     PPID = 301,
-     CUM_TSN = 302,
-     GAPS = 303,
-     DUPS = 304,
-     SRTO_ASSOC_ID = 305,
-     SRTO_INITIAL = 306,
-     SRTO_MAX = 307,
-     SRTO_MIN = 308,
-     SINIT_NUM_OSTREAMS = 309,
-     SINIT_MAX_INSTREAMS = 310,
-     SINIT_MAX_ATTEMPTS = 311,
-     SINIT_MAX_INIT_TIMEO = 312,
-     MYSACK_DELAY = 313,
-     SACK_FREQ = 314,
-     ASSOC_VALUE = 315,
-     ASSOC_ID = 316,
-     SACK_ASSOC_ID = 317,
-     MYFLOAT = 318,
-     INTEGER = 319,
-     HEX_INTEGER = 320,
-     MYWORD = 321,
-     MYSTRING = 322
+     MYSUPPORTED_EXTENSIONS = 294,
+     TYPES = 295,
+     TAG = 296,
+     A_RWND = 297,
+     OS = 298,
+     IS = 299,
+     TSN = 300,
+     MYSID = 301,
+     SSN = 302,
+     PPID = 303,
+     CUM_TSN = 304,
+     GAPS = 305,
+     DUPS = 306,
+     SRTO_ASSOC_ID = 307,
+     SRTO_INITIAL = 308,
+     SRTO_MAX = 309,
+     SRTO_MIN = 310,
+     SINIT_NUM_OSTREAMS = 311,
+     SINIT_MAX_INSTREAMS = 312,
+     SINIT_MAX_ATTEMPTS = 313,
+     SINIT_MAX_INIT_TIMEO = 314,
+     MYSACK_DELAY = 315,
+     SACK_FREQ = 316,
+     ASSOC_VALUE = 317,
+     ASSOC_ID = 318,
+     SACK_ASSOC_ID = 319,
+     MYFLOAT = 320,
+     INTEGER = 321,
+     HEX_INTEGER = 322,
+     MYWORD = 323,
+     MYSTRING = 324
    };
 #endif
 /* Tokens.  */
@@ -143,42 +145,44 @@
 #define TYPE 291
 #define FLAGS 292
 #define LEN 293
-#define TAG 294
-#define A_RWND 295
-#define OS 296
-#define IS 297
-#define TSN 298
-#define MYSID 299
-#define SSN 300
-#define PPID 301
-#define CUM_TSN 302
-#define GAPS 303
-#define DUPS 304
-#define SRTO_ASSOC_ID 305
-#define SRTO_INITIAL 306
-#define SRTO_MAX 307
-#define SRTO_MIN 308
-#define SINIT_NUM_OSTREAMS 309
-#define SINIT_MAX_INSTREAMS 310
-#define SINIT_MAX_ATTEMPTS 311
-#define SINIT_MAX_INIT_TIMEO 312
-#define MYSACK_DELAY 313
-#define SACK_FREQ 314
-#define ASSOC_VALUE 315
-#define ASSOC_ID 316
-#define SACK_ASSOC_ID 317
-#define MYFLOAT 318
-#define INTEGER 319
-#define HEX_INTEGER 320
-#define MYWORD 321
-#define MYSTRING 322
+#define MYSUPPORTED_EXTENSIONS 294
+#define TYPES 295
+#define TAG 296
+#define A_RWND 297
+#define OS 298
+#define IS 299
+#define TSN 300
+#define MYSID 301
+#define SSN 302
+#define PPID 303
+#define CUM_TSN 304
+#define GAPS 305
+#define DUPS 306
+#define SRTO_ASSOC_ID 307
+#define SRTO_INITIAL 308
+#define SRTO_MAX 309
+#define SRTO_MIN 310
+#define SINIT_NUM_OSTREAMS 311
+#define SINIT_MAX_INSTREAMS 312
+#define SINIT_MAX_ATTEMPTS 313
+#define SINIT_MAX_INIT_TIMEO 314
+#define MYSACK_DELAY 315
+#define SACK_FREQ 316
+#define ASSOC_VALUE 317
+#define ASSOC_ID 318
+#define SACK_ASSOC_ID 319
+#define MYFLOAT 320
+#define INTEGER 321
+#define HEX_INTEGER 322
+#define MYWORD 323
+#define MYSTRING 324
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 213 "parser.y"
+#line 218 "parser.y"
 {
     int64 integer;
     double floating;
@@ -194,7 +198,6 @@ typedef union YYSTYPE
         uint32 start_sequence;
         uint16 payload_bytes;
     } tcp_sequence_info;
-    struct option_list *option;
     PacketDrillEvent *event;
     PacketDrillPacket *packet;
     struct syscall_spec *syscall;
@@ -203,6 +206,7 @@ typedef union YYSTYPE
     cQueue *expression_list;
     PacketDrillTcpOption *tcp_option;
     PacketDrillSctpParameter *sctp_parameter;
+    PacketDrillOption *option;
     cQueue *tcp_options;
     struct errno_spec *errno_info;
     cQueue *sctp_chunk_list;
@@ -213,8 +217,8 @@ typedef union YYSTYPE
     PacketDrillSctpChunk *sctp_chunk;
 }
 /* Line 1529 of yacc.c.  */
-#line 217 "parser.h"
-    YYSTYPE;
+#line 221 "parser.h"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

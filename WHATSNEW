@@ -1,34 +1,91 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.3.0 (May, 2016) - stable
+INET-3.3.0 (Jun, 2016) - stable
 -------------------------------
 
-This release requires either OMNeT++ 4.6, or 5.0.
+This release requires OMNeT++ 4.6 or 5.0.
 
-Changes:
+Build:
 
-  - Packetdrill: Added SCTP support and socket options (by Irene Rungeler)
-  - Physical layer: added IdealObstacleLoss. This obstacle loss model determines
-    power loss by checking if there is any obstructing physical object along the
-    straight propagation path. The result is either total power loss if there was
-    such an object or no loss at all if there wasn't.
-  - The Manet rounting feature was removed from the source tree. The external
-    MANET routing algorithms are available in the INETMANET fork
-    (https://github.com/aarizaq/inetmanet-2.0)
-  - AODV: ICMP packets are now accepted (and silently dropped) by the AODV Routing component
-  - examples: 'run' script can now take parameters containing spaces (as long as
+  - Removed unnecessary -pINET from the makemake options. This caused linking
+    issues on Windows when 'clang' was used as a compiler. (the INET_API
+    macros are needed only for Visual C++)
+
+  - In makefrag, use inet_featuretool instead of scanning the compiler options
+    to detect the enablement of the VoIPStream and NSC features
+
+  - Fix: TCP_lwip did not compile when using the command-line make.
+
+  - Examples: 'run' script can now take parameters containing spaces (as long as
     they are quoted properly)
-  - build: removed unnecessary -pINET from the makemake options. This caused linking issues
-    on Windows when 'clang' was used as a compiler. (the INET_API macros are needed only for Viusal C++)
-  - bug fix in IPv4 packet deserialization
-  - bug fix in 802.11 management code
-  - bug fix in TelnetApp (cancels pending timers correctly)
-  - bug fix in Configurator: Links were not properly detected by the configurator if
-    a switch was precedeing all the nodes it was connected to.
-    (i.e. all nodes were defined after the switch in the NED file)
-  - IPv6: double delete fixed in IPv6
-  - IPv4: broadcast addresses can be used only with interfaces that support broadcasting
+
+SCTP:
+
+  - Packetdrill: Added SCTP support and socket options (by Irene Ruengeler)
+
+  - SCTP: added support for the SCTP_ACCEPT command (by Irene Ruengeler)
+
+Physical layer:
+
+  - Added IdealObstacleLoss. This obstacle loss model determines power loss by
+    checking if there is any obstructing physical object along the straight
+    propagation path. The result is either total power loss if there was
+    such an object or no loss at all if there wasn't.
+
+MANET:
+
+  - The "MANET Routing" feature (a collection of routing protocols ported
+    into INET from other projects) was removed from the source tree. The
+    removed MANET routing algorithms are still available in the INETMANET
+    fork of INET (https://github.com/aarizaq/inetmanet-2.0). INET now contains
+    the following natively implemented MANET routing protocols: AODV, DYMO, GPSR.
+
+Fixes:
+
+  - IPv4: bug fix in IPv4 packet deserialization
+
+  - Ieee802.11: bug fix in 802.11 management code (set TID only for QoS data
+    frames)
+
+  - TelnetApp: bug fix (cancel pending timers correctly)
+
+  - IPv4NetworkConfigurator: bug fix: links were not properly detected by the
+    configurator when nodes connected to a switch were defined after the switch
+    in the NED file
+
+  - IPv6: double delete fixed
+
+  - IPv4RoutingTable: fix: only interfaces with the BROADCAST flag set have
+    local broadcast addresses
+
+  - AODV: fix: AODV stopped with an error if an ICMP error packet was received
+    (ICMP packets are now accepted and silently dropped)
+
+  - examples: removed obsolete fingerprints.ini files
+
+Ethernet:
+
+  - Added a separate EtherPhyFrame class. Motivation: there was no obvious way
+    looking at an EtherFrame to tell whether it already contains preamble+SFD
+    or not.
+
+  - Change: When modeling the decapsulation from PHY header (subtracting preamble
+    and SFD lengths), padding to minimum frame size was also undone. This is
+    no longer done.
+
+  - EtherIFG renamed to EtherFilledIFG
+
+  - Catch duplex-halfduplex misconfiguration and throw error
+
+  - Fix incorrect byte counting during burst
+
+  - Serializer: adapted to the introduction of EtherPhyFrame
+
+  - Serializer: fix: CRC was in wrong byte order
+
+  - Serializer: fix: length field contained incorrect value (size of frame
+    instead of size of payload)
 
 
 INET-3.2.4 (April, 2016) - stable
