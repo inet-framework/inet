@@ -15,27 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/mobility/contract/IMobility.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
+#include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
+#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMTransmitter.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoderModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulator.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMPLCPFrame_m.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 
@@ -120,8 +121,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createPacketMod
     phyFrame->setLength(macFrame->getByteLength());
     phyFrame->encapsulate(const_cast<cPacket *>(macFrame));
     phyFrame->setBitLength(phyFrame->getLength() * 8 + plcpHeaderLength);
-    BitVector *serializedPacket = serialize(phyFrame);
-    return new TransmissionPacketModel(check_and_cast<Packet *>(phyFrame), serializedPacket, mode->getDataMode()->getNetBitrate());
+    return new TransmissionPacketModel(check_and_cast<Packet *>(phyFrame), mode->getDataMode()->getNetBitrate());
 }
 
 const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const
@@ -136,7 +136,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAna
         if (isCompliant) {
             const ConvolutionalCode *convolutionalCode = mode->getDataMode()->getCode()->getConvolutionalCode();
             headerBitLength = ENCODED_SIGNAL_FIELD_LENGTH;
-            dataBitLength = convolutionalCode->getEncodedLength((packetModel->getSerializedPacket()->getSize() - DECODED_SIGNAL_FIELD_LENGTH));
+            dataBitLength = convolutionalCode->getEncodedLength((packetModel->getPacket()->getByteLength() * 8 - DECODED_SIGNAL_FIELD_LENGTH));
         }
         else {
             throw cRuntimeError("Unimplemented");
@@ -167,19 +167,19 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFie
     // The SIGNAL field is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1), Tail (6),
     // fields, so the SIGNAL field is 24 bits (OFDM_SYMBOL_SIZE / 2) long.
     BitVector *signalField = new BitVector();
-    const BitVector *serializedPacket = completePacketModel->getSerializedPacket();
+    const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekAt<BytesChunk>(0, completePacketModel->getPacket()->getByteLength())->getBytes());
     for (unsigned int i = 0; i < NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i++)
         signalField->appendBit(serializedPacket->getBit(i));
-    return new TransmissionPacketModel(nullptr, signalField, bps(NaN));
+    return new TransmissionPacketModel(nullptr, bps(NaN));
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
 {
     BitVector *dataField = new BitVector();
-    const BitVector *serializedPacket = completePacketModel->getSerializedPacket();
+    const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekAt<BytesChunk>(0, completePacketModel->getPacket()->getByteLength())->getBytes());
     for (unsigned int i = NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i < serializedPacket->getSize(); i++)
         dataField->appendBit(serializedPacket->getBit(i));
-    return new TransmissionPacketModel(nullptr, dataField, bps(NaN));
+    return new TransmissionPacketModel(nullptr, bps(NaN));
 }
 
 void Ieee80211LayeredOFDMTransmitter::encodeAndModulate(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *& fieldBitModel, const ITransmissionSymbolModel *& fieldSymbolModel, const IEncoder *encoder, const IModulator *modulator, bool isSignalField) const

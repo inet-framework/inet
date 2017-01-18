@@ -15,17 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/ShortBitVector.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
 #include "inet/physicallayer/common/bitlevel/AdditiveScrambler.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoder.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMInterleaver.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/modulation/QAM16Modulation.h"
+#include "inet/physicallayer/modulation/QAM64Modulation.h"
+#include "inet/physicallayer/modulation/QPSKModulation.h"
 
 namespace inet {
 
@@ -44,8 +45,10 @@ std::ostream& Ieee80211OFDMEncoder::printToStream(std::ostream& stream, int leve
 
 const ITransmissionBitModel *Ieee80211OFDMEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
-    const BitVector *serializedPacket = packetModel->getSerializedPacket();
-    BitVector *encodedBits = new BitVector(*serializedPacket);
+    auto packet = packetModel->getPacket();
+    const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getByteLength());
+    auto bitLength = bytesChunk->getChunkLength() * 8;
+    BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
     const IScrambling *scrambling = nullptr;
     if (scrambler) {
         *encodedBits = scrambler->scramble(*encodedBits);

@@ -15,29 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMReceiver.h"
-#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoderModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulatorModule.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
-#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/packetlevel/BandListening.h"
+#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOFDMReceiver.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDefs.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbol.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMSymbolModel.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMModulation.h"
+#include "inet/physicallayer/modulation/BPSKModulation.h"
+#include "inet/physicallayer/modulation/BPSKModulation.h"
 
 namespace inet {
 
@@ -293,7 +294,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
         const ConvolutionalCode *convolutionalCode = nullptr;
         const APSKModulationBase *modulation = nullptr;
         double codeRate = NaN;
-        unsigned int psduLengthInBits = getSignalFieldLength(signalFieldPacketModel->getSerializedPacket()) * 8;
+        unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, signalFieldPacketModel->getPacket()->getByteLength())->getBytes())) * 8;
         unsigned int dataFieldLengthInBits = psduLengthInBits + PPDU_SERVICE_FIELD_BITS_LENGTH + PPDU_TAIL_BITS_LENGTH;
         if (isCompliant) {
             const Ieee80211OFDMDataMode *dataMode = mode->getDataMode();
@@ -339,9 +340,9 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createCompleteSymbolM
 
 const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketModel(const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    const BitVector *headerBits = signalFieldPacketModel->getSerializedPacket();
+    const BitVector *headerBits = new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, signalFieldPacketModel->getPacket()->getByteLength())->getBytes());
     BitVector *mergedBits = new BitVector(*headerBits);
-    const BitVector *dataBits = dataFieldPacketModel->getSerializedPacket();
+    const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, dataFieldPacketModel->getPacket()->getByteLength())->getBytes());
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
     Ieee80211PhySerializer deserializer;
@@ -352,7 +353,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
         isReceptionSuccessful &= !packet->hasBitError();
         packet = packet->getEncapsulatedPacket();
     }
-    return new ReceptionPacketModel(phyFrame, mergedBits, bps(NaN), 0, isReceptionSuccessful);
+    return new ReceptionPacketModel(phyFrame, bps(NaN), 0, isReceptionSuccessful);
 }
 
 const Ieee80211OFDMMode *Ieee80211LayeredOFDMReceiver::computeMode(Hz bandwidth) const
@@ -380,7 +381,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
-        uint8_t rate = getRate(signalFieldPacketModel->getSerializedPacket());
+        uint8_t rate = getRate(new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, signalFieldPacketModel->getPacket()->getByteLength())->getBytes()));
         // TODO: handle erroneous rate field
         mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);
     }
