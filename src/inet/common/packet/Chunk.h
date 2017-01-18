@@ -70,14 +70,18 @@ namespace inet {
  *
  * General rules for peeking into a chunk:
  * 1) Peeking never returns
- *    a) a SliceChunk containing another SliceChunk
- *    b) a SliceChunk containing the whole of another chunk
- *    c) a SliceChunk containing a BytesChunk
- *    d) a SliceChunk containing a ByteCountChunk
- *    e) a SequenceChunk containing connecting BytesChunks
- *    f) a SequenceChunk containing connecting ByteCountChunks
- *    g) a SequenceChunk containing another SequenceChunk
- *    h) a SequenceChunk containing only one chunk
+ *    a) a SliceChunk containing
+ *       - a BytesChunk
+ *       - a ByteCountChunk
+ *       - another SliceChunk
+ *       - the whole of another chunk
+ *       - a SequenceChunk with superfluous elements
+ *    b) a SequenceChunk containing
+ *       - connecting BytesChunks
+ *       - connecting ByteCountChunks
+ *       - connecting SliceChunks
+ *       - another SequenceChunk
+ *       - only one chunk
  * 2) Peeking (various special cases)
  *    a) an empty part of the chunk returns nullptr
  *    b) the whole of the chunk returns the chunk
@@ -92,6 +96,7 @@ namespace inet {
  *       - an element chunk
  *       - a SliceChunk of an element chunk
  *       - a SliceChunk using the original SequenceChunk
+ *       - a new SequenceChunk using the elements of the original SequenceChunk
  *    e) any other chunk returns a SliceChunk
  * 4) Peeking with providing a return type always returns a chunk of the
  *    requested type (or a subtype thereof)
@@ -101,7 +106,7 @@ namespace inet {
  *       BytesChunk containing a part of the serialized bytes of the
  *       original chunk
  *    c) Peeking with a SliceChunk return type for any chunk returns a
- *       SliceChunk containing the original chunk
+ *       SliceChunk containing the requested slice of the original chunk
  *    d) Peeking with a SequenceChunk return type is an error
  *    e) Peeking with a any other return type for any chunk returns a chunk of
  *       the requested type containing data deserialized from the bytes that
