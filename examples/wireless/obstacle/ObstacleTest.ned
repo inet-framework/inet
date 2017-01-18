@@ -22,6 +22,7 @@ import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
 
 network ObstacleTest
 {
@@ -29,18 +30,21 @@ network ObstacleTest
         int numHosts;
         @display("bgb=0,0");
     submodules:
-        environment: PhysicalEnvironment {
+        visualizer: IntegratedVisualizer {
             parameters:
-                @display("p=50,50");
+                @display("p=100,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        physicalEnvironment: PhysicalEnvironment {
             parameters:
-                @display("p=50,150");
+                @display("p=100,150");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,250");
+                @display("p=100,250");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,350");
         }
         host[numHosts]: AdhocHost {
             parameters:

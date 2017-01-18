@@ -566,6 +566,11 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
  */
 void LMacLayer::handleLowerPacket(cPacket *msg)
 {
+    if (msg->hasBitError()) {
+        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+        delete msg;
+        return;
+    }
     // simply pass the massage as self message, to be processed by the FSM.
     handleSelfMessage(msg);
 }

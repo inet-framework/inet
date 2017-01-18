@@ -42,7 +42,7 @@ void StochasticErrorModel::initialize(int stage)
 
 std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << "StochasticErrorModel"
                << "packetErrorRate = " << packetErrorRate
                << "bitErrorRate = " << bitErrorRate

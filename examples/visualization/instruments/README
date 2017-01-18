@@ -1,0 +1,44 @@
+This is an example for instrument figures. Here is some background and
+usage info on instrument figures.
+
+The following instrument figure types exist: gauge, linearGauge,
+progressMeter, thermometer, counter, indicatorLabel, and indicatorText.
+They are implemented with the C++ types GaugeFigure, LinearGaugeFigure,
+ProgressMeterFigure, ThermometerFigure, CounterFigure,
+IndicatorLabelFigurea and IndicatorTextFigure. These C++ types all
+implement IIndicatorFigure.
+
+In practice, instrument figures are driven by signals, using a @statistic
+for converting emitted signals into calls to IIndicatorFigure's setValue()
+method. An example:
+
+  @figure[thruputMeter](type=gauge; pos=50,100; size=150,150);
+  @statistic[dummy](source=throughput; record=figure; targetFigure=thruputMeter);
+
+The first line adds a figure of the type GaugeFigure to the canvas, with
+the name thruputMeter. The second line adds a special "figure" result
+recorder for the throughput signal. The result recorder (see the
+FigureRecorder C++ class) sends every emitted value to the figure denoted
+by the targetFigure attribute of the @statistic, in this case thruputMeter.
+
+One issue is that @statistic can only add signal listeners to the current
+module (on which the @statistic is declared), but not to a submodule or
+sub-submodule. The workaround for this issue is to use a @delegatesignal
+property to "teleport" the signal from its emitted module to the module of
+the @statistic, under a new name. An example:
+
+  @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostB_rcvdPk);
+  @signal[hostB_rcvdPk];
+
+The first line adds a listener to the hostB.udpApp[0] submodule for the
+rcvdPk signal, and emits it on the current module as hostB_rcvdPk. A
+@statistic can then use hostB_rcvdPk as its source signal. The second,
+@signal line is necessary because OMNeT++ only allows declared signals to
+be emitted.
+
+IMPORTANT: When using @delegatesignal, the network must contain a
+DelegateSignalConfigurator module somewhere, because it is what processes
+those properties and makes them work.
+
+See the Wireless Tutorial (tutorials/wireless) for an example.
+

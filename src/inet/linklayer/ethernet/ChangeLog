@@ -1,36 +1,24 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-26  Zoltan Bojthe
 
-  ethernetCRC: swapped byte order
+	Added a separate EtherPhyFrame class. Motivation: there was no obvious
+	way looking at an EtherFrame to tell whether it already contains
+	preamble+SFD or not.
 
-	catch duplex-halfduplex misconfiguration
-
-  EtherMACBase: added, used encapsulate() function
+	Change: When modeling the decapsulation from PHY header (subtracting
+	preamble and SFD lengths), padding to minimum frame size was also undone.
+	This is no longer done.
 
 	EtherIFG renamed to EtherFilledIFG
 
-  - ethernet: added EtherPhyFrame [by ZBojthe]
-    Motivation: there was no obvious way looking at an EtherFrame to tell
-    whether it already contains preamble+SFD or not.
+	Catch duplex-halfduplex misconfiguration and throw error
 
-	- EtherFrame.msg: added EtherPhyFrame, header length settings
-	- updated EtherMAC and EtherMACFullDuplex
-	- tests: eth module tests: EtherFrame --> EtherPhyFrame
-	- EthernetSerializer: removed setFrameByteLength
-
-  Fixed Phy layer (preamble + SFD) decapsulation
-	When modeling the decapsulation from PHY header (subtracting preamble and SFD
-  lengths), padding was also undone. This is something real Ethernet cannot do,
-  because an Ethernet-II frame does not contain a payload length field.
-
-	Ethernet serializer fixes, optimisation
-		- fix: Length field contained length of whole packet instead of length of payload
-		- fix: test/unit/serializer.test didn't work on omnetpp 5.x
-		- fix: incorrect byte counting during burst
-		- added: EtherPhySerializer
+	Fix incorrect byte counting during burst
 
 2016-04-06  ------ inet-3.2.4 released ------
 

@@ -35,20 +35,20 @@ Ieee80211IdealTransmitter::Ieee80211IdealTransmitter() :
 void Ieee80211IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        maxCommunicationRange = m(par("maxCommunicationRange"));
-        maxInterferenceRange = m(par("maxInterferenceRange"));
-        maxDetectionRange = m(par("maxDetectionRange"));
+        communicationRange = m(par("communicationRange"));
+        interferenceRange = m(par("interferenceRange"));
+        detectionRange = m(par("detectionRange"));
     }
 }
 
 std::ostream& Ieee80211IdealTransmitter::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211IdealTransmitter";
-    if (level >= PRINT_LEVEL_INFO)
-        stream << ", maxCommunicationRange = " << maxCommunicationRange;
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", maxInterferenceRange = " << maxInterferenceRange
-               << ", maxDetectionRange = " << maxDetectionRange;
+    if (level <= PRINT_LEVEL_INFO)
+        stream << ", communicationRange = " << communicationRange;
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", interferenceRange = " << interferenceRange
+               << ", detectionRange = " << detectionRange;
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
@@ -68,7 +68,7 @@ const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio 
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
+    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
 }
 
 } // namespace physicallayer

@@ -1,5 +1,47 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-10  Levente Meszaros
+
+	Radio: Added packetReceivedFromUpper and packetSentToUpper signals.
+
+2016-04-19  Levente Meszaros
+
+	Radio: Fixed abortTransmission() cleanup.
+
+2016-04-19  Levente Meszaros
+
+	Followed recent logging API changes.
+
+2016-04-19  Levente Meszaros
+
+	RadioMedium: Fixed removeNonInterferingTransmissions() cache handling.
+
+	The cached frame was not removed.
+
+2016-01-18  Levente Meszaros
+
+	Radio: Changed default value of display communication/interference range
+	parameter.
+
+2016-05-04  Levente Meszaros
+
+	RadioMedium: Renamed "environment" parameters and fields to "physicalEnvironment"
+
+2016-05-31  Levente Meszaros
+
+	RadioMedium: remove packetReceived() from listener API.
+
+2016-01-21  Levente Meszaros
+
+	Radio: Added listener interfaces to support independent visualization.
+
+2016-05-04  Levente Meszaros
+
+	All: Removed visualization from various modules. Visualization-related
+	code will be moved into separate modules under src/inet/visualization.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

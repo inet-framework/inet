@@ -1,5 +1,31 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-31  Levente Meszaros
+
+	Mobility: Use initialZ parameter even if initialized from display string.
+
+2016-04-19  Levente Meszaros
+
+	Resurrected default visualization without a visualizer.
+
+	MobilityBase: added support for geographic positioning: added the
+	coordinateSystemModule, visualizeMobility and visualRepresentation
+	parameters.
+
+2015-10-14  Levente Meszaros
+
+	Mobility: Added facing towards movement: added getCurrentAngular-
+	Position() to MovingMobilityBase. Now all mobile nodes face (i.e.
+	set the  orientation to) the direction of movement. This affects
+	radio reception when direction antenna is used.
+
+2016-05-04  Levente Meszaros
+
+	All: Removed visualization from various modules. Visualization-related
+	code will be moved into separate modules under src/inet/visualization.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

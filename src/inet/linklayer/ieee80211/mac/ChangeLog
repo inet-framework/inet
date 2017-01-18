@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-01-08  Levente Meszaros
+
+	802.11: Resurrected link break signal for giving up a transmission.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

@@ -41,7 +41,7 @@ void CosineAntenna::initialize(int stage)
 std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "CosineAntenna";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", maxGain = " << maxGain
                << ", beamWidth = " << beamWidth;
     return AntennaBase::printToStream(stream, level);

@@ -82,7 +82,7 @@
     <feature
         id="INET_examples"
         name="INET examples"
-        description = "Examples for Basic Internet Protocols (IPv4, TCP, UDP)"
+        description = "Examples for basic internet protocols (IPv4, TCP, UDP)"
         initiallyEnabled = "true"
         requires = "IPv4 TCP_INET UDP Ethernet PPP"
         labels = "protocols examples"
@@ -357,7 +357,7 @@
         name="Network emulation support"
         description = "Support for connecting the simulation to a real network.
                        The ExternalInterface module is responsible for sending/receiving
-                       packets on the network. This feature requires at least version 1.5.3 
+                       packets on the network. This feature requires at least version 1.5.3
                        of the libpcap-dev package."
         initiallyEnabled = "false"
         requires = "IPv4"
@@ -640,6 +640,7 @@
         labels = ""
         nedPackages = "
                        inet.environment.common
+                       inet.environment.ground
                        inet.environment.objectcache
                       "
         extraSourceFolders = ""
@@ -706,7 +707,7 @@
         name="IEEE 802.11"
         description = "Provides IEEE 802.11 (a/b/g/e/p/n) Ad-hoc and Infrastucture mode NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio"
+        requires = "mobility radio idealwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
@@ -737,7 +738,7 @@
         id="apskradio"
         name="APSK radio"
         description = "Provides a hypothetical generic radio for APSK modulations"
-        requires = "mobility radio"
+        requires = "mobility radio Ieee80211"
         labels = ""
         nedPackages = "
                        inet.physicallayer.apskradio
@@ -777,6 +778,36 @@
                        inet.examples.neighborcache
                        inet.examples.wireless
                        inet.tutorials.wireless
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="visualization"
+        name="Visualization"
+        description = "Provides network-level visualization features for physical layer,
+                       data link layer and network layer communications, and more.
+                       Supports both canvas (2D) and OSG (3D) graphics."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.visualizer
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_VISUALIZERS"
+        linkerFlags = ""
+        />
+    <feature
+        id="visualization_examples"
+        name="Visualization examples"
+        description = "Provides examples for the various visualization modules."
+        initiallyEnabled = "true"
+        requires = "visualization physicalenvironment DYMO Ieee80211 IPv4 MultiNet Ethernet"
+        labels = ""
+        nedPackages = "
+                       inet.examples.visualization
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -952,7 +983,7 @@
                        inet.linklayer.ieee8021d
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_IEEE8021D"
         linkerFlags = ""
         />
     <feature
@@ -972,7 +1003,7 @@
     <feature
         id="TUN"
         name="TUN"
-        description = "Provides TUN/TAP virtual network interfaces"
+        description = "TUN/TAP virtual network interface"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -987,9 +1018,9 @@
     <feature
         id="packetdrill"
         name="PacketDrill testing"
-        description = "Provides PacketDrill testing application"
+        description = "PacketDrill testing application"
         initiallyEnabled = "true"
-        requires = "TUN"
+        requires = "TUN TCP_INET UDP SCTP IPv4"
         labels = ""
         nedPackages = "
                        inet.applications.packetdrill
@@ -1002,7 +1033,7 @@
     <feature
         id="BMAC"
         name="BMAC"
-        description = "Provides the B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
+        description = "B-MAC, also called the Berkeley MAC, a Low Power Listening (LPL) protocol"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1016,7 +1047,7 @@
     <feature
         id="LMAC"
         name="LMAC"
-        description = "Provides the L-MAC, a Lightweight Medium Access Protocol for Wireless Sensor Networks"
+        description = "L-MAC, a lightweight MAC protocol for wireless sensor networks"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1030,7 +1061,7 @@
     <feature
         id="CSMA"
         name="CSMA"
-        description = "Provides link layer support for Carrier Sense Multiple Access protocols"
+        description = "A CSMA (Carrier Sense Multiple Access) MAC protocol, similar to 802.15.4"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -1039,6 +1070,20 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_CSMA"
+        linkerFlags = ""
+        />
+    <feature
+        id="CsmaCaMac"
+        name="CSMA/CA"
+        description = "A CSMA/CA (Carrier Sense Multiple Access / Collision Avoidance) MAC protocol, similar to 802.11b"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.csmaca
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_CSMACA"
         linkerFlags = ""
         />
 </features>

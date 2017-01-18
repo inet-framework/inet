@@ -21,20 +21,24 @@ package inet.examples.wireless.crosstalk;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network Crosstalk
 {
     parameters:
-        @display("b=297,203");
-
+        @display("b=300,200");
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
-        radioMedium: Ieee80211DimensionalRadioMedium {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=100,150");
+        }
+        radioMedium: Ieee80211DimensionalRadioMedium {
+            parameters:
+                @display("p=100,250");
         }
         aNode[2]: AdhocHost {
             parameters:

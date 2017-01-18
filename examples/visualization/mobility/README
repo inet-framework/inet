@@ -1,0 +1,8 @@
+This example demonstrates how to display the movement of mobile nodes.
+
+The network contains a number of wireless nodes that just move around randomly.
+The network nodes don't communicate at all, because it's not essential in this
+example.
+
+When you run the example, you should see a number of wireless nodes moving
+around randomly, and you should also see their recent movement trail.

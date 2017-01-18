@@ -1,5 +1,16 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-11  Levente Meszaros
+
+	LMAC: Fixed handling of frames with bit errors.
+
+2016-05-19  Andras Varga
+
+	Added LMAC state machine image from
+	https://github.com/GRCDEV/mixim-sommer/find/VACaMobil
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

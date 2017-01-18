@@ -1,6 +1,125 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.4.0 (Jun, 2016) - stable
+-------------------------------
+
+This INET release requires OMNeT++ 5.0. This is due to the new visualization
+feature which uses the Canvas and OSG APIs introduced in OMNeT++ 5.0. Most
+other parts of the codebase still builds with OMNeT++ 4.6.
+
+Highlights is this release:
+
+Tutorials:
+
+  - Added a Wireless Tutorial (tutorials/wireless). The tutorial consists of
+    several simulation models of increasing complexity, demonstrating the INET
+    architecture and features related to wireless communication networks. The
+    models are accompanied by a text which explains each step, complete with
+    screenshots and recorded animations.
+
+  - Added draft for a visualization tutorial.
+
+Visualizers:
+
+  - Added a new 'visualizer' folder under 'src' that contains visualizer modules.
+    The current visualizer modules can display the scene (optionally with osgEarth),
+    the network nodes (optionally with 3D models), physical objects in
+    the physical environment, node mobility along with movement trail, discovered
+    network connectivity, discovered network routes, ongoing transmissions,
+    ongoing receptions, propagating radio signals, and statistics.
+
+    The visualizer modules are intentionally kept separate from network protocol
+    models. They are responsible for displaying various aspects of the simulation
+    in a graphical user interface. The most common mechanism they use is looking
+    up other modules and/or subscribing to the signals they emit. The visualizer
+    modules are compatible with both Tkenv and Qtenv. In Qtenv they are able to
+    display on both a 2D canvas and a 3D OSG scene.
+
+Instrument figures:
+
+  - Implemented a facility that allows one to display various gauges, meters
+    and indicators in the network graphics that take their inputs from signals.
+    The "gadgets" themselves are figures that are added into the network using
+    @figure properties, and they are driven by signals via @statistic properties,
+    using a special result recorder ("figure") that sets the value in the target
+    figure. Figure types are: gauge, linearGauge, progressMeter, thermometer,
+    counter, indicatorLabel/indicatorText, and indexedImage. Their sources
+    are in src/inet/common/figures.
+
+    There is a demo in examples/visualization/instruments, and an additional
+    usage example in the Wireless Tutorial (tutorials/wireless).
+
+MAC protocols:
+
+  - Added CsmaCaMac, a simple CSMA/CA-based MAC protocol with optional
+    acknowledgements and a retry mechanism. With the appropriate settings,
+    it can approximate basic 802.11b ad-hoc mode operation. The code is
+    based on the original Ieee80211Mac (802.11b) from 2006.
+
+  - IdealMac: Changed out-of-band ACKs to be optional.
+
+  - LMAC, BMAC, CSMA: Fixed handling of frames with bit errors.
+
+  - WirelessNic: added optional classifier submodule
+
+  - Ieee80211Mac: Resurrected link break signal for giving up a transmission.
+
+Radio:
+
+  - The physical environment model has been extended to include a ground model.
+    Ground models need to implement the IGround interface that currently
+    contains a getElevation() method. A very simple implementation, FlatGround
+    is also provided.
+
+  - The TwoRayGroundReflection model has been updated to use the ground model
+    of the physical environment.
+
+  - Added packetReceivedFromUpper and packetSentToUpper signals.
+
+Mobility:
+
+  - Mobility models now use the initialZ parameter even if position is
+    initialized from the display string.
+
+  - Added VehicleMobility that simulates turning at waypoints.
+
+  - Now all mobile nodes face (i.e. set the  orientation to) the direction of
+    movement. This affects radio reception when direction antenna is used.
+
+Physical enviromment:
+
+  - Added geographic coordinate system support.
+
+  - TracingObstacleLoss renamed to DielectricObstacleLoss.
+
+Misc:
+
+  - Added ApplicationPacket that can be used as generic application payload.
+    Currently it contains a sequence number.
+
+  - UDPBasicApp/UDPSink: changed to use ApplicationPacket, and record
+    received packet sequence numbers
+
+  - RelayUnit: Added packetReceivedFromLowerSignal and packetSentToLowerSignal signals.
+
+  - AODV: Removed AODV-RERR messages for inactive routes.
+
+  - Applications: Added throughput statistic to some applications.
+
+  - IPv4: Added sentTo/receivedFrom upper/lower signals.
+
+  - Common: Added average forest "material".
+
+  - Common: Added throughput result filter.
+
+Build:
+
+  - Added a top level 'doc' target to build all INET documentation in a single step
+
+  - Added project feature tests (tests/features)
+
+
 INET-3.3.0 (Jun, 2016) - stable
 -------------------------------
 
@@ -112,7 +231,6 @@ Changes:
   - several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
   - smoke and fingerprint tests are running on both OMNeT++ 4.6 and 5.0
   - some varaiable renames and fixes in ieee802.11
-
 
 INET-3.2.1 (Jan, 2016) - Stable
 -------------------------------

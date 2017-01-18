@@ -47,7 +47,6 @@ RadioMedium::RadioMedium() :
     mediumLimitCache(nullptr),
     neighborCache(nullptr),
     communicationCache(nullptr),
-    mediumVisualizer(nullptr),
     transmissionCount(0),
     radioFrameSendCount(0),
     receptionComputationCount(0),
@@ -92,8 +91,7 @@ void RadioMedium::initialize(int stage)
         mediumLimitCache = check_and_cast<IMediumLimitCache *>(getSubmodule("mediumLimitCache"));
         neighborCache = dynamic_cast<INeighborCache *>(getSubmodule("neighborCache"));
         communicationCache = check_and_cast<ICommunicationCache *>(getSubmodule("communicationCache"));
-        physicalEnvironment = dynamic_cast<IPhysicalEnvironment *>(getModuleByPath("environment"));
-        mediumVisualizer = dynamic_cast<MediumVisualizer *>(getSubmodule("mediumVisualizer"));
+        physicalEnvironment = dynamic_cast<IPhysicalEnvironment *>(getModuleByPath(par("physicalEnvironmentModule")));
         material = physicalEnvironment != nullptr ? physicalEnvironment->getMaterialRegistry()->getMaterial("air") : nullptr;
         const char *rangeFilterString = par("rangeFilter");
         if (!strcmp(rangeFilterString, ""))
@@ -155,26 +153,23 @@ void RadioMedium::finish()
 std::ostream& RadioMedium::printToStream(std::ostream &stream, int level) const
 {
     stream << static_cast<const cSimpleModule *>(this);
-    if (level >= PRINT_LEVEL_TRACE) {
-        stream << ", propagation = " << printObjectToString(propagation, level - 1)
-               << ", pathLoss = " << printObjectToString(pathLoss, level - 1)
-               << ", analogModel = " << printObjectToString(analogModel, level - 1)
-               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level - 1)
-               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level - 1)
-               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level - 1)
-               << ", neighborCache = " << printObjectToString(neighborCache, level - 1)
-               << ", communicationCache = " << printObjectToString(communicationCache, level - 1) ;
+    if (level <= PRINT_LEVEL_TRACE) {
+        stream << ", propagation = " << printObjectToString(propagation, level + 1)
+               << ", pathLoss = " << printObjectToString(pathLoss, level + 1)
+               << ", analogModel = " << printObjectToString(analogModel, level + 1)
+               << ", obstacleLoss = " << printObjectToString(obstacleLoss, level + 1)
+               << ", backgroundNoise = " << printObjectToString(backgroundNoise, level + 1)
+               << ", mediumLimitCache = " << printObjectToString(mediumLimitCache, level + 1)
+               << ", neighborCache = " << printObjectToString(neighborCache, level + 1)
+               << ", communicationCache = " << printObjectToString(communicationCache, level + 1) ;
     }
     return stream;
 }
 
 void RadioMedium::handleMessage(cMessage *message)
 {
-    if (message == removeNonInterferingTransmissionsTimer) {
+    if (message == removeNonInterferingTransmissionsTimer)
         removeNonInterferingTransmissions();
-        if (mediumVisualizer != nullptr)
-            mediumVisualizer->mediumChanged();
-    }
     else
         throw cRuntimeError("Unknown message");
 }
@@ -240,11 +235,10 @@ void RadioMedium::removeNonInterferingTransmissions()
     EV_DEBUG << "Removing " << transmissionIndex << " non interfering transmissions\n";
     for (auto it = transmissions.cbegin(); it != transmissions.cbegin() + transmissionIndex; it++) {
         const ITransmission *transmission = *it;
-        auto radioFrame = communicationCache->getCachedFrame(transmission);
-        if (mediumVisualizer != nullptr)
-            mediumVisualizer->removeTransmission(transmission);
+        const IRadioFrame *radioFrame = communicationCache->getCachedFrame(transmission);
         communicationCache->removeCachedFrame(transmission);
         communicationCache->removeTransmission(transmission);
+        fireTransmissionRemoved(transmission);
         delete radioFrame;
         delete transmission;
     }
@@ -449,6 +443,7 @@ void RadioMedium::addRadio(const IRadio *radio)
         radioModule->subscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
         getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+    fireRadioAdded(radio);
 }
 
 void RadioMedium::removeRadio(const IRadio *radio)
@@ -471,6 +466,7 @@ void RadioMedium::removeRadio(const IRadio *radio)
         radioModule->unsubscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
         getContainingNode(radioModule)->unsubscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+    fireRadioRemoved(radio);
 }
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
@@ -497,8 +493,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         Enter_Method_Silent();
         scheduleAt(communicationCache->getCachedInterferenceEndTime(transmissions[0]), removeNonInterferingTransmissionsTimer);
     }
-    if (mediumVisualizer != nullptr)
-        mediumVisualizer->addTransmission(transmission);
+    fireTransmissionAdded(transmission);
 }
 
 IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, cPacket *macFrame)
@@ -597,8 +592,6 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     communicationCache->removeCachedReceptionResult(radio, transmission);
     cPacket *macFrame = const_cast<cPacket *>(result->getMacFrame()->dup());
     macFrame->setControlInfo(const_cast<ReceptionIndication *>(result->getIndication()));
-    if (mediumVisualizer != nullptr)
-        mediumVisualizer->receivePacket(result);
     delete result;
     return macFrame;
 }
@@ -639,8 +632,6 @@ bool RadioMedium::isReceptionPossible(const IRadio *receiver, const ITransmissio
     const IInterference *interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
     bool isReceptionPossible = receiver->getReceiver()->computeIsReceptionAttempted(listening, reception, part, interference);
     delete interference;
-    if (mediumVisualizer != nullptr)
-        mediumVisualizer->mediumChanged();
     return isReceptionPossible;
 }
 
@@ -652,8 +643,6 @@ bool RadioMedium::isReceptionAttempted(const IRadio *receiver, const ITransmissi
     const IInterference *interference = computeInterference(receiver, listening, transmission, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
     bool isReceptionAttempted = receiver->getReceiver()->computeIsReceptionAttempted(listening, reception, part, interference);
     delete interference;
-    if (mediumVisualizer != nullptr)
-        mediumVisualizer->mediumChanged();
     return isReceptionAttempted;
 }
 
@@ -666,8 +655,6 @@ bool RadioMedium::isReceptionSuccessful(const IRadio *receiver, const ITransmiss
     const ISNIR *snir = getSNIR(receiver, transmission);
     bool isReceptionSuccessful = receiver->getReceiver()->computeIsReceptionSuccessful(listening, reception, part, interference, snir);
     delete interference;
-    if (mediumVisualizer != nullptr)
-        mediumVisualizer->mediumChanged();
     return isReceptionSuccessful;
 }
 
@@ -714,6 +701,54 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
             }
         }
     }
+}
+
+void RadioMedium::fireRadioAdded(const IRadio *radio) const
+{
+    for (auto listener : listeners)
+        listener->radioAdded(radio);
+}
+
+void RadioMedium::fireRadioRemoved(const IRadio *radio) const
+{
+    for (auto listener : listeners)
+        listener->radioRemoved(radio);
+}
+
+void RadioMedium::fireTransmissionAdded(const ITransmission *transmission) const
+{
+    for (auto listener : listeners)
+        listener->transmissionAdded(transmission);
+}
+
+void RadioMedium::fireTransmissionRemoved(const ITransmission *transmission) const
+{
+    for (auto listener : listeners)
+        listener->transmissionRemoved(transmission);
+}
+
+void RadioMedium::fireTransmissionStarted(const ITransmission *transmission) const
+{
+    for (auto listener : listeners)
+        listener->transmissionStarted(transmission);
+}
+
+void RadioMedium::fireTransmissionEnded(const ITransmission *transmission) const
+{
+    for (auto listener : listeners)
+        listener->transmissionEnded(transmission);
+}
+
+void RadioMedium::fireReceptionStarted(const IReception *reception) const
+{
+    for (auto listener : listeners)
+        listener->receptionStarted(reception);
+}
+
+void RadioMedium::fireReceptionEnded(const IReception *reception) const
+{
+    for (auto listener : listeners)
+        listener->receptionEnded(reception);
 }
 
 } // namespace physicallayer

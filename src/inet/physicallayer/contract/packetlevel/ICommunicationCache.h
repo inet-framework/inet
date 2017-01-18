@@ -18,14 +18,15 @@
 #ifndef __INET_ICOMMUNICATIONCACHE_H
 #define __INET_ICOMMUNICATIONCACHE_H
 
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/common/IntervalTree.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/IInterference.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/packetlevel/IInterference.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
 
 namespace inet {
 
@@ -62,10 +63,6 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission) = 0;
     virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *radioFrame) = 0;
     virtual void removeCachedFrame(const ITransmission *transmission) = 0;
-
-    virtual cFigure *getCachedFigure(const ITransmission *transmission) = 0;
-    virtual void setCachedFigure(const ITransmission *transmission, cFigure *figure) = 0;
-    virtual void removeCachedFigure(const ITransmission *transmission) = 0;
     //@}
 
     /** @name Reception Cache */

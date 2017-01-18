@@ -42,7 +42,7 @@ LOGFILTER =
 
 .PHONY : pdf html eclipse
 
-default: pdf html eclipse
+default: pdf
 
 # include ../cover/cover.makefrag
 cover:

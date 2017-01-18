@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-04-19  Levente Meszaros
+
+	StationaryMobility: added support for geographic positioning:
+	initialLatitude, initialLongitude, initialAltitude parameters
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

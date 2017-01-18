@@ -1,4 +1,4 @@
-.PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy
+.PHONY: all clean cleanall makefiles makefiles-so makefiles-lib makefiles-exe checkmakefiles doxy doc
 
 all: checkmakefiles src/inet/features.h 
 	cd src && $(MAKE) all
@@ -10,6 +10,7 @@ cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
 	@rm -f src/Makefile src/inet/features.h
+	@cd tutorials && $(MAKE) clean && rm -rf doc/tutorials
 
 MAKEMAKE_OPTIONS := -f --deep -o INET -O out --no-deep-includes -I.
 
@@ -36,11 +37,10 @@ checkmakefiles:
 
 # generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
 src/inet/features.h: $(wildcard .oppfeaturestate) .oppfeatures
-	@chmod +x ./inet_featuretool
 	@./inet_featuretool defines >src/inet/features.h
 
-doxy:
-	doxygen doxy.cfg
-
-tcptut:
+doc:
+	cd tutorials && $(MAKE) && mkdir -p ../doc/tutorials/wireless && cp -r wireless/html/* ../doc/tutorials/wireless
 	cd doc/src/tcp && $(MAKE)
+	cd doc/src/manual && $(MAKE)
+	doxygen doxy.cfg

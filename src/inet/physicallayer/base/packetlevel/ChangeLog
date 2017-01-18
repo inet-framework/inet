@@ -1,5 +1,28 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-31  Levente Meszaros
+
+	Extracted TracingObstacleLossBase module and renamed TracingObstacleLoss
+	to DielectricObstacleLoss.
+
+	TracingObstacleLossBase: Changed obstaclePenetrated to use a signal
+	instead of a listener.
+
+2016-04-19  Levente Meszaros
+
+	Followed recent logging API changes.
+
+2016-05-09  Levente Meszaros
+
+	Added PathLossBase.
+
+2016-05-04  Levente Meszaros
+
+	All: Removed visualization from various modules. Visualization-related
+	code will be moved into separate modules under src/inet/visualization.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

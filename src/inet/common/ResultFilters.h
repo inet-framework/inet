@@ -47,6 +47,15 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects an ApplicationPacket, and outputs its sequence number.
+ */
+class INET_API ApplicationPacketSequenceNumberFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+};
+
+/**
  * Filter that expects an IMobility and outputs its current coordinate
  */
 class INET_API MobilityPosFilter : public cObjectResultFilter
@@ -89,6 +98,19 @@ class INET_API MessageSourceAddrFilter : public cObjectResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a cPacket and outputs the throughput as double.
+ */
+class INET_API ThroughputFilter : public cObjectResultFilter
+{
+  protected:
+    simtime_t lastSignal = 0;
+    double bytes = 0;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
 };
 
 } // namespace filters

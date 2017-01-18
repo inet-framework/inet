@@ -71,6 +71,7 @@ void IdealMac::initialize(int stage)
         headerLength = par("headerLength").longValue();
         promiscuous = par("promiscuous");
         fullDuplex = par("fullDuplex");
+        useAck = par("useAck");
         ackTimeout = par("ackTimeout");
 
         cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
@@ -88,7 +89,8 @@ void IdealMac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
-        ackTimeoutMsg = new cMessage("link-break");
+        if (useAck)
+            ackTimeoutMsg = new cMessage("link-break");
         getNextMsgFromHL();
         registerInterface();
     }
@@ -156,8 +158,10 @@ void IdealMac::startTransmitting(cPacket *msg)
     IdealMacFrame *frame = encapsulate(msg);
 
     if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
-        lastSentPk = frame->dup();
-        scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
+        if (useAck) {
+            lastSentPk = frame->dup();
+            scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
+        }
     }
     else
         frame->setSrcModuleId(-1);
@@ -204,7 +208,8 @@ void IdealMac::handleLowerPacket(cPacket *msg)
     if (!dropFrameNotForUs(frame)) {
         int senderModuleId = frame->getSrcModuleId();
         IdealMac *senderMac = dynamic_cast<IdealMac *>(getSimulation()->getModule(senderModuleId));
-        if (senderMac)
+        // TODO: this whole out of bounds ack mechanism is fishy
+        if (senderMac && senderMac->useAck)
             senderMac->acked(frame);
         // decapsulate and attach control info
         cPacket *higherlayerMsg = decapsulate(frame);
@@ -231,6 +236,7 @@ void IdealMac::handleSelfMessage(cMessage *message)
 void IdealMac::acked(IdealMacFrame *frame)
 {
     Enter_Method_Silent();
+    ASSERT(useAck);
 
     EV_DEBUG << "IdealMac::acked(" << frame->getFullName() << ") is ";
 

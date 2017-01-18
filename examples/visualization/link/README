@@ -1,0 +1,18 @@
+This example demonstrates how to display active links in a network. An active
+link is created when a packet gets delivered directly from one node to another.
+Active links become inactive over time unless they are reinforced by new packets.
+
+The adhoc wireless network contains a source node, a destination node, and a
+number of intermediate nodes. The source node continuously pings the destination
+node while all nodes move around randomly.
+
+If you run the dynamic example in express mode until 2s, then you should see a
+number of black arrows between the network nodes showing the currently active
+links. These active links represent the communication that happened between the
+DYMO routing protocols to determine the route from the source node to the
+destination. After the route has been established, it is used for a while
+without sending further routing protocol packets. If you continue the simulation
+in fast mode until 10s, then you should see how these links fade away and become
+inactive. Meanwhile the source node continuously sends ping packets to the
+destination node through the established route. This is shown by the arrows
+representing the active links along the route.

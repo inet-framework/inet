@@ -1,5 +1,26 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-31  Levente Meszaros
+
+	IObjectCache: removed insertObject().
+
+2015-10-14  Levente Meszaros
+
+	PhysicalEnvironment: Added texture to physical objects: added
+	IPhysicalObject::getTexture() method
+
+2016-05-09  Levente Meszaros
+
+	Added IGround interface, and a very simple FlatGround.
+
+2016-05-04  Levente Meszaros
+
+	All: Removed visualization from various modules. Visualization-related
+	code will be moved into separate modules under src/inet/visualization.
+	Affected: IPhysicalEnvironment's getViewAngle() etc methods.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

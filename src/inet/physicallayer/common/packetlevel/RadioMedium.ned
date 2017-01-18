@@ -20,7 +20,6 @@ package inet.physicallayer.common.packetlevel;
 import inet.physicallayer.contract.packetlevel.IAnalogModel;
 import inet.physicallayer.contract.packetlevel.ICommunicationCache;
 import inet.physicallayer.contract.packetlevel.IMediumLimitCache;
-import inet.physicallayer.contract.packetlevel.IMediumVisualizer;
 import inet.physicallayer.contract.packetlevel.INeighborCache;
 import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 import inet.physicallayer.contract.packetlevel.IPathLoss;
@@ -38,6 +37,8 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 module RadioMedium like IRadioMedium
 {
     parameters:
+        string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
+
         // submodule type parameters
         string propagationType;                   // NED type of the propagation model
         string pathLossType;                      // NED type of the path loss model
@@ -47,7 +48,6 @@ module RadioMedium like IRadioMedium
         string mediumLimitCacheType = default("MediumLimitCache"); // NED type of the medium limit cache model
         string neighborCacheType = default("");   // NED type of the neighbor cache model
         string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
-        string mediumVisualizerType = default("MediumVisualizer"); // NED type of the medium visualizer
 
         // filter parameters that control when radio frames are sent to receiver radios
         string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
@@ -59,7 +59,7 @@ module RadioMedium like IRadioMedium
         bool recordCommunicationLog = default(false); // when enabled the medium writes a communication log file that contains one line per transmission and per reception
 
         @class(RadioMedium);
-        @display("i=misc/sun");
+        @display("i=misc/sun_s");
 
     submodules:
         propagation: <propagationType> like IPropagation {
@@ -81,10 +81,6 @@ module RadioMedium like IRadioMedium
         obstacleLoss: <obstacleLossType> like IObstacleLoss if obstacleLossType != "" {
             parameters:
                 @display("p=300,150");
-        }
-        mediumVisualizer: <mediumVisualizerType> like IMediumVisualizer if mediumVisualizerType != "" {
-            parameters:
-                @display("p=300,250");
         }
         mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache {
             parameters:

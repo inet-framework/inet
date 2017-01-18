@@ -36,7 +36,7 @@ SignalPacketModel::~SignalPacketModel()
 std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "SignalPacketModel";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", packet = " << packet;
     return stream;
 }

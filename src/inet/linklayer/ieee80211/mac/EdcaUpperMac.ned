@@ -81,4 +81,5 @@ simple EdcaUpperMac like IUpperMac
         string reassemblyClass = default("BasicReassembly");
 
         @display("i=block/layer");
+        @signal[NF_LINK_BREAK](type=Ieee80211DataOrMgmtFrame);
 }

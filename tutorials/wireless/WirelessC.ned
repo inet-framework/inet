@@ -21,7 +21,9 @@ import inet.environment.common.PhysicalEnvironment;
 network WirelessC extends WirelessB
 {
     submodules:
-        environment: PhysicalEnvironment {
-            @display("p=429,29");
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=580,425");
         }
 }
+
+//##### (marker for doxygen)

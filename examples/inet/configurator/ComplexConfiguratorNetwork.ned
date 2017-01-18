@@ -23,12 +23,18 @@ import inet.node.ethernet.Eth1G;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+
 
 network ComplexConfiguratorNetwork
 {
     parameters:
         @display("bgb=1138,534");
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=200,50");
+        }
         configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=50,50");

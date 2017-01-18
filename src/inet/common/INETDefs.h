@@ -30,7 +30,7 @@
 
 using namespace omnetpp;
 
-#if OMNETPP_VERSION < 0x0500 || OMNETPP_BUILDNUM < 1006
+#if OMNETPP_VERSION < 0x0500
 #  error At least OMNeT++/OMNEST version 5.0 required
 #endif // if OMNETPP_VERSION < 0x0500
 

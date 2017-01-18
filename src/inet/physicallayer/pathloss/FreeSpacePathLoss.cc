@@ -40,7 +40,7 @@ void FreeSpacePathLoss::initialize(int stage)
 std::ostream& FreeSpacePathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "FreeSpacePathLoss";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", alpha = " << alpha
                << ", systemLoss = " << systemLoss;
     return stream;

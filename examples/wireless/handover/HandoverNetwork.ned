@@ -22,26 +22,34 @@ import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network HandoverNetwork
 {
-    parameters:
     submodules:
-        host: WirelessHost {
-            @display("p=50,130;r=,,#707070");
-        }
-        ap1: AccessPoint {
-            @display("p=100,200;r=,,#707070");
-        }
-        ap2: AccessPoint {
-            @display("p=500,200;r=,,#707070");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=60,50");
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=140,50");
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
+        host: WirelessHost {
+            parameters:
+                @display("p=50,130;r=,,#707070");
+        }
+        ap1: AccessPoint {
+            parameters:
+                @display("p=100,200;r=,,#707070");
+        }
+        ap2: AccessPoint {
+            parameters:
+                @display("p=500,200;r=,,#707070");
         }
 }
 

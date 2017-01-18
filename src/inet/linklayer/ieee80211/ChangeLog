@@ -1,10 +1,8 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
 2016-06-01  ------ inet-3.3.0 released ------
-
-2016-03-01  Zoltan Bojthe
-
-	ieee80211mgmt: bugfix: use tid only if type==ST_DATA_WITH_QOS
 
 2016-04-06  ------ inet-3.2.4 released ------
 

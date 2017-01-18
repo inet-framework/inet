@@ -23,7 +23,10 @@
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
+#include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
 #include "inet/physicallayer/contract/packetlevel/IListeningDecision.h"
+#include "inet/physicallayer/contract/packetlevel/IMediumLimitCache.h"
+#include "inet/physicallayer/contract/packetlevel/INeighborCache.h"
 #include "inet/physicallayer/contract/packetlevel/IObstacleLoss.h"
 #include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
 #include "inet/physicallayer/contract/packetlevel/IPropagation.h"
@@ -47,6 +50,21 @@ using namespace inet::physicalenvironment;
  */
 class INET_API IRadioMedium : public IPrintableObject
 {
+  public:
+    class INET_API IMediumListener {
+      public:
+        virtual void radioAdded(const IRadio *radio) = 0;
+        virtual void radioRemoved(const IRadio *radio) = 0;
+
+        virtual void transmissionAdded(const ITransmission *transmission) = 0;
+        virtual void transmissionRemoved(const ITransmission *transmission) = 0;
+
+        virtual void transmissionStarted(const ITransmission *transmission) = 0;
+        virtual void transmissionEnded(const ITransmission *transmission) = 0;
+        virtual void receptionStarted(const IReception *reception) = 0;
+        virtual void receptionEnded(const IReception *reception) = 0;
+    };
+
   public:
     /**
      * Returns the material of the radio medium. This function never returns nullptr.
@@ -88,6 +106,10 @@ class INET_API IRadioMedium : public IPrintableObject
      * may return nullptr if there's no physical environment model.
      */
     virtual const IPhysicalEnvironment *getPhysicalEnvironment() const = 0;
+
+    virtual const IMediumLimitCache *getMediumLimitCache() const = 0;
+    virtual const INeighborCache *getNeighborCache() const = 0;
+    virtual const ICommunicationCache *getCommunicationCache() const = 0;
 
     /**
      * Adds a new radio to the radio medium. An exception is thrown if the
@@ -192,6 +214,10 @@ class INET_API IRadioMedium : public IPrintableObject
      * result of the reception process.
      */
     virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const = 0;
+
+    // TODO: replace these with signals when global signals without subscribers optimization is done in omnetpp
+    virtual void addListener(IMediumListener *listener) = 0;
+    virtual void removeListener(IMediumListener *listener) = 0;
 };
 
 } // namespace physicallayer

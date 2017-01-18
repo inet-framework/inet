@@ -18,7 +18,8 @@
 #ifndef __INET_IPATHLOSS_H
 #define __INET_IPATHLOSS_H
 
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
@@ -31,6 +32,13 @@ namespace physicallayer {
 class INET_API IPathLoss : public IPrintableObject
 {
   public:
+    /**
+     * Returns the loss factor for the provided transmission and arrival.
+     * The value is in the range [0, 1] where 1 means no loss at all and 0
+     * means all power is lost.
+     */
+    virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const = 0;
+
     /**
      * Returns the loss factor as a function of propagation speed, carrier
      * frequency and distance. The value is in the range [0, 1] where 1 means

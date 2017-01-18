@@ -1,10 +1,16 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-19  Levente Meszaros
+
+	Removed AODV-RERR messages for inactive routes.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2015-07-27  Zoltan Bojthe
 
-	aodv: bugfix: accept and drop icmp error packages
+	Bugfix: accept and drop ICMP error packages
 
 2016-04-06  ------ inet-3.2.4 released ------
 

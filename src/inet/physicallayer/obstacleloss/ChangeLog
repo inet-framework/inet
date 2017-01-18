@@ -1,8 +1,37 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-31  Levente Meszaros
+
+	TracingObstacleLoss: Changed obstaclePenetrated to use a signal
+	instead of a listener.
+
+	Extracted TracingObstacleLossBase module and renamed TracingObstacleLoss
+	to DielectricObstacleLoss.
+
+2016-01-04  Levente Meszaros
+
+	TracingObstacleLoss: Fix: Added guard against corner case
+
+2016-05-04  Levente Meszaros
+
+	TracingObstacleLoss: Renamed "environment" parameters and fields to
+	"physicalEnvironment".
+
+2016-01-21  Levente Meszaros
+
+	TracingObstacleLoss: Added listener interfaces to support independent
+	visualization.
+
+2016-05-04  Levente Meszaros
+
+	All: Removed visualization from various modules. Visualization-related
+	code will be moved into separate modules under src/inet/visualization.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
-2016-05-04  Levente Mészáros
+2016-05-04  Levente Meszaros
 
 	Radio: Added a very simple IdealObstacleLoss, power loss is either 0 or 1.
 

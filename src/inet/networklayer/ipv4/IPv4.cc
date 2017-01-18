@@ -36,6 +36,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {
 
@@ -185,6 +186,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
 {
     ASSERT(datagram);
     ASSERT(fromIE);
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, datagram);
 
     //
     // "Prerouting"
@@ -273,6 +275,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
 void IPv4::handlePacketFromHL(cPacket *packet)
 {
     EV_INFO << "Received " << packet << " from upper layer.\n";
+    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
 
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
@@ -583,9 +586,11 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram, const InterfaceEnt
         controlInfoCopy->setSocketId(it->second->socketId);
         cPacket *packetCopy = packet->dup();
         packetCopy->setControlInfo(controlInfoCopy);
+        emit(LayeredProtocolBase::packetSentToUpperSignal, packetCopy);
         send(packetCopy, "transportOut");
     }
     if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+        emit(LayeredProtocolBase::packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;
     }

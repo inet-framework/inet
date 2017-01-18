@@ -1,5 +1,16 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-11  Levente Meszaros
+
+	CSMA: Fixed handling of frames with bit errors.
+
+2016-05-19  Andras Varga
+
+	Added CSMA state machine image from
+	https://github.com/GRCDEV/mixim-sommer/find/VACaMobil
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------
@@ -26,8 +37,8 @@
 
 2015-04-22  Rudolf Hornig
 
-	Added NF_LINK_BREAK notification. This enables adhoc routing protocols to
-	work correctly with this mac protocols.
+	Added NF_LINK_BREAK notification. This enables ad-hoc routing protocols to
+	work correctly with this MAC.
 
 2015-04-22 Rudolf Hornig
 

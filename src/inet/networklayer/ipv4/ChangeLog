@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-01-08  Levente Meszaros
+
+	IPv4: Added sentTo/receivedFrom upper/lower signals.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2015-07-20  Zoltan Bojthe

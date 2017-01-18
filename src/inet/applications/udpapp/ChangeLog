@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-25  Andras Varga
+
+	UDPBasicApp/UDPSink: record received pk sequence numbers
+
+2016-01-18  Levente Meszaros
+
+	Applications: Added throughput statistic to some applications.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

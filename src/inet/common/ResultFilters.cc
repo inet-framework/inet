@@ -22,6 +22,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
+#include "inet/applications/base/ApplicationPacket_m.h"
 
 namespace inet {
 
@@ -44,6 +45,15 @@ void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
     if (auto msg = dynamic_cast<cMessage *>(object))
         fire(this, t, t - msg->getTimestamp(), details);
 }
+
+Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
+
+void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+{
+    if (auto msg = dynamic_cast<ApplicationPacket*>(object))
+        fire(this, t, msg->getSequenceNumber() DETAILS_ARG_NAME);
+}
+
 
 Register_ResultFilter("mobilityPos", MobilityPosFilter);
 
@@ -91,6 +101,22 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
         if (ctrl != nullptr) {
             fire(this, t, ctrl->getSourceAddress().str().c_str(), details);
         }
+    }
+}
+
+Register_ResultFilter("throughput", ThroughputFilter);
+
+void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto packet = dynamic_cast<cPacket *>(object)) {
+        const simtime_t now = simTime();
+        if (now - lastSignal >= 0.1) {
+            double throughput = 8 * bytes / (now - lastSignal).dbl();
+            lastSignal = now;
+            bytes = 0;
+            fire(this, now, throughput, details);
+        }
+        bytes += packet->getByteLength();
     }
 }
 

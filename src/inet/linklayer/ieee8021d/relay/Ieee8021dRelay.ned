@@ -34,9 +34,11 @@ import inet.linklayer.contract.IMACRelayUnit;
 simple Ieee8021dRelay like IMACRelayUnit
 {
     parameters:
-        @display("i=block/broadcast;bgb=425,114");
         string interfaceTablePath = default("^.interfaceTable"); // The path to the InterfaceTable module
         string macTablePath = default("^.macTable");             // The path to the MACAddressTable module
+        @display("i=block/broadcast;bgb=425,114");
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
     gates:
         input ifIn[];
         output ifOut[];

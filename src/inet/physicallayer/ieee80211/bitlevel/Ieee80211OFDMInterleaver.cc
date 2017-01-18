@@ -24,8 +24,8 @@ namespace physicallayer {
 std::ostream& Ieee80211OFDMInterleaver::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211Interleaver";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", interleaving = " << printObjectToString(interleaving, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", interleaving = " << printObjectToString(interleaving, level + 1);
     return stream;
 }
 

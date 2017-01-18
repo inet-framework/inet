@@ -22,6 +22,7 @@ import inet.applications.ethernet.EtherAppCli;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 
 module ThroughputClient
@@ -59,6 +60,14 @@ network Throughput
         int numCli;
         @display("b=297,203");
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
         cliHost[numCli]: ThroughputClient {
             parameters:
                 @display("r=,,#707070");
@@ -67,9 +76,4 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=61,46");
-        }
 }
-

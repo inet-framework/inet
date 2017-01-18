@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-19  Andras Varga
+
+	BMAC: added FSM images from https://github.com/GRCDEV/mixim-sommer/find/VACaMobil
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

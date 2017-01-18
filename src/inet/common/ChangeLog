@@ -1,5 +1,27 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-06  Andras Varga
+
+	Added nanToZero() NED function
+
+2016-05-25  Andras Varga
+
+	Added "appPkSeqNo" result filter that accepts ApplicationPacket objects
+	and emits their sequence numbers
+
+2016-01-04  Levente Meszaros
+
+	Added "throughput" result filter. It expects packets, and outputs
+	one bit/second value at least every 100ms (i.e. triggered by the
+	first packet after 100ms has passed since the beginning of the
+	interval)
+
+2016-05-31  Levente Meszaros
+
+	Added OSGUtils.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

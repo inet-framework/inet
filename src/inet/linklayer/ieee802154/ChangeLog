@@ -1,0 +1,35 @@
+====== inet-3.x ======
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2015-03-16  Levente Meszaros
+
+	Radio: Fixed includes and imports after directory renames and moves.
+
+2014-12-15  Levente Meszaros
+
+	802.15.4: Extracted Ieee802154NarrowbandMac.
+
+2014-12-11  Levente Meszaros
+
+	LinkLayer: Moved module interfaces under contract.
+
+2014-12-02  Levente Meszaros
+
+	Ieee802154: Fixed NED parameter type redeclaration errors.
+
+2014-12-02  Florian Meier
+
+	IEEE 802.15.4 Narrowband Physical and Link Layer
+
+	Default settings for the MAC are taken from the 802.15.4-2006 standard.
+	Uses BreakpointPathLoss taken from 802.15.4-2006 Standard Annex E.
+	Default radio settings are taken from the datasheet of the ATmega256RFR2.
+
+2014-09-18  Rudolf Hornig
+
+	build: moved all sources under the src/inet directory
+
+2014-08-13  Levente Meszaros
+
+	Radio: Ported IEEE 802.15.4 UWB IR radio from MIXIM.

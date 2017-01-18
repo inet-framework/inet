@@ -23,6 +23,7 @@ import inet.networklayer.configurator.ipv4.HostAutoConfigurator;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 module DynamicHost extends AdhocHost
 {
@@ -37,6 +38,18 @@ module DynamicHost extends AdhocHost
 network DynamicRadioNetwork
 {
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
         destinationNode: DynamicHost {
             parameters:
                 @display("p=250,50");
@@ -45,14 +58,6 @@ network DynamicRadioNetwork
             parameters:
                 @dynamic(true);
                 @display("p=250,150");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,50");
-        }
-        configurator: IPv4NetworkConfigurator {
-            parameters:
-                @display("p=100,150");
         }
         scenarioManager: ScenarioManager {
             parameters:

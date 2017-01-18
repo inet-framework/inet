@@ -17,6 +17,7 @@
 
 package inet.environment.common;
 
+import inet.environment.contract.IGround;
 import inet.environment.contract.IObjectCache;
 import inet.environment.contract.IPhysicalEnvironment;
 
@@ -43,6 +44,9 @@ import inet.environment.contract.IPhysicalEnvironment;
 //    - @name
 //       This optional attribute specifies the name of the object. The name need
 //       not be unique, and it might be still useful on the graphical user interface.
+//
+//    - @shape
+//       TODO
 //
 //    - @position
 //       This mandatory attribute specifies the position of the object. The value
@@ -90,6 +94,10 @@ import inet.environment.contract.IPhysicalEnvironment;
 //       This optional attribute attaches multiple tags, separated by spaces, to
 //       the object. They are primarily useful for hiding objects in the graphical
 //       user interface. The default value is empty.
+//
+//    - @texture
+//       This optional attribute specifies an image that is drawn on the faces of
+//       the object. The default value specifies no texture.
 //
 //  - <shape>
 //    This element defines a shape that might be used by multiple physical objects.
@@ -155,23 +163,27 @@ import inet.environment.contract.IPhysicalEnvironment;
 module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
-        string objectCacheType = default("GridObjectCache");  // TODO should be empty by default as GridObjectCache require finite space* parameters which is not always present
+        string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
+        string objectCacheType = default("");  // NED type of object cache
+        string groundType = default("");
         double temperature @unit(K) = default(293K);
-        double spaceMinX @unit(m) = default(-1m/0); // min x position of space, unconstrained by default (negative infinity)
-        double spaceMinY @unit(m) = default(-1m/0); // min y position of space, unconstrained by default (negative infinity)
-        double spaceMinZ @unit(m) = default(-1m/0); // min z position of space, unconstrained by default (negative infinity)
-        double spaceMaxX @unit(m) = default(1m/0); // max x position of space, unconstrained by default (positive infinity)
-        double spaceMaxY @unit(m) = default(1m/0); // max y position of space, unconstrained by default (positive infinity)
-        double spaceMaxZ @unit(m) = default(1m/0); // max z position of space, unconstrained by default (positive infinity)
-        string viewAngle = default("z"); // the angle of view is either x, y, z, isometricN (where 0 <= N < 48 defaults to 0) or three rotation angles separated by spaces (it uses orthographic projection that is the projection is parallel to the normal of the viewing surface)
-        string viewTranslation = default("0 0"); // the translation is applied on the 2 dimensional projection
-        double axisLength @unit(m) = default(0m/0); // the length of the x, y, and z axes
+        double spaceMinX @unit(m) = default(0m/0); // lower bound of x coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinY @unit(m) = default(0m/0); // lower bound of y coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMinZ @unit(m) = default(0m/0); // lower bound of z coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxX @unit(m) = default(0m/0); // upper bound of x coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxY @unit(m) = default(0m/0); // upper bound of y coordinates in space, NaN means determined by physical objects, NaN by default
+        double spaceMaxZ @unit(m) = default(0m/0); // upper bound of z coordinates in space, NaN means determined by physical objects, NaN by default
         xml config = default(xml("<config/>"));
         @display("i=misc/town");
         @class(PhysicalEnvironment);
+
     submodules:
         objectCache: <objectCacheType> like IObjectCache if objectCacheType != "" {
-            @display("p=100,50");
+            parameters:
+                @display("p=100,50");
+        }
+        ground: <groundType> like IGround if groundType != "" {
+            parameters:
+                @display("p=100,150");
         }
 }
-

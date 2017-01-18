@@ -97,7 +97,7 @@ void MediumLimitCache::initialize(int stage)
 std::ostream& MediumLimitCache::printToStream(std::ostream &stream, int level) const
 {
     stream << "RadioMediumLimits";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", minConstraintArea = " << minConstraintArea
                << ", maxConstraintArea = " << maxConstraintArea
                << ", maxSpeed = " << maxSpeed

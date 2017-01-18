@@ -3,7 +3,6 @@
 #
 
 WITH_TCP_NSC := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_NSC && echo enabled) )
-CFLAGS += -Dxxx$(WITH_TCP_NSC)xxx
 ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
@@ -39,6 +38,16 @@ ifeq ($(WITH_VOIPSTREAM), enabled)
       LIBS += $(shell $(PKGCFG) --libs libavresample)
       CFLAGS += $(shell $(PKGCFG) --cflags libavresample) -DHAVE_FFMPEG_AVRESAMPLE
     endif
+  endif
+endif
+
+#
+# visualization feature requires (optionally) some extra osg and osgEarth libraries
+#
+WITH_VISUALIZERS := $(shell (cd .. && ./inet_featuretool -q isenabled visualization && echo enabled) )
+ifeq ($(WITH_VISUALIZERS), enabled)
+  ifeq ($(WITH_OSG), yes)
+      LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil
   endif
 endif
 

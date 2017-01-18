@@ -46,11 +46,11 @@ Ieee80211OFDMDecoder::Ieee80211OFDMDecoder(const Ieee80211OFDMCode *code) :
 std::ostream& Ieee80211OFDMDecoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMDecoder";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", code = " << printObjectToString(code, level - 1)
-               << ", descrambler = " << printObjectToString(descrambler, level - 1)
-               << ", fecDecoder = " << printObjectToString(fecDecoder, level - 1)
-               << ", deinterleaver = " << printObjectToString(deinterleaver, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", code = " << printObjectToString(code, level + 1)
+               << ", descrambler = " << printObjectToString(descrambler, level + 1)
+               << ", fecDecoder = " << printObjectToString(fecDecoder, level + 1)
+               << ", deinterleaver = " << printObjectToString(deinterleaver, level + 1);
     return stream;
 }
 

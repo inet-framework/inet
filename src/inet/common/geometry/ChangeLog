@@ -1,5 +1,41 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-04-19  Levente Meszaros
+
+	Common: Added coordinate axes as predefined values to Coord.
+
+2016-01-04  Levente Meszaros
+
+	Common: Fixed bounding box computation.
+
+2016-01-04  Levente Meszaros
+
+	Common: Added getSize and getCenter to Box.
+
+2016-05-31  Levente Meszaros
+
+	Visualizer: Added separate visualizer modules in a new toplevel folder.
+
+	Added separate visualizers for scene, network node, physical environment,
+	mobility, radio medium, connectivity, links, routes, obstacle loss, and
+	statistic. Added 3 visualizer modules for each model, one for cCanvas,
+	another one for OSG, and a combined variant. Also added integrated
+	visualizers that combine all known visualizers into a single module.
+
+	Also added "visualization" feature to .oppfeatures
+
+2016-01-04  Levente Meszaros
+
+	Added geographic coordinate systems:
+
+	* module interface IGeographicCoordinateSystem, and modules
+	  SimpleGeographicCoordinateSystem and OsgGeographicCoordinateSystem.
+
+	* C++ interface IGeographicCoordinateSystem, and GeoCoord (latitude+
+	  longitude+altitude)
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-06  ------ inet-3.2.4 released ------

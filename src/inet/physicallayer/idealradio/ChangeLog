@@ -1,8 +1,22 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-12  Levente Meszaros
+
+	Radio: Renamed IdealTransmitter maxCommunicationRange to
+	communicationRange.
+
+	These parameters are not maximum values but the current values. Also
+	renamed maxInterferenceRange and maxDetectionRange.
+
+2016-04-19  Levente Meszaros
+
+	Followed recent logging API changes.
+
 2016-06-01  ------ inet-3.3.0 released ------
 
-2016-05-04  Levente Mészáros
+2016-05-04  Levente Meszaros
 
 	Radio: Added IdealObstacleLoss support to IdealAnalogModel.
 

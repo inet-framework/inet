@@ -38,7 +38,7 @@ SignalSymbolModel::~SignalSymbolModel()
 std::ostream& SignalSymbolModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "SignalSymbolModel";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", headerSymbolLength = " << headerSymbolLength
                << ", payloadSymbolLength = " << payloadSymbolLength
                << ", headerSymbolRate = " << headerSymbolRate

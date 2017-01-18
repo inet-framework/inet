@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2015-09-29  Levente Meszaros
+
+	NodeBase: added osgModel and osgModelColor parameters.
+	This allows displaying a network node as a 3D model in an OSG visualization
+
 2016-06-01  ------ inet-3.3.0 released ------
 
 2016-04-19  Zoltan Bojthe

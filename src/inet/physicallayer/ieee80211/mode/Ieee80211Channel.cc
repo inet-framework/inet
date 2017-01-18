@@ -30,9 +30,9 @@ Ieee80211Channel::Ieee80211Channel(const IIeee80211Band *band, int channelNumber
 std::ostream& Ieee80211Channel::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211Channel";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", band = " << printObjectToString(band, level - 1);
-    if (level >= PRINT_LEVEL_INFO)
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", band = " << printObjectToString(band, level + 1);
+    if (level <= PRINT_LEVEL_INFO)
         stream << ", channelNumber = " << channelNumber;
     return stream;
 }
