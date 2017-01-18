@@ -18,7 +18,7 @@
 #ifndef __INET_APSKLAYEREDRECEIVER_H
 #define __INET_APSKLAYEREDRECEIVER_H
 
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/SNIRReceiverBase.h"
 #include "inet/physicallayer/common/bitlevel/ConvolutionalCode.h"
@@ -66,7 +66,6 @@ class INET_API APSKLayeredReceiver : public SNIRReceiverBase
     virtual const IReceptionSymbolModel *createSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionSampleModel *sampleModel) const;
     virtual const IReceptionBitModel *createBitModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionSymbolModel *symbolModel) const;
     virtual const IReceptionPacketModel *createPacketModel(const LayeredTransmission *transmission, const ISNIR *snir, const IReceptionBitModel *bitModel) const;
-    virtual const APSKPhyFrame *createPhyFrame(const IReceptionPacketModel *packetModel) const;
 
   public:
     APSKLayeredReceiver();

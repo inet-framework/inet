@@ -18,7 +18,6 @@
 #ifndef __INET_APSKLAYEREDTRANSMITTER_H
 #define __INET_APSKLAYEREDTRANSMITTER_H
 
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
 #include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
 #include "inet/physicallayer/contract/bitlevel/IDigitalAnalogConverter.h"
@@ -55,9 +54,7 @@ class INET_API APSKLayeredTransmitter : public TransmitterBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual int computePaddingLength(BitVector *bits) const;
-    virtual const APSKPhyFrame *createPhyFrame(const cPacket *packet) const;
-    virtual const ITransmissionPacketModel *createPacketModel(const APSKPhyFrame *phyFrame) const;
+    virtual const ITransmissionPacketModel *createPacketModel(const Packet *packet) const;
     virtual const ITransmissionBitModel *createBitModel(const ITransmissionPacketModel *packetModel) const;
     virtual const ITransmissionSymbolModel *createSymbolModel(const ITransmissionBitModel *bitModel) const;
     virtual const ITransmissionSampleModel *createSampleModel(const ITransmissionSymbolModel *symbolModel) const;

@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredReceiver.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyHeaderSerializer.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
+#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/common/packetlevel/BandListening.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
-#include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredReceiver.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKDecoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKDemodulator.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
 
 namespace inet {
 
@@ -153,15 +153,6 @@ const IReceptionPacketModel *APSKLayeredReceiver::createPacketModel(const Layere
         return nullptr;
 }
 
-const APSKPhyFrame *APSKLayeredReceiver::createPhyFrame(const IReceptionPacketModel *packetModel) const
-{
-    const BitVector *bits = packetModel->getSerializedPacket();
-    if (bits != nullptr)
-        return APSKPhyFrameSerializer().deserialize(bits);
-    else
-        return check_and_cast<const APSKPhyFrame *>(packetModel->getPacket()->dup());
-}
-
 const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     const LayeredTransmission *transmission = dynamic_cast<const LayeredTransmission *>(reception->getTransmission());
@@ -170,10 +161,9 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
-    const Packet *phyFrame = check_and_cast<const Packet *>(createPhyFrame(packetModel)); // TODO: type was APSKPhyFrame
-    const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(phyFrame, new BitVector(*packetModel->getSerializedPacket()), bps(NaN), -1, packetModel->isPacketErrorless());
+    auto packet = packetModel->getPacket()->dup();
+    const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(packet, bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
-    auto packet = const_cast<Packet *>(receptionPacketModel->getPacket());
     auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());

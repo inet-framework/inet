@@ -16,14 +16,14 @@
 //
 
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKModulator.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
+#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
@@ -92,35 +92,9 @@ std::ostream& APSKLayeredTransmitter::printToStream(std::ostream& stream, int le
     return stream;
 }
 
-int APSKLayeredTransmitter::computePaddingLength(BitVector *bits) const
+const ITransmissionPacketModel *APSKLayeredTransmitter::createPacketModel(const Packet *packet) const
 {
-    const ConvolutionalCode *forwardErrorCorrection = nullptr;
-    if (encoder) {
-        const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
-        forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
-    }
-    int modulationCodeWordSize = check_and_cast<const APSKModulationBase *>(modulator->getModulation())->getCodeWordSize();
-    int encodedCodeWordSize = forwardErrorCorrection == nullptr ? modulationCodeWordSize : modulationCodeWordSize *forwardErrorCorrection->getCodeRatePuncturingK();
-    return (encodedCodeWordSize - bits->getSize() % encodedCodeWordSize) % encodedCodeWordSize;
-}
-
-const APSKPhyFrame *APSKLayeredTransmitter::createPhyFrame(const cPacket *packet) const
-{
-    APSKPhyFrame *phyFrame = new APSKPhyFrame();
-    phyFrame->setByteLength(APSK_PHY_FRAME_HEADER_BYTE_LENGTH);
-    phyFrame->encapsulate(const_cast<cPacket *>(packet));
-    return phyFrame;
-}
-
-const ITransmissionPacketModel *APSKLayeredTransmitter::createPacketModel(const APSKPhyFrame *phyFrame) const
-{
-    if (levelOfDetail >= PACKET_DOMAIN) {
-        BitVector *bits = APSKPhyFrameSerializer().serialize(phyFrame);
-        bits->appendBit(0, computePaddingLength(bits));
-        return new TransmissionPacketModel(check_and_cast<const Packet *>(phyFrame), bits, bitrate);
-    }
-    else
-        return new TransmissionPacketModel(check_and_cast<const Packet *>(phyFrame), nullptr, bitrate);
+    return new TransmissionPacketModel(check_and_cast<const Packet *>(packet), bitrate);
 }
 
 const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITransmissionPacketModel *packetModel) const
@@ -128,8 +102,9 @@ const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITrans
     if (levelOfDetail >= BIT_DOMAIN)
         return encoder->encode(packetModel);
     else {
-        int netHeaderBitLength = APSK_PHY_FRAME_HEADER_BYTE_LENGTH * 8;
-        int netPayloadBitLength = packetModel->getSerializedPacket()->getSize() - netHeaderBitLength;
+        auto packet = packetModel->getPacket();
+        int netHeaderBitLength = packet->peekHeader<APSKPhyHeader>()->getChunkLength() * 8;
+        int netPayloadBitLength = packet->getByteLength() * 8 - netHeaderBitLength;
         if (encoder) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
             const ConvolutionalCode *forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
@@ -179,8 +154,7 @@ const ITransmissionAnalogModel *APSKLayeredTransmitter::createAnalogModel(const 
 
 const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    const APSKPhyFrame *phyFrame = createPhyFrame(packet);
-    const ITransmissionPacketModel *packetModel = createPacketModel(phyFrame);
+    const ITransmissionPacketModel *packetModel = createPacketModel(packet);
     const ITransmissionBitModel *bitModel = createBitModel(packetModel);
     const ITransmissionSymbolModel *symbolModel = createSymbolModel(bitModel);
     const ITransmissionSampleModel *sampleModel = createSampleModel(symbolModel);

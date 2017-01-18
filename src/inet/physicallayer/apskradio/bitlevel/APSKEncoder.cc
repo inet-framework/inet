@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/apskradio/bitlevel/APSKEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrameSerializer.h"
+#include "inet/physicallayer/apskradio/bitlevel/APSKPhyHeaderSerializer.h"
 
 namespace inet {
 
@@ -66,8 +66,10 @@ std::ostream& APSKEncoder::printToStream(std::ostream& stream, int level) const
 
 const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
-    const BitVector *serializedBits = packetModel->getSerializedPacket();
-    BitVector *encodedBits = new BitVector(*serializedBits);
+    auto packet = packetModel->getPacket();
+    const auto& bytesChunk = packet->peekAt<BytesChunk>(0, packet->getByteLength());
+    auto bitLength = bytesChunk->getChunkLength() * 8;
+    BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
     const IScrambling *scrambling = nullptr;
     if (scrambler) {
         *encodedBits = scrambler->scramble(*encodedBits);
@@ -86,13 +88,13 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
         interleaving = interleaver->getInterleaving();
         EV_DEBUG << "Interleaved bits are: " << *encodedBits << endl;
     }
-    int netHeaderBitLength = APSK_PHY_FRAME_HEADER_BYTE_LENGTH * 8;
+    int netHeaderBitLength = APSK_PHY_HEADER_BYTE_LENGTH * 8;
     if (forwardErrorCorrection == nullptr)
-        return new TransmissionBitModel(netHeaderBitLength, packetModel->getBitrate(), serializedBits->getSize() - netHeaderBitLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(netHeaderBitLength, packetModel->getBitrate(), bitLength - netHeaderBitLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {
         int grossHeaderBitLength = forwardErrorCorrection->getEncodedLength(netHeaderBitLength);
         bps grossBitrate = packetModel->getBitrate() / forwardErrorCorrection->getCodeRate();
-        return new TransmissionBitModel(grossHeaderBitLength, grossBitrate, serializedBits->getSize() - grossHeaderBitLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(grossHeaderBitLength, grossBitrate, bitLength - grossHeaderBitLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
     }
 }
 

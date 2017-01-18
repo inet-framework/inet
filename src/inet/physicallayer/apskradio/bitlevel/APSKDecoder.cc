@@ -77,7 +77,7 @@ const IReceptionPacketModel *APSKDecoder::decode(const IReceptionBitModel *bitMo
     }
     if (descrambler)
         *decodedBits = descrambler->descramble(*decodedBits);
-    return new ReceptionPacketModel(nullptr, decodedBits, bps(NaN), -1, isPacketErrorless);
+    return new ReceptionPacketModel(nullptr, bps(NaN), -1, isPacketErrorless);
 }
 
 } // namespace physicallayer

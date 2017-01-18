@@ -15,30 +15,29 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APSKPHYFRAMESERIALIZER_H
-#define __INET_APSKPHYFRAMESERIALIZER_H
+#ifndef __INET_APSKPHYHEADERSERIALIZER_H
+#define __INET_APSKPHYHEADERSERIALIZER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKPhyFrame_m.h"
+#include "inet/common/packet/Serializer.h"
+#include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-#define APSK_PHY_FRAME_HEADER_BYTE_LENGTH    6
+#define APSK_PHY_HEADER_BYTE_LENGTH    6
 
-class INET_API APSKPhyFrameSerializer
+class INET_API APSKPhyHeaderSerializer : public ChunkSerializer
 {
   public:
-    APSKPhyFrameSerializer();
-
-    virtual BitVector *serialize(const APSKPhyFrame *phyFrame) const;
-    virtual APSKPhyFrame *deserialize(const BitVector *bits) const;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_APSKPHYFRAMESERIALIZER_H
+#endif // ifndef __INET_APSKPHYHEADERSERIALIZER_H
 
