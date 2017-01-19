@@ -19,7 +19,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/bmac/BMacFrame_m.h"
+#include "inet/linklayer/bmac/BMacHeader_m.h"
 #include "inet/linklayer/bmac/BMacLayer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -201,7 +201,7 @@ void BMacLayer::handleUpperPacket(cPacket *msg)
  */
 void BMacLayer::sendPreamble()
 {
-    auto preamble = std::make_shared<BMacFrame>();
+    auto preamble = std::make_shared<BMacHeader>();
     preamble->setSrcAddr(address);
     preamble->setDestAddr(MACAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(headerLength / 8);
@@ -221,7 +221,7 @@ void BMacLayer::sendPreamble()
  */
 void BMacLayer::sendMacAck()
 {
-    auto ack = std::make_shared<BMacFrame>();
+    auto ack = std::make_shared<BMacHeader>();
     ack->setSrcAddr(address);
     ack->setDestAddr(lastDataPktSrcAddr);
     ack->setChunkLength(headerLength / 8);
@@ -426,7 +426,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
                 auto mac = check_and_cast<Packet *>(msg);
-                const MACAddress src = mac->peekHeader<BMacFrame>()->getSrcAddr();
+                const MACAddress src = mac->peekHeader<BMacHeader>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -470,7 +470,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_DATA) {
                 nbRxDataPackets++;
                 auto mac = check_and_cast<Packet *>(msg);
-                const auto bmacHeader = mac->peekHeader<BMacFrame>();
+                const auto bmacHeader = mac->peekHeader<BMacHeader>();
                 const MACAddress& dest = bmacHeader->getDestAddr();
                 const MACAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
@@ -572,7 +572,7 @@ void BMacLayer::sendDataPacket()
     nbTxDataPackets++;
     Packet *pkt = macQueue.front()->dup();
     attachSignal(pkt);
-    lastDataPktDestAddr = pkt->peekHeader<BMacFrame>()->getDestAddr();
+    lastDataPktDestAddr = pkt->peekHeader<BMacHeader>()->getDestAddr();
     pkt->setKind(BMAC_DATA);
     sendDown(pkt);
 }
@@ -609,7 +609,7 @@ void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
 }
 
 /**
- * Encapsulates the received network-layer packet into a BMacFrame and set all
+ * Encapsulates the received network-layer packet into a BMacHeader and set all
  * needed header fields.
  */
 bool BMacLayer::addToQueue(cMessage *msg)
@@ -728,7 +728,7 @@ void BMacLayer::refreshDisplay() const
 
 void BMacLayer::decapsulate(Packet *packet)
 {
-    const auto& msg = packet->popHeader<BMacFrame>();
+    const auto& msg = packet->popHeader<BMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
@@ -737,7 +737,7 @@ void BMacLayer::decapsulate(Packet *packet)
 
 void BMacLayer::encapsulate(Packet *packet)
 {
-    auto pkt = std::make_shared<BMacFrame>();
+    auto pkt = std::make_shared<BMacHeader>();
     pkt->setChunkLength(headerLength / 8);
 
     // copy dest address from the Control Info attached to the network

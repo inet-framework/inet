@@ -24,6 +24,6 @@ namespace inet;
 class noncobject MACAddress;
 class MacHeaderBase extends cObject;
 
-class BMacFrame extends MacHeaderBase
+class BMacHeader extends MacHeaderBase
 {
 }

@@ -48,7 +48,7 @@
 #endif // ifdef WITH_LMAC
 
 #ifdef WITH_BMAC
-#include "inet/linklayer/bmac/BMacFrame_m.h"
+#include "inet/linklayer/bmac/BMacHeader_m.h"
 #endif // ifdef WITH_BMAC
 
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
@@ -1044,7 +1044,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
             || dynamic_cast<LMacFrame *>(frame)
 #endif // ifdef WITH_LMAC
 #ifdef WITH_BMAC
-            || dynamic_cast<BMacFrame *>(frame)
+            || dynamic_cast<BMacHeader *>(frame)
 #endif // ifdef WITH_BMAC
             )
             datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
