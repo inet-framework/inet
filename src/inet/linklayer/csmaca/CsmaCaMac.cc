@@ -401,7 +401,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
     }
 }
 
-void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::receptionStateChangedSignal)

@@ -237,12 +237,14 @@ void SCTP::handleMessage(cMessage *msg)
     else {    // must be from app
         EV_DEBUG << "must be from app\n";
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
+            SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
             cPacket* cmsg = new cPacket("SocketOptions", SCTP_I_SENDSOCKETOPTIONS);
             SCTPCommand* indication = new SCTPCommand("SCTP_I_SENDSOCKETOPTIONS");
+            indication->setSocketId(controlInfo->getSocketId());
             cmsg->setControlInfo(indication);
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
-            send(cmsg, "appOut", 0);
+            send(cmsg, "appOut");
             delete msg;
         } else {
             SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());

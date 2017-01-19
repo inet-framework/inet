@@ -115,7 +115,7 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
     }
 }
 
-void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
     if (!hasGUI()) return;

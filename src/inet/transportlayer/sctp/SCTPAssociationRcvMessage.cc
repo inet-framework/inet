@@ -2000,7 +2000,7 @@ void SCTPAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
         sendQueueAbatedIndication->setBytesLimit(state->sendQueueLimit);
 
         msg->setControlInfo(sendQueueAbatedIndication);
-        sctpMain->send(msg, "appOut", appGateIndex);
+        sctpMain->send(msg, "appOut");
 
         state->lastSendQueueAbated = simTime();
     }

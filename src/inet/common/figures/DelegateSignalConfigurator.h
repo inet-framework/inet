@@ -57,7 +57,7 @@ class INET_API DelegateSignalConfigurator : public cSimpleModule
         int series = -1;
 
       protected:
-        virtual void collect(simtime_t_cref t, double value DETAILS_ARG) override { indicatorFigure->setValue(series, t, value); }
+        virtual void collect(simtime_t_cref t, double value, cObject *details) override { indicatorFigure->setValue(series, t, value); }
 
       public:
         FigureRecorder(IIndicatorFigure *figure, int series) : indicatorFigure(figure), series(series) {}

@@ -766,7 +766,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
 
             SCTPSendInfo* sendCommand = new SCTPSendInfo;
             sendCommand->setLast(true);
-            sendCommand->setAssocId(sctpAssocId);
+            sendCommand->setSocketId(sctpAssocId);
             cmsg->setControlInfo(sendCommand);
 
             sctpSocket.sendMsg(cmsg);

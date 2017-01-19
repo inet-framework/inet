@@ -109,6 +109,7 @@ void SCTPClient::initialize(int stage)
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
+        socket.setOutputGate(gate("socketOut"));
 
         if (addresses.size() == 0)
             socket.bind(port);
@@ -116,7 +117,6 @@ void SCTPClient::initialize(int stage)
             socket.bindx(addresses, port);
 
         socket.setCallbackObject(this);
-        socket.setOutputGate(gate("socketOut"));
         setStatusString("waiting");
 
         simtime_t stopTime = par("stopTime");

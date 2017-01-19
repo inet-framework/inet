@@ -804,7 +804,7 @@
         name="Visualization examples"
         description = "Provides examples for the various visualization modules."
         initiallyEnabled = "true"
-        requires = "visualization physicalenvironment DYMO Ieee80211 IPv4 MultiNet Ethernet"
+        requires = "visualization physicalenvironment DYMO Ieee80211 IPv4 Ethernet"
         labels = ""
         nedPackages = "
                        inet.examples.visualization

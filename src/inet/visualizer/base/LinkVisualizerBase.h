@@ -81,7 +81,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     virtual void updateLink(cModule *source, cModule *destination);
 
   public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace visualizer

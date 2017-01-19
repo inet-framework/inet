@@ -48,10 +48,10 @@ void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
 
 Register_ResultFilter("appPkSeqNo", ApplicationPacketSequenceNumberFilter);
 
-void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG)
+void ApplicationPacketSequenceNumberFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto msg = dynamic_cast<ApplicationPacket*>(object))
-        fire(this, t, msg->getSequenceNumber() DETAILS_ARG_NAME);
+        fire(this, t, msg->getSequenceNumber(), details);
 }
 
 

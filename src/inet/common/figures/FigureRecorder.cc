@@ -47,7 +47,7 @@ void FigureRecorder::init(cComponent *component, const char *statisticName, cons
         throw cRuntimeError("series :%d is out of bounds, figure '%s' supports %d series", series, figureName.c_str(), indicatorFigure->getNumSeries());
 }
 
-void FigureRecorder::collect(simtime_t_cref t, double value DETAILS_ARG)
+void FigureRecorder::collect(simtime_t_cref t, double value, cObject *details)
 {
     indicatorFigure->setValue(series, t, value);
 }

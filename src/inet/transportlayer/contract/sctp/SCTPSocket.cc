@@ -121,7 +121,7 @@ void SCTPSocket::sendToSCTP(cMessage *msg)
 
 void SCTPSocket::getSocketOptions()
 {
-    cPacket* cmsg = new cPacket("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
+    cMessage* cmsg = new cMessage("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
     SCTPSendInfo *cmd = new SCTPSendInfo("getOptions");
     cmd->setSocketId(assocId);
     cmd->setSid(0);
@@ -316,7 +316,7 @@ void SCTPSocket::accept(int32 assId, int32 fd)
     cmd->setLocalPort(localPrt);
     cmd->setRemoteAddr(remoteAddr);
     cmd->setRemotePort(remotePrt);
-    cmd->setAssocId(assId);
+    cmd->setSocketId(assId);
     cmd->setFd(fd);
     cMessage *cmsg = new cMessage("Accept", SCTP_C_ACCEPT);
     cmsg->setControlInfo(cmd);

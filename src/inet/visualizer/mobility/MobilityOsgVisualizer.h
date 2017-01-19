@@ -56,12 +56,12 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
     virtual void extendMovementTrail(osg::Geode *trail, const Coord& position);
 
   public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 
 #else // ifdef WITH_OSG
 
   public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override {}
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {}
 
 #endif // ifdef WITH_OSG
 };
