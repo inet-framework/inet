@@ -14,3 +14,40 @@
 // 
 
 package inet.samples.visualizer.networkroutevisualizer;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.networklayer.NetworkRouteVisualizer;
+
+
+//
+// TODO documentation
+//
+network NetworkRouteSimple
+{
+    @display("bgb=891,488");
+    submodules:
+        routeVisualizer: NetworkRouteVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,250");
+        }
+        source: StandardHost {
+            @display("p=300,150");
+        }
+        destination: StandardHost {
+            @display("p=700,150");
+        }
+
+    connections:
+        source.ethg++ <--> Eth100M <--> destination.ethg++;
+}
+
