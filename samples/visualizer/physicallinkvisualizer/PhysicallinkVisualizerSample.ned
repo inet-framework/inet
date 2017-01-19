@@ -27,6 +27,34 @@ import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 //
 // TODO documentation
 //
+network PhysicallinkVisualizerAdhoc
+{
+    @display("bgb=895,311");
+    submodules:
+        adhocSource: AdhocHost {
+            @display("p=316,80");
+        }
+        adhocDestination: AdhocHost {
+            @display("p=630,80");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
+        linkVisualizer: PhysicalLinkVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+}
+
+
+//
+// TODO documentation
+//
 network PhysicallinkVisualizerInfrastructure
 {
     @display("bgb=895,311");
@@ -54,29 +82,45 @@ network PhysicallinkVisualizerInfrastructure
         }
 }
 
+
+
 //
 // TODO documentation
 //
-network PhysicallinkVisualizerAdhoc
+network ComplexPhysicalLinkVisualizerInfrastructure
 {
-    @display("bgb=895,311");
+    @display("bgb=895,600");
     submodules:
-        adhocSource: AdhocHost {
-            @display("p=316,80");
-        }
-        adhocDestination: AdhocHost {
-            @display("p=630,80");
-        }
-        configurator: IPv4NetworkConfigurator {
-            parameters:
-                @display("p=100,150");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,250");
-        }
-        linkVisualizer: PhysicalLinkVisualizer {
+        linkVisualizer1: PhysicalLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
+        linkVisualizer2: PhysicalLinkVisualizer {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,350");
+        }
+        accessPoint: AccessPoint {
+            @display("p=545,266");
+        }
+        source1: WirelessHost {
+            @display("p=305,182");
+        }
+        destination1: WirelessHost {
+            @display("p=785,182");
+        }
+        source2: WirelessHost {
+            @display("p=305,351");
+        }
+        destination2: WirelessHost {
+            @display("p=785,351");
+        }
 }
+
