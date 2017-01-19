@@ -40,6 +40,21 @@ class INET_API ByteOutputStream {
         return new std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
     }
 
+    void writeBit(bool bit) {
+        // TODO:
+        assert(false);
+    }
+
+    void writeBitRepeatedly(bool bit, int64_t count) {
+        // TODO:
+        assert(false);
+    }
+
+    void writeBits(const std::vector<bool>& bits, int64_t offset = 0, int64_t length = -1) {
+        // TODO:
+        assert(false);
+    }
+
     void writeByte(uint8_t byte) {
         bytes.push_back(byte);
     }

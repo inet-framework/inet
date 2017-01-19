@@ -21,7 +21,7 @@
 namespace inet {
 
 /**
- * This class represents data using a length field only. This can be useful
+ * This class represents data using a byte length field only. This can be useful
  * when the actual data is irrelevant and memory efficiency is high priority.
  */
 class INET_API ByteCountChunk : public Chunk
@@ -57,7 +57,7 @@ class INET_API ByteCountChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual Type getChunkType() const override { return TYPE_BYTECOUNT; }
-    virtual int64_t getChunkLength() const override { return length; }
+    virtual int64_t getChunkLength() const override { return length * 8; }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
@@ -65,8 +65,8 @@ class INET_API ByteCountChunk : public Chunk
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(int64_t length) override { return true; }
-    virtual bool canRemoveFromEnd(int64_t length) override { return true; }
+    virtual bool canRemoveFromBeginning(int64_t length) override { return length % 8 == 0; }
+    virtual bool canRemoveFromEnd(int64_t length) override { return length % 8 == 0; }
 
     virtual void removeFromBeginning(int64_t length) override;
     virtual void removeFromEnd(int64_t length) override;

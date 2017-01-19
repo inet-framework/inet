@@ -16,6 +16,8 @@
 #ifndef __INET_SERIALIZER_H_
 #define __INET_SERIALIZER_H_
 
+#include "inet/common/packet/BitCountChunk.h"
+#include "inet/common/packet/BitsChunk.h"
 #include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/ByteInputStream.h"
 #include "inet/common/packet/ByteOutputStream.h"
@@ -28,14 +30,28 @@ namespace inet {
 class INET_API ChunkSerializer : public cObject
 {
   public:
-    static int64_t totalSerializedBytes;
-    static int64_t totalDeserializedBytes;
+    static int64_t totalSerializedBitCount;
+    static int64_t totalDeserializedBitCount;
 
   public:
     virtual ~ChunkSerializer() { }
 
     virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const = 0;
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const = 0;
+};
+
+class INET_API BitCountChunkSerializer : public ChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
+};
+
+class INET_API BitsChunkSerializer : public ChunkSerializer
+{
+  public:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 class INET_API ByteCountChunkSerializer : public ChunkSerializer

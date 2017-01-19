@@ -145,7 +145,7 @@ std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
     if (contents == nullptr)
         return nullptr;
     else {
-        int64_t peekLength = length == -1 ? getByteLength() - offset : length;
+        int64_t peekLength = length == -1 ? getPacketLength() - offset : length;
         return contents->peek(Chunk::Iterator(true, offset, -1), peekLength);
     }
 }

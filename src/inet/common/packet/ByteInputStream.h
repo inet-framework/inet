@@ -60,6 +60,16 @@ class INET_API ByteInputStream {
 
     void seek(int64_t position) { this->position = position; }
 
+    bool readBit() {
+        // TODO:
+        assert(false);
+    }
+
+    void readBitRepeatedly(bool bit, int64_t count) {
+        // TODO:
+        assert(false);
+    }
+
     uint8_t readByte() {
         if (position == bytes.size()) {
             isReadBeyondEnd_ = true;
