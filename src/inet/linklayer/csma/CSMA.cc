@@ -35,7 +35,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
-#include "inet/linklayer/csma/CSMAFrame_m.h"
+#include "inet/linklayer/csma/CSMAHeader_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 
@@ -209,7 +209,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
 void CSMA::handleUpperPacket(cPacket *msg)
 {
     //MacPkt*macPkt = encapsMsg(msg);
-    auto macPkt = std::make_shared<CSMAFrame>();
+    auto macPkt = std::make_shared<CSMAHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(headerLength / 8);
     MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
@@ -490,7 +490,7 @@ void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
     if (event == EV_FRAME_TRANSMITTED) {
         //    delete msg;
         Packet *packet = macQueue.front();
-        const auto& csmaHeader = packet->peekHeader<CSMAFrame>();
+        const auto& csmaHeader = packet->peekHeader<CSMAHeader>();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
         bool expectAck = useMACAcks;
@@ -843,7 +843,7 @@ void CSMA::handleSelfMessage(cMessage *msg)
 void CSMA::handleLowerPacket(cPacket *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
-    const auto& macPkt = packet->peekHeader<CSMAFrame>();
+    const auto& macPkt = packet->peekHeader<CSMAHeader>();
     const MACAddress& src = macPkt->getSrcAddr();
     const MACAddress& dest = macPkt->getDestAddr();
     long ExpectedNr = 0;
@@ -874,7 +874,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
 
                 if (ackMessage != nullptr)
                     delete ackMessage;
-                auto csmaHeader = std::make_shared<CSMAFrame>();
+                auto csmaHeader = std::make_shared<CSMAHeader>();
                 csmaHeader->setSrcAddr(address);
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(ackLength / 8);
@@ -907,7 +907,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
                 // message is an ack, and it is for us.
                 // Is it from the right node ?
                 Packet *firstPacket = static_cast<Packet *>(macQueue.front());
-                const auto& csmaHeader = firstPacket->peekHeader<CSMAFrame>();
+                const auto& csmaHeader = firstPacket->peekHeader<CSMAHeader>();
                 if (src == csmaHeader->getDestAddr()) {
                     nbRecvdAcks++;
                     executeMac(EV_ACK_RECEIVED, packet);
@@ -947,7 +947,7 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
 
 void CSMA::decapsulate(Packet *packet)
 {
-    const auto& csmaHeader = packet->popHeader<CSMAFrame>();
+    const auto& csmaHeader = packet->popHeader<CSMAHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol()));

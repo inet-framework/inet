@@ -1,5 +1,5 @@
 //**************************************************************************
-// * file:        CSMAFrame.msg
+// * file:        CSMAHeader.msg
 // *
 // * author:      Daniel Willkomm
 // *
@@ -28,11 +28,11 @@ namespace inet;
 class MACFrameBase extends cObject;
 
 //
-// A CSMA mac packet format definition
+// A CSMA mac header format definition
 //
 // @author Daniel Willkomm
 //
-class CSMAFrame extends MACFrameBase
+class CSMAHeader extends MACFrameBase
 {
     long       sequenceId; // Sequence Number to detect duplicate messages
 }
