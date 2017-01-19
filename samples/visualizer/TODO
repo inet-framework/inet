@@ -7,6 +7,7 @@ InterfaceTableVisualizer:
 - lehessen paraméterezni
 - lehessen felsorolás a content paraméterben, pl content="networkAddress,macAddress"
 - ha IP-t vizualizálunk akkor a switchnek ne írjon ki semmit
+- az ip/mac cimhez legyen odairva, hogy melyik interfacehez tartozik
 
 RoutingTableVisualizer:
 - lehessen szöveget írni a nyílra, pl a rule-t
