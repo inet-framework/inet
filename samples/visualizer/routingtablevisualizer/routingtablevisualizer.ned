@@ -17,11 +17,71 @@ package inet.samples.visualizer.routingtablevisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.aodv.AODVRouter;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
+network RoutingTableVisualizerA
+{
+    @display("bgb=822,636");
+    submodules:
+        hostA: StandardHost {
+            @display("p=125.44,247.04");
+        }
+        hostB: StandardHost {
+            @display("p=510.72,247.04");
+        }
+        visualizer: inet.visualizer.networklayer.RoutingTableVisualizer {
+            @display("p=701.44,168.96");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=701.44,81.92");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
 
-network RoutingTableVisualizer
+network RoutingTableVisualizerB
+{
+    @display("bgb=822,636");
+
+    submodules:
+        host1: StandardHost {
+            @display("p=136.96,225.28");
+        }
+        host2: StandardHost {
+            @display("p=136.96,355.84");
+        }
+        host3: StandardHost {
+            @display("p=634.88,225.28");
+        }
+        host4: StandardHost {
+            @display("p=636.16,363.52");
+        }
+        switch: EtherSwitch {
+            @display("p=299.52,302.08");
+        }
+        router: Router {
+            @display("p=476.16,302.08");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=759.04,51.2");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=759.04,124.16");
+        }
+    connections:
+        host1.ethg++ <--> Eth100M <--> switch.ethg++;
+        host2.ethg++ <--> Eth100M <--> switch.ethg++;
+        switch.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> host3.ethg++;
+        router.ethg++ <--> Eth100M <--> host4.ethg++;
+}
+
+network RoutingTableVisualizerC
 {
     @display("bgb=822,636");
     submodules:
@@ -56,3 +116,7 @@ network RoutingTableVisualizer
             @display("p=560,255");
         }
 }
+
+
+
+
