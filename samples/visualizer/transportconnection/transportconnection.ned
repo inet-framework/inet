@@ -20,12 +20,6 @@ network Simple
         host2: StandardHost {
             @display("p=487,133");
         }
-        router: Router {
-            @display("p=279,307");
-        }
-        etherSwitch: EtherSwitch {
-            @display("p=174,214");
-        }
         configurator: IPv4NetworkConfigurator {
             @display("p=108,408");
         }
@@ -33,9 +27,7 @@ network Simple
             @display("p=318,407");
         }
     connections:
-        host1.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        etherSwitch.ethg++ <--> Eth100M <--> router.ethg++;
-        router.ethg++ <--> Eth100M <--> host2.ethg++;
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
 }
 
 network Complex
