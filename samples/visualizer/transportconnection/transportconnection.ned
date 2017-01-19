@@ -37,3 +37,35 @@ network Simple
         etherSwitch.ethg++ <--> Eth100M <--> router.ethg++;
         router.ethg++ <--> Eth100M <--> host2.ethg++;
 }
+
+network Complex
+{
+    @display("bgb=596,421");
+    submodules:
+        host1: StandardHost {
+            @display("p=59,103");
+        }
+        host2: StandardHost {
+            @display("p=59,239");
+        }
+        switch: EtherSwitch {
+            @display("p=155,181");
+        }
+        router: Router {
+            @display("p=244,182");
+        }
+        server: StandardHost {
+            @display("p=333,182;i=device/server");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=495,53");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=495,120");
+        }
+    connections:
+        host1.ethg++ <--> Eth100M <--> switch.ethg++;
+        host2.ethg++ <--> Eth100M <--> switch.ethg++;
+        switch.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> server.ethg++;
+}
