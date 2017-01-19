@@ -16,14 +16,14 @@
 //
 
 cplusplus {{
-    #include "inet/linklayer/base/MACFrameBase_m.h"
+    #include "inet/linklayer/base/MacHeaderBase_m.h"
 }}
 
 namespace inet;
 
 class noncobject MACAddress;
-class MACFrameBase;
+class MacHeaderBase;
 
-packet BMacFrame extends MACFrameBase
+packet BMacFrame extends MacHeaderBase
 {
 }

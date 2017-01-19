@@ -26,7 +26,7 @@ namespace inet;
 class noncobject MACAddress;
 class FieldsChunk extends cObject;
 
-class MACFrameBase extends FieldsChunk
+class MacHeaderBase extends FieldsChunk
 {
     int64_t chunkLength @overridegetter;
     MACAddress srcAddr;

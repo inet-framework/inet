@@ -20,19 +20,19 @@
 // **************************************************************************/
 
 cplusplus {{
-#include "inet/linklayer/base/MACFrameBase_m.h"
+#include "inet/linklayer/base/MacHeaderBase_m.h"
 }}
 
 namespace inet;
 
-class MACFrameBase extends cObject;
+class MacHeaderBase extends cObject;
 
 //
 // A CSMA mac header format definition
 //
 // @author Daniel Willkomm
 //
-class CSMAHeader extends MACFrameBase
+class CSMAHeader extends MacHeaderBase
 {
     long       sequenceId; // Sequence Number to detect duplicate messages
 }
