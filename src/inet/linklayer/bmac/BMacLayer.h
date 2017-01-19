@@ -20,7 +20,6 @@
 #include "inet/linklayer/contract/IMACProtocol.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
-#include "inet/linklayer/bmac/BMacFrame_m.h"
 
 namespace inet {
 
@@ -90,7 +89,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
   protected:
-    typedef std::list<BMacFrame *> MacQueue;
+    typedef std::list<Packet *> MacQueue;
 
     /** @brief The MAC address of the interface. */
     MACAddress address;
@@ -232,7 +231,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     void sendPreamble();
 
     /** @brief Internal function to attach a signal to the packet */
-    void attachSignal(BMacFrame *macPkt);
+    void attachSignal(Packet *macPkt);
 
     /** @brief Internal function to add a new packet from upper to the queue */
     bool addToQueue(cMessage *msg);
@@ -241,8 +240,8 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 
     virtual void clearQueue();
 
-    cPacket *decapsulate(BMacFrame *msg);
-    BMacFrame *encapsulate(cPacket *netwPkt);
+    void decapsulate(Packet *packet);
+    void encapsulate(Packet *packet);
 };
 
 } // namespace inet

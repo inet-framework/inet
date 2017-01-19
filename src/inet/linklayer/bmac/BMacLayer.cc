@@ -19,6 +19,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/bmac/BMacFrame_m.h"
 #include "inet/linklayer/bmac/BMacLayer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -200,15 +201,18 @@ void BMacLayer::handleUpperPacket(cPacket *msg)
  */
 void BMacLayer::sendPreamble()
 {
-    BMacFrame *preamble = new BMacFrame();
+    auto preamble = std::make_shared<BMacFrame>();
     preamble->setSrcAddr(address);
     preamble->setDestAddr(MACAddress::BROADCAST_ADDRESS);
-    preamble->setKind(BMAC_PREAMBLE);
-    preamble->setBitLength(headerLength);
+    preamble->setChunkLength(headerLength / 8);
+    preamble->markImmutable();
 
     //attach signal and send down
-    attachSignal(preamble);
-    sendDown(preamble);
+    auto packet = new Packet();
+    packet->setKind(BMAC_PREAMBLE);
+    packet->pushHeader(preamble);
+    attachSignal(packet);
+    sendDown(packet);
     nbTxPreambles++;
 }
 
@@ -217,15 +221,17 @@ void BMacLayer::sendPreamble()
  */
 void BMacLayer::sendMacAck()
 {
-    BMacFrame *ack = new BMacFrame();
+    auto ack = std::make_shared<BMacFrame>();
     ack->setSrcAddr(address);
     ack->setDestAddr(lastDataPktSrcAddr);
-    ack->setKind(BMAC_ACK);
-    ack->setBitLength(headerLength);
+    ack->setChunkLength(headerLength / 8);
 
     //attach signal and send down
-    attachSignal(ack);
-    sendDown(ack);
+    auto packet = new Packet();
+    packet->setKind(BMAC_ACK);
+    packet->pushHeader(ack);
+    attachSignal(packet);
+    sendDown(packet);
     nbTxAcks++;
     //endSimulation();
 }
@@ -419,8 +425,8 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             }
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
-                BMacFrame *mac = static_cast<BMacFrame *>(msg);
-                const MACAddress src = mac->getSrcAddr();
+                auto mac = check_and_cast<Packet *>(msg);
+                const MACAddress src = mac->peekHeader<BMacFrame>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -463,12 +469,14 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
             }
             if (msg->getKind() == BMAC_DATA) {
                 nbRxDataPackets++;
-                BMacFrame *mac = static_cast<BMacFrame *>(msg);
-                const MACAddress& dest = mac->getDestAddr();
-                const MACAddress& src = mac->getSrcAddr();
+                auto mac = check_and_cast<Packet *>(msg);
+                const auto bmacHeader = mac->peekHeader<BMacFrame>();
+                const MACAddress& dest = bmacHeader->getDestAddr();
+                const MACAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
                     EV_DETAIL << "Local delivery " << mac << endl;
-                    sendUp(decapsulate(mac));
+                    decapsulate(mac);
+                    sendUp(mac);
                 }
                 else {
                     EV_DETAIL << "Received " << mac << " is not for us, dropping frame." << endl;
@@ -562,9 +570,9 @@ void BMacLayer::handleLowerPacket(cPacket *msg)
 void BMacLayer::sendDataPacket()
 {
     nbTxDataPackets++;
-    BMacFrame *pkt = macQueue.front()->dup();
+    Packet *pkt = macQueue.front()->dup();
     attachSignal(pkt);
-    lastDataPktDestAddr = pkt->getDestAddr();
+    lastDataPktDestAddr = pkt->peekHeader<BMacFrame>()->getDestAddr();
     pkt->setKind(BMAC_DATA);
     sendDown(pkt);
 }
@@ -615,8 +623,9 @@ bool BMacLayer::addToQueue(cMessage *msg)
         return false;
     }
 
-    BMacFrame *macPkt = encapsulate((cPacket *)msg);
-    macQueue.push_back(macPkt);
+    auto packet = check_and_cast<Packet *>(msg);
+    encapsulate(packet);
+    macQueue.push_back(packet);
     EV_DETAIL << "Max queue length: " << queueLength << ", packet put in queue"
                                                         "\n  queue size: " << macQueue.size() << " macState: "
               << macState << endl;
@@ -634,7 +643,7 @@ void BMacLayer::clearQueue()
     macQueue.clear();
 }
 
-void BMacLayer::attachSignal(BMacFrame *macPkt)
+void BMacLayer::attachSignal(Packet *macPkt)
 {
     //calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;
@@ -717,40 +726,37 @@ void BMacLayer::refreshDisplay() const
     macState = newState;
    }*/
 
-cPacket *BMacLayer::decapsulate(BMacFrame *msg)
+void BMacLayer::decapsulate(Packet *packet)
 {
-    cPacket *packet = msg->decapsulate();
+    const auto& msg = packet->popHeader<BMacFrame>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
     EV_DETAIL << " message decapsulated " << endl;
-    delete msg;
-    return packet;
 }
 
-BMacFrame *BMacLayer::encapsulate(cPacket *netwPkt)
+void BMacLayer::encapsulate(Packet *packet)
 {
-    BMacFrame *pkt = new BMacFrame(netwPkt->getName(), netwPkt->getKind());
-    pkt->setBitLength(headerLength);
+    auto pkt = std::make_shared<BMacFrame>();
+    pkt->setChunkLength(headerLength / 8);
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    auto dest = netwPkt->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    auto dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CInfo removed, mac addr=" << dest << endl;
-    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(netwPkt->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     pkt->setDestAddr(dest);
 
     //delete the control info
-    delete netwPkt->removeControlInfo();
+    delete packet->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    pkt->encapsulate(netwPkt);
+    pkt->markImmutable();
+    packet->pushHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
-
-    return pkt;
 }
 
 } // namespace inet

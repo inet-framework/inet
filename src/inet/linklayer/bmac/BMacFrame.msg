@@ -22,8 +22,8 @@ cplusplus {{
 namespace inet;
 
 class noncobject MACAddress;
-class MacHeaderBase;
+class MacHeaderBase extends cObject;
 
-packet BMacFrame extends MacHeaderBase
+class BMacFrame extends MacHeaderBase
 {
 }
