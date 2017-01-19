@@ -29,7 +29,7 @@ namespace inet {
 
 using namespace physicallayer;
 
-class IdealMacFrame;
+class IdealMacHeader;
 class InterfaceEntry;
 class IPassiveQueue;
 
@@ -69,7 +69,7 @@ class INET_API IdealMac : public MACProtocolBase
     //@}
 
     virtual void startTransmitting(Packet *msg);
-    virtual bool dropFrameNotForUs(IdealMacFrame *frame);
+    virtual bool dropFrameNotForUs(IdealMacHeader *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
     virtual void initializeMACAddress();

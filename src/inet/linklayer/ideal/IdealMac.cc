@@ -28,7 +28,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/ideal/IdealMac.h"
-#include "inet/linklayer/ideal/IdealMacFrame_m.h"
+#include "inet/linklayer/ideal/IdealMacHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -201,7 +201,7 @@ void IdealMac::handleUpperPacket(cPacket *msg)
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    auto frame = packet->peekHeader<IdealMacFrame>();
+    auto frame = packet->peekHeader<IdealMacHeader>();
     if (msg->hasBitError()) {
         EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
         // TODO: add reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
@@ -256,7 +256,7 @@ void IdealMac::acked(Packet *frame)
 
 void IdealMac::encapsulate(Packet *packet)
 {
-    auto idealMacHeader = std::make_shared<IdealMacFrame>();
+    auto idealMacHeader = std::make_shared<IdealMacHeader>();
     idealMacHeader->setChunkLength(headerLength);
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     idealMacHeader->setSrc(macAddressReq->getSrcAddress());
@@ -272,7 +272,7 @@ void IdealMac::encapsulate(Packet *packet)
     packet->pushHeader(idealMacHeader);
 }
 
-bool IdealMac::dropFrameNotForUs(IdealMacFrame *frame)
+bool IdealMac::dropFrameNotForUs(IdealMacHeader *frame)
 {
     // Current implementation does not support the configuration of multicast
     // MAC address groups. We rather accept all multicast frames (just like they were
@@ -298,7 +298,7 @@ bool IdealMac::dropFrameNotForUs(IdealMacFrame *frame)
 
 void IdealMac::decapsulate(Packet *packet)
 {
-    const auto& idealMacHeader = packet->popHeader<IdealMacFrame>();
+    const auto& idealMacHeader = packet->popHeader<IdealMacHeader>();
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(idealMacHeader->getSrc());
     macAddressInd->setDestAddress(idealMacHeader->getDest());

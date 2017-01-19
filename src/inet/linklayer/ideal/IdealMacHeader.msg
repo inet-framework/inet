@@ -33,7 +33,7 @@ class FieldsChunk extends cObject;
 // Packet for ~IdealMac. Packet size is configurable
 // in the MAC layer. 
 //
-class IdealMacFrame extends FieldsChunk
+class IdealMacHeader extends FieldsChunk
 {
     int64_t chunkLength @overridegetter = 16;
     MACAddress src;     // source address
