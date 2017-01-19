@@ -90,10 +90,11 @@ network ComplexDataLinkVisualizerInfrastructure
 {
     @display("bgb=895,600");
     submodules:
-        visualizer: IntegratedVisualizer {
-            parameters:
-                @display("p=100,450");
-        }
+        // this visualize communication ranges
+//        visualizer: IntegratedVisualizer {
+//            parameters:
+//                @display("p=100,450");
+//        }
         linkVisualizer1: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
