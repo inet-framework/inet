@@ -16,7 +16,7 @@
 #include "inet/linklayer/contract/IMACProtocol.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
-#include "inet/linklayer/lmac/LMacFrame_m.h"
+#include "inet/linklayer/lmac/LMacHeader_m.h"
 
 namespace inet {
 

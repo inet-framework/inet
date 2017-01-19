@@ -44,7 +44,7 @@
 #endif // ifdef WITH_CSMA
 
 #ifdef WITH_LMAC
-#include "inet/linklayer/lmac/LMacFrame_m.h"
+#include "inet/linklayer/lmac/LMacHeader_m.h"
 #endif // ifdef WITH_LMAC
 
 #ifdef WITH_BMAC
@@ -1041,7 +1041,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
             || dynamic_cast<CsmaCaMacFrame *>(frame)
 #endif // ifdef WITH_CSMACA
 #ifdef WITH_LMAC
-            || dynamic_cast<LMacFrame *>(frame)
+            || dynamic_cast<LMacHeader *>(frame)
 #endif // ifdef WITH_LMAC
 #ifdef WITH_BMAC
             || dynamic_cast<BMacHeader *>(frame)

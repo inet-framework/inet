@@ -16,7 +16,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/lmac/LMacFrame_m.h"
+#include "inet/linklayer/lmac/LMacHeader_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -279,7 +279,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = mac->peekHeader<LMacFrame>();
+                const auto& lmacHeader = mac->peekHeader<LMacHeader>();
                 const MACAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
@@ -337,7 +337,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const MACAddress& dest = mac->peekHeader<LMacFrame>()->getDestAddr();
+                const MACAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -382,7 +382,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = mac->peekHeader<LMacFrame>();
+                const auto& lmacHeader = mac->peekHeader<LMacHeader>();
                 const MACAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
@@ -467,9 +467,9 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == LMAC_SEND_CONTROL) {
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
-                auto control = std::make_shared<LMacFrame>();
+                auto control = std::make_shared<LMacHeader>();
                 if ((macQueue.size() > 0) && !SETUP_PHASE)
-                    control->setDestAddr(macQueue.front()->peekHeader<LMacFrame>()->getDestAddr());
+                    control->setDestAddr(macQueue.front()->peekHeader<LMacHeader>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
@@ -500,7 +500,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 Packet *data = new Packet();
                 data->append(macQueue.front()->peekAt(headerLength / 8));
                 data->setKind(LMAC_DATA);
-                const auto& lmacHeader = std::static_pointer_cast<LMacFrame>(macQueue.front()->peekHeader<LMacFrame>()->dupShared());
+                const auto& lmacHeader = std::static_pointer_cast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
@@ -541,7 +541,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
                 auto mac = check_and_cast<Packet *>(msg);
-                const MACAddress& dest = mac->peekHeader<LMacFrame>()->getDestAddr();
+                const MACAddress& dest = mac->peekHeader<LMacHeader>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
@@ -651,7 +651,7 @@ void LMacLayer::findNewSlot()
 
 void LMacLayer::decapsulate(Packet *packet)
 {
-    const auto& msg = packet->peekHeader<LMacFrame>();
+    const auto& msg = packet->peekHeader<LMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
@@ -665,7 +665,7 @@ void LMacLayer::decapsulate(Packet *packet)
 
 void LMacLayer::encapsulate(Packet *netwPkt)
 {
-    auto pkt = std::make_shared<LMacFrame>();
+    auto pkt = std::make_shared<LMacHeader>();
     pkt->setChunkLength(headerLength / 8);
 
     // copy dest address from the Control Info attached to the network
