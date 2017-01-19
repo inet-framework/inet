@@ -157,13 +157,14 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
  */
 void LMacLayer::handleUpperPacket(cPacket *msg)
 {
-    LMacFrame *mac = static_cast<LMacFrame *>(encapsulate(static_cast<cPacket *>(msg)));
+    auto packet = check_and_cast<Packet *>(msg);
+    encapsulate(packet);
 
     // message has to be queued if another message is waiting to be send
     // or if we are already trying to send another message
 
     if (macQueue.size() <= queueLength) {
-        macQueue.push_back(mac);
+        macQueue.push_back(packet);
         EV_DETAIL << "packet put in queue\n  queue size: " << macQueue.size() << " macState: " << macState
                   << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
         ;
@@ -171,7 +172,7 @@ void LMacLayer::handleUpperPacket(cPacket *msg)
     else {
         // queue is full, message has to be deleted
         EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is deleted\n";
-        delete mac;
+        delete packet;
         EV_DETAIL << "ERROR: Queue is full, forced to delete.\n";
     }
 }
@@ -277,9 +278,10 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "Old state: CCA, New state: SEND_CONTROL" << endl;
             }
             else if (msg->getKind() == LMAC_CONTROL) {
-                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
-                const MACAddress& dest = mac->getDestAddr();
-                EV_DETAIL << " I have received a control packet from src " << mac->getSrcAddr() << " and dest " << dest << ".\n";
+                auto mac = check_and_cast<Packet *>(msg);
+                const auto& lmacHeader = mac->peekHeader<LMacFrame>();
+                const MACAddress& dest = lmacHeader->getDestAddr();
+                EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -288,25 +290,25 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 }
 
                 for (int s = 0; s < numSlots; s++) {
-                    occSlotsAway[s] = mac->getOccupiedSlots(s);
+                    occSlotsAway[s] = lmacHeader->getOccupiedSlots(s);
                     EV_DETAIL << "Occupied slot " << s << ": " << occSlotsAway[s] << endl;
                     EV_DETAIL << "Occupied direct slot " << s << ": " << occSlotsDirect[s] << endl;
                 }
 
-                if (mac->getMySlot() > -1) {
+                if (lmacHeader->getMySlot() > -1) {
                     // check first whether this address didn't have another occupied slot and free it again
                     for (int i = 0; i < numSlots; i++) {
-                        if (occSlotsDirect[i] == mac->getSrcAddr())
+                        if (occSlotsDirect[i] == lmacHeader->getSrcAddr())
                             occSlotsDirect[i] = LMAC_FREE_SLOT;
-                        if (occSlotsAway[i] == mac->getSrcAddr())
+                        if (occSlotsAway[i] == lmacHeader->getSrcAddr())
                             occSlotsAway[i] = LMAC_FREE_SLOT;
                     }
-                    occSlotsAway[mac->getMySlot()] = mac->getSrcAddr();
-                    occSlotsDirect[mac->getMySlot()] = mac->getSrcAddr();
+                    occSlotsAway[lmacHeader->getMySlot()] = lmacHeader->getSrcAddr();
+                    occSlotsDirect[lmacHeader->getMySlot()] = lmacHeader->getSrcAddr();
                 }
-                collision = collision || (mac->getMySlot() == mySlot);
-                if (((mySlot > -1) && (mac->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (mac->getOccupiedSlots(mySlot) != address)) || collision) {
-                    EV_DETAIL << "My slot is taken by " << mac->getOccupiedSlots(mySlot) << ". I need to change it.\n";
+                collision = collision || (lmacHeader->getMySlot() == mySlot);
+                if (((mySlot > -1) && (lmacHeader->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (lmacHeader->getOccupiedSlots(mySlot) != address)) || collision) {
+                    EV_DETAIL << "My slot is taken by " << lmacHeader->getOccupiedSlots(mySlot) << ". I need to change it.\n";
                     findNewSlot();
                     EV_DETAIL << "My new slot is " << mySlot << endl;
                 }
@@ -334,8 +336,8 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             }
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
-                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
-                const MACAddress& dest = mac->getDestAddr();
+                auto mac = check_and_cast<Packet *>(msg);
+                const MACAddress& dest = mac->peekHeader<LMacFrame>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -345,7 +347,8 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
                     EV_DETAIL << "sending pkt to upper...\n";
-                    sendUp(decapsulate(mac));
+                    decapsulate(mac);
+                    sendUp(mac);
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
@@ -378,9 +381,10 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
             }
             else if (msg->getKind() == LMAC_CONTROL) {
-                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
-                const MACAddress& dest = mac->getDestAddr();
-                EV_DETAIL << " I have received a control packet from src " << mac->getSrcAddr() << " and dest " << dest << ".\n";
+                auto mac = check_and_cast<Packet *>(msg);
+                const auto& lmacHeader = mac->peekHeader<LMacFrame>();
+                const MACAddress& dest = lmacHeader->getDestAddr();
+                EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
                 bool collision = false;
 
@@ -388,26 +392,26 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                 // copy the current slot assignment
 
                 for (int s = 0; s < numSlots; s++) {
-                    occSlotsAway[s] = mac->getOccupiedSlots(s);
+                    occSlotsAway[s] = lmacHeader->getOccupiedSlots(s);
                     EV_DETAIL << "Occupied slot " << s << ": " << occSlotsAway[s] << endl;
                     EV_DETAIL << "Occupied direct slot " << s << ": " << occSlotsDirect[s] << endl;
                 }
 
-                if (mac->getMySlot() > -1) {
+                if (lmacHeader->getMySlot() > -1) {
                     // check first whether this address didn't have another occupied slot and free it again
                     for (int i = 0; i < numSlots; i++) {
-                        if (occSlotsDirect[i] == mac->getSrcAddr())
+                        if (occSlotsDirect[i] == lmacHeader->getSrcAddr())
                             occSlotsDirect[i] = LMAC_FREE_SLOT;
-                        if (occSlotsAway[i] == mac->getSrcAddr())
+                        if (occSlotsAway[i] == lmacHeader->getSrcAddr())
                             occSlotsAway[i] = LMAC_FREE_SLOT;
                     }
-                    occSlotsAway[mac->getMySlot()] = mac->getSrcAddr();
-                    occSlotsDirect[mac->getMySlot()] = mac->getSrcAddr();
+                    occSlotsAway[lmacHeader->getMySlot()] = lmacHeader->getSrcAddr();
+                    occSlotsDirect[lmacHeader->getMySlot()] = lmacHeader->getSrcAddr();
                 }
 
-                collision = collision || (mac->getMySlot() == mySlot);
-                if (((mySlot > -1) && (mac->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (mac->getOccupiedSlots(mySlot) != address)) || collision) {
-                    EV_DETAIL << "My slot is taken by " << mac->getOccupiedSlots(mySlot) << ". I need to change it.\n";
+                collision = collision || (lmacHeader->getMySlot() == mySlot);
+                if (((mySlot > -1) && (lmacHeader->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (lmacHeader->getOccupiedSlots(mySlot) != address)) || collision) {
+                    EV_DETAIL << "My slot is taken by " << lmacHeader->getOccupiedSlots(mySlot) << ". I need to change it.\n";
                     findNewSlot();
                     EV_DETAIL << "My new slot is " << mySlot << endl;
                 }
@@ -463,21 +467,24 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == LMAC_SEND_CONTROL) {
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
-                LMacFrame *control = new LMacFrame();
-                control->setKind(LMAC_CONTROL);
+                auto control = std::make_shared<LMacFrame>();
                 if ((macQueue.size() > 0) && !SETUP_PHASE)
-                    control->setDestAddr((macQueue.front())->getDestAddr());
+                    control->setDestAddr(macQueue.front()->peekHeader<LMacFrame>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
                 control->setSrcAddr(address);
                 control->setMySlot(mySlot);
-                control->setBitLength(headerLength + numSlots);
+                control->setChunkLength((headerLength + numSlots) / 8);
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
+                control->markImmutable();
 
-                sendDown(control);
+                Packet *packet = new Packet();
+                packet->setKind(LMAC_CONTROL);
+                packet->pushHeader(control);
+                sendDown(packet);
                 if ((macQueue.size() > 0) && (!SETUP_PHASE))
                     scheduleAt(simTime() + controlDuration, sendData);
             }
@@ -490,13 +497,17 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                         cancelEvent(timeout);
                     return;
                 }
-                LMacFrame *data = macQueue.front()->dup();
+                Packet *data = new Packet();
+                data->append(macQueue.front()->peekAt(headerLength / 8));
                 data->setKind(LMAC_DATA);
-                data->setMySlot(mySlot);
-                data->setOccupiedSlotsArraySize(numSlots);
+                const auto& lmacHeader = std::static_pointer_cast<LMacFrame>(macQueue.front()->peekHeader<LMacFrame>()->dupShared());
+                lmacHeader->setMySlot(mySlot);
+                lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
-                    data->setOccupiedSlots(i, occSlotsDirect[i]);
+                    lmacHeader->setOccupiedSlots(i, occSlotsDirect[i]);
+                lmacHeader->markImmutable();
 
+                data->pushHeader(lmacHeader);
                 EV << "Sending down data packet\n";
                 sendDown(data);
                 delete macQueue.front();
@@ -529,13 +540,14 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
-                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
-                const MACAddress& dest = mac->getDestAddr();
+                auto mac = check_and_cast<Packet *>(msg);
+                const MACAddress& dest = mac->peekHeader<LMacFrame>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
                     EV_DETAIL << "sending pkt to upper...\n";
-                    sendUp(decapsulate(mac));
+                    decapsulate(mac);
+                    sendUp(mac);
                 }
                 else {
                     EV_DETAIL << "packet not for me, deleting...\n";
@@ -637,15 +649,13 @@ void LMacLayer::findNewSlot()
     slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId() - 4);
 }
 
-cPacket *LMacLayer::decapsulate(LMacFrame *msg)
+void LMacLayer::decapsulate(Packet *packet)
 {
-    cPacket *packet = msg->decapsulate();
+    const auto& msg = packet->peekHeader<LMacFrame>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
     EV_DETAIL << " message decapsulated " << endl;
-    delete msg;
-    return packet;
 }
 
 /**
@@ -653,10 +663,10 @@ cPacket *LMacLayer::decapsulate(LMacFrame *msg)
  * header fields.
  */
 
-LMacFrame *LMacLayer::encapsulate(cPacket *netwPkt)
+void LMacLayer::encapsulate(Packet *netwPkt)
 {
-    LMacFrame *pkt = new LMacFrame(netwPkt->getName(), netwPkt->getKind());
-    pkt->setBitLength(headerLength);
+    auto pkt = std::make_shared<LMacFrame>();
+    pkt->setChunkLength(headerLength / 8);
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
@@ -672,10 +682,9 @@ LMacFrame *LMacLayer::encapsulate(cPacket *netwPkt)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    pkt->encapsulate(netwPkt);
+    pkt->markImmutable();
+    netwPkt->pushHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
-
-    return pkt;
 }
 
 void LMacLayer::flushQueue()
@@ -689,7 +698,7 @@ void LMacLayer::clearQueue()
     macQueue.clear();
 }
 
-void LMacLayer::attachSignal(LMacFrame *macPkt)
+void LMacLayer::attachSignal(Packet *macPkt)
 {
     //calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;

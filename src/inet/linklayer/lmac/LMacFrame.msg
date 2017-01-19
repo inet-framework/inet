@@ -1,4 +1,4 @@
-// A LMAC packet format definition
+// A LMAC packet header definition
 //
 // @author Anna Foerster
 
@@ -9,9 +9,9 @@ cplusplus {{
 namespace inet;
 
 class noncobject MACAddress;
-class MacHeaderBase;
+class MacHeaderBase extends cObject;
 
-packet LMacFrame extends MacHeaderBase
+class LMacFrame extends MacHeaderBase
 {
     int        mySlot; // the node's current slot number
     MACAddress occupiedSlots[]; // currently known occupied slots

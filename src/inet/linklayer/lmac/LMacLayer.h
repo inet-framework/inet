@@ -115,8 +115,8 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
     /** @brief Encapsulate the NetwPkt into an MacPkt */
-    virtual LMacFrame *encapsulate(cPacket *);
-    virtual cPacket *decapsulate(LMacFrame *);
+    virtual void encapsulate(Packet *);
+    virtual void decapsulate(Packet *);
 
   protected:
     /** @brief Generate new interface address*/
@@ -124,7 +124,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
-    typedef std::list<LMacFrame *> MacQueue;
+    typedef std::list<Packet *> MacQueue;
 
     /** @brief MAC states
      *
@@ -216,7 +216,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
     void findNewSlot();
 
     /** @brief Internal function to attach a signal to the packet */
-    void attachSignal(LMacFrame *macPkt);
+    void attachSignal(Packet *macPkt);
 
     virtual void flushQueue();
 
