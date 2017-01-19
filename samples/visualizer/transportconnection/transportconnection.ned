@@ -12,7 +12,7 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 
 network Simple
 {
-    @display("bgb=596,479");
+    @display("bgb=596,373");
     submodules:
         host1: StandardHost {
             @display("p=78,133");
@@ -21,10 +21,10 @@ network Simple
             @display("p=487,133");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=108,408");
+            @display("p=109,290");
         }
         visualizer: IntegratedVisualizer {
-            @display("p=318,407");
+            @display("p=207,290");
         }
     connections:
         host1.ethg++ <--> Eth100M <--> host2.ethg++;
@@ -38,22 +38,22 @@ network Complex
             @display("p=59,103");
         }
         host2: StandardHost {
-            @display("p=59,239");
+            @display("p=59,329");
         }
         switch: EtherSwitch {
-            @display("p=155,181");
+            @display("p=199,213");
         }
         router: Router {
-            @display("p=244,182");
+            @display("p=299,214");
         }
         server: StandardHost {
-            @display("p=333,182;i=device/server");
+            @display("p=410,214;i=device/server");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=495,53");
+            @display("p=531,53");
         }
         visualizer: IntegratedVisualizer {
-            @display("p=495,120");
+            @display("p=531,119");
         }
     connections:
         host1.ethg++ <--> Eth100M <--> switch.ethg++;
