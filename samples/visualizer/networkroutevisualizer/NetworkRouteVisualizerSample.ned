@@ -16,6 +16,7 @@
 package inet.samples.visualizer.networkroutevisualizer;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.networklayer.NetworkRouteVisualizer;
@@ -26,7 +27,7 @@ import inet.visualizer.networklayer.NetworkRouteVisualizer;
 //
 network NetworkRouteSimple
 {
-    @display("bgb=891,488");
+    @display("bgb=800,300");
     submodules:
         routeVisualizer: NetworkRouteVisualizer {
             parameters:
@@ -49,5 +50,47 @@ network NetworkRouteSimple
 
     connections:
         source.ethg++ <--> Eth100M <--> destination.ethg++;
+}
+
+//
+// TODO documentation
+//
+network NetworkRouteExtended
+{
+    @display("bgb=1000,600");
+    submodules:
+        routeVisualizer: NetworkRouteVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,250");
+        }
+        source: StandardHost {
+            @display("p=250,50");
+        }
+        destination: StandardHost {
+            @display("p=950,550");
+        }
+
+        router0: Router {
+            @display("p=383.73126,279.6875");
+        }
+        router1: Router {
+            @display("p=661.1813,194.6625");
+        }
+        router2: Router {
+            @display("p=787.60004,404.98752");
+        }
+    connections:
+        source.ethg++ <--> Eth100M <--> router0.ethg++;
+        router0.pppg++ <--> Eth100M <--> router1.pppg++;
+        router1.pppg++ <--> Eth100M <--> router2.pppg++;
+        router2.ethg++ <--> Eth100M <--> destination.ethg++;
 }
 
