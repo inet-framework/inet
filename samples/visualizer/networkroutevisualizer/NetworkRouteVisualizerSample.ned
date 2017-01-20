@@ -124,10 +124,10 @@ network NetworkRouteComplex
             parameters:
                 @display("p=100,450");
         }
-        source1: StandardHost {
+        wiredSource: StandardHost {
             @display("p=250,50");
         }
-        destination1: StandardHost {
+        wiredDestination: StandardHost {
             @display("p=930,550");
         }
         router0: Router {
@@ -148,17 +148,17 @@ network NetworkRouteComplex
         accessPoint1: AccessPoint {
             @display("p=286.13998,480.66498");
         }
-        source2: WirelessHost {
+        wirelessSource: WirelessHost {
             @display("p=919.915,114.204994");
         }
-        destination2: WirelessHost {
+        wirelessDestination: WirelessHost {
             @display("p=163.15,549.69");
         }
     connections:
-        source1.ethg++ <--> Eth100M <--> router0.ethg++;
+        wiredSource.ethg++ <--> Eth100M <--> router0.ethg++;
         router0.pppg++ <--> Eth100M <--> router1.pppg++;
         router1.pppg++ <--> Eth100M <--> router2.pppg++;
-        router2.ethg++ <--> Eth100M <--> destination1.ethg++;
+        router2.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
         router0.pppg++ <--> Eth100M <--> router3.pppg++;
         router3.pppg++ <--> Eth100M <--> router2.pppg++;
         router1.ethg++ <--> Eth100M <--> accessPoint0.ethg++;
