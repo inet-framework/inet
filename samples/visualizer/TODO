@@ -11,3 +11,6 @@ InterfaceTableVisualizer:
 
 RoutingTableVisualizer:
 - lehessen szöveget írni a nyílra, pl a rule-t
+
+PhysicalLinkVisualizer:
+- 2 standardhost wired kapcsolattal osszekotve. displayLinks=true mellett sem vizualizalja a physical linket
