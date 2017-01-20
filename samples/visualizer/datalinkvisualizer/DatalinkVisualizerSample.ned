@@ -16,7 +16,9 @@
 package inet.samples.visualizer.datalinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
 import inet.node.inet.AdhocHost;
+import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -27,14 +29,14 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 // TODO documentation
 //
-network DatalinkVisualizerAdhoc
+network DatalinkVisualizerSimple
 {
     @display("bgb=895,311");
     submodules:
-        source: AdhocHost {
+        wirelessSource: AdhocHost {
             @display("p=316,80");
         }
-        destination: AdhocHost {
+        wirelessDestination: AdhocHost {
             @display("p=630,80");
         }
         configurator: IPv4NetworkConfigurator {
@@ -49,13 +51,21 @@ network DatalinkVisualizerAdhoc
             parameters:
                 @display("p=100,50");
         }
+        wiredSource: StandardHost {
+            @display("p=316,200");
+        }
+        wiredDestination: StandardHost {
+            @display("p=630,200");
+        }
+    connections:
+        wiredSource.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
 }
 
 
 //
 // TODO documentation
 //
-network DatalinkVisualizerInfrastructure
+network DatalinkVisualizerExtended
 {
     @display("bgb=895,311");
     submodules:
@@ -91,10 +101,10 @@ network ComplexDataLinkVisualizerInfrastructure
     @display("bgb=895,600");
     submodules:
         // this visualize communication ranges
-//        visualizer: IntegratedVisualizer {
-//            parameters:
-//                @display("p=100,450");
-//        }
+        //        visualizer: IntegratedVisualizer {
+        //            parameters:
+        //                @display("p=100,450");
+        //        }
         linkVisualizer1: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
