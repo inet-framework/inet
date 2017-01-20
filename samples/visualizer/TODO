@@ -14,3 +14,8 @@ RoutingTableVisualizer:
 
 PhysicalLinkVisualizer:
 - 2 standardhost wired kapcsolattal osszekotve. displayLinks=true mellett sem vizualizalja a physical linket
+
+MobilityVisualizer:
+- MobilityVisualizerBase:
+	bool displayMovements = default(true); // display mobility movement, disabled by default --> A komment, vagy az ertek rossz
+- *.visualizer.*.mobilityVisualizer.movementTrailLineWidth nem mukodik
