@@ -16,25 +16,27 @@
 package inet.samples.visualizer.physicallinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.AdhocHost;
+import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 
 
 //
 // TODO documentation
 //
-network PhysicallinkVisualizerAdhoc
+network PhysicallinkVisualizerSimple
 {
     @display("bgb=895,311");
     submodules:
-        adhocSource: AdhocHost {
+        wirelessSource: AdhocHost {
             @display("p=316,80");
         }
-        adhocDestination: AdhocHost {
+        wirelessDestination: AdhocHost {
             @display("p=630,80");
         }
         configurator: IPv4NetworkConfigurator {
@@ -49,13 +51,25 @@ network PhysicallinkVisualizerAdhoc
             parameters:
                 @display("p=100,50");
         }
+        wiredSource: StandardHost {
+            @display("p=316,200");
+        }
+        wiredDestination: StandardHost {
+            @display("p=630,200");
+        }
+        etherSwitch: EtherSwitch {
+            @display("p=484.33627,248.34875");
+        }
+    connections:
+        wiredSource.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
+        etherSwitch.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
 }
 
 
 //
 // TODO documentation
 //
-network PhysicallinkVisualizerInfrastructure
+network PhysicallinkVisualizerExtended
 {
     @display("bgb=895,311");
     submodules:
