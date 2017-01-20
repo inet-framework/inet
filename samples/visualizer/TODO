@@ -19,3 +19,4 @@ MobilityVisualizer:
 - MobilityVisualizerBase:
 	bool displayMovements = default(true); // display mobility movement, disabled by default --> A komment, vagy az ertek rossz
 - *.visualizer.*.mobilityVisualizer.movementTrailLineWidth nem mukodik
+- Orientation: az arc pont az elfordulási szög ellentettjével fordul
