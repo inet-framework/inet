@@ -13,6 +13,12 @@ sim-time-limit=100s
 cmdenv-express-mode = false
 #cmdenv-log-prefix = "%t %N: "
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
 **.IPForward = true

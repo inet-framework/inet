@@ -10,6 +10,12 @@ tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 *.host.numApps = 1
 *.host.app[0].typename = "PingApp"
 *.host.app[0].destAddr = "192.168.0.42"
@@ -56,22 +62,11 @@ Sending ping request #2 to lower layer\.
 processing <at> command\.\.\.
 processing <tell> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test\.host
-Test\.host shutting down
-Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.host
-Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.host
-Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.host
-Clear all sockets
-Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.host
-remove route dest:127\.0\.0\.0  gw:\*  mask:255\.0\.0\.0  metric:1 if:lo0\(127\.0\.0\.1\)  DIRECT IFACENETMASK
-IPv4::flush\(\): packets in queue: empty
-IPv4::flush\(\): pending packets:
-IPv4::flush\(\): packets in hooks: 0
-Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.host
-Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.host
+.*
 Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.host
 Test\.host shut down
 
-<!> No more events -- simulation ended at event #\d+, t=6\.
+<!> No more events
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

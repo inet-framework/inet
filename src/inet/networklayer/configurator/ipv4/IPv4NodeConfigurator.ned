@@ -28,7 +28,7 @@ package inet.networklayer.configurator.ipv4;
 // ~IPv4NetworkConfigurator only computes and remembers configuration data
 // (assigned IP addresses, static routes, etc), but doesn't configure the nodes'
 // routing tables and interfaces accordingly. The actual configuration is
-// is carried out by this module, at network initialization time and also when
+// carried out by this module, at network initialization time and also when
 // the node restarts (i.e. after a shutdown or a crash.)
 //
 // This module is needed because of failure/restart scenarios:

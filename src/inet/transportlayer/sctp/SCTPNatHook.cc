@@ -299,7 +299,7 @@ void SCTPNatHook::finish()
     if (isRegisteredHook())
         ipLayer->unregisterHook(this);
     ipLayer = nullptr;
-    std::cout << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
+    EV_INFO<< getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }
 
 } // namespace sctp

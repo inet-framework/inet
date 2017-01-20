@@ -30,6 +30,11 @@ SCTPQueue::SCTPQueue()
     assoc = nullptr;
 }
 
+SCTPQueue::SCTPQueue(SCTPAssociation *assoc_)
+{
+    assoc = assoc_;
+}
+
 SCTPQueue::~SCTPQueue()
 {
     for (auto & elem : payloadQueue)

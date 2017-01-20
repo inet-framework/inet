@@ -99,9 +99,12 @@ enum SCTPEventCode {
     SCTP_E_SEND_SHUTDOWN_ACK,
     SCTP_E_STOP_SENDING,
     SCTP_E_STREAM_RESET,
+    SCTP_E_RESET_ASSOC,
+    SCTP_E_ADD_STREAMS,
     SCTP_E_SEND_ASCONF,
     SCTP_E_SET_STREAM_PRIO,
-    SCTP_E_ACCEPT
+    SCTP_E_ACCEPT,
+    SCTP_E_SET_RTO_INFO
 };
 
 enum SCTPChunkTypes {
@@ -122,9 +125,10 @@ enum SCTPChunkTypes {
     NR_SACK = 16,
     ASCONF_ACK = 128,
     PKTDROP = 129,
-    STREAM_RESET = 130,
+    RE_CONFIG = 130,
     FORWARD_TSN = 192,
-    ASCONF = 193
+    ASCONF = 193,
+    IFORWARD_TSN = 194
 };
 
 enum SCTPPrMethods {
@@ -142,14 +146,22 @@ enum SCTPStreamResetConstants {
     WRONG_SSN = 3,
     REQUEST_IN_PROGRESS = 4,
     NO_RESET = 5,
-    RESET_OUTGOING = 6,
-    RESET_INCOMING = 7,
-    RESET_BOTH = 8,
-    SSN_TSN = 9,
+    DEFERRED = 6,
+    RESET_OUTGOING = 7,
+    RESET_INCOMING = 8,
+    RESET_BOTH = 9,
+    SSN_TSN = 10,
+    ADD_INCOMING = 11,
+    ADD_OUTGOING = 12,
     OUTGOING_RESET_REQUEST_PARAMETER = 13,
     INCOMING_RESET_REQUEST_PARAMETER = 14,
     SSN_TSN_RESET_REQUEST_PARAMETER = 15,
-    STREAM_RESET_RESPONSE_PARAMETER = 16
+    STREAM_RESET_RESPONSE_PARAMETER = 16,
+    ADD_OUTGOING_STREAMS_REQUEST_PARAMETER = 17,
+    ADD_INCOMING_STREAMS_REQUEST_PARAMETER = 18,
+    ADD_BOTH = 19,
+    PERFORMED_WITH_OPTION = 20,
+    PERFORMED_WITH_ADDOUT = 21
 };
 
 enum SCTPAddIPCorrelatedTypes {
@@ -214,6 +226,7 @@ enum SCTPStreamSchedulers {
 #define SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH    8   // without streams
 #define SCTP_SSN_TSN_RESET_REQUEST_PARAMETER_LENGTH     8
 #define SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH     12
+#define SCTP_ADD_STREAMS_REQUEST_PARAMETER_LENGTH       12
 #define SCTP_SUPPORTED_EXTENSIONS_PARAMETER_LENGTH      4
 #define SCTP_ADD_IP_CHUNK_LENGTH                        8
 #define SCTP_ADD_IP_PARAMETER_LENGTH                    8
@@ -547,6 +560,15 @@ class INET_API SCTPStateVariables : public cObject
         return primaryPath;
     }
 
+    typedef struct requestData
+    {
+        uint32 sn;
+        uint16 result;
+        uint16 type;
+        std::list<uint16> streams;
+        uint32 lastTsn;
+    } RequestData;
+
     bool active;
     bool fork;
     bool ackPointAdvanced;
@@ -562,8 +584,10 @@ class INET_API SCTPStateVariables : public cObject
     bool fastRecoverySupported;
     bool nagleEnabled;
     bool sackAllowed;
+    bool sackAlreadySent;
     bool reactivatePrimaryPath;
     bool resetPending;
+    bool resetRequested;
     bool stopReceiving;    // incoming data will be discarded
     bool stopOldData;    // data with TSN<peerTsnAfterReset will be discarded
     bool queueUpdate;
@@ -574,6 +598,8 @@ class INET_API SCTPStateVariables : public cObject
     bool stopReading;    // will be called when CLOSE was called and no data will be accepted
     bool inOut;
     bool noMoreOutstanding;
+    bool fragInProgress;
+    bool incomingRequestSet;
     uint32 numGapReports;
     L3Address initialPrimaryPath;
     std::list<SCTPPathVariables *> lastDataSourceList;    // DATA chunk sources for new SACK
@@ -613,6 +639,9 @@ class INET_API SCTPStateVariables : public cObject
     uint32 messageAcceptLimit;
     uint32 queueLimit;
     uint16 header;
+    uint16 sendResponse;
+    uint32 responseSn;
+    uint16 numResetRequests;
     int32 probingTimeout;
     std::vector<int32> numMsgsReq;
     int32 cookieLifeTime;
@@ -640,6 +669,8 @@ class INET_API SCTPStateVariables : public cObject
     uint16 chunksAdded;
     uint16 dataChunksAdded;
     uint32 packetBytes;
+    uint16 numAddedOutStreams;
+    uint16 numAddedInStreams;
     bool authAdded;
 
     // ====== NR-SACK =====================================================
@@ -753,13 +784,37 @@ class INET_API SCTPStateVariables : public cObject
     // ====== Stream Reset ================================================
     bool streamReset;
     bool peerStreamReset;
+    bool resetDeferred;
+    bool bundleReset;
+    bool waitForResponse;
+    bool firstPeerRequest;
+    bool appLimited;
+    bool requestsOverlap;
     uint32 streamResetSequenceNumber;
     uint32 expectedStreamResetSequenceNumber;
     uint32 peerRequestSn;
     uint32 inRequestSn;
     uint32 peerTsnAfterReset;
     uint32 lastTsnBeforeReset;    // lastTsn announced in OutgoingStreamResetParameter
-    SCTPStreamResetChunk *resetChunk;
+    SCTPStreamResetChunk *resetChunk; // pointer to the resetChunk (for retransmission)
+    SCTPParameter *incomingRequest;
+    std::list<uint16> resetOutStreams;
+    std::list<uint16> resetInStreams;
+    std::list<uint16> streamsPending;
+    std::list<uint16> streamsToReset;
+    std::list<uint16> peerStreamsToReset;
+    std::map<uint32, RequestData> requests;
+    std::map<uint32, RequestData> peerRequests;
+    SCTPResetInfo *resetInfo;
+    uint16 peerRequestType;
+    uint16 localRequestType;
+
+    bool findRequestNum(uint32 num);
+    bool findPeerRequestNum(uint32 num);
+    bool findPeerStreamToReset(uint16 sn);
+    bool findMatch(uint16 sn);
+    RequestData* findTypeInRequests(uint16 type);
+    uint16 getNumRequestsNotPerformed();
 
     // ====== SCTP Authentication =========================================
     uint16 hmacType;
@@ -886,6 +941,7 @@ class INET_API SCTPAssociation : public cObject
     uint32 numberOfRemoteAddresses;
     uint32 inboundStreams;
     uint32 outboundStreams;
+    uint32 initInboundStreams;
 
     int32 status;
     uint32 initTsn;
@@ -1010,13 +1066,24 @@ class INET_API SCTPAssociation : public cObject
     /**
      * Compare TSNs
      */
-    inline static int32 tsnLt(const uint32 tsn1, const uint32 tsn2) { return (int32)(tsn1 - tsn2) < 0; }
-    inline static int32 tsnLe(const uint32 tsn1, const uint32 tsn2) { return (int32)(tsn1 - tsn2) <= 0; }
-    inline static int32 tsnGe(const uint32 tsn1, const uint32 tsn2) { return (int32)(tsn1 - tsn2) >= 0; }
-    inline static int32 tsnGt(const uint32 tsn1, const uint32 tsn2) { return (int32)(tsn1 - tsn2) > 0; }
-    inline static int32 tsnBetween(const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return (tsn2 - tsn1) >= (midtsn - tsn1); }
-
-    inline static int16 ssnGt(const uint16 ssn1, const uint16 ssn2) { return (int16)(ssn1 - ssn2) > 0; }
+    /* Defines see RFC1982 for details */
+    #define SCTP_UINT16_GT(a, b) (((a < b) && ((uint16_t)(b - a) > (1U<<15))) || \
+                                  ((a > b) && ((uint16_t)(a - b) < (1U<<15))))
+    #define SCTP_UINT16_GE(a, b) (SCTP_UINT16_GT(a, b) || (a == b))
+    #define SCTP_UINT32_GT(a, b) (((a < b) && ((uint32_t)(b - a) > (1U<<31))) || \
+                                  ((a > b) && ((uint32_t)(a - b) < (1U<<31))))
+    #define SCTP_UINT32_GE(a, b) (SCTP_UINT32_GT(a, b) || (a == b))
+    #define SCTP_TSN_GT(a, b) SCTP_UINT32_GT(a, b)
+    #define SCTP_TSN_GE(a, b) SCTP_UINT32_GE(a, b)
+    #define SCTP_SSN_GT(a, b) SCTP_UINT16_GT(a, b)
+    #define SCTP_SSN_GE(a, b) SCTP_UINT16_GE(a, b)
+    inline static int32 tsnGe(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GE(tsn1, tsn2); }
+    inline static int32 tsnGt(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GT(tsn1, tsn2); }
+    inline static int32 tsnLe(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GE(tsn2, tsn1); }
+    inline static int32 tsnLt(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GT(tsn2, tsn1); }
+    inline static int32 tsnBetween(const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return (SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn)); }
+    inline static int16 ssnGt(const uint16 ssn1, const uint16 ssn2) { return SCTP_SSN_GT(ssn1, ssn2); }
+    inline static int32 midGt(const uint32 mid1, const uint32 mid2) { return SCTP_TSN_GT(mid1, mid2); }
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
@@ -1167,14 +1234,20 @@ class INET_API SCTPAssociation : public cObject
 
     bool allPathsInactive() const;
 
-    void sendStreamResetRequest(uint16 type);
-    void sendStreamResetResponse(uint32 srrsn);
-    void sendStreamResetResponse(SCTPSSNTSNResetRequestParameter *requestParam,
+    void sendStreamResetRequest(SCTPResetInfo *info);
+    void sendStreamResetResponse(uint32 srrsn, int result);
+    void sendStreamResetResponse(SCTPSSNTSNResetRequestParameter *requestParam, int result,
             bool options);
     void sendOutgoingResetRequest(SCTPIncomingSSNResetRequestParameter *requestParam);
+    void sendAddOutgoingStreamsRequest(uint16 numStreams);
+    void sendBundledOutgoingResetAndResponse(SCTPIncomingSSNResetRequestParameter *requestParam);
+    void sendAddInAndOutStreamsRequest(SCTPResetInfo *info);
+    void sendDoubleStreamResetResponse(uint32 insrrsn, uint16 inresult, uint32 outsrrsn, uint16 outresult);
+    void checkStreamsToReset();
     void sendPacketDrop(const bool flag);
     void sendHMacError(const uint16 id);
     void sendInvalidStreamError(uint16 sid);
+    void resetGapLists();
 
     SCTPForwardTsnChunk *createForwardTsnChunk(const L3Address& pid);
 
@@ -1198,6 +1271,8 @@ class INET_API SCTPAssociation : public cObject
 
     int32 streamScheduler(SCTPPathVariables *path, bool peek);
     void initStreams(uint32 inStreams, uint32 outStreams);
+    void addInStreams(uint32 inStreams);
+    void addOutStreams(uint32 outStreams);
     int32 numUsableStreams();
     int32 streamSchedulerRoundRobinPacket(SCTPPathVariables *path, bool peek);
     int32 streamSchedulerRandom(SCTPPathVariables *path, bool peek);
@@ -1211,6 +1286,8 @@ class INET_API SCTPAssociation : public cObject
     typedef struct streamSchedulingFunctions
     {
         void (SCTPAssociation::*ssInitStreams)(uint32 inStreams, uint32 outStreams);
+        void (SCTPAssociation::*ssAddInStreams)(uint32 inStreams);
+        void (SCTPAssociation::*ssAddOutStreams)(uint32 outStreams);
         int32 (SCTPAssociation::*ssGetNextSid)(SCTPPathVariables *path, bool peek);
         int32 (SCTPAssociation::*ssUsableStreams)();
     } SSFunctions;
@@ -1231,6 +1308,7 @@ class INET_API SCTPAssociation : public cObject
     SCTPDataVariables *getOutboundDataChunk(const SCTPPathVariables *path,
             const int32 availableSpace,
             const int32 availableCwnd);
+    void fragmentOutboundDataMsgs();
     SCTPDataMsg *dequeueOutboundDataMsg(SCTPPathVariables *path,
             const int32 availableSpace,
             const int32 availableCwnd);
@@ -1253,10 +1331,18 @@ class INET_API SCTPAssociation : public cObject
     /** Methods for Stream Reset **/
     void resetSsns();
     void resetExpectedSsns();
-    SCTPParameter *makeOutgoingStreamResetParameter(uint32 srsn);
-    SCTPParameter *makeIncomingStreamResetParameter(uint32 srsn);
+    bool sendStreamPresent(uint16 sid);
+    bool receiveStreamPresent(uint16 sid);
+    void resetSsn(uint16 id);
+    void resetExpectedSsn(uint16 id);
+    uint32 getExpectedSsnOfStream(uint16 id);
+    uint32 getSsnOfStream(uint16 id);
+    SCTPParameter *makeOutgoingStreamResetParameter(uint32 srsn, SCTPResetInfo *info);
+    SCTPParameter *makeIncomingStreamResetParameter(uint32 srsn, SCTPResetInfo *info);
     SCTPParameter *makeSSNTSNResetParameter(uint32 srsn);
+    SCTPParameter *makeAddStreamsRequestParameter(uint32 srsn, SCTPResetInfo *info);
     void sendOutgoingRequestAndResponse(uint32 inRequestSn, uint32 outRequestSn);
+    void sendOutgoingRequestAndResponse(SCTPIncomingSSNResetRequestParameter *inRequestParam, SCTPOutgoingSSNResetRequestParameter *outRequestParam);
     SCTPEventCode processInAndOutResetRequestArrived(SCTPIncomingSSNResetRequestParameter *inRequestParam, SCTPOutgoingSSNResetRequestParameter *outRequestParam);
     SCTPEventCode processOutAndResponseArrived(SCTPOutgoingSSNResetRequestParameter *outRequestParam, SCTPStreamResetResponseParameter *responseParam);
     SCTPEventCode processStreamResetArrived(SCTPStreamResetChunk *strResChunk);
@@ -1264,6 +1350,12 @@ class INET_API SCTPAssociation : public cObject
     void processIncomingResetRequestArrived(SCTPIncomingSSNResetRequestParameter *requestParam);
     void processSSNTSNResetRequestArrived(SCTPSSNTSNResetRequestParameter *requestParam);
     void processResetResponseArrived(SCTPStreamResetResponseParameter *responseParam);
+    void processAddInAndOutResetRequestArrived(SCTPAddStreamsRequestParameter *addInRequestParam, SCTPAddStreamsRequestParameter *addOutRequestParam);
+    uint32 getBytesInFlightOfStream(uint16 sid);
+    bool getFragInProgressOfStream(uint16 sid);
+    void setFragInProgressOfStream(uint16 sid, bool frag);
+    bool orderedQueueEmptyOfStream(uint16 sid);
+    bool unorderedQueueEmptyOfStream(uint16 sid);
 
     /** Methods for Add-IP and AUTH **/
     void sendAsconf(const char *type, const bool remote = false);

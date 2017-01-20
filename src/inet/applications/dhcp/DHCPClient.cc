@@ -127,21 +127,23 @@ void DHCPClient::finish()
     cancelEvent(startTimer);
 }
 
+namespace {
 static bool routeMatches(const IPv4Route *entry, const IPv4Address& target, const IPv4Address& nmask,
         const IPv4Address& gw, int metric, const char *dev)
 {
-    if (!target.isUnspecified() && !target.equals(entry->getDestination()))
+    if (!target.equals(entry->getDestination()))
         return false;
-    if (!nmask.isUnspecified() && !nmask.equals(entry->getNetmask()))
+    if (!nmask.equals(entry->getNetmask()))
         return false;
-    if (!gw.isUnspecified() && !gw.equals(entry->getGateway()))
+    if (!gw.equals(entry->getGateway()))
         return false;
     if (metric && metric != entry->getMetric())
         return false;
-    if (dev && strcmp(dev, entry->getInterfaceName()))
+    if (strcmp(dev, entry->getInterfaceName()))
         return false;
 
     return true;
+}
 }
 
 const char *DHCPClient::getStateName(ClientState state)
@@ -257,7 +259,7 @@ void DHCPClient::handleTimer(cMessage *msg)
     }
     else if (category == LEASE_TIMEOUT) {
         EV_INFO << "Lease has expired. Starting DHCP process in INIT state." << endl;
-        unboundLease();
+        unbindLease();
         clientState = INIT;
         initClient();
     }
@@ -313,7 +315,7 @@ void DHCPClient::recordLease(DHCPMessage *dhcpACK)
 void DHCPClient::bindLease()
 {
     ie->ipv4Data()->setIPAddress(lease->ip);
-    ie->ipv4Data()->setNetmask(lease->ip.getNetworkMask());
+    ie->ipv4Data()->setNetmask(lease->subnetMask);
 
     std::string banner = "Got IP " + lease->ip.str();
     host->bubble(banner.c_str());
@@ -353,9 +355,9 @@ void DHCPClient::bindLease()
     scheduleAt(simTime() + lease->leaseTime, leaseTimer);
 }
 
-void DHCPClient::unboundLease()
+void DHCPClient::unbindLease()
 {
-    EV_INFO << "Unbound lease on " << ie->getName() << "." << endl;
+    EV_INFO << "Unbinding lease on " << ie->getName() << "." << endl;
 
     cancelEvent(timerT1);
     cancelEvent(timerT2);
@@ -450,7 +452,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
             }
             else if (messageType == DHCPNAK) {
                 EV_INFO << "DHPCNAK message arrived in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
-                unboundLease();    // halt network (remove address)
+                unbindLease();
                 initClient();
             }
             else {
@@ -461,7 +463,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
         case REBINDING:
             if (messageType == DHCPNAK) {
                 EV_INFO << "DHPCNAK message arrived in REBINDING state. The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
-                unboundLease();    // halt network (remove address)
+                unbindLease();
                 initClient();
             }
             else if (messageType == DHCPACK) {
@@ -482,6 +484,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
             }
             else if (messageType == DHCPNAK) {
                 EV_INFO << "DHCPNAK message arrived in REBOOTING. Initialization with known IP address was unsuccessful." << endl;
+                unbindLease();
                 initClient();
             }
             else {
@@ -504,6 +507,7 @@ void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry *>(obj);
         if (associatedIE && ie == associatedIE) {
             EV_INFO << "Interface associated, starting DHCP." << endl;
+            unbindLease();
             initClient();
         }
     }

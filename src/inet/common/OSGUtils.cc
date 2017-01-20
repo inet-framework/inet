@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/OSGUtils.h"
-#include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 
 #ifdef WITH_OSG
 #include <osg/CullFace>

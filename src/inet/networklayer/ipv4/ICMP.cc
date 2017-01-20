@@ -75,7 +75,10 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     }
 
     // don't send ICMP error messages response to unspecified, broadcast or multicast addresses
-    if (origSrcAddr.isMulticast() || origSrcAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
+    if ((inputInterfaceId != -1 && origSrcAddr.isUnspecified())
+            || origSrcAddr.isMulticast()
+            || origSrcAddr.isLimitedBroadcastAddress()
+            || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
         EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << origDatagram << endl;
         delete origDatagram;
         return;
@@ -92,7 +95,7 @@ void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, IC
     }
 
     // assemble a message name
-    char msgname[32];
+    char msgname[80];
     static long ctr;
     sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
 
@@ -247,6 +250,7 @@ void ICMP::processEchoRequest(ICMPMessage *request)
     ctrl->setInterfaceId(-1);
     ctrl->setSrcAddr(dest);
     ctrl->setDestAddr(src);
+    ctrl->setTimeToLive(0); // if the TTL is set to 0 here, IP resets it to the default TTL
 
     sendToIP(reply);
 }

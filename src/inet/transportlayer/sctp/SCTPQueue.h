@@ -55,6 +55,7 @@ class INET_API SCTPQueue : public cObject
      * Constructor.
      */
     SCTPQueue();
+    SCTPQueue(SCTPAssociation *assoc);
 
     /**
      * Virtual destructor.

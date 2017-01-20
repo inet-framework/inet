@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& os, const GenericRoute& e)
 
 std::ostream& operator<<(std::ostream& os, const GenericMulticastRoute& e)
 {
-    os << e.info();
+    os << e.STR_COMPAT();
     return os;
 };
 

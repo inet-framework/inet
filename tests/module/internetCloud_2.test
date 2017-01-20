@@ -45,6 +45,12 @@ network = CloudAndHosts
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 *.sender[*].numApps = 1
 *.sender[*].app[0].typename = "PingApp"
 *.sender[*].app[0].destAddr = "recip"

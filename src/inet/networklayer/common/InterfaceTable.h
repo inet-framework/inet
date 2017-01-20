@@ -85,7 +85,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual void refreshDisplay() const override;
 
     // displays the interface IPv4/IPv6 address on the outgoing link that corresponds to the interface
-    virtual void updateLinkDisplayString(InterfaceEntry *entry);
+    virtual void updateLinkDisplayString(InterfaceEntry *entry) const;
 
     // discover and store which nwlayer/host gates connect to this interface
     virtual void discoverConnectingGates(InterfaceEntry *entry);

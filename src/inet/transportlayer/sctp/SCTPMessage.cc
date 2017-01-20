@@ -232,6 +232,15 @@ SCTPStreamResetChunk& SCTPStreamResetChunk::operator=(const SCTPStreamResetChunk
     return *this;
 }
 
+void SCTPStreamResetChunk::copy(const SCTPStreamResetChunk& other)
+{
+    for (const auto & elem : other.parameterList) {
+        cPacket *param = (elem)->dup();
+        take(param);
+        parameterList.push_back(param);
+    }
+}
+
 void SCTPStreamResetChunk::setParametersArraySize(const uint32 size)
 {
     throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
@@ -273,6 +282,31 @@ cPacket *SCTPStreamResetChunk::removeParameter()
     drop(msg);
     this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
+}
+
+SCTPStreamResetChunk::~SCTPStreamResetChunk()
+{
+    clean();
+}
+
+void SCTPStreamResetChunk::clean()
+{
+    while (!parameterList.empty()) {
+        cPacket *msg = parameterList.front();
+        parameterList.erase(parameterList.begin());
+        dropAndDelete(msg);
+    }
+}
+
+Register_Class(SCTPIncomingSSNResetRequestParameter);
+
+void SCTPIncomingSSNResetRequestParameter::copy(const SCTPIncomingSSNResetRequestParameter& other)
+{
+    setSrReqSn(other.getSrReqSn());
+    setStreamNumbersArraySize(other.getStreamNumbersArraySize());
+    for (uint16 i = 0; i < other.getStreamNumbersArraySize(); i++) {
+        setStreamNumbers(i, other.getStreamNumbers(i));
+    }
 }
 
 Register_Class(SCTPAsconfChunk);

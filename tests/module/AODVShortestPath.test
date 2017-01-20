@@ -74,6 +74,13 @@ tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 num-rngs = 3
 sim-time-limit = 100s
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.mobility.rng-0 = 1
 **.wlan[*].mac.rng-0 = 2
 **.aodv.useHelloMessages = false

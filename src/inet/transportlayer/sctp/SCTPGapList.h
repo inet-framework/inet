@@ -64,6 +64,7 @@ class INET_API SCTPSimpleGapList
     bool updateGapList(const uint32 receivedTSN,
             uint32& cTsnAck,
             bool& newChunkReceived);
+    void resetGaps();
 
     // ====== Private data ===================================================
 
@@ -171,6 +172,7 @@ class INET_API SCTPGapList
     bool updateGapList(const uint32 receivedTSN,
             bool& newChunkReceived,
             bool tsnIsRevokable = true);
+    void resetGaps(const uint32 newCumAck);
 
     // ====== Private data ===================================================
 

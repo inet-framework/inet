@@ -33,6 +33,7 @@ class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
   protected:
     TCPSocket socket;
     long bytesRcvd;
+    TCPSocket socket;
 
     //statistics:
     static simsignal_t rcvdPkSignal;

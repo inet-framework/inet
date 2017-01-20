@@ -49,7 +49,7 @@ packet RSVPPathMsg extends RSVPPacket
     EroVector ERO;
     int color;
 
-    int rsvpKind = PATH_MESSAGE;
+    rsvpKind = PATH_MESSAGE;
 }
 
 //
@@ -61,7 +61,7 @@ packet RSVPPathTear extends RSVPPacket
     RsvpHopObj_t hop;
     SenderTemplateObj_t senderTemplate;
     bool force;
-    int rsvpKind = PTEAR_MESSAGE;
+    rsvpKind = PTEAR_MESSAGE;
 }
 
 
@@ -75,6 +75,5 @@ packet RSVPPathError extends RSVPPacket
     int errorCode;
     SenderDescriptor_t sender_descriptor;
 
-    int rsvpKind = PERROR_MESSAGE;
+    rsvpKind = PERROR_MESSAGE;
 }
-

@@ -56,7 +56,7 @@ class INET_API SimpleVoIPSender : public cSimpleModule, public ILifecycle
 
   protected:
     void talkspurt(simtime_t dur);
-    void selectPeriodTime();
+    void selectTalkOrSilenceInterval();
     void sendVoIPPacket();
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

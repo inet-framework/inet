@@ -13,6 +13,11 @@ rm -rf work/lib
 cp -pPR lib work/       # OSX dos not support cp -a
 opp_test gen $OPT -v $TESTFILES || exit 1
 echo
+
+# include precompiled.h first to all c++ file:
+echo CFLAGS += -include inet/common/precompiled.h >work/makefrag
+
+
 (cd work; opp_makemake -f --deep -lINET -L../../../src -P . --no-deep-includes -I./lib -I../../../src; $MAKE) || exit 1
 echo
 opp_test run $OPT -v $TESTFILES || exit 1

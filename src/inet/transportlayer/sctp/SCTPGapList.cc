@@ -52,6 +52,15 @@ void SCTPSimpleGapList::check(const uint32 cTsnAck) const
     }
 }
 
+void SCTPSimpleGapList::resetGaps()
+{
+    NumGaps = 0;
+    for (unsigned int i = 0; i < MAX_GAP_COUNT; i++) {
+        GapStartList[i] = 0xffff00ff;
+        GapStopList[i] = 0xffff0000;
+    }
+}
+
 // ###### Print gap list ####################################################
 void SCTPSimpleGapList::print(std::ostream& os) const
 {
@@ -381,6 +390,14 @@ bool SCTPGapList::updateGapList(const uint32 receivedTSN,
         NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
     }
     return newChunk;
+}
+
+void SCTPGapList::resetGaps(const uint32 newCumAck)
+{
+    CumAckTSN = newCumAck;
+    RevokableGapList.resetGaps();
+    NonRevokableGapList.resetGaps();
+    CombinedGapList.resetGaps();
 }
 
 } // namespace sctp

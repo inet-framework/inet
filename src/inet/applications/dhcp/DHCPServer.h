@@ -92,7 +92,7 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
      * Send DHCPOFFER message to client in response to DHCPDISCOVER with offer of configuration
      * parameters.
      */
-    virtual void sendOffer(DHCPLease *lease);
+    virtual void sendOffer(DHCPLease *lease, DHCPMessage *packet);
 
     /*
      * Send DHCPACK message to client with configuration parameters, including committed network address.

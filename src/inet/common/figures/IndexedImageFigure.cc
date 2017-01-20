@@ -22,9 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Class(IndexedImageFigure);
-
-#if OMNETPP_VERSION >= 0x500
+Register_Figure("indexedImage", IndexedImageFigure);
 
 static const char *PKEY_IMAGES = "images";
 static const char *PKEY_TINT_AMOUNT = "tintAmount";
@@ -46,12 +44,12 @@ IndexedImageFigure::IndexedImageFigure(const char *name) : cGroupFigure(name)
     addChildren();
 }
 
-std::vector<const char *> IndexedImageFigure::getImages() const
+const std::vector<std::string>& IndexedImageFigure::getImages() const
 {
     return images;
 }
 
-void IndexedImageFigure::setImages(std::vector<const char *> images)
+void IndexedImageFigure::setImages(const std::vector<std::string>& images)
 {
     ASSERT(images.size());
     this->images = images;
@@ -68,12 +66,12 @@ void IndexedImageFigure::setTintAmount(double tintAmount)
     image->setTintAmount(tintAmount);
 }
 
-cFigure::Color IndexedImageFigure::getTintColor() const
+const cFigure::Color& IndexedImageFigure::getTintColor() const
 {
     return image->getTintColor();
 }
 
-void IndexedImageFigure::setTintColor(Color color)
+void IndexedImageFigure::setTintColor(const Color& color)
 {
     image->setTintColor(color);
 }
@@ -108,53 +106,53 @@ void IndexedImageFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-cFigure::Font IndexedImageFigure::getLabelFont() const
+const cFigure::Font& IndexedImageFigure::getLabelFont() const
 {
     return labelFigure->getFont();
 }
 
-void IndexedImageFigure::setLabelFont(cFigure::Font font)
+void IndexedImageFigure::setLabelFont(const Font& font)
 {
     labelFigure->setFont(font);
 }
 
-cFigure::Color IndexedImageFigure::getLabelColor() const
+const cFigure::Color& IndexedImageFigure::getLabelColor() const
 {
     return labelFigure->getColor();
 }
 
-void IndexedImageFigure::setLabelColor(cFigure::Color color)
+void IndexedImageFigure::setLabelColor(const Color& color)
 {
     labelFigure->setColor(color);
 }
 
-cFigure::Point IndexedImageFigure::getLabelOffset() const
+const cFigure::Point IndexedImageFigure::getLabelOffset() const
 {
     return labelFigure->getPosition() - image->getPosition();
 }
 
-void IndexedImageFigure::setLabelOffset(Point offset)
+void IndexedImageFigure::setLabelOffset(const Point& offset)
 {
     labelFigure->setPosition(image->getPosition() + offset);
 }
 
-cFigure::Point IndexedImageFigure::getSize() const
+const cFigure::Point IndexedImageFigure::getSize() const
 {
     return Point(image->getWidth(), image->getHeight());
 }
 
-void IndexedImageFigure::setSize(Point bounds)
+void IndexedImageFigure::setSize(const Point& bounds)
 {
     image->setWidth(bounds.x);
     image->setHeight(bounds.y);
 }
 
-cFigure::Point IndexedImageFigure::getPos() const
+const cFigure::Point& IndexedImageFigure::getPos() const
 {
     return image->getPosition();
 }
 
-void IndexedImageFigure::setPos(Point pos)
+void IndexedImageFigure::setPos(const Point& pos)
 {
     Point offset = getLabelOffset();
     image->setPosition(pos);
@@ -178,7 +176,7 @@ void IndexedImageFigure::parse(cProperty *property)
 
     const char *s;
 
-    std::vector<const char *> names;
+    std::vector<std::string> names;
     for (int i = 0; i < property->getNumValues(PKEY_IMAGES); ++i)
         names.push_back(property->getValue(PKEY_IMAGES, i));
     setImages(names);
@@ -259,18 +257,15 @@ void IndexedImageFigure::setValue(int series, simtime_t timestamp, double newVal
 
 void IndexedImageFigure::refresh()
 {
-    if(std::isnan(value))
-    {
+    if (std::isnan(value)) {
         image->setVisible(false);
         return;
     }
 
     image->setVisible(true);
     int newValue = (int)value % images.size();
-    image->setImageName(images[newValue]);
+    image->setImageName(images[newValue].c_str());
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

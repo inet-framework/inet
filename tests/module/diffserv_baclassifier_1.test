@@ -90,11 +90,19 @@ network TestNetwork
     classifier.defaultOut --> app.in++;
 }
 
+
 %inifile: omnetpp.ini
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = true
 network = TestNetwork
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 
 %contains: result.txt
 ipv4-0: in[0]

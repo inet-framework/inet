@@ -39,7 +39,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // This module checks if there is an other module connected above the management
 // module (e.g. RelayUnit) and sends a copy of the frame there and at the same time
-// sends the frame back to the wirless interface. The relay unit will send it out
+// sends the frame back to the wireless interface. The relay unit will send it out
 // on the interface which is towards the destination or will broadcast it on all
 // interfaces (except on which it was received).
 //

@@ -22,9 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Class(ProgressMeterFigure);
-
-#if OMNETPP_VERSION >= 0x500
+Register_Figure("progressMeter", ProgressMeterFigure);
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_STRIP_COLOR = "stripColor";
@@ -49,22 +47,22 @@ ProgressMeterFigure::ProgressMeterFigure(const char *name) : cGroupFigure(name)
     addChildren();
 }
 
-cFigure::Color ProgressMeterFigure::getBackgroundColor() const
+const cFigure::Color& ProgressMeterFigure::getBackgroundColor() const
 {
     return backgroundFigure->getFillColor();
 }
 
-void ProgressMeterFigure::setBackgroundColor(cFigure::Color color)
+void ProgressMeterFigure::setBackgroundColor(const Color& color)
 {
     backgroundFigure->setFillColor(color);
 }
 
-cFigure::Color ProgressMeterFigure::getStripColor() const
+const cFigure::Color& ProgressMeterFigure::getStripColor() const
 {
     return stripFigure->getFillColor();
 }
 
-void ProgressMeterFigure::setStripColor(cFigure::Color color)
+void ProgressMeterFigure::setStripColor(const Color& color)
 {
     stripFigure->setFillColor(color);
 }
@@ -102,22 +100,22 @@ void ProgressMeterFigure::setText(const char *text)
     refresh();
 }
 
-cFigure::Font ProgressMeterFigure::getTextFont() const
+const cFigure::Font& ProgressMeterFigure::getTextFont() const
 {
     return valueFigure->getFont();
 }
 
-void ProgressMeterFigure::setTextFont(cFigure::Font font)
+void ProgressMeterFigure::setTextFont(const Font& font)
 {
     valueFigure->setFont(font);
 }
 
-cFigure::Color ProgressMeterFigure::getTextColor() const
+const cFigure::Color& ProgressMeterFigure::getTextColor() const
 {
     return valueFigure->getColor();
 }
 
-void ProgressMeterFigure::setTextColor(cFigure::Color color)
+void ProgressMeterFigure::setTextColor(const Color& color)
 {
     valueFigure->setColor(color);
 }
@@ -132,32 +130,32 @@ void ProgressMeterFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-cFigure::Font ProgressMeterFigure::getLabelFont() const
+const cFigure::Font& ProgressMeterFigure::getLabelFont() const
 {
     return labelFigure->getFont();
 }
 
-void ProgressMeterFigure::setLabelFont(cFigure::Font font)
+void ProgressMeterFigure::setLabelFont(const Font& font)
 {
     labelFigure->setFont(font);
 }
 
-cFigure::Color ProgressMeterFigure::getLabelColor() const
+const cFigure::Color& ProgressMeterFigure::getLabelColor() const
 {
     return labelFigure->getColor();
 }
 
-void ProgressMeterFigure::setLabelColor(cFigure::Color color)
+void ProgressMeterFigure::setLabelColor(const Color& color)
 {
     labelFigure->setColor(color);
 }
 
-cFigure::Rectangle ProgressMeterFigure::getBounds() const
+const cFigure::Rectangle& ProgressMeterFigure::getBounds() const
 {
     return borderFigure->getBounds();
 }
 
-void ProgressMeterFigure::setBounds(Rectangle bounds)
+void ProgressMeterFigure::setBounds(const Rectangle& bounds)
 {
     borderFigure->setBounds(bounds);
     layout();
@@ -306,8 +304,6 @@ void ProgressMeterFigure::refresh()
         valueFigure->setText(buf);
     }
 }
-
-#endif    // omnetpp 5
 
 // } // namespace inet
 

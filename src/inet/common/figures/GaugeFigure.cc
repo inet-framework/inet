@@ -22,7 +22,7 @@
 //TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
 using namespace inet;
 
-Register_Class(GaugeFigure);
+Register_Figure("gauge", GaugeFigure);
 
 #define M_PI 3.14159265358979323846
 
@@ -73,33 +73,33 @@ GaugeFigure::~GaugeFigure()
     }
 }
 
-cFigure::Rectangle GaugeFigure::getBounds() const
+const cFigure::Rectangle& GaugeFigure::getBounds() const
 {
     return backgroundFigure->getBounds();
 }
 
-void GaugeFigure::setBounds(Rectangle rect)
+void GaugeFigure::setBounds(const Rectangle& rect)
 {
     backgroundFigure->setBounds(rect);
     layout();
 }
 
-cFigure::Color GaugeFigure::getBackgroundColor() const
+const cFigure::Color& GaugeFigure::getBackgroundColor() const
 {
     return backgroundFigure->getFillColor();
 }
 
-void GaugeFigure::setBackgroundColor(cFigure::Color color)
+void GaugeFigure::setBackgroundColor(const Color& color)
 {
     backgroundFigure->setFillColor(color);
 }
 
-cFigure::Color GaugeFigure::getNeedleColor() const
+const cFigure::Color& GaugeFigure::getNeedleColor() const
 {
     return needle->getFillColor();
 }
 
-void GaugeFigure::setNeedleColor(cFigure::Color color)
+void GaugeFigure::setNeedleColor(const Color& color)
 {
     needle->setFillColor(color);
 }
@@ -114,22 +114,22 @@ void GaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-cFigure::Font GaugeFigure::getLabelFont() const
+const cFigure::Font& GaugeFigure::getLabelFont() const
 {
     return labelFigure->getFont();
 }
 
-void GaugeFigure::setLabelFont(cFigure::Font font)
+void GaugeFigure::setLabelFont(const Font& font)
 {
     labelFigure->setFont(font);
 }
 
-cFigure::Color GaugeFigure::getLabelColor() const
+const cFigure::Color& GaugeFigure::getLabelColor() const
 {
     return labelFigure->getColor();
 }
 
-void GaugeFigure::setLabelColor(cFigure::Color color)
+void GaugeFigure::setLabelColor(const Color& color)
 {
     labelFigure->setColor(color);
 }
@@ -306,7 +306,7 @@ void GaugeFigure::setTickGeometry(cLineFigure *tick, int index)
     tick->setLineWidth(zeroToOne(getBounds().width * TICK_LINE_WIDTH_PERCENT));
 
     Transform trans;
-    trans.rotate(index * (M_PI + M_PI / 2) / (numTicks - 1), getBounds().getCenter()).
+    trans.rotate((M_PI + M_PI / 2) * (index * tickSize + shifting) / (max - min), getBounds().getCenter()).
             rotate(-M_PI / 4, getBounds().getCenter());
     tick->setTransform(trans);
 }
@@ -321,9 +321,9 @@ void GaugeFigure::setNumberGeometry(cTextFigure *number, int index)
     number->setPosition(textPos);
 
     Transform trans;
-    trans.rotate(-index * (M_PI + M_PI / 2) / (numTicks - 1), textPos).
+    trans.rotate(-(M_PI + M_PI / 2) * (index * tickSize + shifting) / (max - min), textPos).
             rotate(M_PI / 4, textPos).
-            rotate(index * (M_PI + M_PI / 2) / (numTicks - 1), getBounds().getCenter()).
+            rotate((M_PI + M_PI / 2) * (index * tickSize + shifting) / (max - min), getBounds().getCenter()).
             rotate(-M_PI / 4, getBounds().getCenter());
     number->setTransform(trans);
 }
@@ -356,8 +356,7 @@ void GaugeFigure::setNeedleTransform()
         angle = -offset;
     else if (value > max)
         angle = (END_ANGLE - START_ANGLE) + offset;
-    else if (std::isnan(value))
-    {
+    else if (std::isnan(value)) {
         needle->setVisible(false);
         return;
     }
@@ -373,8 +372,14 @@ void GaugeFigure::redrawTicks()
 {
     ASSERT(tickFigures.size() == numberFigures.size());
 
+    double fraction = std::abs(fmod(min / tickSize, 1));
+    shifting = tickSize * (min < 0 ? fraction : 1 - fraction);
+    // if fraction == 0 then shifting == tickSize therefore don't have to shift the ticks
+    if (shifting == tickSize)
+        shifting = 0;
+
     int prevNumTicks = numTicks;
-    numTicks = std::max(0.0, std::abs(max - min) / tickSize + 1);
+    numTicks = std::max(0.0, std::abs(max - min - shifting) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
     if (numTicks > tickFigures.size())
@@ -402,7 +407,12 @@ void GaugeFigure::redrawTicks()
         setTickGeometry(tickFigures[i], i);
 
         char buf[32];
-        sprintf(buf, "%g", min + i * tickSize);
+
+        double number = min + i * tickSize + shifting;
+        if (std::abs(number) < tickSize / 2)
+            number = 0;
+
+        sprintf(buf, "%g", number);
         numberFigures[i]->setText(buf);
         setNumberGeometry(numberFigures[i], i);
     }
@@ -422,8 +432,7 @@ void GaugeFigure::redrawCurves()
         const char *token = signalTokenizer.nextToken();
         newStop = atof(token);
         if (newStop > lastStop) {
-            if (index == curveFigures.size())
-            {
+            if (index == curveFigures.size()) {
                 cArcFigure *arc = new cArcFigure("colorStrip");
                 arc->setZoomLineWidth(true);
                 curveFigures.push_back(arc);
@@ -438,8 +447,7 @@ void GaugeFigure::redrawCurves()
             color = Color(token);
     }
     if (lastStop < 1.0) {
-        if (index == curveFigures.size())
-        {
+        if (index == curveFigures.size()) {
             cArcFigure *arc = new cArcFigure("colorStrip");
             arc->setZoomLineWidth(true);
             curveFigures.push_back(arc);

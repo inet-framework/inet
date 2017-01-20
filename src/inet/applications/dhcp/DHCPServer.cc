@@ -57,12 +57,6 @@ void DHCPServer::initialize(int stage)
         WATCH(numReceived);
         WATCH_MAP(leased);
 
-        subnetMask = IPv4Address(par("subnetMask").stringValue());
-        gateway = IPv4Address(par("gateway").stringValue());
-        ipAddressStart = IPv4Address(par("ipAddressStart").stringValue());
-        maxNumOfClients = par("maxNumClients");
-        leaseTime = par("leaseTime");
-
         // DHCP UDP ports
         clientPort = 68;    // client
         serverPort = 67;    // server
@@ -186,7 +180,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
                     lease->xid = packet->getXid();
                     //lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO: !!
                     lease->leased = true;    // TODO
-                    sendOffer(lease);
+                    sendOffer(lease, packet);
                 }
                 else
                     EV_ERROR << "No lease available. Ignoring discover." << endl;
@@ -195,7 +189,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
                 // MAC already exist, offering the same lease
                 lease->xid = packet->getXid();
                 //lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO: !!
-                sendOffer(lease);
+                sendOffer(lease, packet);
             }
         }
         else if (messageType == DHCPREQUEST) {    // RFC 2131, 4.3.2
@@ -303,7 +297,15 @@ void DHCPServer::sendNAK(DHCPMessage *msg)
     nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
     nak->getOptions().setMessageType(DHCPNAK);
 
-    sendToUDP(nak, serverPort, IPv4Address::ALLONES_ADDRESS, clientPort);
+    /* RFC 2131, 4.1
+     *
+     * In all cases, when 'giaddr' is zero, the server broadcasts any DHCPNAK
+     * messages to 0xffffffff.
+     */
+    IPv4Address destAddr = IPv4Address::ALLONES_ADDRESS;
+    if (!msg->getGiaddr().isUnspecified())
+        destAddr = msg->getGiaddr();
+    sendToUDP(nak, serverPort, destAddr, clientPort);
 }
 
 void DHCPServer::sendACK(DHCPLease *lease, DHCPMessage *packet)
@@ -343,13 +345,35 @@ void DHCPServer::sendACK(DHCPLease *lease, DHCPMessage *packet)
     // register the lease time
     lease->leaseTime = simTime();
 
-    if (packet->getGiaddr().isUnspecified() && !packet->getCiaddr().isUnspecified())
-        sendToUDP(ack, serverPort, packet->getCiaddr(), clientPort);
-    else
-        sendToUDP(ack, serverPort, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), clientPort);
+    /* RFC 2131, 4.1
+     * If the 'giaddr' field in a DHCP message from a client is non-zero,
+     * the server sends any return messages to the 'DHCP server' port on the
+     * BOOTP relay agent whose address appears in 'giaddr'. If the 'giaddr'
+     * field is zero and the 'ciaddr' field is nonzero, then the server
+     * unicasts DHCPOFFER and DHCPACK messages to the address in 'ciaddr'.
+     * If 'giaddr' is zero and 'ciaddr' is zero, and the broadcast bit is
+     * set, then the server broadcasts DHCPOFFER and DHCPACK messages to
+     * 0xffffffff. If the broadcast bit is not set and 'giaddr' is zero and
+     * 'ciaddr' is zero, then the server unicasts DHCPOFFER and DHCPACK
+     * messages to the client's hardware address and 'yiaddr' address.
+     */
+    IPv4Address destAddr;
+    if (!packet->getGiaddr().isUnspecified())
+        destAddr = packet->getGiaddr();
+    else if (!packet->getCiaddr().isUnspecified())
+        destAddr = packet->getCiaddr();
+    else if (packet->getBroadcast())
+        destAddr = IPv4Address::ALLONES_ADDRESS;
+    else {
+        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MACAddress.
+        // destAddr = lease->ip;
+        destAddr = IPv4Address::ALLONES_ADDRESS;
+    }
+
+    sendToUDP(ack, serverPort, destAddr, clientPort);
 }
 
-void DHCPServer::sendOffer(DHCPLease *lease)
+void DHCPServer::sendOffer(DHCPLease *lease, DHCPMessage *packet)
 {
     EV_INFO << "Offering " << *lease << endl;
 
@@ -387,7 +411,32 @@ void DHCPServer::sendOffer(DHCPLease *lease)
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
 
-    sendToUDP(offer, serverPort, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), clientPort);
+    /* RFC 2131, 4.1
+     * If the 'giaddr' field in a DHCP message from a client is non-zero,
+     * the server sends any return messages to the 'DHCP server' port on the
+     * BOOTP relay agent whose address appears in 'giaddr'. If the 'giaddr'
+     * field is zero and the 'ciaddr' field is nonzero, then the server
+     * unicasts DHCPOFFER and DHCPACK messages to the address in 'ciaddr'.
+     * If 'giaddr' is zero and 'ciaddr' is zero, and the broadcast bit is
+     * set, then the server broadcasts DHCPOFFER and DHCPACK messages to
+     * 0xffffffff. If the broadcast bit is not set and 'giaddr' is zero and
+     * 'ciaddr' is zero, then the server unicasts DHCPOFFER and DHCPACK
+     * messages to the client's hardware address and 'yiaddr' address.
+     */
+    IPv4Address destAddr;
+    if (!packet->getGiaddr().isUnspecified())
+        destAddr = packet->getGiaddr();
+    else if (!packet->getCiaddr().isUnspecified())
+        destAddr = packet->getCiaddr();
+    else if (packet->getBroadcast())
+        destAddr = IPv4Address::ALLONES_ADDRESS;
+    else {
+        // TODO should send it to client's hardware address and yiaddr address, but the application can not set the destination MACAddress.
+        // destAddr = lease->ip;
+        destAddr = IPv4Address::ALLONES_ADDRESS;
+    }
+
+    sendToUDP(offer, serverPort, destAddr, clientPort);
 }
 
 DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
@@ -455,8 +504,24 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr,
 
 void DHCPServer::startApp()
 {
+    maxNumOfClients = par("maxNumClients");
+    leaseTime = par("leaseTime");
+
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
+    IPv4InterfaceData *ipv4data = ie->ipv4Data();
+    if (ipv4data == nullptr)
+        throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
+    const char *gatewayStr = par("gateway").stringValue();
+    gateway = *gatewayStr ? L3AddressResolver().resolve(gatewayStr, L3AddressResolver::ADDR_IPv4).toIPv4() : ipv4data->getIPAddress();
+    subnetMask = ipv4data->getNetmask();
+    long numReservedAddresses = par("numReservedAddresses").longValue();
+    uint32_t networkStartAddress = ipv4data->getIPAddress().getInt() & ipv4data->getNetmask().getInt();
+    ipAddressStart = IPv4Address(networkStartAddress + numReservedAddresses);
+    if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), ipAddressStart, subnetMask))
+        throw cRuntimeError("The numReservedAddresses parameter larger than address range");
+    if (!IPv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), IPv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
+        throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
     scheduleAt(start, startTimer);
 }
 

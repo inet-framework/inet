@@ -76,16 +76,12 @@ void STPBase::start()
 void STPBase::stop()
 {
     isOperational = false;
-    // colors all connected link gray
-    for (unsigned int i = 0; i < numPorts; i++)
-        colorLink(i, false);
-    switchModule->getDisplayString().setTagArg("i", 1, "");
     ie = nullptr;
 }
 
 void STPBase::colorLink(unsigned int i, bool forwarding) const
 {
-    if (hasGUI() && visualize) {
+    if (visualize) {
         cGate *inGate = switchModule->gate("ethg$i", i);
         cGate *outGate = switchModule->gate("ethg$o", i);
         cGate *outGateNext = outGate ? outGate->getNextGate() : nullptr;
@@ -117,12 +113,12 @@ void STPBase::colorLink(unsigned int i, bool forwarding) const
 
 void STPBase::refreshDisplay() const
 {
-    if (hasGUI() && visualize) {
+    if (visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
             const Ieee8021dInterfaceData *port = getPortInterfaceData(i);
 
             // color link
-            colorLink(i, port->getState() == Ieee8021dInterfaceData::FORWARDING);
+            colorLink(i, isOperational && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
 
             // label ethernet interface with port status and role
             cModule *nicModule = switchModule->getSubmodule("eth", i);
@@ -134,7 +130,7 @@ void STPBase::refreshDisplay() const
         }
 
         // mark root switch
-        if (const_cast<STPBase*>(this)->getRootIndex() == -1)
+        if (isOperational && (const_cast<STPBase*>(this)->getRootIndex() == -1))
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");

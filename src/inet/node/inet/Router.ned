@@ -58,6 +58,7 @@ module Router extends ApplicationLayerNodeBase
         bool hasPIM = default(false);
         hasUdp = default(hasRIP);
         hasTcp = default(hasBGP);
+        bool hasDHCP = default(false);
         *.routingTableModule = default("^.ipv4.routingTable");
 
     submodules:
@@ -78,6 +79,10 @@ module Router extends ApplicationLayerNodeBase
             parameters:
 	            @display("p=700,300");
         }
+        dhcp: <"DHCPServer"> like IApp if hasDHCP {
+            parameters:
+                @display("p=566,80");
+        }
 
     connections allowunconnected:
         ospf.ipOut --> tn.upperLayerIn++ if hasOSPF;
@@ -91,4 +96,7 @@ module Router extends ApplicationLayerNodeBase
 
         pim.networkLayerOut --> tn.upperLayerIn++ if hasPIM;
         pim.networkLayerIn <-- tn.upperLayerOut++ if hasPIM;
+
+        dhcp.udpOut --> at.upperLayerIn++ if hasDHCP;
+        dhcp.udpIn <-- at.upperLayerOut++ if hasDHCP;
 }

@@ -54,8 +54,8 @@ class SomeUDPApp : public UDPAppBase
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+    virtual void refreshDisplay() const override;
 };
 
 #endif
-
 

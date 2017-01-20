@@ -115,7 +115,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
     auto module = check_and_cast<const cModule *>(radio);
     if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
         auto module = check_and_cast<const cModule *>(radio);
-        auto node = getContainingNode(const_cast<cModule *>(module));
+        auto node = getContainingNode(module);
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
         m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
@@ -125,7 +125,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
     }
     if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
         auto module = check_and_cast<const cModule *>(radio);
-        auto node = getContainingNode(const_cast<cModule *>(module));
+        auto node = getContainingNode(module);
         auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
         auto communicationRangeFigure = new cOvalFigure("communicationRange");
         m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);

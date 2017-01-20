@@ -24,10 +24,14 @@ namespace inet {
 
 namespace sctp {
 
-SCTPSendStream::SCTPSendStream(const uint16 id)
+SCTPSendStream::SCTPSendStream(SCTPAssociation *assoc_, const uint16 id)
 {
+    assoc = assoc_;
     streamId = id;
     nextStreamSeqNum = 0;
+    bytesInFlight = 0;
+    resetRequested = false;
+    fragInProgress = false;
 
     char queueName[64];
     snprintf(queueName, sizeof(queueName), "OrderedSendQueue ID %d", id);
@@ -62,6 +66,15 @@ void SCTPSendStream::deleteQueue()
     delete streamQ;
     delete uStreamQ;
 }
+
+uint32 SCTPSendStream::getNextStreamSeqNum() {
+    return nextStreamSeqNum;
+};
+
+void SCTPSendStream::setNextStreamSeqNum(const uint16 num) {
+    nextStreamSeqNum = num;
+};
+
 
 } // namespace sctp
 

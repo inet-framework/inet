@@ -717,7 +717,7 @@ void EtherMACBase::updateConnectionColor(int txState) const
     else
         color = "";
 
-    if (hasGUI() && connectionColoring) {
+    if (connectionColoring) {
         if (connected) {
             transmissionChannel->getDisplayString().setTagArg("ls", 0, color);
             transmissionChannel->getDisplayString().setTagArg("ls", 1, color[0] ? "3" : "1");

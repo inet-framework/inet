@@ -60,6 +60,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
             state->streamReset = openCmd->getStreamReset();
             state->prMethod = openCmd->getPrMethod();
             state->numRequests = openCmd->getNumRequests();
+            state->appLimited = openCmd->getAppLimited();
             if (rAddr.isUnspecified() || remotePort == 0)
                 throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
@@ -144,7 +145,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
 
     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>((PK(msg)->decapsulate()));
     auto iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.sentBytes += smsg->getBitLength() / 8;
+    iter->second.sentBytes += smsg->getByteLength();
 
     // ------ Prepare SCTPDataMsg -----------------------------------------
     const uint32 streamId = sendCommand->getSid();
@@ -249,7 +250,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand *sctpComman
         datMsg->setBooksize(smsg->getByteLength() + state->header);
     }
 
-    qCounter.roomSumSendStreams += ADD_PADDING(smsg->getBitLength() / 8 + SCTP_DATA_CHUNK_LENGTH);
+    qCounter.roomSumSendStreams += ADD_PADDING(smsg->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
     qCounter.bookedSumSendStreams += datMsg->getBooksize();
     // Add chunk size to sender buffer size
     state->sendBuffer += smsg->getByteLength();
@@ -321,9 +322,59 @@ void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
     EV_DEBUG << "process_STREAM_RESET request arriving from App\n";
     SCTPResetInfo *rinfo = check_and_cast<SCTPResetInfo *>(sctpCommand);
     if (!(getPath(remoteAddr)->ResetTimer->isScheduled())) {
-        sendStreamResetRequest(rinfo->getRequestType());
-        if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_BOTH || rinfo->getRequestType() == SSN_TSN)
-            state->resetPending = true;
+        if (rinfo->getRequestType() == ADD_BOTH) {
+            sendAddInAndOutStreamsRequest(rinfo);
+        } else if (!state->fragInProgress && state->outstandingBytes == 0) {
+            sendStreamResetRequest(rinfo);
+            if (rinfo->getRequestType() == RESET_OUTGOING || RESET_BOTH ||
+                rinfo->getRequestType() == SSN_TSN || rinfo->getRequestType() == ADD_INCOMING ||
+                rinfo->getRequestType() == ADD_OUTGOING) {
+                state->resetPending = true;
+            }
+        } else if (state->outstandingBytes > 0) {
+            if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_INCOMING) {
+                if (rinfo->getStreamsArraySize() > 0) {
+                    for (uint16 i = 0; i < rinfo->getStreamsArraySize(); i++) {
+                        if ((getBytesInFlightOfStream(rinfo->getStreams(i)) > 0) ||
+                            getFragInProgressOfStream(rinfo->getStreams(i)) ||
+                            !orderedQueueEmptyOfStream(rinfo->getStreams(i)) ||
+                            !unorderedQueueEmptyOfStream(rinfo->getStreams(i))) {
+                            state->streamsPending.push_back(rinfo->getStreams(i));
+                        } else {
+                            state->streamsToReset.push_back(rinfo->getStreams(i));
+                        }
+                    }
+                } else {
+                    if (rinfo->getRequestType() == RESET_OUTGOING) {
+                        for (uint16 i = 0; i < outboundStreams; i++) {
+                            if ((getBytesInFlightOfStream(i) > 0) || getFragInProgressOfStream(i)) {
+                                state->streamsPending.push_back(i);
+                            } else {
+                                state->streamsToReset.push_back(i);
+                            }
+                        }
+                    }
+                }
+                if (state->streamsToReset.size() > 0) {
+                    sendStreamResetRequest(rinfo);
+                    state->resetPending = true;
+                }
+            }
+            if ((rinfo->getRequestType() == SSN_TSN) ||
+                (rinfo->getRequestType() == ADD_INCOMING) ||
+                (rinfo->getRequestType() == ADD_OUTGOING)) {
+                state->resetInfo = rinfo;
+                state->resetInfo->setName("state-resetLater");
+                state->localRequestType = state->resetInfo->getRequestType();
+            }
+            if (!state->resetPending || state->streamsPending.size() > 0) {
+                state->resetInfo = rinfo->dup();
+                state->resetInfo->setName("state-resetInfo");
+                state->localRequestType = state->resetInfo->getRequestType();
+            }
+        }
+
+        state->resetRequested = true;
     }
 }
 

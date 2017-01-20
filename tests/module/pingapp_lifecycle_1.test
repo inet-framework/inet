@@ -10,6 +10,12 @@ tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 *.host.numApps = 1
 *.host.app[0].typename = "PingApp"
 *.host.app[0].destAddr = "192.168.0.42"
@@ -59,7 +65,7 @@ Sending ping request #0 to lower layer\.
 Sending ping request #3 to lower layer\.
 .*
 
-<!> No more events -- simulation ended at event #\d+, t=9\.
+<!> No more events
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

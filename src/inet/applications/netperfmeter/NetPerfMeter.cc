@@ -255,27 +255,27 @@ void NetPerfMeter::finish()
 
 
 // ###### Show I/O status ###################################################
-void NetPerfMeter::showIOStatus() {
-   if(hasGUI()) {
-      unsigned long long totalSentBytes = 0;
-      for(std::map<unsigned int, SenderStatistics*>::const_iterator iterator = SenderStatisticsMap.begin();
-         iterator != SenderStatisticsMap.end(); iterator++) {
-         const SenderStatistics* senderStatistics = iterator->second;
-         totalSentBytes += senderStatistics->SentBytes;
-      }
+void NetPerfMeter::refreshDisplay() const {
+    unsigned long long totalSentBytes = 0;
+    for(std::map<unsigned int, SenderStatistics*>::const_iterator iterator = SenderStatisticsMap.begin();
+        iterator != SenderStatisticsMap.end(); iterator++) {
+        const SenderStatistics* senderStatistics = iterator->second;
+        totalSentBytes += senderStatistics->SentBytes;
+    }
 
-      unsigned long long totalReceivedBytes = 0;
-      for(std::map<unsigned int, ReceiverStatistics*>::const_iterator iterator = ReceiverStatisticsMap.begin();
-         iterator != ReceiverStatisticsMap.end(); iterator++) {
-         const ReceiverStatistics* receiverStatistics = iterator->second;
-         totalReceivedBytes += receiverStatistics->ReceivedBytes;
-      }
+    unsigned long long totalReceivedBytes = 0;
+    for(std::map<unsigned int, ReceiverStatistics*>::const_iterator iterator = ReceiverStatisticsMap.begin();
+        iterator != ReceiverStatisticsMap.end(); iterator++) {
+        const ReceiverStatistics* receiverStatistics = iterator->second;
+        totalReceivedBytes += receiverStatistics->ReceivedBytes;
+    }
 
-      char status[64];
-      snprintf((char*)&status, sizeof(status), "In: %llu, Out: %llu",
-               totalReceivedBytes, totalSentBytes);
-      getDisplayString().setTagArg("t", 0, status);
-   }
+    char status[64];
+    snprintf((char*)&status, sizeof(status), "In: %llu, Out: %llu",
+           totalReceivedBytes, totalSentBytes);
+    getDisplayString().setTagArg("t", 0, status);
+    //TODO also was setStatusString("Connecting"), setStatusString("Closed")
+
 }
 
 
@@ -524,7 +524,6 @@ void NetPerfMeter::establishConnection()
       PrimaryPath = (primaryPath[0] != 0x00) ?
                        L3AddressResolver().resolve(primaryPath) : L3Address();
 
-      setStatusString("Connecting");
       if(TransportProtocol == SCTP) {
          AddressVector remoteAddressList;
          remoteAddressList.push_back(L3AddressResolver().resolve(remoteAddress));
@@ -765,8 +764,6 @@ void NetPerfMeter::teardownConnection(const bool stopTimeReached)
       }
       SendingAllowed = false;
       ConnectionID   = 0;
-
-      setStatusString("Closed");
    }
 
    if(stopTimeReached) {
@@ -970,7 +967,6 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
          bytesToSend      -= msgSize;
       } while(bytesToSend > 0);
    }
-   showIOStatus();
    return(newlyQueuedBytes);
 }
 
@@ -1178,7 +1174,6 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
       receiverStatistics->ReceivedBytes += dataMessage->getByteLength();
       receiverStatistics->ReceivedDelayHistogram.collect(delay);
    }
-   showIOStatus();
 }
 
 

@@ -47,6 +47,20 @@ struct in_addr {
   u32_t s_addr;
 };
 
+//KLUDGE
+#ifdef INADDR_NONE
+#undef INADDR_NONE
+#endif
+#ifdef INADDR_LOOPBACK
+#undef INADDR_LOOPBACK
+#endif
+#ifdef INADDR_ANY
+#undef INADDR_ANY
+#endif
+#ifdef INADDR_BROADCAST
+#undef INADDR_BROADCAST
+#endif
+
 #define INADDR_NONE         ((u32_t)0xffffffffUL)  /* 255.255.255.255 */
 #define INADDR_LOOPBACK     ((u32_t)0x7f000001UL)  /* 127.0.0.1 */
 #define INADDR_ANY          ((u32_t)0x00000000UL)  /* 0.0.0.0 */

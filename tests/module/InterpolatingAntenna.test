@@ -63,6 +63,12 @@ network = Test
 sim-time-limit = 400us
 ned-path = .;../../../../src
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 # mobility
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m

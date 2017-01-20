@@ -5,7 +5,7 @@
 +0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
 +0 bind(3, ..., ...) = 0
 +0 listen(3, 1) = 0
-+0.05 < sctp: INIT[flgs=0, tag=22, a_rwnd=100000, os=200, is=10, tsn=1, ...]
++0.05 < sctp: INIT[flgs=0, tag=22, a_rwnd=100000, os=200, is=10, tsn=1]
 +0 > sctp: INIT_ACK[flgs=0, tag=..., a_rwnd=..., os=10, is=10, tsn=1, ...]
 +0.05 < sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
 +0 > sctp: COOKIE_ACK[flgs=0]

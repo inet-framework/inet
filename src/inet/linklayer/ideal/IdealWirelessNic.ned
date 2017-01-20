@@ -33,8 +33,7 @@ import inet.physicallayer.contract.packetlevel.IRadio;
 // The most important parameter this model accepts is the transmission range.
 // When a radio transmits a frame, all other radios within transmission range
 // will receive the frame correctly, and radios out of range will not be
-// affected at all. There are no collisions -- a radio can simultaneously
-// receive any number of frames, and also transmit a single frame at the same time.
+// affected at all.
 //
 // This module requires an ~IdealRadioMedium instance in the network.
 //

@@ -21,8 +21,14 @@ network Test
 [General]
 network = Test
 ned-path = .;../../../../src
-sim-time-limit = 10s
+sim-time-limit = 11s
 cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.energyStorage.nominalCapacity = 10 J
 **.energyStorage.initialCapacity = 5 J

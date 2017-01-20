@@ -18,6 +18,12 @@
 #ifndef __INET_INETDEFS_H
 #define __INET_INETDEFS_H
 
+// precompiled headers must be included first
+#include "inet/common/precompiled.h"
+
+// important WITH_* macros defined by OMNET
+#include "inet/opp_defines.h"
+
 // feature defines generated based on the actual feature enablement
 #include "inet/features.h"
 
@@ -25,12 +31,11 @@
 // General definitions.
 //
 
-#include <omnetpp.h>
 #include "inet/common/Compat.h"
 
 using namespace omnetpp;
 
-#if OMNETPP_VERSION < 0x0500
+#if OMNETPP_VERSION < 0x0500 || OMNETPP_BUILDNUM < 1006
 #  error At least OMNeT++/OMNEST version 5.0 required
 #endif // if OMNETPP_VERSION < 0x0500
 
@@ -46,18 +51,6 @@ using namespace omnetpp;
 #endif // if defined(INET_EXPORT)
 
 #include "inet/common/InitStages.h"
-
-// cObject::parsimPack() became const around build #1001
-#if OMNETPP_BUILDNUM >= 1001
-#define PARSIMPACK_CONST const
-#else
-#define PARSIMPACK_CONST
-#endif
-
-#if OMNETPP_BUILDNUM <= 1002
-#define doParsimPacking doPacking
-#define doParsimUnpacking doUnpacking
-#endif
 
 // main namespace of INET framework
 namespace inet {

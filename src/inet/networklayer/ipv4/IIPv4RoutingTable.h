@@ -44,11 +44,6 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     /**
      * For debugging
      */
-    virtual void printRoutingTable() const = 0;
-
-    /**
-     * For debugging
-     */
     virtual void printMulticastRoutingTable() const = 0;
 
     /**
@@ -64,17 +59,8 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * Returns an interface given by its address. Returns nullptr if not found.
      */
     virtual InterfaceEntry *getInterfaceByAddress(const IPv4Address& address) const = 0;
+    using IRoutingTable::getInterfaceByAddress;
     //@}
-
-    /**
-     * IPv4 forwarding on/off
-     */
-    virtual bool isForwardingEnabled() const = 0;
-
-    /**
-     * IPv4 multicast forwarding on/off
-     */
-    virtual bool isMulticastForwardingEnabled() const = 0;
 
     /**
      * Returns routerId.
@@ -92,6 +78,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * Checks if the address is a local one, i.e. one of the host's.
      */
     virtual bool isLocalAddress(const IPv4Address& dest) const = 0;
+    using IRoutingTable::isLocalAddress;
 
     /** @name Routing functions (query the route table) */
     //@{
@@ -113,6 +100,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * if there is no matching route.
      */
     virtual IPv4Route *findBestMatchingRoute(const IPv4Address& dest) const = 0;
+    using IRoutingTable::findBestMatchingRoute;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -140,30 +128,27 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * address list.
      */
     virtual bool isLocalMulticastAddress(const IPv4Address& dest) const = 0;
+    using IRoutingTable::isLocalMulticastAddress;
 
     /**
      * Returns route for a multicast origin and group.
      */
     virtual const IPv4MulticastRoute *findBestMatchingMulticastRoute(const IPv4Address& origin, const IPv4Address& group) const = 0;
+    using IRoutingTable::findBestMatchingMulticastRoute;
     //@}
 
     /** @name Route table manipulation */
     //@{
 
     /**
-     * Returns the total number of unicast routes.
-     */
-    virtual int getNumRoutes() const = 0;
-
-    /**
      * Returns the kth route.
      */
-    virtual IPv4Route *getRoute(int k) const = 0;
+    virtual IPv4Route *getRoute(int k) const override = 0;
 
     /**
      * Finds and returns the default route, or nullptr if it doesn't exist
      */
-    virtual IPv4Route *getDefaultRoute() const = 0;
+    virtual IPv4Route *getDefaultRoute() const override = 0;
 
     /**
      * Adds a route to the routing table. Routes are allowed to be modified
@@ -171,12 +156,14 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * allows routing table internals to be updated on a routing entry change.)
      */
     virtual void addRoute(IPv4Route *entry) = 0;
+    using IRoutingTable::addRoute;
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned of the route was not in the routing table.
      */
     virtual IPv4Route *removeRoute(IPv4Route *entry) = 0;
+    using IRoutingTable::removeRoute;
 
     /**
      * Deletes the given route from the routing table.
@@ -184,16 +171,12 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * not in the routing table.
      */
     virtual bool deleteRoute(IPv4Route *entry) = 0;
-
-    /**
-     * Returns the total number of multicast routes.
-     */
-    virtual int getNumMulticastRoutes() const = 0;
+    using IRoutingTable::deleteRoute;
 
     /**
      * Returns the kth multicast route.
      */
-    virtual IPv4MulticastRoute *getMulticastRoute(int k) const = 0;
+    virtual IPv4MulticastRoute *getMulticastRoute(int k) const override = 0;
 
     /**
      * Adds a multicast route to the routing table. Routes are allowed to be modified
@@ -201,12 +184,14 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * allows routing table internals to be updated on a routing entry change.)
      */
     virtual void addMulticastRoute(IPv4MulticastRoute *entry) = 0;
+    using IRoutingTable::addMulticastRoute;
 
     /**
      * Removes the given route from the routing table, and returns it.
      * nullptr is returned of the route was not in the routing table.
      */
     virtual IPv4MulticastRoute *removeMulticastRoute(IPv4MulticastRoute *entry) = 0;
+    using IRoutingTable::removeMulticastRoute;
 
     /**
      * Deletes the given multicast route from the routing table.
@@ -214,6 +199,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
      * not in the routing table.
      */
     virtual bool deleteMulticastRoute(IPv4MulticastRoute *entry) = 0;
+    using IRoutingTable::deleteMulticastRoute;
 
     /**
      * Deletes invalid routes from the routing table. Invalid routes are those

@@ -55,14 +55,6 @@ bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, cons
     return power == IdealReception::POWER_RECEIVABLE;
 }
 
-bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const
-{
-    if (ignoreInterference)
-        return computeIsReceptionPossible(listening, reception, part);
-    else
-        return ReceiverBase::computeIsReceptionAttempted(listening, reception, part, interference);
-}
-
 bool IdealReceiver::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
 {
     auto power = check_and_cast<const IdealReception *>(reception)->getPower();

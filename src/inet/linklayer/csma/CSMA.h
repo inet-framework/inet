@@ -2,11 +2,11 @@
  * file:        CSMA.h
  *
  * author:     Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
- *				Marc Loebbers, Yosia Hadisusanto
+ *                Marc Loebbers, Yosia Hadisusanto
  *
- * copyright:	(C) 2007-2009 CSEM SA
+ * copyright:    (C) 2007-2009 CSEM SA
  *              (C) 2009 T.U. Eindhoven
- *				(C) 2004 Telecommunication Networks Group (TKN) at
+ *                (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
  *
  *              This program is free software; you can redistribute it

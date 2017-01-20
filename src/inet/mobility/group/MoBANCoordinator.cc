@@ -158,13 +158,6 @@ void MoBANCoordinator::setTargetPosition()
     }
     nextChange = simTime() + duration;
 
-    //show posture name in the graphical interface
-    if (hasGUI()) {
-        char dis_str[100];
-        sprintf(dis_str, "%s until %f", currentPosture->getPostureName(), nextChange.dbl());
-        getDisplayString().setTagArg("t", 0, dis_str);
-    }
-
     // write the move step into the output log file
     if (currentPosture->isMobile())
         fprintf(logfile, "%s %d %f %f %f %f \n", currentPosture->getPostureName(), currentPosture->getPostureID(), targetPosition.x, targetPosition.y, targetPosition.z, speed);
@@ -175,6 +168,14 @@ void MoBANCoordinator::setTargetPosition()
 
     EV_DEBUG << "New posture: " << currentPosture->getPostureName() << endl;
     EV_DEBUG << "Destination: " << targetPosition << " Total Time = " << duration << endl;
+}
+
+void MoBANCoordinator::refreshDisplay() const
+{
+    //show posture name in the graphical interface
+    char dis_str[100];
+    sprintf(dis_str, "%s until %f", currentPosture->getPostureName(), nextChange.dbl());
+    getDisplayString().setTagArg("t", 0, dis_str);
 }
 
 /**

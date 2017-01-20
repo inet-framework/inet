@@ -20,6 +20,7 @@
 #ifndef __INET_TLVOPTION_H_
 #define __INET_TLVOPTION_H_
 
+#include "inet/common/INETDefs.h"
 #include "TLVOption_m.h"
 
 namespace inet {
