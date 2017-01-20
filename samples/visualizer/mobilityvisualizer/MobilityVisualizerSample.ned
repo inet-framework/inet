@@ -14,3 +14,34 @@
 // 
 
 package inet.samples.visualizer.mobilityvisualizer;
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
+
+
+//
+// TODO documentation
+//
+network MobilityVisualizerSimple
+{
+    @display("bgb=800,600");
+    submodules:
+        host: AdhocHost {
+            @display("p=400,300");
+        }
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
+}
+
