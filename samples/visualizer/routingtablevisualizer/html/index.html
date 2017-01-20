@@ -74,5 +74,45 @@ This would yield a two-directional arrow. TODO: do we need this?
 
 <h2>2. Using filters</h2>
 
+<p>
+This configurator demonstrates using the <i>nodeFilter</i> and <i>destinationFilter</i> parameters.
+</p>
+
+<p>
+The network for this configuration is displayed on the following image.
+</p>
+
+<img src="filtersnetwork.png">
+
+<p>
+It consists of a router connected to a switch. Two <tt>StandardHosts</tt> are connected to the switch, and another two <tt>StandardHosts</tt> are connected to the router.
+</p>
+
+</p>
+The goal is to only visualize the routes going from <tt>host2</tt> towards <tt>host3</tt>.
+To this end, the <i>destinationFilter</i> parameter is set to <tt>host3</tt>.
+To narrow the visualized routes down to the ones that lead from <tt>host2</tt>, the <i>nodeFilter</i> parameter
+is specified as <tt>"not(host1 or host4)"</tt>. This instructs the visualizer not to visualize the routing tables of <tt>host1</tt> and <tt>host4</tt>.
+The routing table of <tt>router</tt> needs to be visualized, because the path from <tt>host2</tt> to <tt>host3</tt> leads through it.
+</p>
+
+<p>The visualized routes are displayed on the following image.</p>
+
+<img src="routes.png">
+
+<p>The defaults of the <tt>nodeFilter</tt> and <tt>destinationFilter</tt> parameters is <tt>"*"</tt>, which means all routes from all nodes towards
+all destinations are visualized. The network would look like the following with these default settings.</p>
+
+<img src="fullmesh.png">
+
+<p>
+Note that the arrows don't go through the switch. This is because L2 devices like switches and access points don't have network layers. They are
+effectively transparent for the route visualization arrows. The visualizer could, in theory, know that the packets will take a path that goes through
+the switch. This is true in this situation, but in others there may be multiple interconnected switches, and more paths that the packets can take.
+However, the pathfinding in that case is not a network layer level problem. 
+</p>
+
+<h2>3. 'Visualizing dinamic routes' configuration</h2>
+
 </body>
 </html>
