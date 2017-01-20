@@ -626,7 +626,7 @@ void SCTPSocket::setRtoInfo(double initial, double max, double min)
     if (sockstate == CONNECTED) {
         cMessage *msg = new cMessage("RtoInfo", SCTP_C_SET_RTO_INFO);
         SCTPRtoInfo *cmd = new SCTPRtoInfo();
-        cmd->setAssocId(assocId);
+        cmd->setSocketId(assocId);
         cmd->setRtoInitial(initial);
         cmd->setRtoMin(min);
         cmd->setRtoMax(max);

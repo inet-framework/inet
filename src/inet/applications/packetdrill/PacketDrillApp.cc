@@ -950,7 +950,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
             struct sctp_reset_streams_expr *rs = exp->getResetStreams();
             cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
             SCTPResetInfo *rinfo = new SCTPResetInfo();
-            rinfo->setAssocId(-1);
+            rinfo->setSocketId(-1);
             rinfo->setFd(rs->srs_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
             if (rs->srs_number_streams->getNum() > 0 && rs->srs_stream_list != nullptr) {
@@ -984,7 +984,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
             struct sctp_add_streams_expr *as = exp->getAddStreams();
             cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
             SCTPResetInfo *rinfo = new SCTPResetInfo();
-            rinfo->setAssocId(-1);
+            rinfo->setSocketId(-1);
             rinfo->setFd(as->sas_assoc_id->getNum());
             rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
             if (as->sas_instrms->getNum() != 0 && as->sas_outstrms->getNum() != 0) {
@@ -1055,7 +1055,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 case SCTP_RESET_ASSOC: {
                     cMessage *cmsg = new cMessage("SCTP_C_STREAM_RESET");
                     SCTPResetInfo *rinfo = new SCTPResetInfo();
-                    rinfo->setAssocId(-1);
+                    rinfo->setSocketId(-1);
                     rinfo->setFd(value);
                     rinfo->setRemoteAddr(sctpSocket.getRemoteAddr());
                     rinfo->setRequestType(SSN_TSN);
@@ -1214,7 +1214,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
 
     SCTPSendInfo* sendCommand = new SCTPSendInfo;
     sendCommand->setLast(true);
-    sendCommand->setAssocId(sctpAssocId);
+    sendCommand->setSocketId(sctpAssocId);
     sendCommand->setSid(stream_no);
     sendCommand->setPpid(ppid);
     if (flags == SCTP_UNORDERED) {
@@ -1268,7 +1268,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
 
     SCTPSendInfo* sendCommand = new SCTPSendInfo;
     sendCommand->setLast(true);
-    sendCommand->setAssocId(-1);
+    sendCommand->setSocketId(-1);
     sendCommand->setSid(sid);
     sendCommand->setPpid(ppid);
     sendCommand->setSsn(ssn);

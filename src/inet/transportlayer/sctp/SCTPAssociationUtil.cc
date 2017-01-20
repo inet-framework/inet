@@ -271,12 +271,14 @@ uint16 SCTPAssociation::chunkToInt(const char *type)
         return ASCONF_ACK;
     if (strcmp(type, "PKTDROP") == 0)
         return PKTDROP;
-    if (strcmp(type, "STREAM_RESET") == 0)
-        return STREAM_RESET;
+    if (strcmp(type, "RE_CONFIG") == 0)
+        return RE_CONFIG;
     if (strcmp(type, "FORWARD_TSN") == 0)
         return FORWARD_TSN;
     if (strcmp(type, "ASCONF") == 0)
         return ASCONF;
+    if (strcmp(type, "IFORWARD_TSN") == 0)
+        return IFORWARD_TSN;
     EV_WARN << "ChunkConversion not successful\n";
     return 0xffff;
 }
