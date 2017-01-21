@@ -34,7 +34,7 @@ This example demonstrates the use of the RoutingTableVisualizer module.
 
 <p>The example consists of 3 simulation models of increasing complexity, each demonstrating different features of <tt>RoutingTableVisualizer</tt>.</p>
 
-<h2>About the RoutingTableVisualizer</h2>
+<h2>About <tt>RoutingTableVisualizer</tt></h2>
 
 <p>
 The <tt>RoutingTableVisualizer</tt> module visualizes routing table entries in the following way. Routing table entries are represented visually by solid arrows.
@@ -59,7 +59,7 @@ It reacts to changes in the routing tables, for example when...
 <p>
 The network for this configuration contains 2 <tt>StandardHosts</tt>, an <tt>IPv4Configurator</tt> module and a <tt>RoutingTableVisualizer</tt> module.
 The configuration contains one entry, which enables the visualization of routing tables with the <i>displayRoutingTables</i> parameter.
-All other parameters of the visualizer is left at default.
+All other parameters of the visualizer is left on default.
 </p>
 
 <p>When the simulation is run, the network looks like the following:</p>
@@ -113,6 +113,38 @@ However, the pathfinding in that case is not a network layer level problem.
 </p>
 
 <h2>3. 'Visualizing dinamic routes' configuration</h2>
+
+<p>
+The visualizer reacts to changes in the routing table of hosts selected with the <i>nodeFilter</i> parameter.
+These route changes are due to a dynamic routing protocol, like HDCP or AODV. In this configuration, the
+routes are changed by AODV (Advanced On-Demand Vector Routing Protocol).
+</p>
+
+<p>
+The network for this configuration is displayed on the following image.
+</p>
+
+<img src="dinamicnetwork.png">
+
+<p>
+The network contains a series of <tt>AODVRouters</tt>. These are mobile hosts that have AODV and
+IP forwarding enabled. 6 of the hosts are laid out in a chain, and are stationary.
+Their communication ranges are specified so that each host can only reach the adjacent hosts.
+The 7th hosts moves up and down along the chain of the 6 hosts, and is only in the communication range
+of the 2 or 3 nearby hosts.
+</p>
+
+<p>TODO: the configurator is instructed not to add any routes</p>
+
+<p>
+Host0 is configured to ping Host7. Since each host is only capable of reaching the adjacent hosts, the ping
+packets are relayed to Host7 through the chain. The AODV protocol dynamically configures the routes, in order
+for the ping packets to reach Host7.
+</p>
+
+<p>TODO: results</p>
+
+<p>TODO: some kind of conclusion, more info like documentation, about the other parameters?</p>
 
 </body>
 </html>
