@@ -85,7 +85,7 @@ network RoutingTableVisualizerC
 {
     @display("bgb=822,636");
     submodules:
-        source: AODVRouter {
+        sourceHost: AODVRouter {
             @display("p=120,57");
         }
         host1: AODVRouter {
@@ -103,7 +103,7 @@ network RoutingTableVisualizerC
         host5: AODVRouter {
             @display("p=119.04,554.24");
         }
-        destination: AODVRouter {
+        destinationHost: AODVRouter {
             @display("p=272.64,56.32");
         }
         configurator: IPv4NetworkConfigurator {

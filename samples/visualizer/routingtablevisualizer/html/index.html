@@ -11,21 +11,6 @@
 
 <h2>Goals</h2>
 
-<pre>
-why is this good?
-because you can see the routes just by looking at the playground, without having to look at the routing table entries.
-its for convenience
-information about routes is presented in a compact but complete way - actually a concise way
-an overview of routes and routing tables in the network at a glance
-information is not as precise as from the routing tables. but. its easier to overview it.
-
-what is this?
-routing tables i mean routes are visualized as arrows.
-
-an overview of routes at a glance.
-
-</pre>
-
 <p>
 The RoutingTableVisualizer module can be used to visualize how packets are routed in the network.
 This can be useful because a lot of information about routes is presented at a glance in a concise way, without the need to examine routing tables.
@@ -50,7 +35,7 @@ The <i>nodeFilter</i> parameter controls which nodes' routing tables should be v
 </p>
 
 <p>
-It reacts to changes in the routing tables, for example when...
+The visualizer reacts to changes in the routing tables it is set to visualize, and updates the visualizations.
 </p>
 
 <h2>1. 'Displaying routes' configuration</h2>
@@ -72,7 +57,7 @@ Note that there are separate arrows for the two directions. However, the two arr
 This would yield a two-directional arrow. TODO: do we need this?
 </p>
 
-<h2>2. Using filters</h2>
+<h2>2. 'Using filters' configuration</h2>
 
 <p>
 This configurator demonstrates using the <i>nodeFilter</i> and <i>destinationFilter</i> parameters.
@@ -112,7 +97,7 @@ the switch. This is true in this situation, but in others there may be multiple 
 However, the pathfinding in that case is not a network layer level problem. 
 </p>
 
-<h2>3. 'Visualizing dinamic routes' configuration</h2>
+<h2>3. 'Visualizing dynamic routes' configuration</h2>
 
 <p>
 The visualizer reacts to changes in the routing table of hosts selected with the <i>nodeFilter</i> parameter.
@@ -124,7 +109,7 @@ routes are changed by AODV (Advanced On-Demand Vector Routing Protocol).
 The network for this configuration is displayed on the following image.
 </p>
 
-<img src="dinamicnetwork.png">
+<img src="dynamicnetwork.png">
 
 <p>
 The network contains a series of <tt>AODVRouters</tt>. These are mobile hosts that have AODV and
@@ -134,17 +119,28 @@ The 7th hosts moves up and down along the chain of the 6 hosts, and is only in t
 of the 2 or 3 nearby hosts.
 </p>
 
-<p>TODO: the configurator is instructed not to add any routes</p>
+<p>Since routes are changed dynamically by the AODV protocol, the configurator is instructed not to add any routes.</p>
 
 <p>
-Host0 is configured to ping Host7. Since each host is only capable of reaching the adjacent hosts, the ping
-packets are relayed to Host7 through the chain. The AODV protocol dynamically configures the routes, in order
-for the ping packets to reach Host7.
+<tt>sourceHost</tt> is configured to ping <tt>destinationHost</tt>. Since each host is only capable of reaching the adjacent hosts, the ping
+packets are relayed to <tt>destinationHost</tt> through the chain. The AODV protocol dynamically configures the routes, in order
+for the ping packets to reach <tt>destinationHost</tt>.
 </p>
 
-<p>TODO: results</p>
-
 <p>TODO: some kind of conclusion, more info like documentation, about the other parameters?</p>
+
+<p>The following animation depicts what happens when the simulation is run.</p>
+
+<img src="routingtablevisualizer2.gif">
+
+<p>When <tt>destinationHost</tt> starts to move downwards, packets get routed across the chain to the host that is currently adjacent to <tt>destinationHost</tt>. This host relays the packets to <tt>destinationHost</tt>. When <tt>destinationHost</tt> reaches the bottom of the playground
+and turns back, the routes leading to it from the lower hosts don't change. This is because AODV is an on-demand protocol, thus routes are only changed when it is required. The lower hosts are not taking part of the packet relay. When <tt>destinationHost</tt> gets to the top of the
+playground, the process starts again, and routes are dynamically configured by AODV to relay the packets across the chain to <tt>destinationHost</tt>. The visualizer reacts to the changes in the routing tables, and updates the visualization accordingly.
+
+<h2>Conclusion</h2>
+
+This example demonstrated the key features of the <tt>RoutingTableVisualizer</tt> module. For more information on all features and parameters,
+refer to the NED documentation. TODO: link to ned doc
 
 </body>
 </html>
