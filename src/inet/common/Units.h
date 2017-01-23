@@ -22,6 +22,7 @@
 #ifndef __INET_UNITS_H
 #define __INET_UNITS_H
 
+#include <assert.h>
 #include <cmath>
 #include <iostream>
 
@@ -50,6 +51,10 @@ struct compose;
 // Constructs a unit equivalent to Unit*Num/Den
 template<typename Unit, int Num, int Den = 1>
 struct scale;
+
+// Constructs a unit equivalent to Unit*Num/Den
+template<typename Unit, int Num, int Den = 1>
+struct intscale;
 
 // Constructs a unit equivalent to Unit+Num/Den
 template<typename Unit, int Num, int Den = 1>
@@ -361,6 +366,32 @@ struct convert3<T, scale<U, Num, Den> >
     }
 };
 
+// Convert from a scaled unit
+template<typename T, typename U, int Num, int Den>
+struct convert2<intscale<T, Num, Den>, U>
+{
+    template<typename V>
+    static V fn(const V& v)
+    {
+        auto t = v * Den;
+        assert(t % Num == 0);
+        return convert<T, U>::fn(t / Num);
+    }
+};
+
+// Convert to a scaled unit
+template<typename T, typename U, int Num, int Den>
+struct convert3<T, intscale<U, Num, Den> >
+{
+    template<typename V>
+    static V fn(const V& v)
+    {
+        auto t = convert<T, U>::fn(v) * Num;
+        assert(t % Den == 0);
+        return t / Den;
+    }
+};
+
 // Convert from a translated unit
 template<typename T, typename U, int Num, int Den>
 struct convert2<translate<T, Num, Den>, U>
@@ -403,6 +434,15 @@ struct count_terms<Term, Term>
 // count_terms ignores scaling factors - that is taken care of by scaling_factor.
 template<typename Term, typename Unit, int N, int D>
 struct count_terms<Term, scale<Unit, N, D> >
+{
+    typedef count_terms<Term, Unit> result;
+    static const int num = result::num;
+    static const int den = result::den;
+};
+
+// count_terms ignores scaling factors - that is taken care of by scaling_factor.
+template<typename Term, typename Unit, int N, int D>
+struct count_terms<Term, intscale<Unit, N, D> >
 {
     typedef count_terms<Term, Unit> result;
     static const int num = result::num;
@@ -462,6 +502,12 @@ struct check_terms_equal<pow<Unit, N, D>, T1, T2>
 
 template<typename Unit, int N, int D, typename T1, typename T2>
 struct check_terms_equal<scale<Unit, N, D>, T1, T2>
+{
+    static const bool value = check_terms_equal<Unit, T1, T2>::value;
+};
+
+template<typename Unit, int N, int D, typename T1, typename T2>
+struct check_terms_equal<intscale<Unit, N, D>, T1, T2>
 {
     static const bool value = check_terms_equal<Unit, T1, T2>::value;
 };
@@ -598,6 +644,18 @@ struct scaling_factor<scale<U, N, D> >
 };
 
 template<typename U, int N, int D>
+struct scaling_factor<intscale<U, N, D> >
+{
+    template<typename T>
+    static T fn()
+    {
+        auto t = scaling_factor<U>::template fn<T>() * static_cast<T>(N);
+        assert(t % static_cast<T>(D) == 0);
+        return t / static_cast<T>(D);
+    }
+};
+
+template<typename U, int N, int D>
 struct scaling_factor<pow<U, N, D> >
 {
     template<typename T>
@@ -716,6 +774,20 @@ struct output_unit2<scale<Unit, Num, Den> >
     }
 };
 
+template<typename Unit, int Num, int Den>
+struct output_unit2<intscale<Unit, Num, Den> >
+{
+    template<typename Stream>
+    static void fn(Stream& os)
+    {
+        os << Den;
+        if (Num != 1)
+            os << '/' << Num;
+        os << '.';
+        output_unit<Unit>::fn(os);
+    }
+};
+
 } // namespace internal
 
 template<typename Value, typename Unit>
@@ -746,7 +818,7 @@ struct K;    // Kelvin
 struct A;    // Ampere
 struct mol;    // mole
 struct cd;    // candela
-struct b;    // bit
+struct bit;    // bit
 
 } // namespace units
 
@@ -757,6 +829,7 @@ UNIT_DISPLAY_NAME(units::K, "K");
 UNIT_DISPLAY_NAME(units::A, "A");
 UNIT_DISPLAY_NAME(units::mol, "mol");
 UNIT_DISPLAY_NAME(units::cd, "cd");
+UNIT_DISPLAY_NAME(units::bit, "bit");
 
 namespace units {
 
@@ -982,7 +1055,8 @@ typedef scale<kPa, 1450377, 10000000> psi;
 typedef scale<kPa, 10> millibar;
 
 // Informatics
-typedef compose<b, pow<s, -1> > bps;
+typedef intscale<bit, 1, 8> byte;
+typedef compose<bit, pow<s, -1> > bps;
 typedef scale<bps, 1, 1000> kbps;
 typedef scale<bps, 1, 1000000> Mbps;
 
@@ -1031,6 +1105,7 @@ UNIT_DISPLAY_NAME(units::degree_second, "\"");
 UNIT_DISPLAY_NAME(units::kPa, "kPa");
 UNIT_DISPLAY_NAME(units::psi, "PSI");
 UNIT_DISPLAY_NAME(units::millibar, "millibars");
+UNIT_DISPLAY_NAME(units::byte, "byte");
 UNIT_DISPLAY_NAME(units::bps, "bps");
 UNIT_DISPLAY_NAME(units::kbps, "kbps");
 UNIT_DISPLAY_NAME(units::Mbps, "Mbps");
@@ -1144,6 +1219,9 @@ typedef value<double, units::degree_second> degree_second;
 typedef value<double, units::kPa> kPa;
 typedef value<double, units::psi> psi;
 typedef value<double, units::millibar> millibar;
+
+typedef value<int64_t, units::bit> bit;
+typedef value<int64_t, units::byte> byte;
 
 typedef value<double, units::bps> bps;
 typedef value<double, units::kbps> kbps;
