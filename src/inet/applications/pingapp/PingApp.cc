@@ -357,7 +357,7 @@ void PingApp::sendPingRequest()
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
             const auto& request = std::make_shared<ICMPMessage>();
-            request->setChunkLength(4);
+            request->setChunkLength(byte(4));
             request->setType(ICMP_ECHO_REQUEST);
             request->markImmutable();
             outPacket->prepend(request);
@@ -387,7 +387,7 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
             const auto& request = std::make_shared<EchoPacket>();
-            request->setChunkLength(4);
+            request->setChunkLength(byte(4));
             request->setType(ECHO_PROTOCOL_REQUEST);
             outPacket->prepend(request);
             outPacket->append(std::make_shared<cPacketChunk>(msg));
@@ -411,7 +411,7 @@ void PingApp::sendPingRequest()
 
 void PingApp::processPingResponse(Packet *packet)
 {
-    PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(0, packet->getDataLength()))->getPacket());
+    PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(byte(0), packet->getDataLength()))->getPacket());
     if (pingPayload->getOriginatorId() != pid) {
         EV_WARN << "Received response was not sent by this application, dropping packet\n";
         return;

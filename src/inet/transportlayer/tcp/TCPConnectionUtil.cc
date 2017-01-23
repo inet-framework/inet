@@ -240,7 +240,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
 void TCPConnection::sendToIP(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg)
 {
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && packet->getByteLength() > tcpseg->getChunkLength())
+    if (sndNxtVector && packet->getByteLength() > byte(tcpseg->getChunkLength()).get())
         sndNxtVector->record(tcpseg->getSequenceNo());
 
     if (sndAckVector)
@@ -251,7 +251,7 @@ void TCPConnection::sendToIP(Packet *packet, const std::shared_ptr<TcpHeader>& t
     tcpseg->setDestPort(remotePort);
     ASSERT(tcpseg->getHeaderLength() >= TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20 (without options)
     ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_OCTETS);    // TCP_MAX_HEADER_OCTETS = 60
-    ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
+    ASSERT(byte(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
     state->sentBytes = packet->getByteLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
@@ -278,7 +278,7 @@ void TCPConnection::sendToIP(Packet *pkt, const std::shared_ptr<TcpHeader>& tcps
     printSegmentBrief(tcpseg.get());
 
     IL3AddressType *addressType = dest.getAddressType();
-    ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
+    ASSERT(byte(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
     pkt->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::tcp);
     pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());

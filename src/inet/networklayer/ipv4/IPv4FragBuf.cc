@@ -66,7 +66,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
 
     // add fragment into reassembly buffer
     int bytes = datagram->getTotalLengthField() - datagram->getHeaderLength();
-    buf->buf.replace(datagram->getFragmentOffset(), packet->peekDataAt(datagram->getHeaderLength(), bytes));
+    buf->buf.replace(byte(datagram->getFragmentOffset()), packet->peekDataAt(byte(datagram->getHeaderLength()), byte(bytes)));
     if (datagram->getFragmentOffset() == 0 || buf->packet == nullptr) {
         delete buf->packet;
         buf->packet = packet;
@@ -75,7 +75,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         delete packet;
     }
     if (!datagram->getMoreFragments()) {
-        buf->buf.setExpectedLength(datagram->getFragmentOffset() + bytes);
+        buf->buf.setExpectedLength(byte(datagram->getFragmentOffset() + bytes));
     }
 
     // do we have the complete datagram?
@@ -89,7 +89,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
         pk->transferTagsFrom(buf->packet);
         auto hdr = std::shared_ptr<IPv4Header>(buf->packet->peekHeader<IPv4Header>()->dup());
         const auto& payload = buf->buf.getData();
-        hdr->setTotalLengthField(hdr->getHeaderLength() + payload->getChunkLength());
+        hdr->setTotalLengthField(hdr->getHeaderLength() + byte(payload->getChunkLength()).get());
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
         hdr->markImmutable();

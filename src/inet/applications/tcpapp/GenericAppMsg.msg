@@ -38,7 +38,7 @@ class FieldsChunk extends cObject;
 //
 class GenericAppMsg extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter;
+    bit chunkLength @overridegetter;
     int expectedReplyLength; // in bytes
     double replyDelay;       // reply after this many seconds
     bool serverClose;        // with TCP: if true, server should close the

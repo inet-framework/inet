@@ -41,15 +41,13 @@ enum GenericTLVOptionTypes
     GENERIC_TLVOPTION_TLV_GPSR = 47;
 };
 
-
-
 //
 // Represents a generic network datagram with generic network addresses. 
 //
 class GenericDatagramHeader extends FieldsChunk
 {
     @customize(true);
-    int64_t chunkLength @overridegetter = 10;    //FIXME //KLUDGE set to -1, and should reading from ned parameter
+    bit chunkLength @overridegetter = byte(10);    //FIXME //KLUDGE set to -1, and should reading from ned parameter
     L3Address sourceAddress @getter(_getSrcAddr);
     L3Address destinationAddress @getter(_getDestAddr);
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;

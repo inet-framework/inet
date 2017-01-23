@@ -369,7 +369,7 @@ void UDP::processPacketFromApp(cPacket *appData)
         pseudoHeader.setDestAddress(destAddr);
         pseudoHeader.setProtocolId(17);
         pseudoHeader.setPacketLength(udpPacket->getByteLength());
-        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, udpPacket->getByteLength())));
+        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(byte(0), byte(udpPacket->getByteLength()))));
     }
     udpHeader->setCrc(crc);
     udpHeader->markImmutable();
@@ -403,7 +403,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
     ASSERT(udpPacket->getControlInfo() == nullptr);
     emit(rcvdPkSignal, udpPacket);
 
-    int64_t udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
+    bit udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
     const auto& udpHeader = udpPacket->popHeader<UdpHeader>();
     if (udpHeader == nullptr)
         throw cRuntimeError("not an udp header");
@@ -416,7 +416,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
     auto l3AddressInd = udpPacket->getMandatoryTag<L3AddressInd>();
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
-    auto totalLength = udpHeader->getTotalLengthField();
+    auto totalLength = byte(udpHeader->getTotalLengthField());
     auto crc = udpHeader->getCrc();
 
     bool bitError = false;
@@ -437,8 +437,8 @@ void UDP::processUDPPacket(Packet *udpPacket)
                 pseudoHeader.setSrcAddress(srcAddr);
                 pseudoHeader.setDestAddress(destAddr);
                 pseudoHeader.setProtocolId(17);
-                pseudoHeader.setPacketLength(totalLength);
-                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(0, totalLength)));
+                pseudoHeader.setPacketLength(byte(totalLength).get());
+                bitError = crc != computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(bit(0), totalLength)));
             }
             break;
         }
@@ -512,7 +512,7 @@ void UDP::processICMPv4Error(Packet *packet)
     code = icmpMsg->getCode();
     const auto& ipv4Header = packet->popHeader<IPv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
-        if (const auto& udpHeader = packet->peekHeader<UdpHeader>(8)) {
+        if (const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8))) {
             localAddr = ipv4Header->getSrcAddress();
             remoteAddr = ipv4Header->getDestAddress();
             localPort = udpHeader->getSourcePort();
@@ -613,7 +613,7 @@ void UDP::processUndeliverablePacket(Packet *udpPacket)
     }
 
     //seek to network protocol header
-    udpPacket->setHeaderPopOffset(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getPosition());
+    udpPacket->setHeaderPopOffset(byte(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getPosition()));
     auto inIe = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {

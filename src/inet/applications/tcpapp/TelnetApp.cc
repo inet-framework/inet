@@ -142,7 +142,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 
     const auto& payload = std::make_shared<GenericAppMsg>();
     Packet *packet = new Packet("data");
-    payload->setChunkLength(numBytes);
+    payload->setChunkLength(byte(numBytes));
     payload->setExpectedReplyLength(expectedReplyBytes);
     payload->setServerClose(false);
     payload->markImmutable();

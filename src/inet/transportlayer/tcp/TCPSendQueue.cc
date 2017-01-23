@@ -48,7 +48,7 @@ std::string TCPSendQueue::str() const
 void TCPSendQueue::enqueueAppData(Packet *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
-    dataBuffer.push(msg->peekDataAt(0, msg->getByteLength()));
+    dataBuffer.push(msg->peekDataAt(byte(0), byte(msg->getByteLength())));
     end += msg->getByteLength();
     if (seqLess(end, begin))
         throw cRuntimeError("Send queue is full");
@@ -75,7 +75,7 @@ Packet *TCPSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
     sprintf(msgname, "tcpseg(l=%lu)", numBytes);
 
     Packet *packet = new Packet(msgname);
-    const auto& payload = dataBuffer.peekAt(fromSeq-begin, numBytes);   //get data from buffer
+    const auto& payload = dataBuffer.peekAt(byte(fromSeq - begin), byte(numBytes));   //get data from buffer
     //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", SENDER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << payload << std::endl;
     packet->append(payload);
     return packet;
@@ -88,7 +88,7 @@ void TCPSendQueue::discardUpTo(uint32 seqNum)
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
     if (seqNum != begin) {
-        dataBuffer.pop(seqNum - begin);
+        dataBuffer.pop(byte(seqNum - begin));
         begin = seqNum;
     }
 }

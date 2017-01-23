@@ -57,13 +57,13 @@ class INET_API TCPReceiveQueue : public cObject
     ChunkQueue kludgeQueue;
 #endif
 
-    uint32_t offsetToSeq(int64_t offs) const { return (uint32_t)offs; }
+    uint32_t offsetToSeq(byte offs) const { return (uint32_t)offs.get(); }
 
-    int64_t seqToOffset(uint32_t seq) const
+    byte seqToOffset(uint32_t seq) const
     {
-        int64_t expOffs = reorderBuffer.getExpectedOffset();
+        byte expOffs = reorderBuffer.getExpectedOffset();
         uint32_t expSeq = offsetToSeq(expOffs);
-        return (seqGE(seq, expSeq)) ? expOffs + (seq - expSeq) : expOffs - (expSeq - seq);
+        return byte((seqGE(seq, expSeq)) ? byte(expOffs).get() + (seq - expSeq) : byte(expOffs).get() - (expSeq - seq));
     }
 
   public:

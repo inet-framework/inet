@@ -183,7 +183,7 @@ void EtherTrafGen::sendBurstPackets()
 
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = packetLength->longValue();
-        const auto& payload = std::make_shared<ByteCountChunk>(len);
+        const auto& payload = std::make_shared<ByteCountChunk>(byte(len));
         payload->markImmutable();
         datapacket->append(payload);
         datapacket->ensureTag<EtherTypeReq>()->setEtherType(etherType);

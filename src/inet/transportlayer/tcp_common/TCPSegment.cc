@@ -118,7 +118,7 @@ void TcpHeader::clean()
 {
     dropHeaderOptions();
     setHeaderLength(TCP_HEADER_OCTETS);
-    setChunkLength(TCP_HEADER_OCTETS);
+    setChunkLength(byte(TCP_HEADER_OCTETS));
 }
 
 #if 0   //FIXME KLUDGE
@@ -173,7 +173,7 @@ void TcpHeader::addHeaderOption(TCPOption *option)
     handleChange();
     headerOptionList.push_back(option);
     headerLength += option->getLength();
-    setChunkLength(headerLength);
+    setChunkLength(byte(headerLength));
 }
 
 void TcpHeader::setHeaderOptionArraySize(unsigned int size)
@@ -202,7 +202,7 @@ void TcpHeader::dropHeaderOptions()
         delete opt;
     headerOptionList.clear();
     setHeaderLength(TCP_HEADER_OCTETS);
-    setChunkLength(TCP_HEADER_OCTETS);
+    setChunkLength(byte(TCP_HEADER_OCTETS));
 }
 
 

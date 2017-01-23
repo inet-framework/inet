@@ -87,7 +87,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // do not reply with error message to error message
     if (origDatagram->getTransportProtocol() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekDataAt<ICMPMessage>(origDatagram->getHeaderLength());
+        const auto& recICMPMsg = packet->peekDataAt<ICMPMessage>(byte(origDatagram->getHeaderLength()));
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -106,14 +106,14 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpHeader = std::make_shared<ICMPMessage>();
-    icmpHeader->setChunkLength(8);      //FIXME second 4 byte in icmp header not represented yet
+    icmpHeader->setChunkLength(byte(8));      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
     icmpHeader->markImmutable();
     errorPacket->append(icmpHeader);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
-    errorPacket->append(packet->peekDataAt(0, origDatagram->getHeaderLength() + 8));
+    errorPacket->append(packet->peekDataAt(byte(0), byte(origDatagram->getHeaderLength() + 8)));
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
@@ -228,7 +228,7 @@ void ICMP::processEchoRequest(Packet *request)
     icmpReply->setType(ICMP_ECHO_REPLY);
     icmpReply->markImmutable();
     reply->append(icmpReply);
-    reply->append(request->peekDataAt(0, request->getDataLength()));
+    reply->append(request->peekDataAt(byte(0), request->getDataLength()));
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?

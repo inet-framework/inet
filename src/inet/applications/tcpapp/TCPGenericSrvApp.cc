@@ -112,14 +112,14 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         int connId = packet->getMandatoryTag<SocketInd>()->getSocketId();
         ChunkQueue &queue = socketQueue[connId];
-        auto chunk = packet->peekDataAt(0);
+        auto chunk = packet->peekDataAt(byte(0));
         queue.push(chunk);
         emit(rcvdPkSignal, packet);
 
         bool doClose = false;
         while(const auto& appmsg = queue.pop<GenericAppMsg>()) {
             msgsRcvd++;
-            bytesRcvd += appmsg->getChunkLength();
+            bytesRcvd += byte(appmsg->getChunkLength()).get();
             long requestedBytes = appmsg->getExpectedReplyLength();
             simtime_t msgDelay = appmsg->getReplyDelay();
             if (msgDelay > maxMsgDelay)
@@ -130,7 +130,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
                 outPacket->ensureTag<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = std::make_shared<GenericAppMsg>();
-                payload->setChunkLength(requestedBytes);
+                payload->setChunkLength(byte(requestedBytes));
                 payload->setExpectedReplyLength(0);
                 payload->setReplyDelay(0);
                 payload->markImmutable();

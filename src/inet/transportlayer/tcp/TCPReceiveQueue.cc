@@ -38,7 +38,7 @@ void TCPReceiveQueue::init(uint32 startSeq)
     rcv_nxt = startSeq;
 
     reorderBuffer.clear();
-    reorderBuffer.setExpectedOffset(startSeq);
+    reorderBuffer.setExpectedOffset(byte(startSeq));
 }
 
 std::string TCPReceiveQueue::str() const
@@ -67,7 +67,7 @@ uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, TcpHeader *tcps
         seq = buffSeq;
         tcpPayloadLength -= offs;
     }
-    const auto& payload = packet->peekDataAt(tcpHeaderLength + offs, tcpPayloadLength);
+    const auto& payload = packet->peekDataAt(byte(tcpHeaderLength + offs), byte(tcpPayloadLength));
 
 #ifndef NDEBUG
     if (!reorderBuffer.isEmpty()) {
@@ -150,7 +150,7 @@ uint32 TCPReceiveQueue::getAmountOfBufferedBytes()
     uint32 bytes = 0;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++)
-        bytes += reorderBuffer.getRegionLength(i);
+        bytes += byte(reorderBuffer.getRegionLength(i)).get();
 
     return bytes;
 }
@@ -174,7 +174,7 @@ void TCPReceiveQueue::getQueueStatus()
 
 uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
 {
-    int64_t fs = seqToOffset(fromSeqNum);
+    byte fs = seqToOffset(fromSeqNum);
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
         if (reorderBuffer.getRegionStartOffset(i) <= fs && fs < reorderBuffer.getRegionEndOffset(i))
@@ -186,7 +186,7 @@ uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
 
 uint32 TCPReceiveQueue::getRE(uint32 toSeqNum)
 {
-    int64_t fs = seqToOffset(toSeqNum);
+    byte fs = seqToOffset(toSeqNum);
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
         if (reorderBuffer.getRegionStartOffset(i) < fs && fs <= reorderBuffer.getRegionEndOffset(i))

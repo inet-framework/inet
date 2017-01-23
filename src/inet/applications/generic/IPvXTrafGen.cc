@@ -182,7 +182,7 @@ void IPvXTrafGen::sendPacket()
     sprintf(msgName, "appData-%d", numSent);
 
     Packet *packet = new Packet(msgName);
-    const auto& payload = std::make_shared<ByteCountChunk>(packetLengthPar->longValue());
+    const auto& payload = std::make_shared<ByteCountChunk>(byte(packetLengthPar->longValue()));
     payload->markImmutable();
     packet->append(payload);
 

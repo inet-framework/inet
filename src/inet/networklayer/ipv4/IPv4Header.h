@@ -47,7 +47,7 @@ class INET_API IPv4Header : public IPv4Header_Base, public INetworkDatagram
      */
     virtual int getTotalLengthField() const override;
 
-    virtual int64_t getChunkLength() const override { return getHeaderLength(); }
+    virtual bit getChunkLength() const override { return byte(getHeaderLength()); }
     /**
      * Returns bits 0-5 of the Type of Service field, a value in the 0..63 range
      */

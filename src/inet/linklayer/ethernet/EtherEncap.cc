@@ -127,7 +127,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
     int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - msg->getByteLength();
     if (paddingLength > 0) {
         const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(paddingLength);
+        ethPadding->setChunkLength(byte(paddingLength));
         ethPadding->markImmutable();
         msg->pushTrailer(ethPadding);
     }
@@ -204,7 +204,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
     if (paddingLength > 0) {
         const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(paddingLength);
+        ethPadding->setChunkLength(byte(paddingLength));
         ethPadding->markImmutable();
         packet->pushTrailer(ethPadding);
     }

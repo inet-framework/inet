@@ -208,7 +208,7 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
     if (packet->hasBitError()) {
         // probability of bit error in header = size of header / size of total message
         // (ignore bit error if in payload)
-        double relativeHeaderLength = datagram->getHeaderLength() / (double)datagram->getChunkLength();
+        double relativeHeaderLength = datagram->getHeaderLength() / (double)byte(datagram->getChunkLength()).get();
         if (dblrand() <= relativeHeaderLength) {
             EV_WARN << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
             sendIcmpError(packet, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
@@ -231,7 +231,7 @@ namespace {
 Packet *toMutable(Packet *packet)
 {
     auto newPacket = new Packet(packet->getName());
-    newPacket->append(packet->peekDataAt(0, packet->getDataLength()));
+    newPacket->append(packet->peekDataAt(byte(0), packet->getDataLength()));
     delete packet;
     return newPacket;
 }
@@ -658,7 +658,7 @@ void IPv4::decapsulate(Packet *packet)
     packet->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(transportProtocol);
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
-    packet->ensureTag<NetworkProtocolInd>()->setPosition(ipv4HeaderPos);
+    packet->ensureTag<NetworkProtocolInd>()->setPosition(byte(ipv4HeaderPos).get());
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSrcAddress(datagram->getSrcAddress());
     l3AddressInd->setDestAddress(datagram->getDestAddress());
@@ -712,7 +712,7 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
 
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
-    int payloadLength = packet->getDataLength();
+    int payloadLength = byte(packet->getDataLength()).get();
     int fragmentLength = ((mtu - headerLength) / 8) * 8;    // payload only (without header)
     int offsetBase = ipv4Header->getFragmentOffset();
     if (fragmentLength <= 0)
@@ -745,8 +745,8 @@ void IPv4::fragmentAndSend(Packet *packet, const std::shared_ptr<IPv4Header>& ip
 
         ASSERT(fragment->getByteLength() == 0);
         const auto& fraghdr = std::make_shared<IPv4Header>(*ipv4Header.get()->dup());
-        const auto& fragData = packet->peekDataAt(offset, thisFragmentLength);
-        ASSERT(fragData->getChunkLength() == thisFragmentLength);
+        const auto& fragData = packet->peekDataAt(byte(offset), byte(thisFragmentLength));
+        ASSERT(byte(fragData->getChunkLength()).get() == thisFragmentLength);
         fragment->append(fragData);
 
         // "more fragments" bit is unchanged in the last fragment, otherwise true
@@ -827,7 +827,7 @@ std::shared_ptr<IPv4Header> IPv4::encapsulate(Packet *transportPacket)
     else
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
-    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + transportPacket->getByteLength());
+    ipv4Header->setTotalLengthField(byte(ipv4Header->getChunkLength()).get() + transportPacket->getByteLength());
 //    ipv4Header->markImmutable();
     //transportPacket->prepend(ipv4Header);
     // setting IPv4 options is currently not supported

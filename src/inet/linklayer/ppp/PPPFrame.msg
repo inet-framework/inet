@@ -46,7 +46,7 @@ class FieldsChunk extends cObject;
 // CRC is modelled only via cMessage's bit error attribute.
 class PppHeader extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = 5;
+    bit chunkLength @overridegetter = byte(5);
     short flag = 0x7e;      //1 byte
     short address = 0xff;   //1 byte
     short control = 0x03;   //1 byte
@@ -55,7 +55,7 @@ class PppHeader extends FieldsChunk
 
 class PppTrailer extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = 2; //FIXME correct value is 3, but old inet was used 2 bytes
+    bit chunkLength @overridegetter = byte(2); //FIXME correct value is 3, but old inet was used 2 bytes
     short fcs = 0;      // frame check sequence, 2 byte
     short flag = 0x7e;  // 1 byte, omitted for successive PPP packets
 }

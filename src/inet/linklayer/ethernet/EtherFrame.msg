@@ -49,7 +49,7 @@ enum SAPCode;
 //
 class EtherFrame extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter;
+    bit chunkLength @overridegetter;
     MACAddress dest;
     MACAddress src;
 }
@@ -63,7 +63,7 @@ class EtherFrame extends FieldsChunk
 //
 class EthernetIIFrame extends EtherFrame
 {
-    chunkLength = ETHER_MAC_FRAME_BYTES - 4;    // -4 for FCS
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES - 4);    // -4 for FCS
     int etherType @enum(EtherType);
 }
 
@@ -75,7 +75,7 @@ class EthernetIIFrame extends EtherFrame
 //
 class EtherFrameWithLLC extends EtherFrame
 {
-    chunkLength = ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - 4;    // -4 for FCS
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - 4);    // -4 for FCS
     int dsap;
     int ssap;
     int control;
@@ -93,7 +93,7 @@ class EtherFrameWithLLC extends EtherFrame
 //
 class EtherFrameWithSNAP extends EtherFrameWithLLC
 {
-    chunkLength = ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - 4;    // -4 for FCS
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - 4);    // -4 for FCS
     dsap = 0xAA;
     ssap = 0xAA;
     control = 0x03;
@@ -107,7 +107,7 @@ class EtherFrameWithSNAP extends EtherFrameWithLLC
 //
 class EtherPauseFrame extends EthernetIIFrame
 {
-    chunkLength = ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES;    //FIXME Fcs?
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES);    //FIXME Fcs?
     etherType = ETHERTYPE_FLOW_CONTROL;
     int opCode = 1; // PAUSE
     int pauseTime; // in 512 bit-time units
@@ -118,7 +118,7 @@ class EtherPauseFrame extends EthernetIIFrame
 //
 class Ethernet1QTag extends FieldsChunk     //FIXME bad design
 {
-    int64_t chunkLength @overridegetter = 4;
+    bit chunkLength @overridegetter = byte(4);
     uint8_t pcp;    // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                     // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
     bool de;        // Drop Eligible (DE): a 1-bit field. May be used separately or in conjunction with PCP to indicate frames eligible to be dropped in the presence of congestion.
@@ -135,7 +135,7 @@ class Ethernet1QTag extends FieldsChunk     //FIXME bad design
 //
 class Ethernet1ahITag extends FieldsChunk     //FIXME bad design
 {
-    int64_t chunkLength @overridegetter = 5;    //FIXME check the length value
+    bit chunkLength @overridegetter = byte(5);    //FIXME check the length value
     int ISid=0; // ISID
 }
 
@@ -147,12 +147,12 @@ enum EthernetFcsMode {
 
 class EthernetPadding extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = 0;
+    bit chunkLength @overridegetter = byte(0);
 }
 
 class EthernetFcs extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = ETHER_FCS_BYTES;
+    bit chunkLength @overridegetter = byte(ETHER_FCS_BYTES);
     int32_t fcs;
     int fcsMode @enum(EthernetFcsMode) = FCS_DECLARED_CORRECT;
 }

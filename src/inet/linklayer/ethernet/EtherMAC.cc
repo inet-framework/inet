@@ -491,9 +491,9 @@ void EtherMAC::startFrameTransmission()
 
     if (frame->getByteLength() < minFrameLength) {
         int64_t paddingLength = minFrameLength - frame->getByteLength();
-        frame->removeFromEnd(ETHER_FCS_BYTES);  // remove old FCS
+        frame->removeFromEnd(byte(ETHER_FCS_BYTES));  // remove old FCS
         const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(paddingLength);
+        ethPadding->setChunkLength(byte(paddingLength));
         ethPadding->markImmutable();
         frame->pushTrailer(ethPadding);
         const auto& ethFcs = std::make_shared<EthernetFcs>();

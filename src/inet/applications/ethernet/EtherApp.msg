@@ -34,7 +34,7 @@ class FieldsChunk extends cObject;
 //
 class EtherAppReq extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = 0;
+    bit chunkLength @overridegetter = byte(0);
     long requestId;
     long responseBytes;
 }
@@ -44,7 +44,7 @@ class EtherAppReq extends FieldsChunk
 //
 class EtherAppResp extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter = 0;
+    bit chunkLength @overridegetter = byte(0);
     int requestId;
     int numFrames;
 }
