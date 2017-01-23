@@ -33,14 +33,14 @@ class INET_API ReorderBuffer : public ChunkBuffer
     /**
      * The offset of the next expected data chunk.
      */
-    int64_t expectedOffset;
+    bit expectedOffset;
 
   public:
-    ReorderBuffer(int64_t expectedOffset = -1) : expectedOffset(expectedOffset) { }
+    ReorderBuffer(bit expectedOffset = bit(-1)) : expectedOffset(expectedOffset) { }
     ReorderBuffer(const ReorderBuffer& other) : ChunkBuffer(other), expectedOffset(other.expectedOffset) { }
 
-    int64_t getExpectedOffset() const { return expectedOffset; }
-    void setExpectedOffset(int64_t expectedOffset) { this->expectedOffset = expectedOffset; }
+    bit getExpectedOffset() const { return expectedOffset; }
+    void setExpectedOffset(bit expectedOffset) { this->expectedOffset = expectedOffset; }
 
     /**
      * Returns the largest next available data chunk starting at the expected
@@ -51,7 +51,7 @@ class INET_API ReorderBuffer : public ChunkBuffer
     std::shared_ptr<Chunk> popData() {
         if (regions.size() > 0 && regions[0].offset == expectedOffset) {
             auto data = regions[0].data;
-            int64_t length = data->getChunkLength();
+            bit length = data->getChunkLength();
             clear(expectedOffset, length);
             expectedOffset += length;
             return data;

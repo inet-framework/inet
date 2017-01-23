@@ -32,7 +32,7 @@ class Chunk extends cObject
     bool complete @getter("isComplete");
     bool correct @getter("isCorrect");
     bool properlyRepresented @getter("isProperlyRepresented");
-    int64_t chunkLength;
+    bit chunkLength;
 }
 
 class cPacketChunk extends Chunk
@@ -46,9 +46,9 @@ packet Packet
 {
     @existingClass(true);
     @descriptor(readonly);
-    int64_t headerPopOffset;
-    int64_t trailerPopOffset;
-    int64_t dataLength;
+    bit headerPopOffset;
+    bit trailerPopOffset;
+    bit dataLength;
     Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
 }
 

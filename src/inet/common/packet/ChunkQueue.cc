@@ -21,7 +21,7 @@ namespace inet {
 ChunkQueue::ChunkQueue(const char *name, const std::shared_ptr<Chunk>& contents) :
     cNamedObject(name),
     contents(contents),
-    iterator(Chunk::ForwardIterator(0, 0))
+    iterator(Chunk::ForwardIterator(bit(0), 0))
 {
 }
 
@@ -32,33 +32,33 @@ ChunkQueue::ChunkQueue(const ChunkQueue& other) :
 {
 }
 
-void ChunkQueue::remove(int64_t length)
+void ChunkQueue::remove(bit length)
 {
     poppedByteCount += length;
     contents->moveIterator(iterator, length);
     auto position = iterator.getPosition();
     if (position > contents->getChunkLength() / 2) {
-        contents->seekIterator(iterator, 0);
+        contents->seekIterator(iterator, bit(0));
         contents = contents->peek(position, contents->getChunkLength() - position);
     }
 }
 
-std::shared_ptr<Chunk> ChunkQueue::peek(int64_t length) const
+std::shared_ptr<Chunk> ChunkQueue::peek(bit length) const
 {
-    assert(-1 <= length && length <= getBufferLength());
+    assert(bit(-1) <= length && length <= getBufferLength());
     return contents == nullptr ? nullptr : contents->peek(iterator, length);
 }
 
-std::shared_ptr<Chunk> ChunkQueue::peekAt(int64_t offset, int64_t length) const
+std::shared_ptr<Chunk> ChunkQueue::peekAt(bit offset, bit length) const
 {
-    assert(0 <= offset && offset <= getBufferLength());
-    assert(-1 <= length && length <= getBufferLength());
+    assert(bit(0) <= offset && offset <= getBufferLength());
+    assert(bit(-1) <= length && length <= getBufferLength());
     return contents == nullptr ? nullptr : contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
 }
 
-std::shared_ptr<Chunk> ChunkQueue::pop(int64_t length)
+std::shared_ptr<Chunk> ChunkQueue::pop(bit length)
 {
-    assert(-1 <= length && length <= getBufferLength());
+    assert(bit(-1) <= length && length <= getBufferLength());
     const auto& chunk = peek(length);
     if (chunk != nullptr)
         remove(chunk->getChunkLength());
@@ -69,7 +69,7 @@ void ChunkQueue::clear()
 {
     if (contents != nullptr) {
         poppedByteCount += getBufferLength();
-        contents->seekIterator(iterator, 0);
+        contents->seekIterator(iterator, bit(0));
         contents = nullptr;
     }
 }
@@ -88,7 +88,7 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
             else
                 contents = contents->dupShared();
             contents->insertAtEnd(chunk);
-            contents = contents->peek(0, contents->getChunkLength());
+            contents = contents->peek(bit(0), contents->getChunkLength());
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();

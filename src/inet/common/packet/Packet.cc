@@ -23,16 +23,16 @@ Register_Class(Packet);
 Packet::Packet(const char *name, short kind) :
     cPacket(name, kind),
     contents(nullptr),
-    headerIterator(Chunk::ForwardIterator(0, 0)),
-    trailerIterator(Chunk::BackwardIterator(0, 0))
+    headerIterator(Chunk::ForwardIterator(bit(0), 0)),
+    trailerIterator(Chunk::BackwardIterator(bit(0), 0))
 {
 }
 
 Packet::Packet(const char *name, const std::shared_ptr<Chunk>& contents) :
     cPacket(name),
     contents(contents),
-    headerIterator(Chunk::ForwardIterator(0, 0)),
-    trailerIterator(Chunk::BackwardIterator(0, 0))
+    headerIterator(Chunk::ForwardIterator(bit(0), 0)),
+    trailerIterator(Chunk::BackwardIterator(bit(0), 0))
 {
     assert(contents->isImmutable());
 }
@@ -65,23 +65,23 @@ Chunk *Packet::getChunk(int i) const
         return contents.get();
 }
 
-void Packet::setHeaderPopOffset(int64_t offset)
+void Packet::setHeaderPopOffset(bit offset)
 {
     assert(contents != nullptr);
-    assert(0 <= offset && offset <= getPacketLength() - trailerIterator.getPosition());
-    contents->seekIterator(headerIterator, offset);
-    assert(getDataLength() > 0);
+    assert(bit(0) <= bit(offset) && bit(offset) <= getPacketLength() - trailerIterator.getPosition());
+    contents->seekIterator(headerIterator, bit(offset));
+    assert(getDataLength() > bit(0));
 }
 
-std::shared_ptr<Chunk> Packet::peekHeader(int64_t length) const
+std::shared_ptr<Chunk> Packet::peekHeader(bit length) const
 {
-    assert(-1 <= length && length <= getDataLength());
-    return contents == nullptr ? nullptr : contents->peek(headerIterator, length);
+    assert(bit(-1) <= length && length <= getDataLength());
+    return contents == nullptr ? nullptr : contents->peek(headerIterator, bit(length));
 }
 
-std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
+std::shared_ptr<Chunk> Packet::popHeader(bit length)
 {
-    assert(-1 <= length && length <= getDataLength());
+    assert(bit(-1) <= length && length <= getDataLength());
     const auto& chunk = peekHeader(length);
     if (chunk != nullptr)
         contents->moveIterator(headerIterator, chunk->getChunkLength());
@@ -91,27 +91,27 @@ std::shared_ptr<Chunk> Packet::popHeader(int64_t length)
 void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
-    assert(headerIterator.getPosition() == 0);
+    assert(headerIterator.getPosition() == bit(0));
     prepend(chunk);
 }
 
-void Packet::setTrailerPopOffset(int64_t offset)
+void Packet::setTrailerPopOffset(bit offset)
 {
     assert(contents != nullptr);
     assert(headerIterator.getPosition() <= offset);
-    contents->seekIterator(trailerIterator, getPacketLength() - offset);
-    assert(getDataLength() > 0);
+    contents->seekIterator(trailerIterator, bit(getPacketLength()) - bit(offset));
+    assert(getDataLength() > bit(0));
 }
 
-std::shared_ptr<Chunk> Packet::peekTrailer(int64_t length) const
+std::shared_ptr<Chunk> Packet::peekTrailer(bit length) const
 {
-    assert(-1 <= length && length <= getDataLength());
-    return contents == nullptr ? nullptr : contents->peek(trailerIterator, length);
+    assert(bit(-1) <= length && length <= getDataLength());
+    return contents == nullptr ? nullptr : contents->peek(trailerIterator, bit(length));
 }
 
-std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
+std::shared_ptr<Chunk> Packet::popTrailer(bit length)
 {
-    assert(-1 <= length && length <= getDataLength());
+    assert(bit(-1) <= length && length <= getDataLength());
     const auto& chunk = peekTrailer(length);
     if (chunk != nullptr)
         contents->moveIterator(trailerIterator, -chunk->getChunkLength());
@@ -121,32 +121,32 @@ std::shared_ptr<Chunk> Packet::popTrailer(int64_t length)
 void Packet::pushTrailer(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
-    assert(trailerIterator.getPosition() == 0);
+    assert(trailerIterator.getPosition() == bit(0));
     append(chunk);
 }
 
-std::shared_ptr<Chunk> Packet::peekDataAt(int64_t offset, int64_t length) const
+std::shared_ptr<Chunk> Packet::peekDataAt(bit offset, bit length) const
 {
-    assert(0 <= offset && offset <= getDataLength());
-    assert(-1 <= length && length <= getDataLength());
+    assert(bit(0) <= offset && offset <= getDataLength());
+    assert(bit(-1) <= length && length <= getDataLength());
     if (contents == nullptr)
         return nullptr;
     else {
-        int64_t peekOffset = headerIterator.getPosition() + offset;
-        int64_t peekLength = length == -1 ? getDataLength() - offset : length;
+        bit peekOffset = headerIterator.getPosition() + offset;
+        bit peekLength = length == bit(-1) ? getDataLength() - offset : length;
         return contents->peek(Chunk::Iterator(true, peekOffset, -1), peekLength);
     }
 }
 
-std::shared_ptr<Chunk> Packet::peekAt(int64_t offset, int64_t length) const
+std::shared_ptr<Chunk> Packet::peekAt(bit offset, bit length) const
 {
-    assert(0 <= offset && offset <= getPacketLength());
-    assert(-1 <= length && length <= getPacketLength());
+    assert(bit(0) <= offset && offset <= getPacketLength());
+    assert(bit(-1) <= length && length <= getPacketLength());
     if (contents == nullptr)
         return nullptr;
     else {
-        int64_t peekLength = length == -1 ? getPacketLength() - offset : length;
-        return contents->peek(Chunk::Iterator(true, offset, -1), peekLength);
+        bit peekLength = length == bit(-1) ? getPacketLength() - offset : length;
+        return contents->peek(Chunk::Iterator(true, bit(offset), -1), peekLength);
     }
 }
 
@@ -154,14 +154,14 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
     assert(chunk->isImmutable());
-    assert(headerIterator.getPosition() == 0);
+    assert(headerIterator.getPosition() == bit(0));
     if (contents == nullptr)
         contents = chunk;
     else {
         if (contents->canInsertAtBeginning(chunk)) {
             makeContentsMutable();
             contents->insertAtBeginning(chunk);
-            contents = contents->peek(0, contents->getChunkLength());
+            contents = contents->peek(bit(0), bit(contents->getChunkLength()));
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
@@ -177,14 +177,14 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
     assert(chunk->isImmutable());
-    assert(trailerIterator.getPosition() == 0);
+    assert(trailerIterator.getPosition() == bit(0));
     if (contents == nullptr)
         contents = chunk;
     else {
         if (contents->canInsertAtEnd(chunk)) {
             makeContentsMutable();
             contents->insertAtEnd(chunk);
-            contents = contents->peek(0, contents->getChunkLength());
+            contents = contents->peek(bit(0), contents->getChunkLength());
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
@@ -196,10 +196,10 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
     }
 }
 
-void Packet::removeFromBeginning(int64_t length)
+void Packet::removeFromBeginning(bit length)
 {
-    assert(0 <= length && length <= getPacketLength());
-    assert(headerIterator.getPosition() == 0);
+    assert(bit(0) <= length && length <= getPacketLength());
+    assert(headerIterator.getPosition() == bit(0));
     if (contents->canRemoveFromBeginning(length)) {
         makeContentsMutable();
         contents->removeFromBeginning(length);
@@ -209,16 +209,16 @@ void Packet::removeFromBeginning(int64_t length)
     contents->markImmutable();
 }
 
-void Packet::removeFromEnd(int64_t length)
+void Packet::removeFromEnd(bit length)
 {
-    assert(0 <= length && length <= getPacketLength());
-    assert(trailerIterator.getPosition() == 0);
+    assert(bit(0) <= length && length <= getPacketLength());
+    assert(trailerIterator.getPosition() == bit(0));
     if (contents->canRemoveFromEnd(length)) {
         makeContentsMutable();
         contents->removeFromEnd(length);
     }
     else
-        contents = contents->peek(0, contents->getChunkLength() - length);
+        contents = contents->peek(bit(0), contents->getChunkLength() - length);
     contents->markImmutable();
 }
 

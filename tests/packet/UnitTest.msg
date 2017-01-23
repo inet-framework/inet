@@ -31,19 +31,19 @@ class CompoundHeader extends SequenceChunk
 class TlvHeader extends FieldsChunk
 {
     int8_t type = -1;
-    int64_t chunkLength = -1;
+    bit chunkLength = bit(-1) @overridegetter;
 }
 
 class TlvHeaderBool extends TlvHeader
 {
     type = 1;
-    chunkLength = 3 * 8;
+    chunkLength = byte(3);
     bool boolValue = false;
 }
 
 class TlvHeaderInt extends TlvHeader
 {
     type = 2;
-    chunkLength = 4 * 8;
+    chunkLength = byte(4);
     int16_t int16Value = -1;
 }

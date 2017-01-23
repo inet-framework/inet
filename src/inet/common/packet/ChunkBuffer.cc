@@ -61,7 +61,7 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
             }
             else if (oldRegion.getStartOffset() < newRegion.getStartOffset() && newRegion.getEndOffset() < oldRegion.getEndOffset()) {
                 // new splits old into two parts
-                Region previousRegion(oldRegion.getStartOffset(), oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset()));
+                Region previousRegion(oldRegion.getStartOffset(), oldRegion.data->peek(bit(0), newRegion.getStartOffset() - oldRegion.getStartOffset()));
                 Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset()));
                 oldRegion.offset = nextRegion.offset;
                 oldRegion.data = nextRegion.data;
@@ -70,7 +70,7 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
             }
             else if (oldRegion.getEndOffset() <= newRegion.getEndOffset()) {
                 // new cuts end of old
-                oldRegion.data = oldRegion.data->peek(0, newRegion.getStartOffset() - oldRegion.getStartOffset());
+                oldRegion.data = oldRegion.data->peek(bit(0), newRegion.getStartOffset() - oldRegion.getStartOffset());
             }
             else if (newRegion.getStartOffset() <= oldRegion.getStartOffset()) {
                 // new cuts beginning of old
@@ -96,7 +96,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
             else
                 previousRegion.data = previousRegion.data->dupShared();
             previousRegion.data->insertAtEnd(nextRegion.data);
-            previousRegion.data = previousRegion.data->peek(0, previousRegion.data->getChunkLength());
+            previousRegion.data = previousRegion.data->peek(bit(0), previousRegion.data->getChunkLength());
             previousRegion.data->markImmutable();
             nextRegion.data = nullptr;
         }
@@ -107,7 +107,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
             else
                 nextRegion.data = nextRegion.data->dupShared();
             nextRegion.data->insertAtBeginning(previousRegion.data);
-            nextRegion.data = nextRegion.data->peek(0, nextRegion.data->getChunkLength());
+            nextRegion.data = nextRegion.data->peek(bit(0), nextRegion.data->getChunkLength());
             nextRegion.data->markImmutable();
             nextRegion.offset = previousRegion.offset;
             previousRegion.data = nullptr;
@@ -124,9 +124,9 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
     }
 }
 
-void ChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
+void ChunkBuffer::replace(bit offset, const std::shared_ptr<Chunk>& chunk)
 {
-    assert(offset >= 0);
+    assert(offset >= bit(0));
     assert(chunk != nullptr);
     assert(chunk->isImmutable());
     Region newRegion(offset, chunk);
@@ -157,10 +157,10 @@ void ChunkBuffer::replace(int64_t offset, const std::shared_ptr<Chunk>& chunk)
     }
 }
 
-void ChunkBuffer::clear(int64_t offset, int64_t length)
+void ChunkBuffer::clear(bit offset, bit length)
 {
-    assert(offset >= 0);
-    assert(length >= 0);
+    assert(offset >= bit(0));
+    assert(length >= bit(0));
     for (auto it = regions.begin(); it != regions.end(); it++) {
         auto region = *it;
         if (region.offset == offset && region.data->getChunkLength() == length) {

@@ -19,8 +19,11 @@
 #include <memory>
 #include "inet/common/packet/ByteInputStream.h"
 #include "inet/common/packet/ByteOutputStream.h"
+#include "inet/common/Units.h"
 
 namespace inet {
+
+using namespace units::values;
 
 /**
  * This class represents a piece of data that is usually part of a packet or
@@ -182,19 +185,20 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     {
       protected:
         const bool isForward_;
-        int64_t position;
+        bit position;
         int index;
 
       public:
-        Iterator(int64_t position) : isForward_(true), position(position), index(position == 0 ? 0 : -1) { }
-        explicit Iterator(bool isForward, int64_t position, int index) : isForward_(isForward), position(position), index(index) { }
+        Iterator(bit position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { }
+        Iterator(byte position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { }
+        explicit Iterator(bool isForward, bit position, int index) : isForward_(isForward), position(position), index(index) { }
         Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { }
 
         bool isForward() const { return isForward_; }
         bool isBackward() const { return !isForward_; }
 
-        int64_t getPosition() const { return position; }
-        void setPosition(uint64_t position) { this->position = position; }
+        bit getPosition() const { return position; }
+        void setPosition(bit position) { this->position = position; }
 
         int getIndex() const { return index; }
         void setIndex(int index) { this->index = index; }
@@ -206,8 +210,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     class INET_API ForwardIterator : public Iterator
     {
       public:
-        ForwardIterator(int64_t position) : Iterator(true, position, -1) { }
-        explicit ForwardIterator(int64_t position, int index) : Iterator(true, position, index) { }
+        ForwardIterator(bit position) : Iterator(true, position, -1) { }
+        ForwardIterator(byte position) : Iterator(true, position, -1) { }
+        explicit ForwardIterator(bit position, int index) : Iterator(true, position, index) { }
     };
 
     /**
@@ -216,8 +221,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     class INET_API BackwardIterator : public Iterator
     {
       public:
-        BackwardIterator(int64_t position) : Iterator(false, position, -1) { }
-        explicit BackwardIterator(int64_t position, int index) : Iterator(false, position, index) { }
+        BackwardIterator(bit position) : Iterator(false, position, -1) { }
+        BackwardIterator(byte position) : Iterator(false, position, -1) { }
+        explicit BackwardIterator(bit position, int index) : Iterator(false, position, index) { }
     };
 
   public:
@@ -237,9 +243,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual void handleChange() override;
 
     // NOTE: these peek functions are only used to support the peek template functions
-    virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, int64_t length = -1) const { assert(false); }
-    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, int64_t length = -1) const { assert(false); }
-    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, int64_t length = -1) const { assert(false); }
+    virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, bit length = bit(-1)) const { assert(false); }
+    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, bit length = bit(-1)) const { assert(false); }
+    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, bit length = bit(-1)) const { assert(false); }
 
   protected:
     /**
@@ -249,15 +255,15 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * a constructor to allow creating instances of message compiler generated
      * field based chunk classes.
      */
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
     template <typename T>
-    std::shared_ptr<T> doPeek(const Iterator& iterator, int64_t length = -1) const {
+    std::shared_ptr<T> doPeek(const Iterator& iterator, bit length = bit(-1)) const {
         assertImmutable();
         // TODO: what if it's a backward iterator??? wtf?
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
         chunk->markImmutable();
-        if ((chunk->isComplete() && length == -1) || length == chunk->getChunkLength())
+        if ((chunk->isComplete() && length == bit(-1)) || length == chunk->getChunkLength())
             return std::dynamic_pointer_cast<T>(chunk);
         else
             return nullptr;
@@ -322,8 +328,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     /** @name Iteration related functions */
     //@{
-    virtual void moveIterator(Iterator& iterator, int64_t length) const { iterator.setPosition(iterator.getPosition() + length); }
-    virtual void seekIterator(Iterator& iterator, int64_t offset) const { iterator.setPosition(offset); }
+    virtual void moveIterator(Iterator& iterator, bit length) const { iterator.setPosition(iterator.getPosition() + length); }
+    virtual void seekIterator(Iterator& iterator, bit offset) const { iterator.setPosition(offset); }
     //@}
 
     /** @name Inserting data related functions */
@@ -354,24 +360,24 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canRemoveFromBeginning(int64_t length) { return false; }
+    virtual bool canRemoveFromBeginning(bit length) { return false; }
 
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canRemoveFromEnd(int64_t length) { return false; }
+    virtual bool canRemoveFromEnd(bit length) { return false; }
 
     /**
      * Removes the requested number of bytes from the beginning of this chunk
      * and returns true if the removal was successful.
      */
-    virtual void removeFromBeginning(int64_t length) { assertMutable(); assert(false); }
+    virtual void removeFromBeginning(bit length) { assertMutable(); assert(false); }
 
     /**
      * Removes the requested number of bytes from the end of this chunk and
      * returns true if the removal was successful.
      */
-    virtual void removeFromEnd(int64_t length) { assertMutable(); assert(false); }
+    virtual void removeFromEnd(bit length) { assertMutable(); assert(false); }
     //@}
 
     /** @name Chunk querying related functions */
@@ -385,7 +391,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns the length of data measured in bytes represented by this chunk.
      */
-    virtual int64_t getChunkLength() const = 0;
+    virtual bit getChunkLength() const = 0;
 
     /**
      * Returns the designated part of the data represented by this chunk in its
@@ -394,15 +400,15 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1)) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
      * requested representation.
      */
     template <typename T>
-    bool has(const Iterator& iterator, int64_t length = -1) const {
-        if (length != -1 && getChunkLength() < iterator.getPosition() + length)
+    bool has(const Iterator& iterator, bit length = bit(-1)) const {
+        if (length != bit(-1) && getChunkLength() < iterator.getPosition() + length)
             return false;
         else
             return peek<T>(iterator, length) != nullptr;
@@ -416,12 +422,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
     template <typename T>
-    std::shared_ptr<T> peek(const Iterator& iterator, int64_t length = -1) const {
-        int64_t chunkLength = getChunkLength();
-        assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
-        if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+    std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1)) const {
+        bit chunkLength = getChunkLength();
+        assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+        if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
             return nullptr;
-        else if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength)) {
+        else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
             if (auto tChunk = std::dynamic_pointer_cast<T>(const_cast<Chunk *>(this)->shared_from_this()))
                 return tChunk;
         }
@@ -457,7 +463,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
      */
-    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset = 0, int64_t length = -1);
+    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
 
     /**
      * Deserializes a chunk from the given stream. The returned chunk will be

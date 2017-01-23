@@ -28,8 +28,8 @@ namespace inet {
 class INET_API ChunkQueue : public cNamedObject
 {
   protected:
-    int64_t pushedByteCount = 0;
-    int64_t poppedByteCount = 0;
+    bit pushedByteCount = bit(0);
+    bit poppedByteCount = bit(0);
     /**
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
@@ -37,7 +37,7 @@ class INET_API ChunkQueue : public cNamedObject
     std::shared_ptr<Chunk> contents = nullptr;
     Chunk::Iterator iterator;
 
-    void remove(int64_t length);
+    void remove(bit length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -53,41 +53,41 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns the number of available bytes in the buffer.
      */
-    int64_t getBufferLength() const { return contents == nullptr ? 0 : contents->getChunkLength() - iterator.getPosition(); }
+    bit getBufferLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
 
-    int64_t getPushedByteCount() const { return pushedByteCount; }
+    bit getPushedByteCount() const { return pushedByteCount; }
 
-    int64_t getPoppedByteCount() const { return poppedByteCount; }
+    bit getPoppedByteCount() const { return poppedByteCount; }
     //@}
 
     /** @name Querying data related functions */
     //@{
-    std::shared_ptr<Chunk> peek(int64_t length = -1) const;
+    std::shared_ptr<Chunk> peek(bit length = bit(-1)) const;
 
-    std::shared_ptr<Chunk> peekAt(int64_t offset, int64_t length) const;
+    std::shared_ptr<Chunk> peekAt(bit offset, bit length) const;
 
     template <typename T>
-    bool has(int64_t length = -1) const {
+    bool has(bit length = bit(-1)) const {
         return contents == nullptr ? false : contents->has<T>(iterator, length);
     }
 
     template <typename T>
-    std::shared_ptr<T> peek(int64_t length = -1) const {
+    std::shared_ptr<T> peek(bit length = bit(-1)) const {
         return contents == nullptr ? nullptr : contents->peek<T>(iterator, length);
     }
 
     template <typename T>
-    std::shared_ptr<T> peekAt(int64_t offset, int64_t length = -1) const {
+    std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1)) const {
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
     }
     //@}
 
     /** @name Removing data related functions */
     //@{
-    std::shared_ptr<Chunk> pop(int64_t length = -1);
+    std::shared_ptr<Chunk> pop(bit length = bit(-1));
 
     template <typename T>
-    std::shared_ptr<T> pop(int64_t length = -1) {
+    std::shared_ptr<T> pop(bit length = bit(-1)) {
         const auto& chunk = peek<T>(length);
         if (chunk != nullptr)
             remove(chunk->getChunkLength());

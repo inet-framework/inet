@@ -34,17 +34,17 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
     std::vector<uint8_t> bytes;
-    int64_t chunkLength = chunk->getChunkLength();
-    int64_t resultLength = length == -1 ? chunkLength - offset : length;
-    assert(0 <= resultLength && resultLength <= chunkLength);
-    assert(resultLength % 8 == 0);
-    for (int64_t i = 0; i < resultLength / 8; i++)
-        bytes.push_back(outputStream[offset + i]);
+    bit chunkLength = chunk->getChunkLength();
+    bit resultLength = length == bit(-1) ? chunkLength - offset : length;
+    assert(bit(0) <= resultLength && resultLength <= chunkLength);
+    assert(bit(resultLength).get() % 8 == 0);
+    for (byte i = byte(0); i < byte(resultLength); i++)
+        bytes.push_back(outputStream.getByte(byte(offset + i).get()));
     return std::make_shared<BytesChunk>(bytes);
 }
 
@@ -86,34 +86,34 @@ void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-void BytesChunk::removeFromBeginning(int64_t length)
+void BytesChunk::removeFromBeginning(bit length)
 {
-    assert(0 <= length && length <= getChunkLength());
-    assert(length % 8 == 0);
+    assert(bit(0) <= length && length <= getChunkLength());
+    assert(bit(length).get() % 8 == 0);
     handleChange();
-    bytes.erase(bytes.begin(), bytes.begin() + length / 8);
+    bytes.erase(bytes.begin(), bytes.begin() + byte(length).get());
 }
 
-void BytesChunk::removeFromEnd(int64_t length)
+void BytesChunk::removeFromEnd(bit length)
 {
-    assert(0 <= length && length <= getChunkLength());
-    assert(length % 8 == 0);
+    assert(bit(0) <= length && length <= getChunkLength());
+    assert(bit(length).get() % 8 == 0);
     handleChange();
-    bytes.erase(bytes.end() - length / 8, bytes.end());
+    bytes.erase(bytes.end() - byte(length).get(), bytes.end());
 }
 
-std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, bit length) const
 {
-    assert(0 <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
-    int64_t chunkLength = getChunkLength();
-    if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
+    bit chunkLength = getChunkLength();
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
         return nullptr;
-    else if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength))
+    else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
         return const_cast<BytesChunk *>(this)->shared_from_this();
     else {
-        assert(length == -1 || length % 8 == 0);
-        assert(iterator.getPosition() % 8 == 0);
-        auto result = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + iterator.getPosition() / 8, length == -1 ? bytes.end() : bytes.begin() + (iterator.getPosition() + length) / 8));
+        assert(length == bit(-1) || bit(length).get() % 8 == 0);
+        assert(bit(iterator.getPosition()).get() % 8 == 0);
+        auto result = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + byte(iterator.getPosition()).get(), length == bit(-1) ? bytes.end() : bytes.begin() + byte(iterator.getPosition() + length).get()));
         result->markImmutable();
         return result;
     }
@@ -122,7 +122,7 @@ std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, int64_t length
 std::string BytesChunk::str() const
 {
     std::ostringstream os;
-    os << "BytesChunk, length = " << getChunkLength() << ", bytes = {";
+    os << "BytesChunk, length = " << byte(getChunkLength()) << ", bytes = {";
     bool first = true;
     for (auto byte : bytes) {
         if (!first)

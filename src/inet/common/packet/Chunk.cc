@@ -37,7 +37,7 @@ void Chunk::handleChange()
     assertMutable();
 }
 
-std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     if (!enableImplicitChunkSerialization)
         throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
@@ -47,13 +47,13 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
     return deserialize(inputStream, typeInfo);
 }
 
-std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length) const
 {
-    int64_t chunkLength = getChunkLength();
-    assert(0 <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
-    if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+    bit chunkLength = getChunkLength();
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
         return nullptr;
-    else if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength))
+    else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
         return const_cast<Chunk *>(this)->shared_from_this();
     else
         return doPeek<SliceChunk>(iterator, length);
@@ -66,7 +66,7 @@ std::string Chunk::str() const
     return os.str();
 }
 
-void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     Chunk *chunkPointer = chunk.get();
     auto serializer = SerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));

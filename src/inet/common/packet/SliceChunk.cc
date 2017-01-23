@@ -33,32 +33,32 @@ SliceChunk::SliceChunk(const SliceChunk& other) :
 {
 }
 
-SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) :
+SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, bit offset, bit length) :
     Chunk(),
     chunk(chunk),
     offset(offset),
-    length(length == -1 ? chunk->getChunkLength() - offset : length)
+    length(length == bit(-1) ? chunk->getChunkLength() - offset : length)
 {
     assert(chunk->isImmutable());
-    int64_t chunkLength = chunk->getChunkLength();
-    assert(0 <= this->offset && this->offset <= chunkLength);
-    assert(0 <= this->length && this->offset + this->length <= chunkLength);
+    bit chunkLength = chunk->getChunkLength();
+    assert(bit(0) <= this->offset && this->offset <= chunkLength);
+    assert(bit(0) <= this->length && this->offset + this->length <= chunkLength);
 }
 
-std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     assert(chunk->isImmutable());
-    int64_t chunkLength = chunk->getChunkLength();
-    int64_t sliceLength = length == -1 ? chunkLength - offset : length;
-    assert(0 <= offset && offset <= chunkLength);
-    assert(0 <= sliceLength && sliceLength <= chunkLength);
+    bit chunkLength = chunk->getChunkLength();
+    bit sliceLength = length == bit(-1) ? chunkLength - offset : length;
+    assert(bit(0) <= offset && offset <= chunkLength);
+    assert(bit(0) <= sliceLength && sliceLength <= chunkLength);
     return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
 }
 
-std::shared_ptr<Chunk> SliceChunk::peekSliceChunk(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> SliceChunk::peekSliceChunk(const Iterator& iterator, bit length) const
 {
-    if (iterator.getPosition() == 0 && (length == -1 || length == this->length)) {
-        if (offset == 0 && this->length == chunk->getChunkLength())
+    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == this->length)) {
+        if (offset == bit(0) && this->length == chunk->getChunkLength())
             return chunk;
         else
             return const_cast<SliceChunk *>(this)->shared_from_this();
@@ -67,17 +67,17 @@ std::shared_ptr<Chunk> SliceChunk::peekSliceChunk(const Iterator& iterator, int6
         return chunk->peek(ForwardIterator(iterator.getPosition() + offset, -1), length);
 }
 
-void SliceChunk::setOffset(int64_t offset)
+void SliceChunk::setOffset(bit offset)
 {
     assertMutable();
-    assert(0 <= offset && offset <= chunk->getChunkLength());
+    assert(bit(0) <= offset && offset <= chunk->getChunkLength());
     this->offset = offset;
 }
 
-void SliceChunk::setLength(int64_t length)
+void SliceChunk::setLength(bit length)
 {
     assertMutable();
-    assert(0 <= length && length <= chunk->getChunkLength());
+    assert(bit(0) <= length && length <= chunk->getChunkLength());
     this->length = length;
 }
 
@@ -120,25 +120,25 @@ void SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::removeFromBeginning(int64_t length)
+void SliceChunk::removeFromBeginning(bit length)
 {
-    assert(0 <= length && length <= this->length);
+    assert(bit(0) <= length && length <= this->length);
     handleChange();
     this->offset += length;
     this->length -= length;
 }
 
-void SliceChunk::removeFromEnd(int64_t length)
+void SliceChunk::removeFromEnd(bit length)
 {
-    assert(0 <= length && length <= this->length);
+    assert(bit(0) <= length && length <= this->length);
     handleChange();
     this->length -= length;
 }
 
-std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, bit length) const
 {
-    assert(0 <= iterator.getPosition() && iterator.getPosition() <= this->length);
-    if (length == 0 || (iterator.getPosition() == this->length && length == -1))
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= this->length);
+    if (length == bit(0) || (iterator.getPosition() == this->length && length == bit(-1)))
         return nullptr;
     else
         return peekSliceChunk(iterator, length);

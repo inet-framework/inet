@@ -29,26 +29,26 @@ ByteCountChunk::ByteCountChunk(const ByteCountChunk& other) :
 {
 }
 
-ByteCountChunk::ByteCountChunk(int64_t length) :
+ByteCountChunk::ByteCountChunk(byte length) :
     Chunk(),
     length(length)
 {
-    assert(length >= 0);
+    assert(length >= byte(0));
 }
 
-std::shared_ptr<Chunk> ByteCountChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length)
+std::shared_ptr<Chunk> ByteCountChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
-    int64_t chunkLength = chunk->getChunkLength();
-    int64_t resultLength = length == -1 ? chunkLength - offset : length;
-    assert(0 <= resultLength && resultLength <= chunkLength);
-    assert(resultLength % 8 == 0);
-    return std::make_shared<ByteCountChunk>(resultLength / 8);
+    bit chunkLength = chunk->getChunkLength();
+    bit resultLength = length == bit(-1) ? chunkLength - offset : length;
+    assert(bit(0) <= resultLength && resultLength <= chunkLength);
+    assert(bit(resultLength).get() % 8 == 0);
+    return std::make_shared<ByteCountChunk>(byte(resultLength));
 }
 
-void ByteCountChunk::setLength(int64_t length)
+void ByteCountChunk::setLength(byte length)
 {
     assertMutable();
-    assert(length >= 0);
+    assert(length >= byte(0));
     this->length = length;
 }
 
@@ -78,34 +78,34 @@ void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::removeFromBeginning(int64_t length)
+void ByteCountChunk::removeFromBeginning(bit length)
 {
-    assert(0 <= length && length <= getChunkLength());
-    assert(length % 8 == 0);
+    assert(bit(0) <= length && length <= getChunkLength());
+    assert(bit(length).get() % 8 == 0);
     handleChange();
-    this->length -= length / 8;
+    this->length -= byte(length);
 }
 
-void ByteCountChunk::removeFromEnd(int64_t length)
+void ByteCountChunk::removeFromEnd(bit length)
 {
-    assert(0 <= length && length <= getChunkLength());
-    assert(length % 8 == 0);
+    assert(bit(0) <= length && length <= getChunkLength());
+    assert(bit(length).get() % 8 == 0);
     handleChange();
-    this->length -= length / 8;
+    this->length -= byte(length);
 }
 
-std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, int64_t length) const
+std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, bit length) const
 {
-    assert(0 <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
-    int64_t chunkLength = getChunkLength();
-    if (length == 0 || (iterator.getPosition() == chunkLength && length == -1))
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
+    bit chunkLength = getChunkLength();
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
         return nullptr;
-    else if (iterator.getPosition() == 0 && (length == -1 || length == chunkLength))
+    else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
         return const_cast<ByteCountChunk *>(this)->shared_from_this();
     else {
-        int64_t resultLength = length == -1 ? chunkLength - iterator.getPosition() : length;
-        assert(resultLength % 8 == 0);
-        auto result = std::make_shared<ByteCountChunk>(resultLength / 8);
+        bit resultLength = length == bit(-1) ? chunkLength - iterator.getPosition() : length;
+        assert(bit(resultLength).get() % 8 == 0);
+        auto result = std::make_shared<ByteCountChunk>(resultLength);
         result->markImmutable();
         return result;
     }
@@ -114,7 +114,7 @@ std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, int64_t le
 std::string ByteCountChunk::str() const
 {
     std::ostringstream os;
-    os << "ByteCountChunk, length = " << getChunkLength();
+    os << "ByteCountChunk, length = " << byte(getChunkLength());
     return os.str();
 }
 

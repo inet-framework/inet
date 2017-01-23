@@ -36,7 +36,7 @@ class INET_API BytesChunk : public Chunk
     std::vector<uint8_t> bytes;
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -61,7 +61,7 @@ class INET_API BytesChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual Type getChunkType() const override { return TYPE_BYTES; }
-    virtual int64_t getChunkLength() const override { return bytes.size() * 8; }
+    virtual bit getChunkLength() const override { return byte(bytes.size()); }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
@@ -69,13 +69,13 @@ class INET_API BytesChunk : public Chunk
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(int64_t length) override { return length % 8 == 0; }
-    virtual bool canRemoveFromEnd(int64_t length) override { return length % 8 == 0; }
+    virtual bool canRemoveFromBeginning(bit length) override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromEnd(bit length) override { return bit(length).get() % 8 == 0; }
 
-    virtual void removeFromBeginning(int64_t length) override;
-    virtual void removeFromEnd(int64_t length) override;
+    virtual void removeFromBeginning(bit length) override;
+    virtual void removeFromEnd(bit length) override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1)) const override;
 
     virtual std::string str() const override;
     //@}

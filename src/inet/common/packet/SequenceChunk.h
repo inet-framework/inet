@@ -42,8 +42,8 @@ class INET_API SequenceChunk : public Chunk
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
-    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, int64_t length) const override;
-    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, int64_t length) const override;
+    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, bit length) const override;
+    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, bit length) const override;
 
     void doInsertToBeginning(const std::shared_ptr<Chunk>& chunk);
     void doInsertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
@@ -56,7 +56,7 @@ class INET_API SequenceChunk : public Chunk
     std::deque<std::shared_ptr<Chunk>> dupChunks() const;
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -81,8 +81,8 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Iteration related functions */
     //@{
-    virtual void moveIterator(Iterator& iterator, int64_t length) const override;
-    virtual void seekIterator(Iterator& iterator, int64_t offset) const override;
+    virtual void moveIterator(Iterator& iterator, bit length) const override;
+    virtual void seekIterator(Iterator& iterator, bit offset) const override;
     //@}
 
     /** @name Filling with data related functions */
@@ -96,19 +96,19 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Removing data related functions */
     //@{
-    virtual bool canRemoveFromBeginning(int64_t length) override { return true; }
-    virtual bool canRemoveFromEnd(int64_t length) override { return true; }
+    virtual bool canRemoveFromBeginning(bit length) override { return true; }
+    virtual bool canRemoveFromEnd(bit length) override { return true; }
 
-    virtual void removeFromBeginning(int64_t length) override;
-    virtual void removeFromEnd(int64_t length) override;
+    virtual void removeFromBeginning(bit length) override;
+    virtual void removeFromEnd(bit length) override;
     //@}
 
     /** @name Querying data related functions */
     //@{
     virtual Type getChunkType() const override { return TYPE_SEQUENCE; }
-    virtual int64_t getChunkLength() const override;
+    virtual bit getChunkLength() const override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1)) const override;
     //@}
 
     virtual std::string str() const override;

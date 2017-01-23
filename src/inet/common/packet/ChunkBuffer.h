@@ -29,7 +29,7 @@ class INET_API ChunkBuffer : public cNamedObject
   protected:
     class INET_API Region {
       public:
-        int64_t offset;
+        bit offset;
         /**
          * This chunk is always immutable to allow arbitrary peeking. Nevertheless
          * it's reused if possible to allow efficient merging with newly added chunks.
@@ -37,11 +37,11 @@ class INET_API ChunkBuffer : public cNamedObject
         std::shared_ptr<Chunk> data;
 
       public:
-        Region(int64_t offset, const std::shared_ptr<Chunk>& data) : offset(offset), data(data) { }
+        Region(bit offset, const std::shared_ptr<Chunk>& data) : offset(offset), data(data) { }
         Region(const Region& other) : offset(other.offset), data(other.data) { }
 
-        int64_t getStartOffset() const { return offset; }
-        int64_t getEndOffset() const { return offset + data->getChunkLength(); }
+        bit getStartOffset() const { return offset; }
+        bit getEndOffset() const { return offset + data->getChunkLength(); }
 
         static bool compareStartOffset(const Region& a, const Region& b) { return a.getStartOffset() < b.getStartOffset(); }
         static bool compareEndOffset(const Region& a, const Region& b) { return a.getEndOffset() < b.getEndOffset(); }
@@ -71,9 +71,9 @@ class INET_API ChunkBuffer : public cNamedObject
     //@{
     bool isEmpty() const { return regions.empty(); }
     int getNumRegions() const { return regions.size(); }
-    int64_t getRegionLength(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data->getChunkLength(); }
-    int64_t getRegionStartOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].offset; }
-    int64_t getRegionEndOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].getEndOffset(); }
+    bit getRegionLength(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data->getChunkLength(); }
+    bit getRegionStartOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].offset; }
+    bit getRegionEndOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].getEndOffset(); }
     const std::shared_ptr<Chunk>& getRegionData(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data; }
     //@}
 
@@ -83,12 +83,12 @@ class INET_API ChunkBuffer : public cNamedObject
      * merged with the provided chunk.
      */
     // TODO: add flag to decide between keeping or overwriting old data when replacing with new data
-    void replace(int64_t offset, const std::shared_ptr<Chunk>& chunk);
+    void replace(bit offset, const std::shared_ptr<Chunk>& chunk);
 
     /**
      * Erases the stored data at the provided offset and length.
      */
-    void clear(int64_t offset, int64_t length);
+    void clear(bit offset, bit length);
 
     /**
      * Erases all of the stored data.

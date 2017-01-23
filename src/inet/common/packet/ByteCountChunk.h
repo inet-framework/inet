@@ -32,17 +32,17 @@ class INET_API ByteCountChunk : public Chunk
     /**
      * The chunk length in bytes, or -1 if not yet specified.
      */
-    int64_t length;
+    byte length;
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length);
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     ByteCountChunk();
     ByteCountChunk(const ByteCountChunk& other);
-    ByteCountChunk(int64_t length);
+    ByteCountChunk(byte length);
 
     virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
@@ -50,14 +50,14 @@ class INET_API ByteCountChunk : public Chunk
 
     /** @name Field accessor functions */
     //@{
-    int64_t getLength() const { return length; }
-    void setLength(int64_t length);
+    byte getLength() const { return length; }
+    void setLength(byte length);
     //@}
 
     /** @name Overridden chunk functions */
     //@{
     virtual Type getChunkType() const override { return TYPE_BYTECOUNT; }
-    virtual int64_t getChunkLength() const override { return length * 8; }
+    virtual bit getChunkLength() const override { return length; }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
@@ -65,13 +65,13 @@ class INET_API ByteCountChunk : public Chunk
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(int64_t length) override { return length % 8 == 0; }
-    virtual bool canRemoveFromEnd(int64_t length) override { return length % 8 == 0; }
+    virtual bool canRemoveFromBeginning(bit length) override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromEnd(bit length) override { return bit(length).get() % 8 == 0; }
 
-    virtual void removeFromBeginning(int64_t length) override;
-    virtual void removeFromEnd(int64_t length) override;
+    virtual void removeFromBeginning(bit length) override;
+    virtual void removeFromEnd(bit length) override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, int64_t length = -1) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1)) const override;
 
     virtual std::string str() const override;
     //@}

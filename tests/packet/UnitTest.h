@@ -23,7 +23,7 @@ class CompoundHeader : public CompoundHeader_Base
   friend Chunk;
 
   protected:
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) {
+    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) {
         return Chunk::createChunk(typeInfo, chunk, offset, length);
     }
 
