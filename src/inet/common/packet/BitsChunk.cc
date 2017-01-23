@@ -38,13 +38,13 @@ std::shared_ptr<Chunk> BitsChunk::createChunk(const std::type_info& typeInfo, co
 {
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
-    std::vector<bool> bytes;
+    std::vector<bool> bits;
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
     assert(bit(0) <= resultLength && resultLength <= chunkLength);
     for (bit i = bit(0); i < resultLength; i++)
-        bytes.push_back(outputStream.getBit(bit(offset + i).get()));
-    return std::make_shared<BitsChunk>(bytes);
+        bits.push_back(outputStream.getBit(bit(offset + i).get()));
+    return std::make_shared<BitsChunk>(bits);
 }
 
 void BitsChunk::setBits(const std::vector<bool>& bits)
