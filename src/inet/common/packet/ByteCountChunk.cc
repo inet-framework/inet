@@ -41,7 +41,6 @@ std::shared_ptr<Chunk> ByteCountChunk::createChunk(const std::type_info& typeInf
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
     assert(bit(0) <= resultLength && resultLength <= chunkLength);
-    assert(bit(resultLength).get() % 8 == 0);
     return std::make_shared<ByteCountChunk>(byte(resultLength));
 }
 
@@ -81,7 +80,6 @@ void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 void ByteCountChunk::removeFromBeginning(bit length)
 {
     assert(bit(0) <= length && length <= getChunkLength());
-    assert(bit(length).get() % 8 == 0);
     handleChange();
     this->length -= byte(length);
 }
@@ -89,7 +87,6 @@ void ByteCountChunk::removeFromBeginning(bit length)
 void ByteCountChunk::removeFromEnd(bit length)
 {
     assert(bit(0) <= length && length <= getChunkLength());
-    assert(bit(length).get() % 8 == 0);
     handleChange();
     this->length -= byte(length);
 }
@@ -104,7 +101,6 @@ std::shared_ptr<Chunk> ByteCountChunk::peek(const Iterator& iterator, bit length
         return const_cast<ByteCountChunk *>(this)->shared_from_this();
     else {
         bit resultLength = length == bit(-1) ? chunkLength - iterator.getPosition() : length;
-        assert(bit(resultLength).get() % 8 == 0);
         auto result = std::make_shared<ByteCountChunk>(resultLength);
         result->markImmutable();
         return result;

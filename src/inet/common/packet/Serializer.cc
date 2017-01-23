@@ -71,7 +71,6 @@ void ByteCountChunkSerializer::serialize(ByteOutputStream& stream, const std::sh
 {
     const auto& byteCountChunk = std::static_pointer_cast<const ByteCountChunk>(chunk);
     bit serializedLength = length == bit(-1) ? byteCountChunk->getChunkLength() - offset : length;
-    assert(bit(serializedLength).get() % 8 == 0);
     stream.writeByteRepeatedly('?', byte(serializedLength).get());
     ChunkSerializer::totalSerializedBitCount += serializedLength;
 }
@@ -90,8 +89,6 @@ void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared
 {
     const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
     bit serializedLength = length == bit(-1) ? bytesChunk->getChunkLength() - offset: length;
-    assert(bit(offset).get() % 8 == 0);
-    assert(bit(serializedLength).get() % 8 == 0);
     stream.writeBytes(bytesChunk->getBytes(), byte(offset).get(), byte(serializedLength).get());
     ChunkSerializer::totalSerializedBitCount += serializedLength;
 }

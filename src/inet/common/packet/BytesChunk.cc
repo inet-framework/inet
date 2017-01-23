@@ -42,7 +42,6 @@ std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, c
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
     assert(bit(0) <= resultLength && resultLength <= chunkLength);
-    assert(bit(resultLength).get() % 8 == 0);
     for (byte i = byte(0); i < byte(resultLength); i++)
         bytes.push_back(outputStream.getByte(byte(offset + i).get()));
     return std::make_shared<BytesChunk>(bytes);
@@ -89,7 +88,6 @@ void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 void BytesChunk::removeFromBeginning(bit length)
 {
     assert(bit(0) <= length && length <= getChunkLength());
-    assert(bit(length).get() % 8 == 0);
     handleChange();
     bytes.erase(bytes.begin(), bytes.begin() + byte(length).get());
 }
@@ -97,7 +95,6 @@ void BytesChunk::removeFromBeginning(bit length)
 void BytesChunk::removeFromEnd(bit length)
 {
     assert(bit(0) <= length && length <= getChunkLength());
-    assert(bit(length).get() % 8 == 0);
     handleChange();
     bytes.erase(bytes.end() - byte(length).get(), bytes.end());
 }
@@ -111,8 +108,6 @@ std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, bit length) co
     else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
         return const_cast<BytesChunk *>(this)->shared_from_this();
     else {
-        assert(length == bit(-1) || bit(length).get() % 8 == 0);
-        assert(bit(iterator.getPosition()).get() % 8 == 0);
         auto result = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + byte(iterator.getPosition()).get(), length == bit(-1) ? bytes.end() : bytes.begin() + byte(iterator.getPosition() + length).get()));
         result->markImmutable();
         return result;
