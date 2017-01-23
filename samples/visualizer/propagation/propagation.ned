@@ -4,6 +4,7 @@
 
 package inet.samples.visualizer.propagation;
 
+import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
@@ -61,5 +62,40 @@ network PropagationB
         destination: AdhocHost {
             parameters:
                 @display("p=900,200");
+        }
+}
+
+network PropagationC
+{
+    parameters:
+        @figure[description](type=text; pos=30,30; font=Arial,24; text="Demonstrates how to display transmissions, receptions and propagating signals.");
+        @display("bgb=1000,500");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,100");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,200");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,300");
+        }
+        source1: AdhocHost {
+            parameters:
+                @display("p=300,200");
+        }
+        destination: AdhocHost {
+            parameters:
+                @display("p=601.14496,387.79498");
+        }
+        source2: AdhocHost {
+            parameters:
+                @display("p=900,200");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=100.399994,387.79498");
         }
 }
