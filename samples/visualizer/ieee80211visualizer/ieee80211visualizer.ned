@@ -11,7 +11,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
 
-network AssociationVisualizerA
+network Ieee80211visualizerA
 {
     @display("bgb=835,630");
     submodules:
@@ -32,7 +32,7 @@ network AssociationVisualizerA
         }
 }
 
-network AssociationVisualizerB
+network Ieee80211visualizerB
 {
     parameters:
         @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
@@ -75,7 +75,7 @@ network AssociationVisualizerB
         }
 }
 
-network AssocVisualizerC
+network Ieee80211visualizerC
 {
     @display("bgb=561,411");
     submodules:
@@ -93,5 +93,55 @@ network AssocVisualizerC
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=292,344");
+        }
+}
+
+network Ieee80211visualizerD
+{
+    parameters:
+        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
+        @display("bgb=600,416");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        accessPointA: AccessPoint {
+            parameters:
+                @display("p=300,50");
+        }
+        accessPointB: AccessPoint {
+            parameters:
+                @display("p=500,50");
+        }
+        hostA1: WirelessHost {
+            parameters:
+                @display("p=300,150");
+        }
+        hostA2: WirelessHost {
+            parameters:
+                @display("p=300,250");
+        }
+        hostB1: WirelessHost {
+            parameters:
+                @display("p=500,150");
+        }
+        hostB2: WirelessHost {
+            parameters:
+                @display("p=500,250");
+        }
+        hostB3: WirelessHost {
+            @display("p=300,356");
+        }
+        hostA3: WirelessHost {
+            @display("p=500,356");
         }
 }
