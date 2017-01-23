@@ -52,6 +52,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.app[*].numPacketsToReceivePerClient = 0
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 **.sctp.ssModule=4 # 0=ROUND_ROBIN 1=ROUND_ROBIN_PACKET 2=RANDOM_SCHEDULE 3=RANDOM_SCHEDULE_PACKET
 #4=FAIR_BANDWITH 5=FAIR_BANDWITH_PACKET 6=PRIORITY 7=FCFS 8=PATH_MANUAL 9=PATH_MAP_TO_PATH       = 9

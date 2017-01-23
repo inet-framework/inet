@@ -24,7 +24,7 @@ network SCTPFeatureTest
         sctp_client: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "../../lib/sctp_client.mrt";
+                ipv4.routingTable.routingFile = "../../lib/sctp_client.mrt";
                 ipv4.configurator.networkConfiguratorModule = "";
                 @display("i=old/laptop3;p=128,317");
             gates:
@@ -33,7 +33,7 @@ network SCTPFeatureTest
         sctp_server: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "../../lib/sctp_server.mrt";
+                ipv4.routingTable.routingFile = "../../lib/sctp_server.mrt";
                 ipv4.configurator.networkConfiguratorModule = "";
                 @display("i=old/laptop3");
             gates:
@@ -41,7 +41,7 @@ network SCTPFeatureTest
         }
         router1: Router {
             parameters:
-                routingTable.routingFile = "../../lib/sctp_router1.mrt";
+                ipv4.routingTable.routingFile = "../../lib/sctp_router1.mrt";
                 ipv4.configurator.networkConfiguratorModule = "";
                 @display("i=abstract/router;p=270,293");
             gates:
@@ -49,7 +49,7 @@ network SCTPFeatureTest
         }
         router2: Router {
             parameters:
-                routingTable.routingFile = "../../lib/sctp_router2.mrt";
+                ipv4.routingTable.routingFile = "../../lib/sctp_router2.mrt";
                 ipv4.configurator.networkConfiguratorModule = "";
                 @display("i=abstract/router");
             gates:

@@ -60,6 +60,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.app[0].streamReset = true
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 
 # NIC configuration

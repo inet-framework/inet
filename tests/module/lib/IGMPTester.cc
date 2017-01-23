@@ -5,9 +5,8 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/scenario/IScriptable.h"
-#include "inet/networklayer/common/IPSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
+//#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IGMPMessage.h"

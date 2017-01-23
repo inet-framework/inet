@@ -89,14 +89,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 [^C].*
-CloudAndHosts\.sender\[9\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[8\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[7\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[5\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[4\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[2\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[1\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
-CloudAndHosts\.sender\[0\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
+CloudAndHosts\.sender\[9\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[8\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[7\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[5\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[4\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[2\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[1\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[0\]\.app\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
 [^C].*
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

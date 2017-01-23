@@ -29,7 +29,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #**.client.app[0].log-level = detail
 
 **.server.app[0].typename = "DHCPServer"
-**.server.udpApp[0].numReservedAddresses = 100
+**.server.app[0].numReservedAddresses = 100
 **.server.app[0].maxNumClients = 100
 **.server.app[0].dns = ""
 **.server.app[0].leaseTime = 150s

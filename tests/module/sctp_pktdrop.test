@@ -60,6 +60,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.sctp.swsLimit=3000
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 **.packetDrop = true
 **.sctp.RTXMethod = 2

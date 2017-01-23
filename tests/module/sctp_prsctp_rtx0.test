@@ -55,6 +55,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.app[*].outboundStreams = 1
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 
 # NIC configuration

@@ -56,6 +56,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.app[0].readingInterval =exponential(0.15s)
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 **.sctp.bytesToAddPerRcvdChunk = 250
 **.sctp.bytesToAddPerPeerChunk = 250

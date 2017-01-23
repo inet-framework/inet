@@ -71,6 +71,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Server.app[*].requestLength = 1024
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass="SCTPAlg"
 **.sctp.auth = true
 **.Peer_*.sctp.addIP = true
