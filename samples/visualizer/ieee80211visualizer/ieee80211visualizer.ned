@@ -80,22 +80,22 @@ network Ieee80211visualizerC
     @display("bgb=561,411");
     submodules:
         accessPointA: AccessPoint {
-            @display("p=92,176");
+            @display("p=100,250");
         }
         accessPointB: AccessPoint {
-            @display("p=442,179");
+            @display("p=450,250");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=85,344");
+            @display("p=100,344");
         }
         visualizer: IntegratedVisualizer {
-            @display("p=188,344");
+            @display("p=203,344");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=292,344");
+            @display("p=317,346");
         }
         wirelessHost: WirelessHost {
-            @display("p=92,66");
+            @display("p=100,150");
         }
 }
 
