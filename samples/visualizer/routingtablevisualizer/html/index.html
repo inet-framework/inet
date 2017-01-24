@@ -12,134 +12,138 @@
 <h2>Goals</h2>
 
 <p>
-The RoutingTableVisualizer module can be used to visualize how packets are routed in the network.
-This can be useful because a lot of information about routes is presented at a glance in a concise way, without the need to examine routing tables.
-This example demonstrates the use of the RoutingTableVisualizer module.
+Visualizing how packets are routed in a network can be useful because a lot of information about routes is presented at a glance in a concise way. When routes are visualized, there is no need to examine individual routing tables, and sift through difficult to understand numeric data.
+This example demonstrates how routes can be visualized.
 </p>
 
-<p>The example consists of 3 simulation models of increasing complexity, each demonstrating different features of <tt>RoutingTableVisualizer</tt>.</p>
+<p>The example consists of 3 simulation models of increasing complexity, each demonstrating different features of routing table visualization</p>
 
-<h2>About <tt>RoutingTableVisualizer</tt></h2>
+<h2>About the visualizer</h2>
 
 <p>
-The <tt>RoutingTableVisualizer</tt> module visualizes routing table entries in the following way. Routing table entries are represented visually by solid arrows.
+The <tt><strong>RoutingTableVisualizer</strong></tt> module can be used for this purpose.
+The <tt><strong>RoutingTableVisualizer</strong></tt> module visualizes routing table entries in the following way. Routing table entries are represented visually by solid arrows.
 An arrow going from a source node represents a routing table entry in the source node's routing table. The endpoint node of the arrow is the nexthop in
 the visualized routing table entry.
+Note that in the terminology of this example, the word <i>route</i> means <i>routing table entry</i>. TODO: do we need this?
+Could be used interchangably. For example, routes can lead from somewhere to somewhere, but routing table entries cannot (?)
 </p>
 
 <p>
 The visualizer has a <i>destinationFilter</i> parameter, which specifies the destination node of the visualization.
 The rule that best matches this destination in each node's routing table is visualized by the arrows.
-By default, all routes are visualized towards all destinations.
+By default, all routes are visualized towards all destinations. This means that for each destination, the best matching rule in a given node's routing talbe is visualized as an arrow. TODO: do we need this? Rewrite
 The <i>nodeFilter</i> parameter controls which nodes' routing tables should be visualized.
 </p>
 
 <p>
 The visualizer reacts to changes in the routing tables it is set to visualize, and updates the visualizations.
+It also reacts to IP address changes. These changes can have an effect on routes, because another routing table entry might become the
+best matching rule.
 </p>
 
-<h2>1. 'Displaying routes' configuration</h2>
+<h2>1. Displaying all routing tables</h2>
 
 <p>This configuration demonstrates how to enable the visualization of routes, and how the visualization looks like.
 <p>
-The network for this configuration contains 2 <tt>StandardHosts</tt>, an <tt>IPv4Configurator</tt> module and a <tt>RoutingTableVisualizer</tt> module.
+The network for this configuration contains 2 <tt><strong>StandardHosts</strong></tt>, an <tt><strong>IPv4Configurator</strong></tt> module and a <tt><strong>RoutingTableVisualizer</strong></tt> module.
 The configuration contains one entry, which enables the visualization of routing tables with the <i>displayRoutingTables</i> parameter.
 All other parameters of the visualizer is left on default.
 </p>
 
-<p>When the simulation is run, the network looks like the following:</p>
+<p>When the simulation is run, the network looks like this:</p>
 
 <img src="displayroutes.png">
 
 <p>
-In this simple network, there are just two routes (HostA -> HostB, and HostB -> HostA).
-Note that there are separate arrows for the two directions. However, the two arrows can be merged by setting the <i>lineShift</i> parameter to 0.
-This would yield a two-directional arrow. TODO: do we need this?
+In this simple network, there are just two routes (<tt><strong>HostA -> HostB</strong></tt>, and <tt><strong>HostB -> HostA</strong></tt>).
+There are separate arrows for the two directions.
 </p>
 
-<h2>2. 'Using filters' configuration</h2>
+<h2>2. Filtering routing table entries</h2>
 
 <p>
-This configurator demonstrates using the <i>nodeFilter</i> and <i>destinationFilter</i> parameters.
+The goal of this configuration is to demonstrates the use of the <i>nodeFilter</i> and <i>destinationFilter</i> parameters.
 </p>
 
 <p>
-The network for this configuration is displayed on the following image.
+The network for this configuration look like the following:
 </p>
 
 <img src="filtersnetwork.png">
 
 <p>
-It consists of a router connected to a switch. Two <tt>StandardHosts</tt> are connected to the switch, and another two <tt>StandardHosts</tt> are connected to the router.
+It consists of a router connected to a switch. Two <tt><strong>StandardHosts</strong></tt> are connected to the switch, and another two <tt><strong>StandardHosts</strong></tt> are connected to the router. The visualizer module is <tt><strong>IntegratedVisualizer</strong></tt>, which contains all visualizers as submodules.
 </p>
 
 </p>
-The goal is to only visualize the routes going from <tt>host2</tt> towards <tt>host3</tt>.
-To this end, the <i>destinationFilter</i> parameter is set to <tt>host3</tt>.
-To narrow the visualized routes down to the ones that lead from <tt>host2</tt>, the <i>nodeFilter</i> parameter
-is specified as <tt>"not(host1 or host4)"</tt>. This instructs the visualizer not to visualize the routing tables of <tt>host1</tt> and <tt>host4</tt>.
-The routing table of <tt>router</tt> needs to be visualized, because the path from <tt>host2</tt> to <tt>host3</tt> leads through it.
+The goal is to only visualize the routes going from <tt><strong>host2</strong></tt> towards <tt><strong>host3</strong></tt>.
+To this end, the <i>destinationFilter</i> parameter is set to <tt><strong>host3</strong></tt>.
+To narrow the visualized routes down to the ones that lead from <tt><strong>host2</strong></tt>, the <i>nodeFilter</i> parameter
+is specified as <tt><strong>"not(host1 or host4)"</strong></tt>. This instructs the visualizer not to visualize the routing tables of <tt><strong>host1</strong></tt> and <tt><strong>host4</strong></tt>.
+The routing table of <tt><strong>router</strong></tt> needs to be visualized, because the path from <tt><strong>host2</strong></tt> to <tt><strong>host3</strong></tt> leads through it.
 </p>
 
-<p>The visualized routes are displayed on the following image.</p>
+<p>This is what the visualized routes look like:</p>
 
 <img src="routes.png">
 
-<p>The defaults of the <tt>nodeFilter</tt> and <tt>destinationFilter</tt> parameters is <tt>"*"</tt>, which means all routes from all nodes towards
-all destinations are visualized. The network would look like the following with these default settings.</p>
+<p>The defaults of the <tt><strong>nodeFilter</strong></tt> and <tt><strong>destinationFilter</strong></tt> parameters is <tt><strong>"*"</strong></tt>, which means all routes from all nodes towards
+all destinations are visualized. The network would look like the following with these default settings:</p>
 
 <img src="fullmesh.png">
 
 <p>
-Note that the arrows don't go through the switch. This is because L2 devices like switches and access points don't have network layers. They are
-effectively transparent for the route visualization arrows. The visualizer could, in theory, know that the packets will take a path that goes through
+Note that the arrows don't go through the switch. This is because L2 devices like switches and access points don't have network layers, thus don't have IP addresses or routing tables. They are
+effectively transparent for the route visualization arrows (the visualizer could, in theory, know that the packets will take a path that goes through
 the switch. This is true in this situation, but in others there may be multiple interconnected switches, and more paths that the packets can take.
-However, the pathfinding in that case is not a network layer level problem. 
+However, the pathfinding in that case is not a network layer level problem).
 </p>
 
-<h2>3. 'Visualizing dynamic routes' configuration</h2>
+<h2>3. Visualizing changing routing tables</h2>
 
 <p>
 The visualizer reacts to changes in the routing table of hosts selected with the <i>nodeFilter</i> parameter.
-These route changes are due to a dynamic routing protocol, like HDCP or AODV. In this configuration, the
-routes are changed by AODV (Advanced On-Demand Vector Routing Protocol).
+These routing table changes are due to a dynamic routing protocol like AODV, or changes in IP addresses due to DHCP, for example. In this configuration, the
+routing tables are changed by AODV (Advanced On-Demand Vector Routing Protocol).
 </p>
 
 <p>
-The network for this configuration is displayed on the following image.
+Here is the network for this configuration:
 </p>
 
 <img src="dynamicnetwork.png">
 
 <p>
-The network contains a series of <tt>AODVRouters</tt>. These are mobile hosts that have AODV and
+The network contains a series of <tt><strong>AODVRouters</strong></tt>. These are mobile hosts that have AODV and
 IP forwarding enabled. 6 of the hosts are laid out in a chain, and are stationary.
 Their communication ranges are specified so that each host can only reach the adjacent hosts.
-The 7th hosts moves up and down along the chain of the 6 hosts, and is only in the communication range
-of the 2 or 3 nearby hosts.
+The <tt><strong>destinationHost</strong></tt> hosts moves up and down along the chain, and is only in the communication range
+of the 1 or 2 nearby hosts.
 </p>
-
-<p>Since routes are changed dynamically by the AODV protocol, the configurator is instructed not to add any routes.</p>
 
 <p>
-<tt>sourceHost</tt> is configured to ping <tt>destinationHost</tt>. Since each host is only capable of reaching the adjacent hosts, the ping
-packets are relayed to <tt>destinationHost</tt> through the chain. The AODV protocol dynamically configures the routes, in order
-for the ping packets to reach <tt>destinationHost</tt>.
+Since routes are determined dynamically by the AODV protocol, the configurator is instructed not to add static routes.
+The visualizer module is <tt><strong>IntegratedVisualizer</strong></tt>.
 </p>
 
-<p>TODO: some kind of conclusion, more info like documentation, about the other parameters?</p>
+<p>
+<tt><strong>sourceHost</strong></tt> is configured to ping <tt><strong>destinationHost</strong></tt>. Since each host is capable of reaching the adjacent hosts only, the ping
+packets are relayed to <tt><strong>destinationHost</strong></tt> through the chain. As the network topology changes because of node mobility, the AODV protocol dynamically configures the routes, in order
+for the ping packets to reach <tt><strong>destinationHost</strong></tt>.
+</p>
 
 <p>The following animation depicts what happens when the simulation is run.</p>
 
 <img src="routingtablevisualizer2.gif">
 
-<p>When <tt>destinationHost</tt> starts to move downwards, packets get routed across the chain to the host that is currently adjacent to <tt>destinationHost</tt>. This host relays the packets to <tt>destinationHost</tt>. When <tt>destinationHost</tt> reaches the bottom of the playground
-and turns back, the routes leading to it from the lower hosts don't change. This is because AODV is an on-demand protocol, thus routes are only changed when it is required. The lower hosts are not taking part of the packet relay. When <tt>destinationHost</tt> gets to the top of the
-playground, the process starts again, and routes are dynamically configured by AODV to relay the packets across the chain to <tt>destinationHost</tt>. The visualizer reacts to the changes in the routing tables, and updates the visualization accordingly.
+<p>When <tt><strong>destinationHost</strong></tt> starts to move downwards, packets get routed across the chain to the host that is currently adjacent to <tt><strong>destinationHost</strong></tt>. This host relays the packets to <tt><strong>destinationHost</strong></tt>. When <tt><strong>destinationHost</strong></tt> reaches the bottom of the playground
+and turns back, the routes leading to it from the lower hosts don't change. This is because AODV is an on-demand protocol, thus routes are only changed when it is required. On the way back, the lower hosts are not taking part of the packet relay, and the unused routes remain in their routing tables. When <tt><strong>destinationHost</strong></tt> gets to the top of the
+playground, the process starts again. Routes are dynamically configured by AODV to relay the packets across the chain to <tt><strong>destinationHost</strong></tt>. The visualizer reacts to the changes in the routing tables, and updates the visualization accordingly.
 
 <h2>Conclusion</h2>
 
-This example demonstrated the key features of the <tt>RoutingTableVisualizer</tt> module. For more information on all features and parameters,
+This example demonstrated the key features of routing table visualization. For more information on all features and parameters of <tt><strong>RoutingTableVisualizer</strong></tt>,
 refer to the NED documentation. TODO: link to ned doc
 
 </body>
