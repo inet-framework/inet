@@ -70,9 +70,26 @@ showcases a more advanced use-case.
 
 <p>
 The visualizer for this purpose is the <code><strong>TransportConnectionVisualizer</strong></code>. TODO: how it works
+It displays an icon above the two end-hosts of an active, established transport layer level connection. It reacts to changes
+in the state of the connection. It places the icon when the connection is established, and removes it when it is no longer in the
+established state. The icon are color coded, denoting different connections. Should there be more connections than available colors,
+a number in the icon helps differentiate different connections with the same colored icon. Naturally, there can be multiple connections
+open at a node, thus multiple icons.
+</p>
+
+<p>
+It is important to note that packet paths belonging to the connection have no effect on this visualization (see Visualizing Transport Routes TODO).
 </p>
 
 <h2>1. Enabling the visualization of transport connections</h2>
+
+This configuration uses the following simple network:
+
+<img src="simplenetwork.png">
+
+It consist of 2 <code><strong>StandardHosts</strong></code> connected by a 100Mbit/s ethernet cable. It also contains a <code><strong>IPv4NetworkConfigurator</strong></code> and a <code><strong>TransportConnectionVisualizer</strong></code> module.
+
+TODO: the connection in routingtablevisualizer?
 
 </body>
 
