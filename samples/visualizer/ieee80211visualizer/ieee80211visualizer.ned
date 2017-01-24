@@ -79,10 +79,10 @@ network Ieee80211visualizerC
 {
     @display("bgb=561,411");
     submodules:
-        accessPoint: AccessPoint {
+        accessPointA: AccessPoint {
             @display("p=92,176");
         }
-        accessPoint1: AccessPoint {
+        accessPointB: AccessPoint {
             @display("p=442,179");
         }
         configurator: IPv4NetworkConfigurator {
@@ -93,6 +93,9 @@ network Ieee80211visualizerC
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=292,344");
+        }
+        wirelessHost: WirelessHost {
+            @display("p=92,66");
         }
 }
 
@@ -143,5 +146,105 @@ network Ieee80211visualizerD
         }
         hostA3: WirelessHost {
             @display("p=500,356");
+        }
+}
+
+network Ieee80211visualizerE
+{
+    parameters:
+        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
+        @display("bgb=811,493");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        accessPointA: AccessPoint {
+            parameters:
+                @display("p=332,230");
+        }
+        accessPointB: AccessPoint {
+            parameters:
+                @display("p=519,230");
+        }
+        hostA1: WirelessHost {
+            parameters:
+                @display("p=266,130");
+        }
+        hostA2: WirelessHost {
+            parameters:
+                @display("p=220,231");
+        }
+        hostB1: WirelessHost {
+            parameters:
+                @display("p=573,130");
+        }
+        hostB2: WirelessHost {
+            parameters:
+                @display("p=634,231");
+        }
+        hostB3: WirelessHost {
+            @display("p=266,329");
+        }
+        hostA3: WirelessHost {
+            @display("p=573,329");
+        }
+}
+
+network Ieee80211visualizerF
+{
+    parameters:
+        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
+        @display("bgb=811,493");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        accessPointA: AccessPoint {
+            parameters:
+                @display("p=319.8875,130.4");
+        }
+        accessPointB: AccessPoint {
+            parameters:
+                @display("p=626.53125,129.38126");
+        }
+        hostA1: WirelessHost {
+            parameters:
+                @display("p=384.06876,213.9375");
+        }
+        hostA2: WirelessHost {
+            parameters:
+                @display("p=218.0125,213.9375");
+        }
+        hostB1: WirelessHost {
+            parameters:
+                @display("p=626.53125,254.6875");
+        }
+        hostB2: WirelessHost {
+            parameters:
+                @display("p=722.29376,213.9375");
+        }
+        hostB3: WirelessHost {
+            @display("p=297.475,254.6875");
+        }
+        hostA3: WirelessHost {
+            @display("p=521.6,213.9375");
         }
 }
