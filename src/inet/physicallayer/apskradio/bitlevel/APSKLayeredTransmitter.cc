@@ -103,7 +103,7 @@ const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITrans
         return encoder->encode(packetModel);
     else {
         auto packet = packetModel->getPacket();
-        int netHeaderBitLength = packet->peekHeader<APSKPhyHeader>()->getChunkLength() * 8;
+        int netHeaderBitLength = bit(packet->peekHeader<APSKPhyHeader>()->getChunkLength()).get();
         int netPayloadBitLength = packet->getByteLength() * 8 - netHeaderBitLength;
         if (encoder) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);

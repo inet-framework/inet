@@ -41,7 +41,7 @@ std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int lev
 const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<APSKPhyHeader>();
-    auto dataBitLength = packet->getBitLength() - phyHeader->getChunkLength() * 8;
+    auto dataBitLength = (packet->getPacketLength() - phyHeader->getChunkLength()).get();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);

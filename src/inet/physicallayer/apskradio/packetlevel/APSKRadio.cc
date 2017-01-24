@@ -51,13 +51,13 @@ void APSKRadio::encapsulate(Packet *packet) const
     // KLUDGE:
     auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter);
     if (flatTransmitter != nullptr) {
-        phyHeader->setChunkLength((flatTransmitter->getHeaderBitLength() + 7) / 8);
+        phyHeader->setChunkLength(byte((flatTransmitter->getHeaderBitLength() + 7) / 8));
         modulation = check_and_cast<const APSKModulationBase *>(flatTransmitter->getModulation());
     }
     // KLUDGE:
     auto layeredTransmitter = dynamic_cast<const APSKLayeredTransmitter *>(transmitter);
     if (layeredTransmitter != nullptr) {
-        phyHeader->setChunkLength(APSK_PHY_HEADER_BYTE_LENGTH);
+        phyHeader->setChunkLength(byte(APSK_PHY_HEADER_BYTE_LENGTH));
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
@@ -70,7 +70,7 @@ void APSKRadio::encapsulate(Packet *packet) const
     auto paddingBitLength = computePaddingLength(packet->getByteLength() * 8, nullptr, modulation);
     if (paddingBitLength != 0) {
         assert(paddingBitLength % 8 == 0);
-        auto paddingTrailer = std::make_shared<ByteCountChunk>(paddingBitLength / 8);
+        auto paddingTrailer = std::make_shared<ByteCountChunk>(bit(paddingBitLength));
         paddingTrailer->markImmutable();
         packet->pushTrailer(paddingTrailer);
     }

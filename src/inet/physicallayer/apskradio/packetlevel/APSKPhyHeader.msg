@@ -25,5 +25,5 @@ class FieldsChunk extends cObject;
 
 class APSKPhyHeader extends FieldsChunk
 {
-    int64_t chunkLength @overridegetter;
+    bit chunkLength @overridegetter;
 }

@@ -294,7 +294,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
         const ConvolutionalCode *convolutionalCode = nullptr;
         const APSKModulationBase *modulation = nullptr;
         double codeRate = NaN;
-        unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, signalFieldPacketModel->getPacket()->getByteLength())->getBytes())) * 8;
+        unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(bit(0), signalFieldPacketModel->getPacket()->getPacketLength())->getBytes())) * 8;
         unsigned int dataFieldLengthInBits = psduLengthInBits + PPDU_SERVICE_FIELD_BITS_LENGTH + PPDU_TAIL_BITS_LENGTH;
         if (isCompliant) {
             const Ieee80211OFDMDataMode *dataMode = mode->getDataMode();
@@ -340,9 +340,9 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createCompleteSymbolM
 
 const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketModel(const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    const BitVector *headerBits = new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, signalFieldPacketModel->getPacket()->getByteLength())->getBytes());
+    const BitVector *headerBits = new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(bit(0), signalFieldPacketModel->getPacket()->getPacketLength())->getBytes());
     BitVector *mergedBits = new BitVector(*headerBits);
-    const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, dataFieldPacketModel->getPacket()->getByteLength())->getBytes());
+    const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekAt<BytesChunk>(bit(0), dataFieldPacketModel->getPacket()->getPacketLength())->getBytes());
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
     Ieee80211PhySerializer deserializer;
@@ -381,7 +381,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
-        uint8_t rate = getRate(new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(0, signalFieldPacketModel->getPacket()->getByteLength())->getBytes()));
+        uint8_t rate = getRate(new BitVector(signalFieldPacketModel->getPacket()->peekAt<BytesChunk>(bit(0), signalFieldPacketModel->getPacket()->getPacketLength())->getBytes()));
         // TODO: handle erroneous rate field
         mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);
     }
