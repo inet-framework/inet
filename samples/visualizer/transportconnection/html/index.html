@@ -12,10 +12,12 @@
 <h2>Goals</h2>
 
 <p>
-Transport connection visualization makes it easy to get information about the active transport connections in the network at a glance, without
-using the inspector window.
+Transport connection visualization makes it easy to get information about the active transport connections in the network at a glance, without drilling down in the GUI.
 It makes it easy to identify connections by their two end-hosts, and to tell different connections apart. It also gives a quick overview about
-the number of connections in certain nodes and the whole network.
+the number of connections in certain nodes and the whole network. This example demonstrates such visualization of TCP connections.
+</p>
+
+<p>
 The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration
 showcases a more advanced use-case.
 </p>
@@ -23,11 +25,9 @@ showcases a more advanced use-case.
 <h2>About the visualizer</h2>
 
 <p>
-The visualizer for this purpose is the <code><strong>TransportConnectionVisualizer</strong></code>.
-It displays an icon above the two end-hosts of an active, established transport layer level connection. It reacts to changes
-in the state of the connection. It places the icon when the connection is established, and removes it when it is no longer in the
-established state. The icons are color coded, denoting different connections. Should there be more connections than available colors,
-a number in the icon helps differentiate different connections with the same colored icon. Naturally, there can be multiple connections
+The <code><strong>TransportConnectionVisualizer</strong></code> displays an icon above the two end-hosts of an active, established transport layer level connection. It reacts to changes
+in the state of the connection. It places the icon when the connection is established, and removes it when the connection is closed. The icons are color coded, denoting different connections. Should there be more connections than available colors,
+a number in the icon helps differentiate between connections with the same colored icon. Naturally, there can be multiple connections
 open at a node, thus multiple icons.
 </p>
 
