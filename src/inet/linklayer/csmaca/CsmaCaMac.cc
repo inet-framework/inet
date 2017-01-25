@@ -16,8 +16,11 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriority.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"
 
 namespace inet {
@@ -420,16 +423,15 @@ CsmaCaMacDataFrame *CsmaCaMac::encapsulate(cPacket *msg)
 {
     CsmaCaMacDataFrame *frame = new CsmaCaMacDataFrame(msg->getName());
     frame->setByteLength(headerLength);
+
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     frame->setTransmitterAddress(address);
-    frame->setReceiverAddress(ctrl->getDest());
-    int up = ctrl->getUserPriority();
+    frame->setReceiverAddress(frame->getMandatoryTag<MacAddressReq>()->getDestAddress());
+    auto upp = frame->getTag<UserPriorityReq>();
+    int up = upp == nullptr ? UP_BE : upp->getUserPriority();
     frame->setPriority(up == -1 ? UP_BE : up);  // -1 is unset
-    delete ctrl;
-
     frame->encapsulate(msg);
     return frame;
 }
@@ -437,13 +439,10 @@ CsmaCaMacDataFrame *CsmaCaMac::encapsulate(cPacket *msg)
 cPacket *CsmaCaMac::decapsulate(CsmaCaMacDataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
-
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getTransmitterAddress());
-    ctrl->setDest(frame->getReceiverAddress());
-    ctrl->setUserPriority(frame->getPriority());
-    payload->setControlInfo(ctrl);
-
+    auto addresses = payload->ensureTag<MacAddressInd>();
+    addresses->setSrcAddress(frame->getTransmitterAddress());
+    addresses->setDestAddress(frame->getReceiverAddress());
+    payload->ensureTag<UserPriorityInd>()->setUserPriority(frame->getPriority());
     delete frame;
     return payload;
 }
