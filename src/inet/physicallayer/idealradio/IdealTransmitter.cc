@@ -15,10 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/idealradio/IdealTransmitter.h"
-#include "inet/physicallayer/idealradio/IdealTransmission.h"
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/idealradio/IdealTransmission.h"
+#include "inet/physicallayer/idealradio/IdealTransmitter.h"
 
 namespace inet {
 
@@ -62,12 +64,12 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
     return stream;
 }
 
-const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *packet, const simtime_t startTime) const
 {
-    auto signalBitrateReq = const_cast<cPacket *>(macFrame)->getTag<SignalBitrateReq>();
+    auto signalBitrateReq = const_cast<cPacket *>(packet)->getTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     auto headerDuration = headerBitLength / transmissionBitrate.get();
-    auto dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
+    auto dataDuration = packet->getBitLength() / transmissionBitrate.get();
     auto duration = preambleDuration + headerDuration + dataDuration;
     auto endTime = startTime + duration;
     auto mobility = transmitter->getAntenna()->getMobility();
@@ -75,7 +77,10 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
+    auto idealPhyHeader = std::make_shared<ByteCountChunk>((headerBitLength + 7) / 8);
+    idealPhyHeader->markImmutable();
+    check_and_cast<Packet *>(const_cast<cPacket *>(packet))->pushHeader(idealPhyHeader);
+    return new IdealTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
 }
 
 } // namespace physicallayer
