@@ -29,3 +29,13 @@ MediumVisualizer
 - ha NaN az animation speed akkor legyen valami automatic value (legyen ez a default?)
 - a fade legyen aranyos az automatic-hoz, ha az van megadva
 - add associated object for signals
+
+TransportConnectionVisualizer
+- Ne legyen kiírva semmi az ikonban ha csak 1 pár van az adott színből
+- Szám helyett betűk
+
+Propagation
+- beírni valamit az msg fileba
+
+Általános
+- Size probléma: nagyon nagyok a sample-ök a gifek miatt
