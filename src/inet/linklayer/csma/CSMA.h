@@ -115,7 +115,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
   protected:
-    typedef std::list<CSMAFrame *> MacQueue;
+    typedef std::list<Packet *> MacQueue;
 
     /** @name Different tracked statistics.*/
     /*@{*/
@@ -314,15 +314,15 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     void manageQueue();
     void updateMacState(t_mac_states newMacState);
 
-    void attachSignal(CSMAFrame *mac, simtime_t_cref startTime);
+    void attachSignal(Packet *mac, simtime_t_cref startTime);
     void manageMissingAck(t_mac_event event, cMessage *msg);
     void startTimer(t_mac_timer timer);
 
     virtual simtime_t scheduleBackoff();
 
-    virtual cPacket *decapsulate(CSMAFrame *macPkt);
+    virtual void decapsulate(Packet *packet);
 
-    CSMAFrame *ackMessage;
+    Packet *ackMessage;
 
     //sequence number for sending, map for the general case with more senders
     //also in initialisation phase multiple potential parents

@@ -209,8 +209,9 @@ InterfaceEntry *CSMA::createInterfaceEntry()
 void CSMA::handleUpperPacket(cPacket *msg)
 {
     //MacPkt*macPkt = encapsMsg(msg);
-    CSMAFrame *macPkt = new CSMAFrame(msg->getName());
-    macPkt->setBitLength(headerLength);
+    auto macPkt = std::make_shared<CSMAFrame>();
+    assert(headerLength % 8 == 0);
+    macPkt->setChunkLength(headerLength / 8);
     MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() << ", CInfo removed, mac addr=" << dest << endl;
     macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
@@ -235,9 +236,11 @@ void CSMA::handleUpperPacket(cPacket *msg)
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
     assert(static_cast<cPacket *>(msg));
-    macPkt->encapsulate(static_cast<cPacket *>(msg));
-    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getBitLength() << "\n";
-    executeMac(EV_SEND_REQUEST, macPkt);
+    Packet *packet = check_and_cast<Packet *>(msg);
+    macPkt->markImmutable();
+    packet->pushHeader(macPkt);
+    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() * 8 << "\n";
+    executeMac(EV_SEND_REQUEST, packet);
 }
 
 void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
@@ -245,7 +248,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
     switch (event) {
         case EV_SEND_REQUEST:
             if (macQueue.size() <= queueLength) {
-                macQueue.push_back(static_cast<CSMAFrame *>(msg));
+                macQueue.push_back(static_cast<Packet *>(msg));
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
                 NB = 0;
@@ -275,7 +278,8 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
 
         case EV_FRAME_RECEIVED:
             EV_DETAIL << "(15) FSM State IDLE_1, EV_FRAME_RECEIVED: setting up radio tx -> WAITSIFS." << endl;
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             nbRxFrames++;
 
             if (useMACAcks) {
@@ -288,7 +292,8 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg)
         case EV_BROADCAST_RECEIVED:
             EV_DETAIL << "(23) FSM State IDLE_1, EV_BROADCAST_RECEIVED: Nothing to do." << endl;
             nbRxFrames++;
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         default:
@@ -346,13 +351,15 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg)
             else {
                 EV_DETAIL << "sending frame up and resuming normal operation.";
             }
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         case EV_BROADCAST_RECEIVED:
             EV_DETAIL << "(29) FSM State BACKOFF, EV_BROADCAST_RECEIVED:"
                       << "sending frame up and resuming normal operation." << endl;
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         default:
@@ -372,7 +379,7 @@ void CSMA::clearQueue()
     macQueue.clear();
 }
 
-void CSMA::attachSignal(CSMAFrame *mac, simtime_t_cref startTime)
+void CSMA::attachSignal(Packet *mac, simtime_t_cref startTime)
 {
     simtime_t duration = mac->getBitLength() / bitrate;
     mac->setDuration(duration);
@@ -388,7 +395,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                 EV_DETAIL << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
                 updateMacState(TRANSMITFRAME_4);
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-                CSMAFrame *mac = check_and_cast<CSMAFrame *>(macQueue.front()->dup());
+                Packet *mac = check_and_cast<Packet *>(macQueue.front()->dup());
                 attachSignal(mac, simTime() + aTurnaroundTime);
                 //sendDown(msg);
                 // give time for the radio to be in Tx state before transmitting
@@ -461,13 +468,15 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
             else {
                 EV_DETAIL << " Nothing to do." << endl;
             }
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         case EV_BROADCAST_RECEIVED:
             EV_DETAIL << "(24) FSM State BACKOFF, EV_BROADCAST_RECEIVED:"
                       << " Nothing to do." << endl;
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         default:
@@ -480,11 +489,12 @@ void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 {
     if (event == EV_FRAME_TRANSMITTED) {
         //    delete msg;
-        CSMAFrame *packet = macQueue.front();
+        Packet *packet = macQueue.front();
+        const auto& csmaHeader = packet->peekHeader<CSMAFrame>();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
         bool expectAck = useMACAcks;
-        if (!packet->getDestAddr().isBroadcast() && !packet->getDestAddr().isMulticast()) {
+        if (!csmaHeader->getDestAddr().isBroadcast() && !csmaHeader->getDestAddr().isMulticast()) {
             //unicast
             EV_DETAIL << "(4) FSM State TRANSMITFRAME_4, "
                       << "EV_FRAME_TRANSMITTED [Unicast]: ";
@@ -540,7 +550,8 @@ void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
 
         case EV_BROADCAST_RECEIVED:
         case EV_FRAME_RECEIVED:
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         case EV_DUPLICATE_RECEIVED:
@@ -604,7 +615,8 @@ void CSMA::updateStatusSIFS(t_mac_event event, cMessage *msg)
         case EV_BROADCAST_RECEIVED:
         case EV_FRAME_RECEIVED:
             EV << "Error ! Received a frame during SIFS !" << endl;
-            sendUp(decapsulate(static_cast<CSMAFrame *>(msg)));
+            decapsulate(check_and_cast<Packet *>(msg));
+            sendUp(msg);
             break;
 
         default:
@@ -633,7 +645,7 @@ void CSMA::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
     if (macQueue.size() <= queueLength) {
-        macQueue.push_back(static_cast<CSMAFrame *>(msg));
+        macQueue.push_back(static_cast<Packet *>(msg));
         EV_DETAIL << "(21) FSM State NOT IDLE, EV_SEND_REQUEST"
                   << " and [TxBuff avail]: enqueue packet and don't move." << endl;
     }
@@ -830,12 +842,8 @@ void CSMA::handleSelfMessage(cMessage *msg)
  */
 void CSMA::handleLowerPacket(cPacket *msg)
 {
-    if (msg->hasBitError()) {
-        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
-        delete msg;
-        return;
-    }
-    CSMAFrame *macPkt = static_cast<CSMAFrame *>(msg);
+    Packet *packet = check_and_cast<Packet *>(msg);
+    const auto& macPkt = packet->peekHeader<CSMAFrame>();
     const MACAddress& src = macPkt->getSrcAddr();
     const MACAddress& dest = macPkt->getDestAddr();
     long ExpectedNr = 0;
@@ -849,7 +857,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
         if (!useMACAcks) {
             EV_DETAIL << "Received a data packet addressed to me." << endl;
 //            nbRxFrames++;
-            executeMac(EV_FRAME_RECEIVED, macPkt);
+            executeMac(EV_FRAME_RECEIVED, packet);
         }
         else {
             long SeqNr = macPkt->getSequenceId();
@@ -866,16 +874,19 @@ void CSMA::handleLowerPacket(cPacket *msg)
 
                 if (ackMessage != nullptr)
                     delete ackMessage;
-                ackMessage = new CSMAFrame("CSMA-Ack");
-                ackMessage->setSrcAddr(address);
-                ackMessage->setDestAddr(src);
-                ackMessage->setBitLength(ackLength);
+                auto csmaHeader = std::make_shared<CSMAFrame>();
+                csmaHeader->setSrcAddr(address);
+                csmaHeader->setDestAddr(src);
+                csmaHeader->setChunkLength(ackLength / 8);
+                csmaHeader->markImmutable();
+                ackMessage = new Packet("CSMA-Ack");
+                ackMessage->pushHeader(csmaHeader);
                 //Check for duplicates by checking expected seqNr of sender
                 if (SeqNrChild.find(src) == SeqNrChild.end()) {
                     //no record of current child -> add expected next number to map
                     SeqNrChild[src] = SeqNr + 1;
                     EV_DETAIL << "Adding a new child to the map of Sequence numbers:" << src << endl;
-                    executeMac(EV_FRAME_RECEIVED, macPkt);
+                    executeMac(EV_FRAME_RECEIVED, packet);
                 }
                 else {
                     ExpectedNr = SeqNrChild[src];
@@ -884,39 +895,40 @@ void CSMA::handleLowerPacket(cPacket *msg)
                     if (SeqNr < ExpectedNr) {
                         //Duplicate Packet, count and do not send to upper layer
                         nbDuplicates++;
-                        executeMac(EV_DUPLICATE_RECEIVED, macPkt);
+                        executeMac(EV_DUPLICATE_RECEIVED, packet);
                     }
                     else {
                         SeqNrChild[src] = SeqNr + 1;
-                        executeMac(EV_FRAME_RECEIVED, macPkt);
+                        executeMac(EV_FRAME_RECEIVED, packet);
                     }
                 }
             }
             else if (macQueue.size() != 0) {
                 // message is an ack, and it is for us.
                 // Is it from the right node ?
-                CSMAFrame *firstPacket = static_cast<CSMAFrame *>(macQueue.front());
-                if (src == firstPacket->getDestAddr()) {
+                Packet *firstPacket = static_cast<Packet *>(macQueue.front());
+                const auto& csmaHeader = firstPacket->peekHeader<CSMAFrame>();
+                if (src == csmaHeader->getDestAddr()) {
                     nbRecvdAcks++;
-                    executeMac(EV_ACK_RECEIVED, macPkt);
+                    executeMac(EV_ACK_RECEIVED, packet);
                 }
                 else {
-                    EV << "Error! Received an ack from an unexpected source: src=" << src << ", I was expecting from node addr=" << firstPacket->getDestAddr() << endl;
-                    delete macPkt;
+                    EV << "Error! Received an ack from an unexpected source: src=" << src << ", I was expecting from node addr=" << csmaHeader->getDestAddr() << endl;
+                    delete packet;
                 }
             }
             else {
                 EV << "Error! Received an Ack while my send queue was empty. src=" << src << "." << endl;
-                delete macPkt;
+                delete packet;
             }
         }
     }
     else if (dest.isBroadcast() || dest.isMulticast()) {
-        executeMac(EV_BROADCAST_RECEIVED, macPkt);
+        executeMac(EV_BROADCAST_RECEIVED, packet);
     }
     else {
         EV_DETAIL << "packet not for me, deleting...\n";
-        delete macPkt;
+        delete packet;
     }
 }
 
@@ -933,14 +945,12 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
     }
 }
 
-cPacket *CSMA::decapsulate(CSMAFrame *macPkt)
+void CSMA::decapsulate(Packet *packet)
 {
-    cPacket *packet = macPkt->decapsulate();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(macPkt->getSrcAddr());
+    const auto& csmaHeader = packet->popHeader<CSMAFrame>();
+    packet->ensureTag<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macPkt->getNetworkProtocol()));
-    delete macPkt;
-    return packet;
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol()));
 }
 
 } // namespace inet

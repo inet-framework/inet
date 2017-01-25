@@ -16,15 +16,19 @@
 //
 
 cplusplus {{
-   #include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
 
 class noncobject MACAddress;
+class FieldsChunk extends cObject;
 
-packet MACFrameBase
+class MACFrameBase extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter;
     MACAddress srcAddr;
     MACAddress destAddr;
     int networkProtocol = -1;

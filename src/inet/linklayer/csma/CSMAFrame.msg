@@ -20,19 +20,19 @@
 // **************************************************************************/
 
 cplusplus {{
-    #include "inet/linklayer/base/MACFrameBase_m.h"
+#include "inet/linklayer/base/MACFrameBase_m.h"
 }}
 
 namespace inet;
 
-class MACFrameBase;
+class MACFrameBase extends cObject;
 
 //
 // A CSMA mac packet format definition
 //
 // @author Daniel Willkomm
 //
-packet CSMAFrame extends MACFrameBase
+class CSMAFrame extends MACFrameBase
 {
     long       sequenceId; // Sequence Number to detect duplicate messages
 }
