@@ -407,6 +407,7 @@ void Radio::abortTransmission()
 
 RadioFrame *Radio::createRadioFrame(Packet *packet) const
 {
+    encapsulate(packet);
     RadioFrame *radioFrame = check_and_cast<RadioFrame *>(medium->transmitPacket(this, packet));
     ASSERT(radioFrame->getDuration() != 0);
     return radioFrame;
