@@ -29,7 +29,6 @@ enum UdpConstants{
 };
 
 class FieldsChunk extends cObject;
-
 enum CrcMode
 {
     CRC_DECLARED_CORRECT = 0;
@@ -45,7 +44,7 @@ class UDPHeader extends FieldsChunk
     @customize(true);
     unsigned short srcPort;
     unsigned short destPort;
-    int64_t chunkLength = UDP_HEADER_BYTES;
+    int64_t chunkLength @overridegetter = UDP_HEADER_BYTES;
     int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
     uint16_t crc = 0;
     int crcMode @enum(CrcMode) = -1;

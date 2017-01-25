@@ -126,5 +126,5 @@ class ICMPMessage extends FieldsChunk
     int type = -1 @enum(ICMPType);   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
-    int64_t chunkLength = 4;
+    int64_t chunkLength @overridegetter = 4;
 }

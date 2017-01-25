@@ -38,6 +38,6 @@ enum EchoProtocolType
 class EchoPacket extends FieldsChunk
 {
     int type @enum(EchoProtocolType);
-    int64_t chunkLength = 0;
+    int64_t chunkLength @overridegetter = 0;
 }
 
