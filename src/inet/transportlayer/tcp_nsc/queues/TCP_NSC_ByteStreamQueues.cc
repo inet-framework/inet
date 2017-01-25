@@ -73,11 +73,11 @@ ulong TCP_NSC_ByteStreamSendQueue::getBytesAvailable() const
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment *TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
+TcpHeader *TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, true);
+    TcpHeader *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, true);
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];
@@ -118,7 +118,7 @@ void TCP_NSC_ByteStreamReceiveQueue::setConnection(TCP_NSC_Connection *connP)
     TCP_NSC_ReceiveQueue::setConnection(connP);
 }
 
-void TCP_NSC_ByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP)
+void TCP_NSC_ByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP)
 {
     ASSERT(tcpsegP);
 }
@@ -163,7 +163,7 @@ void TCP_NSC_ByteStreamReceiveQueue::getQueueStatus() const
     // TODO
 }
 
-void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TcpHeader *tcpsegP)
 {
     // nothing to do
 }

@@ -91,11 +91,11 @@ unsigned long TcpLwipMsgBasedSendQueue::getBytesAvailable() const
     return unsentTcpLayerBytesM;
 }
 
-TCPSegment *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
+TcpHeader *TcpLwipMsgBasedSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, false);
+    TcpHeader *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, false);
 
     uint32 fromSeq = tcpseg->getSequenceNo();
     uint32 numBytes = tcpseg->getPayloadLength();
@@ -206,7 +206,7 @@ void TcpLwipMsgBasedReceiveQueue::setConnection(TcpLwipConnection *connP)
     }
 }
 
-void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNoP, const void *bufferP, size_t bufferLengthP)
+void TcpLwipMsgBasedReceiveQueue::notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP, uint32 seqNoP, const void *bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
@@ -307,7 +307,7 @@ void TcpLwipMsgBasedReceiveQueue::getQueueStatus() const
     // TODO
 }
 
-void TcpLwipMsgBasedReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TcpLwipMsgBasedReceiveQueue::notifyAboutSending(const TcpHeader *tcpsegP)
 {
     // nothing to do
 }

@@ -62,7 +62,7 @@ std::string TCPMsgBasedRcvQueue::info() const
     return os.str();
 }
 
-uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
+uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TcpHeader *tcpseg)
 {
     TCPVirtualDataRcvQueue::insertBytesFromSegment(tcpseg);
 

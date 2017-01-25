@@ -292,7 +292,7 @@ bool TCPConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
+bool TCPConnection::processTCPSegment(TcpHeader *tcpseg, L3Address segSrcAddr, L3Address segDestAddr)
 {
     printConnBrief();
     if (!localAddr.isUnspecified()) {

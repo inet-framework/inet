@@ -83,7 +83,7 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
     /**
      *
      */
-    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
+    virtual TcpHeader *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
 
     /**
      *

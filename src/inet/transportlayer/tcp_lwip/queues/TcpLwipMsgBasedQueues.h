@@ -108,7 +108,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      * @param tcpDataP: the tcp segment (with tcp header) created by LWIP
      * @param tcpLenthP: the length of tcp segment.
      */
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) override;
+    virtual TcpHeader *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) override;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
@@ -153,7 +153,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
     /**
      * called back from lwip::tcp_input()
      */
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP, uint32 seqNo,
             const void *bufferP, size_t bufferLengthP) override;
 
     /**
@@ -194,7 +194,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
      * called when connM send out a packet.
      * for read AckNo, if have
      */
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP) override;
+    virtual void notifyAboutSending(const TcpHeader *tcpsegP) override;
 
   protected:
     long int bytesInQueueM;

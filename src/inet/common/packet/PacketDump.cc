@@ -383,7 +383,7 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
     else
 #endif // ifdef WITH_SCTP
 #ifdef WITH_TCP_COMMON
-    if (tcp::TCPSegment *tcpseg = dynamic_cast<tcp::TCPSegment *>(msg)) {
+    if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(msg)) {
         tcpDump(l2r, "", tcpseg, std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
     }
     else
@@ -492,7 +492,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, cons
     cPacket *encapmsg = dgram->getEncapsulatedPacket();
 
 #ifdef WITH_TCP_COMMON
-    if (tcp::TCPSegment *tcpseg = dynamic_cast<tcp::TCPSegment *>(encapmsg)) {
+    if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(encapmsg)) {
         // if TCP, dump as TCP
         tcpDump(l2r, label, tcpseg, dgram->getSrcAddress().str(),
                 dgram->getDestAddress().str(), comment);
@@ -559,9 +559,9 @@ void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, cons
     cPacket *encapmsg = dgram->getEncapsulatedPacket();
 
 #ifdef WITH_TCP_COMMON
-    if (dynamic_cast<TCPSegment *>(encapmsg)) {
+    if (dynamic_cast<TcpHeader *>(encapmsg)) {
         // if TCP, dump as TCP
-        tcpDump(l2r, label, (TCPSegment *)encapmsg, dgram->getSrcAddress().str(),
+        tcpDump(l2r, label, (TcpHeader *)encapmsg, dgram->getSrcAddress().str(),
                 dgram->getDestAddress().str(), comment);
     }
     else
@@ -593,7 +593,7 @@ void PacketDump::dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, cons
 #endif // ifdef WITH_IPv6
 }
 
-void PacketDump::tcpDump(bool l2r, const char *label, tcp::TCPSegment *tcpseg,
+void PacketDump::tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
     using namespace tcp;

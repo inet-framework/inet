@@ -39,7 +39,7 @@ class TCPCommand;
 namespace tcp {
 
 // forward declarations:
-class TCPSegment;
+class TcpHeader;
 class TCP_NSC_SendQueue;
 class TCP_NSC_ReceiveQueue;
 
@@ -93,7 +93,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     void loadStack(const char *stacknameP, int bufferSizeP);
 
     void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(TCPSegment *tcpsegP);
+    void handleIpInputMessage(TcpHeader *tcpsegP);
 
     void sendDataToApp(TCP_NSC_Connection& c);
     void sendErrorNotificationToApp(TCP_NSC_Connection& c, int err);

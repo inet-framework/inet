@@ -144,7 +144,7 @@ void TCP_lwIP::handleIpInputMessage(FlatPacket *packet)
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    TCPSegment *tcpsegP = check_and_cast<TCPSegment *>(packet->peekHeader());
+    TcpHeader *tcpsegP = check_and_cast<TcpHeader *>(packet->peekHeader());
     srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getMandatoryTag<InterfaceInd>())->getInterfaceId();
@@ -572,7 +572,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
 {
     TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
 
-    TCPSegment *tcpseg;
+    TcpHeader *tcpseg;
 
     if (conn) {
         tcpseg = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);

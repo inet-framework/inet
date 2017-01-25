@@ -34,7 +34,7 @@ class IPv4Datagram;
 #ifdef WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #else // ifdef WITH_TCP_COMMON
-namespace inet { namespace tcp { class TCPSegment; } }
+namespace inet { namespace tcp { class TcpHeader; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
@@ -48,7 +48,7 @@ namespace inet {
 class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
-    void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TCPSegment *tcpSeg) const;
+    void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TcpHeader *tcpSeg) const;
     void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPHeader *udpHeader) const;
     void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
 
@@ -83,7 +83,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 #endif // ifdef WITH_IPv4
         }
 #ifdef WITH_TCP_COMMON
-        else if (tcp::TCPSegment *tcpSegment = dynamic_cast<tcp::TCPSegment *>(pk)) {
+        else if (tcp::TcpHeader *tcpSegment = dynamic_cast<tcp::TcpHeader *>(pk)) {
             printTCPPacket(os, srcAddr, destAddr, tcpSegment);
             return;
         }
@@ -104,7 +104,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
 
-void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TCPSegment *tcpSeg) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TcpHeader *tcpSeg) const
 {
 #ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ": ";

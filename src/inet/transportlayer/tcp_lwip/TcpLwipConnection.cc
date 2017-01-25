@@ -51,7 +51,7 @@ TcpLwipConnection::Stats::~Stats()
 {
 }
 
-void TcpLwipConnection::Stats::recordSend(const TCPSegment& tcpsegP)
+void TcpLwipConnection::Stats::recordSend(const TcpHeader& tcpsegP)
 {
     sndWndVector.record(tcpsegP.getWindow());
     sndSeqVector.record(tcpsegP.getSequenceNo());
@@ -60,7 +60,7 @@ void TcpLwipConnection::Stats::recordSend(const TCPSegment& tcpsegP)
         sndAckVector.record(tcpsegP.getAckNo());
 }
 
-void TcpLwipConnection::Stats::recordReceive(const TCPSegment& tcpsegP)
+void TcpLwipConnection::Stats::recordReceive(const TcpHeader& tcpsegP)
 {
     rcvWndVector.record(tcpsegP.getWindow());
     rcvSeqVector.record(tcpsegP.getSequenceNo());
@@ -290,7 +290,7 @@ void TcpLwipConnection::send(cPacket *msgP)
     sendQueueM->enqueueAppData(msgP);
 }
 
-void TcpLwipConnection::notifyAboutSending(const TCPSegment& tcpsegP)
+void TcpLwipConnection::notifyAboutSending(const TcpHeader& tcpsegP)
 {
     receiveQueueM->notifyAboutSending(&tcpsegP);
 

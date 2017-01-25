@@ -76,11 +76,11 @@ unsigned long TcpLwipByteStreamSendQueue::getBytesAvailable() const
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment *TcpLwipByteStreamSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
+TcpHeader *TcpLwipByteStreamSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, true);
+    TcpHeader *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, true);
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];
@@ -120,7 +120,7 @@ void TcpLwipByteStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
-void TcpLwipByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqno, const void *bufferP, size_t bufferLengthP)
+void TcpLwipByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP, uint32 seqno, const void *bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
@@ -171,7 +171,7 @@ void TcpLwipByteStreamReceiveQueue::getQueueStatus() const
     // TODO
 }
 
-void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TcpHeader *tcpsegP)
 {
     // nothing to do
 }

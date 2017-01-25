@@ -27,7 +27,7 @@ namespace tcp {
 
 // forward declarations:
 class TcpLwipConnection;
-class TCPSegment;
+class TcpHeader;
 
 /**
  * Abstract base class for TCP_LWIP send queues. In fact a single object
@@ -139,7 +139,7 @@ class INET_API TcpLwipSendQueue : public cObject
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
+    virtual TcpHeader *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
 
   protected:
     TcpLwipConnection *connM;
@@ -169,7 +169,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * object should *not* be deleted.
      * //FIXME revise this comment
      */
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP, uint32 seqNo,
             const void *bufferP, size_t bufferLengthP) = 0;
 
     /**
@@ -210,7 +210,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * called when connM send out a packet.
      * for read AckNo, if have
      */
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP) = 0;
+    virtual void notifyAboutSending(const TcpHeader *tcpsegP) = 0;
 
   protected:
     TcpLwipConnection *connM;

@@ -52,14 +52,14 @@ std::string Sack::str() const
     return out.str();
 }
 
-Register_Class(TCPSegment);
+Register_Class(TcpHeader);
 
-uint32_t TCPSegment::getSegLen()
+uint32_t TcpHeader::getSegLen()
 {
     return payloadLength + (finBit ? 1 : 0) + (synBit ? 1 : 0);
 }
 
-void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
+void TcpHeader::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
 {
     ASSERT(payloadLength > 0);
 
@@ -85,7 +85,7 @@ void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
     truncateData(truncleft, truncright);
 }
 
-unsigned short TCPSegment::getHeaderOptionArrayLength()
+unsigned short TcpHeader::getHeaderOptionArrayLength()
 {
     unsigned short usedLength = 0;
 
@@ -95,17 +95,17 @@ unsigned short TCPSegment::getHeaderOptionArrayLength()
     return usedLength;
 }
 
-TCPSegment& TCPSegment::operator=(const TCPSegment& other)
+TcpHeader& TcpHeader::operator=(const TcpHeader& other)
 {
     if (this == &other)
         return *this;
     clean();
-    TCPSegment_Base::operator=(other);
+    TcpHeader_Base::operator=(other);
     copy(other);
     return *this;
 }
 
-void TCPSegment::copy(const TCPSegment& other)
+void TcpHeader::copy(const TcpHeader& other)
 {
     for (const auto & elem : other.payloadList)
         addPayloadMessage(elem.msg->dup(), elem.endSequenceNo);
@@ -113,12 +113,12 @@ void TCPSegment::copy(const TCPSegment& other)
         headerOptionList.push_back(opt->dup());
 }
 
-TCPSegment::~TCPSegment()
+TcpHeader::~TcpHeader()
 {
     clean();
 }
 
-void TCPSegment::clean()
+void TcpHeader::clean()
 {
     dropHeaderOptions();
     setHeaderLength(TCP_HEADER_OCTETS);
@@ -133,7 +133,7 @@ void TCPSegment::clean()
     setChunkByteLength(TCP_HEADER_OCTETS);
 }
 
-void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
+void TcpHeader::truncateData(unsigned int truncleft, unsigned int truncright)
 {
     ASSERT(payloadLength >= truncleft + truncright);
 
@@ -158,9 +158,9 @@ void TCPSegment::truncateData(unsigned int truncleft, unsigned int truncright)
     }
 }
 
-void TCPSegment::parsimPack(cCommBuffer *b) const
+void TcpHeader::parsimPack(cCommBuffer *b) const
 {
-    TCPSegment_Base::parsimPack(b);
+    TcpHeader_Base::parsimPack(b);
     b->pack((int)headerOptionList.size());
     for (const auto opt: headerOptionList) {
         b->packObject(opt);
@@ -172,9 +172,9 @@ void TCPSegment::parsimPack(cCommBuffer *b) const
     }
 }
 
-void TCPSegment::parsimUnpack(cCommBuffer *b)
+void TcpHeader::parsimUnpack(cCommBuffer *b)
 {
-    TCPSegment_Base::parsimUnpack(b);
+    TcpHeader_Base::parsimUnpack(b);
     int i, n;
     b->unpack(n);
     for (i = 0; i < n; i++) {
@@ -190,17 +190,17 @@ void TCPSegment::parsimUnpack(cCommBuffer *b)
     }
 }
 
-void TCPSegment::setPayloadArraySize(unsigned int size)
+void TcpHeader::setPayloadArraySize(unsigned int size)
 {
     throw cRuntimeError(this, "setPayloadArraySize() not supported, use addPayloadMessage()");
 }
 
-unsigned int TCPSegment::getPayloadArraySize() const
+unsigned int TcpHeader::getPayloadArraySize() const
 {
     return payloadList.size();
 }
 
-TCPPayloadMessage& TCPSegment::getPayload(unsigned int k)
+TCPPayloadMessage& TcpHeader::getPayload(unsigned int k)
 {
     auto i = payloadList.begin();
     while (k > 0 && i != payloadList.end())
@@ -210,12 +210,12 @@ TCPPayloadMessage& TCPSegment::getPayload(unsigned int k)
     return *i;
 }
 
-void TCPSegment::setPayload(unsigned int k, const TCPPayloadMessage& payload_var)
+void TcpHeader::setPayload(unsigned int k, const TCPPayloadMessage& payload_var)
 {
     throw cRuntimeError(this, "setPayload() not supported, use addPayloadMessage()");
 }
 
-void TCPSegment::addPayloadMessage(cPacket *msg, uint32 endSequenceNo)
+void TcpHeader::addPayloadMessage(cPacket *msg, uint32 endSequenceNo)
 {
     take(msg);
 
@@ -225,7 +225,7 @@ void TCPSegment::addPayloadMessage(cPacket *msg, uint32 endSequenceNo)
     payloadList.push_back(payload);
 }
 
-cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
+cPacket *TcpHeader::removeFirstPayloadMessage(uint32& endSequenceNo)
 {
     if (payloadList.empty())
         return nullptr;
@@ -237,34 +237,34 @@ cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
     return msg;
 }
 
-void TCPSegment::addHeaderOption(TCPOption *option)
+void TcpHeader::addHeaderOption(TCPOption *option)
 {
     headerOptionList.push_back(option);
     headerLength += option->getLength();
     addChunkByteLength(option->getLength());
 }
 
-void TCPSegment::setHeaderOptionArraySize(unsigned int size)
+void TcpHeader::setHeaderOptionArraySize(unsigned int size)
 {
     throw cRuntimeError(this, "setHeaderOptionArraySize() not supported, use addHeaderOption()");
 }
 
-unsigned int TCPSegment::getHeaderOptionArraySize() const
+unsigned int TcpHeader::getHeaderOptionArraySize() const
 {
     return headerOptionList.size();
 }
 
-TCPOptionPtr& TCPSegment::getHeaderOption(unsigned int k)
+TCPOptionPtr& TcpHeader::getHeaderOption(unsigned int k)
 {
     return headerOptionList.at(k);
 }
 
-void TCPSegment::setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption)
+void TcpHeader::setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption)
 {
     throw cRuntimeError(this, "setHeaderOption() not supported, use addHeaderOption()");
 }
 
-void TCPSegment::dropHeaderOptions()
+void TcpHeader::dropHeaderOptions()
 {
     for (auto opt : headerOptionList)
         delete opt;

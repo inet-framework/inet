@@ -29,7 +29,7 @@ class TCPCommand;
 
 namespace tcp {
 
-class TCPSegment;
+class TcpHeader;
 
 /**
  * Abstract base class for TCP receive queues. This class represents
@@ -81,7 +81,7 @@ class INET_API TCPReceiveQueue : public cObject
      *
      * The method should return the sequence number to be ACKed.
      */
-    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) = 0;
+    virtual uint32 insertBytesFromSegment(TcpHeader *tcpseg) = 0;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT

@@ -145,7 +145,7 @@ class INET_API TCP_NSC_SendQueue : public cObject
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP) = 0;
+    virtual TcpHeader *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP) = 0;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
@@ -183,7 +183,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
      *
      * called before nsc_stack->if_receive_packet() called
      */
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP) = 0;
 
     /**
      * The method called when data received from NSC
@@ -223,7 +223,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
      * called when connM send out a packet.
      * for read AckNo, if have
      */
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP) = 0;
+    virtual void notifyAboutSending(const TcpHeader *tcpsegP) = 0;
 
   protected:
     TCP_NSC_Connection *connM;

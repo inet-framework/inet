@@ -54,7 +54,7 @@ class INET_API TCP_NSC_ByteStreamSendQueue : public TCP_NSC_SendQueue
 
     virtual unsigned long getBytesAvailable() const override;
 
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP) override;
+    virtual TcpHeader *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP) override;
 
     virtual void discardUpTo(uint32 seqNumP) override;
 
@@ -80,7 +80,7 @@ class INET_API TCP_NSC_ByteStreamReceiveQueue : public TCP_NSC_ReceiveQueue
 
     virtual void setConnection(TCP_NSC_Connection *connP) override;
 
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP) override;
+    virtual void notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP) override;
 
     virtual void enqueueNscData(void *dataP, int dataLengthP) override;
 
@@ -92,7 +92,7 @@ class INET_API TCP_NSC_ByteStreamReceiveQueue : public TCP_NSC_ReceiveQueue
 
     virtual void getQueueStatus() const override;
 
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP) override;
+    virtual void notifyAboutSending(const TcpHeader *tcpsegP) override;
 
   protected:
     ByteArrayBuffer byteArrayBufferM;

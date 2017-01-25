@@ -91,7 +91,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 #endif
 
 #ifdef WITH_TCP_COMMON
-    tcp::TCPSegment *tcp = dynamic_cast<tcp::TCPSegment *>(ipData->getEncapsulatedPacket());
+    tcp::TcpHeader *tcp = dynamic_cast<tcp::TcpHeader *>(ipData->getEncapsulatedPacket());
     if (tcp) {
         if (tcp->getDestPort() == 21 || tcp->getSrcPort() == 21)
             return UP_BK;

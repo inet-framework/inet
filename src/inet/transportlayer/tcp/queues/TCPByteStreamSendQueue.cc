@@ -70,12 +70,12 @@ uint32 TCPByteStreamSendQueue::getBufferEndSeq()
     return end;
 }
 
-TCPSegment *TCPByteStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+TcpHeader *TCPByteStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
-    TCPSegment *tcpseg = new TCPSegment();
+    TcpHeader *tcpseg = new TcpHeader();
     tcpseg->setSequenceNo(fromSeq);
     tcpseg->setPayloadLength(numBytes);
     tcpseg->addChunkByteLength(numBytes);

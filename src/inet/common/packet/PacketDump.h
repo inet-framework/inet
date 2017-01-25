@@ -28,7 +28,7 @@ namespace inet {
 // Foreign declarations:
 class IPv4Datagram;
 class IPv6Datagram;
-namespace tcp { class TCPSegment; }
+namespace tcp { class TcpHeader; }
 class UDPHeader;
 class ARPPacket;
 namespace sctp { class SCTPMessage; }
@@ -110,7 +110,7 @@ class INET_API PacketDump
     /**
      * Dumps info about the given TCP segment.
      */
-    void tcpDump(bool l2r, const char *label, tcp::TCPSegment *tcpseg, const std::string& srcAddr,
+    void tcpDump(bool l2r, const char *label, tcp::TcpHeader *tcpseg, const std::string& srcAddr,
             const std::string& destAddr, const char *comment = nullptr);
 
     /**

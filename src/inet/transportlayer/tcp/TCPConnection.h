@@ -33,7 +33,7 @@ class TCPOpenCommand;
 
 namespace tcp {
 
-class TCPSegment;
+class TcpHeader;
 class TCPSendQueue;
 class TCPSACKRexmitQueue;
 class TCPReceiveQueue;
@@ -405,26 +405,26 @@ class INET_API TCPConnection : public cObject
      * Shortcut to process most common case as fast as possible. Returns false
      * if segment requires normal (slow) route.
      */
-    virtual bool tryFastRoute(TCPSegment *tcpseg);
+    virtual bool tryFastRoute(TcpHeader *tcpseg);
     /**
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TCPEventCode process_RCV_SEGMENT(TCPSegment *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInListen(TCPSegment *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegment1stThru8th(TCPSegment *tcpseg);
-    virtual TCPEventCode processRstInSynReceived(TCPSegment *tcpseg);
-    virtual bool processAckInEstabEtc(TCPSegment *tcpseg);
+    virtual TCPEventCode process_RCV_SEGMENT(TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInListen(TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInSynSent(TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegment1stThru8th(TcpHeader *tcpseg);
+    virtual TCPEventCode processRstInSynReceived(TcpHeader *tcpseg);
+    virtual bool processAckInEstabEtc(TcpHeader *tcpseg);
     //@}
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
-    virtual bool processMSSOption(TCPSegment *tcpseg, const TCPOptionMaxSegmentSize& option);
-    virtual bool processWSOption(TCPSegment *tcpseg, const TCPOptionWindowScale& option);
-    virtual bool processSACKPermittedOption(TCPSegment *tcpseg, const TCPOptionSackPermitted& option);
-    virtual bool processSACKOption(TCPSegment *tcpseg, const TCPOptionSack& option);
-    virtual bool processTSOption(TCPSegment *tcpseg, const TCPOptionTimestamp& option);
+    virtual bool processMSSOption(TcpHeader *tcpseg, const TCPOptionMaxSegmentSize& option);
+    virtual bool processWSOption(TcpHeader *tcpseg, const TCPOptionWindowScale& option);
+    virtual bool processSACKPermittedOption(TcpHeader *tcpseg, const TCPOptionSackPermitted& option);
+    virtual bool processSACKOption(TcpHeader *tcpseg, const TCPOptionSack& option);
+    virtual bool processTSOption(TcpHeader *tcpseg, const TCPOptionTimestamp& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -448,7 +448,7 @@ class INET_API TCPConnection : public cObject
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(TCPSegment *tcpseg) const;
+    virtual bool isSegmentAcceptable(TcpHeader *tcpseg) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -457,19 +457,19 @@ class INET_API TCPConnection : public cObject
     virtual void sendSynAck();
 
     /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual void readHeaderOptions(TCPSegment *tcpseg);
+    virtual void readHeaderOptions(TcpHeader *tcpseg);
 
     /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual TCPSegment writeHeaderOptions(TCPSegment *tcpseg);
+    virtual TcpHeader writeHeaderOptions(TcpHeader *tcpseg);
 
     /** Utility: adds SACKs to segments header options field */
-    virtual TCPSegment addSacks(TCPSegment *tcpseg);
+    virtual TcpHeader addSacks(TcpHeader *tcpseg);
 
     /** Utility: get TSval from segments TS header option */
-    virtual uint32 getTSval(TCPSegment *tcpseg) const;
+    virtual uint32 getTSval(TcpHeader *tcpseg) const;
 
     /** Utility: get TSecr from segments TS header option */
-    virtual uint32 getTSecr(TCPSegment *tcpseg) const;
+    virtual uint32 getTSecr(TcpHeader *tcpseg) const;
 
     /** Utility: returns true if the connection is not yet accepted by the application */
     virtual bool isToBeAccepted() const { return listeningSocketId != -1; }
@@ -511,13 +511,13 @@ class INET_API TCPConnection : public cObject
     virtual void sendSegment(uint32 bytes);
 
     /** Utility: adds control info to segment and sends it to IP */
-    virtual void sendToIP(TCPSegment *tcpseg);
+    virtual void sendToIP(TcpHeader *tcpseg);
 
     /**
      * Utility: This factory method gets invoked throughout the TCP model to
      * create a TCPSegment. Override it if you need to subclass TCPSegment.
      */
-    virtual TCPSegment *createTCPSegment(const char *name);
+    virtual TcpHeader *createTCPSegment(const char *name);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();
@@ -534,7 +534,7 @@ class INET_API TCPConnection : public cObject
     cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
 
     /** Utility: send IP packet */
-    static void sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest);
+    static void sendToIP(TcpHeader *tcpseg, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);
@@ -555,7 +555,7 @@ class INET_API TCPConnection : public cObject
     /** Utility: prints local/remote addr/port and app gate index/socketId */
     virtual void printConnBrief() const;
     /** Utility: prints important header fields */
-    static void printSegmentBrief(TCPSegment *tcpseg);
+    static void printSegmentBrief(TcpHeader *tcpseg);
     /** Utility: returns name of TCP_S_xxx constants */
     static const char *stateName(int state);
     /** Utility: returns name of TCP_E_xxx constants */
@@ -568,7 +568,7 @@ class INET_API TCPConnection : public cObject
     virtual void updateRcvQueueVars();
 
     /** Utility: returns true when receive queue has enough space for store the tcpseg */
-    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(TCPSegment *tcpseg);
+    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(TcpHeader *tcpseg);
 
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
@@ -576,7 +576,7 @@ class INET_API TCPConnection : public cObject
     virtual unsigned short updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(TCPSegment *tcpseg, bool doAlways = false);
+    virtual void updateWndInfo(TcpHeader *tcpseg, bool doAlways = false);
 
   public:
     /**
@@ -607,7 +607,7 @@ class INET_API TCPConnection : public cObject
      * connection object so that it can call this method, then immediately
      * deletes it.
      */
-    virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(TcpHeader *tcpseg, L3Address src, L3Address dest);
 
     /** @name Various getters **/
     //@{
@@ -632,7 +632,7 @@ class INET_API TCPConnection : public cObject
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    virtual bool processTCPSegment(TCPSegment *tcpSeg, L3Address srcAddr, L3Address destAddr);
+    virtual bool processTCPSegment(TcpHeader *tcpSeg, L3Address srcAddr, L3Address destAddr);
 
     /**
      * Process commands from the application.

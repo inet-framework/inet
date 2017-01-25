@@ -57,7 +57,7 @@ class INET_API Sack : public Sack_Base
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
  */
-class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
+class INET_API TcpHeader : public TcpHeader_Base, public ITransportPacket
 {
   protected:
     typedef std::list<TCPPayloadMessage> PayloadList;
@@ -66,15 +66,15 @@ class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
     OptionList headerOptionList;
 
   private:
-    void copy(const TCPSegment& other);
+    void copy(const TcpHeader& other);
     void clean();
 
   public:
-    TCPSegment(const char *name = nullptr, int kind = 0) : TCPSegment_Base(name, kind) {}
-    TCPSegment(const TCPSegment& other) : TCPSegment_Base(other) { copy(other); }
-    ~TCPSegment();
-    TCPSegment& operator=(const TCPSegment& other);
-    virtual TCPSegment *dup() const override { return new TCPSegment(*this); }
+    TcpHeader(const char *name = nullptr, int kind = 0) : TcpHeader_Base(name, kind) {}
+    TcpHeader(const TcpHeader& other) : TcpHeader_Base(other) { copy(other); }
+    ~TcpHeader();
+    TcpHeader& operator=(const TcpHeader& other);
+    virtual TcpHeader *dup() const override { return new TcpHeader(*this); }
     virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 
@@ -134,7 +134,7 @@ class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
 
     /** Returns the kth TCP options in this TCP segment */
     virtual TCPOptionPtr& getHeaderOption(unsigned int k) override;
-    virtual const TCPOptionPtr& getHeaderOption(unsigned int k) const override {return const_cast<TCPSegment*>(this)->getHeaderOption(k);}
+    virtual const TCPOptionPtr& getHeaderOption(unsigned int k) const override {return const_cast<TcpHeader*>(this)->getHeaderOption(k);}
 
     /** Generated but unused method, should not be called. */
     virtual void setHeaderOption(unsigned int k, const TCPOptionPtr& headerOption) override;
@@ -146,10 +146,10 @@ class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
     virtual void dropHeaderOptions();
 
 
-    virtual unsigned int getSourcePort() const override { return TCPSegment_Base::getSrcPort(); }
-    virtual void setSourcePort(unsigned int port) override { TCPSegment_Base::setSrcPort(port); }
-    virtual unsigned int getDestinationPort() const override { return TCPSegment_Base::getDestPort(); }
-    virtual void setDestinationPort(unsigned int port) override { TCPSegment_Base::setDestPort(port); }
+    virtual unsigned int getSourcePort() const override { return TcpHeader_Base::getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { TcpHeader_Base::setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return TcpHeader_Base::getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { TcpHeader_Base::setDestPort(port); }
 
   protected:
     /**

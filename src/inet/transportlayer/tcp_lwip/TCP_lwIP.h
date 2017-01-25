@@ -39,7 +39,7 @@ class TCPOpenCommand;
 namespace tcp {
 
 // forward declarations:
-class TCPSegment;
+class TcpHeader;
 
 class TcpLwipConnection;
 class TcpLwipReceiveQueue;
@@ -160,7 +160,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
   protected:
     LwipTcpLayer *pLwipTcpLayerM;
     bool isAliveM;
-    TCPSegment *pCurTcpSegM;
+    TcpHeader *pCurTcpSegM;
 };
 
 } // namespace tcp

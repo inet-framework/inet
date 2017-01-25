@@ -157,7 +157,7 @@ void TCPConnection::printConnBrief() const
               << "\n";
 }
 
-void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
+void TCPConnection::printSegmentBrief(TcpHeader *tcpseg)
 {
     EV_STATICCONTEXT;
     EV_INFO << "." << tcpseg->getSrcPort() << " > ";
@@ -236,7 +236,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     return conn;
 }
 
-void TCPConnection::sendToIP(TCPSegment *tcpseg)
+void TCPConnection::sendToIP(TcpHeader *tcpseg)
 {
     // record seq (only if we do send data) and ackno
     if (sndNxtVector && tcpseg->getPayloadLength() != 0)
@@ -269,7 +269,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     tcpMain->send(pkt, "ipOut");
 }
 
-void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
+void TCPConnection::sendToIP(TcpHeader *tcpseg, L3Address src, L3Address dest)
 {
     EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
@@ -287,9 +287,9 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 }
 
-TCPSegment *TCPConnection::createTCPSegment(const char *name)
+TcpHeader *TCPConnection::createTCPSegment(const char *name)
 {
-    return new TCPSegment(name);
+    return new TcpHeader(name);
 }
 
 void TCPConnection::signalConnectionTimeout()
@@ -448,7 +448,7 @@ void TCPConnection::selectInitialSeqNum()
     rexmitQueue->init(state->iss + 1);    // + 1 is for SYN
 }
 
-bool TCPConnection::isSegmentAcceptable(TCPSegment *tcpseg) const
+bool TCPConnection::isSegmentAcceptable(TcpHeader *tcpseg) const
 {
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
@@ -509,7 +509,7 @@ void TCPConnection::sendSyn()
         throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: local port unspecified");
 
     // create segment
-    TCPSegment *tcpseg = createTCPSegment("SYN");
+    TcpHeader *tcpseg = createTCPSegment("SYN");
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setSynBit(true);
     updateRcvWnd();
@@ -529,7 +529,7 @@ void TCPConnection::sendSyn()
 void TCPConnection::sendSynAck()
 {
     // create segment
-    TCPSegment *tcpseg = createTCPSegment("SYN+ACK");
+    TcpHeader *tcpseg = createTCPSegment("SYN+ACK");
     tcpseg->setSequenceNo(state->iss);
     tcpseg->setAckNo(state->rcv_nxt);
     tcpseg->setSynBit(true);
@@ -559,7 +559,7 @@ void TCPConnection::sendRst(uint32 seqNo)
 
 void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
 {
-    TCPSegment *tcpseg = createTCPSegment("RST");
+    TcpHeader *tcpseg = createTCPSegment("RST");
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -576,7 +576,7 @@ void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPo
 
 void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
 {
-    TCPSegment *tcpseg = createTCPSegment("RST+ACK");
+    TcpHeader *tcpseg = createTCPSegment("RST+ACK");
 
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
@@ -599,7 +599,7 @@ void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address 
 
 void TCPConnection::sendAck()
 {
-    TCPSegment *tcpseg = createTCPSegment("ACK");
+    TcpHeader *tcpseg = createTCPSegment("ACK");
 
     tcpseg->setAckBit(true);
     tcpseg->setSequenceNo(state->snd_nxt);
@@ -620,7 +620,7 @@ void TCPConnection::sendAck()
 
 void TCPConnection::sendFin()
 {
-    TCPSegment *tcpseg = createTCPSegment("FIN");
+    TcpHeader *tcpseg = createTCPSegment("FIN");
 
     // Note: ACK bit *must* be set for both FIN and FIN+ACK. What makes
     // the difference for FIN+ACK is that its ackNo acks the remote TCP's FIN.
@@ -661,7 +661,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
-    TCPSegment *tcpseg_temp = createTCPSegment(nullptr);
+    TcpHeader *tcpseg_temp = createTCPSegment(nullptr);
     tcpseg_temp->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tcpseg_temp);
     uint options_len = tcpseg_temp->getHeaderLength() - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
@@ -674,7 +674,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     state->sentBytes = bytes;
 
     // send one segment of 'bytes' bytes from snd_nxt, and advance snd_nxt
-    TCPSegment *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
+    TcpHeader *tcpseg = sendQueue->createSegmentWithBytes(state->snd_nxt, bytes);
     if (tcpseg->getOwnerPacket() == nullptr) {
         //FIXME hack: createSegmentWithBytes should create FlatPackets
         FlatPacket *fp = new FlatPacket(tcpseg->getName());
@@ -950,7 +950,7 @@ void TCPConnection::retransmitData()
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 }
 
-void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
+void TCPConnection::readHeaderOptions(TcpHeader *tcpseg)
 {
     EV_INFO << "TCP Header Option(s) received:\n";
 
@@ -1002,7 +1002,7 @@ void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
     }
 }
 
-bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOptionMaxSegmentSize& option)
+bool TCPConnection::processMSSOption(TcpHeader *tcpseg, const TCPOptionMaxSegmentSize& option)
 {
     if (option.getLength() != 4) {
         EV_ERROR << "ERROR: MSS option length incorrect\n";
@@ -1037,7 +1037,7 @@ bool TCPConnection::processMSSOption(TCPSegment *tcpseg, const TCPOptionMaxSegme
     return true;
 }
 
-bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOptionWindowScale& option)
+bool TCPConnection::processWSOption(TcpHeader *tcpseg, const TCPOptionWindowScale& option)
 {
     if (option.getLength() != 3) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1062,7 +1062,7 @@ bool TCPConnection::processWSOption(TCPSegment *tcpseg, const TCPOptionWindowSca
     return true;
 }
 
-bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOptionTimestamp& option)
+bool TCPConnection::processTSOption(TcpHeader *tcpseg, const TCPOptionTimestamp& option)
 {
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1110,7 +1110,7 @@ bool TCPConnection::processTSOption(TCPSegment *tcpseg, const TCPOptionTimestamp
     return true;
 }
 
-bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOptionSackPermitted& option)
+bool TCPConnection::processSACKPermittedOption(TcpHeader *tcpseg, const TCPOptionSackPermitted& option)
 {
     if (option.getLength() != 2) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1128,7 +1128,7 @@ bool TCPConnection::processSACKPermittedOption(TCPSegment *tcpseg, const TCPOpti
     return true;
 }
 
-TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
+TcpHeader TCPConnection::writeHeaderOptions(TcpHeader *tcpseg)
 {
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpseg->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
@@ -1288,7 +1288,7 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
     return *tcpseg;
 }
 
-uint32 TCPConnection::getTSval(TCPSegment *tcpseg) const
+uint32 TCPConnection::getTSval(TcpHeader *tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TCPOption *option = tcpseg->getHeaderOption(i);
@@ -1299,7 +1299,7 @@ uint32 TCPConnection::getTSval(TCPSegment *tcpseg) const
     return 0;
 }
 
-uint32 TCPConnection::getTSecr(TCPSegment *tcpseg) const
+uint32 TCPConnection::getTSecr(TcpHeader *tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TCPOption *option = tcpseg->getHeaderOption(i);
@@ -1372,7 +1372,7 @@ unsigned short TCPConnection::updateRcvWnd()
     return (unsigned short)scaled_rcv_wnd;
 }
 
-void TCPConnection::updateWndInfo(TCPSegment *tcpseg, bool doAlways)
+void TCPConnection::updateWndInfo(TcpHeader *tcpseg, bool doAlways)
 {
     uint32 true_window = tcpseg->getWindow();
     // RFC 1323, page 10:

@@ -147,7 +147,7 @@ void TCP::handleMessage(cMessage *msg)
         else {
             // must be a TCPSegment
             FlatPacket *pkt = check_and_cast<FlatPacket *>(msg);
-            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(pkt->peekHeader());
+            TcpHeader *tcpseg = check_and_cast<TcpHeader *>(pkt->peekHeader());
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;
@@ -195,7 +195,7 @@ TCPConnection *TCP::createConnection(int socketId)
     return new TCPConnection(this, socketId);
 }
 
-void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr)
+void TCP::segmentArrivalWhileClosed(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
@@ -309,7 +309,7 @@ void TCP::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr)
+TCPConnection *TCP::findConnForSegment(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;

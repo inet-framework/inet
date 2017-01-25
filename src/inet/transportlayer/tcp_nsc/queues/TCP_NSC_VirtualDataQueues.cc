@@ -75,11 +75,11 @@ ulong TCP_NSC_VirtualDataSendQueue::getBytesAvailable() const
     return unsentNscBytesM;    // TODO
 }
 
-TCPSegment *TCP_NSC_VirtualDataSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
+TcpHeader *TCP_NSC_VirtualDataSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
-    TCPSegment *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, false);
+    TcpHeader *tcpseg = serializer::TCPSerializer().deserialize((const unsigned char *)tcpDataP, tcpLengthP, false);
 
     return tcpseg;
 }
@@ -110,7 +110,7 @@ void TCP_NSC_VirtualDataReceiveQueue::setConnection(TCP_NSC_Connection *connP)
     TCP_NSC_ReceiveQueue::setConnection(connP);
 }
 
-void TCP_NSC_VirtualDataReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP)
+void TCP_NSC_VirtualDataReceiveQueue::notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP)
 {
     ASSERT(tcpsegP);
 }
@@ -151,7 +151,7 @@ void TCP_NSC_VirtualDataReceiveQueue::getQueueStatus() const
     // TODO
 }
 
-void TCP_NSC_VirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TCP_NSC_VirtualDataReceiveQueue::notifyAboutSending(const TcpHeader *tcpsegP)
 {
     // nothing to do
 }

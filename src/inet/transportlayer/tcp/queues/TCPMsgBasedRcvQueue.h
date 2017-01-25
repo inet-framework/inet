@@ -69,7 +69,7 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
     /**
      * Called when a TCP segment arrives. Returns sequence number for ACK.
      */
-    virtual uint32 insertBytesFromSegment(TCPSegment *tcpseg) override;
+    virtual uint32 insertBytesFromSegment(TcpHeader *tcpseg) override;
 
     /**
      *

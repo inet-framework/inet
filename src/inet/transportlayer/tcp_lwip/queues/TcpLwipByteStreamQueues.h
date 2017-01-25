@@ -54,7 +54,7 @@ class INET_API TcpLwipByteStreamSendQueue : public TcpLwipSendQueue
 
     unsigned long getBytesAvailable() const override;
 
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) override;
+    virtual TcpHeader *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) override;
 
     virtual void discardAckedBytes(unsigned long bytesP);
 
@@ -82,7 +82,7 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     virtual void setConnection(TcpLwipConnection *connP) override;
 
     // see TcpLwipReceiveQueue
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
+    virtual void notifyAboutIncomingSegmentProcessing(TcpHeader *tcpsegP, uint32 seqNo,
             const void *bufferP, size_t bufferLengthP) override;
 
     // see TcpLwipReceiveQueue
@@ -104,7 +104,7 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     virtual void getQueueStatus() const override;
 
     // see TcpLwipReceiveQueue
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP) override;
+    virtual void notifyAboutSending(const TcpHeader *tcpsegP) override;
 
   protected:
     /// store bytes

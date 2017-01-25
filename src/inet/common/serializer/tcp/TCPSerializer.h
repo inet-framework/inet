@@ -27,7 +27,7 @@
 namespace inet {
 
 //forward declarations:
-namespace tcp { class TCPSegment; class TCPOption; }
+namespace tcp { class TcpHeader; class TCPOption; }
 
 namespace serializer {
 
@@ -49,7 +49,7 @@ class INET_API TCPSerializer : public SerializerBase
     /**
      * Puts a packet sniffed from the wire into a TCPSegment.
      */
-    tcp::TCPSegment *deserialize(const unsigned char *srcbuf, unsigned int bufsize, bool withBytes);
+    tcp::TcpHeader *deserialize(const unsigned char *srcbuf, unsigned int bufsize, bool withBytes);
 };
 
 } // namespace serializer

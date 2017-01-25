@@ -52,8 +52,8 @@ class INET_API TcpLwipConnection
       public:
         Stats();
         ~Stats();
-        void recordSend(const TCPSegment& tcpsegP);
-        void recordReceive(const TCPSegment& tcpsegP);
+        void recordSend(const TcpHeader& tcpsegP);
+        void recordReceive(const TcpHeader& tcpsegP);
 
       protected:
         // statistics
@@ -100,7 +100,7 @@ class INET_API TcpLwipConnection
 
     void fillStatusInfo(TCPStatusInfo& statusInfo);
 
-    void notifyAboutSending(const TCPSegment& tcpsegP);
+    void notifyAboutSending(const TcpHeader& tcpsegP);
 
     int send_data(void *data, int len);
 

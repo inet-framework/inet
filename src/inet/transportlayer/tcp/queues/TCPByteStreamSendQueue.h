@@ -61,7 +61,7 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
 
     virtual uint32 getBufferEndSeq() override;
 
-    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
+    virtual TcpHeader *createSegmentWithBytes(uint32 fromSeq, ulong numBytes) override;
 
     virtual void discardUpTo(uint32 seqNum) override;
 };

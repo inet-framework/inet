@@ -148,7 +148,7 @@ class INET_API TCPSendQueue : public cObject
      * maxNumBytes bytes if the subclass wants to reproduce the original
      * segment boundaries when retransmitting.
      */
-    virtual TCPSegment *createSegmentWithBytes(uint32 fromSeq, ulong maxNumBytes) = 0;
+    virtual TcpHeader *createSegmentWithBytes(uint32 fromSeq, ulong maxNumBytes) = 0;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been

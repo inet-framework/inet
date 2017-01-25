@@ -34,7 +34,7 @@ namespace tcp {
 
 // Forward declarations:
 class TCPConnection;
-class TCPSegment;
+class TcpHeader;
 class TCPSendQueue;
 class TCPReceiveQueue;
 
@@ -141,9 +141,9 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual TCPConnection *createConnection(int socketId);
 
     // utility methods
-    virtual TCPConnection *findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual TCPConnection *findConnForSegment(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr);
     virtual TCPConnection *findConnForApp(int socketId);
-    virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(TcpHeader *tcpseg, L3Address src, L3Address dest);
     virtual void removeConnection(TCPConnection *conn);
     virtual void refreshDisplay() const override;
 

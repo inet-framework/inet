@@ -66,7 +66,7 @@ bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_TCP_COMMON
-        tcp::TCPSegment *tcpSegment = dynamic_cast<tcp::TCPSegment *>(packet);
+        tcp::TcpHeader *tcpSegment = dynamic_cast<tcp::TcpHeader *>(packet);
         if (tcpSegment) {
             srcPort = tcpSegment->getSrcPort();
             destPort = tcpSegment->getDestPort();
@@ -106,7 +106,7 @@ bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_TCP_COMMON
-        tcp::TCPSegment *tcpSegment = dynamic_cast<tcp::TCPSegment *>(packet);
+        tcp::TcpHeader *tcpSegment = dynamic_cast<tcp::TcpHeader *>(packet);
         if (tcpSegment) {
             srcPort = tcpSegment->getSrcPort();
             destPort = tcpSegment->getDestPort();

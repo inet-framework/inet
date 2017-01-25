@@ -28,7 +28,7 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(tcp::TCPSegment, IP_PROT, IP_PROT_TCP, TCPSerializer);
+Register_Serializer(tcp::TcpHeader, IP_PROT, IP_PROT_TCP, TCPSerializer);
 
 // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 #include "inet/common/serializer/headers/bsdint.h"
@@ -130,7 +130,7 @@ void TCPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
     const FlatPacket *pkt = check_and_cast<const FlatPacket *>(_pkt);
-    const TCPSegment *tcpseg = check_and_cast<const TCPSegment *>(pkt->peekHeader());
+    const TcpHeader *tcpseg = check_and_cast<const TcpHeader *>(pkt->peekHeader());
     struct tcphdr tcp;  // = (struct tcphdr *)(b.accessNBytes(sizeof(struct tcphdr)))
 
     int writtenbytes = tcpseg->getChunkByteLength();
@@ -279,12 +279,12 @@ TCPOption *TCPSerializer::deserializeOption(Buffer &b, Context& c)
     return option;
 }
 
-TCPSegment *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bufsize, bool withBytes)
+TcpHeader *TCPSerializer::deserialize(const unsigned char *buf, unsigned int bufsize, bool withBytes)
 {
     Buffer b(const_cast<unsigned char *>(buf), bufsize);
     Context c;
     FlatPacket *pk = check_and_cast_nullable<FlatPacket *>(deserialize(b, c));
-    return pk ? check_and_cast_nullable<TCPSegment *>(pk->peekHeader()) : nullptr;
+    return pk ? check_and_cast_nullable<TcpHeader *>(pk->peekHeader()) : nullptr;
 }
 
 cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
@@ -295,7 +295,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
     b.readNBytes(TCP_HEADER_OCTETS, &tcp);
 
     FlatPacket *pkt = new FlatPacket("parsed-tcp");
-    TCPSegment *tcpseg = new TCPSegment("parsed-tcp");
+    TcpHeader *tcpseg = new TcpHeader("parsed-tcp");
 
     // fill TCP header structure
     tcpseg->setSrcPort(ntohs(tcp.th_sport));

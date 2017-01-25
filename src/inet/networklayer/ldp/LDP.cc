@@ -1194,9 +1194,9 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
     }
 
     // ...and session)
-    if (protocol == IP_PROT_TCP && check_and_cast<tcp::TCPSegment *>(ipdatagram->getEncapsulatedPacket())->getDestPort() == LDP_PORT)
+    if (protocol == IP_PROT_TCP && check_and_cast<tcp::TcpHeader *>(ipdatagram->getEncapsulatedPacket())->getDestPort() == LDP_PORT)
         return false;
-    if (protocol == IP_PROT_TCP && check_and_cast<tcp::TCPSegment *>(ipdatagram->getEncapsulatedPacket())->getSrcPort() == LDP_PORT)
+    if (protocol == IP_PROT_TCP && check_and_cast<tcp::TcpHeader *>(ipdatagram->getEncapsulatedPacket())->getSrcPort() == LDP_PORT)
         return false;
 
     // regular traffic, classify, label etc.

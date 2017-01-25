@@ -44,7 +44,7 @@ class IPv4Datagram;
 #ifdef WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #else // ifdef WITH_TCP_COMMON
-namespace inet { namespace tcp { class TCPSegment; } }
+namespace inet { namespace tcp { class TcpHeader; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
@@ -93,7 +93,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
     std::string formatPingPayload(PingPayload *packet) const;
     std::string formatRIPPacket(RIPPacket *packet) const;
     std::string formatRadioFrame(RadioFrame *packet) const;
-    std::string formatTCPPacket(tcp::TCPSegment *tcpSeg) const;
+    std::string formatTCPPacket(tcp::TcpHeader *tcpSeg) const;
     std::string formatUDPPacket(UDPHeader *udpPacket) const;
 
   public:
@@ -148,7 +148,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         else if (FlatPacket *fp = dynamic_cast<FlatPacket *>(pk)) {
             Chunk *header = fp->peekHeader();
 #ifdef WITH_TCP_COMMON
-            if (tcp::TCPSegment *tcpseg = dynamic_cast<tcp::TCPSegment *>(header)) {
+            if (tcp::TcpHeader *tcpseg = dynamic_cast<tcp::TcpHeader *>(header)) {
                 out << formatTCPPacket(tcpseg);
             }
             else
@@ -341,7 +341,7 @@ std::string InetPacketPrinter2::formatIeee80211Frame(ieee80211::Ieee80211Frame *
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatTCPPacket(tcp::TCPSegment *tcpSeg) const
+std::string InetPacketPrinter2::formatTCPPacket(tcp::TcpHeader *tcpSeg) const
 {
     std::ostringstream os;
 #ifdef WITH_TCP_COMMON

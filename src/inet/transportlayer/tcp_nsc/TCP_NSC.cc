@@ -326,7 +326,7 @@ void TCP_NSC::changeAddresses(TCP_NSC_Connection& connP,
     }
 }
 
-void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
+void TCP_NSC::handleIpInputMessage(TcpHeader *tcpsegP)
 {
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
@@ -690,7 +690,7 @@ void TCP_NSC::handleMessage(cMessage *msgP)
             EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
             // must be a TCPSegment
             FlatPacket *fp = check_and_cast<FlatPacket *>(msgP);
-            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(fp->peekHeader());
+            TcpHeader *tcpseg = check_and_cast<TcpHeader *>(fp->peekHeader());
             handleIpInputMessage(tcpseg);
         }
     }
@@ -875,7 +875,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         conn = findConnByNscSockPair(nscSockPair);
     }
 
-    TCPSegment *tcpseg;
+    TcpHeader *tcpseg;
 
     if (conn) {
         tcpseg = conn->sendQueueM->createSegmentWithBytes(tcph, totalLen - ipHdrLen);

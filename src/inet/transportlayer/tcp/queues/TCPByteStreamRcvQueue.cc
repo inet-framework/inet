@@ -115,7 +115,7 @@ cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
     return msg;
 }
 
-TCPVirtualDataRcvQueue::Region *TCPByteStreamRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
+TCPVirtualDataRcvQueue::Region *TCPByteStreamRcvQueue::createRegionFromSegment(TcpHeader *tcpseg)
 {
     ASSERT(tcpseg->getPayloadLength() == tcpseg->getByteArray().getDataArraySize());
 

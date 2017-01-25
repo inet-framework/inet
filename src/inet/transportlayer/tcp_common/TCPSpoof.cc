@@ -44,7 +44,7 @@ void TCPSpoof::handleMessage(cMessage *msg)
 void TCPSpoof::sendSpoofPacket()
 {
     FlatPacket *packet = new FlatPacket("spoof");
-    TCPSegment *tcpseg = new TCPSegment("spoof");
+    TcpHeader *tcpseg = new TcpHeader("spoof");
 
     L3Address srcAddr = L3AddressResolver().resolve(par("srcAddress"));
     L3Address destAddr = L3AddressResolver().resolve(par("destAddress"));

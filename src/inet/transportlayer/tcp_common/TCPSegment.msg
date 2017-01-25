@@ -201,7 +201,7 @@ class TCPOptionUnknown extends TCPOption
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-packet TCPSegment extends Chunk
+packet TcpHeader extends Chunk
 {
     @customize(true);
     chunkByteLength = TCP_HEADER_OCTETS;
