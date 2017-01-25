@@ -55,26 +55,27 @@ void MACRelayUnit::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
-    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
-    delete frame->removeTag<DispatchProtocolReq>();
+    Packet *packet = check_and_cast<Packet *>(msg);
+    const auto& frame = packet->peekHeader<EtherFrame>();
+    delete packet->removeTag<DispatchProtocolReq>();
     // Frame received from MAC unit
-    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, frame);
-    handleAndDispatchFrame(frame);
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, packet);
+    handleAndDispatchFrame(packet, frame);
 }
 
-void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
+void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const std::shared_ptr<EtherFrame>& frame)
 {
-    int inputInterfacceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     numProcessedFrames++;
 
     // update address table
-    addressTable->updateTableWithAddress(inputInterfacceId, frame->getSrc());
+    addressTable->updateTableWithAddress(inputInterfaceId, frame->getSrc());
 
     // handle broadcast frames first
     if (frame->getDest().isBroadcast()) {
         EV << "Broadcasting broadcast frame " << frame << endl;
-        broadcastFrame(frame, inputInterfacceId);
+        broadcastFrame(packet, inputInterfaceId);
         return;
     }
 
@@ -83,27 +84,27 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
     int outputInterfaceId = addressTable->getPortForAddress(frame->getDest());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
-    if (inputInterfacceId == outputInterfaceId) {
-        EV << "Output port is same as input port, " << frame->getFullName()
+    if (inputInterfaceId == outputInterfaceId) {
+        EV << "Output port is same as input port, " << packet->getFullName()
            << " dest " << frame->getDest() << ", discarding frame\n";
         numDiscardedFrames++;
-        delete frame;
+        delete packet;
         return;
     }
 
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
-        frame->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
+        packet->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
         emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
-        send(frame, "ifOut");
+        send(packet, "ifOut");
     }
     else {
-        EV << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
-        broadcastFrame(frame, inputInterfacceId);
+        EV << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << packet << endl;
+        broadcastFrame(packet, inputInterfaceId);
     }
 }
 
-void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputInterfaceId)
+void MACRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
 {
     int numPorts = ift->getNumInterfaces();
     for (int i = 0; i < numPorts; ++i) {
@@ -112,13 +113,13 @@ void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputInterfaceId)
             continue;
         int ifId = ie->getInterfaceId();
         if (inputInterfaceId != ifId) {
-            EtherFrame *dupFrame = frame->dup();
+            Packet *dupFrame = packet->dup();
             dupFrame->ensureTag<InterfaceReq>()->setInterfaceId(ifId);
             emit(LayeredProtocolBase::packetSentToLowerSignal, dupFrame);
             send(dupFrame, "ifOut");
         }
     }
-    delete frame;
+    delete packet;
 }
 
 void MACRelayUnit::start()

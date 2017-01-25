@@ -23,11 +23,12 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/INETMath.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACBase.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
@@ -151,7 +152,7 @@ class INET_API EtherMACBase : public MACBase
     MACReceiveState receiveState = (MACReceiveState)-1;    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
-    EtherFrame *curTxFrame = nullptr;    // frame being transmitted
+    Packet *curTxFrame = nullptr;    // frame being transmitted
 
     // self messages
     cMessage *endTxMsg = nullptr, *endIFGMsg = nullptr, *endPauseMsg = nullptr;
@@ -218,7 +219,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void finish() override;
 
     /** Checks destination address and drops the frame when frame is not for us; returns true if frame is dropped */
-    virtual bool dropFrameNotForUs(EtherFrame *frame);
+    virtual bool dropFrameNotForUs(Packet *packet, const std::shared_ptr<EtherFrame>& frame);
 
     /**
      * Calculates datarates, etc. Verifies the datarates on the incoming/outgoing channels,
@@ -231,8 +232,8 @@ class INET_API EtherMACBase : public MACBase
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
-    virtual EtherPhyFrame *encapsulate(EtherFrame* phyFrame);
-    virtual EtherFrame *decapsulate(EtherPhyFrame* phyFrame);   // also drops phyFrame
+    virtual EtherPhyFrame *encapsulate(Packet* frame);
+    virtual Packet *decapsulate(EtherPhyFrame* phyFrame);   // also drops phyFrame
 
     // MACBase
     virtual InterfaceEntry *createInterfaceEntry() override;

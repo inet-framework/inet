@@ -390,7 +390,7 @@ void EtherMACBase::processConnectDisconnect()
     }
 }
 
-EtherPhyFrame *EtherMACBase::encapsulate(EtherFrame* frame)
+EtherPhyFrame *EtherMACBase::encapsulate(Packet* frame)
 {
     EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
     phyFrame->encapsulate(frame);
@@ -398,7 +398,7 @@ EtherPhyFrame *EtherMACBase::encapsulate(EtherFrame* frame)
     return phyFrame;
 }
 
-EtherFrame *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
+Packet *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
 {
     if (phyFrame->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
@@ -406,16 +406,7 @@ EtherFrame *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
     cPacket *frame = phyFrame->decapsulate();
     delete phyFrame;
 
-    if (RawPacket *rawPacket = dynamic_cast<RawPacket *>(frame)) {
-        using namespace serializer;
-        Buffer b(rawPacket->getByteArray().getDataPtr(), rawPacket->getByteArray().getDataArraySize());
-        Context c;
-        frame = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET);
-        if (!frame)
-            throw cRuntimeError("Could not deserialize RawPacket '%s' as Ethernet frame", rawPacket->getName());
-        delete rawPacket;
-    }
-    return check_and_cast<EtherFrame *>(frame);
+    return check_and_cast<Packet *>(frame);
 }
 
 void EtherMACBase::flushQueue()
@@ -457,7 +448,7 @@ void EtherMACBase::refreshConnection()
         processConnectDisconnect();
 }
 
-bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
+bool EtherMACBase::dropFrameNotForUs(Packet *packet, const std::shared_ptr<EtherFrame>& frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
     // ethernet address groups. We rather accept all multicast frames (just like they were
@@ -479,7 +470,7 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     if (frame->getDest().isBroadcast())
         return false;
 
-    bool isPause = (dynamic_cast<EtherPauseFrame *>(frame) != nullptr);
+    bool isPause = (dynamic_cast<EtherPauseFrame *>(frame.get()) != nullptr);
 
     if (!isPause && (promiscuous || frame->getDest().isMulticast()))
         return false;
@@ -487,10 +478,10 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     if (isPause && frame->getDest().equals(MACAddress::MULTICAST_PAUSE_ADDRESS))
         return false;
 
-    EV_WARN << "Frame `" << frame->getName() << "' not destined to us, discarding\n";
+    EV_WARN << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
     numDroppedNotForUs++;
-    emit(dropPkNotForUsSignal, frame);
-    delete frame;
+    emit(dropPkNotForUsSignal, packet);
+    delete packet;
     return true;
 }
 
@@ -586,7 +577,7 @@ void EtherMACBase::getNextFrameFromQueue()
     }
     else {
         if (!txQueue.innerQueue->isEmpty())
-            curTxFrame = (EtherFrame *)txQueue.innerQueue->pop();
+            curTxFrame = (Packet *)txQueue.innerQueue->pop();
     }
 }
 

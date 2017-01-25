@@ -17,6 +17,7 @@
 
 
 cplusplus {{
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 #include "inet/linklayer/common/MACAddress.h"
@@ -24,6 +25,8 @@ cplusplus {{
 }}
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 class noncobject MACAddress;
 
@@ -44,8 +47,9 @@ enum SAPCode;
 // Packet length includes Etherner header, payload, padding and FCS.
 // Payload length can be accessed as getEncapsulatedPacket()->getByteLength().
 //
-packet EtherFrame
+class EtherFrame extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter;
     MACAddress dest;
     MACAddress src;
 }
@@ -55,11 +59,11 @@ packet EtherFrame
 // Ethernet II headers contain a 16-bit ~EtherType to identify
 // the encapsulated protocol.
 //
-// Header length: src(6)+dest(6)+etherType(2) + FCS(4) = 18 bytes
+// Header length: src(6)+dest(6)+etherType(2) = 14 bytes
 //
-packet EthernetIIFrame extends EtherFrame
+class EthernetIIFrame extends EtherFrame
 {
-    byteLength = ETHER_MAC_FRAME_BYTES;
+    chunkLength = ETHER_MAC_FRAME_BYTES - 4;    // -4 for FCS
     int etherType @enum(EtherType);
 }
 
@@ -67,11 +71,11 @@ packet EthernetIIFrame extends EtherFrame
 //
 // Ethernet frame with 802.3 LLC header.
 //
-// Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) + FCS(4) = 21 bytes
+// Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) = 17 bytes
 //
-packet EtherFrameWithLLC extends EtherFrame
+class EtherFrameWithLLC extends EtherFrame
 {
-    byteLength = ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH;
+    chunkLength = ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - 4;    // -4 for FCS
     int dsap;
     int ssap;
     int control;
@@ -85,11 +89,11 @@ packet EtherFrameWithLLC extends EtherFrame
 // frame: 0xAA, 0xAA, 0x03.
 //
 // Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1)+
-// orgCode(3)+localCode(2) + FCS(4) = 26 bytes
+// orgCode(3)+localCode(2) = 22 bytes
 //
-packet EtherFrameWithSNAP extends EtherFrameWithLLC
+class EtherFrameWithSNAP extends EtherFrameWithLLC
 {
-    byteLength = ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH;
+    chunkLength = ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - 4;    // -4 for FCS
     dsap = 0xAA;
     ssap = 0xAA;
     control = 0x03;
@@ -101,8 +105,9 @@ packet EtherFrameWithSNAP extends EtherFrameWithLLC
 //
 // Ethernet frame used by the PAUSE protocol
 //
-packet EtherPauseFrame extends EthernetIIFrame
+class EtherPauseFrame extends EthernetIIFrame
 {
+    chunkLength = ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES;    //FIXME Fcs?
     etherType = ETHERTYPE_FLOW_CONTROL;
     int opCode = 1; // PAUSE
     int pauseTime; // in 512 bit-time units
@@ -111,8 +116,9 @@ packet EtherPauseFrame extends EthernetIIFrame
 //
 // Ethernet 802.1Q Tag.
 //
-packet Ethernet1QTag
+class Ethernet1QTag extends FieldsChunk     //FIXME bad design
 {
+    int64_t chunkLength @overridegetter = 4;
     uint8_t pcp;    // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                     // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
     bool de;        // Drop Eligible (DE): a 1-bit field. May be used separately or in conjunction with PCP to indicate frames eligible to be dropped in the presence of congestion.
@@ -127,7 +133,21 @@ packet Ethernet1QTag
 //
 // Ethernet 802.1ah header.
 //
-packet Ethernet1ahITag
+class Ethernet1ahITag extends FieldsChunk     //FIXME bad design
 {
+    int64_t chunkLength @overridegetter = 5;    //FIXME check the length value
     int ISid=0; // ISID
+}
+
+enum EthernetFcsMode {
+    FCS_GOOD = 1;
+    FCS_BAD = 2;
+    FCS_CALCULATED = 3;
+}
+
+class EthernetPaddingAndFcs extends FieldsChunk
+{
+    int64_t chunkLength @overridegetter = 4;
+    int32_t fcs;
+    int fcsMode @enum(EthernetFcsMode) = FCS_GOOD;
 }

@@ -38,6 +38,7 @@ Register_Serializer(EtherPhyFrame, PHYTYPE, PHYTYPE_ETHERNET, EtherPhySerializer
 
 void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
+#if 0
     ASSERT(b.getPos() == 0);
     const EtherFrame *ethPkt = check_and_cast<const EtherFrame *>(pkt);
     b.writeMACAddress(ethPkt->getDest());
@@ -96,10 +97,12 @@ void EthernetSerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         b.fillNBytes((pkt->getByteLength() - 4) - b.getPos(), 0);
     uint32_t fcs = ethernetCRC(b._getBuf(), b.getPos());
     b.writeUint32(fcs);
+#endif
 }
 
 cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
 {
+#if 0
     ASSERT(b.getPos() == 0);
     EtherFrame *etherPacket = nullptr;
     ProtocolGroup protocolGroup = UNKNOWN;
@@ -162,6 +165,9 @@ cPacket* EthernetSerializer::deserialize(const Buffer &b, Context& c)
     if (etherPacket->getByteLength() != frameLength)
         etherPacket->setBitError(true);
     return etherPacket;
+#else
+    return nullptr;
+#endif
 }
 
 void EtherPhySerializer::serialize(const cPacket *pkt, Buffer &b, Context& c)

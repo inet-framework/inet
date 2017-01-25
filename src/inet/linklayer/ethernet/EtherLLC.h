@@ -23,6 +23,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -60,8 +61,8 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void processPacketFromHigherLayer(cPacket *msg);
-    virtual void processFrameFromMAC(EtherFrameWithLLC *msg);
+    virtual void processPacketFromHigherLayer(Packet *packet);
+    virtual void processFrameFromMAC(Packet *packet);
     virtual void handleRegisterSAP(cMessage *msg);
     virtual void handleDeregisterSAP(cMessage *msg);
     virtual void handleSendPause(cMessage *msg);

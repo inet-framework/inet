@@ -19,6 +19,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -49,13 +50,13 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
      *
      * The message pointer should not be referenced any more after this call.
      */
-    virtual void handleAndDispatchFrame(EtherFrame *frame);
+    virtual void handleAndDispatchFrame(Packet *packet, const std::shared_ptr<EtherFrame>& frame);
 
     /**
      * Utility function: sends the frame on all ports except inputport.
      * The message pointer should not be referenced any more after this call.
      */
-    virtual void broadcastFrame(EtherFrame *frame, int inputport);
+    virtual void broadcastFrame(Packet *frame, int inputport);
 
     /**
      * Calls handleIncomingFrame() for frames arrived from outside,

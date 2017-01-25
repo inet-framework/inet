@@ -134,19 +134,19 @@ simple EtherMACFullDuplex like IEtherMAC
         bool connectionColoring = default(true); // colors the connection when transmitting
         @display("i=block/rxtx");
 
-        @signal[txPk](type=EtherFrame);
-        @signal[rxPkOk](type=EtherFrame);
+        @signal[txPk](type=Packet);
+        @signal[rxPkOk](type=Packet);
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
-        @signal[rxPkFromHL](type=EtherFrame);
-        @signal[dropPkNotForUs](type=EtherFrame);
-        @signal[dropPkBitError](type=EtherFrame);
-        @signal[dropPkIfaceDown](type=EtherFrame);        // emitted at end of receiving
-        @signal[dropPkFromHLIfaceDown](type=EtherFrame);
-        @signal[packetSentToLower](type=EtherFrame);
-        @signal[packetReceivedFromLower](type=EtherFrame);
-        @signal[packetSentToUpper](type=EtherFrame);
-        @signal[packetReceivedFromUpper](type=EtherFrame);
+        @signal[rxPkFromHL](type=Packet);
+        @signal[dropPkNotForUs](type=Packet);
+        @signal[dropPkBitError](type=Packet);
+        @signal[dropPkIfaceDown](type=Packet);        // emitted at end of receiving
+        @signal[dropPkFromHLIfaceDown](type=Packet);
+        @signal[packetSentToLower](type=Packet);
+        @signal[packetReceivedFromLower](type=Packet);
+        @signal[packetSentToUpper](type=Packet);
+        @signal[packetReceivedFromUpper](type=Packet);
         @signal[transmitState](type=long); // enum=MACTransmitState
         @signal[receiveState](type=long); // enum=MACReceiveState
 

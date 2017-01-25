@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 
 namespace inet {
@@ -97,7 +98,7 @@ class INET_API EtherMAC : public EtherMACBase
 
     // helpers
     virtual void readChannelParameters(bool errorWhenAsymmetric) override;
-    virtual void processFrameFromUpperLayer(EtherFrame *msg);
+    virtual void processFrameFromUpperLayer(Packet *msg);
     virtual void processMsgFromNetwork(cPacket *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void fillIFGIfInBurst();
@@ -108,9 +109,9 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete();
-    virtual void processReceivedDataFrame(EtherFrame *frame);
+    virtual void processReceivedDataFrame(Packet *frame);
     virtual void processReceivedJam(EtherJam *jam);
-    virtual void processReceivedPauseFrame(EtherPauseFrame *frame);
+    virtual void processReceivedPauseFrame(Packet *packet, EtherPauseFrame *frame);
     virtual void processConnectDisconnect() override;
     virtual void addReception(simtime_t endRxTime);
     virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);

@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 
 namespace inet {
@@ -49,8 +50,8 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void processPacketFromHigherLayer(cPacket *msg);
-    virtual void processFrameFromMAC(EtherFrame *msg);
+    virtual void processPacketFromHigherLayer(Packet *msg);
+    virtual void processFrameFromMAC(Packet *packet);
     virtual void handleSendPause(cMessage *msg);
 
     virtual void refreshDisplay() const override;
