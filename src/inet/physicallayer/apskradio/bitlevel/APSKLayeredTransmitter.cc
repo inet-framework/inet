@@ -104,11 +104,11 @@ int APSKLayeredTransmitter::computePaddingLength(BitVector *bits) const
     return (encodedCodeWordSize - bits->getSize() % encodedCodeWordSize) % encodedCodeWordSize;
 }
 
-const APSKPhyFrame *APSKLayeredTransmitter::createPhyFrame(const cPacket *macFrame) const
+const APSKPhyFrame *APSKLayeredTransmitter::createPhyFrame(const cPacket *packet) const
 {
     APSKPhyFrame *phyFrame = new APSKPhyFrame();
     phyFrame->setByteLength(APSK_PHY_FRAME_HEADER_BYTE_LENGTH);
-    phyFrame->encapsulate(const_cast<cPacket *>(macFrame));
+    phyFrame->encapsulate(const_cast<cPacket *>(packet));
     return phyFrame;
 }
 
@@ -177,9 +177,9 @@ const ITransmissionAnalogModel *APSKLayeredTransmitter::createAnalogModel(const 
     }
 }
 
-const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
+const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    const APSKPhyFrame *phyFrame = createPhyFrame(macFrame);
+    const APSKPhyFrame *phyFrame = createPhyFrame(packet);
     const ITransmissionPacketModel *packetModel = createPacketModel(phyFrame);
     const ITransmissionBitModel *bitModel = createBitModel(packetModel);
     const ITransmissionSymbolModel *symbolModel = createSymbolModel(bitModel);
@@ -192,7 +192,7 @@ const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, macFrame, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
+    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
 }
 
 } // namespace physicallayer

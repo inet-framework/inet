@@ -179,9 +179,9 @@ ConstMapping *Ieee802154UWBIRTransmitter::generateIEEE802154AUWBSignal(const sim
     return mapping;
 }
 
-const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
+const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    int bitLength = macFrame->getBitLength();
+    int bitLength = packet->getBitLength();
     // KLUDGE: generate random bits until serializer is implemented
     std::vector<bool> *bits = new std::vector<bool>();
     for (int i = 0; i < bitLength; i++) {
@@ -203,7 +203,7 @@ const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = generateIEEE802154AUWBSignal(startTime, bits);
-    return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, -1, bitLength, cfg.bitrate, nullptr, cfg.centerFrequency, cfg.bandwidth, powerMapping);
+    return new DimensionalTransmission(transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, -1, bitLength, cfg.bitrate, nullptr, cfg.centerFrequency, cfg.bandwidth, powerMapping);
 }
 
 } // namespace physicallayer

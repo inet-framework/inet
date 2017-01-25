@@ -30,10 +30,10 @@ class INET_API ReceptionResult : public IReceptionResult, public cObject
   protected:
     const IReception *reception;
     const std::vector<const IReceptionDecision *> *decisions;
-    const Packet *macFrame;
+    const Packet *packet;
 
   public:
-    ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *macFrame);
+    ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *packet);
     ~ReceptionResult();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

@@ -62,7 +62,7 @@ class INET_API Ieee802154UWBIRTransmitter : public TransmitterBase
   public:
     Ieee802154UWBIRTransmitter();
 
-    virtual const ITransmission *createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const override;
+    virtual const ITransmission *createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const override;
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };

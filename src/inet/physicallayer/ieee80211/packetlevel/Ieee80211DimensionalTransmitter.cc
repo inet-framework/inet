@@ -47,15 +47,15 @@ std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& strea
     return DimensionalTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, simtime_t startTime) const
+const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
-    const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
-    const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(macFrame);
-    W transmissionPower = computeTransmissionPower(macFrame);
+    const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
+    const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
+    W transmissionPower = computeTransmissionPower(packet);
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
+    const simtime_t duration = transmissionMode->getDuration(packet->getBitLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -64,11 +64,11 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
     int headerBitLength = transmissionMode->getHeaderMode()->getBitLength();
-    int64_t payloadBitLength = macFrame->getBitLength();
+    int64_t payloadBitLength = packet->getBitLength();
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211DimensionalTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, powerMapping, transmissionMode, transmissionChannel);
+    return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, powerMapping, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer

@@ -321,9 +321,9 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
     return new Ieee80211OFDMMode("", new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
+const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto modeReq = const_cast<Packet *>(macFrame)->getTag<Ieee80211ModeReq>();
+    auto modeReq = const_cast<Packet *>(packet)->getTag<Ieee80211ModeReq>();
     if (isCompliant)
         mode = modeReq != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(modeReq->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
     else if (!mode)
@@ -336,7 +336,7 @@ const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const I
     const ITransmissionSymbolModel *dataFieldSymbolModel = nullptr;
     const ITransmissionSampleModel *sampleModel = nullptr;
     const ITransmissionAnalogModel *analogModel = nullptr;
-    const ITransmissionPacketModel *packetModel = createPacketModel(macFrame);
+    const ITransmissionPacketModel *packetModel = createPacketModel(packet);
     encodeAndModulate(packetModel, signalFieldBitModel, signalFieldSymbolModel, signalEncoder, signalModulator, true);
     encodeAndModulate(packetModel, dataFieldBitModel, dataFieldSymbolModel, dataEncoder, dataModulator, false);
     bitModel = createBitModel(signalFieldBitModel, dataFieldBitModel, packetModel);
@@ -350,7 +350,7 @@ const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const I
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, macFrame, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
+    return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
 }
 
 Ieee80211LayeredOFDMTransmitter::~Ieee80211LayeredOFDMTransmitter()

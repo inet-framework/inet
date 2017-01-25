@@ -30,7 +30,7 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
   protected:
     const int id;
     const IRadio *transmitter;
-    const Packet *macFrame;
+    const Packet *packet;
     const simtime_t startTime;
     const simtime_t endTime;
     const simtime_t preambleDuration;
@@ -42,14 +42,14 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const EulerAngles endOrientation;
 
   public:
-    TransmissionBase(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
     virtual int getId() const override { return id; }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
     virtual const IRadio *getTransmitter() const override { return transmitter; }
-    virtual const Packet *getPacket() const override { return macFrame; }
+    virtual const Packet *getPacket() const override { return packet; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }

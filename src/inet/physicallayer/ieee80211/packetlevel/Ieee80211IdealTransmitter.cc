@@ -52,12 +52,12 @@ std::ostream& Ieee80211IdealTransmitter::printToStream(std::ostream& stream, int
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, simtime_t startTime) const
+const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
-    const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
+    const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
+    const simtime_t duration = transmissionMode->getDuration(packet->getBitLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -67,7 +67,7 @@ const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio 
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new IdealTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
+    return new IdealTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
 }
 
 } // namespace physicallayer

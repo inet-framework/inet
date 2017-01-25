@@ -38,12 +38,12 @@ std::ostream& Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream&
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
+const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    W transmissionPower = computeTransmissionPower(macFrame);
-    bps transmissionBitrate = computeTransmissionDataBitrate(macFrame);
+    W transmissionPower = computeTransmissionPower(packet);
+    bps transmissionBitrate = computeTransmissionDataBitrate(packet);
     const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
-    const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
+    const simtime_t dataDuration = packet->getBitLength() / transmissionBitrate.get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
@@ -51,7 +51,7 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
+    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, packet->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

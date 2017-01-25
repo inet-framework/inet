@@ -56,7 +56,7 @@ class INET_API APSKLayeredTransmitter : public TransmitterBase
     virtual void initialize(int stage) override;
 
     virtual int computePaddingLength(BitVector *bits) const;
-    virtual const APSKPhyFrame *createPhyFrame(const cPacket *macFrame) const;
+    virtual const APSKPhyFrame *createPhyFrame(const cPacket *packet) const;
     virtual const ITransmissionPacketModel *createPacketModel(const APSKPhyFrame *phyFrame) const;
     virtual const ITransmissionBitModel *createBitModel(const ITransmissionPacketModel *packetModel) const;
     virtual const ITransmissionSymbolModel *createSymbolModel(const ITransmissionBitModel *bitModel) const;

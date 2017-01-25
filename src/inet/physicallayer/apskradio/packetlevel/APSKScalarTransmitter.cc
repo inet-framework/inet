@@ -37,14 +37,14 @@ std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int lev
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
+const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    W transmissionPower = computeTransmissionPower(macFrame);
-    Hz transmissionCarrierFrequency = computeCarrierFrequency(macFrame);
-    Hz transmissionBandwidth = computeBandwidth(macFrame);
-    bps transmissionBitrate = computeTransmissionDataBitrate(macFrame);
+    W transmissionPower = computeTransmissionPower(packet);
+    Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);
+    Hz transmissionBandwidth = computeBandwidth(packet);
+    bps transmissionBitrate = computeTransmissionDataBitrate(packet);
     const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
-    const simtime_t dataDuration = macFrame->getBitLength() / transmissionBitrate.get();
+    const simtime_t dataDuration = packet->getBitLength() / transmissionBitrate.get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
@@ -52,7 +52,7 @@ const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *tra
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
+    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, packet->getBitLength(), transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

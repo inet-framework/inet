@@ -405,11 +405,11 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     delete signalFieldPacketModel;
     delete dataFieldPacketModel;
 
-    auto macFrame = const_cast<cPacket *>(packetModel->getPacket()->getEncapsulatedPacket());
-    auto snirInd = macFrame->ensureTag<SnirInd>();
+    auto packet = const_cast<Packet *>(packetModel->getPacket());
+    auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
-    macFrame->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
+    packet->ensureTag<ErrorRateInd>()->setPacketErrorRate(packetModel->getPER());
 // TODO: true, true, packetModel->isPacketErrorless()
     return new LayeredReceptionResult(reception, new std::vector<const IReceptionDecision *>(), packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }

@@ -21,16 +21,16 @@ namespace inet {
 
 namespace physicallayer {
 
-ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *macFrame) :
+ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *packet) :
     reception(reception),
     decisions(decisions),
-    macFrame(macFrame)
+    packet(packet)
 {
 }
 
 ReceptionResult::~ReceptionResult()
 {
-    delete macFrame;
+    delete packet;
     delete decisions;
 }
 
@@ -42,7 +42,7 @@ std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) co
 
 const Packet* ReceptionResult::getPacket() const
 {
-    return macFrame;
+    return packet;
 }
 
 } // namespace physicallayer

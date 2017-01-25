@@ -52,27 +52,27 @@ std::ostream& FlatTransmitterBase::printToStream(std::ostream& stream, int level
     return NarrowbandTransmitterBase::printToStream(stream, level);
 }
 
-bps FlatTransmitterBase::computeTransmissionPreambleBitrate(const Packet *macFrame) const
+bps FlatTransmitterBase::computeTransmissionPreambleBitrate(const Packet *packet) const
 {
-    auto signalBitrateReq = const_cast<Packet *>(macFrame)->getTag<SignalBitrateReq>();
+    auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     return signalBitrateReq != nullptr ? signalBitrateReq->getPreambleBitrate() : bitrate;
 }
 
-bps FlatTransmitterBase::computeTransmissionHeaderBitrate(const Packet *macFrame) const
+bps FlatTransmitterBase::computeTransmissionHeaderBitrate(const Packet *packet) const
 {
-    auto signalBitrateReq = const_cast<Packet *>(macFrame)->getTag<SignalBitrateReq>();
+    auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     return signalBitrateReq != nullptr ? signalBitrateReq->getHeaderBitrate() : bitrate;
 }
 
-bps FlatTransmitterBase::computeTransmissionDataBitrate(const Packet *macFrame) const
+bps FlatTransmitterBase::computeTransmissionDataBitrate(const Packet *packet) const
 {
-    auto signalBitrateReq = const_cast<Packet *>(macFrame)->getTag<SignalBitrateReq>();
+    auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     return signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
 }
 
-W FlatTransmitterBase::computeTransmissionPower(const Packet *macFrame) const
+W FlatTransmitterBase::computeTransmissionPower(const Packet *packet) const
 {
-    auto signalPowerReq = const_cast<Packet *>(macFrame)->getTag<SignalPowerReq>();
+    auto signalPowerReq = const_cast<Packet *>(packet)->getTag<SignalPowerReq>();
     return signalPowerReq != nullptr ? signalPowerReq->getPower() : power;
 }
 

@@ -78,15 +78,15 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
 
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    auto macFrame = reception->getTransmission()->getPacket()->dup();
-    auto snirInd = macFrame->ensureTag<SnirInd>();
+    auto packet = reception->getTransmission()->getPacket()->dup();
+    auto snirInd = packet->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
     bool isReceptionSuccessful = true;
     for (auto decision : *decisions)
         isReceptionSuccessful &= decision->isReceptionSuccessful();
-    macFrame->setBitError(!isReceptionSuccessful);
-    return new ReceptionResult(reception, decisions, macFrame);
+    packet->setBitError(!isReceptionSuccessful);
+    return new ReceptionResult(reception, decisions, packet);
 }
 
 } // namespace physicallayer
