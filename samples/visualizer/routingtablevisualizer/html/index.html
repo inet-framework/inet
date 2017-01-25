@@ -56,6 +56,24 @@ In this simple network, there are just two visualized routing entries, in <code>
 
 <p>TODO: routing table numerikusan</p>
 
+<div class="include">
+<pre>
+Node RoutingTableVisualizerA.hostA
+-- Routing table --
+Destination      Netmask          Gateway          Iface            Metric
+<mark>10.0.0.2         255.255.255.255  *                eth0 (10.0.0.1)  0</mark>
+10.0.0.0         255.255.255.252  *                eth0 (10.0.0.1)  20
+127.0.0.0        255.0.0.0        *                lo0  (127.0.0.1) 1
+
+Node RoutingTableVisualizerA.hostB
+-- Routing table --
+Destination      Netmask          Gateway          Iface            Metric
+<mark>10.0.0.1         255.255.255.255  *                eth0 (10.0.0.2)  0</mark>
+10.0.0.0         255.255.255.252  *                eth0 (10.0.0.2)  20
+127.0.0.0        255.0.0.0        *                lo0  (127.0.0.1) 1
+</pre>
+</div>
+
 <p>Note that you can click on an arrow, and the corresponding routing table entry is shown in the inspector window.</p>
 
 <h2>Filtering routing table entries</h2>
