@@ -11,57 +11,11 @@
 
 <h2>Goals</h2>
 
-<pre>
-why is it good?
-
-because you can see active transport connections...maybe you could see that from the inspector window
-if you dig deep...there might be a list of active tcp connections or something
-
-TODO: if you click on the visualization, the inspector window comes up. Write this to the routing table visualization sample too.
-
-So...you can see active tcp connections, and where are they...their endpoints.
-
-The visualizer doesnt care what routes packets take
-
-thats what the transport route visualizer is for
-
-So this is a useful information.
-
-You dont have to dig deep or something. But can you even do that ? Yes you can
-
-So
-
-why is it good?
-
-because you can see the connections. You can see the number of connections, and their endpoints.
-All at once, at glance. You can get an overview of everything.
-
-You dont have to look around in the inspectors...which is not as straightforward
-
-Its just...easy to understand better. Nope. Routing tables are harder to understand, requires more effort.
-Cos there is numberic data. But. Here is numeric data as well. Not as hard. But tedious.
-So. Use the visualizer, and you dont have to do that.
-
-Thats why its good.
-
-And what is it ? It can help you identify the endpoints of different TCP connections just by looking at the network.
-Active connections. And tell them apart. And know how many of them are there.
-</pre>
-
-<p>
-Transport connection visualization makes it easy to get information about the established transport connections in the network at glance.
-It provides an overview of the number of connections. Also, it gives information about the two end-hosts of a connection. It can help
-identify and tell apart different connections.
-</p>
-
 <p>
 Transport connection visualization makes it easy to get information about the active transport connections in the network at a glance, without
 using the inspector window.
 It makes it easy to identify connections by their two end-hosts, and to tell different connections apart. It also gives a quick overview about
-the number of connections in certain nodes and the whole network. This example demonstrates such visualization of TCP connections.
-</p>
-
-<p>
+the number of connections in certain nodes and the whole network.
 The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration
 showcases a more advanced use-case.
 </p>
@@ -91,8 +45,6 @@ This configuration uses the following simple network:
 <p>
 It consist of 2 <code><strong>StandardHosts</strong></code> connected by a 100Mbit/s ethernet cable. It also contains a <code><strong>IPv4NetworkConfigurator</strong></code> and a <code><strong>TransportConnectionVisualizer</strong></code> module.
 </p>
-
-TODO: the connection in routingtablevisualizer?
 
 </body>
 
