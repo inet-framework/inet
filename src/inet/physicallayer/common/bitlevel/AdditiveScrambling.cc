@@ -30,7 +30,7 @@ AdditiveScrambling::AdditiveScrambling(const ShortBitVector& seed, const ShortBi
 std::ostream& AdditiveScrambling::printToStream(std::ostream& stream, int level) const
 {
     stream << "AdditiveScrambling";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", seed = " << seed
                << ", generatorPolynomial = " << generatorPolynomial;
     return stream;

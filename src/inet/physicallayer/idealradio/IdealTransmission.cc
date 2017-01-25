@@ -21,22 +21,22 @@ namespace inet {
 
 namespace physicallayer {
 
-IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
+IdealTransmission::IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange) :
     TransmissionBase(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation),
-    maxCommunicationRange(maxCommunicationRange),
-    maxInterferenceRange(maxInterferenceRange),
-    maxDetectionRange(maxDetectionRange)
+    communicationRange(communicationRange),
+    interferenceRange(interferenceRange),
+    detectionRange(detectionRange)
 {
 }
 
 std::ostream& IdealTransmission::printToStream(std::ostream& stream, int level) const
 {
     stream << "IdealTransmission";
-    if (level >= PRINT_LEVEL_INFO)
-        stream << ", maxCommunicationRange = " << maxCommunicationRange;
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", maxInterferenceRange = " << maxInterferenceRange
-               << ", maxDetectionRange = " << maxDetectionRange;
+    if (level <= PRINT_LEVEL_INFO)
+        stream << ", communicationRange = " << communicationRange;
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", interferenceRange = " << interferenceRange
+               << ", detectionRange = " << detectionRange;
     return TransmissionBase::printToStream(stream, level);
 }
 

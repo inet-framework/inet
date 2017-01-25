@@ -41,7 +41,7 @@ class INET_API PIMHello : public PIMHello_Base
     virtual ~PIMHello();
     PIMHello& operator=(const PIMHello& other);
     virtual PIMHello *dup() const override { return new PIMHello(*this); }
-    virtual void parsimPack(cCommBuffer *b) PARSIMPACK_CONST override;
+    virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 
     // field getter/setter methods

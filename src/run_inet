@@ -1,18 +1,32 @@
 #! /bin/sh
 DIR=`dirname $0`
 
+TOOL=""
+
 # start with valgrind if the first argument is --valgrind
-VALGRIND=""
 VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
 
 if [ "$1" = "--valgrind" ] ; then
    echo "##### Running with Valgrind! ######"
-   VALGRIND="valgrind $VALGRIND_OPTIONS"
+   TOOL="valgrind $VALGRIND_OPTIONS"
    shift
 fi
 
-if [ -f $DIR/INET -o -f $DIR/INET.exe ]; then
-  $VALGRIND $DIR/INET -n $DIR/../tutorials:$DIR/../examples:$DIR "$@"
+# start with gdb if the first argument is --gdb
+GDB_OPTIONS="-quiet -ex run"
+
+if [ "$1" = "--gdb" ] ; then
+   echo "##### Running with GDB! ######"
+   TOOL="gdb $GDB_OPTIONS --args"
+   shift
+fi
+
+OPP_OPTIONS="-n $DIR/../tutorials:$DIR/../examples:$DIR $@"
+
+if [ -f $DIR/INET ]; then
+  $TOOL $DIR/INET $OPP_OPTIONS
+elif [ -f $DIR/INET.exe ]; then
+  $TOOL $DIR/INET.exe $OPP_OPTIONS
 else
-  $VALGRIND opp_run -l $DIR/INET -n  $DIR/../tutorials:$DIR/../examples:$DIR "$@"
+  $TOOL opp_run -l $DIR/INET $OPP_OPTIONS
 fi

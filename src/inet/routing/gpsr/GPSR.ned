@@ -33,7 +33,7 @@ simple GPSR
         @display("i=block/routing");
 
         // context parameters
-        string interfaceTableModule;
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule = default("^.ipv4.routingTable");
         string networkProtocolModule = default("^.ipv4.ip");
         string outputInterface = default("wlan0");

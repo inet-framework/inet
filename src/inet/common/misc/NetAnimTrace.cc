@@ -72,7 +72,7 @@ void NetAnimTrace::dump()
 
 }
 
-void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     if (signalID == messageSentSignal && !source->isModule()) {
         // record a "packet sent" line

@@ -39,7 +39,7 @@ Arrival::Arrival(const simtime_t startPropagationTime, const simtime_t endPropag
 std::ostream& Arrival::printToStream(std::ostream& stream, int level) const
 {
     stream << "Arrival";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
        stream << ", startPropagationTime = " << startPropagationTime
               << ", endPropagationTime = " << endPropagationTime
               << ", startTime = " << startTime

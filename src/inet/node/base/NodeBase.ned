@@ -35,6 +35,8 @@ module NodeBase like INetworkNode
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
         bool hasStatus = default(false);
+        string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
+        string osgModelColor = default(""); // tint color, no colorization by default
         string mobilityType = default("");
         string energyStorageType = default("");
         string energyGeneratorType = default("");

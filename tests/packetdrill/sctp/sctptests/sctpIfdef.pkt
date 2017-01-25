@@ -1,0 +1,53 @@
+//
+// Copyright (C) 2014 Irene Ruengeler
+// Copyright (c) 2016 Michael Tuexen
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+// OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+// SUCH DAMAGE.
+//
+
+// Create a passive non-blocking 1-to-1 style socket.
++0.0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0.0 fcntl(3, F_GETFL) = 0x02 (flags O_RDWR)
++0.0 fcntl(3, F_SETFL, O_RDWR | O_NONBLOCK) = 0
++0.0 setsockopt(3, IPPROTO_SCTP, SCTP_INITMSG, {sinit_num_ostreams=1,
+                                                sinit_max_instreams=1,
+                                                sinit_max_attempts=0,
+                                                sinit_max_init_timeo=0}, 8) = 0
++0.0 bind(3, ..., ...) = 0
++0.0 listen(3, 1) = 0
+// Establish an association.
++0.0 < sctp: INIT[flgs=0, tag=1, a_rwnd=1500, os=1, is=1, tsn=1]
++0.0 > sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=..., os=1, is=1, tsn=1, ...]
++0.1 < sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
++0.0 > sctp: COOKIE_ACK[flgs=0]
++0.0 accept(3, ..., ...) = 4
++0.0 close(3) = 0
+// Inject an empty DATA chunk.
++0.1 < sctp: DATA[flgs=BE, len=16, tsn=1, sid=0, ssn=0, ppid=1234]
+#ifdef Omnet
++0.0 > sctp: ABORT[flgs=0]
+#endif
+#ifdef FreeBSD
++0.0 > sctp: ABORT[flgs=0, NO_USER_DATA[tsn=1]]
+#endif
++0.0 close(4) = 0

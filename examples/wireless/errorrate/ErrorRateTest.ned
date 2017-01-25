@@ -21,18 +21,22 @@ package inet.examples.wireless.errorrate;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network ErrorRateTest
 {
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium {
+        visualizer: IntegratedCanvasVisualizer {
             parameters:
                 @display("p=100,50");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
         }
         sourceHost: AdhocHost {
             parameters:

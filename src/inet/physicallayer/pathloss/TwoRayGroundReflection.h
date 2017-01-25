@@ -18,11 +18,14 @@
 #ifndef __INET_TWORAYGROUNDREFLECTION_H
 #define __INET_TWORAYGROUNDREFLECTION_H
 
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/pathloss/FreeSpacePathLoss.h"
 
 namespace inet {
 
 namespace physicallayer {
+
+using namespace inet::physicalenvironment;
 
 /**
  * This class implements the two ray ground radio path loss model.
@@ -30,16 +33,14 @@ namespace physicallayer {
 class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 {
   protected:
-    m ht;
-    m hr;
+    const IPhysicalEnvironment *physicalEnvironment = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    TwoRayGroundReflection();
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override;
+    virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const override;
 };
 
 } // namespace physicallayer

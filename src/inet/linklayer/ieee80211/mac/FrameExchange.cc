@@ -244,8 +244,10 @@ IFrameExchange::FrameProcessingResult StepBasedFrameExchange::lowerFrameReceived
         if (status == INPROGRESS) {
             logStatus(result == IGNORED ? "processReply(): frame IGNORED": "processReply(): frame PROCESSED");
             checkOperation(operation, "processReply()");
-            if (result == PROCESSED_KEEP || result == PROCESSED_DISCARD || operation != NONE)
+            if (result == PROCESSED_KEEP || result == PROCESSED_DISCARD || operation != NONE) {
+                cleanup();
                 proceed();
+            }
             else
                 operation = EXPECT_FULL_REPLY; // restore
         }
@@ -261,6 +263,7 @@ IFrameExchange::FrameProcessingResult StepBasedFrameExchange::lowerFrameReceived
             logStatus(result == IGNORED ? "processReply(): frame IGNORED": "processReply(): frame PROCESSED");
             checkOperation(operation, "processReply()");
             if (result == PROCESSED_KEEP || result == PROCESSED_DISCARD || operation != NONE) {
+                cleanup();
                 proceed();
             }
             else {

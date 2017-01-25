@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-06-01  Irene Rungeler
+
+	sctp: Added support for the SCTP_ACCEPT command.
+
 2016-05-11  Rudolf Hornig
 
   sctp: refactor: use c++11 style for loop

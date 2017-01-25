@@ -73,7 +73,7 @@ void SUIPathLoss::initialize(int stage)
 std::ostream& SUIPathLoss::printToStream(std::ostream& stream, int level) const
 {
     stream << "SUIPathLoss";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", ht = " << ht
                << ", hr = " << hr;
     return stream;

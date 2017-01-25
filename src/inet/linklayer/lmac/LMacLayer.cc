@@ -569,6 +569,11 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
  */
 void LMacLayer::handleLowerPacket(cPacket *msg)
 {
+    if (msg->hasBitError()) {
+        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+        delete msg;
+        return;
+    }
     // simply pass the massage as self message, to be processed by the FSM.
     handleSelfMessage(msg);
 }
@@ -576,7 +581,7 @@ void LMacLayer::handleLowerPacket(cPacket *msg)
 /**
  * Handle transmission over messages: send the data packet or don;t do anyhting.
  */
-void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;

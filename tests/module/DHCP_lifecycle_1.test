@@ -12,6 +12,12 @@ cmdenv-express-mode = false
 sim-time-limit = 1000s
 record-eventlog = true
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 
@@ -22,7 +28,7 @@ record-eventlog = true
 
 **.server.app[0].typename = "DHCPServer"
 **.server.app[0].subnetMask = "255.255.255.0"
-**.server.app[0].ipAddressStart = "192.168.1.100"
+**.server.app[0].numReservedAddresses = 100
 **.server.app[0].maxNumClients = 100
 **.server.app[0].gateway = "192.168.1.1"
 **.server.app[0].dns = ""

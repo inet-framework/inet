@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& os, const GenericRoute& e)
 
 std::ostream& operator<<(std::ostream& os, const GenericMulticastRoute& e)
 {
-    os << e.info();
+    os << e.STR_COMPAT();
     return os;
 };
 
@@ -123,7 +123,7 @@ void GenericRoutingTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void GenericRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void GenericRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     // TODO:
 }

@@ -54,7 +54,7 @@ packet AODVControlPacket
 //
 class AODVRREQ extends AODVControlPacket
 {
-    unsigned int packetType = RREQ;
+    packetType = RREQ;
     bool joinFlag;
     bool repairFlag;
     bool gratuitousRREPFlag;
@@ -73,7 +73,7 @@ class AODVRREQ extends AODVControlPacket
 //
 class AODVRREP extends AODVControlPacket
 {
-    unsigned int packetType = RREP;
+    packetType = RREP;
     bool repairFlag;
     bool ackRequiredFlag;
     unsigned int prefixSize;
@@ -90,7 +90,7 @@ class AODVRREP extends AODVControlPacket
 //
 class AODVRERR extends AODVControlPacket
 {
-    unsigned int packetType = RERR;
+    packetType = RERR;
     UnreachableNode unreachableNodes[];
     bool noDeleteFlag;
     unsigned int destCount;
@@ -101,7 +101,7 @@ class AODVRERR extends AODVControlPacket
 //
 class AODVRREPACK extends AODVControlPacket
 {
-    unsigned int packetType = RREPACK;
+    packetType = RREPACK;
 }
 
 //

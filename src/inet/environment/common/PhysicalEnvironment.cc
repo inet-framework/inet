@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/environment/common/PhysicalEnvironment.h"
+#include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/geometry/object/Box.h"
 #include "inet/common/geometry/shape/Cuboid.h"
-#include "inet/common/geometry/shape/Sphere.h"
-#include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
-#include "inet/common/geometry/common/Rotation.h"
-#include <algorithm>
+#include "inet/common/geometry/shape/Prism.h"
+#include "inet/common/geometry/shape/Sphere.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/environment/common/PhysicalEnvironment.h"
 
 namespace inet {
 
@@ -34,9 +34,7 @@ PhysicalEnvironment::PhysicalEnvironment() :
     temperature(NaN),
     spaceMin(Coord(NaN, NaN, NaN)),
     spaceMax(Coord(NaN, NaN, NaN)),
-    axisLength(NaN),
-    objectCache(nullptr),
-    objectsLayer(nullptr)
+    objectCache(nullptr)
 {
 }
 
@@ -54,7 +52,9 @@ void PhysicalEnvironment::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
         objectCache = dynamic_cast<IObjectCache *>(getSubmodule("objectCache"));
+        ground = dynamic_cast<IGround *>(getSubmodule("ground"));
         temperature = K(par("temperature"));
         spaceMin.x = par("spaceMinX");
         spaceMin.y = par("spaceMinY");
@@ -62,13 +62,6 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.x = par("spaceMaxX");
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
-        axisLength = par("axisLength");
-        viewAngle = computeViewAngle(par("viewAngle"));
-        viewRotation = Rotation(viewAngle);
-        viewTranslation = computeViewTranslation(par("viewTranslation"));
-        objectsLayer = new cGroupFigure();
-        cCanvas *canvas = getParentModule()->getCanvas();
-        canvas->addFigureBelow(objectsLayer, canvas->getSubmodulesLayer());
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
     {
@@ -77,9 +70,17 @@ void PhysicalEnvironment::initialize(int stage)
         parseMaterials(environment);
         parseObjects(environment);
     }
-    else if (stage == INITSTAGE_LAST)
-    {
-        updateCanvas();
+}
+
+void PhysicalEnvironment::convertPoints(std::vector<Coord>& points)
+{
+    auto originPosition = coordinateSystem == nullptr ? GeoCoord(0, 0, 0) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
+    Box boundingBox = Box::computeBoundingBox(points);
+    Coord center = boundingBox.getCenter();
+    for (auto & point : points) {
+        point -= center;
+        if (coordinateSystem != nullptr)
+            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(point.x + originPosition.latitude, point.y + originPosition.longitude, 0));
     }
 }
 
@@ -138,7 +139,6 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             const char *pointsAttribute = element->getAttribute("points");
             if (!pointsAttribute)
                 throw cRuntimeError("Missing points attribute of prism");
-
             cStringTokenizer tokenizer(pointsAttribute);
             while (tokenizer.hasMoreTokens())
             {
@@ -147,10 +147,12 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 if ((tok = tokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing prism y at %s", element->getSourceLocation());
                 point.y = atof(tok);
+                point.z = -height / 2;
                 points.push_back(point);
             }
             if (points.size() < 3)
                 throw cRuntimeError("prism needs at least three points at %s", element->getSourceLocation());
+            convertPoints(points);
             shape = new Prism(height, Polygon(points));
         }
         else if (!strcmp(typeAttribute, "polyhedron"))
@@ -159,7 +161,6 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             const char *pointsAttribute = element->getAttribute("points");
             if (!pointsAttribute)
                 throw cRuntimeError("Missing points attribute of polyhedron");
-
             cStringTokenizer tokenizer(pointsAttribute);
             while (tokenizer.hasMoreTokens())
             {
@@ -175,6 +176,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             }
             if (points.size() < 4)
                 throw cRuntimeError("polyhedron needs at least four points at %s", element->getSourceLocation());
+            convertPoints(points);
             shape = new Polyhedron(points);
         }
         else
@@ -260,6 +262,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             orientation.gamma = math::deg2rad(atof(tok));
         }
         // shape
+        Coord size = Coord::NIL;
         const ShapeBase *shape = nullptr;
         const char *shapeAttribute = element->getAttribute("shape");
         if (!shapeAttribute)
@@ -268,7 +271,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *shapeType = shapeTokenizer.nextToken();
         if (!strcmp(shapeType, "cuboid"))
         {
-            Coord size;
             if ((tok = shapeTokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing cuboid x at %s", element->getSourceLocation());
             size.x = atof(tok);
@@ -287,6 +289,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 throw cRuntimeError("Missing sphere radius at %s", element->getSourceLocation());
             double radius = atof(tok);
             shape = new Sphere(radius);
+            size = Coord(radius, radius, radius) * 2;
             shapes.push_back(shape);
         }
         else if (!strcmp(shapeType, "prism"))
@@ -303,17 +306,14 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 if ((tok = shapeTokenizer.nextToken()) == nullptr)
                     throw cRuntimeError("Missing prism y at %s", element->getSourceLocation());
                 point.y = atof(tok);
+                point.z = -height / 2;
                 points.push_back(point);
             }
             if (points.size() < 3)
                 throw cRuntimeError("prism needs at least three points at %s", element->getSourceLocation());
-            Box boundingBox = Box::computeBoundingBox(points);
-            Coord center = (boundingBox.getMax() - boundingBox.getMin()) / 2 + boundingBox.getMin();
-            center.z = height / 2;
-            std::vector<Coord> prismPoints;
-            for (auto & point : points)
-                prismPoints.push_back(point - center);
-            shape = new Prism(height, Polygon(prismPoints));
+            size = Box::computeBoundingBox(points).getSize();
+            convertPoints(points);
+            shape = new Prism(height, Polygon(points));
             shapes.push_back(shape);
         }
         else if (!strcmp(shapeType, "polyhedron"))
@@ -333,12 +333,9 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             }
             if (points.size() < 4)
                 throw cRuntimeError("polyhedron needs at least four points at %s", element->getSourceLocation());
-            Box boundingBox = Box::computeBoundingBox(points);
-            Coord center = (boundingBox.getMax() - boundingBox.getMin()) / 2 + boundingBox.getMin();
-            std::vector<Coord> PolyhedronPoints;
-            for (auto & point : points)
-                PolyhedronPoints.push_back(point - center);
-            shape = new Polyhedron(PolyhedronPoints);
+            size = Box::computeBoundingBox(points).getSize();
+            convertPoints(points);
+            shape = new Polyhedron(points);
             shapes.push_back(shape);
         }
         else {
@@ -347,7 +344,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         if (!shape)
             throw cRuntimeError("Unknown shape '%s'", shapeAttribute);
-        const Coord size = shape->computeBoundingBoxSize();
         // position
         Coord position = Coord::NIL;
         const char *positionAttribute = element->getAttribute("position");
@@ -357,23 +353,28 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             const char *kind = tokenizer.nextToken();
             if (!kind)
                 throw cRuntimeError("Missing position kind");
-            else if (!strcmp(kind, "min"))
-                position = size / 2;
-            else if (!strcmp(kind, "max"))
-                position = size / -2;
-            else if (!strcmp(kind, "center"))
-                position = Coord::ZERO;
-            else
-                throw cRuntimeError("Unknown position kind");
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing position x at %s", element->getSourceLocation());
-            position.x += atof(tok);
+            position.x = atof(tok);
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing position y at %s", element->getSourceLocation());
-            position.y += atof(tok);
+            position.y = atof(tok);
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing position z at %s", element->getSourceLocation());
-            position.z += atof(tok);
+            position.z = atof(tok);
+            if (!strcmp(kind, "min"))
+                position += size / 2;
+            else if (!strcmp(kind, "max"))
+                position -= size / 2;
+            else if (!strcmp(kind, "center"))
+                position += Coord::ZERO;
+            else
+                throw cRuntimeError("Unknown position kind");
+            if (coordinateSystem != nullptr) {
+                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(position.x, position.y, 0));
+                position.x = convertedPosition.x;
+                position.y = convertedPosition.y;
+            }
         }
         // material
         const Material *material;
@@ -440,15 +441,15 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *opacityAttribute = element->getAttribute("opacity");
         if (opacityAttribute)
             opacity = atof(opacityAttribute);
+        // texture
+        const char *texture = element->getAttribute("texture");
         // tags
         const char *tags = element->getAttribute("tags");
         // insert object
-        PhysicalObject *object = new PhysicalObject(name, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, tags);
+        PhysicalObject *object = new PhysicalObject(name, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, texture, tags);
         objects.push_back(object);
         if (id != -1)
             idToObjectMap.insert(std::pair<int, const PhysicalObject *>(id, object));
-        if (objectCache)
-            objectCache->insertObject(object);
         const Coord min = position - size / 2;
         const Coord max = position + size / 2;
         if ((!std::isnan(spaceMin.x) && min.x < spaceMin.x) || (!std::isnan(spaceMax.x) && max.x > spaceMax.x) ||
@@ -470,158 +471,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     if (std::isnan(spaceMax.z)) spaceMax.z = computedSpaceMax.z;
 }
 
-void PhysicalEnvironment::updateCanvas()
-{
-    while (objectsLayer->getNumFigures())
-        delete objectsLayer->removeFigure(0);
-    // KLUDGE: TODO: sorting objects with their rotated position's z coordinate to draw them in a "better" order
-    std::vector<const PhysicalObject *> objectsCopy = objects;
-    std::stable_sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
-    for (auto object : objectsCopy)
-    {
-        const ShapeBase *shape = object->getShape();
-        const Coord& position = object->getPosition();
-        const EulerAngles& orientation = object->getOrientation();
-        const Rotation rotation(orientation);
-        // cuboid
-        const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
-        if (cuboid)
-        {
-            std::vector<std::vector<Coord> > faces;
-            cuboid->computeVisibleFaces(faces, rotation, viewRotation);
-            computeFacePoints(object, faces, rotation);
-        }
-        // sphere
-        const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
-        if (sphere)
-        {
-            double radius = sphere->getRadius();
-            cOvalFigure *figure = new cOvalFigure();
-            figure->setFilled(true);
-            cFigure::Point center = computeCanvasPoint(position, viewRotation, viewTranslation);
-            figure->setBounds(cFigure::Rectangle(center.x - radius, center.y - radius, radius * 2, radius * 2));
-            figure->setLineWidth(object->getLineWidth());
-            figure->setLineColor(object->getLineColor());
-            figure->setFillColor(object->getFillColor());
-            figure->setLineOpacity(object->getOpacity());
-            figure->setFillOpacity(object->getOpacity());
-            figure->setZoomLineWidth(false);
-
-            std::string tags("physical_object ");
-            if (object->getTags())
-                tags += object->getTags();
-            figure->setTags(tags.c_str());
-            objectsLayer->addFigure(figure);
-        }
-        // prism
-        const Prism *prism = dynamic_cast<const Prism *>(shape);
-        if (prism)
-        {
-            std::vector<std::vector<Coord> > faces;
-            prism->computeVisibleFaces(faces, rotation, viewRotation);
-            computeFacePoints(object, faces, rotation);
-        }
-        // polyhedron
-        const Polyhedron *polyhedron = dynamic_cast<const Polyhedron *>(shape);
-        if (polyhedron)
-        {
-            std::vector<std::vector<Coord> > faces;
-            polyhedron->computeVisibleFaces(faces, rotation, viewRotation);
-            computeFacePoints(object, faces, rotation);
-        }
-        // add name to the end
-        const char *name = object->getName();
-        if (name)
-        {
-            cLabelFigure *nameFigure = new cLabelFigure();
-            nameFigure->setPosition(computeCanvasPoint(position, viewRotation, viewTranslation));
-            nameFigure->setTags("physical_object object_name label");
-            nameFigure->setText(name);
-            objectsLayer->addFigure(nameFigure);
-        }
-    }
-    if (!std::isnan(axisLength)) {
-        cLineFigure *xAxis = new cLineFigure();
-        cLineFigure *yAxis = new cLineFigure();
-        cLineFigure *zAxis = new cLineFigure();
-        xAxis->setTags("axis");
-        yAxis->setTags("axis");
-        zAxis->setTags("axis");
-        xAxis->setLineWidth(1);
-        yAxis->setLineWidth(1);
-        zAxis->setLineWidth(1);
-#if OMNETPP_VERSION >= 0x500 && OMNETPP_BUILDNUM >= 1006
-        xAxis->setEndArrowhead(cFigure::ARROW_BARBED);
-        yAxis->setEndArrowhead(cFigure::ARROW_BARBED);
-        zAxis->setEndArrowhead(cFigure::ARROW_BARBED);
-#else
-        xAxis->setEndArrowHead(cFigure::ARROW_BARBED);
-        yAxis->setEndArrowHead(cFigure::ARROW_BARBED);
-        zAxis->setEndArrowHead(cFigure::ARROW_BARBED);
-#endif
-        xAxis->setZoomLineWidth(false);
-        yAxis->setZoomLineWidth(false);
-        zAxis->setZoomLineWidth(false);
-
-        xAxis->setStart(computeCanvasPoint(Coord::ZERO));
-        yAxis->setStart(computeCanvasPoint(Coord::ZERO));
-        zAxis->setStart(computeCanvasPoint(Coord::ZERO));
-        xAxis->setEnd(computeCanvasPoint(Coord(axisLength, 0, 0)));
-        yAxis->setEnd(computeCanvasPoint(Coord(0, axisLength, 0)));
-        zAxis->setEnd(computeCanvasPoint(Coord(0, 0, axisLength)));
-        objectsLayer->addFigure(xAxis);
-        objectsLayer->addFigure(yAxis);
-        objectsLayer->addFigure(zAxis);
-        cLabelFigure *xLabel = new cLabelFigure();
-        cLabelFigure *yLabel = new cLabelFigure();
-        cLabelFigure *zLabel = new cLabelFigure();
-
-        xLabel->setTags("axis label");
-        yLabel->setTags("axis label");
-        zLabel->setTags("axis label");
-        xLabel->setText("X");
-        yLabel->setText("Y");
-        zLabel->setText("Z");
-        xLabel->setPosition(computeCanvasPoint(Coord(axisLength, 0, 0)));
-        yLabel->setPosition(computeCanvasPoint(Coord(0, axisLength, 0)));
-        zLabel->setPosition(computeCanvasPoint(Coord(0, 0, axisLength)));
-
-        objectsLayer->addFigure(xLabel);
-        objectsLayer->addFigure(yLabel);
-        objectsLayer->addFigure(zLabel);
-    }
-}
-
-void PhysicalEnvironment::computeFacePoints(const PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation)
-{
-    const Coord& position = object->getPosition();
-    for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)
-    {
-        std::vector<cFigure::Point> canvasPoints;
-        const std::vector<Coord>& facePoints = *it;
-        for (const auto & facePoint : facePoints)
-        {
-            cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(facePoint) + position, viewRotation, viewTranslation);
-            canvasPoints.push_back(canvPoint);
-        }
-        cPolygonFigure *figure = new cPolygonFigure();
-        figure->setFilled(true);
-        figure->setPoints(canvasPoints);
-        figure->setLineWidth(object->getLineWidth());
-        figure->setLineColor(object->getLineColor());
-        figure->setFillColor(object->getFillColor());
-        figure->setLineOpacity(object->getOpacity());
-        figure->setFillOpacity(object->getOpacity());
-        figure->setZoomLineWidth(false);
-
-        std::string tags("physical_object ");
-        if (object->getTags())
-            tags += object->getTags();
-        figure->setTags(tags.c_str());
-        objectsLayer->addFigure(figure);
-    }
-}
-
 const PhysicalObject *PhysicalEnvironment::getObjectById(int id) const
 {
     std::map<int, const PhysicalObject *>::const_iterator it = idToObjectMap.find(id);
@@ -638,80 +487,6 @@ void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegmen
     else
         for (const auto & elem : objects)
             visitor->visit(elem);
-}
-
-void PhysicalEnvironment::handleParameterChange(const char* name)
-{
-    if (name && !strcmp(name, "viewAngle")) {
-        viewAngle = computeViewAngle(par("viewAngle"));
-        viewRotation = Rotation(viewAngle);
-        updateCanvas();
-    }
-    else if (name && !strcmp(name, "viewTranslation")) {
-        viewTranslation = computeViewTranslation(par("viewTranslation"));
-        updateCanvas();
-    }
-}
-
-EulerAngles PhysicalEnvironment::computeViewAngle(const char* viewAngle)
-{
-    double x, y, z;
-    if (!strcmp(viewAngle, "x"))
-    {
-        x = 0;
-        y = M_PI / 2;
-        z = M_PI / -2;
-    }
-    else if (!strcmp(viewAngle, "y"))
-    {
-        x = M_PI / 2;
-        y = 0;
-        z = 0;
-    }
-    else if (!strcmp(viewAngle, "z"))
-    {
-        x = y = z = 0;
-    }
-    else if (!strncmp(viewAngle, "isometric", 9))
-    {
-        int v;
-        int l = strlen(viewAngle);
-        switch (l) {
-            case 9: v = 0; break;
-            case 10: v = viewAngle[9] - '0'; break;
-            case 11: v = (viewAngle[9] - '0') * 10 + viewAngle[10] - '0'; break;
-            default: throw cRuntimeError("Invalid isometric viewAngle parameter");
-        }
-        // 1st axis can point on the 2d plane in 6 directions
-        // 2nd axis can point on the 2d plane in 4 directions (the opposite direction is forbidden)
-        // 3rd axis can point on the 2d plane in 2 directions
-        // this results in 6 * 4 * 2 = 48 different configurations
-        x = math::deg2rad(45 + v % 4 * 90);
-        y = math::deg2rad(v / 24 % 2 ? 35.27 : -35.27);
-        z = math::deg2rad(30 + v / 4 % 6 * 60);
-    }
-    else if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
-    {
-        x = math::deg2rad(x);
-        y = math::deg2rad(y);
-        z = math::deg2rad(z);
-    }
-    else
-        throw cRuntimeError("The viewAngle parameter must be a predefined string or a triplet representing three degrees");
-    return EulerAngles(x, y, z);
-}
-
-cFigure::Point PhysicalEnvironment::computeViewTranslation(const char* viewTranslation)
-{
-    double x, y;
-    if (sscanf(viewTranslation, "%lf %lf", &x, &y) == 2)
-    {
-        x = math::deg2rad(x);
-        y = math::deg2rad(y);
-    }
-    else
-        throw cRuntimeError("The viewTranslation parameter must be a pair of doubles");
-    return cFigure::Point(x, y);
 }
 
 } // namespace physicalenvironment

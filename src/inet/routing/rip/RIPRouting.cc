@@ -285,7 +285,7 @@ RIPRoute *RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int m
     }
 
     ripRoutes.push_back(ripRoute);
-    emit(numRoutesSignal, ripRoutes.size());
+    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
     return ripRoute;
 }
 
@@ -307,7 +307,7 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry& ripInterface)
 /**
  * Listen on interface/route changes and update private data structures.
  */
-void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(signalID));
 
@@ -888,7 +888,7 @@ void RIPRouting::addRoute(const L3Address& dest, int prefixLength, const Interfa
     ripRoute->setLastUpdateTime(simTime());
     ripRoute->setChanged(true);
     ripRoutes.push_back(ripRoute);
-    emit(numRoutesSignal, ripRoutes.size());
+    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
     triggerUpdate();
 }
 
@@ -1030,7 +1030,7 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
         ripRoutes.erase(end, ripRoutes.end());
     delete ripRoute;
 
-    emit(numRoutesSignal, ripRoutes.size());
+    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
 }
 
 /**
@@ -1127,7 +1127,7 @@ void RIPRouting::deleteInterface(const InterfaceEntry *ie)
             it++;
     }
     if (emitNumRoutesSignal)
-        emit(numRoutesSignal, ripRoutes.size());
+        emit(numRoutesSignal, (unsigned long)ripRoutes.size());
 }
 
 int RIPRouting::getInterfaceMetric(InterfaceEntry *ie)

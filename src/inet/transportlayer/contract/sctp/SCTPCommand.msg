@@ -68,6 +68,7 @@ packet SCTPCommand
     int localPort = -1;
     int remotePort = -1;
     int gate = -1;
+    int fd = -1;
 }
 
 //
@@ -108,7 +109,6 @@ message SCTPErrorInfo extends SCTPCommand
 message SCTPOpenCommand extends SCTPCommand
 {
     AddressVector localAddresses;
-    L3Address remoteAddr;            // required for active open
     AddressVector remoteAddresses;
     bool fork = false;               // used only for passive open
     string queueClass = "SCTPQueue"; // may be left empty
@@ -116,6 +116,7 @@ message SCTPOpenCommand extends SCTPCommand
     uint32 inboundStreams;
     uint32 outboundStreams;
     bool streamReset;
+    bool appLimited;
     int prMethod;
     uint32 numRequests;
     uint32 messagesToPush;
@@ -136,6 +137,17 @@ message SCTPSendInfo extends SCTPCommand
     bool sackNow = false;
 }
 
+//
+// Control info to be used when setsockopt changes RtoInfo.
+//
+// @see ~SctpCommandCode, ~SCTP
+//
+message SCTPRtoInfo extends SCTPCommand
+{
+    double rtoInitial;
+    double rtoMin;
+    double rtoMax;
+}
 
 //
 // Control info to be used with the DATA command.
@@ -187,9 +199,10 @@ message SCTPPathInfo extends SCTPCommand
 
 message SCTPResetInfo extends SCTPCommand
 {
-    L3Address remoteAddr;
     unsigned short requestType = 0;
-    char streams[];
+    uint16 instreams = 0;
+    uint16 outstreams = 0;
+    uint16 streams[];
 }
 
 message SCTPInfo extends SCTPCommand

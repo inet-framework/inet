@@ -38,7 +38,7 @@ void SNIRReceiverBase::initialize(int stage)
 
 std::ostream& SNIRReceiverBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", snirThreshold = " << snirThreshold;
     return stream;
 }

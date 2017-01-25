@@ -58,7 +58,7 @@ enum PIMHelloOptionType
 
 class HelloOption
 {
-    short type enum(PIMHelloOptionType);
+    short type @enum(PIMHelloOptionType);
 }
 
 class HoldtimeOption extends HelloOption
@@ -116,7 +116,7 @@ class JoinPruneGroup
 packet PIMPacket
 {
    short         version = 2;
-   short         type enum(PIMPacketType);
+   short         type @enum(PIMPacketType);
 }
 
 // Hello message
@@ -132,7 +132,7 @@ packet PIMHello extends PIMPacket
 // DM, SM
 packet PIMJoinPrune extends PIMPacket
 {
-    short             type enum(PIMPacketType) = JoinPrune;
+    type= JoinPrune;
     IPv4Address        upstreamNeighborAddress;
     int                holdTime;
     //int                numGroups;
@@ -143,7 +143,7 @@ packet PIMJoinPrune extends PIMPacket
 // DM, SM
 packet PIMAssert extends PIMPacket
 {
-    short             type enum(PIMPacketType) = Assert;
+    type = Assert;
     IPv4Address        groupAddress;
     IPv4Address        sourceAddress;
     bool            R;
@@ -155,22 +155,22 @@ packet PIMAssert extends PIMPacket
 // DM
 packet PIMGraft extends PIMJoinPrune
 {
-    short             type enum(PIMPacketType) = Graft;
-    int                holdTime = 0;
+    type = Graft;
+    holdTime = 0;
 }
 
 // GraftAck message
 // DM
 packet PIMGraftAck extends PIMGraft
 {
-    short             type enum(PIMPacketType) = GraftAck;
+    type = GraftAck;
 }
 
 // State Refresh message
 // DM
 packet PIMStateRefresh extends PIMPacket
 {
-    short             type enum(PIMPacketType) = StateRefresh;
+    type = StateRefresh;
     IPv4Address        groupAddress;
     IPv4Address        sourceAddress;
     IPv4Address        originatorAddress;
@@ -185,7 +185,7 @@ packet PIMStateRefresh extends PIMPacket
 // SM
 packet PIMRegister extends PIMPacket
 {
-    short             type enum(PIMPacketType) = Register;
+    type = Register;
     bool            B;
     bool            N;
 }
@@ -194,7 +194,7 @@ packet PIMRegister extends PIMPacket
 // SM
 packet PIMRegisterStop extends PIMPacket
 {
-    short             type enum(PIMPacketType) = RegisterStop;
+    type = RegisterStop;
     IPv4Address        groupAddress;
     IPv4Address        sourceAddress;
 }

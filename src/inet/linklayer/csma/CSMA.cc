@@ -828,6 +828,11 @@ void CSMA::handleSelfMessage(cMessage *msg)
  */
 void CSMA::handleLowerPacket(cPacket *msg)
 {
+    if (msg->hasBitError()) {
+        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+        delete msg;
+        return;
+    }
     CSMAFrame *macPkt = static_cast<CSMAFrame *>(msg);
     const MACAddress& src = macPkt->getSrcAddr();
     const MACAddress& dest = macPkt->getDestAddr();
@@ -913,7 +918,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
     }
 }
 
-void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {

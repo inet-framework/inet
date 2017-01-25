@@ -28,7 +28,7 @@ network ObstacleIntersectionTest
         int numHosts;
         @display("bgb=2000,1000");
     submodules:
-        environment: PhysicalEnvironment {
+        physicalEnvironment: PhysicalEnvironment {
             parameters:
                 @display("p=50,50");
         }

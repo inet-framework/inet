@@ -26,6 +26,7 @@
  #include <sys/socket.h>
 #endif
 #include "inet/transportlayer/sctp/SCTPMessage.h"
+#include "inet/transportlayer/sctp/SCTPAssociation.h"
 
 using namespace inet;
 using namespace sctp;
@@ -40,6 +41,14 @@ struct int_symbol {
 
 #ifndef IPPROTO_SCTP
 #define IPPROTO_SCTP 132
+#endif
+
+/* On Windows we don't have these macros defined (values copyed from fcntl.h) */
+#ifndef F_GETFL
+#define F_GETFL 3
+#endif
+#ifndef F_SETFL
+#define F_SETFL 4
 #endif
 
 /* TCP option numbers and lengths. */
@@ -69,6 +78,8 @@ struct int_symbol {
 #define SCTP_COOKIE_ECHO_CHUNK_TYPE         0x0a
 #define SCTP_COOKIE_ACK_CHUNK_TYPE          0x0b
 #define SCTP_SHUTDOWN_COMPLETE_CHUNK_TYPE   0x0e
+#define SCTP_PAD_CHUNK_TYPE                 0x84
+#define SCTP_RECONFIG_CHUNK_TYPE            0x82
 
 #define SCTP_DATA_CHUNK_I_BIT               0x08
 #define SCTP_DATA_CHUNK_U_BIT               0x04
@@ -91,6 +102,7 @@ struct int_symbol {
 #define FLAG_INIT_CHUNK_IS_NOCHECK              0x00000800
 #define FLAG_INIT_CHUNK_TSN_NOCHECK             0x00001000
 #define FLAG_INIT_CHUNK_OPT_PARAM_NOCHECK       0x00002000
+#define FLAG_INIT_CHUNK_OPT_SUPPORTED_ADDRESS_TYPES_PARAM_NOCHECK 0x00004000
 
 #define FLAG_INIT_ACK_CHUNK_TAG_NOCHECK         0x00000100
 #define FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK      0x00000200
@@ -112,18 +124,71 @@ struct int_symbol {
 #define FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK      0x00000400
 #define FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK        0x00000800
 
+#define FLAG_RECONFIG_RESULT_NOCHECK                            0x00000010
+#define FLAG_RECONFIG_SENDER_NEXT_TSN_NOCHECK                   0x00000040
+#define FLAG_RECONFIG_RECEIVER_NEXT_TSN_NOCHECK                 0x00000080
+#define FLAG_RECONFIG_REQ_SN_NOCHECK                            0x00000010
+#define FLAG_RECONFIG_RESP_SN_NOCHECK                           0x00000020
+#define FLAG_RECONFIG_LAST_TSN_NOCHECK                          0x00000040
+#define FLAG_RECONFIG_NUMBER_OF_NEW_STREAMS_NOCHECK             0x00000080
+
 /* SCTP option names */
-#define SCTP_INITMSG   0
-#define SCTP_RTOINFO   1
-#define SCTP_NODELAY   2
-#define SCTP_MAXSEG    3
-#define SCTP_DELAYED_SACK 4
-#define SCTP_MAX_BURST 5
+#define SCTP_INITMSG                0
+#define SCTP_RTOINFO                1
+#define SCTP_NODELAY                2
+#define SCTP_MAXSEG                 3
+#define SCTP_DELAYED_SACK           4
+#define SCTP_MAX_BURST              5
+#define SCTP_FRAGMENT_INTERLEAVE    6
+#define SCTP_INTERLEAVING_SUPPORTED 7
+#define SCTP_PADDR_PARAMS           8
+#define SCTP_ASSOCINFO              9
+#define SCTP_PEER_ADDR_PARAMS       10
+
+#define SCTP_UNORDERED  1
+
+#define SCTP_ENABLE_STREAM_RESET        0x00000900      /* struct sctp_assoc_value */
+#define SCTP_RESET_STREAMS              0x00000901      /* struct sctp_reset_streams */
+#define SCTP_RESET_ASSOC                0x00000902      /* sctp_assoc_t */
+#define SCTP_ADD_STREAMS                0x00000903      /* struct sctp_add_streams */
+#define SCTP_STATUS                     0x00000100
+
+#define PD_O_RDWR                       0x002
+#define SCTP_COOKIE_WAIT                0x0002
+
+/* For enable stream reset */
+#define SCTP_ENABLE_RESET_STREAM_REQ    0x00000001
+#define SCTP_ENABLE_RESET_ASSOC_REQ     0x00000002
+#define SCTP_ENABLE_CHANGE_ASSOC_REQ    0x00000004
+#define SCTP_ENABLE_VALUE_MASK          0x00000007
+/* For reset streams */
+#define SCTP_STREAM_RESET_INCOMING      0x00000001
+#define SCTP_STREAM_RESET_OUTGOING      0x00000002
+
+#define SCTP_IPV4_ADDRESS_PARAMETER_TYPE    0x0005
+#define SCTP_IPV6_ADDRESS_PARAMETER_TYPE    0x0006
+
+#define SPP_HB_ENABLE           0x00000001
+#define SPP_HB_DISABLE          0x00000002
+#define SPP_HB_DEMAND           0x00000004
+#define SPP_PMTUD_ENABLE        0x00000008
+#define SPP_PMTUD_DISABLE       0x00000010
+#define SPP_HB_TIME_IS_ZERO     0x00000080
+#define SPP_IPV6_FLOWLABEL      0x00000100
+#define SPP_DSCP                0x00000200
+#define SPP_IPV4_TOS            SPP_DSCP
 
 enum direction_t {
     DIRECTION_INVALID,
     DIRECTION_INBOUND,  /* packet coming into the kernel under test */
     DIRECTION_OUTBOUND, /* packet leaving the kernel under test */
+};
+
+/* A --name=value option in a script */
+struct option_list {
+    char *name;
+    char *value;
+    struct option_list *next;
 };
 
 
@@ -159,6 +224,7 @@ enum event_t {
     INVALID_EVENT = 0,
     PACKET_EVENT,
     SYSCALL_EVENT,
+    COMMAND_EVENT,
     NUM_EVENT_TYPES,
 };
 
@@ -180,13 +246,21 @@ enum expression_t {
     EXPR_LINGER,          /* struct linger for SO_LINGER */
     EXPR_WORD,            /* unquoted word in 'string' */
     EXPR_STRING,          /* double-quoted string in 'string' */
+    EXPR_SOCKET_ADDRESS_IPV4, /* sockaddr_in in 'socket_address_ipv4' */
+    EXPR_SOCKET_ADDRESS_IPV6, /* sockaddr_in6 in 'socket_address_ipv6' */
     EXPR_BINARY,          /* binary expression, 2 sub-expressions */
     EXPR_LIST,            /* list of expressions */
     EXPR_SCTP_RTOINFO, /* struct sctp_rtoinfo for SCTP_RTOINFO */
     EXPR_SCTP_INITMSG, /* struct sctp_initmsg for SCTP_INITMSG */
     EXPR_SCTP_ASSOCVAL, /* struct sctp_assoc_value */
     EXPR_SCTP_SACKINFO, /* struct sctp_sack_info for SCTP_DELAYED_SACK */
-    EXPR_SCTP_NODELAY,
+    EXPR_SCTP_PEER_ADDR_PARAMS, /* struct for sctp_paddrparams for SCTP_PEER_ADDR_PARAMS */
+    EXPR_SCTP_SNDRCVINFO,
+    EXPR_SCTP_RESET_STREAMS,
+    EXPR_SCTP_STATUS,
+    EXPR_SCTP_ASSOCPARAMS, /* struct sctp_assocparams for SCTP_ASSOCINFO */
+    EXPR_SCTP_ADD_STREAMS,
+
     NUM_EXPR_TYPES,
 };
 
@@ -220,6 +294,7 @@ class PacketDrillConfig;
 class PacketDrillScript;
 class PacketDrillExpression;
 class PacketDrillStruct;
+class PacketDrillOption;
 
 /* A system call and its expected result. */
 struct syscall_spec {
@@ -229,6 +304,11 @@ struct syscall_spec {
     struct errno_spec *error;    /* errno symbol or NULL */
     char *note;                  /* extra note from strace */
     int64 end_usecs;             /* finish time, if it blocks */
+};
+
+/* A shell command line to execute using system(3) */
+struct command_spec {
+    const char *command_line;    /* executed with /bin/sh */
 };
 
 /* The public, top-level call to parse a test script. It first parses the
@@ -247,6 +327,9 @@ struct syscall_spec {
 int parse_script(PacketDrillConfig *config,
     PacketDrillScript *script,
     struct invocation *callback_invocation);
+
+void parse_and_finalize_config(struct invocation *invocation);
+
 
 /* Top-level info about the invocation of a test script */
 struct invocation {
@@ -283,6 +366,16 @@ struct sctp_assoc_value_expr {
     PacketDrillExpression *assoc_value;
 };
 
+/* Parse tree for sctp_assocparams struct in [gs]etsockopt syscall. */
+struct sctp_assocparams_expr {
+    PacketDrillExpression *sasoc_assoc_id;
+    PacketDrillExpression *sasoc_asocmaxrxt;
+    PacketDrillExpression *sasoc_number_peer_destinations;
+    PacketDrillExpression *sasoc_peer_rwnd;
+    PacketDrillExpression *sasoc_local_rwnd;
+    PacketDrillExpression *sasoc_cookie_life;
+};
+
 /* Parse tree for a sctp_sack_info struct in a [gs]etsockopt syscall. */
 struct sctp_sack_info_expr {
     PacketDrillExpression *sack_assoc_id;
@@ -290,6 +383,57 @@ struct sctp_sack_info_expr {
     PacketDrillExpression *sack_freq;
 };
 
+/* Parse tree for a sctp_paddrparams struct in a [gs]etsockopt syscall. */
+struct sctp_paddrparams_expr {
+    PacketDrillExpression *spp_assoc_id;
+    PacketDrillExpression *spp_address;
+    PacketDrillExpression *spp_hbinterval;
+    PacketDrillExpression *spp_pathmaxrxt;
+    PacketDrillExpression *spp_pathmtu;
+    PacketDrillExpression *spp_flags;
+    PacketDrillExpression *spp_ipv6_flowlabel;
+    PacketDrillExpression *spp_dscp;
+};
+
+/* Parse tree for sctp_sndrcvinfo in sctp_recvmsg syscall. */
+struct sctp_sndrcvinfo_expr {
+    PacketDrillExpression *sinfo_stream;
+    PacketDrillExpression *sinfo_ssn;
+    PacketDrillExpression *sinfo_flags;
+    PacketDrillExpression *sinfo_ppid;
+    PacketDrillExpression *sinfo_context;
+    PacketDrillExpression *sinfo_timetolive;
+    PacketDrillExpression *sinfo_tsn;
+    PacketDrillExpression *sinfo_cumtsn;
+    PacketDrillExpression *sinfo_assoc_id;
+};
+
+struct sctp_reset_streams_expr {
+    PacketDrillExpression *srs_assoc_id;
+    PacketDrillExpression *srs_flags;
+    PacketDrillExpression *srs_number_streams;
+    PacketDrillExpression *srs_stream_list;
+};
+
+/* Parse tree for a sctp_status struct in a [gs]etsockopt syscall. */
+struct sctp_status_expr {
+    PacketDrillExpression *sstat_assoc_id;
+    PacketDrillExpression *sstat_state;
+    PacketDrillExpression *sstat_rwnd;
+    PacketDrillExpression *sstat_unackdata;
+    PacketDrillExpression *sstat_penddata;
+    PacketDrillExpression *sstat_instrms;
+    PacketDrillExpression *sstat_outstrms;
+    PacketDrillExpression *sstat_fragmentation_point;
+    PacketDrillExpression *sstat_primary;
+};
+
+/* Parse tree for sctp_add_stream struct for setsockopt. */
+struct sctp_add_streams_expr {
+    PacketDrillExpression *sas_assoc_id;
+    PacketDrillExpression *sas_instrms;
+    PacketDrillExpression *sas_outstrms;
+};
 
 class INET_API PacketDrillConfig
 {
@@ -312,6 +456,7 @@ class INET_API PacketDrillConfig
         int getWireProtocol() { return wireProtocol; };
         int getSocketDomain() { return socketDomain; };
         int getToleranceUsecs() { return tolerance_usecs; };
+        void parseScriptOptions(cQueue *options);
 };
 
 
@@ -349,6 +494,7 @@ class INET_API PacketDrillEvent : public cObject
         union {
             PacketDrillPacket *packet;
             struct syscall_spec *syscall;
+            struct command_spec *command;
         } eventKind;    /* pointer to the event */
 
     public:
@@ -373,6 +519,8 @@ class INET_API PacketDrillEvent : public cObject
         void setPacket(PacketDrillPacket* packet) { eventKind.packet = packet; };
         void setSyscall(struct syscall_spec *syscall) { eventKind.syscall = syscall; };
         struct syscall_spec *getSyscall() { return eventKind.syscall; };
+        void setCommand(struct command_spec *command) { eventKind.command = command; };
+        struct command_spec *getCommand() { return eventKind.command; };
 };
 
 
@@ -391,7 +539,14 @@ class INET_API PacketDrillExpression : public cObject
             struct sctp_rtoinfo_expr *sctp_rtoinfo;
             struct sctp_initmsg_expr *sctp_initmsg;
             struct sctp_assoc_value_expr *sctp_assoc_value;
+            struct sctp_assocparams_expr *sctp_assocparams;
             struct sctp_sack_info_expr *sctp_sack_info;
+            struct sctp_paddrparams_expr *sctp_paddr_params;
+            struct sctp_sndrcvinfo_expr *sctp_sndrcvinfo;
+            struct sctp_reset_streams_expr *sctp_resetstreams;
+            struct sctp_add_streams_expr *sctp_addstreams;
+            struct sctp_status_expr *sctp_status;
+            L3Address *ip_address;
             cQueue *list;
         } value;
         const char *format; /* the printf format for printing the value */
@@ -409,18 +564,33 @@ class INET_API PacketDrillExpression : public cObject
         void setList(cQueue* queue) { value.list = queue; };
         struct binary_expression* getBinary() { return value.binary; };
         void setBinary(struct binary_expression* bin) { value.binary = bin; };
-
         void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; };
         struct sctp_rtoinfo_expr *getRtoinfo() { return value.sctp_rtoinfo; };
         void setInitmsg(struct sctp_initmsg_expr *exp) { value.sctp_initmsg = exp; };
         struct sctp_initmsg_expr *getInitmsg() { return value.sctp_initmsg; };
+        void setAssocParams(struct sctp_assocparams_expr *exp) { value.sctp_assocparams = exp; };
+        struct sctp_assocparams_expr *getAssocParams() { return value.sctp_assocparams; };
         void setAssocval(struct sctp_assoc_value_expr *exp) { value.sctp_assoc_value = exp; };
         struct sctp_assoc_value_expr *getAssocval() { return value.sctp_assoc_value; };
         void setSackinfo(struct sctp_sack_info_expr *exp) { value.sctp_sack_info = exp; };
         struct sctp_sack_info_expr *getSackinfo() { return value.sctp_sack_info; };
+        void setPaddrParams(struct sctp_paddrparams_expr *exp) {value.sctp_paddr_params = exp; };
+        struct sctp_paddrparams_expr *getPaddrParams() { return value.sctp_paddr_params; };
+        void setSndRcvInfo(struct sctp_sndrcvinfo_expr *exp) {value.sctp_sndrcvinfo = exp; };
+        struct sctp_sndrcvinfo_expr *getSndRcvInfo() { return value.sctp_sndrcvinfo; };
+        void setResetStreams(struct sctp_reset_streams_expr *exp) {value.sctp_resetstreams = exp; };
+        struct sctp_reset_streams_expr *getResetStreams() { return value.sctp_resetstreams; };
+        void setIp(L3Address *exp) {value.ip_address = exp; };
+        void setStatus(struct sctp_status_expr *exp) {value.sctp_status = exp; };
+        struct sctp_status_expr *getStatus() { return value.sctp_status; };
+        void setAddStreams(struct sctp_add_streams_expr *exp) {value.sctp_addstreams = exp; };
+        struct sctp_add_streams_expr *getAddStreams() { return value.sctp_addstreams; };
+
 
         int unescapeCstringExpression(const char *input_string, char **error);
         int getS32(int32 *value, char **error);
+        int getU16(uint16 *value, char **error);
+        int getU32(uint32 *value, char **error);
         int symbolToInt(const char *input_symbol, int64 *output_integer, char **error);
         bool lookupIntSymbol(const char *input_symbol, int64 *output_integer, struct int_symbol *symbols);
 };
@@ -433,6 +603,7 @@ class INET_API PacketDrillScript
         ~PacketDrillScript();
 
     private:
+        cQueue *optionList;
         cQueue *eventList;
         char *buffer;
         int length;
@@ -446,24 +617,48 @@ class INET_API PacketDrillScript
         int getLength() { return length; };
         const char *getScriptPath() { return scriptPath; };
         cQueue *getEventList() { return eventList; };
+        cQueue *getOptionList() { return optionList; };
         void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); };
+        void addOption(PacketDrillOption *opt) { optionList->insert((cObject *)opt); };
 };
 
 class INET_API PacketDrillStruct: public cObject
 {
     public:
         PacketDrillStruct();
-        PacketDrillStruct(uint32 v1, uint32 v2);
+        PacketDrillStruct(int64 v1, int64 v2);
+        PacketDrillStruct(int64 v1, int64 v2, int32 v3, int32 v4, cQueue *streams);
 
-        uint32 getValue1() { return value1; };
-        void setValue1(uint32 value) { value1 = value; };
-        uint32 getValue2() { return value2; };
-        void setValue2(uint32 value) { value2 = value; };
+        int64 getValue1() { return value1; };
+        void setValue1(uint64 value) { value1 = value; };
+        int64 getValue2() { return value2; };
+        void setValue2(uint64 value) { value2 = value; };
+        int32 getValue3() { return value3; }
+        int32 getValue4() { return value4; }
+        cQueue *getStreams() { return streamNumbers; };
         virtual PacketDrillStruct *dup() const { return new PacketDrillStruct(*this); };
 
     private:
-        uint32 value1;
-        uint32 value2;
+        int64 value1;
+        int64 value2;
+        int32 value3;
+        int32 value4;
+        cQueue *streamNumbers;
+};
+
+class INET_API PacketDrillOption: public cObject
+{
+    public:
+        PacketDrillOption(char *name, char *value);
+
+        char *getName() { return name; };
+        void setName(char *name_) { strcpy(name, name_); };
+        char *getValue() { return value; };
+        void setValue(char *value_) { strcpy(value, value_); };
+
+    private:
+        char *name;
+        char *value;
 };
 
 class INET_API PacketDrillBytes: public cObject
@@ -474,6 +669,7 @@ class INET_API PacketDrillBytes: public cObject
 
         void appendByte(uint8 byte);
         uint32 getListLength() { return listLength; };
+        ByteArray* getByteList() { return &byteList; };
 
     private:
         ByteArray byteList;
@@ -533,13 +729,17 @@ class INET_API PacketDrillSctpChunk : public cObject
 class INET_API PacketDrillSctpParameter : public cObject
 {
     public:
-        PacketDrillSctpParameter(int16 len_, void* content_);
+        PacketDrillSctpParameter(uint16 type_, int16 len_, void* content_);
+        ~PacketDrillSctpParameter();
 
     private:
         int32 parameterValue;
         cQueue* parameterList;
         int16 parameterLength;
+        ByteArray *bytearray;
         uint32 flags;
+        uint16 type;
+        void *content;
 
     public:
         int32 getValue() { return parameterValue; };
@@ -547,6 +747,10 @@ class INET_API PacketDrillSctpParameter : public cObject
         uint32 getFlags() { return flags; };
         void setFlags(uint32 flgs_) { flags = flgs_; };
         int16 getLength() { return parameterLength; };
+        uint16 getType() { return type; };
+        ByteArray* getByteList() { return bytearray; };
+        void setByteArrayPointer(ByteArray *ptr) { bytearray = ptr; };
+        void *getContent() { return content; };
 };
 
 #endif

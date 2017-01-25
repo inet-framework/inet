@@ -63,6 +63,7 @@ struct BGPOptionalParameters
 packet BGPOpenMessage extends BGPHeader
 {
     @omitGetVerb(true);
+    @fieldNameSuffix("_var");
     type = BGP_OPEN;
     byteLength = BGP_HEADER_OCTETS + BGP_OPEN_OCTETS;
 

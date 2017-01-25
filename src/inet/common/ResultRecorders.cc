@@ -26,37 +26,37 @@ void GroupCountRecorder::collect(std::string value) {
     groupcounts[value]++;
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) {
     collect(b ? "true" : "false");
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, long l DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) {
     std::stringstream s;
     s << l;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) {
     std::stringstream s;
     s << l;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) {
     std::stringstream s;
     s << d;
     collect(s.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) {
     collect(v.str());
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) {
     collect(s);
 }
 
-void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj DETAILS_ARG) {
+void GroupCountRecorder::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) {
     collect(obj->getFullPath());
 }
 

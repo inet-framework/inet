@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/common/packetlevel/Radio.h"
@@ -83,10 +84,10 @@ void Radio::initialize(int stage)
 std::ostream& Radio::printToStream(std::ostream& stream, int level) const
 {
     stream << static_cast<const cSimpleModule *>(this);
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", antenna = " << printObjectToString(antenna, level - 1)
-               << ", transmitter = " << printObjectToString(transmitter, level - 1)
-               << ", receiver = " << printObjectToString(receiver, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", antenna = " << printObjectToString(antenna, level + 1)
+               << ", transmitter = " << printObjectToString(transmitter, level + 1)
+               << ", receiver = " << printObjectToString(receiver, level + 1);
     return stream;
 }
 
@@ -283,6 +284,7 @@ void Radio::handleLowerCommand(cMessage *message)
 
 void Radio::handleUpperPacket(cPacket *packet)
 {
+    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
         if (transmissionTimer->isScheduled())
             throw cRuntimeError("Received frame from upper layer while already transmitting.");
@@ -363,6 +365,7 @@ void Radio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
     EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
+    check_and_cast<RadioMedium *>(medium)->fireTransmissionStarted(transmission);
 }
 
 void Radio::continueTransmission()
@@ -388,6 +391,7 @@ void Radio::endTransmission()
     EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
+    check_and_cast<RadioMedium *>(medium)->fireTransmissionEnded(transmission);
 }
 
 void Radio::abortTransmission()
@@ -395,6 +399,7 @@ void Radio::abortTransmission()
     auto part = (IRadioSignal::SignalPart)transmissionTimer->getKind();
     auto radioFrame = static_cast<RadioFrame *>(transmissionTimer->getContextPointer());
     auto transmission = radioFrame->getTransmission();
+    transmissionTimer->setContextPointer(nullptr);
     EV_INFO << "Transmission aborted: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     EV_WARN << "Aborting ongoing transmissions is not supported" << endl;
     cancelEvent(transmissionTimer);
@@ -428,6 +433,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     scheduleAt(arrival->getEndTime(part), timer);
     updateTransceiverState();
     updateTransceiverPart();
+    check_and_cast<RadioMedium *>(medium)->fireReceptionStarted(reception);
 }
 
 void Radio::continueReception(cMessage *timer)
@@ -470,6 +476,7 @@ void Radio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, radioFrame->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, radioFrame);
+        emit(LayeredProtocolBase::packetSentToUpperSignal, macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;
     }
@@ -477,6 +484,7 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
+    check_and_cast<RadioMedium *>(medium)->fireReceptionEnded(reception);
     delete timer;
 }
 
@@ -603,7 +611,7 @@ void Radio::refreshDisplay() const
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
     if (displayInterferenceRange || displayCommunicationRange) {
-        cModule *host = findContainingNode(const_cast<Radio*>(this));
+        cModule *host = findContainingNode(this);
         cDisplayString& displayString = host->getDisplayString();
         if (displayInterferenceRange) {
             m maxInterferenceRage = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxInterferenceRange(this);

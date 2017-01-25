@@ -15,6 +15,7 @@
 //
 // Author: Benjamin Martin Seregi
 
+#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -92,6 +93,7 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
             EV_INFO << "Received " << msg << " from network." << endl;
             EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
             delete frame->removeTag<DispatchProtocolReq>();
+            emit(LayeredProtocolBase::packetReceivedFromLowerSignal, frame);
             handleAndDispatchFrame(frame);
         }
     }
@@ -183,6 +185,7 @@ void Ieee8021dRelay::dispatch(EtherFrame *frame, InterfaceEntry *ie)
 
     numDispatchedNonBPDUFrames++;
     frame->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
     send(frame, "ifOut");
 }
 
@@ -217,6 +220,7 @@ void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
 
     EV_INFO << "Sending BPDU frame " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
+    emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
     send(frame, "ifOut");
 }
 

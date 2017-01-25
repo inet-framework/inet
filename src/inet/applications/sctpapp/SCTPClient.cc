@@ -109,6 +109,7 @@ void SCTPClient::initialize(int stage)
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
+        socket.setOutputGate(gate("socketOut"));
 
         if (addresses.size() == 0)
             socket.bind(port);

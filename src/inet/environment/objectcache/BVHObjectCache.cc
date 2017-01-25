@@ -45,6 +45,11 @@ void BVHObjectCache::initialize(int stage)
         leafCapacity = par("leafCapacity");
         axisOrder = par("axisOrder");
     }
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
+    {
+        for (int i = 0; i < physicalEnvironment->getNumObjects(); i++)
+            insertObject(physicalEnvironment->getObject(i));
+    }
 }
 
 bool BVHObjectCache::insertObject(const IPhysicalObject *object)

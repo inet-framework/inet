@@ -152,7 +152,7 @@ InterfaceEntry *STPBase::getPortInterfaceEntry(unsigned int interfaceId)
     return gateIfEntry;
 }
 
-int STPBase::getRootInterfaceId()
+int STPBase::getRootInterfaceId() const
 {
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);

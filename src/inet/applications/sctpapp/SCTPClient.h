@@ -66,6 +66,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
     int64 bufferSize;
     bool timer;
     bool sendAllowed;
+    const char *stateNameStr;
 
     // statistics
     unsigned long int packetsSent;

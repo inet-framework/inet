@@ -65,7 +65,7 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
 std::ostream& QuadTreeNeighborCache::printToStream(std::ostream& stream, int level) const
 {
     stream << "QuadTreeNeighborCache";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", maxNumOfPointsPerQuadrant = " << maxNumOfPointsPerQuadrant
                << ", refillPeriod = " << refillPeriod
                << ", maxSpeed = " << maxSpeed;

@@ -40,6 +40,7 @@ package inet.linklayer.ethernet;
 simple EtherEncap like IEtherEncap
 {
     parameters:
+        string interfaceTableModule;   // The path to the InterfaceTable module
         bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
         @display("i=block/square");
         @signal[encapPk](type=cPacket);

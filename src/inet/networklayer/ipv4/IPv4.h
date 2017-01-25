@@ -293,7 +293,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /// cListener method
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   protected:
     virtual bool isNodeUp();

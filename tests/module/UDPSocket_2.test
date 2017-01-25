@@ -47,13 +47,23 @@ ned-path = .;../../../../src;../../lib
 network = SimpleTestNetwork
 cmdenv-express-mode = false
 cmdenv-event-banner-details = true
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.client.numApps = 1
 **.client.app[0].typename = "TestApp"
 
 %exitcode: 1
 
-%contains-regex: stdout
-<!> Error in module \(inet::UDP\) SimpleTestNetwork\.client\.udp \(id=\d+\) at event \#\d+, t=0: bind: socket is already bound \(sockId=\d+\).
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: test_err.out
+(<!> Error in module \(inet::UDP\) SimpleTestNetwork\.client\.udp \(id=\d+\) at event \#\d+, t=0: bind: socket is already bound \(sockId=\d+\).)|(<!> Error: bind: socket is already bound \(sockId=\d+\) -- in module \(inet::UDP\) SimpleTestNetwork\.client\.udp \(id=\d+\), at t=0s, event \#\d+)
 %#--------------------------------------------------------------------------------------------------------------
 %# %not-contains: stdout
 %# undisposed object:

@@ -26,7 +26,7 @@ Define_Module(RayleighFading);
 std::ostream& RayleighFading::printToStream(std::ostream& stream, int level) const
 {
     stream << "RayleighFading";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", alpha = " << alpha
                << "systemLoss = " << systemLoss;
     return stream;

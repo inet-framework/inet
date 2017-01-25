@@ -54,7 +54,6 @@ CommunicationCacheBase::RadioCacheEntry::~RadioCacheEntry()
 CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry() :
     interferenceEndTime(NaN),
     frame(nullptr),
-    figure(nullptr),
     receptionCacheEntries(nullptr)
 {
 }
@@ -195,21 +194,6 @@ void CommunicationCacheBase::setCachedFrame(const ITransmission *transmission, c
 void CommunicationCacheBase::removeCachedFrame(const ITransmission *transmission)
 {
     getTransmissionCacheEntry(transmission)->frame = nullptr;
-}
-
-cFigure *CommunicationCacheBase::getCachedFigure(const ITransmission *transmission)
-{
-    return getTransmissionCacheEntry(transmission)->figure;
-}
-
-void CommunicationCacheBase::setCachedFigure(const ITransmission *transmission, cFigure *figure)
-{
-    getTransmissionCacheEntry(transmission)->figure = figure;
-}
-
-void CommunicationCacheBase::removeCachedFigure(const ITransmission *transmission)
-{
-    getTransmissionCacheEntry(transmission)->figure = nullptr;
 }
 
 const IArrival *CommunicationCacheBase::getCachedArrival(const IRadio *receiver, const ITransmission *transmission)

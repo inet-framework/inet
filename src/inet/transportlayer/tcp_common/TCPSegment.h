@@ -50,7 +50,7 @@ class INET_API Sack : public Sack_Base
     virtual bool contains(const Sack& other) const;
     virtual void clear();
     virtual void setSegment(unsigned int start_par, unsigned int end_par);
-    virtual std::string str() const;
+    virtual std::string str() const STR_COMPAT_OVERRIDE;
 };
 
 /**
@@ -75,7 +75,7 @@ class INET_API TCPSegment : public TCPSegment_Base, public ITransportPacket
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);
     virtual TCPSegment *dup() const override { return new TCPSegment(*this); }
-    virtual void parsimPack(cCommBuffer *b) PARSIMPACK_CONST override;
+    virtual void parsimPack(cCommBuffer *b) const override;
     virtual void parsimUnpack(cCommBuffer *b) override;
 
     /** Generated but unused method, should not be called. */

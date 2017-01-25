@@ -48,12 +48,13 @@ class INET_API BVHObjectCache : public IObjectCache, public cModule
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
+    virtual bool insertObject(const IPhysicalObject *object);
+
   public:
     BVHObjectCache();
     virtual ~BVHObjectCache();
 
-    bool insertObject(const IPhysicalObject *object) override;
-    void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
+    virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };
 
 } // namespace physicalenvironment

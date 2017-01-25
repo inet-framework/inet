@@ -169,7 +169,7 @@ class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual ~IGMPv2();
 
   protected:

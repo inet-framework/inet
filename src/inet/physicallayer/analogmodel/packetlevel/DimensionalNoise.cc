@@ -30,12 +30,12 @@ DimensionalNoise::DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz ca
 std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) const
 {
     stream << "DimensionalNoise";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", powerDimensionSet = " << power->getDimensionSet();
-    if (level >= PRINT_LEVEL_DEBUG)
+    if (level <= PRINT_LEVEL_DEBUG)
         stream << ", powerMax = " << MappingUtils::findMax(*power)
                << ", powerMin = " << MappingUtils::findMin(*power);
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", power = " << power;
     return NarrowbandNoiseBase::printToStream(stream, level);
 }

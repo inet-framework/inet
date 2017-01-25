@@ -86,7 +86,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
         ASSERT(false);
 }
 
-void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

@@ -2,14 +2,15 @@
 
 +0  socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
 +0  connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
-+0  > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=2048, is=10, tsn=0, ...]
-+0.05  < sctp: INIT_ACK[flgs=0, tag=22, a_rwnd=100000, os=2048, is=10, tsn=0, STATE_COOKIE[len=4, val=...]]
++0  > sctp: INIT[flgs=0, tag=..., a_rwnd=..., os=..., is=..., tsn=1, ...]
++0.05  < sctp: INIT_ACK[flgs=0, tag=22, a_rwnd=100000, os=2048, is=10, tsn=1, STATE_COOKIE[len=4, val=...]]
 +0  > sctp: COOKIE_ECHO[flgs=0, len=4, val=...]
 +0.05  < sctp: COOKIE_ACK[flgs=0]
 
 +30 ~ +35 > sctp: HEARTBEAT[flgs=0, HEARTBEAT_INFORMATION[len=..., val=...]]
 +0.05 < sctp: HEARTBEAT_ACK[flgs=0, HEARTBEAT_INFORMATION[len=..., val=...]]
 +1  close(3) = 0
-+0  > sctp: SHUTDOWN[flgs=0, cum_tsn=-1]
++0  > sctp: SHUTDOWN[flgs=0, cum_tsn=0]
 +0.05  < sctp: SHUTDOWN_ACK[flgs=0]
 +0  > sctp: SHUTDOWN_COMPLETE[flgs=0]
+

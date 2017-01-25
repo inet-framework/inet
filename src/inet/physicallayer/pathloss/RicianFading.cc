@@ -39,7 +39,7 @@ void RicianFading::initialize(int stage)
 std::ostream& RicianFading::printToStream(std::ostream& stream, int level) const
 {
     stream << "RicianFading";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", alpha = " << alpha
                << ", system loss = " << systemLoss
                << ", k = " << k;

@@ -85,6 +85,81 @@ static int64 hextol(const char *s) {
     return strtol(yytext + 2, NULL, 16);
 }
 
+enum ifdef_os {
+    FreeBSD_IFDEF = 1, Omnet_IFDEF
+};
+
+#define MAX_IFDEF_DEPTH 1
+YY_BUFFER_STATE ifdef_stack[MAX_IFDEF_DEPTH];
+int ifdef_stack_ptr = 0;
+
+static inline int get_os_name_length(enum ifdef_os os) {
+    switch (os) {
+    case FreeBSD_IFDEF:
+        return strlen("FreeBSD");
+    case Omnet_IFDEF:
+        return strlen("Omnet");
+    default:
+        return -1;
+    }
+}
+
+static inline bool ignore_ifdef(enum ifdef_os os) {
+#ifdef __FreeBSD__
+    if (os == FreeBSD_IFDEF) {
+        return false;
+    }
+#endif
+#ifdef OMNETPP_VERSION
+    if (os == Omnet_IFDEF) {
+        return false;
+    }
+#endif
+    return true;
+}
+
+static inline char* remove_ifdef_start_and_endtag(char *code, int os_name_length) {
+    unsigned int ifdef_length = strlen("#ifdef ");
+    unsigned int endif_length = strlen("#endif");
+    unsigned int newline_before_endif = 0;
+    char *code_without_ifdef = NULL;
+
+    code_without_ifdef = code + ifdef_length + os_name_length;
+    printf("ifdef_length=%d os_name_length=%d code_without_ifdef=%zu\n", ifdef_length, os_name_length, strlen(code_without_ifdef));
+    newline_before_endif = strlen(code_without_ifdef) - endif_length;
+    code_without_ifdef[newline_before_endif] = (char) 0;
+    return code_without_ifdef;
+}
+
+
+static void handle_ifdef(enum ifdef_os os, const char *s) {
+    char *code = NULL;
+    char *code_without_ifdef = NULL;
+    int os_name_length = get_os_name_length(os);
+printf("handle ifdef code=%s\n", code);
+    if (os_name_length == -1) {
+        fprintf(stderr, "handle_ifdef with unknown os called.\n");
+        exit(1);
+    }
+
+    if (ignore_ifdef(os)) {
+        return;
+    }
+
+    if (ifdef_stack_ptr >= MAX_IFDEF_DEPTH) {
+        fprintf(stderr, "Ifdefs nested too deeply");
+        exit(1);
+    }
+
+    code = strdup(s);
+
+    code_without_ifdef = remove_ifdef_start_and_endtag(code, os_name_length);
+    ifdef_stack[ifdef_stack_ptr++] = YY_CURRENT_BUFFER;
+    yy_switch_to_buffer(yy_scan_string(code_without_ifdef));
+printf("code_without_ifdef=%s\n", code_without_ifdef);
+    free(code);
+}
+
 %}
 
 %{
@@ -106,6 +181,33 @@ cpp_comment	\/\/[^\n]*\n
  */
 c_comment    \/\*(([^*])|(\*[^\/]))*\*\/
 
+/* This matches the following platform specific #ifdef-forms:
+ *   #ifdef FreeBSD => Code that only FreeBSD hosts should execute
+ *   #ifdef Omnet   => Code that only Omnet hosts should execute
+ *
+ *   the pattern for using #ifdef is like this:
+ *   #ifdef FreeBSD
+ *   (specific code only for freebsd)
+ *   #endif
+ */
+
+/* these are the tags that identify the start and ending of an ifdef block */
+ifdef_begin #ifdef[ ]
+ifdef_end   #endif
+/* end_matcher actually matches everything except the "#endif" tag. */
+end_matcher (([^#])|(#[^e])|(#e[^n])|(#en[^d])|(#end[^i])|(#endi[^f]))*
+
+ifdef_freebsd   {ifdef_begin}(?i:FreeBSD){end_matcher}{ifdef_end}
+ifdef_omnet     {ifdef_begin}(?i:Omnet){end_matcher}{ifdef_end}
+
+/* The regexp for code snippets is analogous to that for C comments.
+ * Here is a summary of the regexp for code snippets:
+ *   %{
+ *   any number of:
+ *     (non-}) or (} then non-%)
+ *   }%
+ */
+code         \%\{(([^}])|(\}[^\%]))*\}\%
 
 /* IPv4: a regular experssion for an IPv4 address */
 ipv4_addr    [0-9]+[.][0-9]+[.][0-9]+[.][0-9]+
@@ -136,6 +238,9 @@ ipv6_addr ({v0}|{v1}|{v2}|{v3}|{v4}|{v5}|{v6}|{v7}|{v8}|{v9}|{v10}|{v11}|{v12})
 
 %%
 udp                 return UDP;
+sa_family           return SA_FAMILY;
+sin_port            return SIN_PORT;
+sin_addr            return SIN_ADDR;
 ack                 return ACK;
 eol                 return EOL;
 ecr                 return ECR;
@@ -145,6 +250,8 @@ sack                return TCPSACK;
 sackOK              return SACKOK;
 TS                  return TIMESTAMP;
 val                 return VAL;
+htons               return _HTONS_;
+htonl               return _HTONL_;
 win                 return WIN;
 wscale              return WSCALE;
 sctp                return MYSCTP;
@@ -164,6 +271,19 @@ COOKIE_ACK          return MYCOOKIE_ACK;
 SHUTDOWN_COMPLETE   return MYSHUTDOWN_COMPLETE;
 STATE_COOKIE        return STATE_COOKIE;
 HEARTBEAT_INFORMATION return HEARTBEAT_INFORMATION;
+SUPPORTED_EXTENSIONS return MYSUPPORTED_EXTENSIONS;
+SUPPORTED_ADDRESS_TYPES    return MYSUPPORTED_ADDRESS_TYPES;
+RECONFIG            return RECONFIG;
+OUTGOING_SSN_RESET  return OUTGOING_SSN_RESET;
+INCOMING_SSN_RESET  return INCOMING_SSN_RESET;
+SSN_TSN_RESET       return SSN_TSN_RESET;
+ADD_OUTGOING_STREAMS return ADD_OUTGOING_STREAMS;
+ADD_INCOMING_STREAMS return ADD_INCOMING_STREAMS;
+INVALID_STREAM_IDENTIFIER return MYINVALID_STREAM_IDENTIFIER;
+RECONFIG_RESPONSE   return RECONFIG_RESPONSE;
+IPv4                return IPV4_TYPE;
+IPv6                return IPV6_TYPE;
+types               return TYPES;
 type                return TYPE;
 flgs                return FLAGS;
 len                 return LEN;
@@ -190,6 +310,55 @@ sinit_max_attempts  return SINIT_MAX_ATTEMPTS;
 sinit_max_init_timeo return SINIT_MAX_INIT_TIMEO;
 assoc_value         return ASSOC_VALUE;
 assoc_id            return ASSOC_ID;
+spp_assoc_id        return SPP_ASSOC_ID;
+spp_address         return SPP_ADDRESS;
+spp_hbinterval      return SPP_HBINTERVAL;
+spp_pathmaxrxt      return SPP_PATHMAXRXT;
+spp_pathmtu         return SPP_PATHMTU;
+spp_flags           return SPP_FLAGS;
+spp_ipv6_flowlabel  return SPP_IPV6_FLOWLABEL_; /* avoid name clash */
+spp_dscp            return SPP_DSCP_; /* avoid name clash */
+sinfo_stream        return SINFO_STREAM;
+sinfo_ssn           return SINFO_SSN;
+sinfo_flags         return SINFO_FLAGS;
+sinfo_ppid          return SINFO_PPID;
+sinfo_context       return SINFO_CONTEXT;
+sinfo_timetolive    return SINFO_TIMETOLIVE;
+sinfo_tsn           return SINFO_TSN;
+sinfo_cumtsn        return SINFO_CUMTSN;
+sinfo_assoc_id      return SINFO_ASSOC_ID;
+sinfo_pr_value      return SINFO_PR_VALUE;
+sstat_assoc_id      return SSTAT_ASSOC_ID;
+sstat_state         return SSTAT_STATE;
+sstat_rwnd          return SSTAT_RWND;
+sstat_unackdata     return SSTAT_UNACKDATA;
+sstat_penddata      return SSTAT_PENDDATA;
+sstat_instrms       return SSTAT_INSTRMS;
+sstat_outstrms      return SSTAT_OUTSTRMS;
+sstat_fragmentation_point return SSTAT_FRAGMENTATION_POINT;
+sstat_primary       return SSTAT_PRIMARY;
+srs_assoc_id        return SRS_ASSOC_ID;
+srs_flags           return SRS_FLAGS;
+srs_number_streams  return SRS_NUMBER_STREAMS;
+srs_stream_list     return SRS_STREAM_LIST;
+sasoc_assoc_id      return SASOC_ASSOC_ID;
+sasoc_asocmaxrxt    return SASOC_ASOCMAXRXT;
+sasoc_number_peer_destinations return SASOC_NUMBER_PEER_DESTINATIONS;
+sasoc_peer_rwnd     return SASOC_PEER_RWND;
+sasoc_local_rwnd    return SASOC_LOCAL_RWND;
+sasoc_cookie_life   return SASOC_COOKIE_LIFE;
+sas_assoc_id        return SAS_ASSOC_ID;
+sas_instrms         return SAS_INSTRMS;
+sas_outstrms        return SAS_OUTSTRMS;
+inet_addr           return INET_ADDR;
+req_sn              return REQ_SN;
+resp_sn             return RESP_SN;
+last_tsn            return LAST_TSN;
+sids                return SIDS;
+sender_next_tsn     return SENDER_NEXT_TSN;
+receiver_next_tsn   return RECEIVER_NEXT_TSN;
+number_of_new_streams return NUMBER_OF_NEW_STREAMS;
+result              return RESULT;
 [.][.][.]           return ELLIPSIS;
 --[a-zA-Z0-9_]+     yylval.string = option(yytext); return OPTION;
 [-]?[0-9]*[.][0-9]+ yylval.floating = atof(yytext);   return MYFLOAT;
@@ -197,8 +366,19 @@ assoc_id            return ASSOC_ID;
 0x[0-9a-fA-F]+      yylval.integer = hextol(yytext); return HEX_INTEGER;
 [a-zA-Z0-9_]+       yylval.string = strdup(yytext); return MYWORD;
 \"(\\.|[^"])*\"     yylval.string = quoted(yytext); return MYSTRING;
+\`(\\.|[^`])*\`     yylval.string = quoted(yytext); return BACK_QUOTED;
 [^ \t\n]            return (int) yytext[0];
 [ \t\n]+            /* ignore whitespace */;
 {cpp_comment}       /* ignore C++-style comment */;
 {c_comment}         /* ignore C-style comment */;
+{ifdef_freebsd}     handle_ifdef(FreeBSD_IFDEF, yytext);
+{ifdef_omnet}       handle_ifdef(Omnet_IFDEF, yytext);
+<<EOF>>             {
+                        if ( --ifdef_stack_ptr < 0 ) {
+                            yyterminate();
+                        } else {
+                            yy_delete_buffer(YY_CURRENT_BUFFER);
+                            yy_switch_to_buffer(ifdef_stack[ifdef_stack_ptr]);
+                        }
+                    }
 %%

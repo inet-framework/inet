@@ -18,7 +18,7 @@
 #define __INET_SUIPATHLOSS_H
 
 #include <string>
-#include "inet/physicallayer/contract/packetlevel/IPathLoss.h"
+#include "inet/physicallayer/base/packetlevel/PathLossBase.h"
 
 namespace inet {
 
@@ -29,7 +29,7 @@ namespace physicallayer {
  *
  * @author Konrad Polys, Krzysztof Grochla
  */
-class INET_API SUIPathLoss : public cModule, public IPathLoss
+class INET_API SUIPathLoss : public PathLossBase
 {
   protected:
     /** @brief Transmitter antenna high */

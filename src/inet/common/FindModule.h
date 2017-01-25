@@ -69,7 +69,7 @@ class FindModule
     // the constness version
     static const cModule *findHost(const cModule *const m)
     {
-        return const_cast<cModule *>(findContainingNode(const_cast<cModule *>(m)));
+        return const_cast<cModule *>(findContainingNode(m));
     }
 
     static const cModule *findNetwork(const cModule *const m)

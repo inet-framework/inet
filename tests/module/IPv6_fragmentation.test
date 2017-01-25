@@ -13,6 +13,12 @@ network = inet.examples.ipv6.nclients.NClientsEth
 sim-time-limit=15s
 cmdenv-express-mode=false
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 # number of client computers
 *.n = 1
 
@@ -42,7 +48,7 @@ cmdenv-express-mode=false
 This fragment completes the datagram.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
+Received packet: (inet::ApplicationPacket)UDPBasicAppData-0 (5000 bytes)
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

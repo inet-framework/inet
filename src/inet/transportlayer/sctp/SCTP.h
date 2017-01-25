@@ -32,7 +32,7 @@
 #include "inet/transportlayer/contract/sctp/SCTPSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
-#include "inet/transportlayer/sctp/SCTPMessage_m.h"
+#include "inet/transportlayer/sctp/SCTPMessage.h"
 
 namespace inet {
 
@@ -193,6 +193,7 @@ class INET_API SCTP : public cSimpleModule
 
     SCTPAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
     SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
+    int32 findAssocForFd(int32 fd);
     void sendAbortFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
     void sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address fromAddr, L3Address toAddr);
     virtual void refreshDisplay() const override;
@@ -272,7 +273,14 @@ class INET_API SCTP : public cSimpleModule
     double getSackPeriod() { return socketOptions->sackPeriod; };
     int getMaxBurst() { return socketOptions->maxBurst; };
     int getFragPoint() { return socketOptions->fragPoint; };
-    int getNoDelay() { return socketOptions->noDelay; };
+    int getNagle() { return socketOptions->nagle; };
+    bool getEnableHeartbeats() { return socketOptions->enableHeartbeats; };
+    int getPathMaxRetrans() { return socketOptions->pathMaxRetrans; };
+    int getAssocMaxRtx() { return socketOptions->assocMaxRtx; };
+    double getHbInterval() { return socketOptions->hbInterval; };
+    void setRtoInitial(double rtoInitial) { socketOptions->rtoInitial = rtoInitial; };
+    void setRtoMin(double rtoMin) { socketOptions->rtoMin = rtoMin; };
+    void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; };
 };
 
 } // namespace sctp

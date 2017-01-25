@@ -31,7 +31,7 @@ BandListening::BandListening(const IRadio *radio, simtime_t startTime, simtime_t
 std::ostream& BandListening::printToStream(std::ostream& stream, int level) const
 {
     stream << "BandListening";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
         stream << ", carrierFrequency = " << carrierFrequency
                << ", bandwidth = " << bandwidth;
     return ListeningBase::printToStream(stream, level);

@@ -33,7 +33,7 @@ namespace filters {
 class INET_API MessageAgeFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -43,7 +43,16 @@ class INET_API MessageAgeFilter : public cObjectResultFilter
 class INET_API MessageTSAgeFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects an ApplicationPacket, and outputs its sequence number.
+ */
+class INET_API ApplicationPacketSequenceNumberFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -52,7 +61,7 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
 class INET_API MobilityPosFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -61,7 +70,7 @@ class INET_API MobilityPosFilter : public cObjectResultFilter
 class INET_API XCoordFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -70,7 +79,7 @@ class INET_API XCoordFilter : public cObjectResultFilter
 class INET_API YCoordFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -79,7 +88,7 @@ class INET_API YCoordFilter : public cObjectResultFilter
 class INET_API ZCoordFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 /**
@@ -88,7 +97,20 @@ class INET_API ZCoordFilter : public cObjectResultFilter
 class INET_API MessageSourceAddrFilter : public cObjectResultFilter
 {
   public:
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a cPacket and outputs the throughput as double.
+ */
+class INET_API ThroughputFilter : public cObjectResultFilter
+{
+  protected:
+    simtime_t lastSignal = 0;
+    double bytes = 0;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
 } // namespace filters

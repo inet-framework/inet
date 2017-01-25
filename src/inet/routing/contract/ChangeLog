@@ -1,0 +1,31 @@
+====== inet-3.x ======
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2015-03-16  Levente Meszaros
+
+	Added IPIMRouting
+
+2014-12-11  Levente Mészáros
+
+	Routing: Moved module interfaces under contract.
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------

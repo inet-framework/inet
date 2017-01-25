@@ -24,13 +24,14 @@ namespace inet {
 
 namespace sctp {
 
-SCTPReceiveStream::SCTPReceiveStream()
+SCTPReceiveStream::SCTPReceiveStream(SCTPAssociation *assoc_)
 {
     streamId = 0;
     expectedStreamSeqNum = 0;
     deliveryQ = new SCTPQueue();
     orderedQ = new SCTPQueue();
     unorderedQ = new SCTPQueue();
+    assoc = assoc_;
 }
 
 SCTPReceiveStream::~SCTPReceiveStream()
@@ -153,6 +154,15 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables *dchunk)
 
     return delivery;
 }
+
+int32 SCTPReceiveStream::getExpectedStreamSeqNum() {
+    return expectedStreamSeqNum;
+}
+
+void SCTPReceiveStream::setExpectedStreamSeqNum(int32 seqNum) {
+    expectedStreamSeqNum = seqNum;
+}
+
 
 } // namespace sctp
 

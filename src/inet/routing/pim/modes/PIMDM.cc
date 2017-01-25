@@ -1038,7 +1038,7 @@ void PIMDM::processAssertTimer(cMessage *timer)
     }
 }
 
-void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

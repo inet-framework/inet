@@ -26,7 +26,7 @@ import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 module ThroughputClient
 {
@@ -36,7 +36,6 @@ module ThroughputClient
         *.interfaceTableModule = "^.interfaceTable";
     gates:
         input radioIn @directIn;
-
     submodules:
         cli: EtherAppCli {
             parameters:
@@ -99,6 +98,14 @@ network Throughput
         int numCli;
         @display("b=297,203");
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
         cliHost[numCli]: ThroughputClient {
             parameters:
                 @display("r=,,#707070");
@@ -112,9 +119,4 @@ network Throughput
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=61,46");
-        }
 }
-

@@ -39,7 +39,7 @@ packet RSVPResvMsg extends RSVPPacket
     @customize(true);
     RsvpHopObj_t hop;
     FlowDescriptorVector flowDescriptor;
-    int rsvpKind = RESV_MESSAGE;
+    rsvpKind = RESV_MESSAGE;
 }
 
 //
@@ -50,7 +50,7 @@ packet RSVPResvTear extends RSVPPacket
     @customize(true);
     RsvpHopObj_t hop;
     FlowDescriptorVector flowDescriptor;
-    int rsvpKind = RTEAR_MESSAGE;
+    rsvpKind = RTEAR_MESSAGE;
 }
 
 //
@@ -62,7 +62,5 @@ packet RSVPResvError extends RSVPPacket
     RsvpHopObj_t hop;
     IPv4Address errorNode;
     int errorCode;
-    int rsvpKind = RERROR_MESSAGE;
+    rsvpKind = RERROR_MESSAGE;
 }
-
-

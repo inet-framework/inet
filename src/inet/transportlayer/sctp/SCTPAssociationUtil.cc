@@ -77,6 +77,42 @@ void SCTPAssociation::listOrderedQ()
     }
 }
 
+uint32 SCTPAssociation::getBytesInFlightOfStream(uint16 sid)
+{
+    auto streamIterator = sendStreams.find(sid);
+    assert(streamIterator != sendStreams.end());
+    return (streamIterator->second)->getBytesInFlight();
+}
+
+bool SCTPAssociation::orderedQueueEmptyOfStream(uint16 sid)
+{
+    auto streamIterator = sendStreams.find(sid);
+    assert(streamIterator != sendStreams.end());
+    return (streamIterator->second)->getStreamQ()->isEmpty();
+}
+
+bool SCTPAssociation::unorderedQueueEmptyOfStream(uint16 sid)
+{
+    auto streamIterator = sendStreams.find(sid);
+    assert(streamIterator != sendStreams.end());
+    return (streamIterator->second)->getUnorderedStreamQ()->isEmpty();
+}
+
+
+bool SCTPAssociation::getFragInProgressOfStream(uint16 sid)
+{
+    auto streamIterator = sendStreams.find(sid);
+    assert(streamIterator != sendStreams.end());
+    return (streamIterator->second)->getFragInProgress();
+}
+
+void SCTPAssociation::setFragInProgressOfStream(uint16 sid, bool frag)
+{
+    auto streamIterator = sendStreams.find(sid);
+    assert(streamIterator != sendStreams.end());
+    return (streamIterator->second)->setFragInProgress(frag);
+}
+
 void SCTPAssociation::checkPseudoCumAck(const SCTPPathVariables *path)
 {
     uint32 earliestOutstandingTSN = path->pseudoCumAck;
@@ -87,8 +123,7 @@ void SCTPAssociation::checkPseudoCumAck(const SCTPPathVariables *path)
             earliestOutstandingTSN, rtxEarliestOutstandingTSN);
 
     if (tsnGt(path->pseudoCumAck, earliestOutstandingTSN) ||
-        tsnGt(path->rtxPseudoCumAck, rtxEarliestOutstandingTSN))
-    {
+        tsnGt(path->rtxPseudoCumAck, rtxEarliestOutstandingTSN)) {
         std::cerr << "WRONG PSEUDO CUM-ACK!" << endl
                   << "pseudoCumAck=" << path->pseudoCumAck << ", earliestOutstandingTSN=" << earliestOutstandingTSN << endl
                   << "rtxPseudoCumAck=" << path->rtxPseudoCumAck << ", rtxEarliestOutstandingTSN=" << rtxEarliestOutstandingTSN << endl;
@@ -98,8 +133,7 @@ void SCTPAssociation::checkPseudoCumAck(const SCTPPathVariables *path)
 void SCTPAssociation::printSctpPathMap() const
 {
     EV_DEBUG << "SCTP PathMap:" << endl;
-    for (const auto & elem : sctpPathMap)
-    {
+    for (const auto & elem : sctpPathMap) {
         const SCTPPathVariables *path = elem.second;
         EV_DEBUG << " - " << path->remoteAddress << ":  osb=" << path->outstandingBytes
                  << " cwnd=" << path->cwnd << endl;
@@ -160,8 +194,11 @@ const char *SCTPAssociation::eventName(const int32 event)
         CASE(SCTP_E_SEND_SHUTDOWN_ACK);
         CASE(SCTP_E_STOP_SENDING);
         CASE(SCTP_E_STREAM_RESET);
+        CASE(SCTP_E_RESET_ASSOC);
+        CASE(SCTP_E_ADD_STREAMS);
         CASE(SCTP_E_SEND_ASCONF);
         CASE(SCTP_E_SET_STREAM_PRIO);
+        CASE(SCTP_E_ACCEPT);
     }
     return s;
 #undef CASE
@@ -236,12 +273,14 @@ uint16 SCTPAssociation::chunkToInt(const char *type)
         return ASCONF_ACK;
     if (strcmp(type, "PKTDROP") == 0)
         return PKTDROP;
-    if (strcmp(type, "STREAM_RESET") == 0)
-        return STREAM_RESET;
+    if (strcmp(type, "RE_CONFIG") == 0)
+        return RE_CONFIG;
     if (strcmp(type, "FORWARD_TSN") == 0)
         return FORWARD_TSN;
     if (strcmp(type, "ASCONF") == 0)
         return ASCONF;
+    if (strcmp(type, "IFORWARD_TSN") == 0)
+        return IFORWARD_TSN;
     EV_WARN << "ChunkConversion not successful\n";
     return 0xffff;
 }
@@ -308,9 +347,11 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
     assoc->localAddr = localAddr;
     assoc->localPort = localPort;
     assoc->localAddressList = localAddressList;
+    assoc->listening = true;
 
     assoc->outboundStreams = outboundStreams;
     assoc->inboundStreams = inboundStreams;
+    assoc->fd = fd;
 
     FSM_Goto((*assoc->fsm), SCTP_S_CLOSED);
     sctpMain->printInfoAssocMap();
@@ -383,7 +424,7 @@ void SCTPAssociation::sendIndicationToApp(const int32 code, const int32 value)
     indication->setRemoteAddr(remoteAddr);
     indication->setRemotePort(remotePort);
     msg->setControlInfo(indication);
-    sctpMain->send(msg, "appOut", appGateIndex);
+    sctpMain->send(msg, "appOut");
 }
 
 void SCTPAssociation::sendEstabIndicationToApp()
@@ -405,7 +446,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
     establishIndication->setOutboundStreams(outboundStreams);
     establishIndication->setNumMsgs(state->sendQueueLimit);
     msg->setControlInfo(establishIndication);
-    sctpMain->send(msg, "appOut", appGateIndex);
+    sctpMain->send(msg, "appOut");
 
     char vectorName[128];
     for (uint16 i = 0; i < inboundStreams; i++) {
@@ -416,7 +457,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
 
 void SCTPAssociation::sendToApp(cMessage *msg)
 {
-    sctpMain->send(msg, "appOut", appGateIndex);
+    sctpMain->send(msg, "appOut");
 }
 
 void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
@@ -489,6 +530,7 @@ void SCTPAssociation::sendInit()
     initChunk->setA_rwnd(sctpMain->par("arwnd").longValue());
     state->localRwnd = (long)sctpMain->par("arwnd");
     initChunk->setNoOutStreams(outboundStreams);
+    initInboundStreams = inboundStreams;
     initChunk->setNoInStreams(inboundStreams);
     initChunk->setInitTSN(1000);
     initChunk->setMsg_rwnd(sctpMain->par("messageAcceptLimit").longValue());
@@ -621,7 +663,7 @@ void SCTPAssociation::sendInit()
     }
     if (state->streamReset == true) {
         initChunk->setSepChunksArraySize(++count);
-        initChunk->setSepChunks(count - 1, STREAM_RESET);
+        initChunk->setSepChunks(count - 1, RE_CONFIG);
     }
     if ((bool)sctpMain->par("addIP") == true) {
         initChunk->setSepChunksArraySize(++count);
@@ -831,7 +873,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk *initChunk)
 
     if (state->streamReset == true) {
         initAckChunk->setSepChunksArraySize(++count);
-        initAckChunk->setSepChunks(count - 1, STREAM_RESET);
+        initAckChunk->setSepChunks(count - 1, RE_CONFIG);
     }
     if ((bool)sctpMain->par("addIP") == true) {
         initAckChunk->setSepChunksArraySize(++count);
@@ -1057,7 +1099,7 @@ void SCTPAssociation::sendShutdownComplete()
     sendToIP(sctpshutdowncomplete);
 }
 
-void SCTPAssociation::sendAbort()
+void SCTPAssociation::sendAbort(uint16 tBit)
 {
     SCTPAuthenticationChunk *authChunk;
     SCTPMessage *msg = new SCTPMessage();
@@ -1069,7 +1111,7 @@ void SCTPAssociation::sendAbort()
     msg->setDestPort(remotePort);
     SCTPAbortChunk *abortChunk = new SCTPAbortChunk("ABORT");
     abortChunk->setChunkType(ABORT);
-    abortChunk->setT_Bit(0);
+    abortChunk->setT_Bit(tBit);
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
     if (state->auth && state->peerAuth && typeInChunkList(ABORT)) {
         authChunk = createAuthChunk();
@@ -1078,6 +1120,9 @@ void SCTPAssociation::sendAbort()
         it->second.numAuthChunksSent++;
     }
     msg->addChunk(abortChunk);
+    if (state->resetChunk != nullptr) {
+        delete state->resetChunk;
+    }
     sendToIP(msg, remoteAddr);
 }
 
@@ -1679,8 +1724,7 @@ SCTPSackChunk *SCTPAssociation::createSack()
             sackChunk->setNumGaps(numRevokableGaps);
             sackChunk->setNumNrGaps(numNonRevokableGaps);
             sackLength = sackHeaderLength + revokableGapsSpace + nonRevokableGapsSpace + numDups * 4;
-        }
-        else {
+        } else {
             assert(false);    // NOTE: IMPLEMENT ME!
         }
     }
@@ -1689,8 +1733,7 @@ SCTPSackChunk *SCTPAssociation::createSack()
     if (numDups > 0) {
         sackChunk->setDupTsnsArraySize(numDups);
         uint32 key = 0;
-        for (auto & elem : state->dupList)
-        {
+        for (auto & elem : state->dupList) {
             sackChunk->setDupTsns(key, elem);
             key++;
             if (key == numDups)
@@ -1757,6 +1800,34 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
     cmsg->setControlInfo(cmd);
 
     sendToApp(cmsg);
+}
+
+void SCTPAssociation::sendInvalidStreamError(uint16 sid)
+{
+    SCTPMessage *sctpmsg = new SCTPMessage();
+    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
+    SCTPErrorChunk *errorChunk = new SCTPErrorChunk("ErrorChunk");
+    errorChunk->setChunkType(ERRORTYPE);
+    SCTPSimpleErrorCauseParameter *cause = new SCTPSimpleErrorCauseParameter("Cause");
+    cause->setParameterType(INVALID_STREAM_IDENTIFIER);
+    cause->setByteLength(8);
+    cause->setValue(sid);
+    errorChunk->setByteLength(4);
+    errorChunk->addParameters(cause);
+    sctpmsg->addChunk(errorChunk);
+
+    stopTimer(SackTimer);
+    state->ackState = 0;
+    SCTPSackChunk *sackChunk = createSack();
+
+    if (state->auth && state->peerAuth && typeInChunkList(SACK)) {
+        SCTPAuthenticationChunk *authChunk = createAuthChunk();
+        sctpmsg->addChunk(authChunk);
+        auto it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
+    sctpmsg->addChunk(sackChunk);
+    sendSACKviaSelectedPath(sctpmsg);
 }
 
 void SCTPAssociation::sendHMacError(const uint16 id)
@@ -1855,9 +1926,9 @@ void SCTPAssociation::pushUlp()
                 state->pushMessagesLeft--;
 
             // ====== Non-revokably acknowledge chunks of the message ==========
-            bool dummy;
+          /*  bool dummy;
             for (uint32 j = chunk->tsn; j < chunk->tsn + chunk->fragments; j++)
-                state->gapList.updateGapList(j, dummy, false);
+                state->gapList.updateGapList(j, dummy, false);*/
 
             tempQueuedBytes = state->queuedReceivedBytes;
             state->queuedReceivedBytes -= chunk->len / 8;
@@ -1924,6 +1995,14 @@ void SCTPAssociation::pushUlp()
     } while (i != state->nextRSid);
 
     state->nextRSid = (state->nextRSid + 1) % inboundStreams;
+    if (restrict && state->bufferedMessages > 0) {
+        for (auto & elem : receiveStreams) {
+            if (!(elem.second->getDeliveryQ()->payloadQueue.empty())) {
+                sendDataArrivedNotification(elem.second->getStreamId());
+                break;
+            }
+        }
+    }
     if ((state->queuedReceivedBytes == 0) && (fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)) {
         EV_INFO << "SCTP_E_CLOSE" << endl;
         performStateTransition(SCTP_E_CLOSE);
@@ -2026,16 +2105,14 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
 
         const uint32 oldSum = sum;
         // ====== Iterate all streams to find chunk with TSN "tryTSN" =========
-        for (auto & elem : receiveStreams)
-        {
+        for (auto & elem : receiveStreams) {
             SCTPReceiveStream *receiveStream = elem.second;
 
             // ====== Get chunk to drop ========================================
             SCTPQueue *queue;
             if (uBit) {
                 queue = receiveStream->getUnorderedQ();    // Look in unordered queue
-            }
-            else {
+            } else {
                 queue = receiveStream->getOrderedQ();    // Look in ordered queue
             }
             SCTPDataVariables *chunk = queue->getChunk(tryTSN);
@@ -2064,8 +2141,7 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
                 state->gapList.removeFromGapList(tryTSN);
 
                 break;
-            }
-            else {
+            } else {
                 EV_INFO << "TSN " << tryTSN << " not found in stream "
                         << receiveStream->getStreamId() << endl;
             }
@@ -2229,8 +2305,7 @@ SCTPDataVariables *SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables *
     SCTPDataVariables *retChunk = nullptr;
 
     if (state->prMethod != 0 && !retransmissionQ->payloadQueue.empty()) {
-        for (auto & elem : retransmissionQ->payloadQueue)
-        {
+        for (auto & elem : retransmissionQ->payloadQueue) {
             SCTPDataVariables *chunk = elem.second;
 
             if (chunk->getLastDestinationPath() == path) {
@@ -2273,6 +2348,135 @@ SCTPDataVariables *SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables *
     return retChunk;
 }
 
+void SCTPAssociation::fragmentOutboundDataMsgs() {
+    cPacketQueue *streamQ = nullptr;
+    for (auto iter = sendStreams.begin(); iter != sendStreams.end(); ++iter) {
+        SCTPSendStream *stream = iter->second;
+        streamQ = nullptr;
+
+        if (!stream->getUnorderedStreamQ()->isEmpty()) {
+            streamQ = stream->getUnorderedStreamQ();
+            EV_DETAIL << "fragmentOutboundDataMsgs() found chunks in stream " << iter->first << " unordered queue, queue size=" << stream->getUnorderedStreamQ()->getLength() << "\n";
+        }
+        else if (!stream->getStreamQ()->isEmpty()) {
+            streamQ = stream->getStreamQ();
+            EV_DETAIL << "fragmentOutboundDataMsgs() found chunks in stream " << iter->first << " ordered queue, queue size=" << stream->getStreamQ()->getLength() << "\n";
+        }
+
+        if (streamQ) {
+            int32 b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+
+            /* check if chunk found in queue has to be fragmented */
+            if (b > (int32)state->fragPoint + (int32)SCTP_DATA_CHUNK_LENGTH) {
+                /* START FRAGMENTATION */
+                SCTPDataMsg *datMsgQueued = (SCTPDataMsg *)streamQ->pop();
+                cPacket *datMsgQueuedEncMsg = datMsgQueued->getEncapsulatedPacket();
+                SCTPDataMsg *datMsgLastFragment = nullptr;
+                uint32 offset = 0;
+                uint32 msgbytes = state->fragPoint;
+                const uint16 fullSizedPackets = (uint16)(datMsgQueued->getByteLength() / msgbytes);
+                EV_DETAIL << "Fragmentation: chunk " << &datMsgQueued << " - size = " << datMsgQueued->getByteLength() << endl;
+                EV_DETAIL << assocId << ": number of fullSizedPackets: " << fullSizedPackets << endl;
+                uint16 pcounter = 0;
+
+                while (datMsgQueued) {
+                    /* detemine size of fragment, either max payload or what's left */
+                    if (msgbytes > datMsgQueuedEncMsg->getByteLength() - offset)
+                        msgbytes = datMsgQueuedEncMsg->getByteLength() - offset;
+
+                    /* new DATA msg */
+                    SCTPDataMsg *datMsgFragment = new SCTPDataMsg();
+                    datMsgFragment->setSid(datMsgQueued->getSid());
+                    datMsgFragment->setPpid(datMsgQueued->getPpid());
+                    if (++pcounter == fullSizedPackets && sctpMain->sackNow)
+                        datMsgFragment->setSackNow(true);
+                    else
+                        datMsgFragment->setSackNow(datMsgQueued->getSackNow());
+                    datMsgFragment->setInitialDestination(datMsgQueued->getInitialDestination());
+                    datMsgFragment->setEnqueuingTime(datMsgQueued->getEnqueuingTime());
+                    datMsgFragment->setPrMethod(datMsgQueued->getPrMethod());
+                    datMsgFragment->setPriority(datMsgQueued->getPriority());
+                    //EV_DETAIL << "felix: " << datMsgQueued->getPriority() << endl;
+                    datMsgFragment->setStrReset(datMsgQueued->getStrReset());
+                    datMsgFragment->setMsgNum(datMsgQueued->getMsgNum());
+                    datMsgFragment->setOrdered(datMsgQueued->getOrdered());
+                    datMsgFragment->setExpiryTime(datMsgQueued->getExpiryTime());
+                    datMsgFragment->setRtx(datMsgQueued->getRtx());
+                    datMsgFragment->setFragment(true);
+
+                    if (state->padding)
+                        datMsgFragment->setBooksize(ADD_PADDING(msgbytes + state->header));
+                    else
+                        datMsgFragment->setBooksize(msgbytes + state->header);
+
+                    /* is this the first fragment? */
+                    if (offset == 0)
+                        datMsgFragment->setBBit(true);
+
+                    /* new msg */
+                    cPacket *datMsgFragmentEncMsg = datMsgQueuedEncMsg->dup();
+
+                    datMsgFragmentEncMsg->setByteLength(msgbytes);
+
+                    SCTPSimpleMessage *datMsgQueuedSimple = dynamic_cast<SCTPSimpleMessage *>(datMsgQueuedEncMsg);
+                    SCTPSimpleMessage *datMsgFragmentSimple = dynamic_cast<SCTPSimpleMessage *>(datMsgFragmentEncMsg);
+                    if ((datMsgQueuedSimple != nullptr) &&
+                        (datMsgFragmentSimple != nullptr) &&
+                        (datMsgQueuedSimple->getDataArraySize() >= msgbytes + offset))
+                    {
+                        datMsgFragmentSimple->setDataArraySize(msgbytes);
+                        datMsgFragmentSimple->setDataLen(msgbytes);
+                        /* copy data */
+                        for (uint32 i = offset; i < offset + msgbytes; i++) {
+                            datMsgFragmentSimple->setData(i - offset, datMsgQueuedSimple->getData(i));
+                        }
+                    }
+
+                    offset += msgbytes;
+                    datMsgFragment->encapsulate(datMsgFragmentEncMsg);
+
+                    /* insert fragment into queue */
+                    if (!streamQ->isEmpty()) {
+                        if (!datMsgLastFragment) {
+                            /* insert first fragment at the begining of the queue*/
+                            streamQ->insertBefore((SCTPDataMsg *)streamQ->front(), datMsgFragment);
+                        }
+                        else {
+                            /* insert fragment after last inserted   */
+                            streamQ->insertAfter(datMsgLastFragment, datMsgFragment);
+                        }
+                    }
+                    else
+                        streamQ->insert(datMsgFragment);
+
+                    state->queuedMessages++;
+                    qCounter.roomSumSendStreams += ADD_PADDING(datMsgFragment->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+                    qCounter.bookedSumSendStreams += datMsgFragment->getBooksize();
+                    EV_DETAIL << "Fragmentation: fragment " << &datMsgFragment << " created, length = " << datMsgFragmentEncMsg->getByteLength() << ", queue size = " << streamQ->getLength() << endl;
+
+                    datMsgLastFragment = datMsgFragment;
+
+                    /* all fragments done? */
+                    if (datMsgQueuedEncMsg->getByteLength() == offset) {
+                        datMsgFragment->setEBit(true);
+                        if (sctpMain->sackNow)
+                            datMsgFragment->setSackNow(true);
+                        /* remove original element */
+                        EV_DETAIL << "Fragmentation: delete " << &datMsgQueued << endl;
+                        //streamQ->pop();
+                        qCounter.roomSumSendStreams -= ADD_PADDING(datMsgQueued->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+                        qCounter.bookedSumSendStreams -= datMsgQueued->getBooksize();
+                        delete datMsgQueued;
+                        datMsgQueued = nullptr;
+                        state->queuedMessages--;
+                    }
+                } // while
+            }
+        }
+    }
+
+}
+
 SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
         const int32 availableSpace,
         const int32 availableCwnd)
@@ -2282,6 +2486,9 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
     int32 nextStream = -1;
 
     EV_INFO << "dequeueOutboundDataMsg: " << availableSpace << " bytes left to be sent" << endl;
+
+    fragmentOutboundDataMsgs();
+
     /* Only change stream if we don't have to finish a fragmented message */
     if (state->lastMsgWasFragment)
         nextStream = state->lastStreamScheduled;
@@ -2293,159 +2500,44 @@ SCTPDataMsg *SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables *path,
 
     EV_INFO << "dequeueOutboundDataMsg: now stream " << nextStream << endl;
 
-    for (auto & elem : sendStreams) {
-        if ((int32)elem.first == nextStream) {
-            SCTPSendStream *stream = elem.second;
-            streamQ = nullptr;
+    SCTPSendStream *stream = sendStreams.find(nextStream)->second;
+    streamQ = nullptr;
 
-            if (!stream->getUnorderedStreamQ()->isEmpty()) {
-                streamQ = stream->getUnorderedStreamQ();
-                EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << elem.first << " unordered queue, queue size=" << stream->getUnorderedStreamQ()->getLength() << "\n";
+    if (!stream->getUnorderedStreamQ()->isEmpty()) {
+        streamQ = stream->getUnorderedStreamQ();
+        EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << nextStream << " unordered queue, queue size=" << stream->getUnorderedStreamQ()->getLength() << "\n";
+    }
+    else if (!stream->getStreamQ()->isEmpty()) {
+        streamQ = stream->getStreamQ();
+        EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << nextStream << " ordered queue, queue size=" << stream->getStreamQ()->getLength() << "\n";
+    }
+
+    if (streamQ) {
+        int32 b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
+
+        if ((b <= availableSpace) &&
+            ((int32)((SCTPDataMsg *)streamQ->front())->getBooksize() <= availableCwnd))
+        {
+            datMsg = (SCTPDataMsg *)streamQ->pop();
+            sendQueue->record(streamQ->getLength());
+
+            if (!datMsg->getFragment()) {
+                datMsg->setBBit(true);
+                datMsg->setEBit(true);
+                state->lastMsgWasFragment = false;
             }
-            else if (!stream->getStreamQ()->isEmpty()) {
-                streamQ = stream->getStreamQ();
-                EV_DETAIL << "DequeueOutboundDataMsg() found chunks in stream " << elem.first << " ordered queue, queue size=" << stream->getStreamQ()->getLength() << "\n";
-            }
-
-            if (streamQ) {
-                int32 b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
-
-                /* check if chunk found in queue has to be fragmented */
-                if (b > (int32)state->fragPoint + (int32)SCTP_DATA_CHUNK_LENGTH) {
-                    /* START FRAGMENTATION */
-                    SCTPDataMsg *datMsgQueued = (SCTPDataMsg *)streamQ->pop();
-                    cPacket *datMsgQueuedEncMsg = datMsgQueued->getEncapsulatedPacket();
-                    SCTPDataMsg *datMsgLastFragment = nullptr;
-                    uint32 offset = 0;
-                    uint32 msgbytes = state->fragPoint;
-                    const uint16 fullSizedPackets = (uint16)(datMsgQueued->getByteLength() / msgbytes);
-                    EV_DETAIL << "Fragmentation: chunk " << &datMsgQueued << ", size = " << datMsgQueued->getByteLength() << endl;
-                    EV_DETAIL << assocId << ": number of fullSizedPackets: " << fullSizedPackets << endl;
-                    uint16 pcounter = 0;
-
-                    while (datMsgQueued) {
-                        /* detemine size of fragment, either max payload or what's left */
-
-                        if (msgbytes > datMsgQueuedEncMsg->getByteLength() - offset)
-                            msgbytes = datMsgQueuedEncMsg->getByteLength() - offset;
-
-                        /* new DATA msg */
-                        SCTPDataMsg *datMsgFragment = new SCTPDataMsg();
-                        datMsgFragment->setSid(datMsgQueued->getSid());
-                        datMsgFragment->setPpid(datMsgQueued->getPpid());
-                        if (++pcounter == fullSizedPackets && sctpMain->sackNow)
-                            datMsgFragment->setSackNow(true);
-                        else
-                            datMsgFragment->setSackNow(datMsgQueued->getSackNow());
-                        datMsgFragment->setInitialDestination(datMsgQueued->getInitialDestination());
-                        datMsgFragment->setEnqueuingTime(datMsgQueued->getEnqueuingTime());
-                        datMsgFragment->setPrMethod(datMsgQueued->getPrMethod());
-                        datMsgFragment->setPriority(datMsgQueued->getPriority());
-                        datMsgFragment->setStrReset(datMsgQueued->getStrReset());
-                        datMsgFragment->setMsgNum(datMsgQueued->getMsgNum());
-                        datMsgFragment->setOrdered(datMsgQueued->getOrdered());
-                        datMsgFragment->setExpiryTime(datMsgQueued->getExpiryTime());
-                        datMsgFragment->setRtx(datMsgQueued->getRtx());
-                        datMsgFragment->setFragment(true);
-                        if (state->padding)
-                            datMsgFragment->setBooksize(ADD_PADDING(msgbytes + state->header));
-                        else
-                            datMsgFragment->setBooksize(msgbytes + state->header);
-
-                        /* is this the first fragment? */
-                        if (offset == 0)
-                            datMsgFragment->setBBit(true);
-
-                        /* new msg */
-                        cPacket *datMsgFragmentEncMsg = datMsgQueuedEncMsg->dup();
-
-                        datMsgFragmentEncMsg->setByteLength(msgbytes);
-
-                        SCTPSimpleMessage *datMsgQueuedSimple = dynamic_cast<SCTPSimpleMessage *>(datMsgQueuedEncMsg);
-                        SCTPSimpleMessage *datMsgFragmentSimple = dynamic_cast<SCTPSimpleMessage *>(datMsgFragmentEncMsg);
-                        if ((datMsgQueuedSimple != nullptr) &&
-                            (datMsgFragmentSimple != nullptr) &&
-                            (datMsgQueuedSimple->getDataArraySize() >= msgbytes + offset))
-                        {
-                            datMsgFragmentSimple->setDataArraySize(msgbytes);
-                            datMsgFragmentSimple->setDataLen(msgbytes);
-                            /* copy data */
-                            for (uint32 i = offset; i < offset + msgbytes; i++) {
-                                datMsgFragmentSimple->setData(i - offset, datMsgQueuedSimple->getData(i));
-                            }
-                        }
-
-                        offset += msgbytes;
-                        datMsgFragment->encapsulate(datMsgFragmentEncMsg);
-
-                        /* insert fragment into queue */
-                        if (!streamQ->isEmpty()) {
-                            if (!datMsgLastFragment) {
-                                /* insert first fragment at the begining of the queue*/
-                                streamQ->insertBefore((SCTPDataMsg *)streamQ->front(), datMsgFragment);
-                            }
-                            else {
-                                /* insert fragment after last inserted   */
-                                streamQ->insertAfter(datMsgLastFragment, datMsgFragment);
-                            }
-                        }
-                        else
-                            streamQ->insert(datMsgFragment);
-
-                        state->queuedMessages++;
-                        qCounter.roomSumSendStreams += ADD_PADDING(datMsgFragment->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
-                        qCounter.bookedSumSendStreams += datMsgFragment->getBooksize();
-                        EV_DETAIL << "Fragmentation: fragment " << &datMsgFragment << " created, length = " << datMsgFragmentEncMsg->getByteLength() << ", queue size = " << streamQ->getLength() << endl;
-
-                        datMsgLastFragment = datMsgFragment;
-
-                        /* all fragments done? */
-                        if (datMsgQueuedEncMsg->getByteLength() == offset) {
-                            datMsgFragment->setEBit(true);
-                            if (sctpMain->sackNow)
-                                datMsgFragment->setSackNow(true);
-                            /* remove original element */
-                            EV_DETAIL << "Fragmentation: delete " << &datMsgQueued << endl;
-                            //streamQ->pop();
-                            qCounter.roomSumSendStreams -= ADD_PADDING(datMsgQueued->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
-                            qCounter.bookedSumSendStreams -= datMsgQueued->getBooksize();
-                            delete datMsgQueued;
-                            datMsgQueued = nullptr;
-                            state->queuedMessages--;
-                        }
-                    }
-
-                    /* the next chunk returned will always be a fragment */
+            else {
+                if (datMsg->getEBit())
+                    state->lastMsgWasFragment = false;
+                else
                     state->lastMsgWasFragment = true;
-
-                    b = ADD_PADDING(((SCTPDataMsg *)streamQ->front())->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
-                    /* FRAGMENTATION DONE */
-                }
-
-                if ((b <= availableSpace) &&
-                    ((int32)((SCTPDataMsg *)streamQ->front())->getBooksize() <= availableCwnd))
-                {
-                    datMsg = (SCTPDataMsg *)streamQ->pop();
-                    sendQueue->record(streamQ->getLength());
-
-                    if (!datMsg->getFragment()) {
-                        datMsg->setBBit(true);
-                        datMsg->setEBit(true);
-                        state->lastMsgWasFragment = false;
-                    }
-                    else {
-                        if (datMsg->getEBit())
-                            state->lastMsgWasFragment = false;
-                        else
-                            state->lastMsgWasFragment = true;
-                    }
-
-                    EV_DETAIL << "DequeueOutboundDataMsg() found chunk (" << &datMsg << ") in the stream queue " << &elem.first << "(" << streamQ << ") queue size=" << streamQ->getLength() << "\n";
-                }
             }
-            break;
+
+            EV_DETAIL << "DequeueOutboundDataMsg() found chunk (" << &datMsg << ") in the stream queue " << nextStream << "(" << streamQ << ") queue size=" << streamQ->getLength() << endl;
         }
     }
+
+
     if (datMsg != nullptr) {
         qCounter.roomSumSendStreams -= ADD_PADDING(datMsg->getEncapsulatedPacket()->getByteLength() + SCTP_DATA_CHUNK_LENGTH);
         qCounter.bookedSumSendStreams -= datMsg->getBooksize();
@@ -2504,8 +2596,7 @@ SCTPPathVariables *SCTPAssociation::getNextPath(const SCTPPathVariables *oldPath
 {
     int32 hit = 0;
     if (sctpPathMap.size() > 1) {
-        for (const auto & elem : sctpPathMap)
-        {
+        for (const auto & elem : sctpPathMap) {
             SCTPPathVariables *newPath = elem.second;
             if (newPath == oldPath) {
                 if (++hit == 1) {
@@ -2517,8 +2608,7 @@ SCTPPathVariables *SCTPAssociation::getNextPath(const SCTPPathVariables *oldPath
             }
             if ((newPath->activePath) &&
                 ((state->allowCMT == false) || (newPath->blockingTimeout <= 0.0) ||
-                 (simTime() > newPath->blockingTimeout)))
-            {
+                 (simTime() > newPath->blockingTimeout))) {
                 return newPath;
             }
         }
@@ -2560,11 +2650,11 @@ SCTPPathVariables *SCTPAssociation::getNextDestination(SCTPDataVariables *chunk)
 
 void SCTPAssociation::pmDataIsSentOn(SCTPPathVariables *path)
 {
-    if ((!state->sendHeartbeatsOnActivePaths) || (!state->enableHeartbeats)) {
+    if ((!state->sendHeartbeatsOnActivePaths) || (!sctpMain->getEnableHeartbeats())) {
         /* restart hb_timer on this path */
         stopTimer(path->HeartbeatTimer);
-        if (state->enableHeartbeats) {
-            path->heartbeatTimeout = path->pathRto + (double)sctpMain->par("hbInterval");
+        if (sctpMain->getEnableHeartbeats()) {
+            path->heartbeatTimeout = path->pathRto + (double)sctpMain->getHbInterval();
             startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
             EV_DETAIL << "Restarting HB timer on path " << path->remoteAddress
                       << " to expire at time " << path->heartbeatTimeout << endl;
@@ -2596,8 +2686,8 @@ void SCTPAssociation::pmStartPathManagement()
         if (path->pmtu < state->assocPmtu) {
             state->assocPmtu = path->pmtu;
         }
-        if (state->fragPoint > state->assocPmtu) {
-            state->fragPoint = state->assocPmtu;
+        if (state->fragPoint > path->pmtu - IP_HEADER_LENGTH - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH) {
+            state->fragPoint = path->pmtu - IP_HEADER_LENGTH - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH;
         }
         initCCParameters(path);
         path->pathRto = (double)sctpMain->getRtoInitial();
@@ -2616,8 +2706,8 @@ void SCTPAssociation::pmStartPathManagement()
             path->confirmed = true;
         }
         EV_DETAIL << getFullPath() << " numberOfLocalAddresses=" << state->localAddresses.size() << "\n";
-        if (state->enableHeartbeats) {
-            path->heartbeatTimeout = (double)sctpMain->par("hbInterval") + i * path->pathRto;
+        if (sctpMain->getEnableHeartbeats()) {
+            path->heartbeatTimeout = (double)sctpMain->getHbInterval() + i * path->pathRto;
             stopTimer(path->HeartbeatTimer);
             if (!path->confirmed)
                 sendHeartbeat(path);

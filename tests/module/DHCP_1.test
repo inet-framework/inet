@@ -47,6 +47,12 @@ cmdenv-express-mode = false
 sim-time-limit = 1000s
 record-eventlog = true
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 network = DhcpExample
 
 *.numHosts = 10
@@ -57,10 +63,8 @@ network = DhcpExample
 **.cli[*].app[0].interface="eth0"   # interface toward dhcp server
 
 **.srv.app[0].typename = "DHCPServer"
-**.srv.app[0].subnetMask = "255.255.255.0"        # netmask to assign
-**.srv.app[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.srv.app[0].numReservedAddresses = 100    # ip to start to lease
 **.srv.app[0].maxNumClients = 100     # number of ip to lease
-**.srv.app[0].gateway = "192.168.1.1"     # gateway to assign
 **.srv.app[0].dns = ""         # dns to assign
 **.srv.app[0].leaseTime = 1000s     # lease time in seconds
 **.srv.app[0].interface="eth0"   # interface to listen

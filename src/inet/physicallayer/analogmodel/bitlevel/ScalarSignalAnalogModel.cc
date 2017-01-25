@@ -30,7 +30,7 @@ ScalarSignalAnalogModel::ScalarSignalAnalogModel(const simtime_t duration, Hz ca
 std::ostream& ScalarSignalAnalogModel::printToStream(std::ostream& stream, int level) const
 {
     stream << "ScalarSignalAnalogModel";
-    if (level >= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL)
        stream << ", power = " << power;
     return NarrowbandSignalAnalogModel::printToStream(stream, level);
 }

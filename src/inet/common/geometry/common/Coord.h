@@ -37,8 +37,11 @@ class INET_API Coord : public cObject
 {
   public:
     /** @brief Constant with all values set to 0. */
-    static const Coord ZERO;
     static const Coord NIL;
+    static const Coord ZERO;
+    static const Coord X_AXIS;
+    static const Coord Y_AXIS;
+    static const Coord Z_AXIS;
 
   public:
     /** @name x, y and z coordinate of the position. */

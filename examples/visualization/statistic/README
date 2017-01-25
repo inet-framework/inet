@@ -1,0 +1,8 @@
+This example demonstrates how to display a statistic for network nodes.
+
+The ad-hoc wireless network contains 3 source nodes and 1 destination node.
+The destination node is stationary, the 3 source nodes move around randomly,
+and they continuously ping the destination node.
+
+When you run the example, the statistic visualizer continuously displays the
+last ping round trip time at each source node.

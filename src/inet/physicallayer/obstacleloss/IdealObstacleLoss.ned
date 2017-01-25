@@ -17,7 +17,7 @@
 
 package inet.physicallayer.obstacleloss;
 
-import inet.physicallayer.contract.packetlevel.IObstacleLoss;
+import inet.physicallayer.base.packetlevel.TracingObstacleLossBase;
 
 //
 // This obstacle loss model determines power loss by checking if there is any
@@ -25,10 +25,8 @@ import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 // is either total power loss if there was such an object or no loss at all if
 // there wasn't.
 //
-module IdealObstacleLoss like IObstacleLoss
+module IdealObstacleLoss extends TracingObstacleLossBase
 {
     parameters:
-        string environmentModule = default("environment"); // the path of the environment model relative to the network
-        @display("i=block/control");
         @class(IdealObstacleLoss);
 }

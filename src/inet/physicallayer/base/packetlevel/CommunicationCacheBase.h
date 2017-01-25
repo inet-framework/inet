@@ -18,7 +18,6 @@
 #ifndef __INET_COMMUNICATIONCACHEBASE_H
 #define __INET_COMMUNICATIONCACHEBASE_H
 
-#include "inet/common/IntervalTree.h"
 #include "inet/physicallayer/contract/packetlevel/ICommunicationCache.h"
 
 namespace inet {
@@ -100,10 +99,6 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
          */
         const IRadioFrame *frame;
         /**
-         * The figure representing this transmission.
-         */
-        cFigure *figure;
-        /**
          * The list of intermediate reception computation results.
          */
         void *receptionCacheEntries;
@@ -138,10 +133,6 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission) override;
     virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *frame) override;
     virtual void removeCachedFrame(const ITransmission *transmission) override;
-
-    virtual cFigure *getCachedFigure(const ITransmission *transmission) override;
-    virtual void setCachedFigure(const ITransmission *transmission, cFigure *figure) override;
-    virtual void removeCachedFigure(const ITransmission *transmission) override;
     //@}
 
     /** @name Reception cache */

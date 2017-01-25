@@ -114,7 +114,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     delete ctrl;
 }
 
-void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);

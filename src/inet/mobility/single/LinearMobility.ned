@@ -32,7 +32,7 @@ simple LinearMobility extends MovingMobilityBase
     parameters:
         double initialX @unit(m) = default(uniform(this.constraintAreaMinX, this.constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(this.constraintAreaMinY, this.constraintAreaMaxY));
-        double initialZ @unit(m) = default(uniform(this.constraintAreaMinZ, this.constraintAreaMaxZ));
+        double initialZ @unit(m) = default(nanToZero(uniform(this.constraintAreaMinZ, this.constraintAreaMaxZ)));
         bool initFromDisplayString = default(true);
         double speed @unit(mps) = default(0mps); // speed of the host
         double angle @unit(deg) = default(uniform(0deg, 360deg)); // angle of linear motion

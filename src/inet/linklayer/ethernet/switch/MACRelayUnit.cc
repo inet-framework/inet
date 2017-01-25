@@ -20,6 +20,7 @@
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -57,6 +58,7 @@ void MACRelayUnit::handleMessage(cMessage *msg)
     EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
     delete frame->removeTag<DispatchProtocolReq>();
     // Frame received from MAC unit
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, frame);
     handleAndDispatchFrame(frame);
 }
 
@@ -92,6 +94,7 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
         frame->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
+        emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
         send(frame, "ifOut");
     }
     else {
@@ -111,6 +114,7 @@ void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputInterfaceId)
         if (inputInterfaceId != ifId) {
             EtherFrame *dupFrame = frame->dup();
             dupFrame->ensureTag<InterfaceReq>()->setInterfaceId(ifId);
+            emit(LayeredProtocolBase::packetSentToLowerSignal, dupFrame);
             send(dupFrame, "ifOut");
         }
     }

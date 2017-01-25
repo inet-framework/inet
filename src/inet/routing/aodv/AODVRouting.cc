@@ -38,6 +38,10 @@
 #include "inet/linklayer/csma/CSMAFrame_m.h"
 #endif // ifdef WITH_CSMA
 
+#ifdef WITH_CSMACA
+#include "inet/linklayer/csmaca/CsmaCaMacFrame_m.h"
+#endif // ifdef WITH_CSMA
+
 #ifdef WITH_LMAC
 #include "inet/linklayer/lmac/LMacFrame_m.h"
 #endif // ifdef WITH_LMAC
@@ -998,7 +1002,7 @@ IRoute *AODVRouting::createRoute(const L3Address& destAddr, const L3Address& nex
     return newRoute;
 }
 
-void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {
@@ -1016,6 +1020,9 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 #ifdef WITH_CSMA
             || dynamic_cast<CSMAFrame *>(frame)
 #endif // ifdef WITH_CSMA
+#ifdef WITH_CSMACA
+            || dynamic_cast<CsmaCaMacFrame *>(frame)
+#endif // ifdef WITH_CSMACA
 #ifdef WITH_LMAC
             || dynamic_cast<LMacFrame *>(frame)
 #endif // ifdef WITH_LMAC
@@ -1074,10 +1081,13 @@ void AODVRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
 
     std::vector<UnreachableNode> unreachableNodes;
     AODVRouteData *unreachableRouteData = check_and_cast<AODVRouteData *>(unreachableRoute->getProtocolData());
-    UnreachableNode node;
-    node.addr = unreachableAddr;
-    node.seqNum = unreachableRouteData->getDestSeqNum();
-    unreachableNodes.push_back(node);
+
+    if (unreachableRouteData->isActive()) {
+        UnreachableNode node;
+        node.addr = unreachableAddr;
+        node.seqNum = unreachableRouteData->getDestSeqNum();
+        unreachableNodes.push_back(node);
+    }
 
     // For case (i), the node first makes a list of unreachable destinations
     // consisting of the unreachable neighbor and any additional destinations
@@ -1087,9 +1097,8 @@ void AODVRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
 
-        if (route->getNextHopAsGeneric() == unreachableAddr) {
-            AODVRouteData *routeData = check_and_cast<AODVRouteData *>(route->getProtocolData());
-
+        AODVRouteData *routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
+        if (routeData && routeData->isActive() && route->getNextHopAsGeneric() == unreachableAddr) {
             if (routeData->hasValidDestNum())
                 routeData->setDestSeqNum(routeData->getDestSeqNum() + 1);
 
@@ -1119,6 +1128,9 @@ void AODVRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
         EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second. Canceling sending RERR" << endl;
         return;
     }
+
+    if (unreachableNodes.empty())
+        return;
 
     AODVRERR *rerr = createRERR(unreachableNodes);
     rerrCount++;
@@ -1169,7 +1181,7 @@ void AODVRouting::handleRERR(AODVRERR *rerr, const L3Address& sourceAddr)
         // for which there exists a corresponding entry in the local routing
         // table that has the transmitter of the received RERR as the next hop.
 
-        if (route->getNextHopAsGeneric() == sourceAddr) {
+        if (routeData->isActive() && route->getNextHopAsGeneric() == sourceAddr) {
             for (unsigned int j = 0; j < unreachableArraySize; j++) {
                 if (route->getDestinationAsGeneric() == rerr->getUnreachableNodes(j).addr) {
                     // 1. The destination sequence number of this routing entry, if it

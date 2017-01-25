@@ -40,12 +40,17 @@ typedef struct {
     double sackPeriod;
     int maxBurst;
     int fragPoint;
-    int noDelay;
+    int nagle;
+    bool enableHeartbeats;
+    int pathMaxRetrans;
+    double hbInterval;
+    int assocMaxRtx;
 } SocketOptions;
 
 typedef struct {
     int inboundStreams;
     int outboundStreams;
+    bool streamReset;
 } AppSocketOptions;
 
 class INET_API SCTPSocket
@@ -86,6 +91,7 @@ class INET_API SCTPSocket
     static int32 nextAssocId;
     int sockstate;
     bool oneToOne;
+    bool appLimited;
 
     L3Address localAddr;
     AddressVector localAddresses;
@@ -175,6 +181,8 @@ class INET_API SCTPSocket
      */
     void setOutboundStreams(int streams) { appOptions->outboundStreams = streams; };
     void setInboundStreams(int streams) { appOptions->inboundStreams = streams; };
+    void setAppLimited(bool option) { appLimited = option; };
+    void setStreamReset(int option) { appOptions->streamReset = option; };
     void setStreamPriority(uint32 stream, uint32 priority);
     void setMaxInitRetrans(int option) { sOptions->maxInitRetrans = option; };
     void setMaxInitRetransTimeout(int option) { sOptions->maxInitRetransTimeout = option; };
@@ -185,18 +193,25 @@ class INET_API SCTPSocket
     void setSackPeriod(double option) { sOptions->sackPeriod = option; };
     void setMaxBurst(int option) { sOptions->maxBurst = option; };
     void setFragPoint(int option) { sOptions->fragPoint = option; };
-    void setNoDelay(int option) { sOptions->noDelay = option; };
+    void setNagle(int option) { sOptions->nagle = option; };
+    void setPathMaxRetrans(int option) { sOptions->pathMaxRetrans = option; };
+    void setEnableHeartbeats(bool option) { sOptions->enableHeartbeats = option; printf("enableHeartbeats set to %d\n", sOptions->enableHeartbeats);};
+    void setHbInterval(double option) { sOptions->hbInterval = option; };
+    void setRtoInfo(double initial, double max, double min);
+    void setAssocMaxRtx(int option) { sOptions->assocMaxRtx = option; };
 
     void setUserOptions(void* msg) { sOptions = (SocketOptions*) msg; };
 
     int getOutboundStreams() { return appOptions->outboundStreams; };
     int getInboundStreams() { return appOptions->inboundStreams; };
+    bool getStreamReset() { return appOptions->streamReset; }
     int getLastStream() { return lastStream; };
     double getRtoInitial() { return sOptions->rtoInitial; };
     int getMaxInitRetransTimeout() { return sOptions->maxInitRetransTimeout; };
     int getMaxInitRetrans() { return sOptions->maxInitRetrans; };
     int getMaxBurst() { return sOptions->maxBurst; };
     int getFragPoint() { return sOptions->fragPoint; };
+    int getAssocMaxRtx() { return sOptions->assocMaxRtx; };
 
     void getSocketOptions();
 
@@ -230,14 +245,14 @@ class INET_API SCTPSocket
      */
     void listen(bool fork = true, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
-    void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false);
+    void listen(uint32 requests = 0, bool fork = false, uint32 messagesToPush = 0, bool options = false, int32 fd = -1);
 
     /**
      * Active OPEN to the given remote socket.
      */
     void connect(L3Address remoteAddress, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
-    void connect(L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options = false);
+    void connect(int32 fd, L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options = false);
 
     /**
      * Active OPEN to the given remote socket.
@@ -246,6 +261,7 @@ class INET_API SCTPSocket
      */
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
+    void accept(int32 assocId, int32 fd);
     /**
      * Send data message.
      */
@@ -272,13 +288,13 @@ class INET_API SCTPSocket
      * connection until the remote SCTP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close();
+    void close(int id = -1);
 
     /**
      * Aborts the association.
      */
     void abort();
-    void shutdown();
+    void shutdown(int id = -1);
     /**
      * Causes SCTP to reply with a fresh SCTPStatusInfo, attached to a dummy
      * message as controlInfo(). The reply message can be recognized by its

@@ -31,11 +31,11 @@ class INET_API IPrintableObject
 {
   public:
     enum PrintLevel {
-        PRINT_LEVEL_INFO,
-        PRINT_LEVEL_DETAIL,
-        PRINT_LEVEL_DEBUG,
         PRINT_LEVEL_TRACE,
-        PRINT_LEVEL_COMPLETE = INT_MAX
+        PRINT_LEVEL_DEBUG,
+        PRINT_LEVEL_DETAIL,
+        PRINT_LEVEL_INFO,
+        PRINT_LEVEL_COMPLETE = INT_MIN
     };
 
   public:
@@ -62,12 +62,12 @@ class INET_API IPrintableObject
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
-    return object->printToStream(stream, cLog::logLevel - 3);
+    return object->printToStream(stream, cLog::logLevel);
 };
 
 inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
-    return object.printToStream(stream, cLog::logLevel - 3);
+    return object.printToStream(stream, cLog::logLevel);
 };
 
 inline std::string printObjectToString(const IPrintableObject *object, int level)

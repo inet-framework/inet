@@ -64,14 +64,16 @@ module Radio like IRadio
         bool separateTransmissionParts = default(false); // when enabled the transmission of preamble, header and data part are simulated separately
         bool separateReceptionParts = default(false);    // when enabled the reception of preamble, header and data part are simulated separately 
 
-        bool displayCommunicationRange = default(true); // if true communication range is displayed as a blue circle around the node
-        bool displayInterferenceRange = default(true);  // if true interference range is displayed as a gray circle around the node
+        bool displayCommunicationRange = default(false); // if true communication range is displayed as a blue circle around the node
+        bool displayInterferenceRange = default(false);  // if true interference range is displayed as a gray circle around the node
 
         *.energySourceModule = default(absPath(energySourceModule));
 
         @class(Radio);
         @display("i=block/wrxtx");
 
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
         @signal[radioModeChanged](type=long);
         @signal[listeningChanged];
         @signal[receptionStateChanged](type=long);

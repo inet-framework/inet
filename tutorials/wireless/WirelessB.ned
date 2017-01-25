@@ -18,7 +18,6 @@ package inet.tutorials.wireless;
 import inet.node.inet.INetworkNode;
 
 
-// - drop two standard hosts named hostR1 and hostR2 at the 100,400 and 400,100 positions
 network WirelessB extends WirelessA
 {
     submodules:
@@ -32,3 +31,5 @@ network WirelessB extends WirelessA
             @display("p=350,450");
         }
 }
+
+//##### (marker for doxygen)

@@ -1,34 +1,280 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.3.0 (May, 2016) - stable
+INET-3.5.0 (Jan, 2017) - stable
 -------------------------------
 
-This release requires either OMNeT++ 4.6, or 5.0.
+This release contains mostly bug fixes and compatibility changes. It requires 
+OMNeT++ 5.0 or 5.1 Preview 2. Earlier versions of OMNeT++ are *not* compatible.
 
-Changes:
+Highligts in this release:
 
-  - Packetdrill: Added SCTP support and socket options (by Irene Rungeler)
-  - Physical layer: added IdealObstacleLoss. This obstacle loss model determines
-    power loss by checking if there is any obstructing physical object along the
-    straight propagation path. The result is either total power loss if there was
-    such an object or no loss at all if there wasn't.
-  - The Manet rounting feature was removed from the source tree. The external
-    MANET routing algorithms are available in the INETMANET fork
-    (https://github.com/aarizaq/inetmanet-2.0)
-  - AODV: ICMP packets are now accepted (and silently dropped) by the AODV Routing component
-  - examples: 'run' script can now take parameters containing spaces (as long as
+Build:
+
+  - The build process is now using precompiled headers. This can speed up the 
+    build process considerably.
+
+  - Feature macros (WITH_*) that show the enablement of features are now placed 
+    into a header file (src/inet/features.h) instead of passed on the command line. 
+    The build process adds the WITH_OSG and WITH_OSGEARTH macro to the opp_defines.h 
+    file when WITH_OSG/WITH_OSGEARTH is set to yes. This allows the IDE to properly 
+    highlight/disable the appropriate code fragments.
+
+  - 64-bit build is now supported on Windows.
+
+Visualizers:
+
+  - Added a Plot figure (see InstrumentsExample).
+
+DHCP:
+
+  - DHCP fixes.
+
+  - DHCP can now activated in a Router by setting hasDHCP=true
+
+  - Added new WirelessNetWith2DHCP example.
+
+Radio:
+
+  - Added two-ray interference model.
+
+SCTP:
+
+  - Added StreamReconfig support for SCTP (by Irene Ruengeler)
+
+GPSR:
+
+  - Allow to specify the interface name in a parameter instead of
+    using a hardcoded interface name.
+
+Fixes:
+
+  - Small SimpleEnergyStorage, Antenna initialization
+
+  - Calling IPv6RoutingTable::getInterfaceByAddress(const L3Address& address) or
+    findGpsrOptionFromNetworkDatagram() function caused infinite recursion.
+
+  - Radio: Fixed FreeSpacePathLoss bug in the loss forumula for alpha != 2 case,
+    reported by Benjamin Sliwa.
+
+  - SimpleVoIPServer should resolve the destAddress at startTime (instead 
+    of initialization)
+
+  - Ieee8021dRelay: fixed a null pointer crash
+
+  - StaticCOncentricMobility: fixed a rounding issue
+
+  - ICMP: fixed "icmp error answer to a fragmented udp packet" problem
+
+  - ICMP: fixing bug #64: Buffer Overflow Error
+
+  - AODV: no longer generates assert when RREP-ACK arrived after a timeout
+
+
+INET-3.4.0 (Jun, 2016) - stable
+-------------------------------
+
+This INET release requires OMNeT++ 5.0. This is due to the new visualization
+feature which uses the Canvas and OSG APIs introduced in OMNeT++ 5.0. Most
+other parts of the codebase still builds with OMNeT++ 4.6.
+
+Highlights is this release:
+
+Tutorials:
+
+  - Added a Wireless Tutorial (tutorials/wireless). The tutorial consists of
+    several simulation models of increasing complexity, demonstrating the INET
+    architecture and features related to wireless communication networks. The
+    models are accompanied by a text which explains each step, complete with
+    screenshots and recorded animations.
+
+  - Added draft for a visualization tutorial.
+
+Visualizers:
+
+  - Added a new 'visualizer' folder under 'src' that contains visualizer modules.
+    The current visualizer modules can display the scene (optionally with osgEarth),
+    the network nodes (optionally with 3D models), physical objects in
+    the physical environment, node mobility along with movement trail, discovered
+    network connectivity, discovered network routes, ongoing transmissions,
+    ongoing receptions, propagating radio signals, and statistics.
+
+    The visualizer modules are intentionally kept separate from network protocol
+    models. They are responsible for displaying various aspects of the simulation
+    in a graphical user interface. The most common mechanism they use is looking
+    up other modules and/or subscribing to the signals they emit. The visualizer
+    modules are compatible with both Tkenv and Qtenv. In Qtenv they are able to
+    display on both a 2D canvas and a 3D OSG scene.
+
+Instrument figures:
+
+  - Implemented a facility that allows one to display various gauges, meters
+    and indicators in the network graphics that take their inputs from signals.
+    The "gadgets" themselves are figures that are added into the network using
+    @figure properties, and they are driven by signals via @statistic properties,
+    using a special result recorder ("figure") that sets the value in the target
+    figure. Figure types are: gauge, linearGauge, progressMeter, thermometer,
+    counter, indicatorLabel/indicatorText, and indexedImage. Their sources
+    are in src/inet/common/figures.
+
+    There is a demo in examples/visualization/instruments, and an additional
+    usage example in the Wireless Tutorial (tutorials/wireless).
+
+MAC protocols:
+
+  - Added CsmaCaMac, a simple CSMA/CA-based MAC protocol with optional
+    acknowledgements and a retry mechanism. With the appropriate settings,
+    it can approximate basic 802.11b ad-hoc mode operation. The code is
+    based on the original Ieee80211Mac (802.11b) from 2006.
+
+  - IdealMac: Changed out-of-band ACKs to be optional.
+
+  - LMAC, BMAC, CSMA: Fixed handling of frames with bit errors.
+
+  - WirelessNic: added optional classifier submodule
+
+  - Ieee80211Mac: Resurrected link break signal for giving up a transmission.
+
+Radio:
+
+  - The physical environment model has been extended to include a ground model.
+    Ground models need to implement the IGround interface that currently
+    contains a getElevation() method. A very simple implementation, FlatGround
+    is also provided.
+
+  - The TwoRayGroundReflection model has been updated to use the ground model
+    of the physical environment.
+
+  - Added packetReceivedFromUpper and packetSentToUpper signals.
+
+Mobility:
+
+  - Mobility models now use the initialZ parameter even if position is
+    initialized from the display string.
+
+  - Added VehicleMobility that simulates turning at waypoints.
+
+  - Now all mobile nodes face (i.e. set the  orientation to) the direction of
+    movement. This affects radio reception when direction antenna is used.
+
+Physical enviromment:
+
+  - Added geographic coordinate system support.
+
+  - TracingObstacleLoss renamed to DielectricObstacleLoss.
+
+Misc:
+
+  - Added ApplicationPacket that can be used as generic application payload.
+    Currently it contains a sequence number.
+
+  - UDPBasicApp/UDPSink: changed to use ApplicationPacket, and record
+    received packet sequence numbers
+
+  - RelayUnit: Added packetReceivedFromLowerSignal and packetSentToLowerSignal signals.
+
+  - AODV: Removed AODV-RERR messages for inactive routes.
+
+  - Applications: Added throughput statistic to some applications.
+
+  - IPv4: Added sentTo/receivedFrom upper/lower signals.
+
+  - Common: Added average forest "material".
+
+  - Common: Added throughput result filter.
+
+Build:
+
+  - Added a top level 'doc' target to build all INET documentation in a single step
+
+  - Added project feature tests (tests/features)
+
+
+INET-3.3.0 (Jun, 2016) - stable
+-------------------------------
+
+This release requires OMNeT++ 4.6 or 5.0.
+
+Build:
+
+  - Removed unnecessary -pINET from the makemake options. This caused linking
+    issues on Windows when 'clang' was used as a compiler. (the INET_API
+    macros are needed only for Visual C++)
+
+  - In makefrag, use inet_featuretool instead of scanning the compiler options
+    to detect the enablement of the VoIPStream and NSC features
+
+  - Fix: TCP_lwip did not compile when using the command-line make.
+
+  - Examples: 'run' script can now take parameters containing spaces (as long as
     they are quoted properly)
-  - build: removed unnecessary -pINET from the makemake options. This caused linking issues
-    on Windows when 'clang' was used as a compiler. (the INET_API macros are needed only for Viusal C++)
-  - bug fix in IPv4 packet deserialization
-  - bug fix in 802.11 management code
-  - bug fix in TelnetApp (cancels pending timers correctly)
-  - bug fix in Configurator: Links were not properly detected by the configurator if
-    a switch was precedeing all the nodes it was connected to.
-    (i.e. all nodes were defined after the switch in the NED file)
-  - IPv6: double delete fixed in IPv6
-  - IPv4: broadcast addresses can be used only with interfaces that support broadcasting
+
+SCTP:
+
+  - Packetdrill: Added SCTP support and socket options (by Irene Ruengeler)
+
+  - SCTP: added support for the SCTP_ACCEPT command (by Irene Ruengeler)
+
+Physical layer:
+
+  - Added IdealObstacleLoss. This obstacle loss model determines power loss by
+    checking if there is any obstructing physical object along the straight
+    propagation path. The result is either total power loss if there was
+    such an object or no loss at all if there wasn't.
+
+MANET:
+
+  - The "MANET Routing" feature (a collection of routing protocols ported
+    into INET from other projects) was removed from the source tree. The
+    removed MANET routing algorithms are still available in the INETMANET
+    fork of INET (https://github.com/aarizaq/inetmanet-2.0). INET now contains
+    the following natively implemented MANET routing protocols: AODV, DYMO, GPSR.
+
+Fixes:
+
+  - IPv4: bug fix in IPv4 packet deserialization
+
+  - Ieee802.11: bug fix in 802.11 management code (set TID only for QoS data
+    frames)
+
+  - TelnetApp: bug fix (cancel pending timers correctly)
+
+  - IPv4NetworkConfigurator: bug fix: links were not properly detected by the
+    configurator when nodes connected to a switch were defined after the switch
+    in the NED file
+
+  - IPv6: double delete fixed
+
+  - IPv4RoutingTable: fix: only interfaces with the BROADCAST flag set have
+    local broadcast addresses
+
+  - AODV: fix: AODV stopped with an error if an ICMP error packet was received
+    (ICMP packets are now accepted and silently dropped)
+
+  - examples: removed obsolete fingerprints.ini files
+
+Ethernet:
+
+  - Added a separate EtherPhyFrame class. Motivation: there was no obvious way
+    looking at an EtherFrame to tell whether it already contains preamble+SFD
+    or not.
+
+  - Change: When modeling the decapsulation from PHY header (subtracting preamble
+    and SFD lengths), padding to minimum frame size was also undone. This is
+    no longer done.
+
+  - EtherIFG renamed to EtherFilledIFG
+
+  - Catch duplex-halfduplex misconfiguration and throw error
+
+  - Fix incorrect byte counting during burst
+
+  - Serializer: adapted to the introduction of EtherPhyFrame
+
+  - Serializer: fix: CRC was in wrong byte order
+
+  - Serializer: fix: length field contained incorrect value (size of frame
+    instead of size of payload)
 
 
 INET-3.2.4 (April, 2016) - stable
@@ -55,7 +301,6 @@ Changes:
   - several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
   - smoke and fingerprint tests are running on both OMNeT++ 4.6 and 5.0
   - some varaiable renames and fixes in ieee802.11
-
 
 INET-3.2.1 (Jan, 2016) - Stable
 -------------------------------

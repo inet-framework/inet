@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2016 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -19,44 +19,84 @@
 #define __INET_GAUGEFIGURE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
+#include "IIndicatorFigure.h"
 
 // for the moment commented out as omnet cannot instatiate it from a namespace
 //namespace inet {
 
-class INET_API GaugeFigure : public cOvalFigure, protected cListener, protected cISimulationLifecycleListener
+class INET_API GaugeFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     cPathFigure *needle;
     cTextFigure *valueFigure;
     cTextFigure *labelFigure;
-    const char *signalName;
-    const char *moduleName;
-    const char *label;
-    const char *colorStrip;
-    double minValue = 0;
-    double maxValue = 100;
+    cOvalFigure *backgroundFigure;
+    std::vector<cArcFigure *> curveFigures;
+
+    // TODO Create a structure with cLineFigure* and cTextFigure*
+    std::vector<cLineFigure *> tickFigures;
+    std::vector<cTextFigure *> numberFigures;
+    const char *colorStrip = "";
+    double min = 0;
+    double max = 100;
     double tickSize = 10;
-    double value = minValue;
+    double value = NaN;
+    int numTicks = 0;
+    double shifting = 0;
+    int curvesOnCanvas = 0;
+
+  protected:
+    virtual void parse(cProperty *property) override;
+    virtual const char **getAllowedPropertyKeys() const override;
+    void addChildren();
+
+    void setColorCurve(const cFigure::Color& curveColor, double startAngle, double endAngle, cArcFigure *arc);
+    void setCurveGeometry(cArcFigure *curve);
+    void setTickGeometry(cLineFigure *tick, int index);
+    void setNumberGeometry(cTextFigure *number, int index);
+    void setNeedleGeometry();
+    void setNeedleTransform();
+
+    void redrawTicks();
+    void redrawCurves();
+    void layout();
+    void refresh();
 
   public:
     GaugeFigure(const char *name = nullptr);
-    virtual ~GaugeFigure() {};
+    virtual ~GaugeFigure();
 
-    virtual void parse(cProperty *property) override;
-    virtual bool isAllowedPropertyKey(const char *key) const override;
+    virtual void setValue(int series, simtime_t timestamp, double value) override;
 
-    void addChildren();
-    void addColorCurve(const cFigure::Color &curveColor, double startAngle, double endAngle);
+    const Rectangle& getBounds() const;
+    void setBounds(const Rectangle& rect);
 
-    void setValue(double newValue);
-    void setLabel(const char *newValue);
-    virtual const char *getClassNameForRenderer() const;
+    const Color& getBackgroundColor() const;
+    void setBackgroundColor(const Color& color);
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l DETAILS_ARG) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l DETAILS_ARG) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d DETAILS_ARG) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    const Color& getNeedleColor() const;
+    void setNeedleColor(const Color& color);
 
-    virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) override;
+    const char *getLabel() const;
+    void setLabel(const char *text);
+
+    const Font& getLabelFont() const;
+    void setLabelFont(const Font& font);
+
+    const Color& getLabelColor() const;
+    void setLabelColor(const Color& color);
+
+    double getMinValue() const;
+    void setMinValue(double value);
+
+    double getMaxValue() const;
+    void setMaxValue(double value);
+
+    double getTickSize() const;
+    void setTickSize(double value);
+
+    const char *getColorStrip() const;
+    void setColorStrip(const char *colorStrip);
 };
 
 // } // namespace inet

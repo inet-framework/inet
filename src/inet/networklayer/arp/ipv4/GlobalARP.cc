@@ -217,7 +217,7 @@ L3Address GlobalARP::getL3AddressFor(const MACAddress& macAddr) const
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
 
-void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG)
+void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.

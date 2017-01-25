@@ -2,11 +2,11 @@
  * file:        CSMA.h
  *
  * author:     Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
- *				Marc Loebbers, Yosia Hadisusanto
+ *                Marc Loebbers, Yosia Hadisusanto
  *
- * copyright:	(C) 2007-2009 CSEM SA
+ * copyright:    (C) 2007-2009 CSEM SA
  *              (C) 2009 T.U. Eindhoven
- *				(C) 2004 Telecommunication Networks Group (TKN) at
+ *                (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
  *
  *              This program is free software; you can redistribute it
@@ -112,7 +112,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     virtual void handleSelfMessage(cMessage *) override;
 
     /** @brief Handle control messages from lower layer */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
   protected:
     typedef std::list<CSMAFrame *> MacQueue;

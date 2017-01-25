@@ -54,7 +54,7 @@ simple MassMobility extends MovingMobilityBase
     parameters:
         double initialX @unit(m) = default(uniform(constraintAreaMinX, constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(constraintAreaMinY, constraintAreaMaxY));
-        double initialZ @unit(m) = default(uniform(constraintAreaMinZ, constraintAreaMaxZ));
+        double initialZ @unit(m) = default(nanToZero(uniform(constraintAreaMinZ, constraintAreaMaxZ)));
         double startAngle @unit(deg) = default(uniform(0deg, 360deg)); // initial angle in degrees
         bool initFromDisplayString = default(true);
         volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random)

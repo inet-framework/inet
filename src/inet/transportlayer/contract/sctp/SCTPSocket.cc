@@ -38,6 +38,8 @@ SCTPSocket::SCTPSocket(bool type)
     appOptions = new AppSocketOptions();
     appOptions->inboundStreams = -1;
     appOptions->outboundStreams = -1;
+    appOptions->streamReset = 0;
+    appLimited = false;
     if (oneToOne)
         assocId = getNewAssocId();
     else
@@ -60,6 +62,7 @@ SCTPSocket::SCTPSocket(cMessage *msg)
     appOptions = new AppSocketOptions();
     appOptions->inboundStreams = -1;
     appOptions->outboundStreams = -1;
+    appLimited = false;
     cb = nullptr;
     yourPtr = nullptr;
     gateToSctp = nullptr;
@@ -119,10 +122,9 @@ void SCTPSocket::sendToSCTP(cMessage *msg)
     check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(msg, gateToSctp);
 }
 
-
 void SCTPSocket::getSocketOptions()
 {
-    cPacket* cmsg = new cPacket("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
+    cMessage* cmsg = new cMessage("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
     SCTPSendInfo *cmd = new SCTPSendInfo("getOptions");
     cmd->setSocketId(assocId);
     cmd->setSid(0);
@@ -188,6 +190,7 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     openCmd->setFork(fork);
     openCmd->setOutboundStreams(appOptions->outboundStreams);
     openCmd->setInboundStreams(appOptions->inboundStreams);
+    appOptions->streamReset = reset;
     openCmd->setNumRequests(requests);
     openCmd->setStreamReset(reset);
     openCmd->setMessagesToPush(messagesToPush);
@@ -199,7 +202,7 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     sockstate = LISTENING;
 }
 
-void SCTPSocket::listen(uint32 requests, bool fork, uint32 messagesToPush, bool options)
+void SCTPSocket::listen(uint32 requests, bool fork, uint32 messagesToPush, bool options, int32 fd)
 {
     if (sockstate != CLOSED)
         throw cRuntimeError(sockstate == NOT_BOUND ?
@@ -214,10 +217,12 @@ void SCTPSocket::listen(uint32 requests, bool fork, uint32 messagesToPush, bool 
     else
         openCmd->setSocketId(getNewAssocId());
     openCmd->setFork(fork);
+    openCmd->setFd(fd);
     openCmd->setInboundStreams(appOptions->inboundStreams);
     openCmd->setOutboundStreams(appOptions->outboundStreams);
     openCmd->setNumRequests(requests);
     openCmd->setMessagesToPush(messagesToPush);
+    openCmd->setStreamReset(appOptions->streamReset);
 
     EV_INFO << "Assoc " << openCmd->getSocketId() << ": PassiveOPEN to SCTP from SCTPSocket:listen()\n";
     cMessage *cmsg = new cMessage("PassiveOPEN", SCTP_C_OPEN_PASSIVE);
@@ -256,6 +261,7 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
     openCmd->setRemotePort(remotePrt);
     openCmd->setOutboundStreams(appOptions->outboundStreams);
     openCmd->setInboundStreams(appOptions->inboundStreams);
+    appOptions->streamReset = streamReset;
     openCmd->setNumRequests(numRequests);
     openCmd->setPrMethod(prMethod);
     openCmd->setStreamReset(streamReset);
@@ -268,7 +274,7 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamR
         sockstate = CONNECTING;
 }
 
-void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options)
+void SCTPSocket::connect(int32 fd, L3Address remoteAddress, int32 remotePort, uint32 numRequests, bool options)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
@@ -296,7 +302,10 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, uint32 numRe
     openCmd->setRemotePort(remotePrt);
     openCmd->setOutboundStreams(appOptions->outboundStreams);
     openCmd->setInboundStreams(appOptions->inboundStreams);
+    openCmd->setStreamReset(appOptions->streamReset);
     openCmd->setNumRequests(numRequests);
+    openCmd->setFd(fd);
+    openCmd->setAppLimited(appLimited);
 
     cMessage *cmsg = new cMessage("Associate", SCTP_C_ASSOCIATE);
     cmsg->setControlInfo(openCmd);
@@ -307,6 +316,19 @@ void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, uint32 numRe
 
     if (oneToOne)
         sockstate = CONNECTING;
+}
+
+void SCTPSocket::accept(int32 assId, int32 fd)
+{
+    SCTPCommand *cmd = new SCTPCommand();
+    cmd->setLocalPort(localPrt);
+    cmd->setRemoteAddr(remoteAddr);
+    cmd->setRemotePort(remotePrt);
+    cmd->setSocketId(assId);
+    cmd->setFd(fd);
+    cMessage *cmsg = new cMessage("Accept", SCTP_C_ACCEPT);
+    cmsg->setControlInfo(cmd);
+    sendToSCTP(cmsg);
 }
 
 void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
@@ -353,7 +375,8 @@ void SCTPSocket::sendMsg(cMessage *cmsg)
             lastStream = (lastStream + 1) % appOptions->outboundStreams;
             sendCommand->setSid(lastStream);
         }
-        sendCommand->setSocketId(assocId);
+        if (sendCommand->getSocketId() == -1)
+            sendCommand->setSocketId(assocId);
         cmsg->setControlInfo(sendCommand);
     } else {
         sendCommand = new SCTPSendInfo();
@@ -383,25 +406,31 @@ void SCTPSocket::sendRequest(cMessage *msg)
     sendToSCTP(msg);
 }
 
-void SCTPSocket::close()
+void SCTPSocket::close(int id)
 {
     EV_INFO << "SCTPSocket::close()\n";
 
     cMessage *msg = new cMessage("CLOSE", SCTP_C_CLOSE);
     SCTPCommand *cmd = new SCTPCommand();
-    cmd->setSocketId(assocId);
+    if (id == -1)
+        cmd->setSocketId(assocId);
+    else
+        cmd->setFd(id);
     msg->setControlInfo(cmd);
     sendToSCTP(msg);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
 
-void SCTPSocket::shutdown()
+void SCTPSocket::shutdown(int id)
 {
     EV << "SCTPSocket::shutdown()\n";
 
     cMessage *msg = new cMessage("SHUTDOWN", SCTP_C_SHUTDOWN);
     SCTPCommand *cmd = new SCTPCommand();
-    cmd->setSocketId(assocId);
+    if (id == -1)
+        cmd->setSocketId(assocId);
+    else
+        cmd->setFd(id);
     msg->setControlInfo(cmd);
     sendToSCTP(msg);
 }
@@ -587,6 +616,23 @@ void SCTPSocket::setStreamPriority(uint32 stream, uint32 priority)
     cmd->setPpid(priority);
     msg->setControlInfo(cmd);
     sendToSCTP(msg);
+}
+
+void SCTPSocket::setRtoInfo(double initial, double max, double min)
+{
+    sOptions->rtoInitial = initial;
+    sOptions->rtoMax = max;
+    sOptions->rtoMin = min;
+    if (sockstate == CONNECTED) {
+        cMessage *msg = new cMessage("RtoInfo", SCTP_C_SET_RTO_INFO);
+        SCTPRtoInfo *cmd = new SCTPRtoInfo();
+        cmd->setSocketId(assocId);
+        cmd->setRtoInitial(initial);
+        cmd->setRtoMin(min);
+        cmd->setRtoMax(max);
+        msg->setControlInfo(cmd);
+        sendToSCTP(msg);
+    }
 }
 
 } // namespace inet

@@ -9,11 +9,11 @@
 +0.25    write(3, ..., 1200) = 1200
 +0.00  > sctp: DATA[flgs=B, len=516, tsn=0, sid=0, ssn=0, ppid=0] // Other flags allowed: IU
 +0.05  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99500, gaps=[], dups=[]]
-+0.00  > sctp: DATA[flgs=0, len=516, tsn=1, sid=0, ssn=0, ppid=0], DATA[flgs=E, len=216, tsn=2, sid=0, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=0, len=516, tsn=1, sid=0, ssn=0, ppid=0]; DATA[flgs=E, len=216, tsn=2, sid=0, ssn=0, ppid=0]
 +0  < sctp: SACK[flgs=0, cum_tsn=2, a_rwnd=100000, gaps=[], dups=[]]
 
 +0.25    write(3, ..., 1200) = 1200
-+0.00  > sctp: DATA[flgs=B, len=516, tsn=3, sid=1, ssn=0, ppid=0], DATA[flgs=0, len=516, tsn=4, sid=1, ssn=0, ppid=0], DATA[flgs=E, len=216, tsn=5, sid=1, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=B, len=516, tsn=3, sid=1, ssn=0, ppid=0]; DATA[flgs=0, len=516, tsn=4, sid=1, ssn=0, ppid=0]; DATA[flgs=E, len=216, tsn=5, sid=1, ssn=0, ppid=0]
 +0  < sctp: SACK[flgs=0, cum_tsn=5, a_rwnd=100000, gaps=[], dups=[]]
 
 +0.25    close(3) = 0

@@ -11,34 +11,44 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network WiredAndWirelessHostsWithAP
 {
-    @display("bgb=503,221");
+    @display("bgb=500,300");
     submodules:
-        wirelessHost1: WirelessHost {
-            @display("p=62,69");
-        }
-        wiredHost1: StandardHost {
-            @display("p=296,134");
-        }
-        wiredHost2: StandardHost {
-            @display("p=412,70");
-        }
-        router: Router {
-            @display("p=296,69");
-        }
-        accessPoint: AccessPoint {
-            @display("p=205,69");
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,50");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
                 assignDisjunctSubnetAddresses = false;
-                @display("p=367,165");
+                @display("p=100,150");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=115,165");
+            parameters:
+                @display("p=100,250");
+        }
+        wirelessHost1: WirelessHost {
+            parameters:
+                @display("p=62,69");
+        }
+        wiredHost1: StandardHost {
+            parameters:
+                @display("p=296,134");
+        }
+        wiredHost2: StandardHost {
+            parameters:
+                @display("p=412,70");
+        }
+        router: Router {
+            parameters:
+                @display("p=296,69");
+        }
+        accessPoint: AccessPoint {
+            parameters:
+                @display("p=205,69");
         }
     connections:
         accessPoint.ethg++ <--> Eth100M <--> router.ethg++;

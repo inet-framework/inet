@@ -5,8 +5,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))+"/misc/gdb")
 
 if 'register_inet_printers' in dir():
-    print 'inet pretty printers already initialized.'
+    print('inet pretty printers already initialized.')
 else:
     from inet.printers import register_inet_printers
     register_inet_printers(None)
-    print 'Pretty printers initialized: inet'
+    print('Pretty printers initialized: inet')

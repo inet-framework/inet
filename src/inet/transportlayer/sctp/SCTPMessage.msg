@@ -272,6 +272,7 @@ message SCTPOutgoingSSNResetRequestParameter extends SCTPParameter
 
 message SCTPIncomingSSNResetRequestParameter extends SCTPParameter
 {
+    @customize(true);
     uint32 srReqSn; //Stream Reset Request Sequence Number
     uint16 streamNumbers[];
 }
@@ -287,6 +288,13 @@ message SCTPStreamResetResponseParameter extends SCTPParameter
     uint32 result;
     uint32 sendersNextTsn = 0;
     uint32 receiversNextTsn = 0;
+}
+
+message SCTPAddStreamsRequestParameter extends SCTPParameter
+{
+    uint32 srReqSn; //Stream Reset Request Sequence Number
+    uint16 numberOfStreams;
+    uint16 reserved = 0;
 }
 
 message SCTPResetTimer extends cPacket

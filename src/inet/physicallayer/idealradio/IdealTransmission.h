@@ -31,18 +31,18 @@ namespace physicallayer {
 class INET_API IdealTransmission : public TransmissionBase
 {
   protected:
-    const m maxCommunicationRange;
-    const m maxInterferenceRange;
-    const m maxDetectionRange;
+    const m communicationRange;
+    const m interferenceRange;
+    const m detectionRange;
 
   public:
-    IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange);
+    IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual m getMaxCommunicationRange() const { return maxCommunicationRange; }
-    virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }
-    virtual m getMaxDetectionRange() const { return maxDetectionRange; }
+    virtual m getCommunicationRange() const { return communicationRange; }
+    virtual m getInterferenceRange() const { return interferenceRange; }
+    virtual m getDetectionRange() const { return detectionRange; }
 };
 
 } // namespace physicallayer

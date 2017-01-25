@@ -15,6 +15,7 @@
 #ifndef __INET_RAWPACKET_H
 #define __INET_RAWPACKET_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/RawPacket_m.h"
 
 namespace inet {

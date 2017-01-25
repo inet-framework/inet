@@ -116,16 +116,14 @@ void SimpleEnergyStorage::executeNodeOperation(J newResidualCapacity)
 
 void SimpleEnergyStorage::setResidualCapacity(J newResidualCapacity)
 {
-    if (newResidualCapacity != residualCapacity) {
-        residualCapacity = newResidualCapacity;
-        lastResidualCapacityUpdate = simTime();
-        executeNodeOperation(newResidualCapacity);
-        if (residualCapacity == J(0))
-            EV_WARN << "Energy storage depleted" << endl;
-        else if (residualCapacity == nominalCapacity)
-            EV_INFO << "Energy storage charged" << endl;
-        emit(residualCapacityChangedSignal, residualCapacity.get());
-    }
+    residualCapacity = newResidualCapacity;
+    lastResidualCapacityUpdate = simTime();
+    executeNodeOperation(newResidualCapacity);
+    if (residualCapacity == J(0))
+        EV_WARN << "Energy storage depleted" << endl;
+    else if (residualCapacity == nominalCapacity)
+        EV_INFO << "Energy storage charged" << endl;
+    emit(residualCapacityChangedSignal, residualCapacity.get());
 }
 
 void SimpleEnergyStorage::updateResidualCapacity()

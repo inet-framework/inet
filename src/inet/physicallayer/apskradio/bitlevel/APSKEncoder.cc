@@ -55,12 +55,12 @@ void APSKEncoder::initialize(int stage)
 std::ostream& APSKEncoder::printToStream(std::ostream& stream, int level) const
 {
     stream << "APSKEncoder";
-    if (level >= PRINT_LEVEL_DETAIL)
-        stream << ", code = " << printObjectToString(code, level - 1);
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", scrambler = " << printObjectToString(scrambler, level - 1)
-               << ", fecEncoder = " << printObjectToString(fecEncoder, level - 1)
-               << ", interleaver = " << printObjectToString(interleaver, level - 1);
+    if (level <= PRINT_LEVEL_DETAIL)
+        stream << ", code = " << printObjectToString(code, level + 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", scrambler = " << printObjectToString(scrambler, level + 1)
+               << ", fecEncoder = " << printObjectToString(fecEncoder, level + 1)
+               << ", interleaver = " << printObjectToString(interleaver, level + 1);
     return stream;
 }
 

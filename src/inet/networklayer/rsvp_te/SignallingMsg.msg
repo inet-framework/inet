@@ -59,7 +59,7 @@ message PsbTimerMsg extends SignallingMsg
 {
     int id;
 
-    int command = MSG_PSB_TIMER;
+    command = MSG_PSB_TIMER;
 }
 
 //
@@ -69,7 +69,7 @@ message PsbTimeoutMsg extends SignallingMsg
 {
     int id;
 
-    int command = MSG_PSB_TIMEOUT;
+    command = MSG_PSB_TIMEOUT;
 }
 
 //
@@ -79,7 +79,7 @@ message RsbRefreshTimerMsg extends SignallingMsg
 {
     int id;
 
-    int command = MSG_RSB_REFRESH_TIMER;
+    command = MSG_RSB_REFRESH_TIMER;
 }
 
 //
@@ -89,7 +89,7 @@ message RsbCommitTimerMsg extends SignallingMsg
 {
     int id;
 
-    int command = MSG_RSB_COMMIT_TIMER;
+    command = MSG_RSB_COMMIT_TIMER;
 }
 
 //
@@ -99,7 +99,7 @@ message RsbTimeoutMsg extends SignallingMsg
 {
     int id;
 
-    int command = MSG_RSB_TIMEOUT;
+    command = MSG_RSB_TIMEOUT;
 }
 
 //
@@ -109,7 +109,7 @@ message HelloTimerMsg extends SignallingMsg
 {
     IPv4Address peer;
 
-    int command = MSG_HELLO_TIMER;
+    command = MSG_HELLO_TIMER;
 }
 
 //
@@ -119,7 +119,7 @@ message HelloTimeoutMsg extends SignallingMsg
 {
     IPv4Address peer;
 
-    int command = MSG_HELLO_TIMEOUT;
+    command = MSG_HELLO_TIMEOUT;
 }
 
 //
@@ -132,5 +132,5 @@ message PathNotifyMsg extends SignallingMsg
 
     int status;
 
-    int command = MSG_PATH_NOTIFY;
+    command = MSG_PATH_NOTIFY;
 }

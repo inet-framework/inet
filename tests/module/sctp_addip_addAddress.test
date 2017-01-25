@@ -13,6 +13,13 @@ cmdenv-express-mode = false
 #cmdenv-module-messages=false
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 **.testing = false
 **.testTimeout = 0
 
@@ -59,6 +66,7 @@ ned-path = .;../../../../src;../../lib
 **.sctp_server.sctp.addTime = 10s
 
 # sctp settings
+**.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SCTPAlg"
 **.sctp.addIP = true
 

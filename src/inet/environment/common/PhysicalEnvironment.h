@@ -18,14 +18,15 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
-#include "inet/common/IVisitor.h"
 #include "inet/common/geometry/base/ShapeBase.h"
-#include "inet/common/geometry/object/LineSegment.h"
+#include "inet/common/geometry/common/CoordinateSystem.h"
 #include "inet/common/geometry/common/Rotation.h"
-#include "inet/environment/contract/IPhysicalEnvironment.h"
-#include "inet/environment/contract/IObjectCache.h"
-#include "inet/environment/common/PhysicalObject.h"
+#include "inet/common/geometry/object/LineSegment.h"
+#include "inet/common/IVisitor.h"
 #include "inet/environment/common/MaterialRegistry.h"
+#include "inet/environment/common/PhysicalObject.h"
+#include "inet/environment/contract/IObjectCache.h"
+#include "inet/environment/contract/IPhysicalEnvironment.h"
 
 namespace inet {
 
@@ -42,34 +43,22 @@ namespace physicalenvironment {
 class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 {
   protected:
-    class ObjectPositionComparator
-    {
-        protected:
-            const Rotation &viewRotation;
-
-        public:
-            ObjectPositionComparator(const Rotation &viewRotation) : viewRotation(viewRotation) {}
-
-            bool operator() (const PhysicalObject *left, const PhysicalObject *right) const
-            {
-                return viewRotation.rotateVectorClockwise(left->getPosition()).z < viewRotation.rotateVectorClockwise(right->getPosition()).z;
-            }
-    };
-
-  protected:
     /** @name Parameters */
     //@{
+    IGeographicCoordinateSystem *coordinateSystem = nullptr;
     K temperature;
     Coord spaceMin;
     Coord spaceMax;
-    double axisLength;
+    //@}
+
+    /** @name Submodules */
+    //@{
+    IObjectCache *objectCache = nullptr;
+    IGround *ground = nullptr;
     //@}
 
     /** @name Internal state */
     //@{
-    EulerAngles viewAngle;
-    Rotation viewRotation;
-    cFigure::Point viewTranslation;
     std::vector<const ShapeBase *> shapes;
     std::vector<const Material *> materials;
     std::vector<const PhysicalObject *> objects;
@@ -77,49 +66,37 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
 
     /** @name Cache */
     //@{
-    IObjectCache *objectCache;
     std::map<int, const ShapeBase *> idToShapeMap;  // shared shapes
     std::map<int, const Material *> idToMaterialMap;
     std::map<int, const PhysicalObject *> idToObjectMap;
     std::map<const std::string, const Material *> nameToMaterialMap;
     //@}
 
-    /** @name Graphics */
-    //@{
-    cGroupFigure *objectsLayer;
-    //@}
-
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleParameterChange(const char *name) override;
 
+    virtual void convertPoints(std::vector<Coord>& points);
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
-
-    virtual void updateCanvas();
-
-    virtual void computeFacePoints(const PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation);
-    virtual EulerAngles computeViewAngle(const char *viewAngle);
-    virtual cFigure::Point computeViewTranslation(const char *viewTranslation);
 
   public:
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
 
+    virtual IObjectCache *getObjectCache() const override { return objectCache; }
+    virtual IGround *getGround() const override { return ground; }
+
     virtual K getTemperature() const { return temperature; }
     virtual const Coord& getSpaceMin() const override { return spaceMin; }
     virtual const Coord& getSpaceMax() const override { return spaceMax; }
 
-    virtual const EulerAngles& getViewAngle() const override { return viewAngle; }
-    virtual const Rotation& getViewRotation() const override { return viewRotation; }
-    virtual const cFigure::Point& getViewTranslation() const override { return viewTranslation; }
     virtual const IMaterialRegistry *getMaterialRegistry() const override { return &MaterialRegistry::singleton; }
 
-    virtual int getNumObjects() const { return objects.size(); }
-    virtual const PhysicalObject *getObject(int index) const { return objects[index]; }
-    virtual const PhysicalObject *getObjectById(int id) const;
+    virtual int getNumObjects() const override { return objects.size(); }
+    virtual const PhysicalObject *getObject(int index) const override { return objects[index]; }
+    virtual const PhysicalObject *getObjectById(int id) const override;
 
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const override;
 };

@@ -15,33 +15,47 @@
 
 package inet.tutorials.wireless;
 
+import inet.common.figures.DelegateSignalConfigurator;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 
-// - create a network and specify the size to 500x500
-// - drop an IPv4NetworkConfigurator and rename it to "configurator"
-// - drop an IdealRadioMedium module and rename to "radioMedium"
-// - drop two standardhosts at the 100,100 and 400,400 position and
-//   rename them to hostA and hostB
 network WirelessA
 {
-    @display("bgb=500,500");
-    @figure[thruputInstrument](type=gauge; pos=370,90; size=120,120; maxValue=2500; tickSize=500; colorStrip=green 0.75 yellow 0.9 red;label=Number of packets received; moduleName=hostB.app[0]; signalName=rcvdPk);
-    string hostType = default("WirelessHost");
-    string mediumType = default("IdealRadioMedium");
+    parameters:
+        string hostType = default("WirelessHost");
+        string mediumType = default("IdealRadioMedium");
+
+        @display("bgb=650,500;bgg=100,1,grey95");
+        @figure[title](type=label; pos=0,-1; anchor=sw; color=darkblue);
+
+        @figure[rcvdPkText](type=indicatorText; pos=420,20; anchor=w; font=,20; textFormat="packets received: %g"; initialValue=0);
+        @statistic[rcvdPk](source=hostB_rcvdPk; record=figure(count); targetFigure=rcvdPkText);
+        @signal[hostB_rcvdPk];
+        @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostB_rcvdPk);
+
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=580,125");
+        }
         configurator: IPv4NetworkConfigurator {
-            @display("p=149,29");
+            @display("p=580,200");
         }
         radioMedium: <mediumType> like IRadioMedium {
-            @display("p=309,24");
+            @display("p=580,275");
+        }
+        figureHelper: DelegateSignalConfigurator {
+            @display("p=580,350");
         }
         hostA: <hostType> like INetworkNode {
-            @display("p=50,250");
+            @display("p=50,325");
         }
         hostB: <hostType> like INetworkNode {
-            @display("p=450,250");
+            @display("p=450,325");
         }
 }
+
+//##### (marker for doxygen)
+

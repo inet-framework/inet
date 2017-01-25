@@ -15,6 +15,8 @@
 *              in the top level directory
 ***************************************************************************/
 
+#include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/pathloss/TwoRayGroundReflection.h"
 
 namespace inet {
@@ -23,35 +25,34 @@ namespace physicallayer {
 
 Define_Module(TwoRayGroundReflection);
 
-TwoRayGroundReflection::TwoRayGroundReflection() :
-    ht(m(0)),
-    hr(m(0))
-{
-}
-
 void TwoRayGroundReflection::initialize(int stage)
 {
-    FreeSpacePathLoss::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        ht = m(par("transmitterAntennaHeight"));
-        hr = m(par("receiverAntennaHeight"));
+        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, true);
     }
 }
 
 std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int level) const
 {
     stream << "TwoRayGroundReflection";
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", alpha = " << alpha
-               << ", systemLoss = " << systemLoss
-               << ", ht = " << ht
-               << ", hr = " << hr;
+               << ", systemLoss = " << systemLoss;
     return stream;
 }
 
-double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
-    m waveLength = propagationSpeed / frequency;
+    auto radioMedium = transmission->getTransmitter()->getMedium();
+    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
+    auto transmitterPosition = transmission->getStartPosition();
+    auto recepiverPosition = arrival->getStartPosition();
+    mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
+    Hz carrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
+    m distance = m(recepiverPosition.distance(transmitterPosition));
+    m transmitterAltitude = m(transmitterPosition.z - physicalEnvironment->getGround()->getElevation(transmitterPosition));
+    m receiverAltitude = m(recepiverPosition.z - physicalEnvironment->getGround()->getElevation(recepiverPosition));
+    m waveLength = propagationSpeed / carrierFrequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power
      *
@@ -59,7 +60,7 @@ double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequenc
      *   crossOverDistance = ------------------
      *                           waveLength
      */
-    m crossOverDistance = (4 * M_PI * ht * hr) / waveLength;
+    m crossOverDistance = (4 * M_PI * transmitterAltitude * receiverAltitude) / waveLength;
     if (distance < crossOverDistance)
         return computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     else
@@ -73,7 +74,7 @@ double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequenc
          * To be consistent with the free space equation, L is added here.
          * The original equation in Rappaport's book assumes L = 1.
          */
-        return unit((ht * ht * hr * hr) / (distance * distance * distance * distance * systemLoss)).get();
+        return unit((transmitterAltitude * transmitterAltitude * receiverAltitude * receiverAltitude) / (distance * distance * distance * distance * systemLoss)).get();
 }
 
 } // namespace physicallayer

@@ -1,9 +1,16 @@
 #
+# on windows we have to link with the winsock library as it is no longer added 
+# to the oomnetpp system libraries by default
+#
+ifeq ($(PLATFORM),win32.x86_64)
+  LIBS += -lwsock32
+endif
+
+#
 # TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
 #
 
 WITH_TCP_NSC := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_NSC && echo enabled) )
-CFLAGS += -Dxxx$(WITH_TCP_NSC)xxx
 ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
@@ -42,8 +49,85 @@ ifeq ($(WITH_VOIPSTREAM), enabled)
   endif
 endif
 
+#
+# visualization feature requires (optionally) some extra osg and osgEarth libraries
+#
+WITH_VISUALIZERS := $(shell (cd .. && ./inet_featuretool -q isenabled visualization && echo enabled) )
+ifeq ($(WITH_VISUALIZERS), enabled)
+  ifeq ($(WITH_OSG), yes)
+      OMNETPP_LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil
+  endif
+endif
+
 # uncomment this if you want to run the NS3 vs INET 802.11 cross validation tests in the 'tests/misc/ns3' folder.
 # CFLAGS += -DNS3_VALIDATION
 
 # disable anoying "... hides overloaded virtual function" warning
 CFLAGS += -Wno-overloaded-virtual
+
+#########################################################################
+# precompiled header support for GCC and CLANG
+
+ifeq ($(CC),gcc)
+PRECOMPILED_EXT=gch
+else ifeq ($(CC),clang)
+PRECOMPILED_EXT=pch
+else
+PRECOMPILED_EXT=
+endif
+
+PRECOMPILED_HEADER=inet/common/precompiled.h
+PRECOMPILED_HEADER_PCH=$(PRECOMPILED_HEADER).$(PRECOMPILED_EXT)
+PRECOMPILED_HEADER_D=$(PRECOMPILED_HEADER_PCH:%.$(PRECOMPILED_EXT)=%.d)
+CFLAGS += -include $(PRECOMPILED_HEADER)
+
+# Main target
+all-pch: | pch msgheaders all
+
+.PHONY: pch clean-pch
+
+pch : $(PRECOMPILED_HEADER_PCH)
+
+$(PRECOMPILED_HEADER_PCH): $(PRECOMPILED_HEADER)
+ifneq ("$(PRECOMPILED_EXT)","")
+	@echo Creating precompiled header for $(CC)...
+	$(Q)$(CXX) -x c++-header $(CXXFLAGS) $(filter-out -MMD -include $(PRECOMPILED_HEADER),$(COPTS)) -MD -o $@ $<
+endif
+
+clean: clean-pch clean-defines
+
+clean-pch:
+	$(Q)-rm -f $(PRECOMPILED_HEADER_D) $(PRECOMPILED_HEADER).pch $(PRECOMPILED_HEADER).gch
+
+-include $(PRECOMPILED_HEADER_D)
+
+# Create opp_defines.h so important WITH_* macros from OMNeT++ can be included as macros from a header file
+# This helps the IDE to properly enable/disable conditional code in the editor
+DEFINES_FILE=inet/opp_defines.h
+
+msgheaders: $(DEFINES_FILE)
+
+clean-defines:
+	$(Q)-rm -f $(DEFINES_FILE)
+
+$(DEFINES_FILE) : $(COPTS_FILE)
+	@echo "// Generated file, do not edit" >$(DEFINES_FILE)
+ifeq ($(WITH_OSG),yes)
+	@echo "#ifndef WITH_OSG" >>$(DEFINES_FILE)
+	@echo "#define WITH_OSG" >>$(DEFINES_FILE)
+	@echo "#endif" >>$(DEFINES_FILE)
+endif
+ifeq ($(WITH_OSGEARTH),yes)
+	@echo "#ifndef WITH_OSGEARTH" >>$(DEFINES_FILE)
+	@echo "#define WITH_OSGEARTH" >>$(DEFINES_FILE)
+	@echo "#endif" >>$(DEFINES_FILE)
+endif
+
+# dump out the actual compiler and linker command line for easier debugging
+ifneq ($(MAKECMDGOALS),clean)
+$(info *** COMPILING with:)
+$(info $(CXX) -c $(CXXFLAGS) $(COPTS))
+$(info *** LINKING with:)
+$(info $(SHLIB_LD) -o $O/$(TARGET) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS))
+$(info Compiling...)
+endif

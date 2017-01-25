@@ -33,7 +33,7 @@ ListeningBase::ListeningBase(const IRadio *receiver, simtime_t startTime, simtim
 
 std::ostream& ListeningBase::printToStream(std::ostream& stream, int level) const
 {
-    if (level >= PRINT_LEVEL_TRACE)
+    if (level <= PRINT_LEVEL_TRACE)
         stream << ", receiverId = " << receiver->getId()
                << ", startTime = " << startTime
                << ", endTime = " << endTime

@@ -27,9 +27,9 @@ namespace physicallayer {
 class INET_API Ieee80211IdealTransmitter : public Ieee80211TransmitterBase
 {
   protected:
-    m maxCommunicationRange = m(NaN);
-    m maxInterferenceRange = m(NaN);
-    m maxDetectionRange = m(NaN);
+    m communicationRange = m(NaN);
+    m interferenceRange = m(NaN);
+    m detectionRange = m(NaN);
 
   protected:
     virtual void initialize(int stage) override;

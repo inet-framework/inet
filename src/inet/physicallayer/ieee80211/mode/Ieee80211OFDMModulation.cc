@@ -33,8 +33,8 @@ Ieee80211OFDMModulation::Ieee80211OFDMModulation(const APSKModulationBase* subca
 std::ostream& Ieee80211OFDMModulation::printToStream(std::ostream& stream, int level) const
 {
     stream << "Ieee80211OFDMModulation";
-    if (level >= PRINT_LEVEL_TRACE)
-        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level - 1);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << ", subcarrierModulation = " << printObjectToString(subcarrierModulation, level + 1);
     return stream;
 }
 

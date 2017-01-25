@@ -13,6 +13,12 @@ network = inet.examples.inet.nclients.NClients
 sim-time-limit = 15s
 cmdenv-express-mode = false
 
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
 # number of client computers
 *.n = 1
 
@@ -36,7 +42,7 @@ cmdenv-express-mode = false
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-Received packet: \(cPacket\)UDPBasicAppData-0 .* ToS=53
+Received packet: \(inet::ApplicationPacket\)UDPBasicAppData-0 .* ToS=53
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

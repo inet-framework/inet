@@ -35,5 +35,5 @@ packet RSVPHelloMsg extends RSVPMessage
     int srcInstance;
     int dstInstance;
 
-    int rsvpKind = HELLO_MESSAGE;
+    rsvpKind = HELLO_MESSAGE;
 }

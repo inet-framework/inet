@@ -113,7 +113,7 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG)
+void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
     if (signalID == Ieee80211Radio::radioChannelChangedSignal) {

@@ -39,8 +39,8 @@ Prism::Prism(double height, const Polygon& base) :
 
 Coord Prism::computeBoundingBoxSize() const
 {
-    Coord min;
-    Coord max;
+    Coord min = base.getPoints()[0];
+    Coord max = min;
     for (const auto & elem : base.getPoints()) {
         min = min.min(elem);
         max = max.max(elem);

@@ -47,8 +47,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
     double transmitterAntennaGain = transmitterAntenna->computeGain(transmissionAntennaDirection);
     double receiverAntennaGain = receiverAntenna->computeGain(receptionAntennaDirection);
-    m distance = m(receptionStartPosition.distance(transmission->getStartPosition()));
-    double pathLoss = radioMedium->getPathLoss()->computePathLoss(radioMedium->getPropagation()->getPropagationSpeed(), narrowbandSignalAnalogModel->getCarrierFrequency(), distance);
+    double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCarrierFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();
     return transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);

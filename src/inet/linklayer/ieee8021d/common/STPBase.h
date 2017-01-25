@@ -51,7 +51,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
   public:
     STPBase();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override {}
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {}
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -76,7 +76,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
      * @brief Obtains the root interface ID.
      * @return The root gate interface ID or -1 if there is no root interface.
      */
-    virtual int getRootInterfaceId();
+    virtual int getRootInterfaceId() const;
 
     /**
      * @brief Gets Ieee8021dInterfaceData for interface ID.

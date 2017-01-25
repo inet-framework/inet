@@ -163,7 +163,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort);
 
             if (par("active").boolValue())
-                socket.connect(L3Address(par("connectAddress")), connectPort);
+                socket.connect(L3Address(connectAddress), connectPort);
             else
                 socket.listenOnce();
             scheduleNextSend();

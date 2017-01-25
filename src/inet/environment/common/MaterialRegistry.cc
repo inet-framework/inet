@@ -49,6 +49,7 @@ const Material *MaterialRegistry::getMaterial(const char *name) const
         addMaterial(new Material("copper", Ohmm(1.68), NaN, NaN));
         addMaterial(new Material("aluminium", Ohmm(2.65), NaN, NaN));
         addMaterial(new Material("wood", Ohmm(1E+15), 5, 1.00000043));
+        addMaterial(new Material("forest", Ohmm(37E+3), 1.6, 1));
         addMaterial(new Material("brick", Ohmm(3E+3), 4.5, 1));
         addMaterial(new Material("concrete", Ohmm(1E+2), 4.5, 1));
         addMaterial(new Material("glass", Ohmm(1E+12), 7, 1));

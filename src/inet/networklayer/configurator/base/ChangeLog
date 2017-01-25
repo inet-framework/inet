@@ -1,5 +1,9 @@
 ====== inet-3.x ======
 
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
 2016-04-11  Zoltan Bojthe
 
 	IPv4NetworkConfigurator: fixed that link detection through EtherSwitches was

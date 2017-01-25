@@ -168,9 +168,6 @@ void ExtInterface::displayIdle()
 
 void ExtInterface::refreshDisplay() const
 {
-    if (!hasGUI())
-        return;
-
     const char *str;
 
     if (connected) {

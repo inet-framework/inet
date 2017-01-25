@@ -22,9 +22,7 @@
 #ifndef __INET_MOVINGMOBILITYBASE_H
 #define __INET_MOVINGMOBILITYBASE_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/mobility/base/MobilityBase.h"
-#include "inet/common/figures/TrailFigure.h"
 
 namespace inet {
 
@@ -61,12 +59,6 @@ class INET_API MovingMobilityBase : public MobilityBase
      * The -1 value turns off sending a self message for the next mobility state change. */
     simtime_t nextChange;
 
-    /** @brief Draw the path on the canvas. */
-    bool leaveMovementTrail;
-
-    /** @brief The list of trail figures representing the movement. */
-    TrailFigure *movementTrail;
-
   protected:
     MovingMobilityBase();
 
@@ -84,8 +76,6 @@ class INET_API MovingMobilityBase : public MobilityBase
     /** @brief Moves and notifies listeners. */
     void moveAndUpdate();
 
-    void updateVisualRepresentation() override;
-
     /** @brief Moves according to the mobility model to the current simulation time.
      *
      * Subclasses must override and update lastPosition, lastSpeed, lastUpdate, nextChange
@@ -99,6 +89,9 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() override;
+
+    /** @brief Returns the current angular position at the current simulation time. */
+    virtual EulerAngles getCurrentAngularPosition() override;
 };
 
 } // namespace inet

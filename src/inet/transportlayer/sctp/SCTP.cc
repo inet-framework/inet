@@ -50,7 +50,7 @@ void SCTP::printInfoAssocMap()
             assoc = elem.second;
             key = elem.first;
 
-            EV_DETAIL << "assocId: " << assoc->assocId << "  assoc: " << assoc << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << "\n";
+            EV_DETAIL << "assocId: " << assoc->assocId << "  assoc: " << assoc << " src: " << key.localAddr << " dst: " << key.remoteAddr << " lPort: " << key.localPort << " rPort: " << key.remotePort << " fd: " << assoc->fd <<"\n";
         }
 
         EV_DETAIL << "\n";
@@ -236,12 +236,14 @@ void SCTP::handleMessage(cMessage *msg)
     else {    // must be from app
         EV_DEBUG << "must be from app\n";
         if (msg->getKind() == SCTP_C_GETSOCKETOPTIONS) {
+            SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
             cPacket* cmsg = new cPacket("SocketOptions", SCTP_I_SENDSOCKETOPTIONS);
             SCTPCommand* indication = new SCTPCommand("SCTP_I_SENDSOCKETOPTIONS");
+            indication->setSocketId(controlInfo->getSocketId());
             cmsg->setControlInfo(indication);
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
-            send(cmsg, "appOut", 0);
+            send(cmsg, "appOut");
             delete msg;
         } else {
             SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
@@ -252,6 +254,10 @@ void SCTP::handleMessage(cMessage *msg)
             else
                 appGateIndex = msg->getArrivalGate()->getIndex();
             int32 assocId = controlInfo->getSocketId();
+            if (assocId == -1) {
+                int32 fd = controlInfo->getFd();
+                assocId = findAssocForFd(fd);
+            }
             EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
             SCTPAssociation *assoc = findAssocForApp(appGateIndex, assocId);
 
@@ -309,7 +315,11 @@ SocketOptions* SCTP::collectSocketOptions()
     sockOptions->sackPeriod = (double) par("sackPeriod");
     sockOptions->maxBurst = (int) par("maxBurst");
     sockOptions->fragPoint = (int) par("fragPoint");
-    sockOptions->noDelay = ((bool) par("nagleEnabled")) ? 0 : 1;
+    sockOptions->nagle = ((bool) par("nagleEnabled")) ? 1 : 0;
+    sockOptions->enableHeartbeats = (bool) par("enableHeartbeats");
+    sockOptions->pathMaxRetrans = (int) par("pathMaxRetrans");
+    sockOptions->hbInterval = (double) par("hbInterval");
+    sockOptions->assocMaxRtx = (int) par("assocMaxRetrans");
     return sockOptions;
 }
 
@@ -565,6 +575,17 @@ SCTPAssociation *SCTP::findAssocForApp(int32 appGateIndex, int32 assocId)
     EV_INFO << "findAssoc for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
     auto i = sctpAppAssocMap.find(key);
     return (i == sctpAppAssocMap.end()) ? nullptr : i->second;
+}
+
+int32 SCTP::findAssocForFd(int32 fd)
+{
+    SCTPAssociation *assoc = NULL;
+    for (auto & elem : sctpAppAssocMap) {
+        assoc = elem.second;
+        if (assoc->fd == fd)
+            return assoc->assocId;
+    }
+    return -1;
 }
 
 uint16 SCTP::getEphemeralPort()

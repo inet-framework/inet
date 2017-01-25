@@ -49,7 +49,7 @@ class INET_API L2NodeConfigurator : public cSimpleModule, public ILifecycle, pub
     virtual void configureNode();
 
     // cListener:
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 };
 
 } // namespace inet
