@@ -43,4 +43,5 @@ module IdealRadio extends Radio
         receiverType = default("IdealReceiver");
         separateTransmissionParts = default(false);
         separateReceptionParts = default(false);
+        @class(IdealRadio);
 }

@@ -45,6 +45,9 @@ class INET_API IdealTransmitter : public TransmitterBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
+    virtual simtime_t getPreambleDuration() const { return preambleDuration; }
+    virtual int getHeaderBitLength() const { return headerBitLength; }
+    virtual bps getBitrate() const { return bitrate; }
     virtual m getMaxCommunicationRange() const override { return communicationRange; }
     virtual m getMaxInterferenceRange() const override { return interferenceRange; }
 };

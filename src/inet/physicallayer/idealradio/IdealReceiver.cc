@@ -15,8 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/ByteCountChunk.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
@@ -105,7 +103,6 @@ const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *
     errorRateInd->setSymbolErrorRate(errorRate);
     errorRateInd->setBitErrorRate(errorRate);
     errorRateInd->setPacketErrorRate(errorRate);
-    auto idealPhyHeader = check_and_cast<Packet *>(const_cast<Packet *>(receptionResult->getPacket()))->popHeader<ByteCountChunk>();
     return receptionResult;
 }
 
