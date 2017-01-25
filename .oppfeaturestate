@@ -4,9 +4,9 @@
     <feature enabled="true" id="TCP_INET"/>
     <feature enabled="false" id="TCP_lwIP"/>
     <feature enabled="false" id="TCP_NSC"/>
-    <feature enabled="true" id="IPv4"/>
+    <feature enabled="false" id="IPv4"/>
     <feature enabled="false" id="INET_examples"/>
-    <feature enabled="true" id="IPv6"/>
+    <feature enabled="false" id="IPv6"/>
     <feature enabled="false" id="IPv6_examples"/>
     <feature enabled="false" id="xMIPv6"/>
     <feature enabled="false" id="xMIPv6_examples"/>
