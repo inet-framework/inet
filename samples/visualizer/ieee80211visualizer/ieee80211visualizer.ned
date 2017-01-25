@@ -4,6 +4,7 @@
 
 package inet.samples.visualizer.ieee80211visualizer;
 
+import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
@@ -43,11 +44,11 @@ network Ieee80211visualizerB
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,150");
+                @display("p=99,111");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                @display("p=100,250");
+                @display("p=100,178");
         }
         accessPointA: AccessPoint {
             parameters:
@@ -72,6 +73,9 @@ network Ieee80211visualizerB
         hostB2: WirelessHost {
             parameters:
                 @display("p=500,250");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=100,250");
         }
 }
 
