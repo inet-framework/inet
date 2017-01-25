@@ -19,12 +19,14 @@
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
+#include "inet/common/packet/Chunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;
 
+class Chunk extends cObject;
 class noncobject TLVOptionBase;
 class noncobject TLVOptions;
 
@@ -170,7 +172,7 @@ class IPv4OptionUnknown extends IPv4Option
 //
 // Only one of the option fields can exist at a time.
 //
-packet IPv4Datagram
+class IPv4Datagram extends Chunk
 {
     @customize(true);
 

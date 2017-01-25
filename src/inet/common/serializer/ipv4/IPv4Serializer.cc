@@ -47,6 +47,8 @@
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
 #undef s_addr
 
+#if 0
+
 namespace inet {
 
 namespace serializer {
@@ -438,3 +440,4 @@ IPv4OptionSerializerBase *IPv4OptionSerializerRegistrationList::lookup(int id) c
 
 } // namespace inet
 
+#endif

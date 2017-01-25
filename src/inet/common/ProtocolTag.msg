@@ -93,6 +93,7 @@ class NetworkProtocolReq extends ProtocolTagBase
 //
 class NetworkProtocolInd extends ProtocolTagBase
 {
+    int64_t position = -1;
 }
 
 //

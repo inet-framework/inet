@@ -21,6 +21,10 @@
 #include "UserPriority.h"
 
 #ifdef WITH_IPv4
+#undef WITH_IPv4  //FIXME //KLUDGE
+#endif
+
+#ifdef WITH_IPv4
 #  include "inet/networklayer/ipv4/IPv4Datagram.h"
 #  include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif

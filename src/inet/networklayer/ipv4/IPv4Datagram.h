@@ -35,7 +35,7 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     void clean();
 
   public:
-    IPv4Datagram(const char *name = nullptr, int kind = 0) : IPv4Datagram_Base(name, kind) {}
+    IPv4Datagram() : IPv4Datagram_Base() {}
     IPv4Datagram(const IPv4Datagram& other) : IPv4Datagram_Base(other) {}
     IPv4Datagram& operator=(const IPv4Datagram& other) { IPv4Datagram_Base::operator=(other); return *this; }
 
@@ -45,8 +45,9 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
      * getter/setter for totalLength field in datagram
      * if set to -1, then getter returns getByteLength()
      */
-    int getTotalLengthField() const override;
+    virtual int getTotalLengthField() const override;
 
+    virtual int64_t getByteLength() const override { return getHeaderLength(); }
     /**
      * Returns bits 0-5 of the Type of Service field, a value in the 0..63 range
      */

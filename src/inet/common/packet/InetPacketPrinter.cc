@@ -22,6 +22,10 @@
 #include "inet/applications/pingapp/PingPayload_m.h"
 
 #ifdef WITH_IPv4
+#undef WITH_IPv4        //KLUDGE
+#endif
+
+#ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPMessage.h"
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #else // ifdef WITH_IPv4

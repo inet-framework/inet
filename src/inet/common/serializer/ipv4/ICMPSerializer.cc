@@ -34,7 +34,7 @@
 namespace inet {
 
 namespace serializer {
-
+#if 0
 Register_Serializer(ICMPMessage, IP_PROT, IP_PROT_ICMP, ICMPSerializer);
 
 void ICMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
@@ -196,7 +196,7 @@ cPacket *ICMPSerializer::deserialize(const Buffer &b, Context& c)
         pkt->setBitError(true);
     return pkt;
 }
-
+#endif
 } // namespace serializer
 
 } // namespace inet

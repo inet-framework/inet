@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/common/OldReassemblyBuffer.h"
 
@@ -56,8 +57,8 @@ class INET_API IPv4FragBuf
     //
     struct DatagramBuffer
     {
-        OldReassemblyBuffer buf;    // reassembly buffer
-        IPv4Datagram *datagram;    // the actual datagram
+        ReassemblyBuffer buf;    // reassembly buffer
+        Packet *packet;          // the packet
         simtime_t lastupdate;    // last time a new fragment arrived
     };
 
@@ -66,9 +67,6 @@ class INET_API IPv4FragBuf
 
     // the reassembly buffers
     Buffers bufs;
-
-    // needed for TIME_EXCEEDED errors
-    ICMP *icmpModule;
 
   public:
     /**
@@ -82,17 +80,11 @@ class INET_API IPv4FragBuf
     ~IPv4FragBuf();
 
     /**
-     * Initialize fragmentation buffer. ICMP module is needed for sending
-     * TIME_EXCEEDED ICMP message in purgeStaleFragments().
-     */
-    void init(ICMP *icmp);
-
-    /**
      * Takes a fragment and inserts it into the reassembly buffer.
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise nullptr.
      */
-    IPv4Datagram *addFragment(IPv4Datagram *datagram, simtime_t now);
+    Packet *addFragment(Packet *packet, simtime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their
@@ -103,7 +95,7 @@ class INET_API IPv4FragBuf
      * This method should be called more frequently, maybe every
      * 10..30 seconds or so.
      */
-    void purgeStaleFragments(simtime_t lastupdate);
+    void purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate);
 };
 
 } // namespace inet

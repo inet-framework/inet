@@ -160,7 +160,8 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet
-    virtual void processICMPError(cPacket *icmpErrorMsg);    // TODO use ICMPMessage
+    virtual void processICMPv4Error(Packet *icmpPacket);
+    virtual void processICMPv6Error(Packet *icmpPacket);
 
     // process UDP packets coming from IP
     virtual void processUDPPacket(Packet *udpPacket);

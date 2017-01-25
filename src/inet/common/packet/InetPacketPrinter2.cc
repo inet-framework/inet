@@ -25,6 +25,11 @@
 namespace inet { class EtherFrame; }
 #endif // ifdef WITH_ETHERNET
 
+
+#ifdef WITH_IPv4
+#undef WITH_IPv4        //KLUDGE
+#endif
+
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"

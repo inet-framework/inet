@@ -22,6 +22,7 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -39,11 +40,11 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
   protected:
     std::set<int> transportProtocols;    // where to send up packets
   protected:
-    virtual void processICMPMessage(ICMPMessage *);
-    virtual void errorOut(ICMPMessage *);
-    virtual void processEchoRequest(ICMPMessage *);
-    virtual void sendToIP(ICMPMessage *, const IPv4Address& dest);
-    virtual void sendToIP(ICMPMessage *msg);
+    virtual void processICMPMessage(Packet *);
+    virtual void errorOut(Packet *);
+    virtual void processEchoRequest(Packet *);
+    virtual void sendToIP(Packet *, const IPv4Address& dest);
+    virtual void sendToIP(Packet *msg);
     virtual bool possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId);
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
 
@@ -54,18 +55,7 @@ class INET_API ICMP : public cSimpleModule, public IProtocolRegistrationListener
      * to broadcast or multicast packets -- in that case it will simply delete the packet.
      * Kludge: if inputInterfaceId cannot be determined, pass in -1.
      */
-    virtual void sendErrorMessage(IPv4Datagram *datagram, int inputInterfaceId, ICMPType type, ICMPCode code);
-
-    /**
-     * This method can be called from other modules to send an ICMP error packet
-     * in response to a received bogus packet from the transport layer (like UDP).
-     * It will not send ICMP error in response to broadcast or multicast packets --
-     * in that case it will simply delete the packet.
-     * The ICMP error packet needs to include (part of) the original IPv4 datagram,
-     * so this function will wrap back the transport packet into the IPv4 datagram
-     * based on its IPv4ControlInfo.
-     */
-    virtual void sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -31,26 +31,19 @@ namespace inet {
 
 IPv4FragBuf::IPv4FragBuf()
 {
-    icmpModule = nullptr;
 }
 
 IPv4FragBuf::~IPv4FragBuf()
 {
-    while (!bufs.empty()) {
-        if (bufs.begin()->second.datagram)
-            delete bufs.begin()->second.datagram;
-
-        bufs.erase(bufs.begin());
+    for (auto i = bufs.begin(); i != bufs.end(); ) {
+        delete i->second.packet;
     }
+    bufs.clear();
 }
 
-void IPv4FragBuf::init(ICMP *icmp)
+Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
 {
-    icmpModule = icmp;
-}
-
-IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
-{
+    const auto& datagram = packet->peekHeader<IPv4Datagram>();
     // find datagram buffer
     Key key;
     key.id = datagram->getIdentification();
@@ -58,7 +51,7 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
     key.dest = datagram->getDestAddress();
 
     auto i = bufs.find(key);
-
+#if 0   //FIXME reimplement it
     DatagramBuffer *buf = nullptr;
 
     if (i == bufs.end()) {
@@ -149,9 +142,12 @@ IPv4Datagram *IPv4FragBuf::addFragment(IPv4Datagram *datagram, simtime_t now)
         buf->lastupdate = now;
         return nullptr;
     }
+#else
+    return nullptr;
+#endif
 }
 
-void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
+void IPv4FragBuf::purgeStaleFragments(ICMP *icmpModule, simtime_t lastupdate)
 {
     // this method shouldn't be called too often because iteration on
     // an std::map is *very* slow...
@@ -167,7 +163,7 @@ void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
             // because its length (being a fragment) is smaller than the encapsulated
             // packet, resulting in "length became negative" error. Use getEncapsulatedPacket().
             EV_WARN << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
-            icmpModule->sendErrorMessage(buf.datagram, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+            icmpModule->sendErrorMessage(buf.packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
 
             // delete
             auto oldi = i++;

@@ -40,6 +40,7 @@ void ErrorHandling::initialize()
 
 void ErrorHandling::handleMessage(cMessage *msg)
 {
+#if 0
     numReceived++;
 
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
@@ -65,7 +66,8 @@ void ErrorHandling::handleMessage(cMessage *msg)
             break;
     }
 
-    delete icmpMsg;
+#endif
+    delete msg;
 }
 
 void ErrorHandling::refreshDisplay() const

@@ -32,6 +32,8 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -210,16 +212,18 @@ void PingApp::handleMessage(cMessage *msg)
         scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
     }
     else {
+        Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
-        if (ICMPMessage *icmpMessage = dynamic_cast<ICMPMessage *>(msg)) {
+        if (const auto& icmpMessage = packet->popHeader<ICMPMessage>()) {
             if (icmpMessage->getType() == ICMP_ECHO_REPLY) {
-                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
+//                PingPayload *pingPayload = check_and_cast<PingPayload *>(icmpMessage->decapsulate());
+                PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekData())->getPacket()->dup());
                 processPingResponse(pingPayload);
             }
             else {
                 // process other icmp messages, process icmp errors
             }
-            delete icmpMessage;
+            delete packet;
         }
         else
 #endif
@@ -353,16 +357,16 @@ void PingApp::sendPingRequest()
     sentCount++;
     IL3AddressType *addressType = destAddr.getAddressType();
 
-    cPacket *outPacket = nullptr;
+    Packet *outPacket = new Packet(msg->getName());
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
-            auto *request = new ICMPMessage(msg->getName());
-            outPacket = request;
+            const auto& request = std::make_shared<ICMPMessage>();
             request->setByteLength(4);
             request->setType(ICMP_ECHO_REQUEST);
-            request->encapsulate(msg);
-            request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+            outPacket->prepend(request);
+            outPacket->append(std::make_shared<cPacketChunk>(msg));
+            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
             throw cRuntimeError("INET compiled without IPv4");

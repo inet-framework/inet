@@ -31,6 +31,10 @@
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4
+#undef WITH_IPv4        //FIXME //KLUDGE
+#endif // ifdef WITH_IPv4
+
+#ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #endif // ifdef WITH_IPv4

@@ -42,6 +42,10 @@
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
 
+#ifdef WITH_IPv4
+#undef WITH_IPv4        //FIXME //KLUDGE
+#endif // ifdef WITH_IPv4
+
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
