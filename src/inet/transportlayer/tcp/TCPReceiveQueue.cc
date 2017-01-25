@@ -16,25 +16,24 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
+#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
 
 namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPVirtualDataRcvQueue);
+Register_Class(TCPReceiveQueue);
 
-TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() :
-    TCPReceiveQueue(),
+TCPReceiveQueue::TCPReceiveQueue() :
     rcv_nxt(-1)
 {
 }
 
-TCPVirtualDataRcvQueue::~TCPVirtualDataRcvQueue()
+TCPReceiveQueue::~TCPReceiveQueue()
 {
 }
 
-void TCPVirtualDataRcvQueue::init(uint32 startSeq)
+void TCPReceiveQueue::init(uint32 startSeq)
 {
     rcv_nxt = startSeq;
 
@@ -42,7 +41,7 @@ void TCPVirtualDataRcvQueue::init(uint32 startSeq)
     reorderBuffer.setExpectedOffset(startSeq);
 }
 
-std::string TCPVirtualDataRcvQueue::info() const
+std::string TCPReceiveQueue::str() const
 {
     std::string res;
     char buf[32];
@@ -50,12 +49,13 @@ std::string TCPVirtualDataRcvQueue::info() const
     res = buf;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
-        sprintf(buf, " [%u..%u)", reorderBuffer.getRegionStartOffset(i), reorderBuffer.getRegionEndOffset(i));
+        sprintf(buf, " [%lu..%lu)", reorderBuffer.getRegionStartOffset(i), reorderBuffer.getRegionEndOffset(i));
         res += buf;
     }
+    return res;
 }
 
-uint32_t TCPVirtualDataRcvQueue::insertBytesFromSegment(Packet *packet, TcpHeader *tcpseg)
+uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, TcpHeader *tcpseg)
 {
     int64_t tcpHeaderLength = tcpseg->getHeaderLength();
     int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;
@@ -83,7 +83,7 @@ uint32_t TCPVirtualDataRcvQueue::insertBytesFromSegment(Packet *packet, TcpHeade
     return rcv_nxt;
 }
 
-cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32_t seq)
+cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 
@@ -105,7 +105,7 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32_t seq)
     return nullptr;
 }
 
-uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
+uint32 TCPReceiveQueue::getAmountOfBufferedBytes()
 {
     uint32 bytes = 0;
 
@@ -115,24 +115,24 @@ uint32 TCPVirtualDataRcvQueue::getAmountOfBufferedBytes()
     return bytes;
 }
 
-uint32 TCPVirtualDataRcvQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
+uint32 TCPReceiveQueue::getAmountOfFreeBytes(uint32 maxRcvBuffer)
 {
     uint32 usedRcvBuffer = getAmountOfBufferedBytes();
     uint32 freeRcvBuffer = maxRcvBuffer - usedRcvBuffer;
     return (maxRcvBuffer > usedRcvBuffer) ? freeRcvBuffer : 0;
 }
 
-uint32 TCPVirtualDataRcvQueue::getQueueLength()
+uint32 TCPReceiveQueue::getQueueLength()
 {
     return reorderBuffer.getNumRegions();
 }
 
-void TCPVirtualDataRcvQueue::getQueueStatus()
+void TCPReceiveQueue::getQueueStatus()
 {
     EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << info() << "\n";
 }
 
-uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
+uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)
 {
     int64_t fs = seqToOffset(fromSeqNum);
 
@@ -144,7 +144,7 @@ uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
     return fromSeqNum;
 }
 
-uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
+uint32 TCPReceiveQueue::getRE(uint32 toSeqNum)
 {
     int64_t fs = seqToOffset(toSeqNum);
 
@@ -156,7 +156,7 @@ uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
     return toSeqNum;
 }
 
-uint32 TCPVirtualDataRcvQueue::getFirstSeqNo()
+uint32 TCPReceiveQueue::getFirstSeqNo()
 {
     if (reorderBuffer.getNumRegions() == 0)
         return rcv_nxt;

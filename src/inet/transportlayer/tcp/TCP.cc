@@ -18,17 +18,19 @@
 #include "inet/transportlayer/tcp/TCP.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp/TCPReceiveQueue.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPMessage_m.h"
@@ -38,8 +40,6 @@
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "inet/transportlayer/tcp/queues/TCPVirtualDataRcvQueue.h"
-#include "inet/transportlayer/tcp/queues/TCPVirtualDataSendQueue.h"
 
 namespace inet {
 
@@ -480,7 +480,7 @@ TCPSendQueue *TCP::createSendQueue(TCPDataTransferMode transferModeP)
         case TCP_TRANSFER_BYTECOUNT:
         case TCP_TRANSFER_OBJECT:
         case TCP_TRANSFER_BYTESTREAM:
-            return new TCPVirtualDataSendQueue();
+            return new TCPSendQueue();
 //            return new TCPMsgBasedSendQueue();
 //            return new TCPByteStreamSendQueue();
 
@@ -495,9 +495,7 @@ TCPReceiveQueue *TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
         case TCP_TRANSFER_BYTECOUNT:
         case TCP_TRANSFER_OBJECT:
         case TCP_TRANSFER_BYTESTREAM:
-            return new TCPVirtualDataRcvQueue();
-//            return new TCPMsgBasedRcvQueue();
-//            return new TCPByteStreamRcvQueue();
+            return new TCPReceiveQueue();
 
         default:
             throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);

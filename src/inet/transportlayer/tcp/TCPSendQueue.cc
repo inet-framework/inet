@@ -15,38 +15,37 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/transportlayer/tcp/queues/TCPVirtualDataSendQueue.h"
+#include "inet/transportlayer/tcp/TCPSendQueue.h"
 
 namespace inet {
 
 namespace tcp {
 
-Register_Class(TCPVirtualDataSendQueue);
+Register_Class(TCPSendQueue);
 
-TCPVirtualDataSendQueue::TCPVirtualDataSendQueue() : TCPSendQueue()
-{
-    begin = end = 0;
-}
-
-TCPVirtualDataSendQueue::~TCPVirtualDataSendQueue()
+TCPSendQueue::TCPSendQueue()
 {
 }
 
-void TCPVirtualDataSendQueue::init(uint32 startSeq)
+TCPSendQueue::~TCPSendQueue()
+{
+}
+
+void TCPSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
     dataBuffer.clear();          // clear dataBuffer
 }
 
-std::string TCPVirtualDataSendQueue::info() const
+std::string TCPSendQueue::str() const
 {
     std::stringstream out;
-    out << "[" << begin << ".." << end << ")";
+    out << "[" << begin << ".." << end << ")" << dataBuffer;
     return out.str();
 }
 
-void TCPVirtualDataSendQueue::enqueueAppData(Packet *msg)
+void TCPSendQueue::enqueueAppData(Packet *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     dataBuffer.push(msg->peekDataAt(0, msg->getByteLength()));
@@ -56,17 +55,17 @@ void TCPVirtualDataSendQueue::enqueueAppData(Packet *msg)
     delete msg;
 }
 
-uint32 TCPVirtualDataSendQueue::getBufferStartSeq()
+uint32 TCPSendQueue::getBufferStartSeq()
 {
     return begin;
 }
 
-uint32 TCPVirtualDataSendQueue::getBufferEndSeq()
+uint32 TCPSendQueue::getBufferEndSeq()
 {
     return end;
 }
 
-Packet *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+Packet *TCPSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
 
@@ -85,7 +84,7 @@ Packet *TCPVirtualDataSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong nu
     return packet;
 }
 
-void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
+void TCPSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
 
