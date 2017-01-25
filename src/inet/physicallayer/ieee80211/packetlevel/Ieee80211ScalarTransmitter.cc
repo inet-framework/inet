@@ -18,8 +18,9 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmission.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ScalarTransmitter.h"
 
 namespace inet {
 
@@ -40,13 +41,15 @@ std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, in
 
 const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
+    auto phyHeader = packet->peekHeader<Ieee80211PhyHeader>();
+    auto dataBitLength = bit(packet->getPacketLength() - phyHeader->getChunkLength()).get();
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
     W transmissionPower = computeTransmissionPower(packet);
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(packet->getBitLength());
+    const simtime_t duration = transmissionMode->getDuration(dataBitLength);
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
@@ -54,11 +57,10 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     int headerBitLength = transmissionMode->getHeaderMode()->getBitLength();
-    int64_t payloadBitLength = packet->getBitLength();
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, transmissionMode, transmissionChannel);
+    return new Ieee80211ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, dataBitLength, carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, transmissionMode, transmissionChannel);
 }
 
 } // namespace physicallayer

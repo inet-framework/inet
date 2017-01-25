@@ -15,10 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
 
@@ -126,6 +127,20 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     receptionTimer = nullptr;
     emit(radioChannelChangedSignal, newChannelNumber);
     emit(listeningChangedSignal, 0);
+}
+
+void Ieee80211Radio::encapsulate(Packet *packet) const
+{
+    auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
+    auto phyHeader = std::make_shared<Ieee80211PhyHeader>();
+    phyHeader->setChunkLength(byte((ieee80211Transmitter->getHeaderBitLength() + 7) / 8));
+    phyHeader->markImmutable();
+    packet->pushHeader(phyHeader);
+}
+
+void Ieee80211Radio::decapsulate(Packet *packet) const
+{
+    packet->popHeader<Ieee80211PhyHeader>();
 }
 
 } // namespace physicallayer
