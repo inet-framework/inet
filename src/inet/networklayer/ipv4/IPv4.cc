@@ -356,7 +356,7 @@ void IPv4::datagramLocalOut(Packet *packet, const std::shared_ptr<IPv4Header>& i
         if (multicastLoop && (!destIE || !destIE->isLoopback())) {
             const InterfaceEntry *loopbackIF = ift->getFirstLoopbackInterface();
             if (loopbackIF)
-                fragmentPostRouting(packet->dup(), ipv4Header, loopbackIF, destAddr);
+                fragmentPostRouting(packet->dup(), std::static_pointer_cast<IPv4Header>(ipv4Header->dupShared()), loopbackIF, destAddr);
         }
 
         if (destIE) {
