@@ -11,4 +11,4 @@
 .,                                   -f ethernet-bus-reconnect.ini -r 9,           ,                 e499-7ac6/tplx
 .,                                   -f ethernet-bus-reconnect.ini -r 10,          ,                 12c2-dcd1/tplx
 .,                                   -f ethernet-bus-reconnect.ini -r 11,          ,                 3709-c28b/tplx
-#.,                                   -f ethernet-bus-reconnect.ini -r 12,          ,                 0000-0000/tplx
+# .,                                   -f ethernet-bus-reconnect.ini -r 12,          ,                 0000-0000/tplx

@@ -11,4 +11,4 @@
 .,                                   -f ethernet-hub-reconnect.ini -r 9,           ,                 2d3e-211a/tplx
 .,                                   -f ethernet-hub-reconnect.ini -r 10,          ,                 36f0-c094/tplx
 .,                                   -f ethernet-hub-reconnect.ini -r 11,          ,                 25ce-a1d1/tplx
-#.,                                   -f ethernet-hub-reconnect.ini -r 12,          ,                 0000-0000/tplx
+# .,                                   -f ethernet-hub-reconnect.ini -r 12,          ,                 0000-0000/tplx

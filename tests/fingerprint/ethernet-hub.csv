@@ -11,4 +11,4 @@
 .,                                   -f ethernet-hub.ini -r 9,                     ,                 91ea-e5f3/tplx
 .,                                   -f ethernet-hub.ini -r 10,                    ,                 6578-d621/tplx
 .,                                   -f ethernet-hub.ini -r 11,                    ,                 79f7-1040/tplx
-#.,                                   -f ethernet-hub.ini -r 12,                    ,                 0000-0000/tplx
+# .,                                   -f ethernet-hub.ini -r 12,                    ,                 0000-0000/tplx
