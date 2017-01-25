@@ -24,7 +24,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 Define_Module(PIMDM);
@@ -1042,12 +1042,12 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);
-    IPv4Datagram *datagram;
+    IPv4Header *datagram;
     PIMInterface *pimInterface;
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST) {
-        datagram = check_and_cast<IPv4Datagram *>(obj);
+        datagram = check_and_cast<IPv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             unroutableMulticastPacketArrived(datagram->getSrcAddress(), datagram->getDestAddress(), datagram->getTimeToLive());
@@ -1068,14 +1068,14 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     // data come to non-RPF interface
     else if (signalID == NF_IPv4_DATA_ON_NONRPF) {
-        datagram = check_and_cast<IPv4Datagram *>(obj);
+        datagram = check_and_cast<IPv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface->getInterfaceId());
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF) {
-        datagram = check_and_cast<IPv4Datagram *>(obj);
+        datagram = check_and_cast<IPv4Header *>(obj);
         pimInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             multicastPacketArrivedOnRpfInterface(pimInterface->getInterfaceId(),

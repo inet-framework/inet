@@ -27,7 +27,7 @@
 #include "inet/common/serializer/sctp/SCTPSerializer.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"

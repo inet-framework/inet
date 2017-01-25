@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/routing/pim/modes/PIMBase.h"
 
@@ -271,7 +271,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
     void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
     void multicastPacketArrivedOnRpfInterface(Route *route);
     void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
-    void multicastPacketForwarded(IPv4Datagram *datagram);
+    void multicastPacketForwarded(IPv4Header *datagram);
     void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
     void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
 
@@ -281,14 +281,14 @@ class INET_API PIMSM : public PIMBase, protected cListener
     void iAmDRHasChanged(InterfaceEntry *ie, bool iAmDR);
 
     // send pim messages
-    void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
+    void sendPIMRegister(IPv4Header *datagram, IPv4Address dest, int outInterfaceId);
     void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
     void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
     void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
     void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
     void sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit);
     void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
-    void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
+    void forwardMulticastData(IPv4Header *datagram, int outInterfaceId);
 
     // computed intervals
     double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; }    // Holdtime in Join/Prune messages

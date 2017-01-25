@@ -19,7 +19,7 @@
 
 #include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
 
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header_m.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OSPFArea.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighborState.h"

@@ -17,7 +17,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/networklayer/mpls/LIBTable.h"
 
 namespace inet {
@@ -48,7 +48,7 @@ class INET_API IClassifier
      * The color parameter (which can be set to an arbitrary value) will
      * only be used for the NAM trace if one will be recorded.
      */
-    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
+    virtual bool lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
 };
 
 } // namespace inet

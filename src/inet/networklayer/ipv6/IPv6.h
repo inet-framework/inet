@@ -44,7 +44,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
 {
   public:
     /**
-     * Represents an IPv4Datagram, queued by a Hook
+     * Represents an IPv4Header, queued by a Hook
      */
     class QueuedDatagramForHook
     {

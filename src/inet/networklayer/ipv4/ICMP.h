@@ -30,7 +30,7 @@
 
 namespace inet {
 
-class IPv4Datagram;
+class IPv4Header;
 
 /**
  * ICMP module.

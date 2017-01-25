@@ -23,7 +23,7 @@
 //#include "inet/common/RawPacket.h"
 //#include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/ipv4/ICMP.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 
@@ -43,7 +43,7 @@ IPv4FragBuf::~IPv4FragBuf()
 
 Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
 {
-    const auto& datagram = packet->peekHeader<IPv4Datagram>();
+    const auto& datagram = packet->peekHeader<IPv4Header>();
     // find datagram buffer
     Key key;
     key.id = datagram->getIdentification();
@@ -87,7 +87,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
         pk->transferTagsFrom(buf->packet);
-        auto hdr = std::shared_ptr<IPv4Datagram>(buf->packet->peekHeader<IPv4Datagram>()->dup());
+        auto hdr = std::shared_ptr<IPv4Header>(buf->packet->peekHeader<IPv4Header>()->dup());
         const auto& payload = buf->buf.getData();
         hdr->setTotalLengthField(hdr->getHeaderLength() + payload->getChunkLength());
         hdr->setFragmentOffset(0);

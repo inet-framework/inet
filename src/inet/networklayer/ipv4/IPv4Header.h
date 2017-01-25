@@ -20,26 +20,26 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/INetworkDatagram.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header_m.h"
 
 namespace inet {
 
 /**
- * Represents an IPv4 datagram. More info in the IPv4Datagram.msg file
+ * Represents an IPv4 datagram. More info in the IPv4Header.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
+class INET_API IPv4Header : public IPv4Header_Base, public INetworkDatagram
 {
   private:
-    void copy(const IPv4Datagram& other);
+    void copy(const IPv4Header& other);
     void clean();
 
   public:
-    IPv4Datagram() : IPv4Datagram_Base() {}
-    IPv4Datagram(const IPv4Datagram& other) : IPv4Datagram_Base(other) {}
-    IPv4Datagram& operator=(const IPv4Datagram& other) { IPv4Datagram_Base::operator=(other); return *this; }
+    IPv4Header() : IPv4Header_Base() {}
+    IPv4Header(const IPv4Header& other) : IPv4Header_Base(other) {}
+    IPv4Header& operator=(const IPv4Header& other) { IPv4Header_Base::operator=(other); return *this; }
 
-    virtual IPv4Datagram *dup() const override { return new IPv4Datagram(*this); }
+    virtual IPv4Header *dup() const override { return new IPv4Header(*this); }
 
     /**
      * getter/setter for totalLength field in datagram
@@ -77,7 +77,7 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
      * Returns the kth extension header in this datagram
      */
     virtual TLVOptionBase& getOption(unsigned int k) { return *check_and_cast<TLVOptionBase *>(&(options.at(k))); }
-    virtual const TLVOptionBase& getOption(unsigned int k) const { return const_cast<IPv4Datagram*>(this)->getOption(k); }
+    virtual const TLVOptionBase& getOption(unsigned int k) const { return const_cast<IPv4Header*>(this)->getOption(k); }
 
     /**
      * Returns the TLVOptionBase of the specified type,
@@ -103,8 +103,8 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv4()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv4()); }
-    virtual int getTransportProtocol() const override { return IPv4Datagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { IPv4Datagram_Base::setTransportProtocol(protocol); }
+    virtual int getTransportProtocol() const override { return IPv4Header_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { IPv4Header_Base::setTransportProtocol(protocol); }
 };
 
 } // namespace inet

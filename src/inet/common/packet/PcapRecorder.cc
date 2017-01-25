@@ -22,7 +22,7 @@
 #include "inet/common/packet/PcapRecorder.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -133,7 +133,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     bool hasBitError = false;
 
 #ifdef WITH_IPv4
-    IPv4Datagram *ip4Packet = nullptr;
+    IPv4Header *ip4Packet = nullptr;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     IPv6Datagram *ip6Packet = nullptr;
@@ -142,7 +142,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         if (msg->hasBitError())
             hasBitError = true;
 #ifdef WITH_IPv4
-        if (nullptr != (ip4Packet = dynamic_cast<IPv4Datagram *>(msg))) {
+        if (nullptr != (ip4Packet = dynamic_cast<IPv4Header *>(msg))) {
             break;
         }
 #endif // ifdef WITH_IPv4

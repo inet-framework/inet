@@ -26,7 +26,7 @@
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 
 using namespace inet;
@@ -45,9 +45,9 @@ PacketDrill::~PacketDrill()
 
 }
 
-IPv4Datagram* PacketDrill::makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr)
+IPv4Header* PacketDrill::makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr)
 {
-    IPv4Datagram *datagram = new IPv4Datagram("IPInject");
+    IPv4Header *datagram = new IPv4Header("IPInject");
     datagram->setVersion(4);
     datagram->setHeaderLength(20);
 
@@ -84,7 +84,7 @@ cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direct
     UDPHeader *udpHeader = new UDPHeader("UDPInject");
     udpPacket->pushHeader(udpHeader);
     udpPacket->pushTrailer(new PacketChunk(payload));
-    IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
+    IPv4Header *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
     if (direction == DIRECTION_INBOUND) {
         udpHeader->setSourcePort(app->getRemotePort());
         udpHeader->setDestinationPort(app->getLocalPort());
@@ -235,7 +235,7 @@ cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direct
     tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpPayloadBytes);
     tcpseg->setPayloadLength(tcpPayloadBytes);
 
-    IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_TCP, direction, app->getLocalAddress(),
+    IPv4Header *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_TCP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
     ipDatagram->encapsulate(tcpseg);
     cPacket* pkt = ipDatagram->dup();
@@ -441,7 +441,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
         sctpmsg->addChunk(chunk->getChunk());
     }
 
-    IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_SCTP, direction, app->getLocalAddress(),
+    IPv4Header *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_SCTP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
     ipDatagram->encapsulate(sctpmsg);
     cPacket* pkt = ipDatagram->dup();

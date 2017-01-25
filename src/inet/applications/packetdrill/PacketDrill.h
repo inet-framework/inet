@@ -25,7 +25,7 @@
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UDPPacket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header_m.h"
 #include "inet/transportlayer/sctp/SCTPMessage.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"
 #include "PacketDrillApp.h"
@@ -83,7 +83,7 @@ class INET_API PacketDrill
 
         static PacketDrillSctpChunk* buildErrorChunk(int64 flgs, cQueue *causes);
 
-        static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
+        static IPv4Header *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
 
         int evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error);
 

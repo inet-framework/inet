@@ -20,7 +20,7 @@
 
 #include "inet/routing/ospfv2/interface/OSPFInterface.h"
 
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header_m.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/OSPFArea.h"

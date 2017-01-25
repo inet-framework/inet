@@ -22,7 +22,7 @@
 #include "inet/common/packet/TCPDump.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
 namespace inet {
@@ -58,11 +58,11 @@ void TCPDump::handleMessage(cMessage *msg)
     }
 
 #ifdef WITH_IPv4
-    if (pcapDump.isOpen() && dynamic_cast<IPv4Datagram *>(msg)
+    if (pcapDump.isOpen() && dynamic_cast<IPv4Header *>(msg)
         && (dumpBadFrames || !PK(msg)->hasBitError()))
     {
         const simtime_t stime = simTime();
-        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
+        IPv4Header *ipPacket = check_and_cast<IPv4Header *>(msg);
         pcapDump.writeFrame(stime, ipPacket);
     }
 #endif // ifdef WITH_IPv4

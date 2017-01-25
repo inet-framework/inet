@@ -20,7 +20,7 @@ package inet.networklayer.ipv4;
 
 //
 // Implements the IPv4 protocol. The protocol header is represented
-// by the ~IPv4Datagram message class.
+// by the ~IPv4Header message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
@@ -101,13 +101,13 @@ simple IPv4
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetFromLowerDropped](type=cPacket);
-        @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Datagram);
-        @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Datagram);
-        @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Datagram);
-        @signal[NF_IPv4_MDATA_REGISTER](type=IPv4Datagram);
+        @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Header);
+        @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Header);
+        @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Header);
+        @signal[NF_IPv4_MDATA_REGISTER](type=IPv4Header);
     gates:
         input transportIn @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);
         output transportOut @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);
-        input queueIn @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
-        output queueOut @labels(IPv4Datagram,ARPPacket,Ieee802Ctrl);
+        input queueIn @labels(IPv4Header,ARPPacket,Ieee802Ctrl);
+        output queueOut @labels(IPv4Header,ARPPacket,Ieee802Ctrl);
 }

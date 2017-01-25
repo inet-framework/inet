@@ -23,7 +23,7 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IClassifier.h"
 #include "inet/networklayer/mpls/LIBTable.h"
@@ -56,8 +56,8 @@ class INET_API MPLS : public cSimpleModule, public IProtocolRegistrationListener
     virtual void processPacketFromL2(cMessage *msg);
     virtual void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
 
-    virtual bool tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
-    virtual void labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
+    virtual bool tryLabelAndForwardIPv4Datagram(IPv4Header *ipdatagram);
+    virtual void labelAndForwardIPv4Datagram(IPv4Header *ipdatagram);
 
     virtual void sendToL2(cMessage *msg);
     virtual void sendToL3(cMessage *msg);

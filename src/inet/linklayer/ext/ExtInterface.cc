@@ -34,7 +34,7 @@
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #include "inet/common/INETUtils.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 
@@ -100,7 +100,7 @@ void ExtInterface::handleMessage(cMessage *msg)
 
         Buffer b(const_cast<unsigned char *>(buffer), packetLength);
         Context c;
-        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(IPv4Serializer().deserializePacket(b, c));
+        IPv4Header *ipPacket = check_and_cast<IPv4Header *>(IPv4Serializer().deserializePacket(b, c));
         EV << "Delivering an IPv4 packet from "
            << ipPacket->getSrcAddress()
            << " to "
@@ -113,7 +113,7 @@ void ExtInterface::handleMessage(cMessage *msg)
     }
     else {
         memset(buffer, 0, sizeof(buffer));
-        IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
+        IPv4Header *ipPacket = check_and_cast<IPv4Header *>(msg);
 
         if (connected) {
             struct sockaddr_in addr;

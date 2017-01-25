@@ -71,7 +71,7 @@ void MPLS::processPacketFromL3(cMessage *msg)
 {
     using namespace tcp;
 
-    IPv4Datagram *ipdatagram = check_and_cast<IPv4Datagram *>(msg);
+    IPv4Header *ipdatagram = check_and_cast<IPv4Header *>(msg);
     //int gateIndex = msg->getArrivalGate()->getIndex();
 
     // XXX temporary solution, until TCPSocket and IPv4 are extended to support nam tracing
@@ -92,7 +92,7 @@ void MPLS::processPacketFromL3(cMessage *msg)
     labelAndForwardIPv4Datagram(ipdatagram);
 }
 
-bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
+bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Header *ipdatagram)
 {
     LabelOpVector outLabel;
     std::string outInterface;   //FIXME set based on interfaceID
@@ -116,7 +116,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
 
     if (!mplsPacket->hasLabel()) {
         // yes, this may happen - if we'are both ingress and egress
-        ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
+        ipdatagram = check_and_cast<IPv4Header *>(mplsPacket->decapsulate());    // XXX FIXME superfluous encaps/decaps
         delete mplsPacket;
         ipdatagram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         ipdatagram->removeTag<DispatchProtocolReq>();         // send to NIC
@@ -136,7 +136,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
     return true;
 }
 
-void MPLS::labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
+void MPLS::labelAndForwardIPv4Datagram(IPv4Header *ipdatagram)
 {
     if (tryLabelAndForwardIPv4Datagram(ipdatagram))
         return;
@@ -183,7 +183,7 @@ void MPLS::processPacketFromL2(cMessage *msg)
     if (MPLSPacket *mplsPacket = dynamic_cast<MPLSPacket *>(msg)) {
         processMPLSPacketFromL2(mplsPacket);
     }
-    else if (IPv4Datagram *ipdatagram = dynamic_cast<IPv4Datagram *>(msg)) {
+    else if (IPv4Header *ipdatagram = dynamic_cast<IPv4Header *>(msg)) {
         // IPv4 datagram arrives at Ingress router. We'll try to classify it
         // and add an MPLS header
 
@@ -211,7 +211,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         // Decapsulate the message and pass up to L3
         EV_INFO << ": decapsulating and sending up\n";
 
-        IPv4Datagram *ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
+        IPv4Header *ipdatagram = check_and_cast<IPv4Header *>(mplsPacket->decapsulate());
         cObject *ctrl = mplsPacket->removeControlInfo();
         if (ctrl)
             ipdatagram->setControlInfo(ctrl);
@@ -259,7 +259,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 
         EV_INFO << "decapsulating IPv4 datagram" << endl;
 
-        IPv4Datagram *nativeIP = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
+        IPv4Header *nativeIP = check_and_cast<IPv4Header *>(mplsPacket->decapsulate());
         cObject *ctrl = mplsPacket->removeControlInfo();
         if (ctrl)
             nativeIP->setControlInfo(ctrl);

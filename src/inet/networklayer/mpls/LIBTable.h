@@ -23,7 +23,7 @@
 
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 

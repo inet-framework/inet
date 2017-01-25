@@ -21,7 +21,7 @@
 #include "inet/networklayer/ipv4/ErrorHandling.h"
 
 #include "inet/networklayer/ipv4/ICMPMessage.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 
@@ -45,7 +45,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     ICMPMessage *icmpMsg = check_and_cast<ICMPMessage *>(msg);
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-    IPv4Datagram *d = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
+    IPv4Header *d = check_and_cast<IPv4Header *>(icmpMsg->getEncapsulatedPacket());
 
     EV_WARN << "Error Handler: ICMP message received:\n";
     EV_WARN << " Type: " << (int)icmpMsg->getType()

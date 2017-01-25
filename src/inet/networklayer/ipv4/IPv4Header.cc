@@ -15,31 +15,31 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 #include "inet/common/INETUtils.h"
 
 namespace inet {
 
-Register_Class(IPv4Datagram);
+Register_Class(IPv4Header);
 
-int IPv4Datagram::getTotalLengthField() const
+int IPv4Header::getTotalLengthField() const
 {
     return totalLengthField;
 }
 
-TLVOptionBase *IPv4Datagram::findOptionByType(short int optionType, int index)
+TLVOptionBase *IPv4Header::findOptionByType(short int optionType, int index)
 {
     int i = options.findByType(optionType, index);
     return i >= 0 ? &getOption(i) : nullptr;
 }
 
-void IPv4Datagram::addOption(TLVOptionBase *opt, int atPos)
+void IPv4Header::addOption(TLVOptionBase *opt, int atPos)
 {
     options.add(opt, atPos);
 }
 
-int IPv4Datagram::calculateHeaderByteLength() const
+int IPv4Header::calculateHeaderByteLength() const
 {
     int length = utils::roundUp(20 + options.getLength(), 4);
     ASSERT(length >= 20 && length <= 60 && (length % 4 == 0));

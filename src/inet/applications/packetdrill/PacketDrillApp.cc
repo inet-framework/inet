@@ -27,7 +27,7 @@
 #include "PacketDrillUtils.h"
 #include "PacketDrillInfo_m.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 #include "inet/transportlayer/sctp/SCTPAssociation.h"
 
@@ -119,8 +119,8 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     }
                 }
             } else {
-                IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(outboundPackets->pop());
-                IPv4Datagram *live = check_and_cast<IPv4Datagram*>(msg);
+                IPv4Header *datagram = check_and_cast<IPv4Header *>(outboundPackets->pop());
+                IPv4Header *live = check_and_cast<IPv4Header*>(msg);
                 PacketDrillInfo *info = (PacketDrillInfo *)datagram->getContextPointer();
                 if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
                         info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
@@ -334,7 +334,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
 {
     char str[128];
     if (event->getType() == PACKET_EVENT) {
-        IPv4Datagram *ip = check_and_cast<IPv4Datagram *>(event->getPacket()->getInetPacket());
+        IPv4Header *ip = check_and_cast<IPv4Header *>(event->getPacket()->getInetPacket());
         if (event->getPacket()->getDirection() == DIRECTION_INBOUND) { // < injected packet, will go through the stack bottom up.
             if (protocol == IP_PROT_TCP) {
                 TCPSegment* tcp = check_and_cast<TCPSegment*>(ip->decapsulate());
@@ -441,7 +441,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
             send(ip, "tunOut");
         } else if (event->getPacket()->getDirection() == DIRECTION_OUTBOUND) { // >
             if (receivedPackets->getLength() > 0) {
-                IPv4Datagram *live = check_and_cast<IPv4Datagram *>(receivedPackets->pop());
+                IPv4Header *live = check_and_cast<IPv4Header *>(receivedPackets->pop());
                 if (ip && live) {
                     PacketDrillInfo *liveInfo = (PacketDrillInfo *)live->getContextPointer();
                     if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(),
@@ -1509,7 +1509,7 @@ int PacketDrillApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, 
     }
 }
 
-bool PacketDrillApp::compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram)
+bool PacketDrillApp::compareDatagram(IPv4Header *storedDatagram, IPv4Header *liveDatagram)
 {
     if (!(storedDatagram->getSrcAddress() == liveDatagram->getSrcAddress())) {
         return false;

@@ -47,7 +47,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
 
         Filter() {}
     #ifdef WITH_IPv4
-        bool matches(IPv4Datagram *datagram);
+        bool matches(IPv4Header *datagram);
     #endif // ifdef WITH_IPv4
     #ifdef WITH_IPv6
         bool matches(IPv6Datagram *datagram);

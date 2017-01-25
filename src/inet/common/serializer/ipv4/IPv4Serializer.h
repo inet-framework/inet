@@ -21,7 +21,7 @@
 #define __INET_IPV4SERIALIZER_H
 
 #include "inet/common/serializer/SerializerBase.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 
@@ -75,7 +75,7 @@ INET_API extern IPv4OptionSerializerRegistrationList ipv4OptionSerializers; ///<
         EXECUTE_ON_STARTUP(serializers.add(ID, new SERIALIZERCLASSNAME(#SERIALIZABLECLASSNAME)););
 
 /**
- * Converts between IPv4Datagram and binary (network byte order) IPv4 header.
+ * Converts between IPv4Header and binary (network byte order) IPv4 header.
  */
 class INET_API IPv4Serializer : public SerializerBase
 {
@@ -83,8 +83,8 @@ class INET_API IPv4Serializer : public SerializerBase
     virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
     virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
-    void serializeOptions(const IPv4Datagram *dgram, Buffer& b, Context& c);
-    void deserializeOptions(IPv4Datagram *dgram, Buffer &b, Context& c);
+    void serializeOptions(const IPv4Header *dgram, Buffer& b, Context& c);
+    void deserializeOptions(IPv4Header *dgram, Buffer &b, Context& c);
 
   public:
     IPv4Serializer(const char *name = nullptr) : SerializerBase(name) {}

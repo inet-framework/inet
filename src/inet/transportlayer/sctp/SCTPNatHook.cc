@@ -38,9 +38,9 @@ INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *dat
 {
     SCTPNatEntry *entry;
     SCTPChunk *chunk;
-    IPv4Datagram *dgram;
+    IPv4Header *dgram;
 
-    dgram = dynamic_cast<IPv4Datagram *>(datagram);
+    dgram = dynamic_cast<IPv4Header *>(datagram);
     if (!dgram) {
         return INetfilter::IHook::ACCEPT;
     }
@@ -117,9 +117,9 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
 {
     SCTPNatEntry *entry;
     SCTPChunk *chunk;
-    IPv4Datagram *dgram;
+    IPv4Header *dgram;
 
-    dgram = check_and_cast<IPv4Datagram *>(datagram);
+    dgram = check_and_cast<IPv4Header *>(datagram);
     if (SCTPAssociation::getAddressLevel(dgram->getSrcAddress()) == 3) {
         return INetfilter::IHook::ACCEPT;
     }
@@ -260,7 +260,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramLocalOutHook(INetworkDatagram *da
     return INetfilter::IHook::ACCEPT;
 }
 
-void SCTPNatHook::sendBackError(IPv4Datagram *dgram)
+void SCTPNatHook::sendBackError(IPv4Header *dgram)
 {
     SCTPMessage *sctpmsg = new SCTPMessage();
     sctpmsg->setByteLength(SCTP_COMMON_HEADER);

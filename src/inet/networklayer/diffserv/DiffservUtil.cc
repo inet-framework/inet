@@ -20,7 +20,7 @@
 #include "inet/common/INETUtils.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -200,7 +200,7 @@ cPacket *findIPDatagramInPacket(cPacket *packet)
 {
     for ( ; packet; packet = packet->getEncapsulatedPacket()) {
 #ifdef WITH_IPv4
-        if (dynamic_cast<IPv4Datagram *>(packet))
+        if (dynamic_cast<IPv4Header *>(packet))
             return packet;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6

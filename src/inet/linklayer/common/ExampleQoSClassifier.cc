@@ -25,7 +25,7 @@
 #endif
 
 #ifdef WITH_IPv4
-#  include "inet/networklayer/ipv4/IPv4Datagram.h"
+#  include "inet/networklayer/ipv4/IPv4Header.h"
 #  include "inet/networklayer/ipv4/ICMPMessage_m.h"
 #endif
 #ifdef WITH_IPv6
@@ -59,7 +59,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
     cPacket *ipData = nullptr;
 
 #ifdef WITH_IPv4
-    ipData = dynamic_cast<IPv4Datagram *>(msg);
+    ipData = dynamic_cast<IPv4Header *>(msg);
     if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
         return UP_BE; // ICMP class
 #endif

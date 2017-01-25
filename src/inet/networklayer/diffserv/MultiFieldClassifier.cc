@@ -21,7 +21,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -44,7 +44,7 @@ namespace inet {
 using namespace DiffservUtil;
 
 #ifdef WITH_IPv4
-bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
+bool MultiFieldClassifier::Filter::matches(IPv4Header *datagram)
 {
     if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
         return false;
@@ -171,7 +171,7 @@ int MultiFieldClassifier::classifyPacket(cPacket *packet)
     for ( ; packet; packet = packet->getEncapsulatedPacket()) {
 #ifdef WITH_IPv4
         ;
-        if (IPv4Datagram *ipv4Datagram = dynamic_cast<IPv4Datagram *>(packet)) {
+        if (IPv4Header *ipv4Datagram = dynamic_cast<IPv4Header *>(packet)) {
             for (auto & elem : filters)
                 if (elem.matches(ipv4Datagram))
                     return elem.gateIndex;

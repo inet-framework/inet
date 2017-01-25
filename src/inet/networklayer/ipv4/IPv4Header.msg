@@ -172,7 +172,7 @@ class IPv4OptionUnknown extends IPv4Option
 //
 // Only one of the option fields can exist at a time.
 //
-class IPv4Datagram extends FieldsChunk
+class IPv4Header extends FieldsChunk
 {
     @customize(true);
 

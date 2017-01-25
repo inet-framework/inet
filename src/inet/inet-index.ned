@@ -53,7 +53,7 @@
 //    sets up static routes;
 //  - ~ScenarioManager lets you change things in the model in the middle
 //    of the simulation to study transient behaviour
-//  - message classes: ~IPv4Datagram, ~TCPSegment, ~UDPPacket, ~EthernetIIFrame,
+//  - message classes: ~IPv4Header, ~TCPSegment, ~UDPPacket, ~EthernetIIFrame,
 //    ~ARPPacket, ~PPPFrame, ~GenericAppMsg, ~EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
 //    ~IPv4ControlInfo, ~TCPCommand, ~UDPControlInfo, ~Ieee802Ctrl, etc.

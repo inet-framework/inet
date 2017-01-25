@@ -53,7 +53,7 @@ namespace inet {
 
 namespace serializer {
 
-Register_Serializer(IPv4Datagram, ETHERTYPE, ETHERTYPE_IPv4, IPv4Serializer);
+Register_Serializer(IPv4Header, ETHERTYPE, ETHERTYPE_IPv4, IPv4Serializer);
 
 IPv4OptionSerializerRegistrationList ipv4OptionSerializers("IPv4OptionSerializers"); ///< List of IPv4Option serializers (IPv4OptionSerializerBase)
 
@@ -140,7 +140,7 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 
-    if (typeid(*pkt) != typeid(IPv4Datagram)) {
+    if (typeid(*pkt) != typeid(IPv4Header)) {
         if (c.throwOnSerializerNotFound)
             throw cRuntimeError("IPv4Serializer: class '%s' not accepted", pkt->getClassName());
         EV_ERROR << "IPv4Serializer: class '" << pkt->getClassName() << "' not accepted.\n";
@@ -153,7 +153,7 @@ void IPv4Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
         EV_ERROR << "IPv4Serializer: not enough space for IPv4 header.\n";
         return;
     }
-    const IPv4Datagram *dgram = check_and_cast<const IPv4Datagram *>(pkt);
+    const IPv4Header *dgram = check_and_cast<const IPv4Header *>(pkt);
     unsigned int headerLength = dgram->getHeaderLength();
     ASSERT((headerLength & 3) == 0);
     ip->ip_hl = headerLength >> 2;
@@ -308,7 +308,7 @@ cPacket* IPv4Serializer::deserialize(const Buffer &b, Context& c)
 {
     ASSERT(b.getPos() == 0);
 
-    IPv4Datagram *dest = new IPv4Datagram("parsed-ipv4");
+    IPv4Header *dest = new IPv4Header("parsed-ipv4");
     unsigned int bufsize = b.getRemainingSize();
     const struct ip *ip = static_cast<const struct ip *>(b.accessNBytes(IP_HEADER_BYTES));
     if (!ip ) {
@@ -375,7 +375,7 @@ cPacket* IPv4Serializer::deserialize(const Buffer &b, Context& c)
     return dest;
 }
 
-void IPv4Serializer::serializeOptions(const IPv4Datagram *dgram, Buffer& b, Context& c)
+void IPv4Serializer::serializeOptions(const IPv4Header *dgram, Buffer& b, Context& c)
 {
     unsigned short numOptions = dgram->getOptionArraySize();
     unsigned int optionsLength = 0;
@@ -394,7 +394,7 @@ void IPv4Serializer::serializeOptions(const IPv4Datagram *dgram, Buffer& b, Cont
     }
 }
 
-void IPv4Serializer::deserializeOptions(IPv4Datagram *dgram, Buffer &b, Context& c)
+void IPv4Serializer::deserializeOptions(IPv4Header *dgram, Buffer &b, Context& c)
 {
     while (b.getRemainingSize()) {
         unsigned int pos = b.getPos();

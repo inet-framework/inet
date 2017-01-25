@@ -209,7 +209,7 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     //@}
 
     // IClassifier
-    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
+    virtual bool lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

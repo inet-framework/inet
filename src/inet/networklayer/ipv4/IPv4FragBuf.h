@@ -29,7 +29,7 @@
 namespace inet {
 
 class ICMP;
-class IPv4Datagram;
+class IPv4Header;
 
 /**
  * Reassembly buffer for fragmented IPv4 datagrams.

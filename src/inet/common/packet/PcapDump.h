@@ -26,7 +26,7 @@
 namespace inet {
 
 // Foreign declarations:
-class IPv4Datagram;
+class IPv4Header;
 class IPv6Datagram;
 
 /**
@@ -69,7 +69,7 @@ class INET_API PcapDump
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writeFrame(simtime_t time, const IPv4Datagram *ipPacket);
+    void writeFrame(simtime_t time, const IPv4Header *ipPacket);
     void writeIPv6Frame(simtime_t stime, const IPv6Datagram *ipPacket);
 
     /**

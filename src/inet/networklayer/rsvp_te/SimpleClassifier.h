@@ -22,7 +22,7 @@
 
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvp_te/IRSVPClassifier.h"
 #include "inet/networklayer/mpls/LIBTable.h"
@@ -71,7 +71,7 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
     virtual void processCommand(const cXMLElement& node) override;
 
     // IRSVPClassifier implementation
-    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
+    virtual bool lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
     virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) override;
 
   protected:

@@ -53,7 +53,7 @@ void SimpleClassifier::handleMessage(cMessage *)
 
 // IClassifier implementation (method invoked by MPLS)
 
-bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool SimpleClassifier::lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
     // never label OSPF(TED) and RSVP traffic
 

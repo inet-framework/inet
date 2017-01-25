@@ -1174,7 +1174,7 @@ TCPSocket *LDP::getPeerSocket(IPv4Address peerAddr)
     return sock;
 }
 
-bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool LDP::lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
     IPv4Address destAddr = ipdatagram->getDestAddress();
     int protocol = ipdatagram->getTransportProtocol();

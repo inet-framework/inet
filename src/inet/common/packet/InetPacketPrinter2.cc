@@ -33,14 +33,14 @@ namespace inet { class EtherFrame; }
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/ipv4/ICMPMessage.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #else // ifdef WITH_IPv4
 
 namespace inet {
 
 class ARPPacket;
 class ICMPMessage;
-class IPv4Datagram;
+class IPv4Header;
 
 } // namespace inet
 
@@ -133,7 +133,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4
-            if (IPv4Datagram *ipv4dgram = dynamic_cast<IPv4Datagram *>(pk)) {
+            if (IPv4Header *ipv4dgram = dynamic_cast<IPv4Header *>(pk)) {
                 out << "IPv4: " << srcAddr << " > " << destAddr;
                 if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0) {
                     out << " " << (ipv4dgram->getMoreFragments() ? "" : "last ")

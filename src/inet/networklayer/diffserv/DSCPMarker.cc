@@ -19,7 +19,7 @@
 #include "inet/networklayer/diffserv/DSCPMarker.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -84,7 +84,7 @@ bool DSCPMarker::markPacket(cPacket *packet, int dscp)
 
     for ( ; packet; packet = packet->getEncapsulatedPacket()) {
 #ifdef WITH_IPv4
-        IPv4Datagram *ipv4Datagram = dynamic_cast<IPv4Datagram *>(packet);
+        IPv4Header *ipv4Datagram = dynamic_cast<IPv4Header *>(packet);
         if (ipv4Datagram) {
             ipv4Datagram->setDiffServCodePoint(dscp);
             return true;

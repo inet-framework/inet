@@ -35,7 +35,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #endif // ifdef WITH_IPv4
 
@@ -102,7 +102,7 @@ void PcapDump::openPcap(const char *filename, unsigned int snaplen_par)
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
-void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
+void PcapDump::writeFrame(simtime_t stime, const IPv4Header *ipPacket)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
