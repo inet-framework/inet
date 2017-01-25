@@ -50,15 +50,15 @@ std::ostream& NarrowbandTransmitterBase::printToStream(std::ostream& stream, int
 }
 
 
-Hz NarrowbandTransmitterBase::computeCarrierFrequency(const cPacket *macFrame) const
+Hz NarrowbandTransmitterBase::computeCarrierFrequency(const Packet *macFrame) const
 {
-    auto signalBandReq = const_cast<cPacket *>(macFrame)->getTag<SignalBandReq>();
+    auto signalBandReq = const_cast<Packet *>(macFrame)->getTag<SignalBandReq>();
     return signalBandReq != nullptr ? signalBandReq->getCarrierFrequency() : carrierFrequency;
 }
 
-Hz NarrowbandTransmitterBase::computeBandwidth(const cPacket *macFrame) const
+Hz NarrowbandTransmitterBase::computeBandwidth(const Packet *macFrame) const
 {
-    auto signalBandReq = const_cast<cPacket *>(macFrame)->getTag<SignalBandReq>();
+    auto signalBandReq = const_cast<Packet *>(macFrame)->getTag<SignalBandReq>();
     return signalBandReq != nullptr ? signalBandReq->getBandwidth() : bandwidth;
 }
 

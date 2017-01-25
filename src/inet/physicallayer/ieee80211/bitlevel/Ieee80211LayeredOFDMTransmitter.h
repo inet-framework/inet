@@ -86,7 +86,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
   public:
     virtual ~Ieee80211LayeredOFDMTransmitter();
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }
     virtual const IModulator *getModulator() const { return dataModulator; }
     virtual const IPulseShaper *getPulseShaper() const { return pulseShaper; }

@@ -121,7 +121,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createPacketMod
     phyFrame->encapsulate(const_cast<cPacket *>(macFrame));
     phyFrame->setBitLength(phyFrame->getLength() * 8 + plcpHeaderLength);
     BitVector *serializedPacket = serialize(phyFrame);
-    return new TransmissionPacketModel(phyFrame, serializedPacket, mode->getDataMode()->getNetBitrate());
+    return new TransmissionPacketModel(check_and_cast<Packet *>(phyFrame), serializedPacket, mode->getDataMode()->getNetBitrate());
 }
 
 const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const
@@ -321,9 +321,9 @@ const Ieee80211OFDMMode *Ieee80211LayeredOFDMTransmitter::computeMode(Hz bandwid
     return new Ieee80211OFDMMode("", new Ieee80211OFDMPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *Ieee80211LayeredOFDMTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {
-    auto modeReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ModeReq>();
+    auto modeReq = const_cast<Packet *>(macFrame)->getTag<Ieee80211ModeReq>();
     if (isCompliant)
         mode = modeReq != nullptr ? check_and_cast<const Ieee80211OFDMMode *>(modeReq->getMode()) : &Ieee80211OFDMCompliantModes::getCompliantMode(11, MHz(20));
     else if (!mode)

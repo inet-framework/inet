@@ -50,13 +50,13 @@ class INET_API IReceptionResult : public IPrintableObject
      * Returns the PHY frame corresponding to the reception. This function
      * may return nullptr.
      */
-    virtual const cPacket *getPhyFrame() const = 0;
+    virtual const Packet *getPhyFrame() const = 0;
 
     /**
      * Returns the MAC frame corresponding to this reception. This function
      * may return nullptr.
      */
-    virtual const cPacket *getMacFrame() const = 0;
+    virtual const Packet *getMacFrame() const = 0;
 };
 
 } // namespace physicallayer

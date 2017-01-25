@@ -179,7 +179,7 @@ ConstMapping *Ieee802154UWBIRTransmitter::generateIEEE802154AUWBSignal(const sim
     return mapping;
 }
 
-const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *Ieee802154UWBIRTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {
     int bitLength = macFrame->getBitLength();
     // KLUDGE: generate random bits until serializer is implemented

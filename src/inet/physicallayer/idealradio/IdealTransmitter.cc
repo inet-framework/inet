@@ -64,9 +64,9 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
     return stream;
 }
 
-const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const cPacket *packet, const simtime_t startTime) const
+const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto signalBitrateReq = const_cast<cPacket *>(packet)->getTag<SignalBitrateReq>();
+    auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     auto headerDuration = headerBitLength / transmissionBitrate.get();
     auto dataDuration = packet->getBitLength() / transmissionBitrate.get();
@@ -79,7 +79,7 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
     auto endOrientation = mobility->getCurrentAngularPosition();
     auto idealPhyHeader = std::make_shared<ByteCountChunk>((headerBitLength + 7) / 8);
     idealPhyHeader->markImmutable();
-    check_and_cast<Packet *>(const_cast<cPacket *>(packet))->pushHeader(idealPhyHeader);
+    check_and_cast<Packet *>(const_cast<Packet *>(packet))->pushHeader(idealPhyHeader);
     return new IdealTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
 }
 

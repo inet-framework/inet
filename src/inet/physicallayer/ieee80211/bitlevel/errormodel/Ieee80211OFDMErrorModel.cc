@@ -149,7 +149,7 @@ const IReceptionPacketModel *Ieee80211OFDMErrorModel::computePacketModel(const L
     throw cRuntimeError("Unimplemented!");
     // TODO: implement error model
     const ITransmissionPacketModel *transmissionPacketModel = transmission->getPacketModel();
-    const cPacket *packet = transmissionPacketModel->getPacket();
+    const Packet *packet = transmissionPacketModel->getPacket();
     double per = 0.0;
     bool packetErrorless = per == 0.0;
     return new const ReceptionPacketModel(packet, nullptr, bps(NaN), per, packetErrorless);

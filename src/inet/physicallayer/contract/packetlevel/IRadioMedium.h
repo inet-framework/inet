@@ -18,6 +18,7 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/environment/contract/IMaterial.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
@@ -128,12 +129,12 @@ class INET_API IRadioMedium : public IPrintableObject
      * represents the provided MAC frame. A copy of this radio frame is sent
      * to all affected radios.
      */
-    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame) = 0;
+    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, Packet *macFrame) = 0;
 
     /**
      * Returns the MAC frame that was transmitted in the provided radio frame.
      */
-    virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) = 0;
+    virtual Packet *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) = 0;
 
     /**
      * Returns the listening decision that describes what the receiver detects

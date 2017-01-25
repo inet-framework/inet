@@ -30,10 +30,10 @@ class INET_API ReceptionResult : public IReceptionResult, public cObject
   protected:
     const IReception *reception;
     const std::vector<const IReceptionDecision *> *decisions;
-    const cPacket *macFrame;
+    const Packet *macFrame;
 
   public:
-    ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const cPacket *macFrame);
+    ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *macFrame);
     ~ReceptionResult();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
@@ -41,8 +41,8 @@ class INET_API ReceptionResult : public IReceptionResult, public cObject
     virtual const IReception *getReception() const override { return reception; }
     virtual const std::vector<const IReceptionDecision *> *getDecisions() const override { return decisions; }
 
-    virtual const cPacket *getPhyFrame() const override;
-    virtual const cPacket *getMacFrame() const override;
+    virtual const Packet *getPhyFrame() const override;
+    virtual const Packet *getMacFrame() const override;
 };
 
 } // namespace physicallayer

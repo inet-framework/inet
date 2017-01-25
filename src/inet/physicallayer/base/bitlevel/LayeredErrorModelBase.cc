@@ -30,7 +30,7 @@ namespace physicallayer {
 const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const
 {
     const TransmissionPacketModel *transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
-    const cPacket* packet = transmissionPacketModel->getPacket();
+    const Packet* packet = transmissionPacketModel->getPacket();
     if (packetErrorRate == 0)
         return new ReceptionPacketModel(packet, new BitVector(*transmissionPacketModel->getSerializedPacket()), transmissionPacketModel->getBitrate(), packetErrorRate, true);
     else {

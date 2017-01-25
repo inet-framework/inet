@@ -20,6 +20,7 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/Units.h"
 #include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
@@ -60,13 +61,13 @@ class INET_API ITransmission : public IPrintableObject
      * Returns the PHY frame corresponding to this transmission. This function
      * may return nullptr.
      */
-    virtual const cPacket *getPhyFrame() const = 0;
+    virtual const Packet *getPhyFrame() const = 0;
 
     /**
      * Returns the MAC frame corresponding to this transmission. This function
      * never returns nullptr.
      */
-    virtual const cPacket *getMacFrame() const = 0;
+    virtual const Packet *getMacFrame() const = 0;
 
     /**
      * Returns the time when the transmitter started this transmission. It is

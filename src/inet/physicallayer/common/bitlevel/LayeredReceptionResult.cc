@@ -53,14 +53,14 @@ std::ostream& LayeredReceptionResult::printToStream(std::ostream& stream, int le
     return stream;
 }
 
-const cPacket *LayeredReceptionResult::getPhyFrame() const
+const Packet *LayeredReceptionResult::getPhyFrame() const
 {
     return packetModel->getPacket();
 }
 
-const cPacket *LayeredReceptionResult::getMacFrame() const
+const Packet *LayeredReceptionResult::getMacFrame() const
 {
-    return packetModel->getPacket()->getEncapsulatedPacket();
+    return check_and_cast<Packet *>(packetModel->getPacket()->getEncapsulatedPacket());
 }
 } /* namespace physicallayer */
 } /* namespace inet */

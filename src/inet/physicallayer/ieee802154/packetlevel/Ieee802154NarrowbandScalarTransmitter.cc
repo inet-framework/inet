@@ -38,7 +38,7 @@ std::ostream& Ieee802154NarrowbandScalarTransmitter::printToStream(std::ostream&
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {
     W transmissionPower = computeTransmissionPower(macFrame);
     bps transmissionBitrate = computeTransmissionDataBitrate(macFrame);

@@ -78,7 +78,7 @@ class INET_API APSKLayeredTransmitter : public TransmitterBase
     virtual W getMaxPower() const override { return power; }
     virtual m getMaxCommunicationRange() const override { return m(NaN); }
     virtual m getMaxInterferenceRange() const override { return m(NaN); }
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const override;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

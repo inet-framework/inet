@@ -101,11 +101,11 @@ const IReceptionResult *IdealReceiver::computeReceptionResult(const IListening *
     auto noise = check_and_cast_nullable<const IdealNoise *>(snir->getNoise());
     double errorRate = check_and_cast<const IdealReception *>(reception)->getPower() == IdealReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
     auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
-    auto errorRateInd = const_cast<cPacket *>(receptionResult->getMacFrame())->ensureTag<ErrorRateInd>();
+    auto errorRateInd = const_cast<Packet *>(receptionResult->getMacFrame())->ensureTag<ErrorRateInd>();
     errorRateInd->setSymbolErrorRate(errorRate);
     errorRateInd->setBitErrorRate(errorRate);
     errorRateInd->setPacketErrorRate(errorRate);
-    auto idealPhyHeader = check_and_cast<Packet *>(const_cast<cPacket *>(receptionResult->getMacFrame()))->popHeader<ByteCountChunk>();
+    auto idealPhyHeader = check_and_cast<Packet *>(const_cast<Packet *>(receptionResult->getMacFrame()))->popHeader<ByteCountChunk>();
     return receptionResult;
 }
 

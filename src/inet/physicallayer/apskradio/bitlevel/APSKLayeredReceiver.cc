@@ -170,7 +170,7 @@ const IReceptionResult *APSKLayeredReceiver::computeReceptionResult(const IListe
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
-    const APSKPhyFrame *phyFrame = createPhyFrame(packetModel);
+    const Packet *phyFrame = check_and_cast<const Packet *>(createPhyFrame(packetModel)); // TODO: type was APSKPhyFrame
     const ReceptionPacketModel *receptionPacketModel = new ReceptionPacketModel(phyFrame, new BitVector(*packetModel->getSerializedPacket()), bps(NaN), -1, packetModel->isPacketErrorless());
     delete packetModel;
     auto macFrame = const_cast<cPacket *>(receptionPacketModel->getPacket()->getEncapsulatedPacket());

@@ -345,7 +345,7 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
     Ieee80211PhySerializer deserializer;
-    cPacket *phyFrame = deserializer.deserialize(mergedBits);
+    Packet *phyFrame = check_and_cast<Packet *>(deserializer.deserialize(mergedBits)); // TODO: type was cPacket
     bool isReceptionSuccessful = true;
     cPacket *packet = phyFrame;
     while (packet != nullptr) {

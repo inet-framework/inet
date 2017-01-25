@@ -62,10 +62,10 @@ std::ostream& Ieee80211TransmitterBase::printToStream(std::ostream& stream, int 
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const cPacket *macFrame) const
+const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Packet *macFrame) const
 {
-    auto modeReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ModeReq>();
-    auto bitrateReq = const_cast<cPacket *>(macFrame)->getTag<SignalBitrateReq>();
+    auto modeReq = const_cast<Packet *>(macFrame)->getTag<Ieee80211ModeReq>();
+    auto bitrateReq = const_cast<Packet *>(macFrame)->getTag<SignalBitrateReq>();
     if (modeReq != nullptr) {
         if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
@@ -77,9 +77,9 @@ const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const cP
         return mode;
 }
 
-const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(const cPacket *macFrame) const
+const Ieee80211Channel *Ieee80211TransmitterBase::computeTransmissionChannel(const Packet *macFrame) const
 {
-    auto channelReq = const_cast<cPacket *>(macFrame)->getTag<Ieee80211ChannelReq>();
+    auto channelReq = const_cast<Packet *>(macFrame)->getTag<Ieee80211ChannelReq>();
     return channelReq != nullptr ? channelReq->getChannel() : channel;
 }
 

@@ -40,8 +40,8 @@ class INET_API Ieee80211TransmitterBase : public FlatTransmitterBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const IIeee80211Mode *computeTransmissionMode(const cPacket *macFrame) const;
-    virtual const Ieee80211Channel *computeTransmissionChannel(const cPacket *macFrame) const;
+    virtual const IIeee80211Mode *computeTransmissionMode(const Packet *macFrame) const;
+    virtual const Ieee80211Channel *computeTransmissionChannel(const Packet *macFrame) const;
 
   public:
     Ieee80211TransmitterBase();

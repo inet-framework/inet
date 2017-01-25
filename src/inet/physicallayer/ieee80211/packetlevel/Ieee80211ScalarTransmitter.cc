@@ -38,7 +38,7 @@ std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, in
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
+const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, simtime_t startTime) const
 {
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(macFrame);

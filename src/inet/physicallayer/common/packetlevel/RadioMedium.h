@@ -257,7 +257,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * Creates a new radio frame for the transmitter.
      */
-    virtual IRadioFrame *createTransmitterRadioFrame(const IRadio *radio, cPacket *macFrame);
+    virtual IRadioFrame *createTransmitterRadioFrame(const IRadio *radio, Packet *macFrame);
 
     /**
      * Creates a new radio frame for a receiver.
@@ -334,8 +334,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IRadioFrame *frame);
 
-    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame) override;
-    virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) override;
+    virtual IRadioFrame *transmitPacket(const IRadio *transmitter, Packet *macFrame) override;
+    virtual Packet *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) override;
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 

@@ -27,16 +27,16 @@ namespace physicallayer {
 class INET_API SignalPacketModel : public virtual ISignalPacketModel
 {
   protected:
-    const cPacket *packet;
+    const Packet *packet;
     const BitVector *serializedPacket;
     const bps bitrate;
 
   public:
-    SignalPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate);
+    SignalPacketModel(const Packet *packet, const BitVector *serializedPacket, bps bitrate);
     virtual ~SignalPacketModel();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const cPacket *getPacket() const override { return packet; }
+    virtual const Packet *getPacket() const override { return packet; }
     virtual const BitVector *getSerializedPacket() const override { return serializedPacket; }
     virtual bps getBitrate() const override { return bitrate; }
 };
@@ -44,7 +44,7 @@ class INET_API SignalPacketModel : public virtual ISignalPacketModel
 class INET_API TransmissionPacketModel : public SignalPacketModel, public virtual ITransmissionPacketModel
 {
   public:
-    TransmissionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate);
+    TransmissionPacketModel(const Packet *packet, const BitVector *serializedPacket, bps bitrate);
 };
 
 class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptionPacketModel
@@ -54,7 +54,7 @@ class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptio
     const bool packetErrorless;
 
   public:
-    ReceptionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate, double per, bool packetErrorless);
+    ReceptionPacketModel(const Packet *packet, const BitVector *serializedPacket, bps bitrate, double per, bool packetErrorless);
 
     virtual double getPER() const override { return per; }
     virtual bool isPacketErrorless() const override { return packetErrorless; }

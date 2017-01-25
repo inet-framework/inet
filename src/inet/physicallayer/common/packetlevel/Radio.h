@@ -184,18 +184,18 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void handleReceptionTimer(cMessage *message);
     virtual void handleUpperCommand(cMessage *command);
     virtual void handleLowerCommand(cMessage *command);
-    virtual void handleUpperPacket(cPacket *packet);
+    virtual void handleUpperPacket(Packet *packet);
     virtual void handleLowerPacket(RadioFrame *packet);
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
-    virtual void startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part);
+    virtual void startTransmission(Packet *macFrame, IRadioSignal::SignalPart part);
     virtual void continueTransmission();
     virtual void endTransmission();
     virtual void abortTransmission();
 
-    virtual RadioFrame *createRadioFrame(cPacket *packet) const;
+    virtual RadioFrame *createRadioFrame(Packet *packet) const;
 
     virtual void startReception(cMessage *timer, IRadioSignal::SignalPart part);
     virtual void continueReception(cMessage *timer);
@@ -203,7 +203,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void abortReception(cMessage *timer);
     virtual void captureReception(cMessage *timer);
 
-    virtual void sendUp(cPacket *macFrame);
+    virtual void sendUp(Packet *macFrame);
     virtual cMessage *createReceptionTimer(RadioFrame *radioFrame) const;
     virtual bool isReceptionTimer(const cMessage *message) const;
 

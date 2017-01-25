@@ -117,10 +117,10 @@ const ITransmissionPacketModel *APSKLayeredTransmitter::createPacketModel(const 
     if (levelOfDetail >= PACKET_DOMAIN) {
         BitVector *bits = APSKPhyFrameSerializer().serialize(phyFrame);
         bits->appendBit(0, computePaddingLength(bits));
-        return new TransmissionPacketModel(phyFrame, bits, bitrate);
+        return new TransmissionPacketModel(check_and_cast<const Packet *>(phyFrame), bits, bitrate);
     }
     else
-        return new TransmissionPacketModel(phyFrame, nullptr, bitrate);
+        return new TransmissionPacketModel(check_and_cast<const Packet *>(phyFrame), nullptr, bitrate);
 }
 
 const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITransmissionPacketModel *packetModel) const
@@ -177,7 +177,7 @@ const ITransmissionAnalogModel *APSKLayeredTransmitter::createAnalogModel(const 
     }
 }
 
-const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *APSKLayeredTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {
     const APSKPhyFrame *phyFrame = createPhyFrame(macFrame);
     const ITransmissionPacketModel *packetModel = createPacketModel(phyFrame);

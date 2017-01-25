@@ -205,7 +205,7 @@ void Radio::handleMessageWhenUp(cMessage *message)
             delete message;
         }
         else
-            handleUpperPacket(check_and_cast<cPacket *>(message));
+            handleUpperPacket(check_and_cast<Packet *>(message));
     }
     else if (message->getArrivalGate() == radioIn) {
         if (!message->isPacket()) {
@@ -280,7 +280,7 @@ void Radio::handleLowerCommand(cMessage *message)
     throw cRuntimeError("Unsupported command");
 }
 
-void Radio::handleUpperPacket(cPacket *packet)
+void Radio::handleUpperPacket(Packet *packet)
 {
     emit(LayeredProtocolBase::packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
@@ -332,7 +332,7 @@ void Radio::handleNodeCrash()
     PhysicalLayerBase::handleNodeCrash();
 }
 
-void Radio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
+void Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
 {
     auto radioFrame = createRadioFrame(macFrame);
     auto transmission = radioFrame->getTransmission();
@@ -405,7 +405,7 @@ void Radio::abortTransmission()
     updateTransceiverPart();
 }
 
-RadioFrame *Radio::createRadioFrame(cPacket *packet) const
+RadioFrame *Radio::createRadioFrame(Packet *packet) const
 {
     RadioFrame *radioFrame = check_and_cast<RadioFrame *>(medium->transmitPacket(this, packet));
     ASSERT(radioFrame->getDuration() != 0);
@@ -504,7 +504,7 @@ void Radio::captureReception(cMessage *timer)
     throw cRuntimeError("Not yet implemented");
 }
 
-void Radio::sendUp(cPacket *macFrame)
+void Radio::sendUp(Packet *macFrame)
 {
     emit(minSNIRSignal, macFrame->getMandatoryTag<SnirInd>()->getMinimumSnir());
     auto errorRateInd = macFrame->getMandatoryTag<ErrorRateInd>();

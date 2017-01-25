@@ -37,7 +37,7 @@ std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int lev
     return FlatTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {
     W transmissionPower = computeTransmissionPower(macFrame);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(macFrame);

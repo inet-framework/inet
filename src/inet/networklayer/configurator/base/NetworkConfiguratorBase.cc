@@ -19,8 +19,9 @@
 //
 
 #include <set>
-#include "inet/common/stlutils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -364,7 +365,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-            const cPacket *macFrame = new cPacket();
+            const Packet *macFrame = new Packet();
             const IRadioMedium *radioMedium = receiverRadio->getMedium();
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
             const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
@@ -386,7 +387,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
-            cPacket *transmittedFrame = new cPacket();
+            Packet *transmittedFrame = new Packet();
             transmittedFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
@@ -404,7 +405,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
                 const IReceptionDecision *receptionDecision = new ReceptionDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE, isReceptionPossible, true, true);
                 const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
                 const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
-                cPacket *receivedFrame = const_cast<cPacket *>(receptionResult->getMacFrame());
+                Packet *receivedFrame = const_cast<Packet *>(receptionResult->getMacFrame());
                 packetErrorRate = receivedFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate();
                 delete receptionResult;
                 delete receptionDecision;

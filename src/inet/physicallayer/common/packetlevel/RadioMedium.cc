@@ -498,13 +498,13 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     emit(transmissionAddedSignal, check_and_cast<const cObject *>(transmission));
 }
 
-IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, cPacket *macFrame)
+IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, Packet *macFrame)
 {
     Enter_Method_Silent();
     take(macFrame);
-    auto transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime());
+    auto transmission = radio->getTransmitter()->createTransmission(radio, check_and_cast<Packet *>(macFrame), simTime());
     auto radioFrame = new RadioFrame(transmission);
-    auto phyFrame = const_cast<cPacket *>(transmission->getPhyFrame());
+    auto phyFrame = const_cast<Packet *>(transmission->getPhyFrame());
     auto encapsulatedFrame = phyFrame != nullptr ? phyFrame : macFrame;
     radioFrame->setName(encapsulatedFrame->getName());
     radioFrame->setDuration(transmission->getDuration());
@@ -515,8 +515,8 @@ IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, cPack
 IRadioFrame *RadioMedium::createReceiverRadioFrame(const ITransmission *transmission)
 {
     auto radioFrame = new RadioFrame(transmission);
-    auto phyFrame = const_cast<cPacket *>(transmission->getPhyFrame());
-    auto macFrame = const_cast<cPacket *>(transmission->getMacFrame());
+    auto phyFrame = const_cast<Packet *>(transmission->getPhyFrame());
+    auto macFrame = const_cast<Packet *>(transmission->getMacFrame());
     auto encapsulatedFrame = phyFrame != nullptr ? phyFrame : macFrame;
     radioFrame->setName(encapsulatedFrame->getName());
     radioFrame->setDuration(transmission->getDuration());
@@ -573,7 +573,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
     }
 }
 
-IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
+IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, Packet *macFrame)
 {
     auto radioFrame = createTransmitterRadioFrame(radio, macFrame);
     auto transmission = radioFrame->getTransmission();
@@ -585,7 +585,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     return radioFrame;
 }
 
-cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame)
+Packet *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame)
 {
     const ITransmission *transmission = radioFrame->getTransmission();
     const IListening *listening = communicationCache->getCachedListening(radio, transmission);
@@ -593,7 +593,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
         communicationLog.writeReception(radio, radioFrame);
     const IReceptionResult *result = getReceptionResult(radio, listening, transmission);
     communicationCache->removeCachedReceptionResult(radio, transmission);
-    cPacket *macFrame = const_cast<cPacket *>(result->getMacFrame()->dup());
+    Packet *macFrame = const_cast<Packet *>(result->getMacFrame()->dup());
     delete result;
     return macFrame;
 }
@@ -686,7 +686,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                 if (arrival->getEndTime() >= simTime()) {
                     cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
                     contextSwitcher.methodCallSilent();
-                    const cPacket *macFrame = transmission->getMacFrame();
+                    const Packet *macFrame = transmission->getMacFrame();
                     EV_DEBUG << "Picking up " << macFrame << " originally sent "
                              << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
                              << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()

@@ -44,7 +44,7 @@ std::ostream& APSKDimensionalTransmitter::printToStream(std::ostream& stream, in
     return DimensionalTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
+const ITransmission *APSKDimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, const simtime_t startTime) const
 {
     W transmissionPower = computeTransmissionPower(macFrame);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(macFrame);

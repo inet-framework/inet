@@ -51,8 +51,8 @@ class INET_API LayeredReceptionResult : public ReceptionResult
     virtual const IReceptionSampleModel *getSampleModel() const { return sampleModel; }
     virtual const IReceptionAnalogModel *getAnalogModel() const { return analogModel; }
 
-    virtual const cPacket *getPhyFrame() const override;
-    virtual const cPacket *getMacFrame() const override;
+    virtual const Packet *getPhyFrame() const override;
+    virtual const Packet *getMacFrame() const override;
 };
 
 } // namespace physicallayer

@@ -47,7 +47,7 @@ std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& strea
     return DimensionalTransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
+const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *macFrame, simtime_t startTime) const
 {
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(macFrame);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(macFrame);
