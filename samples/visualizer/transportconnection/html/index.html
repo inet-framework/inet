@@ -58,7 +58,7 @@ identify and tell apart different connections.
 Transport connection visualization makes it easy to get information about the active transport connections in the network at a glance, without
 using the inspector window.
 It makes it easy to identify connections by their two end-hosts, and to tell different connections apart. It also gives a quick overview about
-the number of connections in in certain nodes and the whole network. This example demonstrates such visualization of TCP connections.
+the number of connections in certain nodes and the whole network. This example demonstrates such visualization of TCP connections.
 </p>
 
 <p>
@@ -69,16 +69,17 @@ showcases a more advanced use-case.
 <h2>About the visualizer</h2>
 
 <p>
-The visualizer for this purpose is the <code><strong>TransportConnectionVisualizer</strong></code>. TODO: how it works
+The visualizer for this purpose is the <code><strong>TransportConnectionVisualizer</strong></code>.
 It displays an icon above the two end-hosts of an active, established transport layer level connection. It reacts to changes
 in the state of the connection. It places the icon when the connection is established, and removes it when it is no longer in the
-established state. The icon are color coded, denoting different connections. Should there be more connections than available colors,
+established state. The icons are color coded, denoting different connections. Should there be more connections than available colors,
 a number in the icon helps differentiate different connections with the same colored icon. Naturally, there can be multiple connections
 open at a node, thus multiple icons.
 </p>
 
 <p>
 It is important to note that packet paths belonging to the connection have no effect on this visualization (see Visualizing Transport Routes TODO).
+The transport connection visualization doesn't indicate anything about what paths packets take.
 </p>
 
 <h2>1. Enabling the visualization of transport connections</h2>
@@ -87,7 +88,9 @@ This configuration uses the following simple network:
 
 <img src="simplenetwork.png">
 
+<p>
 It consist of 2 <code><strong>StandardHosts</strong></code> connected by a 100Mbit/s ethernet cable. It also contains a <code><strong>IPv4NetworkConfigurator</strong></code> and a <code><strong>TransportConnectionVisualizer</strong></code> module.
+</p>
 
 TODO: the connection in routingtablevisualizer?
 
