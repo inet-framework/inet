@@ -17,7 +17,7 @@
 
 #include "inet/linklayer/ethernet/EtherLLC.h"
 
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"

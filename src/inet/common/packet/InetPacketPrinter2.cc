@@ -20,7 +20,7 @@
 #include "inet/networklayer/common/L3Address.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #else // ifdef WITH_ETHERNET
 namespace inet { class EtherFrame; }
 #endif // ifdef WITH_ETHERNET

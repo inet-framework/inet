@@ -17,7 +17,7 @@
 
 #include "inet/linklayer/ethernet/EtherFrameClassifier.h"
 
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
 namespace inet {
 

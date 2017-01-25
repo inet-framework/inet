@@ -26,8 +26,9 @@
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

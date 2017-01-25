@@ -17,7 +17,7 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame.h"
 
 #include "inet/common/INETUtils.h"
 

@@ -18,7 +18,8 @@
 
 #include "inet/common/serializer/headers/defs.h"
 #include "inet/common/serializer/SerializerBase.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame.h"
 
 namespace inet {
 

@@ -34,46 +34,6 @@ enum EtherType;
 enum SAPCode;
 
 //
-// Abstract base class for various Ethernet traffic types:
-// EtherJam, EtherFilledIFG and EtherPhyFrame.
-//
-packet EtherTraffic
-{
-}
-
-//
-// Represents jam on the Ethernet.
-//
-packet EtherJam extends EtherTraffic
-{
-    long abortedPkTreeID = 0;  // this field stores the packetTreeId of the aborted packet
-}
-
-//
-// Represents a filled inter-frame gap in burst mode.
-// Also used for calculating IFG times.
-//
-packet EtherFilledIFG extends EtherTraffic
-{
-    bitLength = INTERFRAME_GAP_BITS;
-}
-
-//
-// Represents an Ethernet PHY frame.
-//
-// Contains:
-//  - preamble: not stored (only contributes to length)
-//  - SFD: not stored (only contributes to length)
-//  - encapsulated EtherFrame with padding and FCS
-//
-packet EtherPhyFrame extends EtherTraffic
-{
-    @customize(true);
-    byteLength = PREAMBLE_BYTES + SFD_BYTES;
-    bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration 
-}
-
-//
 // Common base class for classes representing Ethernet II and 802.3 frame types,
 // containing their common header fields.
 //

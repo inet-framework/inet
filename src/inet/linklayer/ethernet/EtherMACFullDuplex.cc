@@ -22,7 +22,8 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

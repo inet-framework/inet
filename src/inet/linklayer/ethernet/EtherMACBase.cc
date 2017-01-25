@@ -23,7 +23,7 @@
 #include "inet/common/RawPacket.h"
 #include "inet/common/serializer/SerializerBase.h"
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"

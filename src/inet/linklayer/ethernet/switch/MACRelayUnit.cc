@@ -16,7 +16,7 @@
 #include "inet/linklayer/ethernet/switch/MACRelayUnit.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/IProtocolRegistrationListener.h"
