@@ -197,9 +197,9 @@ class INET_API CsmaCaMac : public MACProtocolBase
 
     virtual bool isMediumFree();
     virtual bool isReceiving();
-    virtual bool isAck(CsmaCaMacHeader *frame);
-    virtual bool isBroadcast(CsmaCaMacHeader *msg);
-    virtual bool isForUs(CsmaCaMacHeader *msg);
+    virtual bool isAck(Packet *frame);
+    virtual bool isBroadcast(Packet *frame);
+    virtual bool isForUs(Packet *frame);
     //@}
 };
 

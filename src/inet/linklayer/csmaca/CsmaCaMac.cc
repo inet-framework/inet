@@ -28,7 +28,8 @@ Define_Module(CsmaCaMac);
 
 static int getUPBasedFramePriority(cObject *obj)
 {
-    auto macHeader = check_and_cast<CsmaCaMacDataHeader *>(obj);
+    auto frame = static_cast<Packet *>(obj);
+    const auto& macHeader = frame->peekHeader<CsmaCaMacDataHeader>();
     int up = macHeader->getPriority();
     return (up == UP_BK) ? -2 : (up == UP_BK2) ? -1 : up;  // because UP_BE==0, but background traffic should have lower priority than best effort
 }
@@ -220,15 +221,14 @@ void CsmaCaMac::handleLowerPacket(cPacket *msg)
     const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
     EV << "Self address: " << address
        << ", receiver address: " << macHeader->getReceiverAddress()
-       << ", received frame is for us: " << isForUs(macHeader.get()) << endl;
+       << ", received frame is for us: " << isForUs(frame) << endl;
 
     handleWithFsm(msg);
 }
 
 void CsmaCaMac::handleWithFsm(cMessage *msg)
 {
-    Packet *frame = check_and_cast<Packet*>(msg);
-    const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
+    Packet *frame = dynamic_cast<Packet *>(msg);
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -308,19 +308,19 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(sendDataFrame(getCurrentTransmission()));
             FSMA_Event_Transition(Transmit-Broadcast,
-                                  msg == endData && isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacHeader>().get()),
+                                  msg == endData && isBroadcast(getCurrentTransmission()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSentBroadcast++;
             );
             FSMA_Event_Transition(Transmit-Unicast-No-Ack,
-                                  msg == endData && !useAck && !isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacHeader>().get()),
+                                  msg == endData && !useAck && !isBroadcast(getCurrentTransmission()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSent++;
             );
             FSMA_Event_Transition(Transmit-Unicast-Use-Ack,
-                                  msg == endData && useAck && !isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacHeader>().get()),
+                                  msg == endData && useAck && !isBroadcast(getCurrentTransmission()),
                                   WAITACK,
             );
         }
@@ -328,7 +328,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(scheduleAckTimeout(getCurrentTransmission()));
             FSMA_Event_Transition(Receive-Ack,
-                                  isLowerMessage(msg) && isForUs(macHeader.get()) && isAck(macHeader.get()),
+                                  isLowerMessage(msg) && isForUs(frame) && isAck(frame),
                                   IDLE,
                 if (retryCounter == 0) numSentWithoutRetry++;
                 numSent++;
@@ -358,13 +358,13 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Unknown-Ack,
-                                  isLowerMessage(msg) && isAck(macHeader.get()),
+                                  isLowerMessage(msg) && isAck(frame),
                                   IDLE,
                 delete frame;
                 resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Broadcast,
-                                  isLowerMessage(msg) && isBroadcast(macHeader.get()),
+                                  isLowerMessage(msg) && isBroadcast(frame),
                                   IDLE,
                 decapsulate(frame);
                 sendUp(frame);
@@ -372,7 +372,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Unicast-No-Ack,
-                                  isLowerMessage(msg) && isForUs(macHeader.get()) && !useAck,
+                                  isLowerMessage(msg) && isForUs(frame) && !useAck,
                                   IDLE,
                 decapsulate(frame);
                 sendUp(frame);
@@ -380,7 +380,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 resetStateVariables();
             );
             FSMA_Event_Transition(Receive-Unicast-Use-Ack,
-                                  isLowerMessage(msg) && isForUs(macHeader.get()) && useAck,
+                                  isLowerMessage(msg) && isForUs(frame) && useAck,
                                   WAITSIFS,
                 auto frameCopy = frame->dup();
                 decapsulate(frameCopy);
@@ -388,7 +388,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
                 numReceived++;
             );
             FSMA_Event_Transition(Receive-Unicast-Not-For-Us,
-                                  isLowerMessage(msg) && !isForUs(macHeader.get()),
+                                  isLowerMessage(msg) && !isForUs(frame),
                                   IDLE,
                 delete frame;
                 resetStateVariables();
@@ -587,7 +587,7 @@ void CsmaCaMac::retryCurrentTransmission()
 
 Packet *CsmaCaMac::getCurrentTransmission()
 {
-    return check_and_cast<Packet *>(transmissionQueue.front());
+    return static_cast<Packet *>(transmissionQueue.front());
 }
 
 void CsmaCaMac::popTransmissionQueue()
@@ -617,18 +617,21 @@ bool CsmaCaMac::isReceiving()
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_RECEIVING;
 }
 
-bool CsmaCaMac::isAck(CsmaCaMacHeader *macHeader)
+bool CsmaCaMac::isAck(Packet *frame)
 {
-    return dynamic_cast<CsmaCaMacAckHeader *>(macHeader);
+    const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
+    return std::dynamic_pointer_cast<CsmaCaMacAckHeader>(macHeader) != nullptr;
 }
 
-bool CsmaCaMac::isBroadcast(CsmaCaMacHeader *macHeader)
+bool CsmaCaMac::isBroadcast(Packet *frame)
 {
+    const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
     return macHeader->getReceiverAddress().isBroadcast();
 }
 
-bool CsmaCaMac::isForUs(CsmaCaMacHeader *macHeader)
+bool CsmaCaMac::isForUs(Packet *frame)
 {
+    const auto& macHeader = frame->peekHeader<CsmaCaMacHeader>();
     return macHeader->getReceiverAddress() == address;
 }
 
