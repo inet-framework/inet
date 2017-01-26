@@ -32,6 +32,12 @@ open at a node, thus there can be multiple icons.
 </p>
 
 <p>
+The <code><strong>nodeFilter</strong></code> parameter specifies which hosts' connections should be visualized.
+The <code><strong>portFilter</strong></code> parameter selects connections to be visualized based on their port numbers.
+By default, connections with all port numbers in all hosts are visualized.
+</p>
+
+<p>
 It is important to note that packet paths belonging to the connection have no effect on this visualization (see Visualizing Transport Routes TODO).
 The transport connection visualization doesn't indicate anything about what paths packets take.
 </p>
@@ -81,6 +87,27 @@ to another <code><strong>StandardHost</strong></code>, the server. The hosts are
 server via TCP and send packets to it.
 </p>
 
+<p>
+There are multiple TCP applications set up in the hosts that connect to the server:
+</p>
+
+<ul>
+<li><code><strong>host1</strong></code>: 2 connections on port 80 (http), 1 connection on port 22 (ssh)</li>
+<li><code><strong>host2</strong></code>: 1 connection on port 80, 1 connection on port 22</li>
+</ul>
+
+<p>The visualizer is instructed to only visualize connections on port 80:</p>
+
+<div class="snippet">
+*.visualizer.*.transportConnectionVisualizer.portFilter = "80"
+</div>
+
+<p>
+When the simulation is run and the connections are established, the network looks like the following:
+</p>
+
+<img src="port80.png">
+
 <pre>
 So now host2 has 2 port80 connections and host1 has 1
 
@@ -88,6 +115,12 @@ So now host2 has 2 port80 connections and host1 has 1
 2. figure: screenshot only...set portfilter to 22. 1 connection for each host, 2 for the server.
 3. figure: screenshot only...also set nodefilter to host2. 1 connection.
 4. figure: screenshot only...display all connections. 3 for host1, 2 for host2, and 5 for the server.
+
+will have to explain that there can be multiple connections. And that they are color coded.
+and that you can use node and port filters.
+
+here is an idea: have a big network, maybe as a third config, or just a screenshot. big network, lots of connections,
+and lots of routes -> this visualizer is not concerned with routes.
 </pre>
 
 </body>
