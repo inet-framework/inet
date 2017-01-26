@@ -4,7 +4,7 @@
     <feature enabled="true" id="TCP_INET"/>
     <feature enabled="false" id="TCP_lwIP"/>
     <feature enabled="false" id="TCP_NSC"/>
-    <feature enabled="false" id="IPv4"/>
+    <feature enabled="true" id="IPv4"/>
     <feature enabled="false" id="INET_examples"/>
     <feature enabled="false" id="IPv6"/>
     <feature enabled="false" id="IPv6_examples"/>
@@ -51,6 +51,8 @@
     <feature enabled="false" id="apskradio"/>
     <feature enabled="false" id="idealwireless"/>
     <feature enabled="false" id="wireless_examples"/>
+    <feature enabled="true" id="visualization"/>
+    <feature enabled="false" id="visualization_examples"/>
     <feature enabled="false" id="VoIPStream"/>
     <feature enabled="false" id="VoIPStream_examples"/>
     <feature enabled="false" id="SimpleVoIP"/>
@@ -69,4 +71,5 @@
     <feature enabled="false" id="BMAC"/>
     <feature enabled="false" id="LMAC"/>
     <feature enabled="false" id="CSMA"/>
+    <feature enabled="true" id="CsmaCaMac"/>
 </featurestates>
