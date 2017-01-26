@@ -19,10 +19,6 @@
 #ifndef __INET_TCP_NSC_CONNECTION_H
 #define __INET_TCP_NSC_CONNECTION_H
 
-#ifndef HAVE_NSC
-#error Please install NSC or disable 'TCP_NSC' feature
-#endif // ifndef HAVE_NSC
-
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"

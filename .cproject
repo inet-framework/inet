@@ -27,82 +27,14 @@
 							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1843986175" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1544720771" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.preprocessor.def.33891026" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.33891026" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1304941279" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1163034331" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.892294620" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.193803687" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.193803687" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<option id="gnu.c.compiler.option.include.paths.552444216" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
@@ -120,93 +52,6 @@
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.732390572" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="org.omnetpp.cdt.gnu.config.debug.229043752.1275517272" name="/" resourcePath="src">
-						<toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.2006975904" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.debug" unusedChildren="">
-							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1016321392" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1843986175"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1922498173" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.1544720771">
-								<option id="gnu.cpp.compiler.option.preprocessor.def.527650023" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.159444035" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1237244045" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.892294620">
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1072908" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1726470872" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.156730993" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.1169210834"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1780164748" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.1065738287"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1848873911" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.420284418">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1747975327" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -239,82 +84,14 @@
 							<builder id="org.omnetpp.cdt.gnu.builder.release.1176677325" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1643927787" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1039888888" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
-								<option id="gnu.cpp.compiler.option.preprocessor.def.655304152" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.655304152" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1086707691" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.958073850" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.419916163" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1241715501" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1241715501" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<option id="gnu.c.compiler.option.include.paths.951413942" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
@@ -332,93 +109,6 @@
 									<listOptionValue builtIn="false" value="../../src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1865888372" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="org.omnetpp.cdt.gnu.config.release.1746235823.699956095" name="/" resourcePath="src">
-						<toolChain id="org.omnetpp.cdt.gnu.toolchain.release.58547284" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.release" unusedChildren="">
-							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE" id="org.omnetpp.cdt.targetPlatform" isAbstract="false" name="Windows, Linux, Mac" osList="win32,linux,macosx" superClass="org.omnetpp.cdt.targetPlatform"/>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.31422813" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1643927787"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1910980394" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.1039888888">
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1548106982" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.796347027" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.578609124" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.419916163">
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.905987848" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="WITH_TCP_COMMON"/>
-									<listOptionValue builtIn="false" value="WITH_TCP_INET"/>
-									<listOptionValue builtIn="false" value="WITH_IPv4"/>
-									<listOptionValue builtIn="false" value="WITH_IPv6"/>
-									<listOptionValue builtIn="false" value="WITH_xMIPv6"/>
-									<listOptionValue builtIn="false" value="WITH_GENERIC"/>
-									<listOptionValue builtIn="false" value="WITH_FLOOD"/>
-									<listOptionValue builtIn="false" value="WITH_UDP"/>
-									<listOptionValue builtIn="false" value="WITH_RTP"/>
-									<listOptionValue builtIn="false" value="WITH_SCTP"/>
-									<listOptionValue builtIn="false" value="WITH_DHCP"/>
-									<listOptionValue builtIn="false" value="WITH_ETHERNET"/>
-									<listOptionValue builtIn="false" value="WITH_PPP"/>
-									<listOptionValue builtIn="false" value="WITH_MPLS"/>
-									<listOptionValue builtIn="false" value="WITH_OSPFv2"/>
-									<listOptionValue builtIn="false" value="WITH_BGPv4"/>
-									<listOptionValue builtIn="false" value="WITH_PIM"/>
-									<listOptionValue builtIn="false" value="WITH_AODV"/>
-									<listOptionValue builtIn="false" value="WITH_RIP"/>
-									<listOptionValue builtIn="false" value="WITH_POWER"/>
-									<listOptionValue builtIn="false" value="WITH_RADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE80211"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE802154"/>
-									<listOptionValue builtIn="false" value="WITH_APSKRADIO"/>
-									<listOptionValue builtIn="false" value="WITH_IDEALWIRELESS"/>
-									<listOptionValue builtIn="false" value="WITH_VISUALIZERS"/>
-									<listOptionValue builtIn="false" value="WITH_IEEE8021D"/>
-									<listOptionValue builtIn="false" value="WITH_TUN"/>
-									<listOptionValue builtIn="false" value="WITH_PACKETDRILL"/>
-									<listOptionValue builtIn="false" value="WITH_BMAC"/>
-									<listOptionValue builtIn="false" value="WITH_LMAC"/>
-									<listOptionValue builtIn="false" value="WITH_CSMA"/>
-									<listOptionValue builtIn="false" value="WITH_CSMACA"/>
-								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1741425934" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1227642329" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.1190158571"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1261186484" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.893445214"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.base.216930235" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.960891752">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1680301834" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>

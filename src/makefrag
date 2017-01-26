@@ -1,6 +1,6 @@
 #
-# on windows we have to link with the winsock library as it is no longer added 
-# to the oomnetpp system libraries by default
+# on windows we have to link with the winsock2 library as it is no longer added
+# to the omnetpp system libraries by default (as of OMNeT++ 5.1)
 #
 ifeq ($(PLATFORM),win32.x86_64)
   LIBS += -lwsock32
@@ -9,14 +9,23 @@ endif
 #
 # TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
 #
-
 WITH_TCP_NSC := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_NSC && echo enabled) )
 ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
-    CFLAGS += -I../3rdparty/nsc-$(NSC_VERSION)/sim -DHAVE_NSC
+    INCLUDE_PATH += -I../3rdparty/nsc-$(NSC_VERSION)/sim
     LIBS += -Wl,-rpath,$(abspath ../3rdparty/nsc-$(NSC_VERSION))
+  else
+    $(error Please install NSC or disable 'TCP_NSC' feature)
   endif
+endif
+
+#
+# TCP implementation using the lwIP stack
+#
+WITH_TCP_LWIP := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_lwIP && echo enabled) )
+ifeq ($(WITH_TCP_LWIP), enabled)
+  INCLUDE_PATH += -Iinet/transportlayer/tcp_lwip/lwip/include -Iinet/transportlayer/tcp_lwip/lwip/include/ipv4 -Iinet/transportlayer/tcp_lwip/lwip/include/ipv6
 endif
 
 #
@@ -129,5 +138,5 @@ $(info *** COMPILING with:)
 $(info $(CXX) -c $(CXXFLAGS) $(COPTS))
 $(info *** LINKING with:)
 $(info $(SHLIB_LD) -o $O/$(TARGET) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS) $(LDFLAGS))
-$(info Compiling...)
+$(info Building...)
 endif

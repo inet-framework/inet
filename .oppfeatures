@@ -40,7 +40,7 @@
                        inet.transportlayer.tcp_lwip
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_TCP_LWIP -Iinet/transportlayer/tcp_lwip/lwip/include -Iinet/transportlayer/tcp_lwip/lwip/include/ipv4 -Iinet/transportlayer/tcp_lwip/lwip/include/ipv6"
+        compileFlags = "-DWITH_TCP_LWIP"
         linkerFlags = ""
         />
     <feature
