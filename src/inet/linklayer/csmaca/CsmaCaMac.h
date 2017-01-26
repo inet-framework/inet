@@ -151,8 +151,8 @@ class INET_API CsmaCaMac : public MACProtocolBase
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
-    virtual void encapsulate(Packet *packet);
-    virtual void decapsulate(Packet *packet);
+    virtual void encapsulate(Packet *frame);
+    virtual void decapsulate(Packet *frame);
     //@}
 
     /**
