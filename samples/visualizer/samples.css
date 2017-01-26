@@ -19,3 +19,13 @@ body {
 mark {
 	background-color: #cbda00;
 }
+
+.snippet {
+	border-style: solid;
+	border-width: 1px;
+	border-color: #c4cfe5;
+	background-color: #fbfcfd;
+	padding: 4px 6px;
+	margin: 4px 8px 4px 2px;
+	font-family: monospace;
+}
