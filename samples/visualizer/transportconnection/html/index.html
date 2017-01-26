@@ -47,8 +47,7 @@ It consist of 2 <code><strong>StandardHosts</strong></code> connected to each ot
 </p>
 
 <p>
-TCP applications are set up in both hosts, and <code><strong>host1</strong></code> is configured to send TCP packets to
-<code><strong>host2</strong></code>.
+TCP applications are set up in both hosts, and <code><strong>host1</strong></code> is configured to connect to <code><strong>host2</strong></code>, and send TCP packets to it.
 The visualization of transport connections is enabled with the visualizer's <code><strong>displayTransportConnections</strong></code> parameter:
 </p>
 
@@ -63,6 +62,33 @@ When the simulation is run for a while and TCP connection is established, the ne
 </p>
 
 <img src="simpleconnection.png">
+
+<p>
+The icon representing the end-points of the TCP connection is placed above the hosts.
+</p>
+
+<h2>Advanced features of the visualization</h2>
+
+<p>
+This configuration demonstrates the visualization of multiple connections. It uses the following network:
+</p>
+
+<img src="complexnetwork.png">
+
+<p>
+There are two <code><strong>StandardHosts</strong></code> connected to a switch, which is connected via a router
+to another <code><strong>StandardHost</strong></code>, the server. The hosts are configured to connect to the
+server via TCP and send packets to it.
+</p>
+
+<pre>
+So now host2 has 2 port80 connections and host1 has 1
+
+1. figure: only the port 80 connectons are visualized. 2 for host1 and 1 for host2 and 3 for the server. portfilter = 80
+2. figure: screenshot only...set portfilter to 22. 1 connection for each host, 2 for the server.
+3. figure: screenshot only...also set nodefilter to host2. 1 connection.
+4. figure: screenshot only...display all connections. 3 for host1, 2 for host2, and 5 for the server.
+</pre>
 
 </body>
 
