@@ -29,3 +29,9 @@ mark {
 	margin: 4px 8px 4px 2px;
 	font-family: monospace;
 }
+
+var {
+	font-family: monospace;
+	font-weight: bold;
+	font-style: normal;
+}
