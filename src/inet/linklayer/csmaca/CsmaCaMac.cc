@@ -28,7 +28,7 @@ Define_Module(CsmaCaMac);
 
 static int getUPBasedFramePriority(cObject *obj)
 {
-    auto frame = check_and_cast<CsmaCaMacDataFrame*>(obj);
+    auto frame = check_and_cast<CsmaCaMacDataHeader *>(obj);
     int up = frame->getPriority();
     return (up == UP_BK) ? -2 : (up == UP_BK2) ? -1 : up;  // because UP_BE==0, but background traffic should have lower priority than best effort
 }
@@ -202,7 +202,7 @@ void CsmaCaMac::handleUpperPacket(cPacket *msg)
     }
     auto packet = check_and_cast<Packet *>(msg);
     encapsulate(packet);
-    const auto& csmaCaHeader = packet->peekHeader<CsmaCaMacFrame>();
+    const auto& csmaCaHeader = packet->peekHeader<CsmaCaMacHeader>();
     EV << "frame " << packet << " received from higher layer, receiver = " << csmaCaHeader->getReceiverAddress() << endl;
     ASSERT(!csmaCaHeader->getReceiverAddress().isUnspecified());
     transmissionQueue.insert(packet);
@@ -216,7 +216,7 @@ void CsmaCaMac::handleLowerPacket(cPacket *msg)
 {
     EV << "received message from lower layer: " << msg << endl;
 
-    CsmaCaMacFrame *frame = check_and_cast<CsmaCaMacFrame *>(msg);
+    CsmaCaMacHeader *frame = check_and_cast<CsmaCaMacHeader *>(msg);
     EV << "Self address: " << address
        << ", receiver address: " << frame->getReceiverAddress()
        << ", received frame is for us: " << isForUs(frame) << endl;
@@ -227,7 +227,7 @@ void CsmaCaMac::handleLowerPacket(cPacket *msg)
 void CsmaCaMac::handleWithFsm(cMessage *msg)
 {
     Packet *frame = check_and_cast<Packet*>(msg);
-    const auto& csmaCaHeader = frame->peekHeader<CsmaCaMacFrame>();
+    const auto& csmaCaHeader = frame->peekHeader<CsmaCaMacHeader>();
     FSMA_Switch(fsm)
     {
         FSMA_State(IDLE)
@@ -307,19 +307,19 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         {
             FSMA_Enter(sendDataFrame(getCurrentTransmission()));
             FSMA_Event_Transition(Transmit-Broadcast,
-                                  msg == endData && isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacFrame>().get()),
+                                  msg == endData && isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacHeader>().get()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSentBroadcast++;
             );
             FSMA_Event_Transition(Transmit-Unicast-No-Ack,
-                                  msg == endData && !useAck && !isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacFrame>().get()),
+                                  msg == endData && !useAck && !isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacHeader>().get()),
                                   IDLE,
                 finishCurrentTransmission();
                 numSent++;
             );
             FSMA_Event_Transition(Transmit-Unicast-Use-Ack,
-                                  msg == endData && useAck && !isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacFrame>().get()),
+                                  msg == endData && useAck && !isBroadcast(getCurrentTransmission()->peekHeader<CsmaCaMacHeader>().get()),
                                   WAITACK,
             );
         }
@@ -429,7 +429,7 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 
 void CsmaCaMac::encapsulate(Packet *packet)
 {
-    auto csmaCaMacHeader = std::make_shared<CsmaCaMacDataFrame>();
+    auto csmaCaMacHeader = std::make_shared<CsmaCaMacDataHeader>();
     csmaCaMacHeader->setChunkLength(byte(headerLength));
 
     // TODO: kludge to make isUpperMessage work
@@ -444,7 +444,7 @@ void CsmaCaMac::encapsulate(Packet *packet)
 
 void CsmaCaMac::decapsulate(Packet *packet)
 {
-    auto csmaCaMacHeader = packet->popHeader<CsmaCaMacDataFrame>();
+    auto csmaCaMacHeader = packet->popHeader<CsmaCaMacDataHeader>();
     auto addresses = packet->ensureTag<MacAddressInd>();
     addresses->setSrcAddress(csmaCaMacHeader->getTransmitterAddress());
     addresses->setDestAddress(csmaCaMacHeader->getReceiverAddress());
@@ -500,7 +500,7 @@ void CsmaCaMac::generateBackoffPeriod()
     ASSERT(0 <= retryCounter && retryCounter <= retryLimit);
     EV << "generating backoff slot number for retry: " << retryCounter << endl;
     int cw;
-    if (getCurrentTransmission()->peekHeader<CsmaCaMacFrame>()->getReceiverAddress().isMulticast())
+    if (getCurrentTransmission()->peekHeader<CsmaCaMacHeader>()->getReceiverAddress().isMulticast())
         cw = cwMulticast;
     else
         cw = std::min(cwMax, (cwMin + 1) * (1 << retryCounter) - 1);
@@ -546,9 +546,9 @@ void CsmaCaMac::sendDataFrame(Packet *frameToSend)
 void CsmaCaMac::sendAckFrame()
 {
     EV << "sending Ack frame\n";
-    auto frameToAck = static_cast<CsmaCaMacDataFrame *>(endSifs->getContextPointer());
+    auto frameToAck = static_cast<CsmaCaMacDataHeader *>(endSifs->getContextPointer());
     endSifs->setContextPointer(nullptr);
-    auto ackFrame = std::make_shared<CsmaCaMacAckFrame>();
+    auto ackFrame = std::make_shared<CsmaCaMacAckHeader>();
     ackFrame->setReceiverAddress(frameToAck->getTransmitterAddress());
     ackFrame->setChunkLength(byte(ackLength));
     ackFrame->markImmutable();
@@ -616,17 +616,17 @@ bool CsmaCaMac::isReceiving()
     return radio->getReceptionState() == IRadio::RECEPTION_STATE_RECEIVING;
 }
 
-bool CsmaCaMac::isAck(CsmaCaMacFrame *frame)
+bool CsmaCaMac::isAck(CsmaCaMacHeader *frame)
 {
-    return dynamic_cast<CsmaCaMacAckFrame *>(frame);
+    return dynamic_cast<CsmaCaMacAckHeader *>(frame);
 }
 
-bool CsmaCaMac::isBroadcast(CsmaCaMacFrame *frame)
+bool CsmaCaMac::isBroadcast(CsmaCaMacHeader *frame)
 {
     return frame->getReceiverAddress().isBroadcast();
 }
 
-bool CsmaCaMac::isForUs(CsmaCaMacFrame *frame)
+bool CsmaCaMac::isForUs(CsmaCaMacHeader *frame)
 {
     return frame->getReceiverAddress() == address;
 }

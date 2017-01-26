@@ -17,7 +17,6 @@
 
 cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/FieldsChunk.h"
 }}
 
@@ -26,18 +25,18 @@ namespace inet;
 class noncobject MACAddress;
 class FieldsChunk extends cObject;
 
-class CsmaCaMacFrame extends FieldsChunk
+class CsmaCaMacHeader extends FieldsChunk
 {
     bit chunkLength @overridegetter;
     MACAddress transmitterAddress;
     MACAddress receiverAddress;
 }
 
-class CsmaCaMacAckFrame extends CsmaCaMacFrame
+class CsmaCaMacAckHeader extends CsmaCaMacHeader
 {
 }
 
-class CsmaCaMacDataFrame extends CsmaCaMacFrame
+class CsmaCaMacDataHeader extends CsmaCaMacHeader
 {
     int priority;  // 802.1d UP (User Priority) 
 }

@@ -22,7 +22,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
-#include "inet/linklayer/csmaca/CsmaCaMacFrame_m.h"
+#include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
@@ -197,9 +197,9 @@ class INET_API CsmaCaMac : public MACProtocolBase
 
     virtual bool isMediumFree();
     virtual bool isReceiving();
-    virtual bool isAck(CsmaCaMacFrame *frame);
-    virtual bool isBroadcast(CsmaCaMacFrame *msg);
-    virtual bool isForUs(CsmaCaMacFrame *msg);
+    virtual bool isAck(CsmaCaMacHeader *frame);
+    virtual bool isBroadcast(CsmaCaMacHeader *msg);
+    virtual bool isForUs(CsmaCaMacHeader *msg);
     //@}
 };
 
