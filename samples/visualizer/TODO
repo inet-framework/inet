@@ -33,6 +33,7 @@ MediumVisualizer
 TransportConnectionVisualizer
 - Ne legyen kiírva semmi az ikonban ha csak 1 pár van az adott színből
 - Szám helyett betűk
+- a portFilter úgy tűnik hogy nem működik
 
 Propagation
 - beírni valamit az msg fileba
