@@ -129,8 +129,8 @@ const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAna
     int headerBitLength = -1;
     int dataBitLength = -1;
     if (levelOfDetail > PACKET_DOMAIN) {
-        headerBitLength = bitModel->getHeaderBitLength();
-        dataBitLength = bitModel->getPayloadBitLength();
+        headerBitLength = bit(bitModel->getHeaderLength()).get();
+        dataBitLength = bit(bitModel->getDataLength()).get();
     }
     else {
         if (isCompliant) {
@@ -250,13 +250,13 @@ const ITransmissionBitModel *Ieee80211LayeredOFDMTransmitter::createBitModel(con
         unsigned int dataBitLength = dataFieldBits->getSize();
         for (unsigned int i = 0; i < dataFieldBits->getSize(); i++)
             encodedBits->appendBit(dataFieldBits->getBit(i));
-        const TransmissionBitModel *transmissionBitModel = new TransmissionBitModel(signalBitLength, mode->getSignalMode()->getGrossBitrate(), dataBitLength, mode->getDataMode()->getGrossBitrate(), encodedBits, dataFieldBitModel->getForwardErrorCorrection(), dataFieldBitModel->getScrambling(), dataFieldBitModel->getInterleaving());
+        const TransmissionBitModel *transmissionBitModel = new TransmissionBitModel(bit(signalBitLength), mode->getSignalMode()->getGrossBitrate(), bit(dataBitLength), mode->getDataMode()->getGrossBitrate(), encodedBits, dataFieldBitModel->getForwardErrorCorrection(), dataFieldBitModel->getScrambling(), dataFieldBitModel->getInterleaving());
         delete signalFieldBitModel;
         delete dataFieldBitModel;
         return transmissionBitModel;
     }
     // TODO
-    return new TransmissionBitModel(-1, mode->getSignalMode()->getGrossBitrate(), -1, mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
+    return new TransmissionBitModel(bit(-1), mode->getSignalMode()->getGrossBitrate(), bit(-1), mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
 
 void Ieee80211LayeredOFDMTransmitter::appendPadding(BitVector *serializedPacket, unsigned int length) const

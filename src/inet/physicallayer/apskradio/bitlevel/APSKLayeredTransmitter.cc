@@ -103,22 +103,22 @@ const ITransmissionBitModel *APSKLayeredTransmitter::createBitModel(const ITrans
         return encoder->encode(packetModel);
     else {
         auto packet = packetModel->getPacket();
-        int netHeaderBitLength = bit(packet->peekHeader<APSKPhyHeader>()->getChunkLength()).get();
-        int netPayloadBitLength = packet->getByteLength() * 8 - netHeaderBitLength;
+        bit netHeaderLength = packet->peekHeader<APSKPhyHeader>()->getChunkLength();
+        bit netDataLength = packet->getPacketLength() - netHeaderLength;
         if (encoder) {
             const APSKEncoder *apskEncoder = check_and_cast<const APSKEncoder *>(encoder);
             const ConvolutionalCode *forwardErrorCorrection = apskEncoder->getCode()->getConvolutionalCode();
             if (forwardErrorCorrection == nullptr)
-                return new TransmissionBitModel(netHeaderBitLength, bitrate, netPayloadBitLength, bitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
+                return new TransmissionBitModel(netHeaderLength, bitrate, netDataLength, bitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             else {
-                int grossHeaderBitLength = forwardErrorCorrection->getEncodedLength(netHeaderBitLength);
-                int grossPayloadBitLength = forwardErrorCorrection->getEncodedLength(netPayloadBitLength);
+                bit grossHeaderLength = bit(forwardErrorCorrection->getEncodedLength(bit(netHeaderLength).get()));
+                bit grossDataLength = bit(forwardErrorCorrection->getEncodedLength(bit(netDataLength).get()));
                 bps grossBitrate = bitrate / forwardErrorCorrection->getCodeRate();
-                return new TransmissionBitModel(grossHeaderBitLength, grossBitrate, grossPayloadBitLength, grossBitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
+                return new TransmissionBitModel(grossHeaderLength, grossBitrate, grossDataLength, grossBitrate, nullptr, forwardErrorCorrection, nullptr, nullptr);
             }
         }
         else
-            return new TransmissionBitModel(netHeaderBitLength, bitrate, netPayloadBitLength, bitrate, nullptr, nullptr, nullptr, nullptr);
+            return new TransmissionBitModel(netHeaderLength, bitrate, netDataLength, bitrate, nullptr, nullptr, nullptr, nullptr);
     }
 }
 

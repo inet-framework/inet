@@ -36,7 +36,7 @@ void IdealRadio::encapsulate(Packet *packet) const
 {
     auto idealTransmitter = check_and_cast<const IdealTransmitter *>(transmitter);
     auto phyHeader = std::make_shared<IdealPhyHeader>();
-    phyHeader->setChunkLength(byte((idealTransmitter->getHeaderBitLength() + 7) / 8));
+    phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
 }

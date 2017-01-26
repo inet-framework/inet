@@ -67,8 +67,8 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISNIR *snir, IR
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
     double bitrate = flatTransmission->getBitrate().get();
     double minSNIR = snir->getMin();
-    int payloadBitLength = flatTransmission->getDataBitLength();
-    return berTableFile->getPer(bitrate, minSNIR, payloadBitLength / 8);
+    bit dataLength = flatTransmission->getDataLength();
+    return berTableFile->getPer(bitrate, minSNIR, byte(dataLength).get());
 }
 
 double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const

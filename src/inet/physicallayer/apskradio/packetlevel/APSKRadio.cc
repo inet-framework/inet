@@ -51,7 +51,7 @@ void APSKRadio::encapsulate(Packet *packet) const
     // KLUDGE:
     auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter);
     if (flatTransmitter != nullptr) {
-        phyHeader->setChunkLength(byte((flatTransmitter->getHeaderBitLength() + 7) / 8));
+        phyHeader->setChunkLength(byte(flatTransmitter->getHeaderLength()));
         modulation = check_and_cast<const APSKModulationBase *>(flatTransmitter->getModulation());
     }
     // KLUDGE:

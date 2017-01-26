@@ -68,7 +68,7 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
 {
     auto packet = packetModel->getPacket();
     const auto& bytesChunk = packet->peekAt<BytesChunk>(bit(0), packet->getPacketLength());
-    auto bitLength = bit(bytesChunk->getChunkLength()).get();
+    auto bitLength = bytesChunk->getChunkLength();
     BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
     const IScrambling *scrambling = nullptr;
     if (scrambler) {
@@ -88,13 +88,13 @@ const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel 
         interleaving = interleaver->getInterleaving();
         EV_DEBUG << "Interleaved bits are: " << *encodedBits << endl;
     }
-    int netHeaderBitLength = APSK_PHY_HEADER_BYTE_LENGTH * 8;
+    bit netHeaderLength = byte(APSK_PHY_HEADER_BYTE_LENGTH);
     if (forwardErrorCorrection == nullptr)
-        return new TransmissionBitModel(netHeaderBitLength, packetModel->getBitrate(), bitLength - netHeaderBitLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(netHeaderLength, packetModel->getBitrate(), bitLength - netHeaderLength, packetModel->getBitrate(), encodedBits, forwardErrorCorrection, scrambling, interleaving);
     else {
-        int grossHeaderBitLength = forwardErrorCorrection->getEncodedLength(netHeaderBitLength);
+        bit grossHeaderLength = bit(forwardErrorCorrection->getEncodedLength(bit(netHeaderLength).get()));
         bps grossBitrate = packetModel->getBitrate() / forwardErrorCorrection->getCodeRate();
-        return new TransmissionBitModel(grossHeaderBitLength, grossBitrate, bitLength - grossHeaderBitLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
+        return new TransmissionBitModel(grossHeaderLength, grossBitrate, bitLength - grossHeaderLength, grossBitrate, encodedBits, forwardErrorCorrection, scrambling, interleaving);
     }
 }
 

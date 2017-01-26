@@ -41,13 +41,13 @@ std::ostream& APSKScalarTransmitter::printToStream(std::ostream& stream, int lev
 const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<APSKPhyHeader>();
-    auto dataBitLength = (packet->getPacketLength() - phyHeader->getChunkLength()).get();
+    auto dataLength = packet->getPacketLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);
     Hz transmissionBandwidth = computeBandwidth(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);
-    const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
-    const simtime_t dataDuration = dataBitLength / transmissionBitrate.get();
+    const simtime_t headerDuration = bit(headerLength).get() / bps(transmissionBitrate).get();
+    const simtime_t dataDuration = bit(dataLength).get() / bps(transmissionBitrate).get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
@@ -55,7 +55,7 @@ const ITransmission *APSKScalarTransmitter::createTransmission(const IRadio *tra
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, packet->getBitLength(), transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
+    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

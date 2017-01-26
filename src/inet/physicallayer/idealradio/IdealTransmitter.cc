@@ -28,7 +28,7 @@ namespace physicallayer {
 Define_Module(IdealTransmitter);
 
 IdealTransmitter::IdealTransmitter() :
-    headerBitLength(-1),
+    headerLength(bit(-1)),
     bitrate(NaN),
     communicationRange(NaN),
     interferenceRange(NaN),
@@ -40,7 +40,7 @@ void IdealTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         preambleDuration = par("preambleDuration");
-        headerBitLength = par("headerBitLength");
+        headerLength = bit(par("headerBitLength"));
         bitrate = bps(par("bitrate"));
         communicationRange = m(par("communicationRange"));
         interferenceRange = m(par("interferenceRange"));
@@ -53,7 +53,7 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
     stream << "IdealTransmitter";
     if (level <= PRINT_LEVEL_TRACE)
         stream << ", preambleDuration = " << preambleDuration
-               << ", headerBitLength = " << headerBitLength
+               << ", headerLength = " << headerLength
                << ", bitrate = " << bitrate;
     if (level <= PRINT_LEVEL_INFO)
         stream << ", communicationRange = " << communicationRange;
@@ -66,11 +66,11 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<IdealPhyHeader>();
-    auto dataBitLength = bit(packet->getPacketLength() - phyHeader->getChunkLength()).get();
+    auto dataLength = packet->getPacketLength() - phyHeader->getChunkLength();
     auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
-    auto headerDuration = headerBitLength / transmissionBitrate.get();
-    auto dataDuration = dataBitLength / transmissionBitrate.get();
+    auto headerDuration = bit(headerLength).get() / bps(transmissionBitrate).get();
+    auto dataDuration = bit(dataLength).get() / bps(transmissionBitrate).get();
     auto duration = preambleDuration + headerDuration + dataDuration;
     auto endTime = startTime + duration;
     auto mobility = transmitter->getAntenna()->getMobility();

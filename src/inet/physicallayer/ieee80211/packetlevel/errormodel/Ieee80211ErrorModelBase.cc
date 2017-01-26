@@ -34,8 +34,8 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadio
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
     const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
     const IIeee80211Mode *mode = ieee80211Transmission->getMode();
-    double headerSuccessRate = getHeaderSuccessRate(mode, flatTransmission->getHeaderBitLength(), snir->getMin());
-    double dataSuccessRate = getDataSuccessRate(mode, flatTransmission->getDataBitLength(), snir->getMin());
+    double headerSuccessRate = getHeaderSuccessRate(mode, bit(flatTransmission->getHeaderLength()).get(), snir->getMin());
+    double dataSuccessRate = getDataSuccessRate(mode, bit(flatTransmission->getDataLength()).get(), snir->getMin());
     switch (part) {
         case IRadioSignal::SIGNAL_PART_WHOLE:
             return 1.0 - headerSuccessRate * dataSuccessRate;

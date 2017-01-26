@@ -155,7 +155,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createCompleteBitModel(c
         const BitVector *dataBits = dataFieldBitModel->getBits();
         for (unsigned int i = 0; i < dataBits->getSize(); i++)
             bits->appendBit(dataBits->getBit(i));
-        return new ReceptionBitModel(signalFieldBitModel->getHeaderBitLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getPayloadBitLength(), dataFieldBitModel->getPayloadBitRate(), bits);
+        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits);
     }
     return nullptr;
 }
@@ -273,7 +273,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createSignalFieldBitMode
         const BitVector *bits = bitModel->getBits();
         for (unsigned int i = 0; i < signalFieldLength; i++)
             signalFieldBits->appendBit(bits->getBit(i));
-        signalFieldBitModel = new ReceptionBitModel(signalFieldLength, bitModel->getHeaderBitRate(), -1, bps(NaN), signalFieldBits);
+        signalFieldBitModel = new ReceptionBitModel(bit(signalFieldLength), bitModel->getHeaderBitRate(), bit(-1), bps(NaN), signalFieldBits);
     }
     return signalFieldBitModel;
 }
@@ -314,13 +314,13 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
 //        ASSERT(dataFieldLengthInBits % convolutionalCode->getCodeRatePuncturingK() == 0);
         unsigned int encodedDataFieldLengthInBits = dataFieldLengthInBits * codeRate;
         const BitVector *bits = bitModel->getBits();
-        unsigned int encodedSignalFieldLength = signalFieldBitModel->getHeaderBitLength();
+        unsigned int encodedSignalFieldLength = bit(signalFieldBitModel->getHeaderLength()).get();
         if (dataFieldLengthInBits + encodedSignalFieldLength > bits->getSize())
             throw cRuntimeError("The calculated data field length = %d is greater then the actual bitvector length = %d", dataFieldLengthInBits, bits->getSize());
         BitVector *dataBits = new BitVector();
         for (unsigned int i = 0; i < encodedDataFieldLengthInBits; i++)
             dataBits->appendBit(bits->getBit(encodedSignalFieldLength + i));
-        dataFieldBitModel = new ReceptionBitModel(-1, bps(NaN), encodedDataFieldLengthInBits, bitModel->getPayloadBitRate(), dataBits);
+        dataFieldBitModel = new ReceptionBitModel(bit(-1), bps(NaN), bit(encodedDataFieldLengthInBits), bitModel->getDataBitRate(), dataBits);
     }
     return dataFieldBitModel;
 }

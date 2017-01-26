@@ -42,8 +42,8 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
 {
     W transmissionPower = computeTransmissionPower(packet);
     bps transmissionBitrate = computeTransmissionDataBitrate(packet);
-    const simtime_t headerDuration = headerBitLength / transmissionBitrate.get();
-    const simtime_t dataDuration = packet->getBitLength() / transmissionBitrate.get();
+    const simtime_t headerDuration = bit(headerLength).get() / bps(transmissionBitrate).get();
+    const simtime_t dataDuration = bit(packet->getPacketLength()).get() / bps(transmissionBitrate).get();
     const simtime_t duration = preambleDuration + headerDuration + dataDuration;
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
@@ -51,7 +51,7 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, packet->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
+    return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, packet->getPacketLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
 }
 
 } // namespace physicallayer

@@ -133,7 +133,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 {
     auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
     auto phyHeader = std::make_shared<Ieee80211PhyHeader>();
-    phyHeader->setChunkLength(byte((ieee80211Transmitter->getHeaderBitLength() + 7) / 8));
+    phyHeader->setChunkLength(byte(ieee80211Transmitter->getHeaderLength()));
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
 }

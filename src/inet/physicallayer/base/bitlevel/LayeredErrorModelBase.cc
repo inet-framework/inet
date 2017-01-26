@@ -45,14 +45,14 @@ const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTr
 {
     const TransmissionBitModel *transmissionBitModel = check_and_cast<const TransmissionBitModel *>(transmission->getBitModel());
     if (bitErrorRate == 0)
-        return new const ReceptionBitModel(transmissionBitModel->getHeaderBitLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getPayloadBitLength(), transmissionBitModel->getPayloadBitRate(), new BitVector(*transmissionBitModel->getBits()));
+        return new const ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), new BitVector(*transmissionBitModel->getBits()));
     else {
         BitVector *receivedBits = new BitVector(*transmissionBitModel->getBits());
         for (unsigned int i = 0; i < receivedBits->getSize(); i++) {
             if (uniform(0, 1) < bitErrorRate)
                 receivedBits->toggleBit(i);
         }
-        return new const ReceptionBitModel(transmissionBitModel->getHeaderBitLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getPayloadBitLength(), transmissionBitModel->getPayloadBitRate(), receivedBits);
+        return new const ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), receivedBits);
     }
 }
 
