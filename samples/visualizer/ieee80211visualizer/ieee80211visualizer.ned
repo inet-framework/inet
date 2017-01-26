@@ -100,3 +100,24 @@ network Ieee80211visualizerC
             @display("p=100,150");
         }
 }
+
+network adhocinfrastructure
+{
+    @display("bgb=644,401");
+    submodules:
+        wirelessHost: WirelessHost {
+            @display("p=153,201");
+        }
+        wirelessHost1: WirelessHost {
+            @display("p=387,198");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=563,59");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=563,125");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=553,198");
+        }
+}

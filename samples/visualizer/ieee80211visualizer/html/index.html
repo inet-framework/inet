@@ -1,0 +1,65 @@
+<!DOCTYPE=html>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../samples.css">
+<title>IEEE 802.11 Visualization Example</title>
+</head>
+
+<body>
+
+<h1><center>IEEE 802.11 Visualization Example</center></h1>
+
+<h2>Goals</h2>
+
+<pre>
+So why is this good?
+
+Because of convenience, like the others. You have to drill down in the inspector windows to find the information.
+The information of which nodes are connected to which access points. Which access points create which wifi networks.
+What is the ssid. If two APs have the same ssid, are the colored the same or differently ?
+They are colored the same.
+
+They also give information about the signal strength. Nothing can do that i think.
+Maybe the propagation visualizer.
+
+But. This is good because it gives some information in infrastructure mode only.
+
+Because there is no association in adhoc mode.
+
+But. Any device can create infrastructure mode wifi...my phone can create it...but normally it functions as a STA
+not an AP. I guess an AdhocHost can do that...just need to set the mgmt type to AP
+
+It works
+</pre>
+
+<p>
+This example demonstrates the visualization of the association states of 802.11 wireless nodes.
+Visualizing the association states of nodes can give 
+</p>
+
+<p>
+This example demonstrates the visualization of the association states and signal strengths in 802.11 infrastructure mode wireless networks.
+Visualizing these gives an overview about wireless network signal quality and the associated nodes. It is very conventient to get this information
+just by looking at the network, without needing to dig deep in the inspector windows of various nodes.
+</p>
+
+<h2>About the visualizer</h2>
+
+<p>
+The <var>Ieee80211Visualizer</var> displays a wifi network symbol above network nodes when they are associated with a wireless network.
+This icon indicates the SSID of the network the given node is connected to. The icons for networks with different SSID's are colored differently.
+The icon is also displayed above nodes that create the networks, e.g. access points. The icon also indicates the signal strength present at the
+location of a given node. TODO: how is it indicated? and how does it work?
+</p>
+
+<p>
+The visualizer's <var>nodeFilter</var> parameter selects which nodes' association states are visualized. The <var>interfaceFilter</var> parameter
+selects which interfaces are considered in the visualization. By default, all interfaces of all nodes are considered.
+</p>
+
+<h2>Displaying associations</h2>
+
+</body>
+
+</html>
