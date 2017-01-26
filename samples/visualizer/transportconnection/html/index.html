@@ -19,16 +19,16 @@ the number of connections in certain nodes and the whole network. This example d
 
 <p>
 The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration
-showcases a more advanced use-case.
+showcases a more advanced use-case. TODO: The second, more complex configuration shows the more advanced features.
 </p>
 
 <h2>About the visualizer</h2>
 
 <p>
 The <code><strong>TransportConnectionVisualizer</strong></code> displays an icon above the two end-hosts of an active, established transport layer level connection. It reacts to changes
-in the state of the connection. It places the icon when the connection is established, and removes it when the connection is closed. The icons are color coded, denoting different connections. Should there be more connections than available colors,
-a number in the icon helps differentiate between connections with the same colored icon. Naturally, there can be multiple connections
-open at a node, thus multiple icons.
+in the state of the connection. It places the icon when the connection is established, and removes it when it is closed. The icons are color coded, denoting different connections. Should there be more connections than available colors,
+a number in the icon helps differentiate between connections with the same icon color. Naturally, there can be multiple connections
+open at a node, thus there can be multiple icons.
 </p>
 
 <p>
@@ -43,8 +43,26 @@ This configuration uses the following simple network:
 <img src="simplenetwork.png">
 
 <p>
-It consist of 2 <code><strong>StandardHosts</strong></code> connected by a 100Mbit/s ethernet cable. It also contains a <code><strong>IPv4NetworkConfigurator</strong></code> and a <code><strong>TransportConnectionVisualizer</strong></code> module.
+It consist of 2 <code><strong>StandardHosts</strong></code> connected to each other. It also contains a <code><strong>IPv4NetworkConfigurator</strong></code> and a <code><strong>TransportConnectionVisualizer</strong></code> module.
 </p>
+
+<p>
+TCP applications are set up in both hosts, and <code><strong>host1</strong></code> is configured to send TCP packets to
+<code><strong>host2</strong></code>.
+The visualization of transport connections is enabled with the visualizer's <code><strong>displayTransportConnections</strong></code> parameter:
+</p>
+
+<div class="snippet">
+*.visualizer.*.transportConnectionVisualizer.displayTransportConnections = true
+</div>
+
+<p>TODO: include this in the routingtable sample</p>
+
+<p>
+When the simulation is run for a while and TCP connection is established, the network looks like this:
+</p>
+
+<img src="simpleconnection.png">
 
 </body>
 
