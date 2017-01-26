@@ -216,9 +216,6 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
         }
     }
 
-    // hop counter decrement
-    datagram->setTimeToLive(datagram->getTimeToLive() - 1);
-
     EV_DETAIL << "Received datagram `" << datagram->getName() << "' with dest=" << datagram->getDestAddress() << "\n";
 
     const InterfaceEntry *destIE = nullptr;
@@ -266,12 +263,13 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             EV_WARN << "Skip forwarding of multicast datagram (packet is link-local)\n";
             delete packet;
         }
-        else if (datagram->getTimeToLive() == 0) {
+        else if (datagram->getTimeToLive() <= 1) {      // TTL before decrement
             EV_WARN << "Skip forwarding of multicast datagram (TTL reached 0)\n";
             delete packet;
         }
         else {
             auto newHeader = std::static_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
+            newHeader->setTimeToLive(newHeader->getTimeToLive() - 1);
             // needed a mutable copy for forwarding
             forwardMulticastPacket(toMutable(packet), newHeader, fromIE);
         }
@@ -289,6 +287,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
                 auto packet2 = packet->dup();
                 auto newHeader = std::static_pointer_cast<IPv4Header>(packet2->popHeader<IPv4Header>()->dupShared());
+                newHeader->setTimeToLive(newHeader->getTimeToLive() - 1);
                 // needed a mutable copy for forwarding
                 fragmentPostRouting(toMutable(packet2), newHeader, broadcastIE, IPv4Address::ALLONES_ADDRESS);
             }
@@ -304,6 +303,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else {
             auto newHeader = std::static_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
             // needed a mutable copy for forwarding
+            newHeader->setTimeToLive(newHeader->getTimeToLive() - 1);
             routeUnicastPacket(toMutable(packet), newHeader, fromIE, destIE, nextHopAddr);
         }
     }
