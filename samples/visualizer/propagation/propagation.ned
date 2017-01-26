@@ -17,16 +17,16 @@ network PropagationA
     @display("bgb=920,566");
     submodules:
         host2: WirelessHost {
-            @display("p=441,272");
+            @display("p=645.645,270.27");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=761,99");
+            @display("p=853.545,46.2");
         }
         visualizer: IntegratedVisualizer {
-            @display("p=764,163");
+            @display("p=853.545,123.585");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=768,223");
+            @display("p=852.39,204.435");
         }
         host1: WirelessHost {
             @display("p=179,271");
