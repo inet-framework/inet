@@ -35,8 +35,6 @@ network Ieee80211visualizerA
 
 network Ieee80211visualizerB
 {
-    parameters:
-        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
