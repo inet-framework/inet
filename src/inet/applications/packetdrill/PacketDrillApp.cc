@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "PacketDrillApp.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -22,7 +24,6 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "PacketDrillUtils.h"
-#include "PacketDrillApp.h"
 #include "PacketDrillInfo_m.h"
 #include "inet/transportlayer/udp/UDPPacket_m.h"
 #include "inet/networklayer/ipv4/IPv4Datagram_m.h"
