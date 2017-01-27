@@ -60,6 +60,42 @@ selects which interfaces are considered in the visualization. By default, all in
 
 <h2>Displaying associations</h2>
 
+<p>
+This configuration demonstrates the visualization with the default visualizer settings. It uses this simple network:
+</p>
+
+<img src="simplenetwork.png">
+
+<p>
+It contains a <var>WirelessHost</var> and an <var>AccessPoint</var>. Additionally, there is an <var>IPv4NetworkConfigurator</var>, 
+an <var>Ieee80211Visualizer</var> and a <var>Ieee80211ScalarRadioMedium</var> module. TODO: replace Integrated with Ieee80211Visualizer
+</p>
+
+<p>
+The visualization is activated with the visualizer's <i>displayAssociations</i> parameter:
+</p>
+
+<div class="snippet">
+*.visualizer.*.ieee80211Visualizer.displayAssociations = true
+</div>
+
+<p>
+When the simulation is run, and the host has been associated to the access point, the network looks like this:
+</p>
+
+<img src="displayassoc.png">
+
+<p>
+The wifi icon is placed above the host and the access point. The default SSID of the access point is left on default,
+which is 'SSID'. This is displayed with the icon.
+</p>
+
+<h2>Advanced features</h2>
+
+
+
+
+
 </body>
 
 </html>
