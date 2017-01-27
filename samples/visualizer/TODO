@@ -47,3 +47,6 @@ Ieee80211
 - ez legyen kikapcsolható
 - lehessen felsorolni a színeket
 - dark/light colors
+
+InfoVisualizer
+- Amikor a statistic value-ja 0, akkor '-' van kiírva
