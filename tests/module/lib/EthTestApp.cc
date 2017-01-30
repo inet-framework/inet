@@ -19,6 +19,8 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/common/MACAddress.h"
 
@@ -56,9 +58,16 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
 {
     char name[100];
     sprintf(name, "PK at %s: %i Bytes", SIMTIME_STR(t), bytes);
-    EtherFrame *packet = new EtherFrame(name);
-    packet->setByteLength(bytes);
-    packet->setDest(destAddr);
+    Packet *packet = new Packet(name);
+    const auto& hdr = std::make_shared<EtherFrame>();
+    hdr->setDest(destAddr);
+    hdr->setChunkLength(byte(14));
+    hdr->markImmutable();
+    packet->prepend(hdr);
+    const auto& payload = std::make_shared<ByteCountChunk>(byte(bytes-14));
+    payload->markImmutable();
+    packet->append(payload);
+    ASSERT(packet->getByteLength() == bytes);
     //TODO set packet->destAddr
     scheduleAt(t, packet);
 }
