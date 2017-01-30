@@ -29,11 +29,12 @@ MediumVisualizer
 - ha NaN az animation speed akkor legyen valami automatic value (legyen ez a default?)
 - a fade legyen aranyos az automatic-hoz, ha az van megadva
 - add associated object for signals
+- signal power for transmissions and receptions
 
 TransportConnectionVisualizer
 - Ne legyen kiírva semmi az ikonban ha csak 1 pár van az adott színből
 - Szám helyett betűk
-- a portFilter úgy tűnik hogy nem működik
+- portFilter egyszerre szűr local és remote portra
 
 Propagation
 - beírni valamit az msg fileba
@@ -50,3 +51,10 @@ Ieee80211
 
 InfoVisualizer
 - Amikor a statistic value-ja 0, akkor '-' van kiírva
+- when content = "str" some strange symbols appear
+
+StatisticVisualizer
+- Kicsi egész számoknál scientific notation-t használ
+
+ObstacleLossVisualizer
+- Az intersectionnél ki lehetne írni hogy hány dB-el csökkent a jel
