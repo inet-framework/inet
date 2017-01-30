@@ -36,6 +36,6 @@ network InfoVisualizationExampleB extends InfoVisualizationExample
 {
     submodules:
         relay: AdhocHost {
-            @display("p=448,200");
+            @display("p=447,143");
         }
 }
