@@ -428,6 +428,7 @@ CsmaCaMacDataFrame *CsmaCaMac::encapsulate(cPacket *msg)
     frame->setReceiverAddress(ctrl->getDest());
     int up = ctrl->getUserPriority();
     frame->setPriority(up == -1 ? UP_BE : up);  // -1 is unset
+    frame->setNetworkProtocol(ctrl->getNetworkProtocol());
     delete ctrl;
 
     frame->encapsulate(msg);
@@ -442,6 +443,8 @@ cPacket *CsmaCaMac::decapsulate(CsmaCaMacDataFrame *frame)
     ctrl->setSrc(frame->getTransmitterAddress());
     ctrl->setDest(frame->getReceiverAddress());
     ctrl->setUserPriority(frame->getPriority());
+    ctrl->setNetworkProtocol(frame->getNetworkProtocol());
+    ctrl->setInterfaceId(interfaceEntry->getInterfaceId());
     payload->setControlInfo(ctrl);
 
     delete frame;

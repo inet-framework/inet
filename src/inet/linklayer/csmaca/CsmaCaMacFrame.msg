@@ -36,4 +36,5 @@ packet CsmaCaMacAckFrame extends CsmaCaMacFrame
 packet CsmaCaMacDataFrame extends CsmaCaMacFrame
 {
     int priority;  // 802.1d UP (User Priority) 
+    int networkProtocol = -1;
 }
