@@ -76,7 +76,7 @@ The icon representing the end-points of the TCP connection is placed above the h
 <h2>Advanced features of the visualization</h2>
 
 <p>
-This configuration demonstrates the visualization of multiple connections. It uses the following network:
+This configuration demonstrates the visualization of multiple connections, and filtering nodes and ports. It uses the following network:
 </p>
 
 <img src="complexnetwork.png">
@@ -107,6 +107,34 @@ When the simulation is run and the connections are established, the network look
 </p>
 
 <img src="port80.png">
+
+<p>
+A node can have multiple connections. Here, <var>host1</var> has two, and <var>server</var> has 3.
+Thus there are multiple icons placed above each other at these hosts. Connections can be differentiated
+by their icon color.
+</p>
+
+<p>
+To visualize the connections that use port 22 at the server, the <var>portFilter</var> is set to 22. The
+network would look like this:
+</p>
+
+<img src="port22.png">
+
+<p>
+To visualize connections at <var>host2</var> only, the <var>nodeFilter</var> parameter is set to <var>host2</var>.
+It would look like this:
+</p>
+
+<p>TODO: img</p>
+
+<p>
+When both filters are set to "*" (their default), all 5 connections are visualized:
+</p>
+
+<img src="all.png">
+
+<p>TODO: screenshot where there are 2 colors and numbers</p>
 
 <pre>
 So now host2 has 2 port80 connections and host1 has 1
