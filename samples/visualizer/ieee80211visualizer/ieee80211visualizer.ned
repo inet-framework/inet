@@ -35,6 +35,7 @@ network Ieee80211visualizerA
 
 network Ieee80211visualizerB
 {
+    @display("bgb=574,468");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
@@ -58,19 +59,19 @@ network Ieee80211visualizerB
         }
         hostA1: WirelessHost {
             parameters:
-                @display("p=300,150");
+                @display("p=300,249");
         }
         hostA2: WirelessHost {
             parameters:
-                @display("p=300,250");
+                @display("p=300,349");
         }
         hostB1: WirelessHost {
             parameters:
-                @display("p=500,150");
+                @display("p=500,249");
         }
         hostB2: WirelessHost {
             parameters:
-                @display("p=500,250");
+                @display("p=500,349");
         }
         physicalEnvironment: PhysicalEnvironment {
             @display("p=100,250");
