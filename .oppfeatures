@@ -791,7 +791,6 @@
                        inet.examples.adhoc
                        inet.examples.neighborcache
                        inet.examples.wireless
-                       inet.tutorials.wireless
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -1108,6 +1107,30 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_CSMACA"
+        linkerFlags = ""
+        />
+    <feature
+        id="wirelesstutorial"
+        name="Wireless tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
+        initiallyEnabled = "true"
+        requires = "physicalenvironment apskradio idealwireless Ieee80211 IPv4 UDP AODV"
+        labels = ""
+        nedPackages = "inet.tutorials.wireless"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="visualizationtutorial"
+        name="Visualization tutorial"
+        description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to visualizing state and behavior of communication networks."
+        initiallyEnabled = "true"
+        requires = "visualization physicalenvironment Ieee80211 IPv4 AODV"
+        labels = ""
+        nedPackages = "inet.tutorials.visualization"
+        extraSourceFolders = ""
+        compileFlags = ""
         linkerFlags = ""
         />
 </features>
