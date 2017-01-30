@@ -65,6 +65,8 @@ void MACRelayUnit::handleMessage(cMessage *msg)
 
 void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const std::shared_ptr<EtherFrame>& frame)
 {
+    //FIXME : should handle multicast mac addresses correctly
+
     int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     numProcessedFrames++;
