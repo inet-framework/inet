@@ -84,7 +84,7 @@
         name="INET examples"
         description = "Examples for basic internet protocols (IPv4, TCP, UDP)"
         initiallyEnabled = "true"
-        requires = "IPv4 TCP_INET UDP Ethernet PPP"
+        requires = "IPv4 TCP_INET UDP Ethernet PPP Ieee80211"
         labels = "protocols examples"
         nedPackages = "
                        inet.examples.inet
@@ -518,7 +518,7 @@
         name="DYMO"
         description = "Dynamic MANET On-demand Routing"
         initiallyEnabled = "true"
-        requires = "UDP IPv4 Ieee80211"
+        requires = "UDP IPv4 Ieee80211 MultiNet"
         labels = "routing"
         nedPackages = "
                        inet.routing.dymo
@@ -562,7 +562,7 @@
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
         initiallyEnabled = "true"
-        requires = "UDP IPv4"
+        requires = "UDP IPv4 MultiNet"
         labels = "routing"
         nedPackages = "
                        inet.routing.gpsr
@@ -592,7 +592,7 @@
         name="RIP examples"
         description = "Routing Information Protocol examples"
         initiallyEnabled = "true"
-        requires = "UDP IPv4 RIP"
+        requires = "UDP IPv4 RIP IPv6 Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.rip
@@ -607,7 +607,7 @@
         description = "Examples for the MANET routing protocols"
         initiallyEnabled = "true"
         requires = "TCP_INET UDP IPv4 DYMO GPSR"
-        labels = "routing manet examples"
+        labels = "routing manet examples MultiNet"
         nedPackages = "
                        inet.examples.manetrouting
                       "
@@ -665,7 +665,7 @@
         id="physicalenvironment_examples"
         name="Physical environment examples"
         description = "Physical environment examples"
-        requires = ""
+        requires = "physicalenvironment IPv4 Ieee80211"
         labels = ""
         nedPackages = "
                        inet.examples.objectcache
@@ -738,7 +738,7 @@
         name="IEEE 802.15.4"
         description = "Provides IEEE 802.15.4 Narrowband and Ultra-Wideband NICs"
         initiallyEnabled = "true"
-        requires = "mobility radio CSMA"
+        requires = "mobility radio apskradio CSMA idealwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee802154
