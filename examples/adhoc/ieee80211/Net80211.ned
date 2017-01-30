@@ -21,14 +21,14 @@ package inet.examples.adhoc.ieee80211;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 network Net80211
 {
     parameters:
         int numHosts;
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
                 @display("p=100,50");
         }

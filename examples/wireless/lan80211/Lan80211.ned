@@ -22,7 +22,7 @@ import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 network Lan80211
 {
@@ -30,7 +30,7 @@ network Lan80211
         int numHosts;
         **.mgmt.numChannels = 2;
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
                 @display("p=100,50");
         }

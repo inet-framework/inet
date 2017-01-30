@@ -19,7 +19,7 @@ import inet.common.figures.DelegateSignalConfigurator;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.INetworkNode;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 
 network WirelessA
@@ -37,7 +37,7 @@ network WirelessA
         @delegatesignal[rcvdPk](source=hostB.udpApp[0].rcvdPk; target=hostB_rcvdPk);
 
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             @display("p=580,125");
         }
         configurator: IPv4NetworkConfigurator {

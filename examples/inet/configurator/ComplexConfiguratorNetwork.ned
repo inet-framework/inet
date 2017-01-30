@@ -23,7 +23,7 @@ import inet.node.ethernet.Eth1G;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 
 network ComplexConfiguratorNetwork
@@ -31,7 +31,7 @@ network ComplexConfiguratorNetwork
     parameters:
         @display("bgb=1138,534");
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
                 @display("p=200,50");
         }
