@@ -64,7 +64,7 @@
     <feature enabled="false" id="DiffServ_examples"/>
     <feature enabled="false" id="InternetCloud"/>
     <feature enabled="false" id="InternetCloud_examples"/>
-    <feature enabled="false" id="Ieee8021d"/>
+    <feature enabled="true" id="Ieee8021d"/>
     <feature enabled="false" id="Ieee8021d_examples"/>
     <feature enabled="false" id="TUN"/>
     <feature enabled="false" id="packetdrill"/>
