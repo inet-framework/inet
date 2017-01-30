@@ -22,6 +22,8 @@
 #define __INET_STP_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
@@ -73,13 +75,13 @@ class INET_API STP : public STPBase
     /*
      * Bridge Protocol Data Unit handling
      */
-    void handleBPDU(BPDU *bpdu);
+    void handleBPDU(Packet *packet, const std::shared_ptr<BPDU>& bpdu);
     virtual void initInterfacedata(unsigned int interfaceId);
 
     /**
      * Topology change handling
      */
-    void handleTCN(BPDU *tcn);
+    void handleTCN(Packet *packet, const std::shared_ptr<BPDU>& tcn);
     virtual void handleMessage(cMessage *msg) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

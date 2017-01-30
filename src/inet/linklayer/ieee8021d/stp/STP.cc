@@ -23,7 +23,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -67,19 +67,14 @@ void STP::handleMessage(cMessage *msg)
         return;
     }
 
-    cMessage *tmp = msg;
-
     if (!msg->isSelfMessage()) {
-        if (dynamic_cast<BPDU *>(tmp)) {
-            BPDU *bpdu = (BPDU *)tmp;
+        Packet *packet = check_and_cast<Packet*>(msg);
+        const auto& bpdu = CHK(packet->peekHeader<BPDU>());
 
-            if (bpdu->getBpduType() == CONFIG_BDPU)
-                handleBPDU(bpdu);
-            else if (bpdu->getBpduType() == TCN_BPDU)
-                handleTCN(bpdu);
-        }
-        else
-            throw cRuntimeError("Non-BPDU packet received");
+        if (bpdu->getBpduType() == CONFIG_BDPU)
+            handleBPDU(packet, bpdu);
+        else if (bpdu->getBpduType() == TCN_BPDU)
+            handleTCN(packet, bpdu);
     }
     else {
         if (msg == tick) {
@@ -91,9 +86,9 @@ void STP::handleMessage(cMessage *msg)
     }
 }
 
-void STP::handleBPDU(BPDU *bpdu)
+void STP::handleBPDU(Packet *packet, const std::shared_ptr<BPDU>& bpdu)
 {
-    int arrivalGate = bpdu->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int arrivalGate = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalGate);
 
     if (bpdu->getTcaFlag()) {
@@ -102,7 +97,7 @@ void STP::handleBPDU(BPDU *bpdu)
     }
 
     // get inferior BPDU, reply with superior
-    if (!isSuperiorBPDU(arrivalGate, bpdu)) {
+    if (!isSuperiorBPDU(arrivalGate, bpdu.get())) {
         if (port->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
             EV_DETAIL << "Inferior Configuration BPDU " << bpdu << " arrived on port=" << arrivalGate << " responding to it with a superior BPDU." << endl;
             generateBPDU(arrivalGate);
@@ -132,42 +127,41 @@ void STP::handleBPDU(BPDU *bpdu)
     }
 
     tryRoot();
-    delete bpdu;
+    delete packet;
 }
 
-void STP::handleTCN(BPDU *tcn)
+void STP::handleTCN(Packet *packet, const std::shared_ptr<BPDU>& tcn)
 {
     EV_INFO << "Topology Change Notification BDPU " << tcn << " arrived." << endl;
     topologyChangeNotification = true;
 
-    int arrivalGate = tcn->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    MacAddressInd *addressInd = tcn->removeMandatoryTag<MacAddressInd>();
+    int arrivalGate = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    MacAddressInd *addressInd = packet->getMandatoryTag<MacAddressInd>();
     MACAddress srcAddress = addressInd->getSrcAddress();
     MACAddress destAddress = addressInd->getDestAddress();
-    delete addressInd;
 
     // send ACK to the sender
     EV_INFO << "Sending Topology Change Notification ACK." << endl;
     generateBPDU(arrivalGate, srcAddress, false, true);
 
     if (!isRoot) {
-        tcn->clearTags();
-        tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-        tcn->ensureTag<MacAddressReq>()->setSrcAddress(srcAddress);
-        tcn->ensureTag<MacAddressReq>()->setDestAddress(destAddress);
-        send(tcn, "relayOut");
+        packet->clearTags();
+        packet->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+        packet->ensureTag<MacAddressReq>()->setSrcAddress(srcAddress);
+        packet->ensureTag<MacAddressReq>()->setDestAddress(destAddress);
+        send(packet, "relayOut");
     }
     else
-        delete tcn;
+        delete packet;
 }
 
 void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, bool tcaFlag)
 {
-    BPDU *bpdu = new BPDU();
-    bpdu->ensureTag<MacAddressReq>()->setDestAddress(address);
-    bpdu->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+    Packet *packet = new Packet("BPDU");
+    const auto& bpdu = std::make_shared<BPDU>();
+    packet->ensureTag<MacAddressReq>()->setDestAddress(address);
+    packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
 
-    bpdu->setName("BPDU");
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(0);
     bpdu->setBpduType(0);    // 0 if configuration BPDU
@@ -195,7 +189,9 @@ void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, 
         }
     }
 
-    send(bpdu, "relayOut");
+    bpdu->markImmutable();
+    packet->append(bpdu);
+    send(packet, "relayOut");
 }
 
 void STP::generateTCN()
@@ -205,19 +201,21 @@ void STP::generateTCN()
         if (getPortInterfaceData(rootInterfaceId)->getRole() == Ieee8021dInterfaceData::ROOT) {
             // exist root port to notifying
             topologyChangeNotification = false;
-            BPDU *tcn = new BPDU();
+            Packet *packet = new Packet("BPDU");
+            const auto& tcn = std::make_shared<BPDU>();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);
-            tcn->setName("BPDU");
 
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
 
-            tcn->ensureTag<MacAddressReq>()->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
-            tcn->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+            packet->ensureTag<MacAddressReq>()->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
+            packet->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
 
+            tcn->markImmutable();
+            packet->append(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
-            send(tcn, "relayOut");
+            send(packet, "relayOut");
         }
     }
 }

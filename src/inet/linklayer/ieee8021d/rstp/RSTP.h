@@ -21,9 +21,10 @@
 #define __INET_RSTP_H
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/switch/MACAddressTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
@@ -97,7 +98,7 @@ class INET_API RSTP : public STPBase
      * @brief BPDU processing.
      * Updates port information. Handles port role changes.
      */
-    virtual void handleIncomingFrame(BPDU *frame);
+    virtual void handleIncomingFrame(Packet *packet);
     virtual void processBPDU(BPDU *frame, unsigned int arrivalInterfaceId);
     virtual bool processBetterSource(BPDU *frame, unsigned int arrivalInterfaceId);
     virtual bool processSameSource(BPDU *frame, unsigned int arrivalInterfaceId);

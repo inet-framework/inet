@@ -19,6 +19,7 @@
 #define __INET_IEEE8021DRELAY_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -66,22 +67,22 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      * Includes calls to updateTableWithAddress() and getPortForAddress().
      *
      */
-    void handleAndDispatchFrame(EtherFrame *frame);
-    void dispatch(EtherFrame *frame, InterfaceEntry *ie);
-    void learn(EtherFrame *frame, int arrivalInterfaceId);
-    void broadcast(EtherFrame *frame);
+    void handleAndDispatchFrame(Packet *packet);
+    void dispatch(Packet *packet, InterfaceEntry *ie);
+    void learn(MACAddress srcAddr, int arrivalInterfaceId);
+    void broadcast(Packet *packet);
 
     /**
      * Receives BPDU from the STP/RSTP module and dispatch it to network.
      * Sets EherFrame destination, source, etc. according to the BPDU's Ieee802Ctrl info.
      */
-    void dispatchBPDU(BPDU *bpdu);
+    void dispatchBPDU(Packet *packet);
 
     /**
      * Deliver BPDU to the STP/RSTP module.
      * Sets the BPDU's Ieee802Ctrl info according to the arriving EtherFrame.
      */
-    void deliverBPDU(EtherFrame *frame);
+    void deliverBPDU(Packet *packet);
 
     // For lifecycle
     virtual void start();

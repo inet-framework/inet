@@ -23,6 +23,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
@@ -81,17 +82,16 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
 
     if (!msg->isSelfMessage()) {
         // messages from STP process
+        Packet *frame = check_and_cast<Packet *>(msg);
         if (msg->arrivedOn("stpIn")) {
             numReceivedBPDUsFromSTP++;
             EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
-            BPDU *bpdu = check_and_cast<BPDU *>(msg);
-            dispatchBPDU(bpdu);
+            dispatchBPDU(frame);
         }
         // messages from network
         else if (msg->arrivedOn("ifIn")) {
             numReceivedNetworkFrames++;
             EV_INFO << "Received " << msg << " from network." << endl;
-            EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
             delete frame->removeTag<DispatchProtocolReq>();
             emit(LayeredProtocolBase::packetReceivedFromLowerSignal, frame);
             handleAndDispatchFrame(frame);
@@ -111,11 +111,11 @@ bool Ieee8021dRelay::isForwardingInterface(InterfaceEntry *ie)
     return true;
 }
 
-void Ieee8021dRelay::broadcast(EtherFrame *frame)
+void Ieee8021dRelay::broadcast(Packet *packet)
 {
-    EV_DETAIL << "Broadcast frame " << frame << endl;
+    EV_DETAIL << "Broadcast frame " << packet << endl;
 
-    int inputInterfacceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    int inputInterfacceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     int numPorts = ifTable->getNumInterfaces();
     for (int i = 0; i < numPorts; i++) {
@@ -123,120 +123,120 @@ void Ieee8021dRelay::broadcast(EtherFrame *frame)
         if (ie->isLoopback() || !ie->isBroadcast())
             continue;
         if (ie->getInterfaceId() != inputInterfacceId && isForwardingInterface(ie)) {
-            dispatch(frame->dup(), ie);
+            dispatch(packet->dup(), ie);
         }
     }
-
-    delete frame;
+    delete packet;
 }
 
-void Ieee8021dRelay::handleAndDispatchFrame(EtherFrame *frame)
+void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
 {
-    int arrivalInterfaceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    const auto& frame = packet->peekHeader<EtherFrame>();
+    int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
     Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->ieee8021dData();
     if (isStpAware && arrivalPortData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
-    learn(frame, arrivalInterfaceId);
+    learn(frame->getSrc(), arrivalInterfaceId);
 
     // BPDU Handling
     if (isStpAware && (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED) {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
-        deliverBPDU(frame);    // deliver to the STP/RSTP module
+        deliverBPDU(packet);    // deliver to the STP/RSTP module
     }
     else if (isStpAware && !arrivalPortData->isForwarding()) {
         EV_INFO << "The arrival port is not forwarding! Discarding it!" << endl;
         numDroppedFrames++;
-        delete frame;
+        delete packet;
     }
     else if (frame->getDest().isBroadcast()) {    // broadcast address
-        broadcast(frame);
+        broadcast(packet);
     }
     else {
         int outputInterfaceId = macTable->getPortForAddress(frame->getDest());
         // Not known -> broadcast
         if (outputInterfaceId == -1) {
             EV_DETAIL << "Destination address = " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
-            broadcast(frame);
+            broadcast(packet);
         }
         else {
             InterfaceEntry *outputInterface = ifTable->getInterfaceById(outputInterfaceId);
             if (outputInterfaceId != arrivalInterfaceId) {
                 if (isForwardingInterface(outputInterface))
-                    dispatch(frame, outputInterface);
+                    dispatch(packet, outputInterface);
                 else {
                     EV_INFO << "Output interface " << outputInterface->getFullName() << " is not forwarding. Discarding!" << endl;
                     numDroppedFrames++;
-                    delete frame;
+                    delete packet;
                 }
             }
             else {
-                EV_DETAIL << "Output port is same as input port, " << frame->getFullName() << " destination = " << frame->getDest() << ", discarding frame " << frame << endl;
+                EV_DETAIL << "Output port is same as input port, " << packet->getFullName() << " destination = " << frame->getDest() << ", discarding frame " << frame << endl;
                 numDroppedFrames++;
-                delete frame;
+                delete packet;
             }
         }
     }
 }
 
-void Ieee8021dRelay::dispatch(EtherFrame *frame, InterfaceEntry *ie)
+void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
 {
-    EV_INFO << "Sending frame " << frame << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
+    const auto& frame = packet->peekHeader<EtherFrame>();
+    EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
-    frame->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
-    send(frame, "ifOut");
+    packet->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
+    send(packet, "ifOut");
 }
 
-void Ieee8021dRelay::learn(EtherFrame *frame, int arrivalInterfaceId)
+void Ieee8021dRelay::learn(MACAddress srcAddr, int arrivalInterfaceId)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
 
     if (!isStpAware || port->isLearning())
-        macTable->updateTableWithAddress(arrivalInterfaceId, frame->getSrc());
+        macTable->updateTableWithAddress(arrivalInterfaceId, srcAddr);
 }
 
-void Ieee8021dRelay::dispatchBPDU(BPDU *bpdu)
+void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 {
-    unsigned int portNum = bpdu->getMandatoryTag<InterfaceReq>()->getInterfaceId();
-    MACAddress address = bpdu->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    const auto& bpdu = CHK(packet->peekHeader<BPDU>());
+    unsigned int portNum = packet->getMandatoryTag<InterfaceReq>()->getInterfaceId();
+    MACAddress address = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
 
     if (ifTable->getInterfaceById(portNum) == nullptr)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
 
     // TODO: use LLCFrame
-    EthernetIIFrame *frame = new EthernetIIFrame(bpdu->getName());
-
-    frame->setKind(bpdu->getKind());
+    Packet *outPacket = new Packet(packet->getName());
+    const auto& frame = std::make_shared<EthernetIIFrame>();
+    outPacket->setKind(packet->getKind());
     frame->setSrc(bridgeAddress);
     frame->setDest(address);
-    frame->setByteLength(ETHER_MAC_FRAME_BYTES);
     frame->setEtherType(-1);
-    frame->encapsulate(bpdu);
+    outPacket->pushHeader(frame);
+    outPacket->append(bpdu);
 
-    if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
+    EtherEncap::addPaddingAndFcs(outPacket);
 
-    EV_INFO << "Sending BPDU frame " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
+    EV_INFO << "Sending BPDU frame " << outPacket << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
-    emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
-    send(frame, "ifOut");
+    emit(LayeredProtocolBase::packetSentToLowerSignal, outPacket);
+    send(outPacket, "ifOut");
 }
 
-void Ieee8021dRelay::deliverBPDU(EtherFrame *frame)
+void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
-    BPDU *bpdu = check_and_cast<BPDU *>(frame->decapsulate());
+    const auto& eth = CHK(packet->popHeader<EtherFrame>());
+    const auto& bpdu = CHK(packet->peekHeader<BPDU>());
 
-    auto macAddressTag = bpdu->ensureTag<MacAddressInd>();
-    macAddressTag->setSrcAddress(frame->getSrc());
-    macAddressTag->setDestAddress(frame->getDest());
-
-    delete frame;    // we have the BPDU packet, so delete the frame
+    auto macAddressTag = packet->ensureTag<MacAddressInd>();
+    macAddressTag->setSrcAddress(eth->getSrc());
+    macAddressTag->setDestAddress(eth->getDest());
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
     numDeliveredBDPUsToSTP++;
-    send(bpdu, "stpOut");
+    send(packet, "stpOut");
 }
 
 Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interfaceId)

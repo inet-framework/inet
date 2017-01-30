@@ -14,11 +14,14 @@
 //
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
 
+class FieldsChunk extends cObject;
 class noncobject MACAddress;
 
 
@@ -26,9 +29,9 @@ class noncobject MACAddress;
 // Represents a BPDU (Bridge PDU) used by the STP and RSTP protocols,
 // as defined in the 802.1D-1998 specification.
 //
-packet BPDU
+class BPDU extends FieldsChunk
 {
-    byteLength = 35;
+    bit chunkLength @overridegetter = byte(35);
     unsigned int protocolIdentifier;          // 0 for STP, 1 for RSTP (TODO use them)
     unsigned int protocolVersionIdentifier;   // currently 0
 

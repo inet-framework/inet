@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -115,7 +116,7 @@ void RSTP::handleMessage(cMessage *msg)
         }
     }
     else {
-        handleIncomingFrame(check_and_cast<BPDU *>(msg));    // handling BPDU
+        handleIncomingFrame(check_and_cast<Packet *>(msg));    // handling BPDU
     }
 }
 
@@ -271,12 +272,13 @@ void RSTP::handleBackup(BPDU *frame, unsigned int arrivalInterfaceId)
     }
 }
 
-void RSTP::handleIncomingFrame(BPDU *frame)
+void RSTP::handleIncomingFrame(Packet *packet)
 {
+    BPDU *frame = CHK(packet->peekHeader<BPDU>().get());
     // incoming BPDU handling
     // checking message age
-    int arrivalInterfaceId = frame->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    MACAddress src = frame->getMandatoryTag<MacAddressInd>()->getSrcAddress();
+    int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    MACAddress src = packet->getMandatoryTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "BPDU received at port " << arrivalInterfaceId << "." << endl;
     if (frame->getMessageAge() < maxAge) {
         // checking TC
@@ -579,7 +581,8 @@ void RSTP::sendTCNtoRoot()
         Ieee8021dInterfaceData *rootPort = getPortInterfaceData(r);
         if (rootPort->getRole() != Ieee8021dInterfaceData::DISABLED) {
             if (simTime() < rootPort->getTCWhile()) {
-                BPDU *frame = new BPDU();
+                Packet *packet = new Packet("BPDU");
+                const auto& frame = std::make_shared<BPDU>();
                 frame->setRootPriority(rootPort->getRootPriority());
                 frame->setRootAddress(rootPort->getRootAddress());
                 frame->setMessageAge(rootPort->getAge());
@@ -589,17 +592,20 @@ void RSTP::sendTCNtoRoot()
                 frame->setPortNum(r);
                 frame->setBridgeAddress(bridgeAddress);
                 frame->setTcFlag(true);
-                frame->setName("BPDU");
                 frame->setMaxAge(maxAge);
                 frame->setHelloTime(helloTime);
                 frame->setForwardDelay(forwardDelay);
-                if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-                    frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-                auto macAddressReq = frame->ensureTag<MacAddressReq>();
+                frame->markImmutable();
+                packet->append(frame);
+
+                EtherEncap::addPaddingAndFcs(packet);
+
+                auto macAddressReq = packet->ensureTag<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
                 macAddressReq->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
-                frame->ensureTag<InterfaceReq>()->setInterfaceId(r);
-                send(frame, "relayOut");
+                packet->ensureTag<InterfaceReq>()->setInterfaceId(r);
+
+                send(packet, "relayOut");
             }
         }
     }
@@ -629,7 +635,8 @@ void RSTP::sendBPDU(int interfaceId)
     if (r != -1)
         rootPort = getPortInterfaceData(r);
     if (iport->getRole() != Ieee8021dInterfaceData::DISABLED) {
-        BPDU *frame = new BPDU();
+        Packet *packet = new Packet("BPDU");
+        const auto& frame = std::make_shared<BPDU>();
         if (r != -1) {
             frame->setRootPriority(rootPort->getRootPriority());
             frame->setRootAddress(rootPort->getRootAddress());
@@ -650,17 +657,18 @@ void RSTP::sendBPDU(int interfaceId)
             frame->setTcFlag(true);
         else
             frame->setTcFlag(false);
-        frame->setName("BPDU");
         frame->setMaxAge(maxAge);
         frame->setHelloTime(helloTime);
         frame->setForwardDelay(forwardDelay);
-        if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-            frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-        auto macAddressReq = frame->ensureTag<MacAddressReq>();
+
+        EtherEncap::addPaddingAndFcs(packet);
+
+        auto macAddressReq = packet->ensureTag<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);
         macAddressReq->setDestAddress(MACAddress::STP_MULTICAST_ADDRESS);
-        frame->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
-        send(frame, "relayOut");
+        packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+
+        send(packet, "relayOut");
     }
 }
 
