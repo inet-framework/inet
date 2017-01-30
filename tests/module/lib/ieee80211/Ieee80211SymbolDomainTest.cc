@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#if 0
+
 #include "Ieee80211SymbolDomainTest.h"
 #include "inet/common/ModuleAccess.h"
 #include <fstream>
@@ -93,3 +95,4 @@ void Ieee80211SymbolDomainTest::test() const
 
 } /* namespace inet */
 
+#endif
