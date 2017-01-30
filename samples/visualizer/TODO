@@ -35,6 +35,7 @@ TransportConnectionVisualizer
 - Ne legyen kiírva semmi az ikonban ha csak 1 pár van az adott színből
 - Szám helyett betűk
 - portFilter egyszerre szűr local és remote portra
+- nodeFilter úgy tűnik nem működik
 
 Propagation
 - beírni valamit az msg fileba
@@ -48,6 +49,7 @@ Ieee80211
 - ez legyen kikapcsolható
 - lehessen felsorolni a színeket
 - dark/light colors
+- Ieee80211Visualizer-rel nem működik, csak Integrated-el
 
 InfoVisualizer
 - Amikor a statistic value-ja 0, akkor '-' van kiírva
