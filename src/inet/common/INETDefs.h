@@ -27,6 +27,8 @@
 // feature defines generated based on the actual feature enablement
 #include "inet/features.h"
 
+#include <memory>
+
 //
 // General definitions.
 //
@@ -74,6 +76,14 @@ template<class T>
 T *__checknull(T *p, const char *expr, const char *file, int line)
 {
     if (!p)
+        throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
+    return p;
+}
+
+template<class T>
+const std::shared_ptr<T>& __checknull(const std::shared_ptr<T>& p, const char *expr, const char *file, int line)
+{
+    if (p == nullptr)
         throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
     return p;
 }
