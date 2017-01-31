@@ -111,11 +111,13 @@ Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame 
         frame->setByteLength(0);  // needed for decapsulation of larger packet
         value.frame = check_and_cast_nullable<Ieee80211DataOrMgmtFrame *>(frame->decapsulate());
     }
+    MACAddress txAddress = frame->getTransmitterAddress();
     delete frame;
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
         Ieee80211DataOrMgmtFrame *result = value.frame;
+        result->setTransmitterAddress(txAddress);
         fragmentsMap.erase(key);
         return result;
     }

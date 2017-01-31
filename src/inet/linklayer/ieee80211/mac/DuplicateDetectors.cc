@@ -137,7 +137,7 @@ bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
         auto it = cache.find(transmitterAddr);
         if (it == cache.end())
             cache[transmitterAddr] = seqVal;
-        if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
+        else if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
             return true;
         else
             it->second = seqVal;
@@ -150,7 +150,7 @@ bool QoSDuplicateDetector::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
         auto it = lastSeenSeqNumCache.find(key);
         if (it == lastSeenSeqNumCache.end())
             lastSeenSeqNumCache[key] = seqVal;
-        if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
+        else if (it->second.seqNum == seqVal.seqNum && it->second.fragNum == seqVal.fragNum && frame->getRetry())
             return true;
         else
             it->second = seqVal;

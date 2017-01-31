@@ -67,8 +67,10 @@ void Contention::initialize(int stage)
         if (txIndex > 0 && !collisionController)
             throw cRuntimeError("No collision controller module -- one is needed when multiple Contention instances are present");
 
-        if (!collisionController)
+        if (!collisionController) {
             startTxEvent = new cMessage("startTx");
+            startTxEvent->setSchedulingPriority(1000); // XXX: for validation
+        }
 
         fsm.setName("fsm");
         fsm.setState(IDLE, "IDLE");
@@ -114,6 +116,7 @@ void Contention::startContention(simtime_t ifs, simtime_t eifs, int cwMin, int c
 
     int cw = computeCw(cwMin, cwMax, retryCount);
     backoffSlots = intrand(cw + 1);
+    EV_DETAIL << "Starting contention: cw = " << cw << ", slots = " << backoffSlots << endl;
 
 #ifdef NS3_VALIDATION
     static const char *AC[] = {"AC_BE", "AC_BK", "AC_VI", "AC_VO"};
@@ -182,11 +185,6 @@ void Contention::handleWithFSM(EventType event, cMessage *msg)
                     cancelTransmissionRequest();
                     computeRemainingBackoffSlots();
                     );
-            FSMA_Event_Transition(optimized-internal-collision,
-                    event == INTERNAL_COLLISION && backoffOptimizationDelta != SIMTIME_ZERO,
-                    IFS_AND_BACKOFF,
-                    revokeBackoffOptimization();
-                    );
             FSMA_Event_Transition(Internal-collision,
                     event == INTERNAL_COLLISION,
                     IDLE,
@@ -200,6 +198,7 @@ void Contention::handleWithFSM(EventType event, cMessage *msg)
             FSMA_Fail_On_Unhandled_Event();
         }
         FSMA_State(OWNING) {
+            FSMA_Enter(mac->sendDownPendingRadioConfigMsg()); // XXX: validation
             FSMA_Event_Transition(Channel-Released,
                     event == CHANNEL_RELEASED,
                     IDLE,

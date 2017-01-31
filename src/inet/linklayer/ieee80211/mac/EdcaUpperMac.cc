@@ -83,10 +83,10 @@ void EdcaUpperMac::initialize()
 
     int numACs = params->isEdcaEnabled() ? 4 : 1;
     acData = new AccessCategoryData[numACs];
-    CompareFunc compareFunc = par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData;
+    // XXX: validation CompareFunc compareFunc = par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData;
     for (int i = 0; i < numACs; i++) {
         acData[i].transmissionQueue.setName(suffix("txQueue-", i).c_str());
-        acData[i].transmissionQueue.setup(compareFunc);
+        // acData[i].transmissionQueue.setup(compareFunc);
     }
 
     statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
@@ -181,16 +181,17 @@ void EdcaUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame, AccessCategory ac)
 
 AccessCategory EdcaUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    if (frame->getType() == ST_DATA) {
+    if (frame->getType() == ST_DATA || dynamic_cast<Ieee80211ManagementFrame*>(frame)) {
         return AC_BE;  // non-QoS frames are Best Effort
     }
     else if (frame->getType() == ST_DATA_WITH_QOS) {
         Ieee80211DataFrame *dataFrame = check_and_cast<Ieee80211DataFrame*>(frame);
         return mapTidToAc(dataFrame->getTid());  // QoS frames: map TID to AC
     }
-    else {
-        return AC_VO; // management frames travel in the Voice category
-    }
+    // XXX: for validation
+//    else {
+//        return AC_VO; // management frames travel in the Voice category
+//    }
 }
 
 AccessCategory EdcaUpperMac::mapTidToAc(int tid)

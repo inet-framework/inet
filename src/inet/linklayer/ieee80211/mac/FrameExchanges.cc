@@ -381,7 +381,7 @@ void SendMulticastDataFrameExchange::start()
 void SendMulticastDataFrameExchange::startContention()
 {
     AccessCategory ac = accessCategory;  // abbreviate
-    contention[txIndex]->startContention(params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMulticast(ac), params->getCwMulticast(ac), params->getSlotTime(), 0, this);
+    contention[txIndex]->startContention(params->getAifsTime(ac), params->getEifsTime(ac), params->getCwMin(ac), params->getCwMax(ac), params->getSlotTime(), retryCount, this);
 }
 
 void SendMulticastDataFrameExchange::internalCollision(int txIndex)
