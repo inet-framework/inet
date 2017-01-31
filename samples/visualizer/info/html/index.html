@@ -16,19 +16,23 @@
 Various compound modules in INET contain submodules that display information about their state in the graphical runtime environment.
 This is of limited use, since one has to enter the compound modules to see this information. Information of important
 submodules can be visualized at containing network nodes, at the top level of the network. This makes such information conveniently
-available at glance, without the need to open graphical views or going into compound modules.
+available at a glance, without the need to open graphical views or going into compound modules.
 This example contains a configuration that demonstrates visualization of nodes' IEEE 802.11 channel access state.
 </p>
 
 <h2>About the visualizer</h2>
 
 <p>
-The <var>InfoVisualizer</var> module can visualize information of a submodules for a network node on the top level canvas.
+The <var>InfoVisualizer</var> module can visualize information of submodules for a network node on the top level canvas.
 The submodules can be selected with the visualizer's <var>modules</var> parameter. This parameter takes full path module names.
-Wildcards can be used to select a certain submodule name in multiple nodes. Additionally, one can specify multiple submodule names.
+Wildcards can be used to select a certain submodule in multiple nodes. Additionally, one can specify multiple submodule names.
 </p>
 
-<p>TODO: about the content parameter, and how its visualized.</p>
+<p>
+The visualizer can display module states in two ways, this can be set with the <var>content</var> parameter.
+When set to <i>str</i>, it displays the return value of the module's str() function. When set to <i>displayStringText</i>,
+it displays the 't' tag of the submodule's display string. The default is <i>str</i>. TODO: do we need this ?
+</p>
 
 <h2>The visualization</h2>
 
@@ -40,20 +44,36 @@ The network for the simulation is the following:
 
 <p>
 It contains 3 <var>AdhocHosts</var> arranged in a simple chain. It also contains an <var>IPv4NetworkConfigurator</var>,
-an <var>Ieee80211ScalarRadioMedium</var>, and an <var>IntegratedVisualizer</var> module. The communicaton ranges of hosts
-is determined by their radio transmitter power, which is configured so that hosts can only reach adjacent hosts.
+an <var>Ieee80211ScalarRadioMedium</var>, and an <var>IntegratedVisualizer</var> module. The communication ranges of hosts
+is determined by their radio transmitter power, which is configured so that hosts can only reach adjacent hosts in the chain.
 Hosts' routing tables are set up accordingly, <var>source</var> is configured to send UDP packets to <var>destination</var> via
 <var>relay</var>.
 </p>
 
 <p>
-The visualizer is configured to visualize node's channel access state. This is contained in each node's Contention module.
+, thus packets going between <var>source</var> and <var>destination</var> are routed via <var>relay</var>.
+</p>
+
+<p>
+The visualizer is configured to visualize node's channel access state. This information is contained in each node's Contention module.
 The location of the Contention module is <var>AdhocHost/wlan/mac</var>:
 </p>
 
 <div class="snippet">
 *.visualizer.*.infoVisualizer.modules = "*.*.wlan[0].mac.ctn[0]"
 </div>
+
+<p>
+The <var>content</var> parameter is set to display the submodule's display string text:
+</p>
+
+<div class="snippet">
+*.visualizer.*.infoVisualizer.content = "displayStringText"
+</div>
+
+<p>
+Additionally, <var>source</var> is configured to send UDP packets to <var>destination</var>.
+</p>
 
 <pre>
 TODO: you can specify multiple modules... "modules = *.*.wlan[0].mac.ctn[0] *.*.interfaceTable"
