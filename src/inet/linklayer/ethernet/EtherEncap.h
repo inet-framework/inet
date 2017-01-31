@@ -55,6 +55,9 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void handleSendPause(cMessage *msg);
 
     virtual void refreshDisplay() const override;
+
+  public:
+    static void addPaddingAndFcs(Packet *packet, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
 };
 
 } // namespace inet

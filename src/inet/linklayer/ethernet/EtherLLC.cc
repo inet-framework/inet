@@ -19,6 +19,7 @@
 
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
@@ -140,17 +141,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
     frame->markImmutable();
     packet->pushHeader(frame);
 
-    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
-    if (paddingLength > 0) {
-        const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(byte(paddingLength));
-        ethPadding->markImmutable();
-        packet->pushTrailer(ethPadding);
-    }
-    const auto& ethFcs = std::make_shared<EthernetFcs>();
-    //FIXME calculate Fcs if needed
-    ethFcs->markImmutable();
-    packet->pushTrailer(ethFcs);
+    EtherEncap::addPaddingAndFcs(packet);
 
     send(packet, "lowerLayerOut");
 }
@@ -268,17 +259,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     frame->setDest(dest);
     packet->pushHeader(frame);
 
-    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
-    if (paddingLength > 0) {
-        const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(byte(paddingLength));
-        ethPadding->markImmutable();
-        packet->pushTrailer(ethPadding);
-    }
-    const auto& ethFcs = std::make_shared<EthernetFcs>();
-    //FIXME calculate Fcs if needed
-    ethFcs->markImmutable();
-    packet->pushTrailer(ethFcs);
+    EtherEncap::addPaddingAndFcs(packet);
 
     send(packet, "lowerLayerOut");
     emit(pauseSentSignal, pauseUnits);

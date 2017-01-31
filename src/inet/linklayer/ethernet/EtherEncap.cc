@@ -124,20 +124,25 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
         msg->pushHeader(eth2Frame);
     }
 
-    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - msg->getByteLength();
+    EtherEncap::addPaddingAndFcs(msg);
+
+    EV_INFO << "Sending " << msg << " to lower layer.\n";
+    send(msg, "lowerLayerOut");
+}
+
+void EtherEncap::addPaddingAndFcs(Packet *packet, int64_t requiredMinBytes)
+{
+    int64_t paddingLength = requiredMinBytes - ETHER_FCS_BYTES - packet->getByteLength();
     if (paddingLength > 0) {
         const auto& ethPadding = std::make_shared<EthernetPadding>();
         ethPadding->setChunkLength(byte(paddingLength));
         ethPadding->markImmutable();
-        msg->pushTrailer(ethPadding);
+        packet->pushTrailer(ethPadding);
     }
     const auto& ethFcs = std::make_shared<EthernetFcs>();
     //FIXME calculate Fcs if needed
     ethFcs->markImmutable();
-    msg->pushTrailer(ethFcs);
-
-    EV_INFO << "Sending " << msg << " to lower layer.\n";
-    send(msg, "lowerLayerOut");
+    packet->pushTrailer(ethFcs);
 }
 
 void EtherEncap::processFrameFromMAC(Packet *packet)
@@ -201,19 +206,9 @@ void EtherEncap::handleSendPause(cMessage *msg)
     frame->setDest(dest);
     packet->pushHeader(frame);
 
-    int64_t paddingLength = MIN_ETHERNET_FRAME_BYTES - ETHER_FCS_BYTES - packet->getByteLength();
-    if (paddingLength > 0) {
-        const auto& ethPadding = std::make_shared<EthernetPadding>();
-        ethPadding->setChunkLength(byte(paddingLength));
-        ethPadding->markImmutable();
-        packet->pushTrailer(ethPadding);
-    }
-    const auto& ethFcs = std::make_shared<EthernetFcs>();
-    //FIXME calculate Fcs if needed
-    ethFcs->markImmutable();
-    packet->pushTrailer(ethFcs);
+    EtherEncap::addPaddingAndFcs(packet);
 
-    EV_INFO << "Sending " << frame << " to lower layer.\n";
+   EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 
     emit(pauseSentSignal, pauseUnits);
