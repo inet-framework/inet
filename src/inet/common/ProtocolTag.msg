@@ -3,14 +3,17 @@
 //
 
 cplusplus{{
+#include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/TagBase_m.h"
+#include "inet/common/Units.h"
 }}
 
 namespace inet;
 
 cplusplus{{
 typedef const Protocol * ProtocolPtr;
+using namespace units::values;
 }}
 
 class noncobject ProtocolPtr;
@@ -93,7 +96,7 @@ class NetworkProtocolReq extends ProtocolTagBase
 //
 class NetworkProtocolInd extends ProtocolTagBase
 {
-    int64_t position = -1;
+    bit position = bit(-1);
 }
 
 //
