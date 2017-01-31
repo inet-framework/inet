@@ -18,7 +18,7 @@
     <feature enabled="false" id="RTP_examples"/>
     <feature enabled="false" id="SCTP"/>
     <feature enabled="false" id="SCTP_examples"/>
-    <feature enabled="false" id="DHCP"/>
+    <feature enabled="true" id="DHCP"/>
     <feature enabled="false" id="DHCP_examples"/>
     <feature enabled="true" id="Ethernet"/>
     <feature enabled="false" id="Ethernet_examples"/>
