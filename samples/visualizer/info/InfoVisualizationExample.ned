@@ -8,7 +8,7 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 network InfoVisualizationExample
 {
     parameters:
-        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
+        @figure[description](type=text; pos=240,10; font=Arial,20; text="Visualizing submodule information");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
