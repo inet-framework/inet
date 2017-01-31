@@ -23,7 +23,7 @@ just by looking at the network, without needing to dig deep in the inspector win
 <p>
 The <var>Ieee80211Visualizer</var> displays a wifi network symbol above network nodes when they are associated with a wireless network.
 This icon indicates the SSID of the network the given node is connected to. The icons for networks with different SSID's are colored differently.
-The icon is also displayed above nodes that create the networks, e.g. access points. The icon also indicates the signal strength present at the
+The icon is also displayed above nodes that create the networks, e.g. access points. Additionally, the icon indicates the signal strength present at the
 location of a given node. TODO: how is it indicated? and how does it work?
 </p>
 
@@ -87,16 +87,14 @@ The handover is demonstrated using the following network:
 <img src="handovernetwork.png">
 
 <p>
-There are two <var>AccessPoints</var>. A <var>WirelessHost</var> moves horizontally back and forth, going out of the range
-of one access point and into the range of another. When that happens, it gets associated with the other access point, i.e. gets
+There are two <var>AccessPoints</var>. The access points are configured to create wireless networks with different SSIDs, these are <var>alpha</var> and <var>bravo</var> for <var>accessPointA</var> and <var>accessPointB</var>, respectively. A <var>WirelessHost</var> moves horizontally back and forth, going out of the range
+of one access point and into the range of another. When that happens, it gets associated with the other access point, i.e. it is
 "handed over". There are also an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and an
 <var>IntegratedVisualizer</var> module.
-The access points are configured to create wireless networks with different SSIDs, these are <var>alpha</var> and <var>bravo</var> for
-<var>accessPointA</var> and <var>accessPointB</var>, respectively.
 </p>
 
 <p>
-When the simulation is run and the host has been associated to and access point, the network looks like this:
+When the simulation is run and the host has been associated to an access point, the network looks like this:
 </p>
 
 <img src="handover.png">
@@ -107,11 +105,9 @@ The communication ranges of the access points are visualized as blue circles. Th
 
 <img src="handover2.gif">
 
-<pre>
-TODO: something about...the icon changes to reflect the new association
-
-and i guess thats it. some kind of conclusion...further information...just like with the routingtablevisualizer
-</pre>
+<p>
+When the handover happens, the association indicator icon changes to reflect the new association.
+</p>
 
 <h2>Further information</h2>
 
