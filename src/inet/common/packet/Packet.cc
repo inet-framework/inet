@@ -222,4 +222,10 @@ void Packet::removeFromEnd(bit length)
     contents->markImmutable();
 }
 
+void Packet::removePoppedParts()
+{
+    removeFromBeginning(getHeaderPoppedLength());
+    removeFromEnd(getTrailerPoppedLength());
+}
+
 } // namespace

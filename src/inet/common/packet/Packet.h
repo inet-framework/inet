@@ -119,9 +119,9 @@ class INET_API Packet : public cPacket
     void setHeaderPopOffset(bit offset);
 
     /**
-     * Returns the total byte count of popped packet headers.
+     * Returns the total length of popped packet headers.
      */
-    bit getHeaderPoppedByteCount() const { return headerIterator.getPosition(); }
+    bit getHeaderPoppedLength() const { return headerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekHeader(bit length = bit(-1)) const;
 
@@ -154,21 +154,21 @@ class INET_API Packet : public cPacket
     /** @name Trailer querying related functions */
     //@{
     /**
-     * Returns the trailer pop offset measured in bytes from the beginning of
-     * the packet. The returned value is in the range [0, getPacketLength()].
+     * Returns the trailer pop offset from the beginning of the packet.
+     * The returned value is in the range [0, getPacketLength()].
      */
     bit getTrailerPopOffset() const { return getPacketLength() - trailerIterator.getPosition(); }
 
     /**
-     * Changes the trailer pop offset measured in bytes from the beginning of
-     * the packet. The value must be in the range [0, getPacketLength()].
+     * Changes the trailer pop offset from the beginning of the packet.
+     * The value must be in the range [0, getPacketLength()].
      */
     void setTrailerPopOffset(bit offset);
 
     /**
-     * Returns the total byte count of popped packet trailers.
+     * Returns the total length of popped packet trailers.
      */
-    bit getTrailerPoppedByteCount() const { return trailerIterator.getPosition(); }
+    bit getTrailerPoppedLength() const { return trailerIterator.getPosition(); }
 
     std::shared_ptr<Chunk> peekTrailer(bit length = bit(-1)) const;
 
@@ -248,6 +248,9 @@ class INET_API Packet : public cPacket
     //@{
     void removeFromBeginning(bit length);
     void removeFromEnd(bit length);
+
+    /** remove popped headers and trailers */
+    void removePoppedParts();
     //@}
 
     virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
