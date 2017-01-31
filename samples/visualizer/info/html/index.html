@@ -14,9 +14,9 @@
 
 <p>
 Various compound modules in INET contain submodules that display information about their state in the graphical runtime environment.
-This is of limited use, since one has to enter the compound modules to see this information. Information of important
+This is of limited use, since one has to enter the compound modules to see this information. States of important
 submodules can be visualized at containing network nodes, at the top level of the network. This makes such information conveniently
-available at a glance, without the need to open graphical views or going into compound modules.
+available at a glance, without the need to open graphical views or go into compound modules.
 This example contains a configuration that demonstrates visualization of nodes' IEEE 802.11 channel access state.
 </p>
 
@@ -25,11 +25,11 @@ This example contains a configuration that demonstrates visualization of nodes' 
 <p>
 The <var>InfoVisualizer</var> module can visualize information of submodules for a network node on the top level canvas.
 The submodules can be selected with the visualizer's <var>modules</var> parameter. This parameter takes full path module names.
-Wildcards can be used to select a certain submodule in multiple nodes. Additionally, one can specify multiple submodule names.
+Wildcards can be used to select a certain submodule in multiple nodes. Additionally, one can specify multiple submodules for a node.
 </p>
 
 <p>
-The visualizer can display module states in two ways, this can be set with the <var>content</var> parameter.
+The visualizer can display module states in one of two ways, selected with the <var>content</var> parameter.
 When set to <i>str</i>, it displays the return value of the module's str() function. When set to <i>displayStringText</i>,
 it displays the 't' tag of the submodule's display string. The default is <i>str</i>. TODO: do we need this ?
 </p>
@@ -46,12 +46,8 @@ The network for the simulation is the following:
 It contains 3 <var>AdhocHosts</var> arranged in a simple chain. It also contains an <var>IPv4NetworkConfigurator</var>,
 an <var>Ieee80211ScalarRadioMedium</var>, and an <var>IntegratedVisualizer</var> module. The communication ranges of hosts
 is determined by their radio transmitter power, which is configured so that hosts can only reach adjacent hosts in the chain.
-Hosts' routing tables are set up accordingly, <var>source</var> is configured to send UDP packets to <var>destination</var> via
-<var>relay</var>.
-</p>
-
-<p>
-, thus packets going between <var>source</var> and <var>destination</var> are routed via <var>relay</var>.
+Hosts' routing tables are set up accordingly, thus packets going between <var>source</var> and <var>destination</var> 
+are routed via <var>relay</var>.
 </p>
 
 <p>
@@ -87,7 +83,7 @@ The visualization changes to reflect the changes in the access state. It takes o
 
 <ul>
 <li>IDLE when the node is receiving and doesn't want to transmit</li>
-<li>OWNING when the node has the channel, transmitting or receiving an ACK</li>
+<li>OWNING when the node has the channel, transmitting, or receiving an ACK</li>
 <li>IFS+BKOFF when the node has finished transmitting and backing off</li>
 <li>DEFER when the node wants to transmit but the channel is in use</li>
 </ul>
