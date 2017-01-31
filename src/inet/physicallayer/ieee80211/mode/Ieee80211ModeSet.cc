@@ -242,7 +242,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getSlowerMandatoryMode(const IIeee80211M
 const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);
-    if (index > 0)
+    if (index >= 0)
         for (int i = index+1; i < (int)entries.size(); i++)
             if (entries[i].isMandatory)
                 return entries[i].mode;
