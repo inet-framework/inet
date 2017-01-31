@@ -29,17 +29,6 @@ Because there is no association in adhoc mode.
 </pre>
 
 <p>
-This example demonstrates the visualization of the association states of 802.11 wireless nodes.
-Visualizing the association states of nodes can give 
-</p>
-
-<p>
-This example demonstrates the visualization of the association states and signal strengths in 802.11 infrastructure mode wireless networks.
-Visualizing these gives an overview about wireless network signal quality and the associated nodes. It is very conventient to get this information
-just by looking at the network, without needing to dig deep in the inspector windows of various nodes.
-</p>
-
-<p>
 This example demonstrates the visualization of the association states and signal strengths in 802.11 infrastructure mode wireless networks.
 Visualizing these gives an overview about an access point's associated nodes and wireless signal quality. It is very conventient to get this information
 just by looking at the network, without needing to dig deep in the inspector windows of various nodes.
@@ -106,9 +95,39 @@ So, A1 has 4 bars, A2 3 bars, B1 2 bars, B2 one bar. Or something like that.
 
 <h2>Visualizing handover</h2>
 
+<p>
+This configuration examines how a handover happens while the association state is visualized.
+The handover is demonstrated using the following network:
+</p>
 
+<img src="handovernetwork.png">
 
+<p>
+There are two <var>AccessPoints</var>. A <var>WirelessHost</var> moves horizontally back and forth, going out of the range
+of one access point and into the range of another. When that happens, it gets associated with the other access point, i.e. gets
+"handed over". There are also an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and an
+<var>IntegratedVisualizer</var> module.
+The access points are configured to create wireless networks with different SSIDs, these are <var>alpha</var> and <var>bravo</var> for
+<var>accessPointA</var> and <var>accessPointB</var>, respectively.
+</p>
 
+<p>
+When the simulation is run and the host has been associated to and access point, the network looks like this:
+</p>
+
+<img src="handover.png">
+
+<p>
+The communication ranges of the access points are visualized as blue circles. The following animation illustrates the handover:
+</p>
+
+<img src="handover2.gif">
+
+<pre>
+TODO: something about...the icon changes to reflect the new association
+
+and i guess thats it. some kind of conclusion...further information...just like with the routingtablevisualizer
+</pre>
 
 </body>
 
