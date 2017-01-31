@@ -19,7 +19,7 @@
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
 
 namespace inet {

@@ -25,8 +25,16 @@
 #include <string.h>
 
 #ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
+
+
+//FIXME KLUDGE:
+#ifdef WITH_ETHERNET
+#undef WITH_ETHERNET
+#endif
+//end of KLUDGE
+
 
 namespace inet {
 
