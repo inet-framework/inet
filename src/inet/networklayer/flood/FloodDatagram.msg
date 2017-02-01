@@ -21,9 +21,9 @@ cplusplus {{
 
 namespace inet;
 
-class NetworkDatagramBase;
+class NetworkDatagramBase extends cObject;
 
-packet FloodDatagram extends NetworkDatagramBase
+class FloodDatagram extends NetworkDatagramBase
 {
     @customize(true);
 

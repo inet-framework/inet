@@ -125,10 +125,8 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     /** @brief Checks whether a message was already broadcasted*/
     bool notBroadcasted(FloodDatagram *);
 
-    // decapsulate packet from datagram, create control info, delete datagram
-    cMessage *decapsulate(FloodDatagram *datagram);
-
-    FloodDatagram *encapsulate(cPacket *);
+    void decapsulate(Packet *packet);
+    void encapsulate(Packet *packet);
 
     /**
      * @brief Attaches a "control info" (NetwToMac) structure (object) to the message pMsg.
