@@ -16,15 +16,15 @@
 //
 
 cplusplus {{
-   #include "inet/networklayer/base/NetworkDatagramBase_m.h"
+#include "inet/networklayer/base/NetworkDatagramBase_m.h"
 }}
 
 namespace inet;
 
 class noncobject L3Address;
-class NetworkDatagramBase;
+class NetworkDatagramBase extends cObject;
 
-packet WiseRouteDatagram extends NetworkDatagramBase
+class WiseRouteDatagram extends NetworkDatagramBase
 {
     @customize(true);
 
