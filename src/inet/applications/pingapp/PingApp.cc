@@ -213,7 +213,8 @@ void PingApp::handleMessage(cMessage *msg)
     else {
         Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
-        if (const auto& icmpMessage = packet->popHeader<ICMPMessage>()) {
+        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
+            const auto& icmpMessage = packet->popHeader<ICMPMessage>();
             if (icmpMessage->getType() == ICMP_ECHO_REPLY) {
                 processPingResponse(packet);
             }
@@ -225,7 +226,8 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
 #ifdef WITH_IPv6
-        if (ICMPv6Message *icmpMessage = dynamic_cast<ICMPv6Message *>(msg)) {
+        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmp) {
+            ICMPv6Message *icmpMessage = dynamic_cast<ICMPv6Message *>(msg);
             if (icmpMessage->getType() == ICMPv6_ECHO_REPLY) {
                 check_and_cast<ICMPv6EchoReplyMsg *>(msg);
                 processPingResponse(packet);
@@ -238,7 +240,8 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
 #ifdef WITH_GENERIC
-        if (const auto& icmpMessage = packet->popHeader<EchoPacket>()) {
+        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
+            const auto& icmpMessage = packet->popHeader<EchoPacket>();
             if (icmpMessage->getType() == ECHO_PROTOCOL_REPLY) {
                 processPingResponse(packet);
             }
