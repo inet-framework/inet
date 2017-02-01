@@ -101,7 +101,7 @@ The visualization changes to reflect the changes in the access state. It takes o
 <p>TODO: do we need this ?</p>
 
 <p>
-The handover is displayed on this animation:
+The following animation illustrates as a packet from <var>source</var> makes its way to <var>destination</var>:
 </p>
 
 <img src="info1.gif">
@@ -109,6 +109,27 @@ The handover is displayed on this animation:
 <img src="info2.gif">
 
 <p>TODO: what is happening on the animation</p>
+
+<p>
+When <var>source</var> starts transmitting the UDP packet, its state changes to OWNING.
+The relay host's state is IDLE while receiving this packet. After it has received it,
+the state changes to IFS+BKOFF, then, while transmitting the ACK, it changes to DEFER.
+Meanwhile, the state of the source host remains OWNING, because it has the channel for the duration
+of the PACKET-ACK exchange. The relay host's state is DEFER because it wants to send the packet
+it just received to the destination host. After the ACK, the relay host has the channel.
+The state of the destination host remains IDLE, as it doesnt want to send any packets.
+</p>
+
+<p>
+The source host transmits an UDP packet to relay host, which ACKs it. While this happens,
+the state of the source hosts OWNING, as it owns the channel for the duration of the packet-ACK
+exchange. When the relay host receives the UDP packet, its state changes to IFS+BKOFF.
+It then transmits the ACK, while its state turns to DEFER, because it already has the packet
+it wants to relay to the destination host. After the ACK, the relay host gets the channel.
+The state of the destination host remains IDLE, as it doesn't transmit any packets,
+just ACKs the ones it receives.
+</p>
+
 
 <p>
 Multiple submodules can be specified with the visualizer's <i>modules</i> parameter.
