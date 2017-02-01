@@ -31,7 +31,7 @@ void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER)
-        registerProtocol(Protocol::icmpv4, gate("ipOut"));
+        registerProtocol(Protocol::echo, gate("ipOut"));
 }
 
 void EchoProtocol::handleMessage(cMessage *msg)
@@ -61,13 +61,15 @@ void EchoProtocol::processPacket(Packet *msg)
 void EchoProtocol::processEchoRequest(Packet *request)
 {
     // turn request into a reply
-    const auto& icmpReq = request->popHeader<EchoPacket>();
+    const auto& echoReq = request->popHeader<EchoPacket>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
     const auto& echoReply = std::make_shared<EchoPacket>();
+    echoReply->setChunkLength(echoReq->getChunkLength());
+    echoReply->setType(ECHO_PROTOCOL_REPLY);
+    echoReply->markImmutable();
     reply->append(echoReply);
     reply->append(request->peekDataAt(byte(0), request->getDataLength()));
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
-    echoReply->setType(ECHO_PROTOCOL_REPLY);
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
@@ -75,6 +77,8 @@ void EchoProtocol::processEchoRequest(Packet *request)
     addressReq->setSrcAddress(addressInd->getDestAddress());
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
+    reply->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
+    reply->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
     send(reply, "ipOut");
     delete request;
 }
