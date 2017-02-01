@@ -106,7 +106,7 @@ void Flood::handleUpperPacket(cPacket *m)
 {
     auto packet = check_and_cast<Packet *>(m);
     encapsulate(packet);
-    auto msg = packet->peekHeader<FloodDatagram>();
+    auto msg = packet->peekHeader<FloodHeader>();
 
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
@@ -147,7 +147,7 @@ void Flood::handleUpperPacket(cPacket *m)
 void Flood::handleLowerPacket(cPacket *m)
 {
     auto packet = check_and_cast<Packet *>(m);
-    auto msg = packet->peekHeader<FloodDatagram>();
+    auto msg = packet->peekHeader<FloodHeader>();
 
     //msg not broadcasted yet
     if (notBroadcasted(msg.get())) {
@@ -189,7 +189,7 @@ void Flood::handleLowerPacket(cPacket *m)
                 decapsulate(packet);
                 auto packetCopy = new Packet();
                 packetCopy->append(packet->peekDataAt(bit(0), packet->getDataLength()));
-                auto floodHeaderCopy = std::static_pointer_cast<FloodDatagram>(msg->dupShared());
+                auto floodHeaderCopy = std::static_pointer_cast<FloodHeader>(msg->dupShared());
                 floodHeaderCopy->setTtl(msg->getTtl() - 1);
                 floodHeaderCopy->markImmutable();
                 packetCopy->pushHeader(floodHeaderCopy);
@@ -223,7 +223,7 @@ void Flood::handleLowerPacket(cPacket *m)
  * the list is full and a new message has to be entered, the oldest
  * entry is deleted.
  **/
-bool Flood::notBroadcasted(FloodDatagram *msg)
+bool Flood::notBroadcasted(FloodHeader *msg)
 {
     if (!plainFlooding)
         return true;
@@ -258,7 +258,7 @@ bool Flood::notBroadcasted(FloodDatagram *msg)
  **/
 void Flood::decapsulate(Packet *packet)
 {
-    auto floodHeader = packet->popHeader<FloodDatagram>();
+    auto floodHeader = packet->popHeader<FloodHeader>();
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodHeader->getTransportProtocol()));
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(floodHeader->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
@@ -279,7 +279,7 @@ void Flood::encapsulate(Packet *appPkt)
     EV << "in encaps...\n";
 
     auto cInfo = appPkt->removeControlInfo();
-    auto pkt = std::make_shared<FloodDatagram>(); // TODO: appPkt->getName(), appPkt->getKind());
+    auto pkt = std::make_shared<FloodHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(bit(headerLength));
 
     auto hopLimitReq = appPkt->removeTag<HopLimitReq>();

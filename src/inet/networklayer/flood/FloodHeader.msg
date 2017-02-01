@@ -23,7 +23,7 @@ namespace inet;
 
 class NetworkHeaderBase extends cObject;
 
-class FloodDatagram extends NetworkHeaderBase
+class FloodHeader extends NetworkHeaderBase
 {
     @customize(true);
 

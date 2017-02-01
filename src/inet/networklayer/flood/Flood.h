@@ -27,7 +27,7 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/flood/FloodDatagram.h"
+#include "inet/networklayer/flood/FloodHeader.h"
 
 namespace inet {
 
@@ -123,7 +123,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     virtual void handleLowerPacket(cPacket *) override;
 
     /** @brief Checks whether a message was already broadcasted*/
-    bool notBroadcasted(FloodDatagram *);
+    bool notBroadcasted(FloodHeader *);
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);
