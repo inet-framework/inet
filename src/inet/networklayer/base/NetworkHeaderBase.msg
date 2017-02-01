@@ -26,7 +26,7 @@ namespace inet;
 class noncobject L3Address;
 class FieldsChunk extends cObject;
 
-class NetworkDatagramBase extends FieldsChunk
+class NetworkHeaderBase extends FieldsChunk
 {
     bit chunkLength @overridegetter;
     L3Address srcAddr;

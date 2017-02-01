@@ -16,14 +16,14 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/base/NetworkDatagramBase_m.h"
+#include "inet/networklayer/base/NetworkHeaderBase_m.h"
 }}
 
 namespace inet;
 
-class NetworkDatagramBase extends cObject;
+class NetworkHeaderBase extends cObject;
 
-class FloodDatagram extends NetworkDatagramBase
+class FloodDatagram extends NetworkHeaderBase
 {
     @customize(true);
 
