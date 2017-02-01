@@ -100,13 +100,34 @@ The visualization changes to reflect the changes in the access state. It takes o
 
 <p>TODO: do we need this ?</p>
 
-<p>TODO: gif</p>
+<p>
+The handover is displayed on this animation:
+</p>
 
-<pre>
-TODO: you can specify multiple modules... "modules = *.*.wlan[0].mac.ctn[0] *.*.interfaceTable"
+<img src="info1.gif">
 
-this might be an important feature...a note and a screenshot might be enough ?
-</pre>
+<img src="info2.gif">
+
+<p>TODO: what is happening on the animation</p>
+
+<p>
+Multiple submodules can be specified with the visualizer's <i>modules</i> parameter.
+For example, the UDP application's state can be displayed in addition to the channel access state:
+</p>
+
+<div class="snippet">
+*.visualizer.*.infoVisualizer.modules = "*.*.wlan[0].mac.ctn[0] *.*.udpApp[0]"
+</div>
+
+<p>
+This would look like the following:
+</p>
+
+<img src="multiplemodules.png">
+
+<p>
+Here, the visualizer displays the UDP application's number of sent and received packets.
+</p>
 
 <p>TODO: some kind of conclusion like in the other samples</p>
 
