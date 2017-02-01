@@ -78,7 +78,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      **/
     typedef struct tMsgDesc
     {
-        ProbabilisticBroadcastDatagram *pkt;
+        Packet *pkt;
         int nbBcast;    // number of times the present node has passed the
                         // message through a broadcast attempt.
         bool initialSend;    // true if message to be sent for first
@@ -121,12 +121,12 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     /** @brief Returns a network layer packet which encapsulates the upper layer
      *         packet passed to the function.
      **/
-    virtual cPacket *encapsulate(cPacket *msg);
+    virtual void encapsulate(Packet *packet);
 
     /** @brief extracts and returns the application layer packet which is encapsulated
      *         in the network layer packet given in argument, delete network layer packet.
      **/
-    virtual cPacket *decapsulate(ProbabilisticBroadcastDatagram *msg);
+    virtual void decapsulate(Packet *packet);
 
     /** @brief Insert a new message in both known ID list and message queue.
      *         The message comes either from upper layer or from lower layer.
@@ -138,7 +138,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      *  @param iAmInitialSender message comes from upper layer, I am its creator
      *                          and initial sender.
      **/
-    virtual void insertNewMessage(ProbabilisticBroadcastDatagram *pkt, bool iAmInitialSender = false);
+    virtual void insertNewMessage(Packet *packet, bool iAmInitialSender = false);
 
     /**
      * @brief Attaches a "control info" (NetwToMac) structure (object) to the message pMsg.
