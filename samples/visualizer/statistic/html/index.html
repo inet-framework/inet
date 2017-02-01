@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../samples.css">
+<title>Visualizing Statistics Example</title>
+</head>
+
+<body>
+
+<h1><center>Visualizing Statistics Example</center></h1>
+
+<h2>Goals</h2>
+
+<p>
+Statistics collected by submodules can be visualized at nodes, on the top level canvas. Usually statistics are analyzed after that
+the simulation has concluded, but it can be useful to see the values of a statistic as the simulation is running. This could help
+in troubleshooting and verifying simulation models. This example
+contains a configuration that visualizes the round trip time of ping packets.
+</p>
+
+<h2>About the visualizer</h2>
+
+<p>
+The <var>StatisticVisualizer</var> displays and keeps track of the last value of a statistic.
+The <i>sourceFilter</i> parameter selects the submodule which has the statistic.
+The <i>signalName</i> parameter sets a signal to subscribe to.
+The <i>statisticName</i> parameter selects the statistic to display. By default, this is the same
+as the <i>signalName</i> parameter.
+</p>
+
+<p>
+The <var>StatisticVisualizer</var> displays and keeps track of the last value of a statistic.
+It is notified of value changes by subscribing to a signal. The <i>signalName</i> parameter
+select which signal to subscribe to. The <i>sourceFilter</i> parameter selects which modules should
+be the source of the signals it subscribes to. The <i>statisticName</i> parameter selects the statistic
+to be displayed. By default, this is the same as the <i>signalName</i> parameter.
+</p>
+
+<p>
+The visualizer displays the statistic value with a string prefix, selected with the <i>prefix</i> parameter.
+By default, the prefix is the statistic name. The <i>unit</i> parameter selects what unit to display the value in.
+By default, it's the unit of the statistic. Additionally, the displayed value can be limited by the <i>minValue</i>
+and <i>maxValue</i> parameters.
+</p>
+
+</body>
+
+</html>
