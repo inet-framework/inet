@@ -89,6 +89,7 @@ const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 138, &Protocol::manet },
 
     { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol
+    { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });
 
 } // namespace inet

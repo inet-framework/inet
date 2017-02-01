@@ -78,6 +78,7 @@ const Protocol Protocol::dsr("dsr");
 const Protocol Protocol::dymo("dymo");
 const Protocol Protocol::egp("egp");
 const Protocol Protocol::ethernet("ethernet");
+const Protocol Protocol::echo("echo");
 const Protocol Protocol::gnp("gnp");            // INET specific Generic Network Protocol
 const Protocol Protocol::gpsr("gpsr");
 const Protocol Protocol::icmpv4("icmpv4");

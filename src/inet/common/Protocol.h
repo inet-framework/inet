@@ -55,6 +55,7 @@ class INET_API Protocol
     static const Protocol dsdv2;
     static const Protocol dsr;
     static const Protocol dymo;
+    static const Protocol echo;
     static const Protocol egp;
     static const Protocol ethernet;
     static const Protocol gnp;
