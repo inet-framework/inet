@@ -30,7 +30,7 @@
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/wiseroute/WiseRouteDatagram.h"
+#include "inet/networklayer/wiseroute/WiseRouteHeader.h"
 
 namespace inet {
 

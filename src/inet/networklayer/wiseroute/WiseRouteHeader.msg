@@ -24,7 +24,7 @@ namespace inet;
 class noncobject L3Address;
 class NetworkHeaderBase extends cObject;
 
-class WiseRouteDatagram extends NetworkHeaderBase
+class WiseRouteHeader extends NetworkHeaderBase
 {
     @customize(true);
 

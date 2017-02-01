@@ -15,36 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_WISEROUTEDATAGRAM_H
-#define __INET_WISEROUTEDATAGRAM_H
+#ifndef __INET_WiseRouteHeader_H
+#define __INET_WiseRouteHeader_H
 
 #include "inet/networklayer/contract/INetworkDatagram.h"
-#include "inet/networklayer/wiseroute/WiseRouteDatagram_m.h"
+#include "inet/networklayer/wiseroute/WiseRouteHeader_m.h"
 
 namespace inet {
 
 /**
- * Represents an WiseRoute datagram. More info in the WiseRouteDatagram.msg file
+ * Represents an WiseRoute datagram. More info in the WiseRouteHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetworkDatagram
+class INET_API WiseRouteHeader : public WiseRouteHeader_Base, public INetworkDatagram
 {
   public:
-    WiseRouteDatagram() : WiseRouteDatagram_Base() {}
-    WiseRouteDatagram(const WiseRouteDatagram& other) : WiseRouteDatagram_Base(other) {}
-    WiseRouteDatagram& operator=(const WiseRouteDatagram& other) { WiseRouteDatagram_Base::operator=(other); return *this; }
+    WiseRouteHeader() : WiseRouteHeader_Base() {}
+    WiseRouteHeader(const WiseRouteHeader& other) : WiseRouteHeader_Base(other) {}
+    WiseRouteHeader& operator=(const WiseRouteHeader& other) { WiseRouteHeader_Base::operator=(other); return *this; }
 
-    virtual WiseRouteDatagram *dup() const override { return new WiseRouteDatagram(*this); }
+    virtual WiseRouteHeader *dup() const override { return new WiseRouteHeader(*this); }
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const override { return WiseRouteDatagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
+    virtual int getTransportProtocol() const override { return WiseRouteHeader_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { WiseRouteHeader_Base::setTransportProtocol(protocol); };
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_WISEROUTEDATAGRAM_H
+#endif // ifndef __INET_WiseRouteHeader_H
 

@@ -104,7 +104,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 {
     if (msg->getKind() == SEND_ROUTE_FLOOD_TIMER) {
         // Send route flood packet and restart the timer
-        auto pkt = std::make_shared<WiseRouteDatagram>();
+        auto pkt = std::make_shared<WiseRouteHeader>();
         L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
         pkt->setChunkLength(byte(headerLength));
         pkt->setInitialSrcAddr(myNetwAddr);
@@ -134,7 +134,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 void WiseRoute::handleLowerPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    auto netwMsg = std::static_pointer_cast<WiseRouteDatagram>(packet->peekHeader<WiseRouteDatagram>()->dupShared());
+    auto netwMsg = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
     const L3Address& finalDestAddr = netwMsg->getFinalDestAddr();
     const L3Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
     const L3Address& srcAddr = netwMsg->getSrcAddr();
@@ -170,7 +170,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                 pCtrlInfo = packet->removeControlInfo();
                 netwMsg->setNbHops(netwMsg->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
-                packet->popHeader<WiseRouteDatagram>();
+                packet->popHeader<WiseRouteHeader>();
                 p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
                 netwMsg->markImmutable();
                 p->pushHeader(netwMsg);
@@ -198,7 +198,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                 pCtrlInfo = packet->removeControlInfo();
                 netwMsg->setNbHops(netwMsg->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
-                packet->popHeader<WiseRouteDatagram>();
+                packet->popHeader<WiseRouteHeader>();
                 p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
                 netwMsg->markImmutable();
                 p->pushHeader(netwMsg);
@@ -222,7 +222,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
                 netwMsg->setNbHops(netwMsg->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
-                packet->popHeader<WiseRouteDatagram>();
+                packet->popHeader<WiseRouteHeader>();
                 p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
                 netwMsg->markImmutable();
                 p->pushHeader(netwMsg);
@@ -243,7 +243,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
     L3Address finalDestAddr;
     L3Address nextHopAddr;
     MACAddress nextHopMacAddr;
-    auto pkt = std::make_shared<WiseRouteDatagram>();
+    auto pkt = std::make_shared<WiseRouteHeader>();
 
     pkt->setChunkLength(byte(headerLength));
 
@@ -352,7 +352,7 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 
 void WiseRoute::decapsulate(Packet *packet)
 {
-    auto msg = packet->popHeader<WiseRouteDatagram>();
+    auto msg = packet->popHeader<WiseRouteHeader>();
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
