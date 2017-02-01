@@ -16,16 +16,19 @@
 //
 
 cplusplus {{
-   #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
 
 namespace inet;
 
 class noncobject L3Address;
+class FieldsChunk extends cObject;
 
-
-packet NetworkDatagramBase
+class NetworkDatagramBase extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     L3Address srcAddr;
     L3Address destAddr;
 }
