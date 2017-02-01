@@ -392,9 +392,12 @@ void PingApp::sendPingRequest()
             const auto& request = std::make_shared<EchoPacket>();
             request->setChunkLength(byte(4));
             request->setType(ECHO_PROTOCOL_REQUEST);
+            request->markImmutable();
             outPacket->prepend(request);
-            outPacket->append(std::make_shared<cPacketChunk>(msg));
-            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);  //FIXME do not use icmpv4 for generic network protocol
+            auto payload = std::make_shared<cPacketChunk>(msg);
+            payload->markImmutable();
+            outPacket->append(payload);
+            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else
             throw cRuntimeError("INET compiled without Generic Network");
