@@ -1,0 +1,3 @@
+<environment>
+    <object position="min 200 200 0" orientation="0 0 0" shape="cuboid 500 20 20" material="brick" fill-color="203 65 84" opacity="0.8" texture="brick.jpg"/>
+</environment>

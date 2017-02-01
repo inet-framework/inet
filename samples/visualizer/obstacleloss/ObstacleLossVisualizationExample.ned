@@ -37,3 +37,27 @@ network ObstacleLossVisualizationExample
                 @display("p=400,150");
         }
 }
+
+network ObstacleLossB
+{
+    @display("bgb=800,400");
+    submodules:
+        source: AdhocHost {
+            @display("p=250,116");
+        }
+        destination: AdhocHost {
+            @display("p=750,299");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=88,51");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=87,116");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=88,181");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=88,250");
+        }
+}
