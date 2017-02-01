@@ -12,7 +12,7 @@
 #include <map>
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
-#include "inet/networklayer/probabilistic/ProbabilisticBroadcastDatagram.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {

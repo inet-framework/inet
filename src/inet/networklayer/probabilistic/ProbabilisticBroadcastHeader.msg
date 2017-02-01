@@ -24,7 +24,7 @@ namespace inet;
 class noncobject L3Address;
 class NetworkHeaderBase extends cObject;
 
-class ProbabilisticBroadcastDatagram extends NetworkHeaderBase
+class ProbabilisticBroadcastHeader extends NetworkHeaderBase
 {
     @customize(true);
 

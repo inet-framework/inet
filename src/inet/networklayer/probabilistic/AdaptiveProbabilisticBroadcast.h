@@ -45,7 +45,7 @@ class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
     /** @brief Handle self messages */
     virtual void handleSelfMessage(cMessage *msg) override;
 
-    void updateNeighMap(ProbabilisticBroadcastDatagram *m);
+    void updateNeighMap(ProbabilisticBroadcastHeader *m);
 
     void updateBeta();
 

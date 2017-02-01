@@ -15,36 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H
-#define __INET_PROBABILISTICBROADCASTDATAGRAM_H
+#ifndef __INET_ProbabilisticBroadcastHeader_H
+#define __INET_ProbabilisticBroadcastHeader_H
 
 #include "inet/networklayer/contract/INetworkDatagram.h"
-#include "inet/networklayer/probabilistic/ProbabilisticBroadcastDatagram_m.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 
 namespace inet {
 
 /**
- * Represents an ProbabilisticBroadcast datagram. More info in the ProbabilisticBroadcastDatagram.msg file
+ * Represents an ProbabilisticBroadcast datagram. More info in the ProbabilisticBroadcastHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API ProbabilisticBroadcastDatagram : public ProbabilisticBroadcastDatagram_Base, public INetworkDatagram
+class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeader_Base, public INetworkDatagram
 {
   public:
-    ProbabilisticBroadcastDatagram() : ProbabilisticBroadcastDatagram_Base() {}
-    ProbabilisticBroadcastDatagram(const ProbabilisticBroadcastDatagram& other) : ProbabilisticBroadcastDatagram_Base(other) {}
-    ProbabilisticBroadcastDatagram& operator=(const ProbabilisticBroadcastDatagram& other) { ProbabilisticBroadcastDatagram_Base::operator=(other); return *this; }
+    ProbabilisticBroadcastHeader() : ProbabilisticBroadcastHeader_Base() {}
+    ProbabilisticBroadcastHeader(const ProbabilisticBroadcastHeader& other) : ProbabilisticBroadcastHeader_Base(other) {}
+    ProbabilisticBroadcastHeader& operator=(const ProbabilisticBroadcastHeader& other) { ProbabilisticBroadcastHeader_Base::operator=(other); return *this; }
 
-    virtual ProbabilisticBroadcastDatagram *dup() const override { return new ProbabilisticBroadcastDatagram(*this); }
+    virtual ProbabilisticBroadcastHeader *dup() const override { return new ProbabilisticBroadcastHeader(*this); }
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const override { return ProbabilisticBroadcastDatagram_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { ProbabilisticBroadcastDatagram_Base::setTransportProtocol(protocol); };
+    virtual int getTransportProtocol() const override { return ProbabilisticBroadcastHeader_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) override { ProbabilisticBroadcastHeader_Base::setTransportProtocol(protocol); };
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H
+#endif // ifndef __INET_ProbabilisticBroadcastHeader_H
 

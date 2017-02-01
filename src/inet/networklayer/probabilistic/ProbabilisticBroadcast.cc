@@ -55,7 +55,7 @@ void ProbabilisticBroadcast::handleUpperPacket(cPacket *msg)
     // encapsulate message in a network layer packet.
     auto packet = check_and_cast<Packet *>(msg);
     encapsulate(packet);
-    auto pkt = packet->peekHeader<ProbabilisticBroadcastDatagram>();
+    auto pkt = packet->peekHeader<ProbabilisticBroadcastHeader>();
     nbDataPacketsSent++;
     EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleUpperMsg(): Pkt ID = " << pkt->getId() << " TTL = " << pkt->getAppTtl() << endl;
     // submit packet for first insertion in queue.
@@ -66,7 +66,7 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
 {
     MACAddress macSrcAddr;
     auto packet = check_and_cast<Packet *>(msg);
-    auto m = packet->peekHeader<ProbabilisticBroadcastDatagram>();
+    auto m = packet->peekHeader<ProbabilisticBroadcastHeader>();
     auto macAddressInd = packet->getMandatoryTag<MacAddressInd>();
     m->setNbHops(m->getNbHops() + 1);
     macSrcAddr = macAddressInd->getSrcAddress();
@@ -119,7 +119,7 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
         // into a container of type tMsgDesc.
         msgDesc = popFirstMessageUpdateQueue();
         auto packet = msgDesc->pkt;
-        auto pkt = packet->peekHeader<ProbabilisticBroadcastDatagram>();
+        auto pkt = packet->peekHeader<ProbabilisticBroadcastHeader>();
         // if the packet is alive, duplicate it and insert the copy in the queue,
         // then perform a broadcast attempt.
         EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleSelfMsg(): Message ID= " << pkt->getId() << " TTL= " << pkt->getAppTtl() << endl;
@@ -135,7 +135,7 @@ void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
                 // => insert it with delay = TTL. So when the copy will be popped out of the
                 // queue, it will be considered as dead and discarded.
                 auto packetCopy = packet->dup();
-                auto pktCopy = packetCopy->peekHeader<ProbabilisticBroadcastDatagram>();;
+                auto pktCopy = packetCopy->peekHeader<ProbabilisticBroadcastHeader>();;
                 // control info is not duplicated with the message, so we have to re-create one here.
                 setDownControlInfo(packetCopy, MACAddress::BROADCAST_ADDRESS);
                 // it the copy that is re-inserted into the queue so update the container accordingly
@@ -237,7 +237,7 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
 
     EV << "PBr: " << simTime() << " n" << myNetwAddr << "         insertMessage() bcastDelay = " << bcastDelay << " Msg ID = " << msgDesc->pkt->getId() << endl;
     // update TTL field of the message to the value it will have when taken out of the list
-    auto probabilisticBroadcastHeader = msgDesc->pkt->peekHeader<ProbabilisticBroadcastDatagram>();
+    auto probabilisticBroadcastHeader = msgDesc->pkt->peekHeader<ProbabilisticBroadcastHeader>();
     probabilisticBroadcastHeader->setAppTtl(probabilisticBroadcastHeader->getAppTtl() - bcastDelay);
     // insert message ID in ID list.
     knownMsgIds.insert(msgDesc->pkt->getId());
@@ -276,7 +276,7 @@ ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQ
 
 void ProbabilisticBroadcast::encapsulate(Packet *packet)
 {
-    auto pkt = std::make_shared<ProbabilisticBroadcastDatagram>(); // TODO: msg->getName());
+    auto pkt = std::make_shared<ProbabilisticBroadcastHeader>(); // TODO: msg->getName());
     cObject *controlInfo = packet->removeControlInfo();
     L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
 
@@ -300,7 +300,7 @@ void ProbabilisticBroadcast::encapsulate(Packet *packet)
 
 void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSender)
 {
-    auto pkt = packet->peekHeader<ProbabilisticBroadcastDatagram>();
+    auto pkt = packet->peekHeader<ProbabilisticBroadcastHeader>();
     simtime_t ttl = pkt->getAppTtl();
 
     if (ttl > 0) {
@@ -336,7 +336,7 @@ void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSen
 
 void ProbabilisticBroadcast::decapsulate(Packet *packet)
 {
-    auto msg = packet->peekHeader<ProbabilisticBroadcastDatagram>();
+    auto msg = packet->peekHeader<ProbabilisticBroadcastHeader>();
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
     packet->ensureTag<L3AddressInd>()->setSrcAddress(msg->getSrcAddr());

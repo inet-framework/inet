@@ -31,14 +31,14 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
 
 void AdaptiveProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
 {
-    ProbabilisticBroadcastDatagram *m = check_and_cast<ProbabilisticBroadcastDatagram *>(msg);
+    ProbabilisticBroadcastHeader *m = check_and_cast<ProbabilisticBroadcastHeader *>(msg);
     // Update neighbors table before calling the method of the super class
     // because it may delete the message.
     updateNeighMap(m);
     ProbabilisticBroadcast::handleLowerPacket(msg);
 }
 
-void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastDatagram *m)
+void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastHeader *m)
 {
     //find the network address of the node who sent the msg
     NeighborMap::key_type nodeAddress = m->getSrcAddr();
