@@ -62,7 +62,7 @@ std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length) const
 std::string Chunk::str() const
 {
     std::ostringstream os;
-    os << "Chunk, length = " << getChunkLength();
+    os << getClassName() << ", length = " << getChunkLength();
     return os.str();
 }
 
