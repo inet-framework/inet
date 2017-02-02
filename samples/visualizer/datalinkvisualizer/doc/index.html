@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="../../samples.css">
 	<title>Data link visualizer example</title>
 	<link rel="stylesheet" type="text/css" href="../../etc/samples.css">
 </head>
@@ -11,7 +13,31 @@
 
 	<p>
 		This example simulation demonstrates ...
+        <!--
+            Miért jó ez a visualizer?
+            A datalinkVisualizer-rel ránézésre meg tudjuk állapítani, hogy melyek az aktív második rétegbeli linkek a hálózatban.
+            Könnyen azonosítani tudjuk a hálózatban lévő adatkapcsolati rétegben létrejött kapcsolatokat.
+            Wireless hálózatokban különösen hasznos, mert láthatjuk, hogy melyik eszköz melyik eszköznek küldött vmilyen csomagot.
+            Vezetékes kapcsolatoknál is segít, ha pl. egy csomag nem jut el, egy állomásból egy másik távoli állomáshoz, 
+            akkor könnyedén azonosíthatjuk, hogy hol akad el a csomag.
+
+            Mit mutat be a sample?
+            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.
+            
+        -->
 	</p>
+
+    <p><h2>About the visualizer</h2></p>
+        The <code><strong>datalinkVisualizer</strong></code> ...        
+        <!--
+            Mi ez a visualizer?
+            A datalinkVisualizer-rel nyilvántarthatjuk az aktív kapcsolatokat a hálózatunkban.
+            Akkor alakul ki link két eszköz között, amikor egy csomag az egyik eszköz adatkapcs. rétegétől a másik eszköz adatkapcs. rétegébe érkezik.
+            A kapcsolatokat folyamatos nyilak reprezentálják.
+            Szűrni tudjuk, hogy milyen típusú csomagok esetén figyelje a link kialakulását.
+            A linkVisualizer leszármazottja, ebből adódóan az összes ilyen tulajdonságát testreszabhatjuk, mint pl. nyíl típusa, packet/nodefilter...
+            Több visualizer-t is elhelyezhetünk a szimulációban, ezzel jobban áttekinthetővé téve az adatkapcsolati rétegben létrejött kapcsolatokat.
+        -->
 
 	<p><h2>The model</h2></p>
 
