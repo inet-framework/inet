@@ -21,6 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 
@@ -60,14 +61,14 @@ class INET_API INetfilter
          * a datagram that was received from the lower layer. The nextHopAddress
          * is ignored when the outputInterfaceEntry is nullptr.
          */
-        virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
 
         /**
          * This is the second hook called by the network protocol before it sends
          * a datagram to the lower layer. This is done after the datagramPreRoutingHook
          * or the datagramLocalInHook is called and the datagram is routed.
          */
-        virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
 
         /**
          * This is the last hook called by the network protocol before it sends
@@ -87,7 +88,7 @@ class INET_API INetfilter
          * a datagram that was received from the upper layer. The nextHopAddress
          * is ignored when the outputInterfaceEntry is a nullptr. After this is done
          */
-        virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
     };
 
     virtual ~INetfilter() {}
@@ -115,7 +116,7 @@ class INET_API INetfilter
      * function may be used by a reactive routing protocol when it completes the
      * route discovery process.
      */
-    virtual void reinjectQueuedDatagram(const Packet *datagram) = 0;
+    virtual void reinjectQueuedDatagram(const Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header) = 0;
 };
 
 class INET_API NetfilterBase : public INetfilter {
