@@ -206,7 +206,7 @@ void IdealMac::handleLowerPacket(cPacket *msg)
         return;
     }
 
-    if (!dropFrameNotForUs(frame.get())) {
+    if (!dropFrameNotForUs(packet)) {
         int senderModuleId = frame->getSrcModuleId();
         IdealMac *senderMac = dynamic_cast<IdealMac *>(getSimulation()->getModule(senderModuleId));
         // TODO: this whole out of bounds ack mechanism is fishy
@@ -223,6 +223,8 @@ void IdealMac::handleSelfMessage(cMessage *message)
 {
     if (message == ackTimeoutMsg) {
         EV_DETAIL << "IdealMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
+        auto idealMacHeader = lastSentPk->popHeader<IdealMacHeader>();
+        lastSentPk->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
         // packet lost
         emit(NF_LINK_BREAK, lastSentPk);
         delete lastSentPk;
@@ -270,8 +272,9 @@ void IdealMac::encapsulate(Packet *packet)
     packet->pushHeader(idealMacHeader);
 }
 
-bool IdealMac::dropFrameNotForUs(IdealMacHeader *frame)
+bool IdealMac::dropFrameNotForUs(Packet *packet)
 {
+    auto frame = packet->peekHeader<IdealMacHeader>();
     // Current implementation does not support the configuration of multicast
     // MAC address groups. We rather accept all multicast frames (just like they were
     // broadcasts) and pass it up to the higher layer where they will be dropped
@@ -288,9 +291,8 @@ bool IdealMac::dropFrameNotForUs(IdealMacHeader *frame)
     if (promiscuous || frame->getDest().isMulticast())
         return false;
 
-    EV << "Frame `" << frame->getName() << "' not destined to us, discarding\n";
-    emit(dropPkNotForUsSignal, frame);
-    delete frame;
+    EV << "Frame `" << packet->getName() << "' not destined to us, discarding\n";
+    emit(dropPkNotForUsSignal, packet);
     return true;
 }
 

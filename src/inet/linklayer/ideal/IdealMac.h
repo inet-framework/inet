@@ -56,7 +56,7 @@ class INET_API IdealMac : public MACProtocolBase
     IPassiveQueue *queueModule = nullptr;
 
     int outStandingRequests = 0;
-    cPacket *lastSentPk = nullptr;
+    Packet *lastSentPk = nullptr;
     simtime_t ackTimeout;
     cMessage *ackTimeoutMsg = nullptr;
 
@@ -69,7 +69,7 @@ class INET_API IdealMac : public MACProtocolBase
     //@}
 
     virtual void startTransmitting(Packet *msg);
-    virtual bool dropFrameNotForUs(IdealMacHeader *frame);
+    virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
     virtual void initializeMACAddress();
