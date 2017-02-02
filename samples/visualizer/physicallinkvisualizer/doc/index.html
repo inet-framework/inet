@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="../../samples.css">
 	<title>Physical link visualizer example</title>
-	<link rel="stylesheet" type="text/css" href="../../etc/samples.css">
 </head>
 
 <body>
@@ -11,7 +12,31 @@
 
 	<p>
 		This example simulation demonstrates ...
+        <!--
+            Miért jó ez a visualizer?
+            A physicalLinkVisualizer-rel ránézésre meg tudjuk állapítani, hogy melyek az aktív első rétegbeli linkek a hálózatban.
+            Könnyen azonosítani tudjuk a hálózatban lévő fizikai rétegben létrejött kapcsolatokat.
+            Meg tudjuk állapítani, hogy egy adott üzenetet mely eszköz vett. Ez wireless hálózatoknál hasznos pl., mert látjuk, 
+            hogy ki veszi az AP által küldött csomagokat.
+            Eszközről eszközre tudjuk követni egy csomag útját, ennek segítségével esetenként fizikai rétegbeli hibákra tudunk következtetni.
+
+            Mit mutat be a sample?
+            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyik különböző funkciókat mutat be.
+            
+        -->
 	</p>
+
+    <p><h2>About the visualizer</h2></p>
+        The <code><strong>physicalLinkVisualizer</strong></code> ...        
+        <!--
+            Mi ez a visualizer?
+            A physicalLinkVisualizer-rel nyilvántarthatjuk az aktív kapcsolatokat a hálózatunkban.
+            Akkor alakul ki link két eszköz között, amikor egy csomag az egyik eszköz fizikai rétegétől a másik eszköz fizikai rétegébe érkezik.
+            A kapcsolatokat pontozott nyilak reprezentálják.
+            Szűrni tudjuk, hogy milyen típusú csomagok esetén figyelje a link kialakulását.
+            A linkVisualizer leszármazottja, ebből adódóan az összes ilyen tulajdonságát testreszabhatjuk, mint pl. nyíl típusa, packet/nodefilter...
+            Több visualizer-t is elhelyezhetünk a szimulációban, ezzel jobban áttekinthetővé téve az fizikai rétegben létrejött kapcsolatokat.
+        -->
 
 	<p><h2>The model</h2></p>
 
