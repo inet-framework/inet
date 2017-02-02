@@ -45,3 +45,17 @@ network MobilityVisualizerSimple
         }
 }
 
+//
+// TODO documentation
+//
+network MobilityVisualizerExtended extends MobilityVisualizerSimple
+{
+    submodules:
+        host1: AdhocHost {
+            @display("p=538,158");
+        }
+        host2: AdhocHost {
+            @display("p=552,345");
+        }
+}
+
