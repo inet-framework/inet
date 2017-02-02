@@ -436,6 +436,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
     // TODO: kludge to make isUpperMessage work
     frame->setArrival(frame->getArrivalModuleId(), frame->getArrivalGateId());
 
+    macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(frame->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     macHeader->setTransmitterAddress(address);
     macHeader->setReceiverAddress(frame->getMandatoryTag<MacAddressReq>()->getDestAddress());
     auto upReq = frame->getTag<UserPriorityReq>();
@@ -450,6 +451,7 @@ void CsmaCaMac::decapsulate(Packet *frame)
     addressInd->setSrcAddress(macHeader->getTransmitterAddress());
     addressInd->setDestAddress(macHeader->getReceiverAddress());
     frame->ensureTag<UserPriorityInd>()->setUserPriority(macHeader->getPriority());
+    frame->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
 }
 
 /****************************************************************
