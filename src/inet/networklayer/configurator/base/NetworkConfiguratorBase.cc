@@ -20,6 +20,7 @@
 
 #include <set>
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"
@@ -34,6 +35,7 @@
 #include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/idealradio/IdealPhyHeader_m.h"
 #endif
 
 namespace inet {
@@ -388,7 +390,13 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
             Packet *transmittedFrame = new Packet();
-            transmittedFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
+            auto byteCountChunk = std::make_shared<ByteCountChunk>(byte(transmitterInterfaceInfo->interfaceEntry->getMTU()));
+            byteCountChunk->markImmutable();
+            transmittedFrame->append(byteCountChunk);
+            // KLUDGE: call transmitter->createPhyHeader();
+            auto phyHeader = std::make_shared<IdealPhyHeader>();
+            phyHeader->markImmutable();
+            transmittedFrame->pushHeader(phyHeader);
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
