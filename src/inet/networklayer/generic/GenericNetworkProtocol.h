@@ -167,7 +167,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *datagram) override;
-    virtual void reinjectQueuedDatagram(const Packet *datagram) override;
+    virtual void reinjectQueuedDatagram(const Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header) override;
 
   protected:
     /**
