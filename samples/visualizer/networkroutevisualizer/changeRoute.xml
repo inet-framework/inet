@@ -1,0 +1,14 @@
+<scenario>
+    <at t="5">
+        <tell module="lifecycleController" target="router1" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="10">
+        <tell module="lifecycleController" target="router1" operation="NodeStartOperation"/>
+    </at>
+    <at t="15">
+        <tell module="lifecycleController" target="router3" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="20">
+        <tell module="lifecycleController" target="router3" operation="NodeStartOperation"/>
+    </at>
+</scenario>
