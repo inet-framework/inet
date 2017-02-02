@@ -31,7 +31,7 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 network DatalinkVisualizerSimple
 {
-    @display("bgb=895,311");
+    @display("bgb=900,300");
     submodules:
         wirelessSource: AdhocHost {
             @display("p=316,80");
@@ -67,7 +67,7 @@ network DatalinkVisualizerSimple
 //
 network DatalinkVisualizerExtended
 {
-    @display("bgb=895,311");
+    @display("bgb=900,300");
     submodules:
         linkVisualizer: DataLinkVisualizer {
             parameters:
@@ -98,13 +98,8 @@ network DatalinkVisualizerExtended
 //
 network ComplexDataLinkVisualizerInfrastructure
 {
-    @display("bgb=895,600");
+    @display("bgb=900,600");
     submodules:
-        // this visualize communication ranges
-        //        visualizer: IntegratedVisualizer {
-        //            parameters:
-        //                @display("p=100,450");
-        //        }
         linkVisualizer1: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
