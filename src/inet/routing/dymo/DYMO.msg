@@ -18,16 +18,19 @@
 //
 
 cplusplus {{
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/dymo/DYMOdefs.h"
 }}
 
+namespace inet;
+
+class FieldsChunk extends cObject;
+
 namespace inet::dymo;
 
 class noncobject L3Address;
-
 class noncobject DYMOSequenceNumber;
-
 class noncobject DYMOMetricType;
 
 //
@@ -70,11 +73,12 @@ message RREQHolddownTimer extends RREQTimer {
 // DYMO packets
 //
 
-packet DYMOPacket {
+class DYMOPacket extends FieldsChunk {
+    bit chunkLength @overridegetter;
     int hopLimit;
 }
 
-packet RteMsg extends DYMOPacket {
+class RteMsg extends DYMOPacket {
     int hopCount;
     AddressBlock originatorNode;
     AddressBlock targetNode;
@@ -84,24 +88,24 @@ packet RteMsg extends DYMOPacket {
 //
 // DYMO RREQ packet
 //
-packet RREQ extends RteMsg {
+class RREQ extends RteMsg {
 }
 
 //
 // DYMO RREP packet
 //
-packet RREP extends RteMsg {
+class RREP extends RteMsg {
 }
 
 //
 // DYMO RREP ACK packet
 //
-packet RREP_ACK extends DYMOPacket {
+class RREP_ACK extends DYMOPacket {
 }
 
 //
 // DYMO RERR packet
 //
-packet RERR extends DYMOPacket {
+class RERR extends DYMOPacket {
     AddressBlock unreachableNode[];
 }

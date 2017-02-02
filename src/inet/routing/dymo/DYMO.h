@@ -90,7 +90,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     DYMOSequenceNumber sequenceNumber;
     std::map<L3Address, DYMOSequenceNumber> targetAddressToSequenceNumber;
     std::map<L3Address, RREQTimer *> targetAddressToRREQTimer;
-    std::multimap<L3Address, INetworkDatagram *> targetAddressToDelayedPackets;
+    std::multimap<L3Address, std::pair<Packet *, std::shared_ptr<IPv4Header>>> targetAddressToDelayedPackets;
     std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
 
   public:
@@ -116,9 +116,9 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     bool hasOngoingRouteDiscovery(const L3Address& target);
 
     // handling IP datagrams
-    void delayDatagram(INetworkDatagram *datagram);
-    void reinjectDelayedDatagram(INetworkDatagram *datagram);
-    void dropDelayedDatagram(INetworkDatagram *datagram);
+    void delayDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
+    void reinjectDelayedDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
+    void dropDelayedDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
     void eraseDelayedDatagrams(const L3Address& target);
     bool hasDelayedDatagrams(const L3Address& target);
 
@@ -145,45 +145,45 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
 
     // handling UDP packets
     void sendUDPPacket(cPacket *packet, double delay);
-    void processUDPPacket(FlatPacket *packet);
+    void processUDPPacket(Packet *packet);
 
     // handling DYMO packets
-    void sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
-    void processDYMOPacket(DYMOPacket *packet);
+    void sendDYMOPacket(const std::shared_ptr<DYMOPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
+    void processDYMOPacket(Packet *packet, const std::shared_ptr<DYMOPacket>& dymoPacket);
 
     // handling RteMsg packets
-    bool permissibleRteMsg(RteMsg *rteMsg);
-    void processRteMsg(RteMsg *rteMsg);
-    int computeRteMsgBitLength(RteMsg *rteMsg);
+    bool permissibleRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg);
+    void processRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg);
+    bit computeRteMsgLength(const std::shared_ptr<RteMsg>& rteMsg);
 
     // handling RREQ packets
-    RREQ *createRREQ(const L3Address& target, int retryCount);
-    void sendRREQ(RREQ *rreq);
-    void processRREQ(RREQ *rreq);
-    int computeRREQBitLength(RREQ *rreq);
+    std::shared_ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
+    void sendRREQ(const std::shared_ptr<RREQ>& rreq);
+    void processRREQ(Packet *packet, const std::shared_ptr<RREQ>& rreq);
+    bit computeRREQLength(const std::shared_ptr<RREQ> &rreq);
 
     // handling RREP packets
-    RREP *createRREP(RteMsg *rteMsg);
-    RREP *createRREP(RteMsg *rteMsg, IRoute *route);
-    void sendRREP(RREP *rrep);
-    void sendRREP(RREP *rrep, IRoute *route);
-    void processRREP(RREP *rrep);
-    int computeRREPBitLength(RREP *rrep);
+    std::shared_ptr<RREP> createRREP(const std::shared_ptr<RteMsg>& rteMsg);
+    std::shared_ptr<RREP> createRREP(const std::shared_ptr<RteMsg>& rteMsg, IRoute *route);
+    void sendRREP(const std::shared_ptr<RREP>& rrep);
+    void sendRREP(const std::shared_ptr<RREP>& rrep, IRoute *route);
+    void processRREP(Packet *packet, const std::shared_ptr<RREP>& rrep);
+    bit computeRREPLength(const std::shared_ptr<RREP> &rrep);
 
     // handling RERR packets
-    RERR *createRERR(std::vector<L3Address>& addresses);
-    void sendRERR(RERR *rerr);
+    std::shared_ptr<RERR> createRERR(std::vector<L3Address>& addresses);
+    void sendRERR(const std::shared_ptr<RERR>& rerr);
     void sendRERRForUndeliverablePacket(const L3Address& destination);
     void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
-    void processRERR(RERR *rerr);
-    int computeRERRBitLength(RERR *rerr);
+    void processRERR(Packet *packet, const std::shared_ptr<RERR>& rerr);
+    bit computeRERRLength(const std::shared_ptr<RERR>& rerr);
 
     // handling routes
-    IRoute *createRoute(RteMsg *rteMsg, AddressBlock& addressBlock);
-    void updateRoutes(RteMsg *rteMsg, AddressBlock& addressBlock);
-    void updateRoute(RteMsg *rteMsg, AddressBlock& addressBlock, IRoute *route);
+    IRoute *createRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
+    void updateRoutes(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
+    void updateRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock, IRoute *route);
     int getLinkCost(const InterfaceEntry *interfaceEntry, DYMOMetricType metricType);
-    bool isLoopFree(RteMsg *rteMsg, IRoute *route);
+    bool isLoopFree(const std::shared_ptr<RteMsg>& rteMsg, IRoute *route);
 
     // handling expunge timer
     void processExpungeTimer();
@@ -201,21 +201,21 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     bool isClientAddress(const L3Address& address);
 
     // added node
-    void addSelfNode(RteMsg *rteMsg);
-    void addNode(RteMsg *rteMsg, AddressBlock& addressBlock);
+    void addSelfNode(const std::shared_ptr<RteMsg>& rteMsg);
+    void addNode(const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
 
     // sequence number
     void incrementSequenceNumber();
 
     // routing
-    Result ensureRouteForDatagram(INetworkDatagram *datagram);
+    Result ensureRouteForDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
 
     // netfilter
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
+    virtual Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
 
     // lifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
