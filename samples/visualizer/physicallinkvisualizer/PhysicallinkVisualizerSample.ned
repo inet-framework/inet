@@ -31,7 +31,7 @@ import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 //
 network PhysicallinkVisualizerSimple
 {
-    @display("bgb=895,311");
+    @display("bgb=900,300");
     submodules:
         wirelessSource: AdhocHost {
             @display("p=316,80");
@@ -71,7 +71,7 @@ network PhysicallinkVisualizerSimple
 //
 network PhysicallinkVisualizerExtended
 {
-    @display("bgb=895,311");
+    @display("bgb=900,300");
     submodules:
         linkVisualizer: PhysicalLinkVisualizer {
             parameters:
@@ -103,7 +103,7 @@ network PhysicallinkVisualizerExtended
 //
 network ComplexPhysicalLinkVisualizerInfrastructure
 {
-    @display("bgb=895,600");
+    @display("bgb=900,600");
     submodules:
         linkVisualizer1: PhysicalLinkVisualizer {
             parameters:
