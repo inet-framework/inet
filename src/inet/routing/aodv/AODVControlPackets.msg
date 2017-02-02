@@ -17,12 +17,13 @@
 //
 
 cplusplus {{
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 }}
 
 namespace inet;
 
-class Chunk extends cObject;
+class FieldsChunk extends cObject;
 class noncobject L3Address;
 
 //
@@ -45,8 +46,9 @@ enum AODVControlPacketType
 //
 // Base packet for AODV Control Packets
 //
-class AODVControlPacket extends Chunk
+class AODVControlPacket extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     unsigned int packetType;
 }
 

@@ -130,7 +130,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     bool isOperational = false;
 
     // internal
-    std::multimap<L3Address, INetworkDatagram *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
+    std::multimap<L3Address, std::pair<Packet *, std::shared_ptr<IPv4Header>>> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
 
   protected:
     void handleMessage(cMessage *msg) override;
@@ -151,29 +151,29 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     void expungeRoutes();
 
     /* Control packet creators */
-    AODVRREPACK *createRREPACK();
-    AODVRREP *createHelloMessage();
-    AODVRREQ *createRREQ(const L3Address& destAddr);
-    AODVRREP *createRREP(AODVRREQ *rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
-    AODVRREP *createGratuitousRREP(AODVRREQ *rreq, IRoute *originatorRoute);
-    AODVRERR *createRERR(const std::vector<UnreachableNode>& unreachableNodes);
+    std::shared_ptr<AODVRREPACK> createRREPACK();
+    std::shared_ptr<AODVRREP> createHelloMessage();
+    std::shared_ptr<AODVRREQ> createRREQ(const L3Address& destAddr);
+    std::shared_ptr<AODVRREP> createRREP(const std::shared_ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
+    std::shared_ptr<AODVRREP> createGratuitousRREP(const std::shared_ptr<AODVRREQ>& rreq, IRoute *originatorRoute);
+    std::shared_ptr<AODVRERR> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 
     /* Control Packet handlers */
-    void handleRREP(AODVRREP *rrep, const L3Address& sourceAddr);
-    void handleRREQ(AODVRREQ *rreq, const L3Address& sourceAddr, unsigned int timeToLive);
-    void handleRERR(AODVRERR *rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(AODVRREP *helloMessage);
-    void handleRREPACK(AODVRREPACK *rrepACK, const L3Address& neighborAddr);
+    void handleRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& sourceAddr);
+    void handleRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
+    void handleRERR(const std::shared_ptr<AODVRERR>& rerr, const L3Address& sourceAddr);
+    void handleHelloMessage(const std::shared_ptr<AODVRREP>& helloMessage);
+    void handleRREPACK(const std::shared_ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
-    void sendRREQ(AODVRREQ *rreq, const L3Address& destAddr, unsigned int timeToLive);
-    void sendRREPACK(AODVRREPACK *rrepACK, const L3Address& destAddr);
-    void sendRREP(AODVRREP *rrep, const L3Address& destAddr, unsigned int timeToLive);
-    void sendGRREP(AODVRREP *grrep, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREPACK(const std::shared_ptr<AODVRREPACK>& rrepACK, const L3Address& destAddr);
+    void sendRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void sendGRREP(const std::shared_ptr<AODVRREP>& grrep, const L3Address& destAddr, unsigned int timeToLive);
 
     /* Control Packet forwarders */
-    void forwardRREP(AODVRREP *rrep, const L3Address& destAddr, unsigned int timeToLive);
-    void forwardRREQ(AODVRREQ *rreq, unsigned int timeToLive);
+    void forwardRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void forwardRREQ(const std::shared_ptr<AODVRREQ>& rreq, unsigned int timeToLive);
 
     /* Self message handlers */
     void handleRREPACKTimer();
@@ -187,17 +187,17 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
-    Result ensureRouteForDatagram(INetworkDatagram *datagram);
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
-    void delayDatagram(INetworkDatagram *datagram);
+    Result ensureRouteForDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
+    virtual Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
+    virtual Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
+    virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
+    void delayDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
-    void sendAODVPacket(AODVControlPacket *packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
+    void sendAODVPacket(const std::shared_ptr<AODVControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void clearState();
 
     /* Lifecycle */
