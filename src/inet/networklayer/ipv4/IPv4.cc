@@ -220,7 +220,7 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
 
     const InterfaceEntry *destIE = nullptr;
     L3Address nextHop(IPv4Address::UNSPECIFIED_ADDRESS);
-    if (datagramPreRoutingHook(packet, fromIE, destIE, nextHop) == INetfilter::IHook::ACCEPT)
+    if (datagramPreRoutingHook(packet, ipv4Header, fromIE, destIE, nextHop) == INetfilter::IHook::ACCEPT)
         preroutingFinish(packet, fromIE, destIE, nextHop.toIPv4());
 }
 
@@ -331,7 +331,7 @@ void IPv4::handlePacketFromHL(Packet *packet)
 
     // TODO:
     L3Address nextHopAddr(IPv4Address::UNSPECIFIED_ADDRESS);
-    if (datagramLocalOutHook(packet, destIE, nextHopAddr) == INetfilter::IHook::ACCEPT)
+    if (datagramLocalOutHook(packet, ipv4Header, destIE, nextHopAddr) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet, ipv4Header, destIE, nextHopAddr.toIPv4());
 }
 
@@ -460,7 +460,7 @@ void IPv4::routeUnicastPacket(Packet *packet, const std::shared_ptr<IPv4Header>&
     else {    // fragment and send
         L3Address nextHop(nextHopAddr);
         if (fromIE != nullptr) {
-            if (datagramForwardHook(packet, fromIE, destIE, nextHop) != INetfilter::IHook::ACCEPT)
+            if (datagramForwardHook(packet, ipv4Header, fromIE, destIE, nextHop) != INetfilter::IHook::ACCEPT)
                 return;
             nextHopAddr = nextHop.toIPv4();
         }
@@ -968,14 +968,13 @@ void IPv4::dropQueuedDatagram(const Packet *packet)
     }
 }
 
-void IPv4::reinjectQueuedDatagram(const Packet *packet)
+void IPv4::reinjectQueuedDatagram(const Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header)
 {
     Enter_Method("reinjectDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == packet) {
             auto *qPacket = iter->datagram;
             take(qPacket);
-            const auto& ipv4Header = qPacket->peekHeader<IPv4Header>();
             switch (iter->hookType) {
                 case INetfilter::IHook::LOCALOUT:
                     datagramLocalOut(qPacket, ipv4Header, iter->outIE, iter->nextHopAddr);
@@ -1007,10 +1006,10 @@ void IPv4::reinjectQueuedDatagram(const Packet *packet)
     }
 }
 
-INetfilter::IHook::Result IPv4::datagramPreRoutingHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramPreRoutingHook(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramPreRoutingHook(packet, inIE, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramPreRoutingHook(packet, ipv4Header, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1033,10 +1032,10 @@ INetfilter::IHook::Result IPv4::datagramPreRoutingHook(Packet *packet, const Int
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramForwardHook(datagram, ipv4Header, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
@@ -1170,10 +1169,10 @@ INetfilter::IHook::Result IPv4::datagramLocalInHook(Packet *packet, const Interf
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramLocalOutHook(Packet *packet, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalOutHook(packet, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramLocalOutHook(packet, ipv4Header, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
