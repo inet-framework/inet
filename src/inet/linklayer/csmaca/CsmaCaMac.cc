@@ -16,7 +16,9 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriority.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -432,16 +434,15 @@ void CsmaCaMac::encapsulate(Packet *frame)
 {
     auto macHeader = std::make_shared<CsmaCaMacDataHeader>();
     macHeader->setChunkLength(byte(headerLength));
-
-    // TODO: kludge to make isUpperMessage work
-    frame->setArrival(frame->getArrivalModuleId(), frame->getArrivalGateId());
-
+    auto dest = frame->getMandatoryTag<MacAddressReq>()->getDestAddress();
     macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(frame->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     macHeader->setTransmitterAddress(address);
     macHeader->setReceiverAddress(frame->getMandatoryTag<MacAddressReq>()->getDestAddress());
     auto upReq = frame->getTag<UserPriorityReq>();
     int up = upReq == nullptr ? UP_BE : upReq->getUserPriority();
     macHeader->setPriority(up == -1 ? UP_BE : up);  // -1 is unset
+    macHeader->markImmutable();
+    frame->pushHeader(macHeader);
 }
 
 void CsmaCaMac::decapsulate(Packet *frame)
@@ -450,6 +451,7 @@ void CsmaCaMac::decapsulate(Packet *frame)
     auto addressInd = frame->ensureTag<MacAddressInd>();
     addressInd->setSrcAddress(macHeader->getTransmitterAddress());
     addressInd->setDestAddress(macHeader->getReceiverAddress());
+    frame->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     frame->ensureTag<UserPriorityInd>()->setUserPriority(macHeader->getPriority());
     frame->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
 }
