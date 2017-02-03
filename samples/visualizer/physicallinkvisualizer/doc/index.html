@@ -9,9 +9,14 @@
 	<h1><center>Physical link visualizer example</center></h1>
 
 	<p><h2>Goals</h2></p>
-
-	<p>
-		This example simulation demonstrates ...
+    <p> Visualizing physical links is useful, because based on this we can determine the first layer links in the network.
+        We can identify at a glance which nodes received a packet.
+        It is especially helpful in wireless networks e.g we can see which nodes are able to receive a packet from the access point.
+    </p>
+    <p>    
+        The example consists of 3 simulation models, each demonstrating different features of physical link visualization.
+    </p>
+	    
         <!--
             Miért jó ez a visualizer?
             A physicalLinkVisualizer-rel ránézésre meg tudjuk állapítani, hogy melyek az aktív első rétegbeli linkek a hálózatban.
@@ -21,13 +26,22 @@
             Eszközről eszközre tudjuk követni egy csomag útját, ennek segítségével esetenként fizikai rétegbeli hibákra tudunk következtetni.
 
             Mit mutat be a sample?
-            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyik különböző funkciókat mutat be.
-            
+            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyik különböző funkciókat mutat be.           
         -->
-	</p>
 
     <p><h2>About the visualizer</h2></p>
-        The <code><strong>physicalLinkVisualizer</strong></code> ...        
+    <p>
+        The <code><strong>physicalLinkVisualizer</strong></code> keeps track of active physical links in a network.
+        A link becomes active between two nodes when a packet arrives at the receiver node's physical link layer from the source node's physical link layer.
+        By default links are not displayed, we can enable their visualization by switching the <i>displayLinks</i> parameter to true.
+    </p>
+    <p> 
+        The links are represented visually by dotted arrows.
+        The arrow's starting point is the sender node and its endpoint is the receiver node.
+        The visualizer has filtering parameters, like <i>nodeFilter</i>, <i>interfaceFilter</i> and <i>packetFilter</i>.
+        Using these we can specify which physical links are shown. By default all nodes, all interfaces and all packets are considered for displaying physical links.
+        It is possible to use logical expressions as the filter's parameter, e.g <i>packetFilter = "ping* or tcp*"</i> shows the ping and the tcp physical links.
+    </p>     
         <!--
             Mi ez a visualizer?
             A physicalLinkVisualizer-rel nyilvántarthatjuk az aktív kapcsolatokat a hálózatunkban.
@@ -38,21 +52,15 @@
             Több visualizer-t is elhelyezhetünk a szimulációban, ezzel jobban áttekinthetővé téve az fizikai rétegben létrejött kapcsolatokat.
         -->
 
-	<p><h2>The model</h2></p>
+	<p><h2>Sample 1</h2></p>
 
-<p></p>
+    <p>
+    </p>
 
-<p><b>The network</b></p>
+    <p><h2>More information</h2></p>
 
-	<p>The network contains ...</p>
-
-<p><b>Configuration</b></p>
-
-<p></p>
-
-<p><h2>Results</h2></p>
-
-<p></p>
+    <p>
+    </p>
 
 </body>
 </html>
