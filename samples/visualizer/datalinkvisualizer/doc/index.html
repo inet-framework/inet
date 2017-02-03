@@ -11,11 +11,14 @@
 
 	<p><h2>Goals</h2></p>
 
-	<p>
-		Visualizing data links is useful, because based on this we can determine the second layer links in the network.
+	<p> 
+        Visualizing data links is useful, because based on this we can determine the second layer links in the network.
         It is especially useful in wireless networks, because we can see which devices communicate with each other.
         In wired networks it is also helpful, e.g when a packet doesn't reach the destination node. In this case we can see at a glance where the communication is jammed.
-
+    </p>
+    <p>    
+        The example consists of 3 simulation models, each demonstrating different features of physical link visualization.
+    </p>
         <!--
             Miért jó ez a visualizer?
             A datalinkVisualizer-rel ránézésre meg tudjuk állapítani, hogy melyek az aktív második rétegbeli linkek a hálózatban.
@@ -26,24 +29,24 @@
             A visualizer két szomszédos eszköz között működik, így lépésről-lépésre követhetjük a csomag útvonalát.
 
             Mit mutat be a sample?
-            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.
-            
+            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.         
         -->
-	</p>
-
+	
     <p><h2>About the visualizer</h2></p>
     
-    <p> The <code><strong>datalinkVisualizer</strong></code> keeps track of active data links in a network.
+    <p> 
+        The <code><strong>datalinkVisualizer</strong></code> keeps track of active data links in a network.
         A link becomes active between two nodes when a packet arrives at the receiver node's data link layer from the source node's data link layer.
-        By default links are not displayed, we can enable their visualization by switching the <i>displayLinks</i> parameter to true. </p>
-        
-    <p> The links are represented visually by solid arrows.
+        By default links are not displayed, we can enable their visualization by switching the <i>displayLinks</i> parameter to true.
+    </p>   
+    <p> 
+        The links are represented visually by solid arrows.
         The arrow's starting point is the sender node and its endpoint is the receiver node.
         The visualizer has filtering parameters, like <i>nodeFilter</i>, <i>interfaceFilter</i> and <i>packetFilter</i>.
-        Using these we can specify which data links are shown. By default all nodes, all interfaces and all packets are considered to display data links.
-        It is possible to use a logical expression as the parameter of a filter e.g <i>packetFilter = "(ping*) or (tcp*)"</i>.</p>
+        Using these we can specify which data links are shown. By default all nodes, all interfaces and all packets are considered for displaying data links.
+        It is possible to use logical expressions as the filter's parameter, e.g <i>packetFilter = "ping* or tcp*"</i> shows the ping and the tcp data links.
+    </p>
         
-
         <!--
             Mi ez a visualizer?
             A datalinkVisualizer-rel nyilvántarthatjuk az aktív kapcsolatokat a hálózatunkban.
