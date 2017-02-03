@@ -113,8 +113,8 @@ class INET_API STP : public STPBase
     /*
      * Check of the received BPDU is superior to port information from InterfaceTable
      */
-    bool isSuperiorBPDU(int interfaceId, BPDU *bpdu);
-    void setSuperiorBPDU(int interfaceId, BPDU *bpdu);
+    bool isSuperiorBPDU(int interfaceId, const std::shared_ptr<BPDU>& bpdu);
+    void setSuperiorBPDU(int interfaceId, const std::shared_ptr<BPDU>& bpdu);
 
     void handleTick();
 

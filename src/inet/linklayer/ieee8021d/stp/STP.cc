@@ -97,7 +97,7 @@ void STP::handleBPDU(Packet *packet, const std::shared_ptr<BPDU>& bpdu)
     }
 
     // get inferior BPDU, reply with superior
-    if (!isSuperiorBPDU(arrivalGate, bpdu.get())) {
+    if (!isSuperiorBPDU(arrivalGate, bpdu)) {
         if (port->getRole() == Ieee8021dInterfaceData::DESIGNATED) {
             EV_DETAIL << "Inferior Configuration BPDU " << bpdu << " arrived on port=" << arrivalGate << " responding to it with a superior BPDU." << endl;
             generateBPDU(arrivalGate);
@@ -145,14 +145,14 @@ void STP::handleTCN(Packet *packet, const std::shared_ptr<BPDU>& tcn)
     generateBPDU(arrivalGate, srcAddress, false, true);
 
     if (!isRoot) {
-        packet->clearTags();
-        packet->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-        packet->ensureTag<MacAddressReq>()->setSrcAddress(srcAddress);
-        packet->ensureTag<MacAddressReq>()->setDestAddress(destAddress);
-        send(packet, "relayOut");
+        Packet *outPacket = new Packet(packet->getName());
+        outPacket->append(tcn);
+        outPacket->ensureTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+        outPacket->ensureTag<MacAddressReq>()->setSrcAddress(srcAddress);
+        outPacket->ensureTag<MacAddressReq>()->setDestAddress(destAddress);
+        send(outPacket, "relayOut");
     }
-    else
-        delete packet;
+    delete packet;
 }
 
 void STP::generateBPDU(int interfaceId, const MACAddress& address, bool tcFlag, bool tcaFlag)
@@ -220,7 +220,7 @@ void STP::generateTCN()
     }
 }
 
-bool STP::isSuperiorBPDU(int interfaceId, BPDU *bpdu)
+bool STP::isSuperiorBPDU(int interfaceId, const std::shared_ptr<BPDU>& bpdu)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(interfaceId);
     Ieee8021dInterfaceData *xBpdu = new Ieee8021dInterfaceData();
@@ -257,7 +257,7 @@ bool STP::isSuperiorBPDU(int interfaceId, BPDU *bpdu)
     return true;
 }
 
-void STP::setSuperiorBPDU(int interfaceId, BPDU *bpdu)
+void STP::setSuperiorBPDU(int interfaceId, const std::shared_ptr<BPDU>& bpdu)
 {
     // BDPU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())

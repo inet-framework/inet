@@ -208,26 +208,32 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
         throw cRuntimeError("Output port %d doesn't exist!", portNum);
 
     // TODO: use LLCFrame
-    Packet *outPacket = new Packet(packet->getName());
     const auto& frame = std::make_shared<EthernetIIFrame>();
-    outPacket->setKind(packet->getKind());
+    packet->setKind(packet->getKind());
     frame->setSrc(bridgeAddress);
     frame->setDest(address);
     frame->setEtherType(-1);
-    outPacket->pushHeader(frame);
-    outPacket->append(bpdu);
+    frame->markImmutable();
+    packet->pushHeader(frame);
 
-    EtherEncap::addPaddingAndFcs(outPacket);
+    EtherEncap::addPaddingAndFcs(packet);
 
-    EV_INFO << "Sending BPDU frame " << outPacket << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
+    EV_INFO << "Sending BPDU frame " << packet << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;
-    emit(LayeredProtocolBase::packetSentToLowerSignal, outPacket);
-    send(outPacket, "ifOut");
+    emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
+    send(packet, "ifOut");
 }
 
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
     const auto& eth = CHK(packet->popHeader<EtherFrame>());
+    const auto& fcs = CHK(packet->popTrailer<EthernetFcs>());
+    //FIXME verify fcs
+    //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
+    // this code needed for unchanged fingerprints
+    while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
+        packet->popTrailer<EthernetPadding>();
+
     const auto& bpdu = CHK(packet->peekHeader<BPDU>());
 
     auto macAddressTag = packet->ensureTag<MacAddressInd>();
