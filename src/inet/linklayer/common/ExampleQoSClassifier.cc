@@ -69,10 +69,12 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 #endif
 
 #ifdef WITH_IPv6
-    if (!ipData) {
-        ipData = dynamic_cast<IPv6Datagram *>(msg);
-        if (ipData && dynamic_cast<ICMPv6Message *>(ipData->getEncapsulatedPacket()))
+    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+        const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+        if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6_ICMP)
             return UP_BE; // ICMPv6 class
+        ipProtocol = ipv6Header->getTransportProtocol();
+        ipHeaderLength = ipv6Header->getChunkLength();
     }
 #endif
 
