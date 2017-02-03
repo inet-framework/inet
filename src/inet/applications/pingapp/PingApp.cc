@@ -226,7 +226,7 @@ void PingApp::handleMessage(cMessage *msg)
         else
 #endif
 #ifdef WITH_IPv6
-        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmp) {
+        if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
             ICMPv6Message *icmpMessage = dynamic_cast<ICMPv6Message *>(msg);
             if (icmpMessage->getType() == ICMPv6_ECHO_REPLY) {
                 check_and_cast<ICMPv6EchoReplyMsg *>(msg);
@@ -375,12 +375,15 @@ void PingApp::sendPingRequest()
         }
         case L3Address::IPv6: {
 #ifdef WITH_IPv6
-            auto *request = new ICMPv6EchoRequestMsg(msg->getName());
-            outPacket = request;
-            request->setByteLength(4);
+            const auto& request = std::make_shared<ICMPv6EchoRequestMsg>();
+            request->setChunkLength(byte(4));
             request->setType(ICMPv6_ECHO_REQUEST);
-            request->encapsulate(msg);
-            request->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
+            request->markImmutable();
+            outPacket->prepend(request);
+            auto payload = std::make_shared<cPacketChunk>(msg);
+            payload->markImmutable();
+            outPacket->append(payload);
+            outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
             throw cRuntimeError("INET compiled without IPv6");
