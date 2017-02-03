@@ -96,7 +96,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
      * Handles incoming DHCP messages, and implements the
      * state-transition diagram for DHCP clients.
      */
-    virtual void handleDHCPMessage(DHCPMessage *msg);
+    virtual void handleDHCPMessage(Packet *packet);
 
     /*
      * Performs state changes and requests according to the timer expiration events
@@ -112,7 +112,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     /*
      * Performs UDP transmission.
      */
-    virtual void sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort);
+    virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     /*
      * Client broadcast to locate available servers.
@@ -136,12 +136,12 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     /*
      * Records configuration parameters from a DHCPACK message.
      */
-    virtual void recordLease(DHCPMessage *dhcpACK);
+    virtual void recordLease(const std::shared_ptr<DHCPMessage>& dhcpACK);
 
     /*
      * Records minimal configuration parameters from a DHCPOFFER message.
      */
-    virtual void recordOffer(DHCPMessage *dhcpOffer);
+    virtual void recordOffer(const std::shared_ptr<DHCPMessage>& dhcpOffer);
 
     /*
      * Assigns the IP address to the interface.
@@ -168,7 +168,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
      * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
      * in response to DHCPINFORM messages.
      */
-    virtual void handleDHCPACK(DHCPMessage *msg);
+    virtual void handleDHCPACK(const std::shared_ptr<DHCPMessage>& msg);
 
     /*
      * Selects the first non-loopback interface

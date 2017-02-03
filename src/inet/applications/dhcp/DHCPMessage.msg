@@ -18,12 +18,14 @@
 //
 
 cplusplus {{
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet;
 
+class FieldsChunk extends cObject;
 class noncobject MACAddress;
 class noncobject IPv4Address;
 
@@ -93,8 +95,9 @@ class DHCPOptions {
 //
 // @see DHCPClient, DHCPServer
 //
-packet DHCPMessage
+class DHCPMessage extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     int op @enum(DHCPOpcode); // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
     int htype; // hardware address type, see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
     int hlen; // hardware address length (e.g.  '6' for 10mb ethernet)

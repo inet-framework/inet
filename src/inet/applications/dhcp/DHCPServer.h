@@ -86,28 +86,28 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     /*
      * Implements the server's state machine.
      */
-    virtual void processDHCPMessage(DHCPMessage *packet);
+    virtual void processDHCPMessage(Packet *packet);
 
     /*
      * Send DHCPOFFER message to client in response to DHCPDISCOVER with offer of configuration
      * parameters.
      */
-    virtual void sendOffer(DHCPLease *lease, DHCPMessage *packet);
+    virtual void sendOffer(DHCPLease *lease, const std::shared_ptr<DHCPMessage>& dhcpMsg);
 
     /*
      * Send DHCPACK message to client with configuration parameters, including committed network address.
      */
-    virtual void sendACK(DHCPLease *lease, DHCPMessage *packet);
+    virtual void sendACK(DHCPLease *lease, const std::shared_ptr<DHCPMessage>& dhcpMsg);
 
     /*
      * Send DHCPNAK message to client indicating client's notion of network address is incorrect
      * (e.g., client has moved to new subnet) or client's lease as expired.
      */
-    virtual void sendNAK(DHCPMessage *msg);
+    virtual void sendNAK(const std::shared_ptr<DHCPMessage>& dhcpMsg);
 
     virtual void handleSelfMessages(cMessage *msg);
     virtual InterfaceEntry *chooseInterface();
-    virtual void sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort);
+    virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     /*
      * Signal handler for cObject, override cListener function.

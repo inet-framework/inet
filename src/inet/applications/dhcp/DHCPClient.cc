@@ -203,11 +203,12 @@ void DHCPClient::handleMessage(cMessage *msg)
         handleTimer(msg);
     }
     else if (msg->arrivedOn("socketIn")) {
-        DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage *>(msg);
-        if (!dhcpPacket)
-            throw cRuntimeError(dhcpPacket, "Unexpected packet received (not a DHCPMessage)");
+        auto packet = check_and_cast<Packet *>(msg);
+        if (packet->getKind() == UDP_I_DATA)
+            handleDHCPMessage(packet);
+        else
+            throw cRuntimeError(packet, "Unexpected packet received");
 
-        handleDHCPMessage(dhcpPacket);
         delete msg;
     }
     else
@@ -268,7 +269,7 @@ void DHCPClient::handleTimer(cMessage *msg)
         throw cRuntimeError("Unknown self message '%s'", msg->getName());
 }
 
-void DHCPClient::recordOffer(DHCPMessage *dhcpOffer)
+void DHCPClient::recordOffer(const std::shared_ptr<DHCPMessage>& dhcpOffer)
 {
     if (!dhcpOffer->getYiaddr().isUnspecified()) {
         IPv4Address ip = dhcpOffer->getYiaddr();
@@ -288,7 +289,7 @@ void DHCPClient::recordOffer(DHCPMessage *dhcpOffer)
         EV_WARN << "DHCPOFFER arrived, but no IP address has been offered. Discarding it and remaining in SELECTING." << endl;
 }
 
-void DHCPClient::recordLease(DHCPMessage *dhcpACK)
+void DHCPClient::recordLease(const std::shared_ptr<DHCPMessage>& dhcpACK)
 {
     if (!dhcpACK->getYiaddr().isUnspecified()) {
         IPv4Address ip = dhcpACK->getYiaddr();
@@ -391,10 +392,11 @@ void DHCPClient::initRebootedClient()
     clientState = REBOOTING;
 }
 
-void DHCPClient::handleDHCPMessage(DHCPMessage *msg)
+void DHCPClient::handleDHCPMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
+    const auto& msg = CHK(packet->peekHeader<DHCPMessage>());
     if (msg->getOp() != BOOTREPLY) {
         EV_WARN << "Client received a non-BOOTREPLY message, dropping." << endl;
         return;
@@ -523,9 +525,10 @@ void DHCPClient::sendRequest()
     // setting the xid
     xid = intuniform(0, RAND_MAX);    // generating a new xid for each transmission
 
-    DHCPMessage *request = new DHCPMessage("DHCPREQUEST");
+    Packet *packet = new Packet("DHCPREQUEST");
+    const auto& request = std::make_shared<DHCPMessage>();
     request->setOp(BOOTREQUEST);
-    request->setByteLength(280);    // DHCP request packet size
+    request->setChunkLength(byte(280));    // DHCP request packet size
     request->setHtype(1);    // ethernet
     request->setHlen(6);    // hardware Address length (6 octets)
     request->setHops(0);
@@ -547,32 +550,37 @@ void DHCPClient::sendRequest()
     request->getOptions().setParameterRequestList(2, DNS);
     request->getOptions().setParameterRequestList(3, NTP_SRV);
 
+    L3Address destAddr;
+
     // RFC 4.3.6 Table 4
     if (clientState == INIT_REBOOT) {
         request->getOptions().setRequestedIp(lease->ip);
         request->setCiaddr(IPv4Address());    // zero
+        destAddr = IPv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
-        sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }
     else if (clientState == REQUESTING) {
         request->getOptions().setServerIdentifier(lease->serverId);
         request->getOptions().setRequestedIp(lease->ip);
         request->setCiaddr(IPv4Address());    // zero
+        destAddr = IPv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
-        sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }
     else if (clientState == RENEWING) {
         request->setCiaddr(lease->ip);    // the client IP
+        destAddr = lease->serverId;
         EV_INFO << "Sending DHCPREQUEST extending lease for IP " << lease->ip << " via unicast to " << lease->serverId << "." << endl;
-        sendToUDP(request, clientPort, lease->serverId, serverPort);
     }
     else if (clientState == REBINDING) {
         request->setCiaddr(lease->ip);    // the client IP
+        destAddr = IPv4Address::ALLONES_ADDRESS;
         EV_INFO << "Sending DHCPREQUEST renewing the IP " << lease->ip << " via broadcast." << endl;
-        sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }
     else
         throw cRuntimeError("Invalid state");
+    request->markImmutable();
+    packet->append(request);
+    sendToUDP(packet, clientPort, destAddr, serverPort);
 }
 
 void DHCPClient::sendDiscover()
@@ -580,9 +588,10 @@ void DHCPClient::sendDiscover()
     // setting the xid
     xid = intuniform(0, RAND_MAX);
     //std::cout << xid << endl;
-    DHCPMessage *discover = new DHCPMessage("DHCPDISCOVER");
+    Packet *packet = new Packet("DHCPDISCOVER");
+    const auto& discover = std::make_shared<DHCPMessage>();
     discover->setOp(BOOTREQUEST);
-    discover->setByteLength(280);    // DHCP Discover packet size;
+    discover->setChunkLength(byte(280));    // DHCP Discover packet size;
     discover->setHtype(1);    // ethernet
     discover->setHlen(6);    // hardware Address lenght (6 octets)
     discover->setHops(0);
@@ -603,16 +612,20 @@ void DHCPClient::sendDiscover()
     discover->getOptions().setParameterRequestList(2, DNS);
     discover->getOptions().setParameterRequestList(3, NTP_SRV);
 
+    discover->markImmutable();
+    packet->append(discover);
+
     EV_INFO << "Sending DHCPDISCOVER." << endl;
-    sendToUDP(discover, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
+    sendToUDP(packet, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
 }
 
 void DHCPClient::sendDecline(IPv4Address declinedIp)
 {
     xid = intuniform(0, RAND_MAX);
-    DHCPMessage *decline = new DHCPMessage("DHCPDECLINE");
+    Packet *packet = new Packet("DHCPDECLINE");
+    const auto& decline = std::make_shared<DHCPMessage>();
     decline->setOp(BOOTREQUEST);
-    decline->setByteLength(280);    // DHCPDECLINE packet size
+    decline->setChunkLength(byte(280));    // DHCPDECLINE packet size
     decline->setHtype(1);    // ethernet
     decline->setHlen(6);    // hardware Address length (6 octets)
     decline->setHops(0);
@@ -624,11 +637,15 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     decline->setFile("");    // no file given
     decline->getOptions().setMessageType(DHCPDECLINE);
     decline->getOptions().setRequestedIp(declinedIp);
+
+    decline->markImmutable();
+    packet->append(decline);
+
     EV_INFO << "Sending DHCPDECLINE." << endl;
-    sendToUDP(decline, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
+    sendToUDP(packet, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
 }
 
-void DHCPClient::handleDHCPACK(DHCPMessage *msg)
+void DHCPClient::handleDHCPACK(const std::shared_ptr<DHCPMessage>& msg)
 {
     recordLease(msg);
     cancelEvent(timerTo);
@@ -659,7 +676,7 @@ void DHCPClient::scheduleTimerT2()
     scheduleAt(simTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
 }
 
-void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort)
+void DHCPClient::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
     msg->ensureTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
