@@ -24,7 +24,20 @@ This example contains a configuration that demonstrates visualization of nodes' 
 
 <p>
 The <var>InfoVisualizer</var> module can visualize information of submodules for a network node on the top level canvas.
-The submodules can be selected with the visualizer's <var>modules</var> parameter. This parameter takes full path module names.
+The <var>InfoVisualizer</var> module can visualize state information displayed by various submodules. This information is
+visualized at the contaning network node, on the top level canvas. The following image illustrates this with the example of
+the UDP submodule:
+</p>
+
+<img src="example.png">
+
+<p>
+The image on the left shows the state information displayed by the UDP app. The image on the right show the same information
+displayed at the containing node, on the top level canvas.
+</p>
+
+<p>
+The submodules whose states should be visualized can be selected with the visualizer's <var>modules</var> parameter. This parameter takes full path module names.
 Wildcards can be used to select a certain submodule in multiple nodes. Additionally, one can specify multiple submodules for a node.
 </p>
 
