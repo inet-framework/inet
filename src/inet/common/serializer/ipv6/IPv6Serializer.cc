@@ -53,6 +53,7 @@ namespace inet {
 
 namespace serializer {
 
+#if 0
 Register_Serializer(IPv6Datagram, ETHERTYPE, ETHERTYPE_IPv6, IPv6Serializer);
 
 void IPv6Serializer::serialize(const cPacket *pkt, Buffer &b, Context& c)
@@ -191,6 +192,7 @@ cPacket* IPv6Serializer::deserialize(const Buffer &b, Context& c)
     }
     return dest;
 }
+#endif
 
 } // namespace serializer
 

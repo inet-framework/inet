@@ -25,6 +25,8 @@ namespace inet {
 
 namespace serializer {
 
+#if 0
+
 /**
  * Converts between ICMPMessage and binary (network byte order) ICMP header.
  */
@@ -37,6 +39,8 @@ class INET_API ICMPv6Serializer : public SerializerBase
   public:
     ICMPv6Serializer(const char *name = nullptr) : SerializerBase(name) {}
 };
+
+#endif
 
 } // namespace serializer
 

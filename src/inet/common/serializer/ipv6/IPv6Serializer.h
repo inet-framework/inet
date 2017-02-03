@@ -24,6 +24,7 @@ namespace inet {
 
 namespace serializer {
 
+#if 0
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
  */
@@ -36,6 +37,7 @@ class INET_API IPv6Serializer : public SerializerBase
   public:
     IPv6Serializer(const char *name = nullptr) : SerializerBase(name) {}
 };
+#endif
 
 } // namespace serializer
 

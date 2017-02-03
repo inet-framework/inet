@@ -35,6 +35,8 @@ namespace inet {
 
 namespace serializer {
 
+#if 0
+
 Register_Serializer(ICMPv6Message, IP_PROT, IP_PROT_IPv6_ICMP, ICMPv6Serializer);
 
 void ICMPv6Serializer::serialize(const cPacket *_pkt, Buffer &b, Context& c)
@@ -214,6 +216,8 @@ cPacket *ICMPv6Serializer::deserialize(const Buffer &b, Context& context)
         _pkt->setBitError(true);
     return _pkt;
 }
+
+#endif
 
 } // namespace serializer
 
