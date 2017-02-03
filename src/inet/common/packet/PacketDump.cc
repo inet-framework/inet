@@ -50,6 +50,10 @@
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 
+#ifdef WITH_IPv6
+#undef WITH_IPv6        //FIXME //KLUDGE
+#endif // ifdef WITH_IPv6
+
 namespace inet {
 
 PacketDump::PacketDump()

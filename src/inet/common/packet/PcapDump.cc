@@ -34,6 +34,10 @@
 #undef WITH_IPv4        //FIXME //KLUDGE
 #endif // ifdef WITH_IPv4
 
+#ifdef WITH_IPv6
+#undef WITH_IPv6        //FIXME //KLUDGE
+#endif // ifdef WITH_IPv6
+
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/common/serializer/ipv4/IPv4Serializer.h"
