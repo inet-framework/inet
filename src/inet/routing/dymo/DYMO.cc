@@ -207,7 +207,7 @@ void DYMO::completeRouteDiscovery(const L3Address& target)
     auto lt = targetAddressToDelayedPackets.lower_bound(target);
     auto ut = targetAddressToDelayedPackets.upper_bound(target);
     for (auto it = lt; it != ut; it++)
-        reinjectDelayedDatagram(it->second.first, it->second.second);
+        reinjectDelayedDatagram(it->second);
     eraseDelayedDatagrams(target);
 }
 
@@ -218,7 +218,7 @@ void DYMO::cancelRouteDiscovery(const L3Address& target)
     auto lt = targetAddressToDelayedPackets.lower_bound(target);
     auto ut = targetAddressToDelayedPackets.upper_bound(target);
     for (auto it = lt; it != ut; it++)
-        dropDelayedDatagram(it->second.first, it->second.second);
+        dropDelayedDatagram(it->second);
     eraseDelayedDatagrams(target);
 }
 
@@ -231,22 +231,25 @@ bool DYMO::hasOngoingRouteDiscovery(const L3Address& target)
 // handling IP datagrams
 //
 
-void DYMO::delayDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+void DYMO::delayDatagram(Packet *datagram)
 {
-    EV_INFO << "Queuing datagram: source = " << ipv4Header->getSourceAddress() << ", destination = " << ipv4Header->getDestinationAddress() << endl;
-    const L3Address& target = ipv4Header->getDestinationAddress();
-    targetAddressToDelayedPackets.insert(std::pair<L3Address, std::pair<Packet *, std::shared_ptr<IPv4Header>>>(target, std::pair<Packet *, std::shared_ptr<IPv4Header>>(datagram, ipv4Header)));
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    EV_INFO << "Queuing datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
+    const L3Address& target = networkHeader->getDestinationAddress();
+    targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
 }
 
-void DYMO::reinjectDelayedDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+void DYMO::reinjectDelayedDatagram(Packet *datagram)
 {
-    EV_INFO << "Sending queued datagram: source = " << ipv4Header->getSourceAddress() << ", destination = " << ipv4Header->getDestinationAddress() << endl;
-    networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram), ipv4Header);
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    EV_INFO << "Sending queued datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
+    networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram));
 }
 
-void DYMO::dropDelayedDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+void DYMO::dropDelayedDatagram(Packet *datagram)
 {
-    EV_WARN << "Dropping queued datagram: source = " << ipv4Header->getSourceAddress() << ", destination = " << ipv4Header->getDestinationAddress() << endl;
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    EV_WARN << "Dropping queued datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
     networkProtocol->dropQueuedDatagram(const_cast<const Packet *>(datagram));
 }
 
@@ -1363,10 +1366,11 @@ void DYMO::incrementSequenceNumber()
 // routing
 //
 
-INetfilter::IHook::Result DYMO::ensureRouteForDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+INetfilter::IHook::Result DYMO::ensureRouteForDatagram(Packet *datagram)
 {
-    const L3Address& source = ipv4Header->getSourceAddress();
-    const L3Address& destination = ipv4Header->getDestinationAddress();
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    const L3Address& source = networkHeader->getSourceAddress();
+    const L3Address& destination = networkHeader->getDestinationAddress();
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {
@@ -1384,7 +1388,7 @@ INetfilter::IHook::Result DYMO::ensureRouteForDatagram(Packet *datagram, const s
         }
         else if (source.isUnspecified() || isClientAddress(source)) {
             EV_DETAIL << (broken ? "Broken" : "Missing") << " route: source = " << source << ", destination = " << destination << endl;
-            delayDatagram(datagram, ipv4Header);
+            delayDatagram(datagram);
             if (!hasOngoingRouteDiscovery(destination))
                 startRouteDiscovery(destination);
             else
@@ -1440,8 +1444,8 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         if (true) { // TODO: datagram->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
             // TODO: get nexthop and interface from the packet
             // auto networkProtocolControlInfo = datagram->getControlInfo();
-            const auto& ipv4Header = datagram->peekHeader<IPv4Header>();
-            const L3Address& destination = ipv4Header->getDestinationAddress();
+            const auto& networkHeader = peekNetworkHeader(datagram);
+            const L3Address& destination = networkHeader->getDestinationAddress();
             if (destination.getAddressType() == addressType) {
                 IRoute *route = routingTable->findBestMatchingRoute(destination);
                 if (route) {

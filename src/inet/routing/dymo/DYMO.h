@@ -90,7 +90,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     DYMOSequenceNumber sequenceNumber;
     std::map<L3Address, DYMOSequenceNumber> targetAddressToSequenceNumber;
     std::map<L3Address, RREQTimer *> targetAddressToRREQTimer;
-    std::multimap<L3Address, std::pair<Packet *, std::shared_ptr<IPv4Header>>> targetAddressToDelayedPackets;
+    std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;
     std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
 
   public:
@@ -116,9 +116,9 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     bool hasOngoingRouteDiscovery(const L3Address& target);
 
     // handling IP datagrams
-    void delayDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
-    void reinjectDelayedDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
-    void dropDelayedDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
+    void delayDatagram(Packet *datagram);
+    void reinjectDelayedDatagram(Packet *datagram);
+    void dropDelayedDatagram(Packet *datagram);
     void eraseDelayedDatagrams(const L3Address& target);
     bool hasDelayedDatagrams(const L3Address& target);
 
@@ -208,14 +208,14 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void incrementSequenceNumber();
 
     // routing
-    Result ensureRouteForDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
+    Result ensureRouteForDatagram(Packet *datagram);
 
     // netfilter
-    virtual Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
-    virtual Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+    virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
     virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
+    virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
 
     // lifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

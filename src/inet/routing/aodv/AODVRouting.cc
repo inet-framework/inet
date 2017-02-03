@@ -178,11 +178,12 @@ void AODVRouting::handleMessage(cMessage *msg)
     }
 }
 
-INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(Packet *datagram)
 {
     Enter_Method("datagramPreRoutingHook");
-    const L3Address& destAddr = ipv4Header->getDestinationAddress();
-    const L3Address& sourceAddr = ipv4Header->getSourceAddress();
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    const L3Address& destAddr = networkHeader->getDestinationAddress();
+    const L3Address& sourceAddr = networkHeader->getSourceAddress();
 
     if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
@@ -213,7 +214,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(Packet *datagram, 
 
             EV_INFO << (isInactive ? "Inactive" : "Missing") << " route for destination " << destAddr << endl;
 
-            delayDatagram(datagram, ipv4Header);
+            delayDatagram(datagram);
 
             if (!hasOngoingRouteDiscovery(destAddr)) {
                 // When a new route to the same destination is required at a later time
@@ -257,11 +258,12 @@ L3Address AODVRouting::getSelfIPAddress() const
     return routingTable->getRouterIdAsGeneric();
 }
 
-void AODVRouting::delayDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+void AODVRouting::delayDatagram(Packet *datagram)
 {
-    EV_DETAIL << "Queuing datagram, source " << ipv4Header->getSourceAddress() << ", destination " << ipv4Header->getDestinationAddress() << endl;
-    const L3Address& target = ipv4Header->getDestinationAddress();
-    targetAddressToDelayedPackets.insert(std::pair<L3Address, std::pair<Packet *, std::shared_ptr<IPv4Header>>>(target, std::pair<Packet *, std::shared_ptr<IPv4Header>>(datagram, ipv4Header)));
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    EV_DETAIL << "Queuing datagram, source " << networkHeader->getSourceAddress() << ", destination " << networkHeader->getDestinationAddress() << endl;
+    const L3Address& target = networkHeader->getDestinationAddress();
+    targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
 }
 
 void AODVRouting::sendRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive)
@@ -993,8 +995,8 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
         // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac. etc
         Packet *datagram = check_and_cast<Packet *>(obj);
         if (datagram->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-            const auto& ipv4Header = datagram->peekHeader<IPv4Header>();
-            L3Address unreachableAddr = ipv4Header->getDestinationAddress();
+            const auto& networkHeader = datagram->peekHeader<IPv4Header>();
+            L3Address unreachableAddr = networkHeader->getDestinationAddress();
             if (unreachableAddr.getAddressType() == addressType) {
                 // A node initiates processing for a RERR message in three situations:
                 //
@@ -1286,10 +1288,10 @@ void AODVRouting::completeRouteDiscovery(const L3Address& target)
 
     // reinject the delayed datagrams
     for (auto it = lt; it != ut; it++) {
-        Packet *datagram = it->second.first;
-        auto ipv4Header = it->second.second;
-        EV_DETAIL << "Sending queued datagram: source " << ipv4Header->getSourceAddress() << ", destination " << ipv4Header->getDestinationAddress() << endl;
-        networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram), ipv4Header);
+        Packet *datagram = it->second;
+        const auto& networkHeader = peekNetworkHeader(datagram);
+        EV_DETAIL << "Sending queued datagram: source " << networkHeader->getSourceAddress() << ", destination " << networkHeader->getDestinationAddress() << endl;
+        networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram));
     }
 
     // clear the multimap
@@ -1471,7 +1473,7 @@ void AODVRouting::scheduleExpungeRoutes()
     }
 }
 
-INetfilter::IHook::Result AODVRouting::datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result AODVRouting::datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     // TODO: Implement: Actions After Reboot
     // If the node receives a data packet for some other destination, it SHOULD
@@ -1479,8 +1481,9 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(Packet *datagram, con
     // timer to expire after current time plus DELETE_PERIOD.
 
     Enter_Method("datagramForwardHook");
-    const L3Address& destAddr = ipv4Header->getDestinationAddress();
-    const L3Address& sourceAddr = ipv4Header->getSourceAddress();
+    const auto& networkHeader = peekNetworkHeader(datagram);
+    const L3Address& destAddr = networkHeader->getDestinationAddress();
+    const L3Address& sourceAddr = networkHeader->getSourceAddress();
     IRoute *ipSource = routingTable->findBestMatchingRoute(sourceAddr);
 
     if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast()) {
@@ -1576,7 +1579,7 @@ void AODVRouting::cancelRouteDiscovery(const L3Address& destAddr)
     auto lt = targetAddressToDelayedPackets.lower_bound(destAddr);
     auto ut = targetAddressToDelayedPackets.upper_bound(destAddr);
     for (auto it = lt; it != ut; it++)
-        networkProtocol->dropQueuedDatagram(const_cast<const Packet *>(it->second.first));
+        networkProtocol->dropQueuedDatagram(const_cast<const Packet *>(it->second));
 
     targetAddressToDelayedPackets.erase(lt, ut);
 }

@@ -238,12 +238,12 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet is delivered via the network
@@ -258,7 +258,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
   public:
     /**
@@ -279,7 +279,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * re-injects a previously queued datagram
      */
-    virtual void reinjectQueuedDatagram(const Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header) override;
+    virtual void reinjectQueuedDatagram(const Packet *datagram) override;
 
     /**
      * ILifecycle method

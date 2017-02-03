@@ -611,7 +611,7 @@ void GenericNetworkProtocol::dropQueuedDatagram(const Packet *datagram)
     }
 }
 
-void GenericNetworkProtocol::reinjectQueuedDatagram(const Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header)
+void GenericNetworkProtocol::reinjectQueuedDatagram(const Packet *datagram)
 {
     Enter_Method("reinjectDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
@@ -647,7 +647,7 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const Packet *datagram, cons
 INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramPreRoutingHook(datagram, nullptr, inIE, outIE, nextHop);
+        IHook::Result r = elem.second->datagramPreRoutingHook(datagram, inIE, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -675,7 +675,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(Packet 
 INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(datagram, nullptr, inIE, outIE, nextHop);
+        IHook::Result r = elem.second->datagramForwardHook(datagram, inIE, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration
@@ -754,7 +754,7 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(Packet *da
 INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHop)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalOutHook(datagram, nullptr, outIE, nextHop);
+        IHook::Result r = elem.second->datagramLocalOutHook(datagram, outIE, nextHop);
         switch (r) {
             case IHook::ACCEPT:
                 break;    // continue iteration

@@ -130,7 +130,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     bool isOperational = false;
 
     // internal
-    std::multimap<L3Address, std::pair<Packet *, std::shared_ptr<IPv4Header>>> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
+    std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
 
   protected:
     void handleMessage(cMessage *msg) override;
@@ -187,13 +187,13 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
-    Result ensureRouteForDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
-    virtual Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
-    virtual Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
+    Result ensureRouteForDatagram(Packet *datagram);
+    virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
     virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, ipv4Header); }
-    void delayDatagram(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header);
+    virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+    void delayDatagram(Packet *datagram);
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;

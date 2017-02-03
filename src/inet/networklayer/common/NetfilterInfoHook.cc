@@ -38,12 +38,12 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public NetfilterBase::H
     /**
      * called before a packet arriving from the network is routed
      */
-    virtual Result datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    virtual Result datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 
     /**
      * called before a packet is delivered via the network
@@ -58,7 +58,7 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public NetfilterBase::H
     /**
      * called before a packet arriving locally is delivered
      */
-    virtual Result datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
 };
 
 Define_Module(NetfilterInfoHook);
@@ -78,7 +78,7 @@ void NetfilterInfoHook::handleMessage(cMessage *msg)
     throw cRuntimeError("This module can not receive messages");
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": PREROUTING packet=" << check_and_cast<cObject *>(datagram)->getName()
             << " inIE=" << (inIE ? inIE->getName() : "nullptr")
@@ -86,7 +86,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(Packet *data
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": FORWARD: packet=" << check_and_cast<cObject *>(datagram)->getName()
             << " inIE=" << (inIE ? inIE->getName() : "nullptr")
@@ -114,7 +114,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(Packet *datagra
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagram, const std::shared_ptr<IPv4Header>& ipv4Header, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << check_and_cast<cObject *>(datagram)->getName()
             << " outIE=" << (outIE ? outIE->getName() : "nullptr")
