@@ -163,6 +163,7 @@ void EtherLLC::processFrameFromMAC(Packet *packet)
     if (frame == nullptr) {
         EV << "Incoming packet does not have an LLC ethernet header, dropped. Header is " << (ethHeader ? ethHeader->getClassName() : "nullptr") << "\n";
         delete packet;
+        return;
     }
     // check SAP
     int sap = frame->getDsap();
