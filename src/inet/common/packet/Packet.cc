@@ -206,7 +206,8 @@ void Packet::removeFromBeginning(bit length)
     }
     else
         contents = contents->peek(length, contents->getChunkLength() - length);
-    contents->markImmutable();
+    if (contents)
+        contents->markImmutable();
 }
 
 void Packet::removeFromEnd(bit length)
@@ -219,13 +220,22 @@ void Packet::removeFromEnd(bit length)
     }
     else
         contents = contents->peek(bit(0), contents->getChunkLength() - length);
-    contents->markImmutable();
+    if (contents)
+        contents->markImmutable();
 }
 
 void Packet::removePoppedParts()
 {
-    removeFromBeginning(getHeaderPoppedLength());
-    removeFromEnd(getTrailerPoppedLength());
+    bit hlen = getHeaderPoppedLength();
+    if (hlen > bit(0)) {
+        setHeaderPopOffset(bit(0));
+        removeFromBeginning(hlen);
+    }
+    bit tlen = getTrailerPoppedLength();
+    if (tlen > bit(0)) {
+        setTrailerPopOffset(bit(0));
+        removeFromEnd(tlen);
+    }
 }
 
 } // namespace
