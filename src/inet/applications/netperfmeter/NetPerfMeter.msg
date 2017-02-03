@@ -26,11 +26,14 @@
 // *   Contact: dreibh@iem.uni-due.de
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
 }}
 
 namespace inet;
 
+class FieldsChunk extends cObject;
 class noncobject SCTPSimpleMessage;
 
 

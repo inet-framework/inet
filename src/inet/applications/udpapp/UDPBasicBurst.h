@@ -88,7 +88,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
   protected:
     // chooses random destination address
     virtual L3Address chooseDestAddr();
-    virtual cPacket *createPacket();
+    virtual Packet *createPacket();
     virtual void processPacket(cPacket *msg);
     virtual void generateBurst();
 

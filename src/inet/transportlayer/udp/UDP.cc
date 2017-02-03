@@ -213,7 +213,7 @@ void UDP::processCommandFromApp(cMessage *msg)
         }
 
         case UDP_C_DATA:
-            processPacketFromApp(PK(msg));
+            processPacketFromApp(check_and_cast<Packet *>(msg));
             return;     // prevent delete of msg
 
         case UDP_C_SETOPTION: {
@@ -302,15 +302,15 @@ void UDP::processCommandFromApp(cMessage *msg)
     delete msg;    // also deletes control info in it
 }
 
-void UDP::processPacketFromApp(cPacket *appData)
+void UDP::processPacketFromApp(Packet *packet)
 {
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 
-    int socketId = appData->getMandatoryTag<SocketReq>()->getSocketId();
+    int socketId = packet->getMandatoryTag<SocketReq>()->getSocketId();
     SockDesc *sd = getOrCreateSocket(socketId);
 
-    auto addressReq = appData->ensureTag<L3AddressReq>();
+    auto addressReq = packet->ensureTag<L3AddressReq>();
     srcAddr = addressReq->getSrcAddress();
     destAddr = addressReq->getDestAddress();
 
@@ -318,7 +318,7 @@ void UDP::processPacketFromApp(cPacket *appData)
         addressReq->setSrcAddress(srcAddr = sd->localAddr);
     if (destAddr.isUnspecified())
         addressReq->setDestAddress(destAddr = sd->remoteAddr);
-    if (auto portsReq = appData->removeTag<L4PortReq>()) {
+    if (auto portsReq = packet->removeTag<L4PortReq>()) {
         srcPort = portsReq->getSrcPort();
         destPort = portsReq->getDestPort();
         delete portsReq;
@@ -328,14 +328,14 @@ void UDP::processPacketFromApp(cPacket *appData)
     if (destPort == -1)
         destPort = sd->remotePort;
 
-    auto interfaceReq = appData->getTag<InterfaceReq>();
+    auto interfaceReq = packet->getTag<InterfaceReq>();
     ASSERT(interfaceReq == nullptr || interfaceReq->getInterfaceId() != -1);
 
     if (interfaceReq == nullptr && destAddr.isMulticast()) {
         auto membership = sd->findFirstMulticastMembership(destAddr);
         int interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
         if (interfaceId != -1)
-            appData->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
+            packet->ensureTag<InterfaceReq>()->setInterfaceId(interfaceId);
     }
 
     if (addressReq->getDestAddress().isUnspecified())
@@ -343,24 +343,19 @@ void UDP::processPacketFromApp(cPacket *appData)
     if (destPort <= 0 || destPort > 65535)
         throw cRuntimeError("send invalid remote port number %d", destPort);
 
-    Packet *udpPacket = new Packet(appData->getName());
-    udpPacket->transferTagsFrom(appData);
+
+    if (packet->getTag<MulticastReq>() == nullptr)
+        packet->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
+    if (sd->ttl != -1 && packet->getTag<HopLimitReq>() == nullptr)
+        packet->ensureTag<HopLimitReq>()->setHopLimit(sd->ttl);
+    if (packet->getTag<DscpReq>() == nullptr)
+        packet->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
+
     auto udpHeader = std::make_shared<UdpHeader>();
-    auto udpData = std::make_shared<cPacketChunk>(appData); // TODO
-    udpData->markImmutable();
-    udpPacket->append(udpData);
-
-    if (udpPacket->getTag<MulticastReq>() == nullptr)
-        udpPacket->ensureTag<MulticastReq>()->setMulticastLoop(sd->multicastLoop);
-    if (sd->ttl != -1 && udpPacket->getTag<HopLimitReq>() == nullptr)
-        udpPacket->ensureTag<HopLimitReq>()->setHopLimit(sd->ttl);
-    if (udpPacket->getTag<DscpReq>() == nullptr)
-        udpPacket->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
-
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
-    udpHeader->setTotalLengthField(udpPacket->getByteLength());
+    udpHeader->setTotalLengthField(packet->getByteLength());
     udpHeader->setCrcMode(CRC_DECLARED_CORRECT);       //FIXME choose CRC_DECLARED_CORRECT, CRC_DECLARED_INCORRECT, CRC_COMPUTED
     uint16_t crc = 0;
     if (udpHeader->getCrcMode() == CRC_COMPUTED) {
@@ -368,14 +363,14 @@ void UDP::processPacketFromApp(cPacket *appData)
         pseudoHeader.setSrcAddress(srcAddr);
         pseudoHeader.setDestAddress(destAddr);
         pseudoHeader.setProtocolId(17);
-        pseudoHeader.setPacketLength(udpPacket->getByteLength());
-        crc = computeUdpCrc(pseudoHeader, *(udpPacket->peekDataAt<BytesChunk>(byte(0), byte(udpPacket->getByteLength()))));
+        pseudoHeader.setPacketLength(packet->getByteLength());
+        crc = computeUdpCrc(pseudoHeader, *(packet->peekDataAt<BytesChunk>(byte(0), byte(packet->getByteLength()))));
     }
     udpHeader->setCrc(crc);
     udpHeader->markImmutable();
-    udpPacket->prepend(udpHeader);
-    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-    udpPacket->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+    packet->pushHeader(udpHeader);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
+    packet->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
 
     const Protocol *l3Protocol = nullptr;
     if (destAddr.getType() == L3Address::IPv4) {
@@ -390,11 +385,11 @@ void UDP::processPacketFromApp(cPacket *appData)
         // send to generic
         l3Protocol = &Protocol::gnp;
     }
-    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
-    EV_INFO << "Sending app packet " << appData->getName() << " over " << l3Protocol->getName() << ".\n";
-    emit(sentPkSignal, udpPacket);
-    send(udpPacket, "ipOut");
+    EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
+    emit(sentPkSignal, packet);
+    send(packet, "ipOut");
     numSent++;
 }
 
@@ -466,11 +461,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
             return;
         }
         else {
-            const auto& payloadChunk = udpPacket->popHeader<cPacketChunk>();
-            cPacket *payload = payloadChunk->getPacket()->dup();
-            payload->transferTagsFrom(udpPacket);
-            delete udpPacket;
-            sendUp(payload, sd, srcPort, destPort);
+            sendUp(udpPacket, sd, srcPort, destPort);
         }
     }
     else {
@@ -483,15 +474,10 @@ void UDP::processUDPPacket(Packet *udpPacket)
             return;
         }
         else {
-            const auto& payloadChunk = udpPacket->popHeader<cPacketChunk>();
-            cPacket *payload = payloadChunk->getPacket()->dup();
-            payload->transferTagsFrom(udpPacket);
-            delete udpPacket;
-
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
-                sendUp(payload->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
-            sendUp(payload, sds[i], srcPort, destPort);    // send original to last socket
+                sendUp(udpPacket->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
+            sendUp(udpPacket, sds[i], srcPort, destPort);    // send original to last socket
         }
     }
 }

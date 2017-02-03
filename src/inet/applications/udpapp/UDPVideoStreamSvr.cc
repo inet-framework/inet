@@ -18,6 +18,7 @@
 
 #include "inet/applications/udpapp/UDPVideoStreamSvr.h"
 
+#include "inet/common/packet/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
@@ -72,7 +73,7 @@ void UDPVideoStreamSvr::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         // start streaming
-        processStreamRequest(msg);
+        processStreamRequest(check_and_cast<Packet *>(msg));
     }
     else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
@@ -83,7 +84,7 @@ void UDPVideoStreamSvr::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
+void UDPVideoStreamSvr::processStreamRequest(Packet *msg)
 {
     // register video stream...
     cMessage *timer = new cMessage("VideoStreamTmr");
@@ -113,13 +114,15 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     VideoStreamData *d = &(it->second);
 
     // generate and send a packet
-    cPacket *pkt = new cPacket("VideoStrmPk");
+    Packet *pkt = new Packet("VideoStrmPk");
     long pktLen = packetLen->longValue();
 
     if (pktLen > d->bytesLeft)
         pktLen = d->bytesLeft;
+    const auto& payload = std::make_shared<ByteCountChunk>(byte(pktLen));
+    payload->markImmutable();
+    pkt->append(payload);
 
-    pkt->setByteLength(pktLen);
     emit(sentPkSignal, pkt);
     socket.sendTo(pkt, d->clientAddr, d->clientPort);
 

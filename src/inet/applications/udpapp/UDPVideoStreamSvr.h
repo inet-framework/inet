@@ -24,6 +24,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
@@ -67,7 +68,7 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     static simsignal_t reqStreamBytesSignal;    // length of video streams served
     static simsignal_t sentPkSignal;
 
-    virtual void processStreamRequest(cMessage *msg);
+    virtual void processStreamRequest(Packet *msg);
     virtual void sendStreamData(cMessage *timer);
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

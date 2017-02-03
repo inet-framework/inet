@@ -887,16 +887,19 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
    unsigned long newlyQueuedBytes = 0;
    if(TransportProtocol == TCP) {
       // TCP is stream-oriented: just pass the amount of frame data.
-      NetPerfMeterDataMessage* tcpMessage = new NetPerfMeterDataMessage;
+      Packet* pk = new Packet();
+      const auto& tcpMessage = std::make_shared<NetPerfMeterDataMessage>();
       tcpMessage->setCreationTime(simTime());
-      tcpMessage->setByteLength(frameSize);
-      tcpMessage->setKind(TCP_C_SEND);
+      tcpMessage->setChunkLength(byte(frameSize));
+      tcpMessage->markImmutable();
+      pk->append(tcpMessage);
+      pk->setKind(TCP_C_SEND);
 
       if(IncomingSocketTCP) {
-         IncomingSocketTCP->send(tcpMessage);
+         IncomingSocketTCP->send(pk);
       }
       else {
-         SocketTCP->send(tcpMessage);
+         SocketTCP->send(pk);
       }
 
       newlyQueuedBytes += frameSize;
@@ -912,14 +915,17 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
          const unsigned int msgSize =
             (bytesToSend > MaxMsgSize) ? MaxMsgSize : bytesToSend;
 
+         if (false) {
+         }
          // ====== SCTP =====================================================
-         if(TransportProtocol == SCTP) {
+#ifdef WITH_SCTP
+         else if(TransportProtocol == SCTP) {
             const bool sendUnordered  = (UnorderedMode > 0.0)  ? (uniform(0.0, 1.0) < UnorderedMode)  : false;
             const bool sendUnreliable = (UnreliableMode > 0.0) ? (uniform(0.0, 1.0) < UnreliableMode) : false;
 
             NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
             dataMessage->setCreationTime(simTime());
-            dataMessage->setByteLength(msgSize);
+            dataMessage->setChunkLength(byte(msgSize));
             /*
             dataMessage->setDataArraySize(msgSize);
             for(unsigned long i = 0; i < msgSize; i++)  {
@@ -950,13 +956,16 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             senderStatistics->SentBytes += msgSize;
             senderStatistics->SentMessages++;
          }
-
+#endif
          // ====== UDP ===================================================
          else if(TransportProtocol == UDP) {
-            NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
+            Packet* packet = new Packet();
+            const auto& dataMessage = std::make_shared<NetPerfMeterDataMessage>();
             dataMessage->setCreationTime(simTime());
-            dataMessage->setByteLength(msgSize);
-            SocketUDP->send(dataMessage);
+            dataMessage->setChunkLength(byte(msgSize));
+            dataMessage->markImmutable();
+            packet->append(dataMessage);
+            SocketUDP->send(packet);
 
             SenderStatistics* senderStatistics = getSenderStatistics(0);
             senderStatistics->SentBytes += msgSize;

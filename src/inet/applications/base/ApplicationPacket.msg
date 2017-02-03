@@ -15,12 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
+}}
+
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 //
 // Generic application packet
 //
-packet ApplicationPacket
+class ApplicationPacket extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     long sequenceNumber;
 }

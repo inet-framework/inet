@@ -168,7 +168,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void processUDPPacket(Packet *udpPacket);
 
     // process packets from application
-    virtual void processPacketFromApp(cPacket *appData);
+    virtual void processPacketFromApp(Packet *appData);
 
     // process commands from application
     virtual void processCommandFromApp(cMessage *msg);

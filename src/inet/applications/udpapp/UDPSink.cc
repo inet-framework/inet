@@ -19,6 +19,7 @@
 #include "inet/applications/udpapp/UDPSink.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
@@ -68,10 +69,10 @@ void UDPSink::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         // process incoming packet
-        processPacket(PK(msg));
+        processPacket(check_and_cast<Packet *>(msg));
     }
     else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
+        EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
         delete msg;
     }
     else {
@@ -130,7 +131,7 @@ void UDPSink::processStop()
     socket.close();
 }
 
-void UDPSink::processPacket(cPacket *pk)
+void UDPSink::processPacket(Packet *pk)
 {
     EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);

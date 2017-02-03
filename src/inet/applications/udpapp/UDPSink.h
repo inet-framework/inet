@@ -49,7 +49,7 @@ class INET_API UDPSink : public ApplicationBase
     virtual ~UDPSink();
 
   protected:
-    virtual void processPacket(cPacket *msg);
+    virtual void processPacket(Packet *msg);
     virtual void setSocketOptions();
 
   protected:

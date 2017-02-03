@@ -46,7 +46,7 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         delete msg;
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        cPacket *pk = PK(msg);
+        Packet *pk = check_and_cast<Packet *>(msg);
         // statistics
         numEchoed++;
         emit(pkSignal, pk);
@@ -55,6 +55,7 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         int srcPort = pk->getMandatoryTag<L4PortInd>()->getSrcPort();
         pk->clearTags();
+        pk->removePoppedParts();
 
         // send back
         socket.sendTo(pk, remoteAddress, srcPort);

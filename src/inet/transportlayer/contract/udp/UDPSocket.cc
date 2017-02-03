@@ -93,7 +93,7 @@ void UDPSocket::connect(L3Address addr, int port)
     sendToUDP(msg);
 }
 
-void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort)
+void UDPSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
     auto addressReq = pk->ensureTag<L3AddressReq>();
@@ -103,7 +103,7 @@ void UDPSocket::sendTo(cPacket *pk, L3Address destAddr, int destPort)
     sendToUDP(pk);
 }
 
-void UDPSocket::send(cPacket *pk)
+void UDPSocket::send(Packet *pk)
 {
     pk->setKind(UDP_C_DATA);
     sendToUDP(pk);

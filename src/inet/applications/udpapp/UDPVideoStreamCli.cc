@@ -19,6 +19,7 @@
 
 #include "inet/applications/udpapp/UDPVideoStreamCli.h"
 
+#include "inet/common/packet/ByteCountChunk.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -49,7 +50,7 @@ void UDPVideoStreamCli::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         // process incoming packet
-        receiveStream(PK(msg));
+        receiveStream(check_and_cast<Packet *>(msg));
     }
     else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
@@ -77,12 +78,14 @@ void UDPVideoStreamCli::requestStream()
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
 
-    cPacket *pk = new cPacket("VideoStrmReq");
-    pk->setByteLength(1);   //FIXME set packet length
+    Packet *pk = new Packet("VideoStrmReq");
+    const auto& payload = std::make_shared<ByteCountChunk>(byte(1));    //FIXME set packet length
+    payload->markImmutable();
+    pk->append(payload);
     socket.sendTo(pk, svrAddr, svrPort);
 }
 
-void UDPVideoStreamCli::receiveStream(cPacket *pk)
+void UDPVideoStreamCli::receiveStream(Packet *pk)
 {
     EV_INFO << "Video stream packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);

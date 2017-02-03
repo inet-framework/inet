@@ -20,6 +20,7 @@
 
 #include <vector>
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -223,13 +224,13 @@ class INET_API UDPSocket
      * Sends a data packet to the given address and port.
      * Additional options can be passed in a SendOptions struct.
      */
-    void sendTo(cPacket *msg, L3Address destAddr, int destPort);
+    void sendTo(Packet *msg, L3Address destAddr, int destPort);
 
     /**
      * Sends a data packet to the address and port specified previously
      * in a connect() call.
      */
-    void send(cPacket *msg);
+    void send(Packet *msg);
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another

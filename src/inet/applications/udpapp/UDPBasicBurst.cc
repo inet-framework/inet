@@ -24,6 +24,8 @@
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -103,18 +105,21 @@ L3Address UDPBasicBurst::chooseDestAddr()
     return destAddresses[k];
 }
 
-cPacket *UDPBasicBurst::createPacket()
+Packet *UDPBasicBurst::createPacket()
 {
     char msgName[32];
     sprintf(msgName, "UDPBasicAppData-%d", counter++);
     long msgByteLength = messageLengthPar->longValue();
-    ApplicationPacket *payload = new ApplicationPacket(msgName);
-    payload->setByteLength(msgByteLength);
+    Packet *pk = new Packet(msgName);
+    const auto& payload = std::make_shared<ApplicationPacket>();
+    payload->setChunkLength(byte(msgByteLength));
     payload->setSequenceNumber(numSent);
-    payload->addPar("sourceId") = getId();
-    payload->addPar("msgId") = numSent;
+    payload->markImmutable();
+    pk->append(payload);
+    pk->addPar("sourceId") = getId();
+    pk->addPar("msgId") = numSent;
 
-    return payload;
+    return pk;
 }
 
 void UDPBasicBurst::processStart()
@@ -289,7 +294,7 @@ void UDPBasicBurst::generateBurst()
     if (chooseDestAddrMode == PER_SEND)
         destAddr = chooseDestAddr();
 
-    cPacket *payload = createPacket();
+    Packet *payload = createPacket();
     payload->setTimestamp();
     emit(sentPkSignal, payload);
     socket.sendTo(payload, destAddr, destPort);

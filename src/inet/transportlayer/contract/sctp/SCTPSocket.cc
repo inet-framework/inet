@@ -347,6 +347,7 @@ void SCTPSocket::send(SCTPSimpleMessage *msg, int32 prMethod, double prValue, in
         throw cRuntimeError("SCTPSocket::send(): one-to-many style socket must be listening");
     }
 
+#if 0   //FIXME KLUDGE
     SCTPSendInfo *sendCommand = new SCTPSendInfo();
     sendCommand->setSocketId(assocId);
     sendCommand->setSid(streamId);
@@ -363,6 +364,7 @@ void SCTPSocket::send(SCTPSimpleMessage *msg, int32 prMethod, double prValue, in
     cmsg->setControlInfo(sendCommand);
 
     sendToSCTP(cmsg);
+#endif
 }
 
 void SCTPSocket::sendMsg(cMessage *cmsg)

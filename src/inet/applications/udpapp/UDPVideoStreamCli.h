@@ -23,6 +23,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPSocket.h"
 
 namespace inet {
@@ -51,7 +52,7 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void requestStream();
-    virtual void receiveStream(cPacket *msg);
+    virtual void receiveStream(Packet *msg);
 
     // ApplicationBase:
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;

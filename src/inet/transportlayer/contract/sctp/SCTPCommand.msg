@@ -19,6 +19,8 @@
 
 cplusplus {{
 #include <vector>
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand.h"
@@ -30,8 +32,8 @@ cplusplus {{
 typedef std::vector<L3Address> AddressVector;
 }}
 
+class FieldsChunk extends cObject;
 class noncobject L3Address;
-
 class noncobject AddressVector;
 
 //
@@ -218,8 +220,9 @@ message SCTPSendQueueAbated extends SCTPCommand
     uint64 queuedForStream[];
 }
 
-packet SCTPSimpleMessage
+class SCTPSimpleMessage extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     char data[];
     simtime_t creationTime = 0;

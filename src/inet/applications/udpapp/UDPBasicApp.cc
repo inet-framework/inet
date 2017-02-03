@@ -22,6 +22,8 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
 namespace inet {
@@ -114,14 +116,15 @@ void UDPBasicApp::sendPacket()
 {
     std::ostringstream str;
     str << packetName << "-" << numSent;
-    ApplicationPacket *payload = new ApplicationPacket(str.str().c_str());
-    payload->setByteLength(par("messageLength").longValue());
+    Packet *packet = new Packet(str.str().c_str());
+    const auto& payload = std::make_shared<ApplicationPacket>();
+    payload->setChunkLength(byte(par("messageLength").longValue()));
     payload->setSequenceNumber(numSent);
-
+    payload->markImmutable();
+    packet->append(payload);
     L3Address destAddr = chooseDestAddr();
-
-    emit(sentPkSignal, payload);
-    socket.sendTo(payload, destAddr, destPort);
+    emit(sentPkSignal, packet);
+    socket.sendTo(packet, destAddr, destPort);
     numSent++;
 }
 
