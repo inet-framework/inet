@@ -34,14 +34,30 @@
     <p><h2>About the visualizer</h2></p>
 
     <p>
-        The <code><strong>networkRouteVisualizer</strong></code> ...  
-        Network routes may established not only between adjacent devices.  
-	</p>          
+        The <code><strong>networkRouteVisualizer</strong></code> keeps track of active network routes.
+        A route between two node is considered active if a packet reach the destination's network layer.
+        Network routes may be established not only between adjacent devices, it also can be established between remote devices.
+        By default routes are not displayed, we can enable their vsisualization by switching the <i>displayRoutes</i> parameter to true.
+	</p>   
+
+    <p> 
+        The links are represented visually by solid arrows.
+        The arrow's starting point is the source node and its endpoint is the destination node.
+        The line goes through those intermediate devices which are the part of the third layer path.
+    </p>
+    <p>    
+        The visualizer has filtering parameters, like <i>nodeFilter</i>, <i>interfaceFilter</i> and <i>packetFilter</i>.
+        Using these we can specify which network routes are shown. By default all nodes, all interfaces and all packets are considered for displaying network routes.
+        It is possible to use logical expressions as the filter's parameter, e.g <i>packetFilter = "ping* or tcp*"</i> shows the ping and the tcp network routes.
+    </p>       
         <!--
             Mi ez a visualizer?
             A networkRouteVisualizer nyilvántartja a harmadik rétegbeli kapcsolatokat.
             Akkor válik aktívvá egy network route két pont között, amikor a csomag eléri a cél állomás hálózati rétegét.
-            A kapcsolatokat folytonos nyilak reprezentálják, melyek végponttól-végpontig tartanak, a forrástól a cél felé mutatva.
+
+            A kapcsolatokat folytonos nyilak reprezentálják.
+            A nyilak kezdőpontja a forrás, végpontja a cél állomás.
+            A nyíl keresztülmegy azokon a közbülső eszközökön, melyek részei a harmadik rétegbeli útvonalnak.
             A nyilak stílusát, filtereket lehet testreszabni.
             Több networkRouteVisualizert is beállíthatunk.
         -->
