@@ -28,6 +28,6 @@ moduleinterface INetworkProtocol
     gates:
         input transportIn @labels(INetworkProtocolControlInfo/down);
         output transportOut @labels(INetworkProtocolControlInfo/up);
-        input queueIn @labels(INetworkDatagram);
-        output queueOut @labels(INetworkDatagram);
+        input queueIn @labels(INetworkHeader);
+        output queueOut @labels(INetworkHeader);
 }

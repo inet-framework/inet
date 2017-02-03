@@ -26,8 +26,8 @@ moduleinterface ILinkLayerUpper
     parameters:
         @display("i=block/rxtx");
     gates:
-        input upperLayerIn @labels(INetworkDatagram/down);
-        output upperLayerOut @labels(INetworkDatagram/up);
+        input upperLayerIn @labels(INetworkHeader/down);
+        output upperLayerOut @labels(INetworkHeader/up);
 }
 
 //

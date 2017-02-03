@@ -28,6 +28,6 @@ moduleinterface INetworkLayer
     gates:
         input transportIn @labels(ITransportPacket/down);
         output transportOut @labels(ITransportPacket/up);
-        input ifIn @labels(INetworkDatagram/up);
-        output ifOut @labels(INetworkDatagram/down);
+        input ifIn @labels(INetworkHeader/up);
+        output ifOut @labels(INetworkHeader/down);
 }

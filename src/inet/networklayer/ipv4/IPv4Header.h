@@ -19,7 +19,7 @@
 #define __INET_IPV4DATAGRAM_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/ipv4/IPv4Header_m.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ namespace inet {
  * Represents an IPv4 datagram. More info in the IPv4Header.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv4Header : public IPv4Header_Base, public INetworkDatagram
+class INET_API IPv4Header : public IPv4Header_Base, public INetworkHeader
 {
   private:
     void copy(const IPv4Header& other);

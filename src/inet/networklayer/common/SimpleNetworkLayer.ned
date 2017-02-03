@@ -34,8 +34,8 @@ module SimpleNetworkLayer like INetworkLayer
         @display("i=block/fork");
 
     gates:
-        input ifIn @labels(INetworkDatagram);
-        output ifOut @labels(INetworkDatagram);
+        input ifIn @labels(INetworkHeader);
+        output ifOut @labels(INetworkHeader);
         input transportIn @labels(ITransportPacket/down);
         output transportOut @labels(ITransportPacket/up);
 

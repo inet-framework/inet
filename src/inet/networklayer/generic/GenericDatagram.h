@@ -19,7 +19,7 @@
 #define __INET_GENERICDATAGRAM_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
@@ -29,7 +29,7 @@ namespace inet {
  * Represents a generic datagram. More info in the GenericDatagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base, public INetworkDatagram
+class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base, public INetworkHeader
 {
   public:
     GenericDatagramHeader() : GenericDatagramHeader_Base() {}

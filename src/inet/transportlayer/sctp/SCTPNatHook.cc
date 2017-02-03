@@ -34,7 +34,7 @@ void SCTPNatHook::initialize()
     ipLayer->registerHook(0, this);
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     SCTPNatEntry *entry;
     SCTPChunk *chunk;
@@ -113,7 +113,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *dat
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     SCTPNatEntry *entry;
     SCTPChunk *chunk;
@@ -245,17 +245,17 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
+INetfilter::IHook::Result SCTPNatHook::datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inIE)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     return INetfilter::IHook::ACCEPT;
 }

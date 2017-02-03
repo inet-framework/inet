@@ -148,6 +148,7 @@ void AODVRouting::handleMessage(cMessage *msg)
             Packet *udpPacket = check_and_cast<Packet *>(msg);
             udpPacket->popHeader<UdpHeader>();
             L3Address sourceAddr = udpPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress();
+            // KLUDGE: I added this -1 after TTL decrement has been moved in IPv4
             unsigned int arrivalPacketTTL = udpPacket->getMandatoryTag<HopLimitInd>()->getHopLimit() - 1;
             const auto& ctrlPacket = udpPacket->popHeader<AODVControlPacket>();
 //            ctrlPacket->transferTagsFrom(msg);

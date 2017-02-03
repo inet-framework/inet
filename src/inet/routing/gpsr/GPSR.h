@@ -110,16 +110,16 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     // handling packets
     GPSROption *createGpsrOption(L3Address destination, cPacket *content);
     int computeOptionLength(GPSROption *gpsrOption);
-    void setGpsrOptionOnNetworkDatagram(INetworkDatagram *datagram);
-    void removeGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram);
+    void setGpsrOptionOnNetworkDatagram(INetworkHeader *datagram);
+    void removeGpsrOptionFromNetworkDatagram(INetworkHeader *datagram);
 
     // returns nullptr if not found
-    GPSROption *findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram);
-    const GPSROption *findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram) const { return const_cast<GPSR *>(this)->findGpsrOptionInNetworkDatagram(datagram); }
+    GPSROption *findGpsrOptionInNetworkDatagram(INetworkHeader *datagram);
+    const GPSROption *findGpsrOptionInNetworkDatagram(INetworkHeader *datagram) const { return const_cast<GPSR *>(this)->findGpsrOptionInNetworkDatagram(datagram); }
 
     // throws an error when not found
-    GPSROption *getGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram);
-    const GPSROption *getGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram) const { return const_cast<GPSR *>(this)->getGpsrOptionFromNetworkDatagram(datagram); }
+    GPSROption *getGpsrOptionFromNetworkDatagram(INetworkHeader *datagram);
+    const GPSROption *getGpsrOptionFromNetworkDatagram(INetworkHeader *datagram) const { return const_cast<GPSR *>(this)->getGpsrOptionFromNetworkDatagram(datagram); }
 
     // configuration
     bool isNodeUp() const;
@@ -138,7 +138,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     // address
     std::string getHostName() const;
     L3Address getSelfAddress() const;
-    L3Address getSenderNeighborAddress(INetworkDatagram *datagram) const;
+    L3Address getSenderNeighborAddress(INetworkHeader *datagram) const;
 
     // neighbor
     simtime_t getNextNeighborExpiration();
@@ -147,19 +147,19 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     L3Address getNextPlanarNeighborCounterClockwise(const L3Address& startNeighborAddress, double startNeighborAngle);
 
     // next hop
-    L3Address findNextHop(INetworkDatagram *datagram, const L3Address& destination);
-    L3Address findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination);
-    L3Address findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination);
+    L3Address findNextHop(INetworkHeader *datagram, const L3Address& destination);
+    L3Address findGreedyRoutingNextHop(INetworkHeader *datagram, const L3Address& destination);
+    L3Address findPerimeterRoutingNextHop(INetworkHeader *datagram, const L3Address& destination);
 
     // routing
-    Result routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop);
+    Result routeDatagram(INetworkHeader *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop);
 
     // netfilter
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override;
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override;
+    virtual Result datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override;
+    virtual Result datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) override;
 
     // lifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

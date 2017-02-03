@@ -19,7 +19,7 @@
 #define __INET_FloodHeader_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/flood/FloodHeader_m.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ namespace inet {
  * Represents an flood datagram. More info in the FloodHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API FloodHeader : public FloodHeader_Base, public INetworkDatagram
+class INET_API FloodHeader : public FloodHeader_Base, public INetworkHeader
 {
   public:
     FloodHeader() : FloodHeader_Base() {}

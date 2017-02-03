@@ -48,8 +48,8 @@ module IPv4NetworkLayer like INetworkLayer
         @display("i=block/fork");
 
     gates:
-        input ifIn @labels(INetworkDatagram);
-        output ifOut @labels(INetworkDatagram);
+        input ifIn @labels(INetworkHeader);
+        output ifOut @labels(INetworkHeader);
         input transportIn @labels(IPv4ControlInfo/down);
         output transportOut @labels(IPv4ControlInfo/up);
         input igmpIn;

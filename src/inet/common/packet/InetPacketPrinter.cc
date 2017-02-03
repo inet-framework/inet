@@ -18,7 +18,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
 
 #ifdef WITH_IPv4
@@ -75,7 +75,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     L3Address srcAddr, destAddr;
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); pk; pk = pk->getEncapsulatedPacket()) {
-        if (INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk)) {
+        if (INetworkHeader *dgram = dynamic_cast<INetworkHeader *>(pk)) {
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4

@@ -20,7 +20,7 @@
 
 #include <list>
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/ipv6/IPv6Datagram_m.h"
 
 namespace inet {
@@ -29,7 +29,7 @@ namespace inet {
  * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
+class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkHeader
 {
   protected:
     typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;

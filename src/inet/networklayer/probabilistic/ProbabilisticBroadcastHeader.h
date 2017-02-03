@@ -18,7 +18,7 @@
 #ifndef __INET_ProbabilisticBroadcastHeader_H
 #define __INET_ProbabilisticBroadcastHeader_H
 
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace inet {
  * Represents an ProbabilisticBroadcast datagram. More info in the ProbabilisticBroadcastHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeader_Base, public INetworkDatagram
+class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeader_Base, public INetworkHeader
 {
   public:
     ProbabilisticBroadcastHeader() : ProbabilisticBroadcastHeader_Base() {}

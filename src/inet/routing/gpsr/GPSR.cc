@@ -390,7 +390,7 @@ L3Address GPSR::getSelfAddress() const
     return ret;
 }
 
-L3Address GPSR::getSenderNeighborAddress(INetworkDatagram *datagram) const
+L3Address GPSR::getSenderNeighborAddress(INetworkHeader *datagram) const
 {
     const GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
     return gpsrOption->getSenderAddress();
@@ -482,7 +482,7 @@ L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeig
 // next hop
 //
 
-L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destination)
+L3Address GPSR::findNextHop(INetworkHeader *datagram, const L3Address& destination)
 {
     GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
     switch (gpsrOption->getRoutingMode()) {
@@ -492,7 +492,7 @@ L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destina
     }
 }
 
-L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
+L3Address GPSR::findGreedyRoutingNextHop(INetworkHeader *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using greedy routing: destination = " << destination << endl;
     GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
@@ -522,7 +522,7 @@ L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Add
         return bestNeighbor;
 }
 
-L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
+L3Address GPSR::findPerimeterRoutingNextHop(INetworkHeader *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using perimeter routing: destination = " << destination << endl;
     GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
@@ -577,7 +577,7 @@ L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3
 // routing
 //
 
-INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::routeDatagram(INetworkHeader *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
     const L3Address& source = datagram->getSourceAddress();
     const L3Address& destination = datagram->getDestinationAddress();
@@ -597,7 +597,7 @@ INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const 
     }
 }
 
-void GPSR::setGpsrOptionOnNetworkDatagram(INetworkDatagram *datagram)
+void GPSR::setGpsrOptionOnNetworkDatagram(INetworkHeader *datagram)
 {
     cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
     GPSROption *gpsrOption = createGpsrOption(datagram->getDestinationAddress(), networkPacket->getEncapsulatedPacket());
@@ -648,7 +648,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(INetworkDatagram *datagram)
     }
 }
 
-GPSROption *GPSR::findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram)
+GPSROption *GPSR::findGpsrOptionInNetworkDatagram(INetworkHeader *datagram)
 {
     cPacket *networkPacket = check_and_cast<cPacket *>(datagram);
     GPSROption *gpsrOption = nullptr;
@@ -686,7 +686,7 @@ GPSROption *GPSR::findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram)
     return gpsrOption;
 }
 
-GPSROption *GPSR::getGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram)
+GPSROption *GPSR::getGpsrOptionFromNetworkDatagram(INetworkHeader *datagram)
 {
     GPSROption *gpsrOption = findGpsrOptionInNetworkDatagram(datagram);
     if (gpsrOption == nullptr)
@@ -698,7 +698,7 @@ GPSROption *GPSR::getGpsrOptionFromNetworkDatagram(INetworkDatagram *datagram)
 // netfilter
 //
 
-INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
     Enter_Method("datagramPreRoutingHook");
     const L3Address& destination = datagram->getDestinationAddress();
@@ -708,7 +708,7 @@ INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagra
         return routeDatagram(datagram, outputInterfaceEntry, nextHop);
 }
 
-INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
     Enter_Method("datagramLocalOutHook");
     const L3Address& destination = datagram->getDestinationAddress();

@@ -16,11 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 
 namespace inet {
 
-Register_Abstract_Class(INetworkDatagram);
+Register_Abstract_Class(INetworkHeader);
 
 } // namespace inet
 

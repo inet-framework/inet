@@ -16,6 +16,6 @@ class TagBase extends cObject;
 class OrigNetworkDatagramInd extends TagBase
 {
     @customize(true);
-    // INetworkDatagram *origDatagram; // owned pointer
+    // INetworkHeader *origDatagram; // owned pointer
 }
 

@@ -18,7 +18,7 @@
 #ifndef __INET_WiseRouteHeader_H
 #define __INET_WiseRouteHeader_H
 
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/wiseroute/WiseRouteHeader_m.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace inet {
  * Represents an WiseRoute datagram. More info in the WiseRouteHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API WiseRouteHeader : public WiseRouteHeader_Base, public INetworkDatagram
+class INET_API WiseRouteHeader : public WiseRouteHeader_Base, public INetworkHeader
 {
   public:
     WiseRouteHeader() : WiseRouteHeader_Base() {}

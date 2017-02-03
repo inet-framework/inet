@@ -57,7 +57,7 @@ void CloudDelayerBase::finish()
 void CloudDelayerBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        INetworkDatagram *context = (INetworkDatagram *)msg->getContextPointer();
+        INetworkHeader *context = (INetworkHeader *)msg->getContextPointer();
         delete msg;
         networkProtocol->reinjectQueuedDatagram(context);
     }
@@ -69,12 +69,12 @@ void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int
     outDelay = SIMTIME_ZERO;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     Enter_Method_Silent();
 
@@ -102,17 +102,17 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }

@@ -16,17 +16,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INETWORKDATAGRAM_H
-#define __INET_INETWORKDATAGRAM_H
+#ifndef __INET_INETWORKHEADER_H
+#define __INET_INETWORKHEADER_H
 
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
-class INET_API INetworkDatagram
+class INET_API INetworkHeader
 {
   public:
-    virtual ~INetworkDatagram() {}
+    virtual ~INetworkHeader() {}
     virtual L3Address getSourceAddress() const = 0;
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;
@@ -37,5 +37,5 @@ class INET_API INetworkDatagram
 
 } // namespace inet
 
-#endif // ifndef __INET_INETWORKDATAGRAM_H
+#endif // ifndef __INET_INETWORKHEADER_H
 

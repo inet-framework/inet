@@ -64,7 +64,7 @@ namespace inet { class UdpHeader; }
 namespace inet { namespace ieee80211 { class Ieee80211Frame; } }
 #endif // ifdef WITH_IEEE80211
 
-#include "inet/networklayer/contract/INetworkDatagram.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/applications/pingapp/PingPayload_m.h"
 
 #ifdef WITH_RIP
@@ -129,7 +129,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); showEncapsulatedPackets && pk; pk = pk->getEncapsulatedPacket()) {
         std::ostringstream out;
-        INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk);
+        INetworkHeader *dgram = dynamic_cast<INetworkHeader *>(pk);
         if (dgram) {
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();

@@ -189,27 +189,27 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE);
+    IHook::Result datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inIE);
 
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
   public:
     IPv6();
@@ -220,8 +220,8 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;
-    virtual void dropQueuedDatagram(const INetworkDatagram *daragram) override;
-    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) override;
+    virtual void dropQueuedDatagram(const INetworkHeader *daragram) override;
+    virtual void reinjectQueuedDatagram(const INetworkHeader *datagram) override;
 
   protected:
     /**
