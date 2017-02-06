@@ -79,7 +79,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     // source of the fragment, pointing to the Payload Length field of
     // the fragment packet.
     if (moreFragments && (fragmentLength % 8) != 0) {
-        icmpModule->sendErrorMessage(datagram, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD);    // TODO set pointer
+        // KLUDGE: revive icmpModule->sendErrorMessage(datagram, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD);    // TODO set pointer
         return nullptr;
     }
 
@@ -91,7 +91,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     // the fragment, pointing to the Fragment Offset field of the
     // fragment packet.
     if (offset + fragmentLength > 65535) {
-        icmpModule->sendErrorMessage(datagram, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD);    // TODO set pointer
+        // KLUDGE: revive icmpModule->sendErrorMessage(datagram, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD);    // TODO set pointer
         return nullptr;
     }
 
@@ -153,7 +153,7 @@ void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
             if (buf.datagram) {
                 // send ICMP error
                 EV_INFO << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
-                icmpModule->sendErrorMessage(buf.datagram, ICMPv6_TIME_EXCEEDED, 0);
+                // KLUDGE: revive icmpModule->sendErrorMessage(buf.datagram, ICMPv6_TIME_EXCEEDED, 0);
             }
 
             // delete

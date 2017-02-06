@@ -593,6 +593,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 {
     const auto& datagram = packet->peekHeader<IPv6Datagram>();
     // Defragmentation. skip defragmentation if datagram is not fragmented
+#if 0 // KLUDGE: TODO
     IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (fh) {
         EV_DETAIL << "Datagram fragment: offset=" << fh->getFragmentOffset()
@@ -611,6 +612,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
         }
         EV_DETAIL << "This fragment completes the datagram.\n";
     }
+#endif
 
 #ifdef WITH_xMIPv6
     // #### 29.08.07 - CB
@@ -806,6 +808,9 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         return;
     }
 
+    // KLUDGE: TODO
+    ASSERT(false);
+#if 0
     // create and send fragments
     int headerLength = datagram->calculateUnfragmentableHeaderByteLength();
     int payloadLength = byte(packet->getPacketLength() - byte(headerLength)).get();
@@ -839,6 +844,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
     }
 
     delete packet;
+#endif
 }
 
 void IPv6::sendDatagramToOutput(Packet *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
