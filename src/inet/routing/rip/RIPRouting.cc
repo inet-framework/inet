@@ -294,14 +294,18 @@ RIPRoute *RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int m
  */
 void RIPRouting::sendRIPRequest(const RIPInterfaceEntry& ripInterface)
 {
-    RIPPacket *packet = new RIPPacket("RIP request");
+    Packet *pk = new Packet("RIP request");
+    const  auto& packet = std::make_shared<RIPPacket>();
     packet->setCommand(RIP_REQUEST);
     packet->setEntryArraySize(1);
     RIPEntry& entry = packet->getEntry(0);
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
-    emit(sentRequestSignal, packet);
-    sendPacket(packet, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface.ie);
+    packet->setChunkLength(byte(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+    packet->markImmutable();
+    pk->append(packet);
+    emit(sentRequestSignal, pk);
+    sendPacket(pk, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface.ie);
 }
 
 /**
@@ -537,12 +541,12 @@ void RIPRouting::handleMessage(cMessage *msg)
         }
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        RIPPacket *packet = check_and_cast<RIPPacket *>(msg);
-        unsigned char command = packet->getCommand();
+        Packet *pk = check_and_cast<Packet *>(msg);
+        unsigned char command = CHK(pk->peekHeader<RIPPacket>())->getCommand();
         if (command == RIP_REQUEST)
-            processRequest(packet);
+            processRequest(pk);
         else if (command == RIP_RESPONSE)
-            processResponse(packet);
+            processResponse(pk);
         else
             throw cRuntimeError("RIP: unknown command (%d)", (int)command);
     }
@@ -592,9 +596,11 @@ void RIPRouting::processUpdate(bool triggered)
  *     and metric 16 (infinity). In this case the whole routing table is sent,
  *     using the normal output process (sendRoutes() method).
  */
-void RIPRouting::processRequest(RIPPacket *packet)
+void RIPRouting::processRequest(Packet *packet)
 {
-    int numEntries = packet->getEntryArraySize();
+    const auto& ripPacket = std::dynamic_pointer_cast<RIPPacket>(CHK(packet->peekHeader<RIPPacket>())->dupShared());
+
+    int numEntries = ripPacket->getEntryArraySize();
     if (numEntries == 0) {
         EV_INFO << "received empty request, ignoring.\n";
         delete packet;
@@ -604,13 +610,11 @@ void RIPRouting::processRequest(RIPPacket *packet)
     L3Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     int srcPort = packet->getMandatoryTag<L4PortInd>()->getSrcPort();
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    packet->clearTags();
 
     EV_INFO << "received request from " << srcAddr << "\n";
 
-    RIPRoute *ripRoute;
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        RIPEntry& entry = ripPacket->getEntry(i);
         switch (entry.addressFamilyId) {
             case RIP_AF_NONE:
                 if (numEntries == 1 && entry.metric == RIP_INFINITE_METRIC) {
@@ -621,26 +625,27 @@ void RIPRouting::processRequest(RIPPacket *packet)
                     return;
                 }
                 else {
-                    delete packet;
                     throw cRuntimeError("RIP: invalid request.");
                 }
                 break;
 
-            case RIP_AF_INET:
-                ripRoute = findRoute(entry.address, entry.prefixLength);
+            case RIP_AF_INET: {
+                RIPRoute *ripRoute = findRoute(entry.address, entry.prefixLength);
                 entry.metric = ripRoute ? ripRoute->getMetric() : RIP_INFINITE_METRIC;
                 // entry.nextHop, entry.routeTag?
                 break;
+            }
 
             default:
-                delete packet;
                 throw cRuntimeError("RIP: request has invalid addressFamilyId: %d.", (int)entry.addressFamilyId);
         }
     }
 
-    packet->setCommand(RIP_RESPONSE);
-    packet->setName("RIP response");
-    socket.sendTo(check_and_cast<Packet*>(packet), srcAddr, srcPort);   //KLUDGE
+    ripPacket->setCommand(RIP_RESPONSE);
+    Packet *outPacket = new Packet("RIP response");
+    ripPacket->markImmutable();
+    outPacket->append(ripPacket);
+    socket.sendTo(outPacket, srcAddr, srcPort);   //KLUDGE
 }
 
 /**
@@ -654,7 +659,8 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
 
     int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMTU() - 40    /*IPv6_HEADER_BYTES*/ - 8    /*UDP_HEADER_BYTES*/ - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
 
-    RIPPacket *packet = new RIPPacket("RIP response");
+    Packet *pk = new Packet("RIP response");
+    auto packet = std::make_shared<RIPPacket>();
     packet->setCommand(RIP_RESPONSE);
     packet->setEntryArraySize(maxEntries);
     int k = 0;    // index into RIP entries
@@ -695,9 +701,14 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
 
         // if packet is full, then send it and allocate a new one
         if (k >= maxEntries) {
-            emit(sentUpdateSignal, packet);
-            sendPacket(packet, address, port, ripInterface.ie);
-            packet = new RIPPacket("RIP response");
+            packet->setChunkLength(byte(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+            packet->markImmutable();
+            pk->append(packet);
+
+            emit(sentUpdateSignal, pk);
+            sendPacket(pk, address, port, ripInterface.ie);
+            pk = new Packet("RIP response");
+            packet = std::make_shared<RIPPacket>();
             packet->setCommand(RIP_RESPONSE);
             packet->setEntryArraySize(maxEntries);
             k = 0;
@@ -707,11 +718,15 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
     // send last packet if it has entries
     if (k > 0) {
         packet->setEntryArraySize(k);
-        emit(sentUpdateSignal, packet);
-        sendPacket(packet, address, port, ripInterface.ie);
+        packet->setChunkLength(byte(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+        packet->markImmutable();
+        pk->append(packet);
+
+        emit(sentUpdateSignal, pk);
+        sendPacket(pk, address, port, ripInterface.ie);
     }
     else
-        delete packet;
+        delete pk;
 }
 
 /**
@@ -741,7 +756,7 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
  *        if (received from route.gateway AND route.metric != metric) OR metric < route.metric
  *          updateRoute(route)
  */
-void RIPRouting::processResponse(RIPPacket *packet)
+void RIPRouting::processResponse(Packet *packet)
 {
     emit(rcvdResponseSignal, packet);
 
@@ -765,10 +780,12 @@ void RIPRouting::processResponse(RIPPacket *packet)
         return;
     }
 
+    const auto& ripPacket = CHK(packet->peekHeader<RIPPacket>());
+
     EV_INFO << "response received from " << srcAddr << "\n";
-    int numEntries = packet->getEntryArraySize();
+    int numEntries = ripPacket->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        const RIPEntry& entry = ripPacket->getEntry(i);
         int metric = std::min((int)entry.metric + incomingIe->metric, RIP_INFINITE_METRIC);
         L3Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
 
@@ -794,7 +811,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
     delete packet;
 }
 
-bool RIPRouting::isValidResponse(RIPPacket *packet)
+bool RIPRouting::isValidResponse(Packet *packet)
 {
     // check that received from ripUdpPort
     if (packet->getMandatoryTag<L4PortInd>()->getSrcPort() != ripUdpPort) {
@@ -828,10 +845,11 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
         }
     }
 
+    const auto& ripPacket = packet->peekHeader<RIPPacket>();
     // validate entries
-    int numEntries = packet->getEntryArraySize();
+    int numEntries = ripPacket->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        RIPEntry& entry = ripPacket->getEntry(i);
 
         // check that metric is in range [1,16]
         if (entry.metric < 1 || entry.metric > RIP_INFINITE_METRIC) {
@@ -1037,10 +1055,8 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
  * Sends the packet to the specified destination.
  * If the destAddr is a multicast, then the destInterface must be specified.
  */
-void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface)
+void RIPRouting::sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface)
 {
-    packet->setByteLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
-
     if (destAddr.isMulticast()) {
         packet->ensureTag<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
         if (mode == RIPng) {
@@ -1048,7 +1064,7 @@ void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int de
             packet->ensureTag<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
     }
-    socket.sendTo(check_and_cast<Packet*>(packet), destAddr, destPort);         //KLUDGE
+    socket.sendTo(packet, destAddr, destPort);
 }
 
 /*----------------------------------------

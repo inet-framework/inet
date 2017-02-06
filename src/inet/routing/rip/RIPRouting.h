@@ -20,6 +20,7 @@
 #define __INET_RIPROUTING_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -202,12 +203,12 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     virtual RIPRoute *importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
     virtual void sendRIPRequest(const RIPInterfaceEntry& ripInterface);
 
-    virtual void processRequest(RIPPacket *packet);
+    virtual void processRequest(Packet *pk);
     virtual void processUpdate(bool triggered);
     virtual void sendRoutes(const L3Address& address, int port, const RIPInterfaceEntry& ripInterface, bool changedOnly);
 
-    virtual void processResponse(RIPPacket *packet);
-    virtual bool isValidResponse(RIPPacket *packet);
+    virtual void processResponse(Packet *pk);
+    virtual bool isValidResponse(Packet *packet);
     virtual void addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
     virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
 
@@ -216,7 +217,7 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     virtual void invalidateRoute(RIPRoute *route);
     virtual void purgeRoute(RIPRoute *route);
 
-    virtual void sendPacket(RIPPacket *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface);
+    virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface);
 };
 
 } // namespace inet

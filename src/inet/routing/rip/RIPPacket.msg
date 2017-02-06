@@ -19,6 +19,8 @@
 class noncobject L3Address;
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 }}
 
@@ -28,6 +30,8 @@ cplusplus {{
 const int RIP_HEADER_SIZE = 4;
 const int RIP_RTE_SIZE = 20;
 }}
+
+class FieldsChunk extends cObject;
 
 //
 // RIP commands
@@ -66,7 +70,9 @@ struct RIPEntry
 //
 // note: Authentication entry is not allowed
 //
-packet RIPPacket {
+class RIPPacket extends FieldsChunk
+{
+    bit chunkLength @overridegetter = bit(-1);
     unsigned char command @enum(RIPCommand);
     // version is fixed: 2
     RIPEntry entry[];
