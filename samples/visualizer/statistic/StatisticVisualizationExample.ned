@@ -79,3 +79,29 @@ network StatisticVisualizationD
             @display("p=331,104");
         }
 }
+
+network StatisticVisualizationExampleD
+{
+    parameters:
+        @display("bgb=1391,377");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=64.256,62.247997");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=64.256,180.72");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=62.247997,287.14398");
+        }
+        destination: AdhocHost {
+            parameters:
+                @display("p=596.376,180.72");
+        }
+        source: AdhocHost {
+            @display("p=363.448,180.72");
+        }
+}
