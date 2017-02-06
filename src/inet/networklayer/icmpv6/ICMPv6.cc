@@ -180,7 +180,7 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     if (!validateDatagramPromptingError(origDatagram))
         return;
 
-    ICMPv6Message *errorMsg;
+    Packet *errorMsg;
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
         errorMsg = createDestUnreachableMsg(code);
@@ -201,9 +201,8 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     // error when decapsulating the origDatagram on the receiver side.
     // A workaround is to avoid decapsulation, or to manually set the
     // errorMessage length to be larger than the encapsulated message.
-    errorMsg->encapsulate(origDatagram);
-    if (errorMsg->getChunkLength() + byte(IPv6_HEADER_BYTES) > byte(IPv6_MIN_MTU))
-        errorMsg->setChunkLength(byte(IPv6_MIN_MTU - IPv6_HEADER_BYTES));
+    bit copyLength =  byte(IPv6_MIN_MTU) - errorMsg->getPacketLength();
+    errorMsg->append(origDatagram->peekDataAt(bit(0), std::min(copyLength, origDatagram->getDataLength())));
 
     // debugging information
     EV_DEBUG << "sending ICMP error: (" << errorMsg->getClassName() << ")" << errorMsg->getName()
@@ -211,7 +210,8 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
-    if (origDatagram->getSrcAddress().isUnspecified()) {
+    const auto& ipv6Header = origDatagram->peekHeader<IPv6Datagram>();
+    if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
         errorMsg->ensureTag<L3AddressInd>()->setSrcAddress(IPv6Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
@@ -220,21 +220,8 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
         processICMPv6Message(errorMsg);
     }
     else {
-        sendToIP(errorMsg, origDatagram->getSrcAddress());
+        sendToIP(errorMsg, ipv6Header->getSrcAddress());
     }
-}
-
-void ICMPv6::sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code)
-{
-    Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
-
-    auto dgramTag = transportPacket->removeMandatoryTag<OrigNetworkDatagramInd>();
-    IPv6Datagram *datagram = check_and_cast<IPv6Datagram*>(dgramTag->removeOrigDatagram());
-    delete dgramTag;
-    take(transportPacket);
-    take(datagram);
-    datagram->encapsulate(transportPacket);
-    sendErrorMessage(datagram, type, code);
 }
 
 void ICMPv6::sendToIP(Packet *msg, const IPv6Address& dest)
@@ -251,38 +238,50 @@ void ICMPv6::sendToIP(Packet *msg)
     send(msg, "ipv6Out");
 }
 
-ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)
+Packet *ICMPv6::createDestUnreachableMsg(int code)
 {
-    ICMPv6DestUnreachableMsg *errorMsg = new ICMPv6DestUnreachableMsg(); // TODO: "Dest Unreachable");
+    auto errorMsg = std::make_shared<ICMPv6DestUnreachableMsg>();
     errorMsg->setType(ICMPv6_DESTINATION_UNREACHABLE);
     errorMsg->setCode(code);
-    return errorMsg;
+    auto packet = new Packet("Dest Unreachable");
+    errorMsg->markImmutable();
+    packet->append(errorMsg);
+    return packet;
 }
 
-ICMPv6Message *ICMPv6::createPacketTooBigMsg(int mtu)
+Packet *ICMPv6::createPacketTooBigMsg(int mtu)
 {
-    ICMPv6PacketTooBigMsg *errorMsg = new ICMPv6PacketTooBigMsg(); // TODO: "Packet Too Big");
+    auto errorMsg = std::make_shared<ICMPv6PacketTooBigMsg>();
     errorMsg->setType(ICMPv6_PACKET_TOO_BIG);
     errorMsg->setCode(0);    //Set to 0 by sender and ignored by receiver.
     errorMsg->setMTU(mtu);
-    return errorMsg;
+    auto packet = new Packet("Packet Too Big");
+    errorMsg->markImmutable();
+    packet->append(errorMsg);
+    return packet;
 }
 
-ICMPv6Message *ICMPv6::createTimeExceededMsg(int code)
+Packet *ICMPv6::createTimeExceededMsg(int code)
 {
-    ICMPv6TimeExceededMsg *errorMsg = new ICMPv6TimeExceededMsg(); // TODO: "Time Exceeded");
+    auto errorMsg = std::make_shared<ICMPv6TimeExceededMsg>();
     errorMsg->setType(ICMPv6_TIME_EXCEEDED);
     errorMsg->setCode(code);
-    return errorMsg;
+    auto packet = new Packet("Time Exceeded");
+    errorMsg->markImmutable();
+    packet->append(errorMsg);
+    return packet;
 }
 
-ICMPv6Message *ICMPv6::createParamProblemMsg(int code)
+Packet *ICMPv6::createParamProblemMsg(int code)
 {
-    ICMPv6ParamProblemMsg *errorMsg = new ICMPv6ParamProblemMsg(); // TODO: "Parameter Problem");
+    auto errorMsg = std::make_shared<ICMPv6ParamProblemMsg>();
     errorMsg->setType(ICMPv6_PARAMETER_PROBLEM);
     errorMsg->setCode(code);
     //TODO: What Pointer? section 3.4
-    return errorMsg;
+    auto packet = new Packet("Parameter Problem");
+    errorMsg->markImmutable();
+    packet->append(errorMsg);
+    return packet;
 }
 
 bool ICMPv6::validateDatagramPromptingError(Packet *packet)

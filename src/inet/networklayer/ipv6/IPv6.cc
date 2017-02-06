@@ -591,6 +591,7 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
 
 void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 {
+    auto ipv6HeaderPosition = packet->getHeaderPopOffset();
     const auto& datagram = packet->peekHeader<IPv6Datagram>();
     // Defragmentation. skip defragmentation if datagram is not fragmented
 #if 0 // KLUDGE: TODO
@@ -673,7 +674,8 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
     else if (!hasSocket) {
         // TODO send ICMP Destination Unreacheable error
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
-        sendIcmpError(packet, NULL, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+        packet->setHeaderPopOffset(ipv6HeaderPosition);
+        sendIcmpError(packet, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
     }
 }
 
@@ -1157,11 +1159,6 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(Packet *datagram, const Int
 void IPv6::sendIcmpError(Packet *origDatagram, ICMPv6Type type, int code)
 {
     icmp->sendErrorMessage(origDatagram, type, code);
-}
-
-void IPv6::sendIcmpError(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code)
-{
-    icmp->sendErrorMessage(transportPacket, ctrl, type, code);
 }
 
 } // namespace inet

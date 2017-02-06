@@ -51,24 +51,15 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
      */
     virtual void sendErrorMessage(Packet *datagram, ICMPv6Type type, int code);
 
-    /**
-     * This method can be called from other modules to send an ICMP error packet
-     * in response to a received bogus packet from the transport layer (like UDP).
-     * The ICMP error packet needs to include (part of) the original IP datagram,
-     * so this function will wrap back the transport packet into the IP datagram
-     * based on its IPv4ControlInfo.
-     */
-    virtual void sendErrorMessage(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code);
-
   protected:
     // internal helper functions
     virtual void sendToIP(Packet *msg, const IPv6Address& dest);
     virtual void sendToIP(Packet *msg);    // FIXME check if really needed
 
-    virtual ICMPv6Message *createDestUnreachableMsg(int code);
-    virtual ICMPv6Message *createPacketTooBigMsg(int mtu);
-    virtual ICMPv6Message *createTimeExceededMsg(int code);
-    virtual ICMPv6Message *createParamProblemMsg(int code);    //TODO:Section 3.4 describes a pointer. What is it?
+    virtual Packet *createDestUnreachableMsg(int code);
+    virtual Packet *createPacketTooBigMsg(int mtu);
+    virtual Packet *createTimeExceededMsg(int code);
+    virtual Packet *createParamProblemMsg(int code);    //TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**
