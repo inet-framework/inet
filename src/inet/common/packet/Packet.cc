@@ -68,15 +68,15 @@ Chunk *Packet::getChunk(int i) const
 void Packet::setHeaderPopOffset(bit offset)
 {
     assert(contents != nullptr);
-    assert(bit(0) <= bit(offset) && bit(offset) <= getPacketLength() - trailerIterator.getPosition());
-    contents->seekIterator(headerIterator, bit(offset));
+    assert(bit(0) <= offset && offset <= getPacketLength() - trailerIterator.getPosition());
+    contents->seekIterator(headerIterator, offset);
     assert(getDataLength() > bit(0));
 }
 
 std::shared_ptr<Chunk> Packet::peekHeader(bit length) const
 {
     assert(bit(-1) <= length && length <= getDataLength());
-    return contents == nullptr ? nullptr : contents->peek(headerIterator, bit(length));
+    return contents == nullptr ? nullptr : contents->peek(headerIterator, length);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(bit length)
@@ -99,14 +99,14 @@ void Packet::setTrailerPopOffset(bit offset)
 {
     assert(contents != nullptr);
     assert(headerIterator.getPosition() <= offset);
-    contents->seekIterator(trailerIterator, bit(getPacketLength()) - bit(offset));
+    contents->seekIterator(trailerIterator, getPacketLength() - offset);
     assert(getDataLength() > bit(0));
 }
 
 std::shared_ptr<Chunk> Packet::peekTrailer(bit length) const
 {
     assert(bit(-1) <= length && length <= getDataLength());
-    return contents == nullptr ? nullptr : contents->peek(trailerIterator, bit(length));
+    return contents == nullptr ? nullptr : contents->peek(trailerIterator, length);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(bit length)
@@ -146,7 +146,7 @@ std::shared_ptr<Chunk> Packet::peekAt(bit offset, bit length) const
         return nullptr;
     else {
         bit peekLength = length == bit(-1) ? getPacketLength() - offset : length;
-        return contents->peek(Chunk::Iterator(true, bit(offset), -1), peekLength);
+        return contents->peek(Chunk::Iterator(true, offset, -1), peekLength);
     }
 }
 
@@ -161,7 +161,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
         if (contents->canInsertAtBeginning(chunk)) {
             makeContentsMutable();
             contents->insertAtBeginning(chunk);
-            contents = contents->peek(bit(0), bit(contents->getChunkLength()));
+            contents = contents->peek(bit(0), contents->getChunkLength());
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
