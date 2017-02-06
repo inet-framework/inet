@@ -85,10 +85,10 @@ network DatalinkVisualizerExtended
             @display("p=600,120");
         }
         wirelessSource: WirelessHost {
-            @display("p=360,45");
+            @display("p=380,55");
         }
         wirelessDestination: WirelessHost {
-            @display("p=822.64,44.07");
+            @display("p=820,55");
         }
 }
 
