@@ -19,6 +19,7 @@
 #define __INET_TUNSOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -39,7 +40,7 @@ class INET_API TunSocket
     void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
 
     void open(int interfaceId);
-    void send(cPacket *packet);
+    void send(Packet *packet);
     void close();
 
     /**

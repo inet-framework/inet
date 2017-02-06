@@ -87,7 +87,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
                 message->clearTags();
                 message->ensureTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
                 message->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-                l3Socket.send(PK(message));
+                l3Socket.send(check_and_cast<Packet *>(message));
             }
             else if (protocol == &Protocol::udp) {
                 message->clearTags();
@@ -101,7 +101,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
             if (packetProtocol == protocol) {
                 delete message->removeControlInfo();
                 message->clearTags();
-                tunSocket.send(PK(message));
+                tunSocket.send(check_and_cast<Packet *>(message));
             }
             else
                 throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;

@@ -67,7 +67,7 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         networkDatagram->setDestinationAddress(networkDatagram->getSourceAddress());
         delete message->removeControlInfo();
         message->clearTags();
-        tunSocket.send(PK(message));
+        tunSocket.send(check_and_cast<Packet*>(message));
         packetsSent++;
     }
     else
