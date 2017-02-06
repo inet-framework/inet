@@ -55,7 +55,7 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
         L3Address remoteAddress = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress();
         int srcPort = pk->getMandatoryTag<L4PortInd>()->getSrcPort();
         pk->clearTags();
-        pk->removePoppedParts();
+        pk->removePoppedChunks();
 
         // send back
         socket.sendTo(pk, remoteAddress, srcPort);
