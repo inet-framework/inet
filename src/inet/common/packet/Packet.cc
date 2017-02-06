@@ -224,18 +224,24 @@ void Packet::removeFromEnd(bit length)
         contents->markImmutable();
 }
 
-void Packet::removePoppedParts()
+void Packet::removePoppedHeaders()
 {
-    bit hlen = getHeaderPoppedLength();
-    if (hlen > bit(0)) {
-        setHeaderPopOffset(bit(0));
-        removeFromBeginning(hlen);
-    }
-    bit tlen = getTrailerPoppedLength();
-    if (tlen > bit(0)) {
-        setTrailerPopOffset(bit(0));
-        removeFromEnd(tlen);
-    }
+    bit poppedLength = getHeaderPoppedLength();
+    setHeaderPopOffset(bit(0));
+    removeFromBeginning(poppedLength);
+}
+
+void Packet::removePoppedTrailers()
+{
+    bit poppedLength = getTrailerPoppedLength();
+    setTrailerPopOffset(bit(0));
+    removeFromEnd(poppedLength);
+}
+
+void Packet::removePoppedChunks()
+{
+    removePoppedHeaders();
+    removePoppedTrailers();
 }
 
 } // namespace

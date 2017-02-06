@@ -250,7 +250,9 @@ class INET_API Packet : public cPacket
     void removeFromEnd(bit length);
 
     /** remove popped headers and trailers */
-    void removePoppedParts();
+    void removePoppedHeaders();
+    void removePoppedTrailers();
+    void removePoppedChunks();
     //@}
 
     virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
