@@ -91,7 +91,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
             }
             else if (protocol == &Protocol::udp) {
                 message->clearTags();
-                clientSocket.send(PK(message));
+                clientSocket.send(check_and_cast<Packet *>(message));
             }
             else
                 throw cRuntimeError("Unknown protocol: %s", protocol->getName());;

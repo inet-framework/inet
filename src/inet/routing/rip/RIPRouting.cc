@@ -640,7 +640,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
 
     packet->setCommand(RIP_RESPONSE);
     packet->setName("RIP response");
-    socket.sendTo(packet, srcAddr, srcPort);
+    socket.sendTo(check_and_cast<Packet*>(packet), srcAddr, srcPort);   //KLUDGE
 }
 
 /**
@@ -1048,7 +1048,7 @@ void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int de
             packet->ensureTag<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
     }
-    socket.sendTo(packet, destAddr, destPort);
+    socket.sendTo(check_and_cast<Packet*>(packet), destAddr, destPort);         //KLUDGE
 }
 
 /*----------------------------------------
