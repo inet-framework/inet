@@ -65,6 +65,7 @@
     </p>
     <p>
         For this configuration the network contains two wireless nodes (<code><strong>AdhocHost</strong></code>), two wired hosts (<code><strong>StandardHost</strong></code>). Besides these nodes, the network has an <code><strong>IPv4NetworkConfigurator</strong></code>, an <code><strong>Ieee80211ScalarRadioMedium</strong></code> and a <code><strong>DataLinkVisualizer</strong></code> module.
+        <img src="datalinkVisuSimpNet.png.gif">
         The <code><strong>wirelessSource</strong></code> pings the <code><strong>wirelessDestination</strong></code>, the <code><strong>wiredSource</strong></code> pings the <code><strong>wiredDestination</strong></code>.
         The configuration is really simple.
         It consists of one line which enables the <code><strong>DatalinkVisualizer</strong></code> with the <i>displayLinks</i> parameter.
@@ -72,13 +73,17 @@
     </p>
     <p>
         When we start the simulation, here is what happens:
+    </p>
+    <p>
         <img src="enablingDatalinks.gif">
+    </p>
+    <p>
         The communication starts between the nodes.
         When a message reach its destination's data link layer, the data link is activated between the nodes and an arrow is shown from the sender towards the receiver.
         Then the arrows fade out in real time.
     </p>
         <!--
-            Mit csinálunk?
+            Mit csinálunk / mi a sample célja?
                 Ebben a példában megmutatjuk hogy kell bekapcsolni a visualizer-t
                 A default kinézetét fogjuk látni
                 
@@ -94,11 +99,53 @@
                 valós időben elhalványulnak
         -->
 
+    <p><h2>Filtering data links</h2></p>
+    <p>
+    </p>
+    <p>
+    </p>
+    <p>
+        <img src="filteringDatalinks.gif">
+    </p>
+        <!--
+            Mit csinálunk / mi a sample célja?
+                a filter funkciót mutatjuk meg
+                ezzel meg tudjuk mondani, hogy mely eszközök, mely interfacek vagy mely típusú packetek esetén akarjuk látni a data linkeket
+                
+            Mi a konfig?
+                packetfilter
+                értelmes fadeOut
+
+            Mi az eredmény?
+                gif
+        -->
+
+    <p><h2>Using Multiple visualizers</h2></p>
+
+    <p>
+    </p>
+    <p>
+    </p>
+    <p>
+        <img src="usingMultipleVisualizers.gif">
+    </p>
+        <!--
+            Mit csinálunk / mi a sample célja?
+                
+                
+            Mi a konfig?
+                
+
+            Mi az eredmény?
+                
+        -->
+
+<!-- Alcim minta   
     <p><h2>Sample</h2></p>
 
     <p>
     </p>
-
+-->    
     <p><h2>More information</h2></p>
 
     <p>
