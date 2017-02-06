@@ -1,6 +1,7 @@
 <scenario>
     <at t="5">
         <tell module="lifecycleController" target="router1" operation="NodeShutdownOperation"/>
+        <!-- <disconnect src-module="router1" src-gate="pppg$o[0]" /> -->
     </at>
     <at t="10">
         <tell module="lifecycleController" target="router1" operation="NodeStartOperation"/>
