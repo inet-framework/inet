@@ -1,7 +1,9 @@
 package inet.samples.visualizer.packetdrop;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100G;
 import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
@@ -93,7 +95,7 @@ network PacketDropC
             @display("p=465,37");
         }
     connections:
-        standardHost.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        etherSwitch.ethg++ <--> Eth100M <--> router.ethg++;
         router.ethg++ <--> Eth100M <--> accessPoint.ethg++;
+        standardHost.ethg++ <--> Eth100G <--> etherSwitch.ethg++;
+        etherSwitch.ethg++ <--> Eth10M <--> router.ethg++;
 }
