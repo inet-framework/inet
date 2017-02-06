@@ -31,31 +31,35 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 network DatalinkVisualizerSimple
 {
-    @display("bgb=900,300");
+    @display("bgb=900,400");
     submodules:
-        wirelessSource: AdhocHost {
-            @display("p=316,80");
-        }
-        wirelessDestination: AdhocHost {
-            @display("p=630,80");
-        }
-        configurator: IPv4NetworkConfigurator {
-            parameters:
-                @display("p=100,150");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,250");
-        }
-        linkVisualizer: DataLinkVisualizer {
+        linkVisualizer1: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
+        linkVisualizer2: DataLinkVisualizer {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,350");
+        }
+        wirelessSource: AdhocHost {
+            @display("p=300,80");
+        }
+        wirelessDestination: AdhocHost {
+            @display("p=600,80");
+        }
         wiredSource: StandardHost {
-            @display("p=316,200");
+            @display("p=300,280");
         }
         wiredDestination: StandardHost {
-            @display("p=630,200");
+            @display("p=600,280");
         }
     connections:
         wiredSource.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
@@ -116,19 +120,19 @@ network ComplexDataLinkVisualizerInfrastructure
             parameters:
                 @display("p=100,350");
         }
-        accessPoint: AccessPoint {
-            @display("p=545,266");
-        }
-        wirelessSource1: WirelessHost {
+//        accessPoint: AccessPoint {
+//            @display("p=545,266");
+//        }
+        wirelessSource1: AdhocHost {
             @display("p=305,182");
         }
-        wirelessDestination1: WirelessHost {
+        wirelessDestination1: AdhocHost {
             @display("p=785,182");
         }
-        wirelessSource2: WirelessHost {
+        wirelessSource2: AdhocHost {
             @display("p=305,351");
         }
-        wirelessDestination2: WirelessHost {
+        wirelessDestination2: AdhocHost {
             @display("p=785,351");
         }
 }
