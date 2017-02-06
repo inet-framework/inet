@@ -171,6 +171,7 @@ void EtherEncap::processFrameFromMAC(Packet *packet)
     if (etherType != -1) {
         packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
     }
 
     EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
