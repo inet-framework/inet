@@ -88,11 +88,11 @@ network PhysicallinkVisualizerExtended
         accessPoint: AccessPoint {
             @display("p=600,120");
         }
-        source: WirelessHost {
-            @display("p=360,45");
+        wirelessSource: WirelessHost {
+            @display("p=380,55");
         }
-        destination: WirelessHost {
-            @display("p=840,45");
+        wirelessDestination: WirelessHost {
+            @display("p=820,55");
         }
 }
 
@@ -124,17 +124,17 @@ network ComplexPhysicalLinkVisualizerInfrastructure
         accessPoint: AccessPoint {
             @display("p=545,266");
         }
-        source1: WirelessHost {
+        wirelessSource1: WirelessHost {
             @display("p=305,182");
         }
-        destination1: WirelessHost {
+        wirelessDestination1: WirelessHost {
             @display("p=785,182");
         }
-        source2: WirelessHost {
+        wirelessSource2: WirelessHost {
             @display("p=305,351");
         }
-        destination2: WirelessHost {
+        wirelessDestination2: WirelessHost {
             @display("p=785,351");
         }
-}
 
+}
