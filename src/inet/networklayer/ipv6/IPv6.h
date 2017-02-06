@@ -49,11 +49,11 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     class QueuedDatagramForHook
     {
       public:
-        QueuedDatagramForHook(IPv6Datagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *outIE, const IPv6Address& nextHopAddr, IHook::Type hookType) :
+        QueuedDatagramForHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *outIE, const IPv6Address& nextHopAddr, IHook::Type hookType) :
             datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
-        IPv6Datagram *datagram = nullptr;
+        Packet *datagram = nullptr;
         const InterfaceEntry *inIE = nullptr;
         const InterfaceEntry *outIE = nullptr;
         IPv6Address nextHopAddr;
@@ -127,9 +127,9 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * Encapsulate packet coming from higher layers into IPv6Datagram
      */
-    virtual IPv6Datagram *encapsulate(cPacket *transportPacket);
+    virtual void encapsulate(Packet *transportPacket);
 
-    virtual void preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr);
+    virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr);
 
     virtual void handleMessage(cMessage *msg) override;
 
@@ -138,12 +138,12 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(cPacket *msg);
-    virtual void datagramLocalOut(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress);
+    virtual void datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress);
 
     /**
      * Handle incoming ICMP messages.
      */
-    virtual void handleReceivedICMP(ICMPv6Message *msg);
+    virtual void handleReceivedICMP(Packet *msg);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to
@@ -151,36 +151,36 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL);
-    virtual void resolveMACAddressAndSendPacket(IPv6Datagram *datagram, int interfaceID, IPv6Address nextHop, bool fromHL);
+    virtual void routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL);
+    virtual void resolveMACAddressAndSendPacket(Packet *packet, int interfaceID, IPv6Address nextHop, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPv6Datagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL);
+    virtual void routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL);
 
     /**
      * Performs fragmentation if needed, and sends the original datagram or the fragments
      * through the specified interface.
      */
-    virtual void fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& nextHopAddr, bool fromHL);
+    virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIE, const MACAddress& nextHopAddr, bool fromHL);
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
      */
-    virtual void localDeliver(IPv6Datagram *datagram, const InterfaceEntry *fromIE);
+    virtual void localDeliver(Packet *packet, const InterfaceEntry *fromIE);
 
     /**
      * Decapsulate and return encapsulated packet after attaching IPv6ControlInfo.
      */
-    virtual cPacket *decapsulate(IPv6Datagram *datagram);
+    virtual void decapsulate(Packet *packet);
 
     /**
      * Last hoplimit check, then send datagram on the given interface.
      */
-    virtual void sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr);
+    virtual void sendDatagramToOutput(Packet *packet, const InterfaceEntry *destIE, const MACAddress& macAddr);
 
-    void sendIcmpError(IPv6Datagram *origDatagram, ICMPv6Type type, int code);
+    void sendIcmpError(Packet *origDatagram, ICMPv6Type type, int code);
     void sendIcmpError(cPacket *transportPacket, void *ctrl, ICMPv6Type type, int code);
 
     // NetFilter functions:
@@ -189,27 +189,27 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inIE);
+    IHook::Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inIE);
 
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
   public:
     IPv6();
@@ -220,8 +220,8 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     // Netfilter:
     virtual void registerHook(int priority, IHook *hook) override;
     virtual void unregisterHook(IHook *hook) override;
-    virtual void dropQueuedDatagram(const INetworkHeader *daragram) override;
-    virtual void reinjectQueuedDatagram(const INetworkHeader *datagram) override;
+    virtual void dropQueuedDatagram(const Packet *daragram) override;
+    virtual void reinjectQueuedDatagram(const Packet *datagram) override;
 
   protected:
     /**
@@ -243,7 +243,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * The nextHop and interfaceId are output parameter.
      */
     bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
-            IPv6Datagram *datagram, bool fromHL);
+            Packet *datagram, bool fromHL);
 
 #ifdef WITH_xMIPv6
     /**

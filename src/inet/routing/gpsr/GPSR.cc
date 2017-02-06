@@ -657,7 +657,6 @@ GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const std::shared_ptr<INetwork
 #endif
 #ifdef WITH_IPv6
     if (auto dgram = std::dynamic_pointer_cast<IPv6Datagram>(datagram)) {
-        IPv6Datagram *dgram = static_cast<IPv6Datagram *>(datagram);
         IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));

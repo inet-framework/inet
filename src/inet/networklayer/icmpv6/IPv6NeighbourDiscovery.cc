@@ -180,36 +180,38 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         else
             throw cRuntimeError("Unrecognized Timer"); //stops sim w/ error msg.
     }
-    else if (dynamic_cast<ICMPv6Message *>(msg)) {
-        //This information will serve as input parameters to various processors.
-        ICMPv6Message *ndMsg = (ICMPv6Message *)msg;
-        processNDMessage(ndMsg);
-    }
-    else if (dynamic_cast<IPv6Datagram *>(msg)) {    // not ND message
-        IPv6Datagram *datagram = static_cast<IPv6Datagram *>(msg);
-        processIPv6Datagram(datagram);
+    else if (dynamic_cast<Packet *>(msg)) {
+        auto packet = check_and_cast<Packet *>(msg);
+        if (dynamic_cast<ICMPv6Message *>(msg)) {
+            //This information will serve as input parameters to various processors.
+            ICMPv6Message *ndMsg = (ICMPv6Message *)msg;
+            processNDMessage(packet, ndMsg);
+        }
+        else if (dynamic_cast<IPv6Datagram *>(msg)) {    // not ND message
+            processIPv6Datagram(check_and_cast<Packet *>(msg));
+        }
     }
     else
         throw cRuntimeError("Unknown message type received.\n");
 }
 
-void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg)
+void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, ICMPv6Message *msg)
 {
     if (dynamic_cast<IPv6RouterSolicitation *>(msg)) {
         IPv6RouterSolicitation *rs = (IPv6RouterSolicitation *)msg;
-        processRSPacket(rs);
+        processRSPacket(packet, rs);
     }
     else if (dynamic_cast<IPv6RouterAdvertisement *>(msg)) {
         IPv6RouterAdvertisement *ra = (IPv6RouterAdvertisement *)msg;
-        processRAPacket(ra);
+        processRAPacket(packet, ra);
     }
     else if (dynamic_cast<IPv6NeighbourSolicitation *>(msg)) {
         IPv6NeighbourSolicitation *ns = (IPv6NeighbourSolicitation *)msg;
-        processNSPacket(ns);
+        processNSPacket(packet, ns);
     }
     else if (dynamic_cast<IPv6NeighbourAdvertisement *>(msg)) {
         IPv6NeighbourAdvertisement *na = (IPv6NeighbourAdvertisement *)msg;
-        processNAPacket(na);
+        processNAPacket(packet, na);
     }
     else if (dynamic_cast<IPv6Redirect *>(msg)) {
         IPv6Redirect *redirect = (IPv6Redirect *)msg;
@@ -229,11 +231,12 @@ void IPv6NeighbourDiscovery::finish()
 {
 }
 
-void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
+void IPv6NeighbourDiscovery::processIPv6Datagram(Packet *packet)
 {
-    EV_INFO << "Packet " << msg << " arrived from IPv6 module.\n";
+    const auto& msg = packet->peekHeader<IPv6Datagram>();
+    EV_INFO << "Packet " << packet << " arrived from IPv6 module.\n";
 
-    IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->getControlInfo());
+    IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(packet->getControlInfo());
     int nextHopIfID = ctrl->getInterfaceId();
     IPv6Address nextHopAddr = ctrl->getNextHop();
     //bool fromHL = ctrl->getFromHL();
@@ -248,8 +251,8 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
     if (nextHopIfID == -1) {
         //draft-ietf-ipv6-2461bis-04 has omitted on-link assumption.
         //draft-ietf-v6ops-onlinkassumption-03 explains why.
-        delete msg->removeControlInfo();
-        icmpv6->sendErrorMessage(msg, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
+        delete packet->removeControlInfo();
+        icmpv6->sendErrorMessage(packet, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
         return;
     }
 
@@ -290,25 +293,25 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         EV_INFO << "Reachability State is INCOMPLETE. Address Resolution already initiated.\n";
         EV_INFO << "Add packet to entry's queue until Address Resolution is complete.\n";
         bubble("Packet added to queue until Address Resolution is complete.");
-        nce->pendingPackets.push_back(msg);
-        pendingQueue.insert(msg);
+        nce->pendingPackets.push_back(packet);
+        pendingQueue.insert(packet);
         break;
     case IPv6NeighbourCache::STALE:
         EV_INFO << "Reachability State is STALE.\n";
-        send(msg, "ipv6Out");
+        send(packet, "ipv6Out");
         initiateNeighbourUnreachabilityDetection(nce);
         break;
     case IPv6NeighbourCache::REACHABLE:
         EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-        send(msg, "ipv6Out");
+        send(packet, "ipv6Out");
         break;
     case IPv6NeighbourCache::DELAY:
         EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-        send(msg, "ipv6Out");
+        send(packet, "ipv6Out");
         break;
     case IPv6NeighbourCache::PROBE:
         EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-        send(msg, "ipv6Out");
+        send(packet, "ipv6Out");
         break;
     default:
         throw cRuntimeError("Unknown Neighbour cache entry state.");
@@ -734,14 +737,13 @@ void IPv6NeighbourDiscovery::dropQueuedPacketsAwaitingAR(Neighbour *nce)
 
     while (!pendingPackets.empty()) {
         auto i = pendingPackets.begin();
-        cMessage *msg = (*i);
-        IPv6Datagram *ipv6Msg = check_and_cast<IPv6Datagram *>(msg);
+        Packet *msg = (*i);
         //Assume msg is the packet itself. I need the datagram's source addr.
         //The datagram's src addr will be the destination of the unreachable msg.
         EV_INFO << "Sending ICMP unreachable destination." << endl;
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
-        icmpv6->sendErrorMessage(ipv6Msg, ICMPv6_DESTINATION_UNREACHABLE, ADDRESS_UNREACHABLE);
+        icmpv6->sendErrorMessage(msg, ICMPv6_DESTINATION_UNREACHABLE, ADDRESS_UNREACHABLE);
     }
 
     //RFC 2461: Section 7.3.3
@@ -961,7 +963,7 @@ void IPv6NeighbourDiscovery::makeTentativeAddressPermanent(const IPv6Address& te
     }
 }
 
-IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceEntry *ie)
 {
     ASSERT(ie->ipv6Data()->getAdvSendAdvertisements() == false);
     //RFC 2461: Section 6.3.7 Sending Router Solicitations
@@ -977,20 +979,22 @@ IPv6RouterSolicitation *IPv6NeighbourDiscovery::createAndSendRSPacket(InterfaceE
         myIPv6Address = IPv6Address::UNSPECIFIED_ADDRESS; //set my IPv6 address to unspecified.
 
     IPv6Address destAddr = IPv6Address::ALL_ROUTERS_2;    //all_routers multicast
-    IPv6RouterSolicitation *rs = new IPv6RouterSolicitation("RSpacket");
+    auto rs = std::make_shared<IPv6RouterSolicitation>();
     rs->setType(ICMPv6_ROUTER_SOL);
-    rs->setByteLength(ICMPv6_HEADER_BYTES);
+    rs->setChunkLength(byte(ICMPv6_HEADER_BYTES));
 
     //The Source Link-Layer Address option SHOULD be set to the host's link-layer
     //address, if the IP source address is not the unspecified address.
     if (!myIPv6Address.isUnspecified()) {
         rs->setSourceLinkLayerAddress(ie->getMacAddress());
-        rs->setByteLength(ICMPv6_HEADER_BYTES + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+        rs->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
     }
 
     //Construct a Router Solicitation message
-    sendPacketToIPv6Module(rs, destAddr, myIPv6Address, ie->getInterfaceId());
-    return rs;
+    auto packet = new Packet("RSpacket");
+    rs->markImmutable();
+    packet->append(rs);
+    sendPacketToIPv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
 
 void IPv6NeighbourDiscovery::initiateRouterDiscovery(cMessage *msg)
@@ -1074,15 +1078,15 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
     }
 }
 
-void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs)
+void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitation *rs)
 {
-    if (validateRSPacket(rs) == false) {
+    if (validateRSPacket(packet, rs) == false) {
         delete rs;
         return;
     }
 
     //Find out which interface the RS message arrived on.
-    InterfaceEntry *ie = ift->getInterfaceById(rs->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);    //fetch advertising interface entry.
 
     //RFC 2461: Section 6.2.6
@@ -1090,7 +1094,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs)
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "This is an advertising interface, processing RS\n";
 
-        if (validateRSPacket(rs) == false) {
+        if (validateRSPacket(packet, rs) == false) {
             delete rs;
             return;
         }
@@ -1153,7 +1157,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs)
     }
 }
 
-bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs)
+bool IPv6NeighbourDiscovery::validateRSPacket(Packet *packet, IPv6RouterSolicitation *rs)
 {
     bool result = true;
     /*6.1.1.  Validation of Router Solicitation Messages
@@ -1162,20 +1166,20 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs)
 
        - The IP Hop Limit field has a value of 255, i.e., the packet
        could not possibly have been forwarded by a router.*/
-    if (rs->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
+    if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop limit is not 255! RS validation failed!\n";
         result = false;
     }
 
     //- ICMP Code is 0.
-    if (rs->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
+    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
         EV_WARN << "ICMP Code is not 0! RS validation failed!\n";
         result = false;
     }
 
     //- If the IP source address is the unspecified address, there is no
     //source link-layer address option in the message.
-    if (rs->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
+    if (packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         EV_WARN << "IP source address is unspecified\n";
 
         if (rs->getSourceLinkLayerAddress().isUnspecified() == false) {
@@ -1186,7 +1190,7 @@ bool IPv6NeighbourDiscovery::validateRSPacket(IPv6RouterSolicitation *rs)
     return result;
 }
 
-IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv6Address& destAddr, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv6Address& destAddr, InterfaceEntry *ie)
 {
     EV_INFO << "Create and send RA invoked!\n";
     //Must use link-local addr. See: RFC2461 Section 6.1.2
@@ -1195,7 +1199,7 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv
     //This operation includes all options, regardless whether it is solicited or unsolicited.
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {    //if this is an advertising interface
         //Construct a Router Advertisment message
-        IPv6RouterAdvertisement *ra = new IPv6RouterAdvertisement("RApacket");
+        auto ra = std::make_shared<IPv6RouterAdvertisement>();
         ra->setType(ICMPv6_ROUTER_AD);
 
         //RFC 2461: Section 6.2.3 Router Advertisment Message Content
@@ -1284,24 +1288,25 @@ IPv6RouterAdvertisement *IPv6NeighbourDiscovery::createAndSendRAPacket(const IPv
             ra->setPrefixInformation(i, prefixInfo);
         }
 
-        ra->setByteLength(ICMPv6_HEADER_BYTES + numAdvPrefixes * IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH);
-        sendPacketToIPv6Module(ra, destAddr, sourceAddr, ie->getInterfaceId());
-        return ra;
-    }
+        ra->setChunkLength(byte(ICMPv6_HEADER_BYTES + numAdvPrefixes * IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH));
 
-    return nullptr;    //XXX is this OK?
+        auto packet = new Packet("RApacket");
+        ra->markImmutable();
+        packet->append(ra);
+        sendPacketToIPv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
+    }
 }
 
-void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra)
+void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertisement *ra)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(ra->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "Interface is an advertising interface, dropping RA message.\n";
         delete ra;
         return;
     }
     else {
-        if (validateRAPacket(ra) == false) {
+        if (validateRAPacket(packet, ra) == false) {
             delete ra;
             return;
         }
@@ -1319,7 +1324,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra)
         cancelRouterDiscovery(ie);    //Cancel router discovery if it is in progress.
         EV_INFO << "Interface is a host, processing RA.\n";
 
-        processRAForRouterUpdates(ra);    //See RFC2461: Section 6.3.4
+        processRAForRouterUpdates(packet, ra);    //See RFC2461: Section 6.3.4
 
         //Possible options
         //MACAddress macAddress = ra->getSourceLinkLayerAddress();
@@ -1351,7 +1356,7 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra)
     delete ra;
 }
 
-void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *ra)
+void IPv6NeighbourDiscovery::processRAForRouterUpdates(Packet *packet, IPv6RouterAdvertisement *ra)
 {
     EV_INFO << "Processing RA for Router Updates\n";
     //RFC2461: Section 6.3.4
@@ -1359,8 +1364,8 @@ void IPv6NeighbourDiscovery::processRAForRouterUpdates(IPv6RouterAdvertisement *
 
     //On receipt of a valid Router Advertisement, a host extracts the source
     //address of the packet and does the following:
-    IPv6Address raSrcAddr = ra->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    InterfaceEntry *ie = ift->getInterfaceById(ra->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    IPv6Address raSrcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     int ifID = ie->getInterfaceId();
 
     /*- If the address is not already present in the host's Default Router List,
@@ -1758,14 +1763,14 @@ void IPv6NeighbourDiscovery::sendSolicitedRA(cMessage *msg)
     delete msg;
 }
 
-bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra)
+bool IPv6NeighbourDiscovery::validateRAPacket(Packet *packet, IPv6RouterAdvertisement *ra)
 {
     bool result = true;
 
     //RFC 2461: Section 6.1.2 Validation of Router Advertisement Messages
     /*A node MUST silently discard any received Router Advertisement
        messages that do not satisfy all of the following validity checks:*/
-    IPv6Address srcAddr = ra->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    IPv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
     //- IP Source Address is a link-local address.  Routers must use
     //  their link-local address as the source for Router Advertisement
@@ -1778,13 +1783,13 @@ bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra)
 
     //- The IP Hop Limit field has a value of 255, i.e., the packet
     //  could not possibly have been forwarded by a router.
-    if (ra->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
+    if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop limit is not 255! RA validation failed!\n";
         result = false;
     }
 
     //- ICMP Code is 0.
-    if (ra->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
+    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::icmpv6) {
         EV_WARN << "ICMP Code is not 0! RA validation failed!\n";
         result = false;
     }
@@ -1801,7 +1806,7 @@ bool IPv6NeighbourDiscovery::validateRAPacket(IPv6RouterAdvertisement *ra)
     return result;
 }
 
-IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
+void IPv6NeighbourDiscovery::createAndSendNSPacket(const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
         const IPv6Address& dgSrcAddr, InterfaceEntry *ie)
 {
 #ifdef WITH_xMIPv6
@@ -1811,12 +1816,12 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(const I
     MACAddress myMacAddr = ie->getMacAddress();
 
     //Construct a Neighbour Solicitation message
-    IPv6NeighbourSolicitation *ns = new IPv6NeighbourSolicitation("NSpacket");
+    auto ns = std::make_shared<IPv6NeighbourSolicitation>();
     ns->setType(ICMPv6_NEIGHBOUR_SOL);
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
-    ns->setByteLength(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE);      // RFC 2461, Section 4.3.
+    ns->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // RFC 2461, Section 4.3.
 
     /*If the solicitation is being sent to a solicited-node multicast
        address, the sender MUST include its link-layer address (if it has
@@ -1824,25 +1829,27 @@ IPv6NeighbourSolicitation *IPv6NeighbourDiscovery::createAndSendNSPacket(const I
     if (dgDestAddr.matches(IPv6Address("FF02::1:FF00:0"), 104) &&    // FIXME what's this? make constant...
             !dgSrcAddr.isUnspecified()) {
         ns->setSourceLinkLayerAddress(myMacAddr);
-        ns->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+        ns->setChunkLength(ns->getChunkLength() + byte(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
     }
 
-    sendPacketToIPv6Module(ns, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
+    auto packet = new Packet("NSpacket");
+    ns->markImmutable();
+    packet->append(ns);
+    sendPacketToIPv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
-    return ns;
 }
 
-void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns)
+void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, IPv6NeighbourSolicitation *ns)
 {
     //Control Information
-    InterfaceEntry *ie = ift->getInterfaceById(ns->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     IPv6Address nsTargetAddr = ns->getTargetAddress();
 
     //RFC 2461:Section 7.2.3
     //If target address is not a valid "unicast" or anycast address assigned to the
     //receiving interface, we should silently discard the packet.
-    if (validateNSPacket(ns) == false
+    if (validateNSPacket(packet, ns) == false
         || ie->ipv6Data()->hasAddress(nsTargetAddr) == false)
     {
         bubble("NS validation failed\n");
@@ -1856,18 +1863,18 @@ void IPv6NeighbourDiscovery::processNSPacket(IPv6NeighbourSolicitation *ns)
         //If the Target Address is tentative, the Neighbor Solicitation should
         //be processed as described in [ADDRCONF].
         EV_INFO << "Process NS for Tentative target address.\n";
-        processNSForTentativeAddress(ns);
+        processNSForTentativeAddress(packet, ns);
     }
     else {
         //Otherwise, the following description applies.
         EV_INFO << "Process NS for Non-Tentative target address.\n";
-        processNSForNonTentativeAddress(ns, ie);
+        processNSForNonTentativeAddress(packet, ns, ie);
     }
 
     delete ns;
 }
 
-bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns)
+bool IPv6NeighbourDiscovery::validateNSPacket(Packet *packet, IPv6NeighbourSolicitation *ns)
 {
     bool result = true;
 
@@ -1876,7 +1883,7 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns)
        messages that do not satisfy all of the following validity checks:*/
     //- The IP Hop Limit field has a value of 255, i.e., the packet
     //could not possibly have been forwarded by a router.
-    if (ns->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
+    if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop limit is not 255! NS validation failed!\n";
         result = false;
     }
@@ -1888,11 +1895,11 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns)
     }
 
     //- If the IP source address is the unspecified address,
-    if (ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
+    if (packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         EV_WARN << "Source Address is unspecified\n";
 
         //the IP destination address is a solicited-node multicast address.
-        if (ns->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6().matches(IPv6Address::SOLICITED_NODE_PREFIX, 104) == false) {
+        if (packet->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6().matches(IPv6Address::SOLICITED_NODE_PREFIX, 104) == false) {
             EV_WARN << " but IP dest address is not a solicited-node multicast address! NS validation failed!\n";
             result = false;
         }
@@ -1908,10 +1915,10 @@ bool IPv6NeighbourDiscovery::validateNSPacket(IPv6NeighbourSolicitation *ns)
     return result;
 }
 
-void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitation *ns)
+void IPv6NeighbourDiscovery::processNSForTentativeAddress(Packet *packet, IPv6NeighbourSolicitation *ns)
 {
     //Control Information
-    IPv6Address nsSrcAddr = ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    IPv6Address nsSrcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
     //IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
 
     ASSERT(nsSrcAddr.isUnicast() || nsSrcAddr.isUnspecified());
@@ -1935,23 +1942,23 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
     }
 }
 
-void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(Packet *packet, IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     //Neighbour Solicitation Information
     //MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
 
     //target addr is not tentative addr
     //solicitation processed as described in RFC2461:section 7.2.3
-    if (ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
+    if (packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         EV_INFO << "Address is duplicate! Inform Sender of duplicate address!\n";
-        sendSolicitedNA(ns, ie);
+        sendSolicitedNA(packet, ns, ie);
     }
     else {
-        processNSWithSpecifiedSrcAddr(ns, ie);
+        processNSWithSpecifiedSrcAddr(packet, ns, ie);
     }
 }
 
-void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(Packet *packet, IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
     //RFC 2461, Section 7.2.3
     /*If the Source Address is not the unspecified address and, on link layers
@@ -1961,7 +1968,7 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicita
 
     //Neighbour Solicitation Information
     MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
-    IPv6Address nsL3SrcAddr = ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    IPv6Address nsL3SrcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
     int ifID = ie->getInterfaceId();
 
@@ -1987,13 +1994,13 @@ void IPv6NeighbourDiscovery::processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicita
 
     /*After any updates to the Neighbor Cache, the node sends a Neighbor
        Advertisement response as described in the next section.*/
-    sendSolicitedNA(ns, ie);
+    sendSolicitedNA(packet, ns, ie);
 }
 
-void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::sendSolicitedNA(Packet *packet, IPv6NeighbourSolicitation *ns, InterfaceEntry *ie)
 {
-    IPv6NeighbourAdvertisement *na = new IPv6NeighbourAdvertisement("NApacket");
-    na->setByteLength(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE);      // FIXME set correct length
+    auto na = std::make_shared<IPv6NeighbourAdvertisement>();
+    na->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));      // FIXME set correct length
 
     //RFC 2461: Section 7.2.4
     /*A node sends a Neighbor Advertisement in response to a valid Neighbor
@@ -2008,7 +2015,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, Inte
        been received. If the solicitation's IP Destination Address is a multicast
        address, the Target Link-Layer option MUST be included in the advertisement.*/
     na->setTargetLinkLayerAddress(ie->getMacAddress());    //here, we always include the MAC addr.
-    na->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    na->setChunkLength(na->getChunkLength() + byte(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
 
     /*Furthermore, if the node is a router, it MUST set the Router flag to one;
        otherwise it MUST set the flag to zero.*/
@@ -2032,7 +2039,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, Inte
 
     IPv6Address naDestAddr;
     //If the source of the solicitation is the unspecified address,
-    if (ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
+    if (packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().isUnspecified()) {
         /*the node MUST set the Solicited flag to zero and multicast the advertisement
            to the all-nodes address.*/
         na->setSolicitedFlag(false);
@@ -2042,7 +2049,7 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, Inte
         /*Otherwise, the node MUST set the Solicited flag to one and unicast
            the advertisement to the Source Address of the solicitation.*/
         na->setSolicitedFlag(true);
-        naDestAddr = ns->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+        naDestAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
     }
 
     /*If the Target Address is an anycast address the sender SHOULD delay sending
@@ -2065,7 +2072,11 @@ void IPv6NeighbourDiscovery::sendSolicitedNA(IPv6NeighbourSolicitation *ns, Inte
     //done we should check the destinations of the list of queued packets and send
     //off the respective ones.
     IPv6Address myIPv6Addr = ie->ipv6Data()->getPreferredAddress();
-    sendPacketToIPv6Module(na, naDestAddr, myIPv6Addr, ie->getInterfaceId());
+
+    auto naPacket = new Packet("NApacket");
+    na->markImmutable();
+    naPacket->append(na);
+    sendPacketToIPv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 
 void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
@@ -2152,9 +2163,9 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 #endif /* WITH_xMIPv6 */
 }
 
-void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na)
+void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na)
 {
-    if (validateNAPacket(na) == false) {
+    if (validateNAPacket(packet, na) == false) {
         delete na;
         return;
     }
@@ -2164,7 +2175,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na)
 
     //First, we check if the target address in NA is found in the interface it
     //was received on is tentative.
-    InterfaceEntry *ie = ift->getInterfaceById(na->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (ie->ipv6Data()->isTentativeAddress(naTargetAddr)) {
         throw cRuntimeError("Duplicate Address Detected! Manual attention needed!");
     }
@@ -2189,7 +2200,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na)
     delete na;
 }
 
-bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na)
+bool IPv6NeighbourDiscovery::validateNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na)
 {
     bool result = true;    //adopt optimistic approach
 
@@ -2199,7 +2210,7 @@ bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na)
 
     //- The IP Hop Limit field has a value of 255, i.e., the packet
     //  could not possibly have been forwarded by a router.
-    if (na->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
+    if (packet->getMandatoryTag<HopLimitInd>()->getHopLimit() != 255) {
         EV_WARN << "Hop Limit is not 255! NA validation failed!\n";
         result = false;
     }
@@ -2212,7 +2223,7 @@ bool IPv6NeighbourDiscovery::validateNAPacket(IPv6NeighbourAdvertisement *na)
 
     //- If the IP Destination Address is a multicast address the Solicited flag
     //  is zero.
-    if (na->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6().isMulticast()) {
+    if (packet->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv6().isMulticast()) {
         if (na->getSolicitedFlag() == true) {
             EV_WARN << "Dest Address is multicast address but solicited flag is 0!\n";
             result = false;
@@ -2375,12 +2386,12 @@ void IPv6NeighbourDiscovery::processNAForOtherNCEStates(IPv6NeighbourAdvertiseme
     }
 }
 
-IPv6Redirect *IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
+void IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
 {
     //Construct a Redirect message
-    IPv6Redirect *redirect = new IPv6Redirect("redirectMsg");
+    auto redirect = std::make_shared<IPv6Redirect>(); // TODO: "redirectMsg");
     redirect->setType(ICMPv6_REDIRECT);
-    redirect->setByteLength(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE);   // RFC 2461, Section 4.5
+    redirect->setChunkLength(byte(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE));   // RFC 2461, Section 4.5
 
 //FIXME incomplete code
 #if 0
@@ -2392,8 +2403,6 @@ IPv6Redirect *IPv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry
     redirect->setTargetLinkLayerAddress();
     redirect->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
 #endif
-
-    return redirect;
 }
 
 void IPv6NeighbourDiscovery::processRedirectPacket(IPv6Redirect *redirect)

@@ -170,7 +170,7 @@ int IPv6Datagram::calculateUnfragmentableHeaderByteLength() const
  */
 int IPv6Datagram::calculateFragmentLength() const
 {
-    int len = getByteLength() - IPv6_HEADER_BYTES;
+    int len = byte(getChunkLength()).get() - IPv6_HEADER_BYTES;
     unsigned int i;
     for (i = 0; i < extensionHeaders.size(); i++) {
         len -= extensionHeaders[i]->getByteLength();

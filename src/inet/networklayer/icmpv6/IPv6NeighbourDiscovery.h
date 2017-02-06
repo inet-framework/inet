@@ -23,8 +23,7 @@
 #include <set>
 #include <map>
 
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
 #include "inet/networklayer/icmpv6/IPv6NeighbourCache.h"
@@ -49,7 +48,7 @@ class xMIPv6;
 class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 {
   public:
-    typedef std::vector<cMessage *> MsgPtrVector;
+    typedef std::vector<Packet *> MsgPtrVector;
     typedef IPv6NeighbourCache::Key Key;    //for convenience
     typedef IPv6NeighbourCache::Neighbour Neighbour;    // for convenience
     typedef IPv6NeighbourCache::DefaultRouterList DefaultRouterList;    // for convenience
@@ -171,11 +170,11 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void processNDMessage(ICMPv6Message *msg);
+    virtual void processNDMessage(Packet *packet, ICMPv6Message *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void finish() override;
 
-    virtual void processIPv6Datagram(IPv6Datagram *datagram);
+    virtual void processIPv6Datagram(Packet *packet);
     virtual IPv6NeighbourDiscovery::AdvIfEntry *fetchAdvIfEntry(InterfaceEntry *ie);
     virtual IPv6NeighbourDiscovery::RDEntry *fetchRDEntry(InterfaceEntry *ie);
     /************************End of Miscellaneous Stuff********************/
@@ -283,7 +282,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     /************End Of Address Autoconfiguration Stuff********************/
 
     /************Router Solicitation Stuff*********************************/
-    virtual IPv6RouterSolicitation *createAndSendRSPacket(InterfaceEntry *ie);
+    virtual void createAndSendRSPacket(InterfaceEntry *ie);
     virtual void initiateRouterDiscovery(cMessage *msg);
     /**
      *  RFC 2461: Section 6.3.7 4th paragraph
@@ -296,15 +295,15 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
      */
     virtual void cancelRouterDiscovery(InterfaceEntry *ie);
     virtual void processRDTimeout(cMessage *msg);
-    virtual void processRSPacket(IPv6RouterSolicitation *rs);
-    virtual bool validateRSPacket(IPv6RouterSolicitation *rs);
+    virtual void processRSPacket(Packet *packet, IPv6RouterSolicitation *rs);
+    virtual bool validateRSPacket(Packet *packet, IPv6RouterSolicitation *rs);
     /************End of Router Solicitation Stuff**************************/
 
     /************Router Advertisment Stuff*********************************/
-    virtual IPv6RouterAdvertisement *createAndSendRAPacket(const IPv6Address& destAddr,
+    virtual void createAndSendRAPacket(const IPv6Address& destAddr,
             InterfaceEntry *ie);
-    virtual void processRAPacket(IPv6RouterAdvertisement *ra);
-    virtual void processRAForRouterUpdates(IPv6RouterAdvertisement *ra);
+    virtual void processRAPacket(Packet *packet, IPv6RouterAdvertisement *ra);
+    virtual void processRAForRouterUpdates(Packet *packet, IPv6RouterAdvertisement *ra);
     //RFC 2461: Section 6.3.4
     /*Note: Implementations can choose to process the on-link aspects of the
        prefixes separately from the address autoconfiguration aspects of the
@@ -336,17 +335,17 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     virtual void resetRATimer(InterfaceEntry *ie);
     virtual void sendPeriodicRA(cMessage *msg);
     virtual void sendSolicitedRA(cMessage *msg);
-    virtual bool validateRAPacket(IPv6RouterAdvertisement *ra);
+    virtual bool validateRAPacket(Packet *packet, IPv6RouterAdvertisement *ra);
     /************End of Router Advertisement Stuff*************************/
 
     /************Neighbour Solicitaton Stuff*******************************/
-    virtual IPv6NeighbourSolicitation *createAndSendNSPacket(const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
+    virtual void createAndSendNSPacket(const IPv6Address& nsTargetAddr, const IPv6Address& dgDestAddr,
             const IPv6Address& dgSrcAddr, InterfaceEntry *ie);
-    virtual void processNSPacket(IPv6NeighbourSolicitation *ns);
-    virtual bool validateNSPacket(IPv6NeighbourSolicitation *ns);
-    virtual void processNSForTentativeAddress(IPv6NeighbourSolicitation *ns);
-    virtual void processNSForNonTentativeAddress(IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
-    virtual void processNSWithSpecifiedSrcAddr(IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
+    virtual void processNSPacket(Packet *packet, IPv6NeighbourSolicitation *ns);
+    virtual bool validateNSPacket(Packet *packet, IPv6NeighbourSolicitation *ns);
+    virtual void processNSForTentativeAddress(Packet *packet, IPv6NeighbourSolicitation *ns);
+    virtual void processNSForNonTentativeAddress(Packet *packet, IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
+    virtual void processNSWithSpecifiedSrcAddr(Packet *packet, IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
     /************End Of Neighbour Solicitation Stuff***********************/
 
     /************Neighbour Advertisment Stuff)*****************************/
@@ -356,7 +355,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
             const IPv6Address& nsSrcAddr, const IPv6Address& nsDestAddr, InterfaceEntry *ie);
 #endif /* WITH_xMIPv6 */
 
-    virtual void sendSolicitedNA(IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
+    virtual void sendSolicitedNA(Packet *packet, IPv6NeighbourSolicitation *ns, InterfaceEntry *ie);
 
 #ifdef WITH_xMIPv6
 
@@ -369,8 +368,8 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
   protected:    // update 12.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    virtual void processNAPacket(IPv6NeighbourAdvertisement *na);
-    virtual bool validateNAPacket(IPv6NeighbourAdvertisement *na);
+    virtual void processNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na);
+    virtual bool validateNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na);
     virtual void processNAForIncompleteNCEState(IPv6NeighbourAdvertisement *na,
             IPv6NeighbourCache::Neighbour *nce);
     virtual void processNAForOtherNCEStates(IPv6NeighbourAdvertisement *na,
@@ -378,7 +377,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     /************End Of Neighbour Advertisement Stuff**********************/
 
     /************Redirect Message Stuff************************************/
-    virtual IPv6Redirect *createAndSendRedirectPacket(InterfaceEntry *ie);
+    virtual void createAndSendRedirectPacket(InterfaceEntry *ie);
     virtual void processRedirectPacket(IPv6Redirect *redirect);
     /************End Of Redirect Message Stuff*****************************/
 

@@ -20,10 +20,9 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 //  Implementation of IPv6 version: Wei Yang, Ng, 2005
 
-#include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/ipv6/IPv6ErrorHandling.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ErrorHandling.h"
 
 namespace inet {
 
@@ -35,15 +34,16 @@ void IPv6ErrorHandling::initialize()
 
 void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
-    ICMPv6Message *icmpv6Msg = check_and_cast<ICMPv6Message *>(msg);
-    IPv6Datagram *d = check_and_cast<IPv6Datagram *>(icmpv6Msg->getEncapsulatedPacket());
-    int type = (int)icmpv6Msg->getType();
+    auto packet = check_and_cast<Packet *>(msg);
+    const auto& icmpv6Header = packet->popHeader<ICMPv6Message>();
+    const auto& ipv6Datagram = packet->peekHeader<IPv6Datagram>();
+    int type = (int)icmpv6Header->getType();
 
     EV_ERROR << " Type: " << type;
 
     switch (type) {
         case ICMPv6_DESTINATION_UNREACHABLE: {
-            ICMPv6DestUnreachableMsg *msg2 = check_and_cast<ICMPv6DestUnreachableMsg *>(icmpv6Msg);
+            const auto& msg2 = std::dynamic_pointer_cast<ICMPv6DestUnreachableMsg>(icmpv6Header);
             int code = msg2->getCode();
             EV_ERROR << " Code: " << code;
             displayType1Msg(code);
@@ -51,7 +51,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         }
 
         case ICMPv6_PACKET_TOO_BIG: {
-            ICMPv6PacketTooBigMsg *msg2 = check_and_cast<ICMPv6PacketTooBigMsg *>(icmpv6Msg);
+            const auto& msg2 = std::dynamic_pointer_cast<ICMPv6PacketTooBigMsg>(icmpv6Header);
             int code = msg2->getCode();
             int mtu = msg2->getMTU();
             EV_ERROR << " Code: " << code << " MTU: " << mtu;
@@ -61,7 +61,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         }
 
         case ICMPv6_TIME_EXCEEDED: {
-            ICMPv6TimeExceededMsg *msg2 = check_and_cast<ICMPv6TimeExceededMsg *>(icmpv6Msg);
+            const auto& msg2 = std::dynamic_pointer_cast<ICMPv6TimeExceededMsg>(icmpv6Header);
             int code = msg2->getCode();
             EV_ERROR << " Code: " << code;
             displayType3Msg(code);
@@ -69,7 +69,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
         }
 
         case ICMPv6_PARAMETER_PROBLEM: {
-            ICMPv6ParamProblemMsg *msg2 = check_and_cast<ICMPv6ParamProblemMsg *>(icmpv6Msg);
+            const auto& msg2 = std::dynamic_pointer_cast<ICMPv6ParamProblemMsg>(icmpv6Header);
             int code = msg2->getCode();
             EV_ERROR << " Code: " << code;
             displayType4Msg(code);
@@ -86,13 +86,13 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
             break;
     }
 
-    EV_DETAIL << "Datagram: Byte length: " << d->getByteLength()
-              << " Src: " << d->getSrcAddress()
-              << " Dest: " << d->getDestAddress()
+    EV_DETAIL << "Datagram: length: " << ipv6Datagram->getChunkLength()
+              << " Src: " << ipv6Datagram->getSrcAddress()
+              << " Dest: " << ipv6Datagram->getDestAddress()
               << " Time: " << simTime()
               << endl;
 
-    delete icmpv6Msg;
+    delete msg;
 }
 
 void IPv6ErrorHandling::displayType1Msg(int code)

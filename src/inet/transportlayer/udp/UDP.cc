@@ -539,24 +539,24 @@ void UDP::processICMPv6Error(Packet *packet)
     ushort localPort, remotePort;
     bool udpHeaderAvailable = false;
 
-    if (ICMPv6Message *icmpMsg = dynamic_cast<ICMPv6Message *>(pk)) {
-        type = icmpMsg->getType();
-        code = -1;    // FIXME this is dependent on getType()...
-        // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(icmpMsg->getEncapsulatedPacket());
-        IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
-        if (!fh || fh->getFragmentOffset() == 0) {
-            if (Packet *packet = dynamic_cast<Packet *>(datagram->getEncapsulatedPacket())) {
-                if (const auto& udpHeader = packet->peekHeader<UdpHeader>()) {
-                    localAddr = datagram->getSrcAddress();
-                    remoteAddr = datagram->getDestAddress();
-                    localPort = udpHeader->getSourcePort();
-                    remotePort = udpHeader->getDestinationPort();
-                    udpHeaderAvailable = true;
-                }
-            }
+    const auto& icmpMsg = packet->popHeader<ICMPv6Message>();
+    ASSERT(icmpMsg);
+
+    type = icmpMsg->getType();
+    code = -1;    // FIXME this is dependent on getType()...
+    // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
+    const auto& ipv6Header = packet->popHeader<IPv6Datagram>();
+    IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+    if (!fh || fh->getFragmentOffset() == 0) {
+        if (const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8))) {
+            localAddr = ipv6Header->getSrcAddress();
+            remoteAddr = ipv6Header->getDestAddress();
+            localPort = udpHeader->getSourcePort();
+            remotePort = udpHeader->getDestinationPort();
+            udpHeaderAvailable = true;
         }
     }
+
     EV_WARN << "ICMPv6 error received: type=" << type << " code=" << code
             << " about packet " << localAddr << ":" << localPort << " > "
             << remoteAddr << ":" << remotePort << "\n";
@@ -615,7 +615,7 @@ void UDP::processUndeliverablePacket(Packet *udpPacket)
 #ifdef WITH_IPv6
         if (!icmpv6)
             icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
-        icmpv6->sendErrorMessage(udpPacket, inIe, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+        icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
 #else // ifdef WITH_IPv6
         delete udpPacket;
 #endif // ifdef WITH_IPv6

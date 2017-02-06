@@ -22,8 +22,7 @@
 #include <map>
 #include <vector>
 
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/linklayer/common/MACAddress.h"
 
@@ -47,7 +46,7 @@ namespace inet {
 class INET_API IPv6NeighbourCache
 {
   public:
-    typedef std::vector<cMessage *> MsgPtrVector;    // TODO verify this is really needed --Andras
+    typedef std::vector<Packet *> MsgPtrVector;    // TODO verify this is really needed --Andras
 
     /** Neighbour's reachability state */
     enum ReachabilityState { INCOMPLETE, REACHABLE, STALE, DELAY, PROBE };

@@ -86,7 +86,7 @@ void IPv6Tunneling::initialize(int stage)
 
 void IPv6Tunneling::handleMessage(cMessage *msg)
 {
-    IPv6Datagram *dgram = check_and_cast<IPv6Datagram *>(msg);
+    Packet *dgram = check_and_cast<Packet *>(msg);
 
     if (msg->getArrivalGate()->isName("upperLayerIn")) {
         // decapsulate
@@ -360,8 +360,9 @@ int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress, TunnelType
     return outInterfaceId;
 }
 
-void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
+void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 {
+    auto dgram = packet->peekHeader<IPv6Datagram>();
     int vIfIndex = -1;
 
     if (dgram->getTransportProtocol() == IP_PROT_IPv6EXT_MOB) {
@@ -380,7 +381,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
         throw cRuntimeError("encapsulateDatagram(): tunnel not existent");
 
     // TODO copy information from old ctrlInfo into new one (Traffic Class, Flow label, etc.)
-    delete dgram->removeControlInfo();
+    delete packet->removeControlInfo();
 
 #ifdef WITH_xMIPv6
     if ((tunnels[vIfIndex].tunnelType == T2RH) || (tunnels[vIfIndex].tunnelType == HA_OPT)) {
@@ -461,22 +462,23 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram *dgram)
           // normal tunnel - just modify controlInfo and send
           // datagram back to IPv6 module for encapsulation
 
-    dgram->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-    auto addresses = dgram->ensureTag<L3AddressInd>();
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+    auto addresses = packet->ensureTag<L3AddressInd>();
     addresses->setSrcAddress(tunnels[vIfIndex].entry);
     addresses->setDestAddress(tunnels[vIfIndex].exit);
 
-    send(dgram, "upperLayerOut");
+    send(packet, "upperLayerOut");
 #ifdef WITH_xMIPv6
 }
 
 #endif // ifdef WITH_xMIPv6
 }
 
-void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
+void IPv6Tunneling::decapsulateDatagram(Packet *packet)
 {
+    auto dgram = packet->popHeader<IPv6Datagram>();
     // decapsulation is performed in IPv6 module
-    IPv6Address srcAddr = dgram->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    IPv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 
 #ifdef WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel
@@ -504,7 +506,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram *dgram)
     // (important if several interfaces are available)
     //controlInfo->setInterfaceId(-1);
 
-    send(dgram, "linkLayerOut");
+    send(packet, "linkLayerOut");
 
 #ifdef WITH_xMIPv6
     // Alain Tigyo, 21.03.2008

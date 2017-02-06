@@ -118,7 +118,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
         if (!ret)
             throw cRuntimeError("Model error: completed datagram without datagram pointer.");
         ret->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
-        ret->setByteLength(ret->calculateUnfragmentableHeaderByteLength() + buf->buf.getTotalLength());
+        ret->setChunkLength(byte(ret->calculateUnfragmentableHeaderByteLength() + buf->buf.getTotalLength()));
         bufs.erase(i);
         return ret;
     }

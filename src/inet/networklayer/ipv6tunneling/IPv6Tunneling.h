@@ -27,8 +27,7 @@
 #ifndef __INET_IPV6TUNNELING_H
 #define __INET_IPV6TUNNELING_H
 
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
@@ -237,12 +236,12 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
      * Attaches a Type 2 Routing Header in the control info if the datagram is routed over an
      * appropriate RH2 pseudo tunnel.
      */
-    void encapsulateDatagram(IPv6Datagram *dgram);
+    void encapsulateDatagram(Packet *packet);
 
     /**
      * Strip tunnel headers from datagram
      */
-    void decapsulateDatagram(IPv6Datagram *dgram);
+    void decapsulateDatagram(Packet *packet);
 
     friend std::ostream& operator<<(std::ostream& os, const IPv6Tunneling::Tunnel& tun);
 

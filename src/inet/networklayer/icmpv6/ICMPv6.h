@@ -19,10 +19,9 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
-#include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
 
 namespace inet {
 
@@ -50,7 +49,7 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
      *      - Parameter Problem Message       - 4
      *  Code Types have different semantics for each error type. See RFC 2463.
      */
-    virtual void sendErrorMessage(IPv6Datagram *datagram, ICMPv6Type type, int code);
+    virtual void sendErrorMessage(Packet *datagram, ICMPv6Type type, int code);
 
     /**
      * This method can be called from other modules to send an ICMP error packet
@@ -63,8 +62,8 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
 
   protected:
     // internal helper functions
-    virtual void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
-    virtual void sendToIP(ICMPv6Message *msg);    // FIXME check if really needed
+    virtual void sendToIP(Packet *msg, const IPv6Address& dest);
+    virtual void sendToIP(Packet *msg);    // FIXME check if really needed
 
     virtual ICMPv6Message *createDestUnreachableMsg(int code);
     virtual ICMPv6Message *createPacketTooBigMsg(int mtu);
@@ -83,26 +82,26 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
      *  could be for ICMP ping requests or ICMPv6 messages that require processing.
      */
     virtual void handleMessage(cMessage *msg) override;
-    virtual void processICMPv6Message(ICMPv6Message *);
+    virtual void processICMPv6Message(Packet *packet);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /**
      *  Respond to the machine that tried to ping us.
      */
-    virtual void processEchoRequest(ICMPv6EchoRequestMsg *);
+    virtual void processEchoRequest(Packet *packet, const std::shared_ptr<ICMPv6EchoRequestMsg>& header);
 
     /**
      *  Forward the ping reply to the "pingOut" of this module.
      */
-    virtual void processEchoReply(ICMPv6EchoReplyMsg *);
+    virtual void processEchoReply(Packet *packet, const std::shared_ptr<ICMPv6EchoReplyMsg>& header);
 
     /**
      * Validate the received IPv6 datagram before responding with error message.
      */
-    virtual bool validateDatagramPromptingError(IPv6Datagram *datagram);
+    virtual bool validateDatagramPromptingError(Packet *packet);
 
-    virtual void errorOut(ICMPv6Message *);
+    virtual void errorOut(const std::shared_ptr<ICMPv6Message>& header);
 
   protected:
     typedef std::map<long, int> PingMap;
