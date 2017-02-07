@@ -39,7 +39,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         else
             throw cRuntimeError("Unknown signalShape parameter value: '%s'", signalShapeString);
         signalOpacity = par("signalOpacity");
-        signalColor = par("signalColor");
+        signalColorSet.parseColors(par("signalColor"));
         signalRingCount = par("signalRingCount");
         signalRingSize = par("signalRingSize");
         signalFadingDistance = par("signalFadingDistance");
@@ -167,11 +167,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
 {
     cFigure::Point position = canvasProjection->computeCanvasPoint( transmission->getStartPosition());
     cGroupFigure* groupFigure = new cGroupFigure("signal");
-    cFigure::Color color;
-    if (!strcmp(signalColor, "auto"))
-        color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-    else
-        color = cFigure::parseColor(signalColor);
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());
     SignalFigure* signalFigure = new SignalFigure("bubble");
     signalFigure->setTags("propagating_signal");
     signalFigure->setTooltip("These rings represents a signal propagating through the medium");

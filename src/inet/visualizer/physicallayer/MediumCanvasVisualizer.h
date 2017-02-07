@@ -26,6 +26,7 @@
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/util/ColorSet.h"
 
 namespace inet {
 
@@ -40,7 +41,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     const CanvasProjection *canvasProjection = nullptr;
     SignalShape signalShape = SIGNAL_SHAPE_RING;
     double signalOpacity = NaN;
-    const char *signalColor = nullptr;
+    ColorSet signalColorSet;
     int signalRingCount = -1;
     double signalRingSize = NaN;
     double signalFadingDistance = NaN;
