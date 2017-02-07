@@ -183,7 +183,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     signalFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
     signalFigure->refresh();
     groupFigure->addFigure(signalFigure);
-    cLabelFigure* nameFigure = new cLabelFigure("name");
+    cLabelFigure* nameFigure = new cLabelFigure("packet name");
     nameFigure->setPosition(position);
     nameFigure->setTags("propagating_signal packet_name label");
     nameFigure->setText(transmission->getMacFrame()->getName());
@@ -277,11 +277,11 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
         }
         if (displayTransmissions || displayReceptions) {
             auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
-            auto group = new cGroupFigure();
+            auto group = new cGroupFigure("activity");
             cFigure::Rectangle bounds;
             if (displayTransmissions) {
                 std::string imageName = par("transmissionImage");
-                auto transmissionImage = new cIconFigure();
+                auto transmissionImage = new cIconFigure("transmission");
                 transmissionImage->setTags("transmission");
                 transmissionImage->setTooltip("This icon represents an ongoing transmission in a wireless interface");
                 transmissionImage->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
@@ -292,7 +292,7 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             }
             if (displayReceptions) {
                 std::string imageName = par("receptionImage");
-                auto receptionImage = new cIconFigure();
+                auto receptionImage = new cIconFigure("reception");
                 receptionImage->setTags("reception");
                 receptionImage->setTooltip("This icon represents an ongoing reception in a wireless interface");
                 receptionImage->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());

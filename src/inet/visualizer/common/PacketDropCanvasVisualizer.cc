@@ -38,7 +38,7 @@ void PacketDropCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        packetDropGroup = new cGroupFigure();
+        packetDropGroup = new cGroupFigure("packet drops");
         packetDropGroup->setZIndex(zIndex);
         canvas->addFigure(packetDropGroup);
     }

@@ -109,7 +109,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
 
 const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path) const
 {
-    auto figure = new cPolylineFigure();
+    auto figure = new cPolylineFigure("path");
     figure->setLineWidth(lineWidth);
     figure->setLineStyle(lineStyle);
     figure->setEndArrowhead(cFigure::ARROW_BARBED);

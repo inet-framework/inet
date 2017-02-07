@@ -44,7 +44,7 @@ void LinkCanvasVisualizerBase::initialize(int stage)
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        linkGroup = new cGroupFigure();
+        linkGroup = new cGroupFigure("links");
         linkGroup->setZIndex(zIndex);
         canvas->addFigure(linkGroup);
     }

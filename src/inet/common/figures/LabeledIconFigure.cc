@@ -24,7 +24,7 @@ LabeledIconFigure::LabeledIconFigure(const char *name) :
 {
     iconFigure = new cIconFigure("icon");
     iconFigure->setAnchor(cFigure::ANCHOR_NW);
-    labelFigure = new cLabelFigure("text");
+    labelFigure = new cLabelFigure("label");
     labelFigure->setAnchor(cFigure::ANCHOR_CENTER);
     labelFigure->setHalo(true);
     addFigure(iconFigure);
