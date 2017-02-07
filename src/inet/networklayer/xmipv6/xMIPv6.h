@@ -406,7 +406,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Swaps the addresses between the original destination address of the datagram and
      * the field in the routing header.
      */
-    void processType2RH(IPv6Datagram *datagram, IPv6RoutingHeader *rh);
+    void processType2RH(Packet *packet, IPv6Datagram *datagram, IPv6RoutingHeader *rh);
 
     /**
      * Perform validity checks according to RFC 3775 - Section 6.4
@@ -419,7 +419,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Swaps the addresses between the original source address of the datagram and
      * the field in the option.
      */
-    void processHoAOpt(IPv6Datagram *datagram, HomeAddressOption *hoaOpt);
+    void processHoAOpt(Packet *packet, IPv6Datagram *datagram, HomeAddressOption *hoaOpt);
 
 //
 // Binding Refresh Request related functions

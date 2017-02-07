@@ -182,13 +182,14 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
     }
     else if (dynamic_cast<Packet *>(msg)) {
         auto packet = check_and_cast<Packet *>(msg);
-        if (dynamic_cast<ICMPv6Message *>(msg)) {
+        auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::icmpv6) {
             //This information will serve as input parameters to various processors.
-            ICMPv6Message *ndMsg = (ICMPv6Message *)msg;
-            processNDMessage(packet, ndMsg);
+            const auto& ndMsg = packet->peekHeader<ICMPv6Message>();
+            processNDMessage(packet, ndMsg.get()); // KLUDGE: remove get()
         }
-        else if (dynamic_cast<IPv6Datagram *>(msg)) {    // not ND message
-            processIPv6Datagram(check_and_cast<Packet *>(msg));
+        else {    // not ND message
+            processIPv6Datagram(packet);
         }
     }
     else
@@ -1081,7 +1082,6 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
 void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitation *rs)
 {
     if (validateRSPacket(packet, rs) == false) {
-        delete rs;
         return;
     }
 
@@ -1095,7 +1095,6 @@ void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitat
         EV_INFO << "This is an advertising interface, processing RS\n";
 
         if (validateRSPacket(packet, rs) == false) {
-            delete rs;
             return;
         }
 
@@ -1104,7 +1103,6 @@ void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitat
         //First we extract RS specific information from the received message
         MACAddress macAddr = rs->getSourceLinkLayerAddress();
         EV_INFO << "MAC Address '" << macAddr << "' extracted\n";
-        delete rs;
 
         /*A router MAY choose to unicast the response directly to the soliciting
            host's address (if the solicitation's source address is not the unspecified
@@ -1153,7 +1151,6 @@ void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitat
     }
     else {
         EV_INFO << "This interface is a host, discarding RA message\n";
-        delete rs;
     }
 }
 
@@ -1302,12 +1299,10 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "Interface is an advertising interface, dropping RA message.\n";
-        delete ra;
         return;
     }
     else {
         if (validateRAPacket(packet, ra) == false) {
-            delete ra;
             return;
         }
 
@@ -1316,7 +1311,6 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
             // in case we are currently performing DAD we ignore this RA
             // TODO improve this procedure in order to allow reinitiating DAD
             // (which means cancel current DAD, start new DAD)
-            delete ra;
             return;
         }
 #endif /* WITH_xMIPv6 */
@@ -1345,7 +1339,7 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
                 // homeNetworkInfo now carries HoA, global unicast HA address and the home network prefix
                 // update 4.9.07 - CB
                 IPv6Address HoA = ie->ipv6Data()->getGlobalAddress();    //MN's home address
-                IPv6Address HA = ra->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().setPrefix(prefixInfo.getPrefix(), prefixInfo.getPrefixLength());
+                IPv6Address HA = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6().setPrefix(prefixInfo.getPrefix(), prefixInfo.getPrefixLength());
                 EV_DETAIL << "The HoA of MN is: " << HoA << ", MN's HA Address is: " << HA
                           << " and the home prefix is " << prefixInfo.getPrefix() << endl;
                 ie->ipv6Data()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength());    //populate the HoA of MN, the HA global scope address and the home network prefix
@@ -1353,7 +1347,6 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
 #endif /* WITH_xMIPv6 */
         }
     }
-    delete ra;
 }
 
 void IPv6NeighbourDiscovery::processRAForRouterUpdates(Packet *packet, IPv6RouterAdvertisement *ra)
@@ -1853,7 +1846,6 @@ void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, IPv6NeighbourSolici
         || ie->ipv6Data()->hasAddress(nsTargetAddr) == false)
     {
         bubble("NS validation failed\n");
-        delete ns;
         return;
     }
 
@@ -1870,8 +1862,6 @@ void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, IPv6NeighbourSolici
         EV_INFO << "Process NS for Non-Tentative target address.\n";
         processNSForNonTentativeAddress(packet, ns, ie);
     }
-
-    delete ns;
 }
 
 bool IPv6NeighbourDiscovery::validateNSPacket(Packet *packet, IPv6NeighbourSolicitation *ns)
@@ -2096,9 +2086,9 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
     // multicast address.  These advertisements MUST be separated by at
     // least RetransTimer seconds.
 #else /* WITH_xMIPv6 */
-    IPv6NeighbourAdvertisement *na = new IPv6NeighbourAdvertisement("NApacket");
+    auto na = std::make_shared<IPv6NeighbourAdvertisement>();
     IPv6Address myIPv6Addr = ie->ipv6Data()->getPreferredAddress();
-    na->setByteLength(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE);
+    na->setChunkLength(byte(ICMPv6_HEADER_BYTES + IPv6_ADDRESS_SIZE));
 #endif /* WITH_xMIPv6 */
 
     // The Target Address field in the unsolicited advertisement is set to
@@ -2107,7 +2097,7 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 #ifdef WITH_xMIPv6
     na->setTargetAddress(myIPv6Addr);
     na->setTargetLinkLayerAddress(ie->getMacAddress());
-    na->addByteLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
+    na->setChunkLength(na->getChunkLength() + byte(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
 #endif /* WITH_xMIPv6 */
 
     // The Solicited flag MUST be set to zero, in order to avoid confusing
@@ -2159,14 +2149,16 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
     // obtain a reachable link-layer address, though the delay may be
     // slightly longer.
 #ifdef WITH_xMIPv6
-    sendPacketToIPv6Module(na, IPv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
+    auto packet = new Packet("NApacket");
+    na->markImmutable();
+    packet->append(na);
+    sendPacketToIPv6Module(packet, IPv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 #endif /* WITH_xMIPv6 */
 }
 
 void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na)
 {
     if (validateNAPacket(packet, na) == false) {
-        delete na;
         return;
     }
 
@@ -2185,7 +2177,6 @@ void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvert
     if (neighbourEntry == nullptr) {
         EV_INFO << "NA received. Target Address not found in Neighbour Cache\n";
         EV_INFO << "Dropping NA packet.\n";
-        delete na;
         return;
     }
 
@@ -2196,8 +2187,6 @@ void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvert
         processNAForIncompleteNCEState(na, neighbourEntry);
     else
         processNAForOtherNCEStates(na, neighbourEntry);
-
-    delete na;
 }
 
 bool IPv6NeighbourDiscovery::validateNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na)

@@ -26,6 +26,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -185,13 +186,14 @@ void xMIPv6::handleMessage(cMessage *msg)
     }
     // CB on 29.08.07
     // normal datagram with an extension header
-    else if (dynamic_cast<IPv6Datagram *>(msg)) {
-        IPv6ExtensionHeader *eh = (IPv6ExtensionHeader *)msg->getContextPointer();
+    else if (auto packet = dynamic_cast<Packet *>(msg)) {
+        auto msg = packet->peekHeader<IPv6Datagram>();
+        IPv6ExtensionHeader *eh = (IPv6ExtensionHeader *)packet->getContextPointer();
 
         if (dynamic_cast<IPv6RoutingHeader *>(eh))
-            processType2RH((IPv6Datagram *)msg, (IPv6RoutingHeader *)eh);
+            processType2RH(packet, (IPv6Datagram *)msg.get(), (IPv6RoutingHeader *)eh);
         else if (dynamic_cast<HomeAddressOption *>(eh))
-            processHoAOpt((IPv6Datagram *)msg, (HomeAddressOption *)eh);
+            processHoAOpt(packet, (IPv6Datagram *)msg.get(), (HomeAddressOption *)eh);
         else
             throw cRuntimeError("Unknown Extension Header.");
     }
@@ -2043,7 +2045,7 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
     //createBUTimer(bulEntry.destAddress, ie, false); // update 07.09.07 - CB
 }
 
-void xMIPv6::processType2RH(IPv6Datagram *datagram, IPv6RoutingHeader *rh)
+void xMIPv6::processType2RH(Packet *packet, IPv6Datagram *datagram, IPv6RoutingHeader *rh)
 {
     //EV << "Processing RH2..." << endl;
 
@@ -2099,10 +2101,10 @@ void xMIPv6::processType2RH(IPv6Datagram *datagram, IPv6RoutingHeader *rh)
 
     if (validRH2) {
         EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
-        send(datagram, "toIPv6");
+        send(packet, "toIPv6");
     }
     else // update 12.09.07 - CB
-        delete datagram;
+        delete packet;
 }
 
 bool xMIPv6::validateType2RH(IPv6Datagram& datagram, const IPv6RoutingHeader& rh)
@@ -2134,7 +2136,7 @@ bool xMIPv6::validateType2RH(IPv6Datagram& datagram, const IPv6RoutingHeader& rh
     return true;
 }
 
-void xMIPv6::processHoAOpt(IPv6Datagram *datagram, HomeAddressOption *hoaOpt)
+void xMIPv6::processHoAOpt(Packet *packet, IPv6Datagram *datagram, HomeAddressOption *hoaOpt)
 {
     // datagram from MN to CN
     bool validHoAOpt = false;
@@ -2172,10 +2174,10 @@ void xMIPv6::processHoAOpt(IPv6Datagram *datagram, HomeAddressOption *hoaOpt)
 
     if (validHoAOpt) {
         EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
-        send(datagram, "toIPv6");
+        send(packet, "toIPv6");
     }
     else
-        delete datagram;
+        delete packet;
 }
 
 void xMIPv6::createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beStatus)    // update 12.09.07 - CB

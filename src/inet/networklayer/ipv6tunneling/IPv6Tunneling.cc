@@ -413,9 +413,8 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
         }
 
         // get rid of the encapsulation of the IPv6 module
-        cMessage *packet = dgram->decapsulate();
+        packet->popHeader<IPv6Datagram>();
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(dgram->getTransportProtocol()));
-        delete dgram;
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
             // construct Type 2 Routing Header (RFC 3775 - 6.4.1)
@@ -496,7 +495,7 @@ void IPv6Tunneling::decapsulateDatagram(Packet *packet)
            ingress filtering. This check is not necessary if the reverse-
            tunneled packet is protected by ESP in tunnel mode.*/
         EV_INFO << "Dropping packet: source address of tunnel IP header different from tunnel exit points!" << endl;
-        delete dgram;
+        delete packet;
         return;
     }
 #endif // ifdef WITH_xMIPv6
@@ -511,7 +510,7 @@ void IPv6Tunneling::decapsulateDatagram(Packet *packet)
 #ifdef WITH_xMIPv6
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
-    InterfaceEntry *ie = ift->getInterfaceById(dgram->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (rt->isMobileNode() && (srcAddr == ie->ipv6Data()->getHomeAgentAddress())
         && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
     {

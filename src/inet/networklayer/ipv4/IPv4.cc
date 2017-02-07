@@ -268,7 +268,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             delete packet;
         }
         else {
-            // TODO: factor out
+            // KLUDGE: TODO: factor out
             auto packetCopy = toMutable(packet);
             const auto& ipv4Header = packetCopy->peekHeader<IPv4Header>();
             packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
@@ -291,7 +291,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
-                // TODO: factor out
+                // KLUDGE: TODO: factor out
                 auto packetCopy = toMutable(packet);
                 const auto& ipv4Header = packetCopy->peekHeader<IPv4Header>();
                 packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
@@ -312,7 +312,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             delete packet;
         }
         else {
-            // TODO: factor out
+            // KLUDGE: TODO: factor out
             auto packetCopy = toMutable(packet);
             auto ipv4Header = packetCopy->peekHeader<IPv4Header>();
             packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
@@ -693,7 +693,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     // fill in source address
     if (ipv4Header->getSrcAddress().isUnspecified()) {
-        // TODO: factor out
+        // KLUDGE: TODO: factor out
         packet->removeFromBeginning(ipv4Header->getChunkLength());
         auto ipv4HeaderCopy = std::static_pointer_cast<IPv4Header>(ipv4Header->dupShared());
         // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();

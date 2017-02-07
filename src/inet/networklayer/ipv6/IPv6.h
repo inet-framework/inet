@@ -98,18 +98,19 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     class ScheduledDatagram : public cPacket
     {
       protected:
+        Packet *packet = nullptr;
         IPv6Datagram *datagram = nullptr;
         const InterfaceEntry *ie = nullptr;
         MACAddress macAddr;
         bool fromHL = false;
       public:
-        ScheduledDatagram(IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
+        ScheduledDatagram(Packet *packet, IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
         const InterfaceEntry *getIE() { return ie; }
         const IPv6Address& getSrcAddress() {return datagram->getSrcAddress(); }
         const MACAddress& getMACAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
-        IPv6Datagram *removeDatagram() { IPv6Datagram *ret = datagram; datagram = nullptr; return ret; }
+        Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
 #endif /* WITH_xMIPv6 */
 
@@ -251,7 +252,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * and the packet has to be dropped or if the datagram has been forwarded to another
      * module for further processing.
      */
-    bool processExtensionHeaders(IPv6Datagram *datagram);
+    bool processExtensionHeaders(Packet *packet, IPv6Datagram *datagram);
 #endif /* WITH_xMIPv6 */
 };
 

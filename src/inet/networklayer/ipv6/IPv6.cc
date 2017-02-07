@@ -63,7 +63,8 @@ IPv6::~IPv6()
 }
 
 #ifdef WITH_xMIPv6
-IPv6::ScheduledDatagram::ScheduledDatagram(IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
+IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
+        packet(packet),
         datagram(datagram),
         ie(ie),
         macAddr(macAddr),
@@ -73,7 +74,7 @@ IPv6::ScheduledDatagram::ScheduledDatagram(IPv6Datagram *datagram, const Interfa
 
 IPv6::ScheduledDatagram::~ScheduledDatagram()
 {
-    delete datagram;
+    delete packet;
 }
 #endif /* WITH_xMIPv6 */
 
@@ -193,7 +194,7 @@ void IPv6::endService(cPacket *msg)
 #endif /* WITH_xMIPv6 */
 
     if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<IPv6NDMessage *>(msg))
+        || (msg->getArrivalGate()->isName("ndIn") && msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
         || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
         || (msg->getArrivalGate()->isName("xMIPv6In") && dynamic_cast<MobilityHeader *>(msg))    // Zarrar
@@ -203,7 +204,7 @@ void IPv6::endService(cPacket *msg)
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
         handleMessageFromHL(msg);
     }
-    else if (msg->getArrivalGate()->isName("ndIn") && dynamic_cast<Packet *>(msg)) {
+    else if (msg->getArrivalGate()->isName("ndIn") && msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         auto packet = check_and_cast<Packet *>(msg);
         IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
         bool fromHL = ctrl->getFromHL();
@@ -285,9 +286,9 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     encapsulate(packet);
 
 #ifdef WITH_xMIPv6
-    if (datagram == nullptr) {
+    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() != &Protocol::ipv6) {
         EV_WARN << "Encapsulation failed - dropping packet." << endl;
-        delete msg;
+        delete packet;
         return;
     }
 #endif /* WITH_xMIPv6 */
@@ -369,7 +370,14 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
-        datagram->setHopLimit(datagram->getHopLimit() - 1);
+        // KLUDGE: TODO
+        packet->removePoppedChunks();
+        packet->removeFromBeginning(datagram->getChunkLength());
+        auto ipv6Header = std::static_pointer_cast<IPv6Datagram>(datagram->dupShared());
+        // TODO: dup or mark datagram->markMutableIfExclusivelyOwned();
+        ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
+        ipv6Header->markImmutable();
+        packet->pushHeader(ipv6Header);
     }
 
     // routing
@@ -439,7 +447,7 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6A
             && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
         {
             EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;
-            delete datagram;
+            delete packet;
             numDropped++;
             return;
         }
@@ -503,7 +511,14 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
         // TBD: in IPv4, arrange TTL check like this
-        datagram->setHopLimit(datagram->getHopLimit() - 1);
+        // KLUDGE: TODO
+        packet->removePoppedChunks();
+        packet->removeFromBeginning(datagram->getChunkLength());
+        auto ipv6Header = std::static_pointer_cast<IPv6Datagram>(datagram->dupShared());
+        // TODO: dup or mark datagram->markMutableIfExclusivelyOwned();
+        ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
+        ipv6Header->markImmutable();
+        packet->pushHeader(ipv6Header);
     }
 
     // for now, we just send it out on every interface except on which it came. FIXME better!!!
@@ -618,7 +633,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 #ifdef WITH_xMIPv6
     // #### 29.08.07 - CB
     // check for extension headers
-    if (!processExtensionHeaders(datagram)) {
+    if (!processExtensionHeaders(packet, datagram.get())) {
         // ext. header processing not yet finished
         // datagram was sent to another module or dropped
         // -> interrupt local delivery process
@@ -638,10 +653,9 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
         send(packetCopy, "transportOut");
     }
 
-    if (protocol == IP_PROT_IPv6_ICMP && dynamic_cast<IPv6NDMessage *>(packet)) {
-        EV_INFO << "Neigbour Discovery packet: passing it to ND module\n";
-        send(packet, "ndOut");
-    }
+    if (protocol == IP_PROT_IPv6_ICMP) {
+        handleReceivedICMP(packet);
+    }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
 #ifdef WITH_xMIPv6
     else if (protocol == IP_PROT_IPv6EXT_MOB && dynamic_cast<MobilityHeader *>(packet)) {
         // added check for MIPv6 support to prevent nodes w/o the
@@ -656,13 +670,10 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
                Any node that does not recognize the Mobility header will return an
                ICMP Parameter Problem, Code 1, message to the sender of the packet*/
             EV_INFO << "No MIPv6 support on this node!\n";
-            sendIcmpError(packet, NULL, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
+            sendIcmpError(packet, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
         }
     }
 #endif /* WITH_xMIPv6 */
-    else if (protocol == IP_PROT_IPv6_ICMP) {
-        handleReceivedICMP(packet);
-    }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
     else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
@@ -681,13 +692,21 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 
 void IPv6::handleReceivedICMP(Packet *msg)
 {
-    EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
-    send(msg, "transportOut");
+    const auto& icmpHeader = msg->peekHeader<ICMPv6Message>();
+    if (std::dynamic_pointer_cast<IPv6NDMessage>(icmpHeader) != nullptr) {
+        EV_INFO << "Neigbour Discovery packet: passing it to ND module\n";
+        send(msg, "ndOut");
+    }
+    else {
+        EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
+        send(msg, "transportOut");
+    }
 }
 
 void IPv6::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
+    auto ipv6HeaderPos = packet->getHeaderPopOffset();
     auto datagram = packet->popHeader<IPv6Datagram>();
 
     // create and fill in control info
@@ -697,7 +716,7 @@ void IPv6::decapsulate(Packet *packet)
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<OrigNetworkDatagramInd>()->setOrigDatagram(packet);    // original IP datagram might be needed in upper layers to send back ICMP error message
+    packet->ensureTag<NetworkProtocolInd>()->setPosition(ipv6HeaderPos);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSrcAddress(datagram->getSrcAddress());
     l3AddressInd->setDestAddress(datagram->getDestAddress());
@@ -729,7 +748,7 @@ void IPv6::encapsulate(Packet *transportPacket)
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                     src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
 #else /* WITH_xMIPv6 */
-            return nullptr;
+            return;
 #endif /* WITH_xMIPv6 */
         }
         datagram->setSrcAddress(src);
@@ -761,6 +780,7 @@ void IPv6::encapsulate(Packet *transportPacket)
     datagram->markImmutable();
     transportPacket->pushHeader(datagram);
 
+    transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     // setting IP options is currently not supported
 }
 
@@ -782,13 +802,21 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         // source address can be unspecified during DAD
         const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
-        datagram->setSrcAddress(srcAddr);
+
+        // TODO: factor out
+        packet->removeFromBeginning(datagram->getChunkLength());
+        auto ipv6HeaderCopy = std::static_pointer_cast<IPv6Datagram>(datagram->dupShared());
+        // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
+        ipv6HeaderCopy->setSrcAddress(srcAddr);
+        ipv6HeaderCopy->markImmutable();
+        packet->pushHeader(ipv6HeaderCopy);
+
     #ifdef WITH_xMIPv6
         // if the datagram has a tentative address as source we have to reschedule it
         // as it can not be sent before the address' tentative status is cleared - CB
         if (ie->ipv6Data()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
-            ScheduledDatagram *sDgram = new ScheduledDatagram(datagram, ie, nextHopAddr, fromHL);
+            ScheduledDatagram *sDgram = new ScheduledDatagram(packet, datagram.get(), ie, nextHopAddr, fromHL);
             queue.insert(sDgram);
             return;
         }
@@ -902,7 +930,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
 }
 
 #ifdef WITH_xMIPv6
-bool IPv6::processExtensionHeaders(IPv6Datagram *datagram)
+bool IPv6::processExtensionHeaders(Packet *packet, IPv6Datagram *datagram)
 {
     int noExtHeaders = datagram->getExtensionHeaderArraySize();
     EV_INFO << noExtHeaders << " extension header(s) for processing..." << endl;
@@ -919,9 +947,9 @@ bool IPv6::processExtensionHeaders(IPv6Datagram *datagram)
             // if no MIP support, ignore the header
             if (rt->hasMIPv6Support() && rh->getRoutingType() == 2) {
                 // for simplicity, we set a context pointer on the datagram
-                datagram->setContextPointer(rh);
+                packet->setContextPointer(rh);
                 EV_INFO << "Sending datagram with RH2 to MIPv6 module" << endl;
-                send(datagram, "xMIPv6Out");
+                send(packet, "xMIPv6Out");
                 return false;
             }
             else {
@@ -934,9 +962,9 @@ bool IPv6::processExtensionHeaders(IPv6Datagram *datagram)
             //EV << "object of type=" << typeid(eh).name() << endl;
 
             if (rt->hasMIPv6Support() && dynamic_cast<HomeAddressOption *>(eh)) {
-                datagram->setContextPointer(eh);
+                packet->setContextPointer(eh);
                 EV_INFO << "Sending datagram with HoA Option to MIPv6 module" << endl;
-                send(datagram, "xMIPv6Out");
+                send(packet, "xMIPv6Out");
                 return false;
             }
             else {
