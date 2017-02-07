@@ -18,6 +18,7 @@
 #ifndef __INET_ROUTINGTABLECANVASVISUALIZER_H
 #define __INET_ROUTINGTABLECANVASVISUALIZER_H
 
+#include "inet/common/figures/LabeledLineFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
 
@@ -30,10 +31,10 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
   protected:
     class INET_API RouteCanvasVisualization : public RouteVisualization {
       public:
-        cLineFigure *figure = nullptr;
+        LabeledLineFigure *figure = nullptr;
 
       public:
-        RouteCanvasVisualization(cLineFigure *figure, int nodeModuleId, int nextHopModuleId);
+        RouteCanvasVisualization(LabeledLineFigure *figure, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteCanvasVisualization();
     };
 
