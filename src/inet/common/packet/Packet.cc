@@ -252,7 +252,7 @@ void Packet::removePoppedHeaders()
 void Packet::removePoppedTrailers()
 {
     bit poppedLength = getTrailerPoppedLength();
-    setTrailerPopOffset(bit(0));
+    setTrailerPopOffset(getPacketLength());
     removeFromEnd(poppedLength);
 }
 
