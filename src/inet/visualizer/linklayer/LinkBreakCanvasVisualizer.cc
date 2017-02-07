@@ -38,7 +38,7 @@ void LinkBreakCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        linkBreakGroup = new cGroupFigure();
+        linkBreakGroup = new cGroupFigure("link breaks");
         linkBreakGroup->setZIndex(zIndex);
         canvas->addFigure(linkBreakGroup);
     }

@@ -35,7 +35,7 @@ void SignalFigure::setColor(const cFigure::Color& color)
 void SignalFigure::setRingCount(int count)
 {
     for (int i = 0; i < count; i++) {
-        auto ring = new cRingFigure();
+        auto ring = new cRingFigure("wave power");
         ring->setFilled(true);
         ring->setOutlined(false);
         rings.push_back(ring);
@@ -46,7 +46,7 @@ void SignalFigure::setRingCount(int count)
 void SignalFigure::setWaveCount(int count)
 {
     for (int i = 0; i < count; i++) {
-        auto wave = new cOvalFigure();
+        auto wave = new cOvalFigure("wave crest");
         wave->setFilled(false);
         wave->setOutlined(true);
         waves.push_back(wave);

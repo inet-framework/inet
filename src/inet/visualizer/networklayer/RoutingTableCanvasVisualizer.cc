@@ -42,7 +42,7 @@ void RoutingTableCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        routeGroup = new cGroupFigure();
+        routeGroup = new cGroupFigure("routing tables");
         routeGroup->setZIndex(zIndex);
         canvas->addFigure(routeGroup);
     }
@@ -67,7 +67,7 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
 
 const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
 {
-    auto figure = new LabeledLineFigure();
+    auto figure = new LabeledLineFigure("routing entry");
     figure->setTags("route");
     figure->setTooltip("This arrow represents a route in a routing table");
     figure->setAssociatedObject(route);

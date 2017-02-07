@@ -28,6 +28,7 @@ NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, cFigure:
 }
 
 NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode) :
+    cGroupFigure(networkNode->getFullName()),
     networkNode(networkNode)
 {
     // TODO: determine size from icon

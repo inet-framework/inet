@@ -22,9 +22,9 @@ namespace inet {
 BoxedLabelFigure::BoxedLabelFigure(const char *name) :
     cGroupFigure(name)
 {
-    labelFigure = new cLabelFigure("text");
+    labelFigure = new cLabelFigure("label");
     labelFigure->setPosition(cFigure::Point(spacing, spacing));
-    rectangleFigure = new cRectangleFigure("border");
+    rectangleFigure = new cRectangleFigure("box");
     rectangleFigure->setCornerRx(spacing);
     rectangleFigure->setCornerRy(spacing);
     rectangleFigure->setFilled(true);
