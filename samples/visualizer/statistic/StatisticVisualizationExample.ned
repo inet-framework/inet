@@ -83,7 +83,7 @@ network StatisticVisualizationD
 network StatisticVisualizationExampleD
 {
     parameters:
-        @display("bgb=1391,377");
+        @display("bgb=901.5187,376.65");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
@@ -99,7 +99,7 @@ network StatisticVisualizationExampleD
         }
         destination: AdhocHost {
             parameters:
-                @display("p=596.376,180.72");
+                @display("p=500,179.60625");
         }
         source: AdhocHost {
             @display("p=363.448,180.72");
