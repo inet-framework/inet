@@ -50,6 +50,7 @@ void MediumVisualizerBase::initialize(int stage)
         displaySignals = par("displaySignals");
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+        signalPropagationAdditionalTime = par("signalPropagationAdditionalTime");
         displayTransmissions = par("displayTransmissions");
         displayReceptions = par("displayReceptions");
         displayInterferenceRanges = par("displayInterferenceRanges");
@@ -125,7 +126,7 @@ bool MediumVisualizerBase::isSignalPropagationInProgress(const ITransmission *tr
     const simtime_t transmissionStartTime = transmission->getStartTime();
     const simtime_t transmissionEndTime = transmission->getEndTime();
     const simtime_t interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
-    simtime_t maxPropagationTime = interferenceEndTime - transmissionEndTime - mediumLimitCache->getMaxTransmissionDuration();
+    simtime_t maxPropagationTime = interferenceEndTime - transmissionEndTime - mediumLimitCache->getMaxTransmissionDuration() + signalPropagationAdditionalTime;
     return (transmissionStartTime <= now && now < transmissionStartTime + maxPropagationTime) ||
            (transmissionEndTime <= now && now < transmissionEndTime + maxPropagationTime);
 }

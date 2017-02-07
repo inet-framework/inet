@@ -41,6 +41,7 @@ simple MediumVisualizerBase extends VisualizerBase
         bool displaySignals = default(false); // display signals propagating through the medium, disabled by default
         double signalPropagationAnimationSpeed = default(0); // animation speed while the very beginning or end of a signal is propagating on the medium, value must be in the range (0, +inf)
         double signalTransmissionAnimationSpeed = default(0); // animation speed while a signal is being transmitted on the medium, value must be in the range (0, +inf)
+        double signalPropagationAdditionalTime @unit(s) = default(0s); // additional simulation time to animate signal propagation after leaving last receiver
 
         bool displayTransmissions = default(false); // display an image where a transmission is currently in progress, disabled by default
         string transmissionImage = default("misc/transmission.png"); // transmission image for ongoing transmissions
