@@ -85,3 +85,27 @@ network ObstacleLossC
             @display("p=88,250");
         }
 }
+
+network ObstacleLossD
+{
+    @display("bgb=800,400");
+    submodules:
+        source: AdhocHost {
+            @display("p=200,50");
+        }
+        destination: AdhocHost {
+            @display("p=700,350");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=88,51");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=87,116");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=88,181");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=88,250");
+        }
+}
