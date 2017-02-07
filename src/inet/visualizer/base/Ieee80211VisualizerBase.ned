@@ -40,6 +40,8 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
 
         string icon = default("misc/signal_s"); // wireless network visualization icon
+        string iconColor @enum("light", "dark") = default("dark"); // wireless network icon color is a list of colors, a set of dark colors by default
+
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
 

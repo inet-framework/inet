@@ -52,7 +52,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211CanvasVisualizer::crea
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents an IEEE 802.11 association");
     iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
-    iconFigure->setTintColor(cFigure::GOOD_DARK_COLORS[hasher(ssid) % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
+    iconFigure->setTintColor(iconColorSet.getColor(hasher(ssid)));
     iconFigure->setTintAmount(1);
     auto labelFigure = labeledIconFigure->getLabelFigure();
     labelFigure->setTooltip("This label represents the SSID of an IEEE 802.11 association");
