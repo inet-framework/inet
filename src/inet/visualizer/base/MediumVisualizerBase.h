@@ -50,6 +50,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     bool displaySignals = false;
     double signalPropagationAnimationSpeed = NaN;
     double signalTransmissionAnimationSpeed = NaN;
+    double signalPropagationAdditionalTime = NaN;
     bool displayTransmissions = false;
     bool displayReceptions = false;
     bool displayInterferenceRanges = false;
