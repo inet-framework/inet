@@ -47,6 +47,7 @@ void Ieee80211VisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         icon = par("icon");
+        iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
         if (displayAssociations)

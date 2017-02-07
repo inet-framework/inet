@@ -20,6 +20,7 @@
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 
@@ -47,6 +48,7 @@ class INET_API Ieee80211VisualizerBase : public VisualizerBase, public cListener
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     const char *icon = nullptr;
+    ColorSet iconColorSet;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
     //@}
