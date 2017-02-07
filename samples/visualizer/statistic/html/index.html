@@ -2,6 +2,9 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="../../samples.css">
+<link rel="stylesheet" type="text/css" href="gifplayer.css">
+<script src="jquery-3.1.1.min.js"></script>
+<script src="jquery.gifplayer.js"></script>
 <title>Visualizing Statistics Example</title>
 </head>
 
@@ -44,6 +47,12 @@ and <i>maxValue</i> parameters.
 </p>
 
 <h2>The visualization</h2>
+
+<img class="gif" width=900px data-mode="video" data-mp4="statisticvisualizer3.mp4" src="statisticvisualizer3.png">
+
+<script>
+$('.gif').gifplayer();
+</script>
 
 </body>
 
