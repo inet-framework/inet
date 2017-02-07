@@ -96,6 +96,63 @@ network PacketDropC
         }
     connections:
         router.ethg++ <--> Eth100M <--> accessPoint.ethg++;
+        standardHost.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
+        etherSwitch.ethg++ <--> Eth100M <--> router.ethg++;
+}
+
+network PacketDropD
+{
+    @display("bgb=720,400");
+    submodules:
+        standardHost: StandardHost {
+            @display("p=80,198");
+        }
+        etherSwitch: EtherSwitch {
+            @display("p=211,197");
+        }
+        router: Router {
+            @display("p=323,198");
+        }
+        accessPoint: AccessPoint {
+            @display("p=449,197");
+        }
+        wirelessHost: WirelessHost {
+            @display("p=589,194");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=88,37");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=267,37");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=465,37");
+        }
+    connections:
+        router.ethg++ <--> Eth100M <--> accessPoint.ethg++;
         standardHost.ethg++ <--> Eth100G <--> etherSwitch.ethg++;
         etherSwitch.ethg++ <--> Eth10M <--> router.ethg++;
+}
+
+network PacketDropE
+{
+    parameters:
+        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,150");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,250");
+        }
+        source: AdhocHost {
+            parameters:
+                @display("p=250,150");
+        }
 }
