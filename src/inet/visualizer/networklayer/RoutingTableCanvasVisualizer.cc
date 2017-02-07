@@ -23,7 +23,7 @@ namespace visualizer {
 
 Define_Module(RoutingTableCanvasVisualizer);
 
-RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(cLineFigure *figure, int nodeModuleId, int nextHopModuleId) :
+RoutingTableCanvasVisualizer::RouteCanvasVisualization::RouteCanvasVisualization(LabeledLineFigure *figure, int nodeModuleId, int nextHopModuleId) :
     RouteVisualization(nodeModuleId, nextHopModuleId),
     figure(figure)
 {
@@ -67,14 +67,19 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
 
 const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualizer::createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const
 {
-    auto figure = new cLineFigure();
+    auto figure = new LabeledLineFigure();
     figure->setTags("route");
     figure->setTooltip("This arrow represents a route in a routing table");
     figure->setAssociatedObject(route);
-    figure->setEndArrowhead(cFigure::ARROW_TRIANGLE);
-    figure->setLineWidth(lineWidth);
-    figure->setLineColor(lineColor);
-    figure->setLineStyle(lineStyle);
+    auto lineFigure = figure->getLineFigure();
+    lineFigure->setEndArrowhead(cFigure::ARROW_TRIANGLE);
+    lineFigure->setLineWidth(lineWidth);
+    lineFigure->setLineColor(lineColor);
+    lineFigure->setLineStyle(lineStyle);
+    auto labelFigure = figure->getLabelFigure();
+    labelFigure->setFont(labelFont);
+    labelFigure->setColor(labelColor);
+    labelFigure->setText(route->info().c_str());
     auto routeVisualization = new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
     routeVisualization->shiftPriority = 0.5;
     return routeVisualization;

@@ -49,5 +49,9 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
 
+        string labelFont = default("<default>"); // label font, automatic by default
+        string labelColor = default("black"); // label color, black by default
+        string labelContent @enum("info") = default("info"); // label content, route info by default
+
         @class(RoutingTableVisualizerBase);
 }

@@ -55,6 +55,9 @@ void RoutingTableVisualizerBase::initialize(int stage)
         lineContactSpacing = par("lineContactSpacing");
         lineContactMode = par("lineContactMode");
         lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
+        labelFont = cFigure::parseFont(par("labelFont"));
+        labelColor = cFigure::Color(par("labelColor"));
+        labelContent = par("labelContent");
         if (displayRoutingTables)
             subscribe();
     }

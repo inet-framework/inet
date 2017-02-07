@@ -54,6 +54,9 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     double lineWidth = NaN;
     double lineContactSpacing = NaN;
     const char *lineContactMode = nullptr;
+    cFigure::Font labelFont;
+    cFigure::Color labelColor;
+    const char *labelContent = nullptr;
     //@}
 
     LineManager *lineManager = nullptr;
