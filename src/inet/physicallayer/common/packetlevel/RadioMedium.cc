@@ -474,7 +474,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     transmissionCount++;
     transmissions.push_back(transmission);
     communicationCache->addTransmission(transmission);
-    simtime_t maxArrivalEndTime = simTime();
+    simtime_t maxArrivalEndTime = transmission->getEndTime();
     for (const auto receiverRadio : radios) {
         if (receiverRadio != nullptr && receiverRadio != transmitterRadio) {
             const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
