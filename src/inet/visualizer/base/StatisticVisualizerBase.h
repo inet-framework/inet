@@ -20,6 +20,7 @@
 
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -47,9 +48,23 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         const int moduleId = -1;
         const simsignal_t signal = -1;
         const char *unit = nullptr;
+        mutable double printValue = NaN;
+        mutable const char *printUnit = nullptr;
 
       public:
         StatisticVisualization(int moduleId, simsignal_t signal, const char *unit);
+    };
+
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const StatisticVisualizerBase *visualizer = nullptr;
+        const StatisticVisualization *visualization = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) { }
+
+        virtual const char *resolveDirective(char directive) override;
     };
 
   protected:
@@ -59,8 +74,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     ModuleFilter sourceFilter;
     const char *signalName = nullptr;
     const char *statisticName = nullptr;
-    const char *prefix = nullptr;
-    const char *unit = nullptr;
+    StringFormat format;
+    std::vector<std::string> units;
     double minValue = NaN;
     double maxValue = NaN;
     cFigure::Font font;
@@ -89,7 +104,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization);
     virtual void removeAllStatisticVisualizations();
 
-    virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) = 0;
+    virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization);
     virtual void processSignal(cComponent *source, simsignal_t signal, double value);
 
   public:

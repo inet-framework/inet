@@ -77,6 +77,7 @@ void StatisticOsgVisualizer::removeStatisticVisualization(const StatisticVisuali
 
 void StatisticOsgVisualizer::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)
 {
+    StatisticVisualizerBase::refreshStatisticVisualization(statisticVisualization);
     auto statisticOsgVisualization = static_cast<const StatisticOsgVisualization *>(statisticVisualization);
     auto geode = check_and_cast<osg::Geode *>(statisticOsgVisualization->node);
     auto label = check_and_cast<osgText::Text *>(geode->getDrawable(0));

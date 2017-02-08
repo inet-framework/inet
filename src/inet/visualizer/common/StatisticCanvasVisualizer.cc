@@ -74,6 +74,7 @@ void StatisticCanvasVisualizer::removeStatisticVisualization(const StatisticVisu
 
 void StatisticCanvasVisualizer::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)
 {
+    StatisticVisualizerBase::refreshStatisticVisualization(statisticVisualization);
     auto statisticCanvasVisualization = static_cast<const StatisticCanvasVisualization *>(statisticVisualization);
     auto figure = statisticCanvasVisualization->figure;
     figure->setText(getText(statisticVisualization).c_str());
