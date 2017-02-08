@@ -51,6 +51,7 @@ class INET_API TransportConnectionCanvasVisualizer : public TransportConnectionV
     virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TCPConnection *tcpConnection) const override;
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
+    virtual void setConnectionLabelsVisible(bool visible);
 };
 
 } // namespace visualizer
