@@ -61,8 +61,9 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
-    char label[32];
-    sprintf(label, "%ld", 1 + connectionVisualizations.size() / iconColorSet.getSize());
+    char label[2];
+    label[0] = 'a' + (char)(connectionVisualizations.size() / iconColorSet.getSize());
+    label[1] = '\0';
     labelFigure->setText(label);
     return labeledIconFigure;
 }
@@ -84,6 +85,7 @@ void TransportConnectionCanvasVisualizer::addConnectionVisualization(const Trans
     auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(destinationModule));
     destinationVisualization->addAnnotation(connectionCanvasVisualization->destinationFigure, connectionCanvasVisualization->destinationFigure->getBounds().getSize());
+    setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
 }
 
 void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization)
@@ -96,6 +98,16 @@ void TransportConnectionCanvasVisualizer::removeConnectionVisualization(const Tr
     auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
     auto destinationVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(destinationModule));
     destinationVisualization->removeAnnotation(connectionCanvasVisualization->destinationFigure);
+    setConnectionLabelsVisible(connectionVisualizations.size() > iconColorSet.getSize());
+}
+
+void TransportConnectionCanvasVisualizer::setConnectionLabelsVisible(bool visible)
+{
+    for (auto connectionVisualization : connectionVisualizations) {
+        auto connectionCanvasVisualization = static_cast<const TransportConnectionCanvasVisualization *>(connectionVisualization);
+        connectionCanvasVisualization->sourceFigure->getLabelFigure()->setVisible(visible);
+        connectionCanvasVisualization->destinationFigure->getLabelFigure()->setVisible(visible);
+    }
 }
 
 } // namespace visualizer
