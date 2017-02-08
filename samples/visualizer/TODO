@@ -1,20 +1,10 @@
-LinkVisualizerBase:
-- Otlet: FadeOutMode lehetne defaultbol "simulationTime" és/vagy a FadeOutTime tobb ido
-
 InterfaceTableVisualizer:
-- ne legyen kiírva alapból a wired interface-ek neve és IP címe...ezt a visualizernek kéne csinálnia
-- a visualizerrel reprodukálni lehet ugyanezt
-- lehessen paraméterezni
-- lehessen felsorolás a content paraméterben, pl content="networkAddress,macAddress"
-- ha IP-t vizualizálunk akkor a switchnek ne írjon ki semmit
-- az ip/mac cimhez legyen odairva, hogy melyik interfacehez tartozik
+- ne legyen kiírva alapból a wired interface-ek neve és IP címe a connectionokre...ezt a visualizernek kéne csinálnia
+- a visualizerrel reprodukálni kellene ugyanezt a wired esetben
+- interface filter for interfaces which have IP address
 
 RoutingTableVisualizer:
-- lehessen szöveget írni a nyílra, pl a rule-t
-
-PhysicalLinkVisualizer:
-- 2 standardhost wired kapcsolattal osszekotve. displayLinks=true mellett sem vizualizalja a physical linket
-
+- nem fordul el a label a nyillal
 
 MobilityVisualizer:
 - MobilityVisualizerBase:
@@ -28,27 +18,23 @@ MediumVisualizer
 - A signal vége lelassulva lépjen be a transmittáló node-nál (még a vége előtt lassuljon le) 
 - ha NaN az animation speed akkor legyen valami automatic value (legyen ez a default?)
 - a fade legyen aranyos az automatic-hoz, ha az van megadva
-- add associated object for signals
 - signal power for transmissions and receptions
+- associated object
 
 TransportConnectionVisualizer
-- Ne legyen kiírva semmi az ikonban ha csak 1 pár van az adott színből
-- Szám helyett betűk
+- Szám helyett NAGY betűk
 - portFilter egyszerre szűr local és remote portra
 - nodeFilter úgy tűnik nem működik
 
 Propagation
-- beírni valamit az msg fileba
+- beírni valamit az route, connection, etc. msg fileba, hogy ne legyen ures az inspector
 
 Általános
 - Size probléma: nagyon nagyok a sample-ök a gifek miatt
 - Mindenhova: ned doc link -> a visualizerekre
 
 Ieee80211
-- a jelerősség függvényében változzon
-- ez legyen kikapcsolható
-- lehessen felsorolni a színeket
-- dark/light colors
+- a jelerősség függvényében változzon az icon, ez legyen kikapcsolható
 - Ieee80211Visualizer-rel nem működik, csak Integrated-el
 
 InfoVisualizer
@@ -60,3 +46,6 @@ StatisticVisualizer
 
 ObstacleLossVisualizer
 - Az intersectionnél ki lehetne írni hogy hány dB-el csökkent a jel
+
+SceneVisualizer
+- viewScalar parameter
