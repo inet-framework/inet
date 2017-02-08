@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 
 namespace inet {
@@ -30,6 +31,36 @@ InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int
     networkNodeId(networkNodeId),
     interfaceId(interfaceId)
 {
+}
+
+const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'N':
+            result = interfaceEntry->getName();
+            break;
+        case 'n':
+            result = interfaceEntry->getNetworkAddress().str();
+            break;
+        case '4':
+            result = interfaceEntry->ipv4Data() == nullptr ? "" : interfaceEntry->ipv4Data()->getIPAddress().str();
+            break;
+        case '6':
+            result = interfaceEntry->ipv6Data() == nullptr ? "" : interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
+            break;
+        case 'm':
+            result = interfaceEntry->getMacAddress().str();
+            break;
+        case 'i':
+            result = interfaceEntry->info();
+            break;
+        case 's':
+            result = interfaceEntry->str();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
 }
 
 InterfaceTableVisualizerBase::~InterfaceTableVisualizerBase()
@@ -46,7 +77,7 @@ void InterfaceTableVisualizerBase::initialize(int stage)
         displayInterfaceTables = par("displayInterfaceTables");
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        content = par("content");
+        format.parseFormat(par("format"));
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::parseColor(par("textColor"));
         backgroundColor = cFigure::parseColor(par("backgroundColor"));
@@ -63,8 +94,8 @@ void InterfaceTableVisualizerBase::handleParameterChange(const char *name)
             nodeFilter.setPattern(par("nodeFilter"));
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
-        else if (!strcmp(name, "content"))
-            content = par("content");
+        else if (!strcmp(name, "format"))
+            format.parseFormat(par("format"));
         updateAllInterfaceVisualizations();
     }
 }
@@ -148,16 +179,8 @@ void InterfaceTableVisualizerBase::updateAllInterfaceVisualizations()
 
 std::string InterfaceTableVisualizerBase::getVisualizationText(const InterfaceEntry *interfaceEntry)
 {
-    if (!strcmp(content, "networkAddress"))
-        return interfaceEntry->getNetworkAddress().str();
-    else if (!strcmp(content, "macAddress"))
-        return interfaceEntry->getMacAddress().str();
-    else if (!strcmp(content, "info"))
-        return interfaceEntry->info();
-    else if (!strcmp(content, "str"))
-        return interfaceEntry->str();
-    else
-        throw cRuntimeError("Unknown content parameter");
+    DirectiveResolver directiveResolver(interfaceEntry);
+    return format.formatString(&directiveResolver);
 }
 
 void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)

@@ -23,6 +23,7 @@
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -41,13 +42,24 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
         virtual ~InterfaceVisualization() {}
     };
 
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const InterfaceEntry *interfaceEntry = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const InterfaceEntry *interfaceEntry) : interfaceEntry(interfaceEntry) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   protected:
     /** @name Parameters */
     //@{
     bool displayInterfaceTables = false;
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
-    const char *content = nullptr;
+    StringFormat format;
     cFigure::Font font;
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
