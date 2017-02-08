@@ -26,7 +26,7 @@ void StringFormat::parseFormat(const char *format)
     this->format = format;
 }
 
-const char *StringFormat::formatString(IDirectiveResolver *directiveResolver)
+const char *StringFormat::formatString(IDirectiveResolver *directiveResolver) const
 {
     result.clear();
     int current = 0;
