@@ -17,8 +17,8 @@
 <p>
 Statistics collected by submodules can be visualized at nodes, on the top level canvas. Usually statistics are analyzed after that
 the simulation has concluded, but it can be useful to see the values of a statistic as the simulation is running. This could help
-in troubleshooting and verifying simulation models. This example
-contains a configuration that visualizes the round trip time of ping packets.
+in troubleshooting and verifying simulation models. 
+This example contains two configurations, showing the basics and the more advanced features of the visualization.
 </p>
 
 <h2>About the visualizer</h2>
@@ -46,9 +46,41 @@ By default, it's the unit of the statistic. Additionally, the displayed value ca
 and <i>maxValue</i> parameters.
 </p>
 
-<h2>The visualization</h2>
+<h2>Displaying rtt of ping packets</h2>
 
-<center><img class="gif" width=850px data-mode="video" data-mp4="statisticvisualizer3.mp4" src="statisticvisualizer3.png"></center>
+<p>
+The first configuration uses this simple network:
+</p>
+
+<img src="rttnetwork.png">
+
+<p>
+It contains two <var>AdhocHosts</var>, an <var>IPv4NetworkConfigurator</var>, an <var>IntegratedVisualizer</var>,
+and an <var>Ieee80211ScalarRadioMedium</var> module. The hosts are stationary, and <var>source</var> is configured
+to ping <var>destination</var>.
+</p>
+
+<p>
+The configuration of the visualization in omnetpp.ini is the following:
+</p>
+
+<pre class="snippet">
+*.visualizer.*.statisticVisualizer.sourceFilter = "**.pingApp[*]"
+*.visualizer.*.statisticVisualizer.signalName = "rtt"
+*.visualizer.*.statisticVisualizer.unit = "ms"
+*.visualizer.*.statisticVisualizer.minValue = 0
+*.visualizer.*.statisticVisualizer.maxValue = 2E-3
+</pre>
+
+<p>
+This sets all <var>pingApps</var> as the signal source. The signal name is set to <i>rtt</i>, and the since there is no
+statistic name specified, it is also the statistic name. The unit of the statistic is seconds, but the visualizer is
+set to display it in milliseconds. There is also min and max value limits set to the displayed value.
+</p>
+
+<h2>Trying video</h2>
+
+<center><img class="gif" width=662px data-mode="video" data-mp4="statisticvisualizer3.mp4" src="statisticvisualizer3.png"></center>
 
 <script>
 $('.gif').gifplayer();
