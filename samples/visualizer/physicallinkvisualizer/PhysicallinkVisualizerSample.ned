@@ -51,51 +51,8 @@ network PhysicallinkVisualizerSimple
             parameters:
                 @display("p=100,50");
         }
-        wiredSource: StandardHost {
-            @display("p=316,200");
-        }
-        wiredDestination: StandardHost {
-            @display("p=630,200");
-        }
-        etherSwitch: EtherSwitch {
-            @display("p=484.33627,248.34875");
-        }
     connections:
-        wiredSource.ethg++ <--> Eth100M <--> etherSwitch.ethg++;
-        etherSwitch.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
 }
-
-
-//
-// TODO documentation
-//
-network PhysicallinkVisualizerExtended
-{
-    @display("bgb=900,300");
-    submodules:
-        linkVisualizer: PhysicalLinkVisualizer {
-            parameters:
-                @display("p=100,50");
-        }
-        configurator: IPv4NetworkConfigurator {
-            parameters:
-                @display("p=100,150");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,250");
-        }
-        accessPoint: AccessPoint {
-            @display("p=600,120");
-        }
-        wirelessSource: WirelessHost {
-            @display("p=380,55");
-        }
-        wirelessDestination: WirelessHost {
-            @display("p=820,55");
-        }
-}
-
 
 
 //
