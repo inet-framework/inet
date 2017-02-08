@@ -20,6 +20,7 @@
 
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -38,12 +39,23 @@ class INET_API InfoVisualizerBase : public VisualizerBase
         virtual ~InfoVisualization() {}
     };
 
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const cModule *module = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const cModule *module) : module(module) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   protected:
     /** @name Parameters */
     //@{
     bool displayInfos = false;
     ModuleFilter modules;
-    const char *content = nullptr;
+    StringFormat format;
     cFigure::Font font;
     cFigure::Color textColor;
     cFigure::Color backgroundColor;
@@ -64,7 +76,7 @@ class INET_API InfoVisualizerBase : public VisualizerBase
     virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const = 0;
     virtual void removeAllInfoVisualizations();
 
-    virtual const char *getInfoText(omnetpp::cModule* module) const;
+    virtual const char *getInfoVisualizationText(cModule *module) const;
 };
 
 } // namespace visualizer
