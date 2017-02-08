@@ -14,22 +14,22 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 
 network Ieee80211visualizerA
 {
-    @display("bgb=835,630");
+    @display("bgb=746.852,436.192");
     submodules:
         accessPoint: AccessPoint {
-            @display("p=523,301");
+            @display("p=420.97598,201.612");
         }
         wirelessHost: WirelessHost {
-            @display("p=211,302");
+            @display("p=173.716,202.88");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=722,55");
+            @display("p=651.752,55.792");
         }
         visualizer: IntegratedVisualizer {
-            @display("p=722,129");
+            @display("p=651.752,129.336");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=721,202");
+            @display("p=650.484,202.88");
         }
 }
 
@@ -120,5 +120,26 @@ network adhocinfrastructure
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=553,198");
+        }
+}
+
+network Ieee80211visualizerD
+{
+    @display("bgb=746.852,436.192");
+    submodules:
+        accessPoint: AccessPoint {
+            @display("p=420.97598,201.612");
+        }
+        wirelessHost: WirelessHost {
+            @display("p=173.716,202.88");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=651.752,55.792");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=651.752,129.336");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=650.484,202.88");
         }
 }
