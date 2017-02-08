@@ -27,7 +27,7 @@ showcases a more advanced use-case. TODO: The second, more complex configuration
 <p>
 The <var>TransportConnectionVisualizer</var> displays an icon above the two end-hosts of an active, established transport layer level connection. It reacts to changes
 in the state of the connection. It places the icon when the connection is established, and removes it when it is closed. The icons are color coded, denoting different connections. Should there be more connections than available colors,
-a number in the icon helps differentiate between connections with the same icon color. Naturally, there can be multiple connections
+a letter in the icon helps differentiate between connections with the same icon color. Naturally, there can be multiple connections
 open at a node, thus there can be multiple icons.
 </p>
 
@@ -35,6 +35,20 @@ open at a node, thus there can be multiple icons.
 The <var>nodeFilter</var> parameter specifies which hosts' connections should be visualized.
 The <var>portFilter</var> parameter selects connections to be visualized based on their port numbers.
 By default, connections with all port numbers in all hosts are visualized.
+</p>
+
+<p>
+The <var>iconColor</var> parameter sets the colors used for differentiating various connections.
+</p>
+
+<p>
+The <var>iconColor</var> parameter specifies what icon colors to use for differentiating various connections.
+It takes a list of colors, e.g. "blue, red, green". It also takes a set of colors, either "light" or "dark".
+</p>
+
+<p>
+This parameter takes a set of colors, which is either "light" or "dark", using light or dark colors, respectively.
+Colors can also be listed, e.g. "blue, red, green", to use just these colors for the icons.
 </p>
 
 <p>
@@ -68,6 +82,8 @@ When the simulation is run for a while and TCP connection is established, the ne
 </p>
 
 <img src="simpleconnection.png">
+
+<p>TODO: update screenshots</p>
 
 <p>
 The icon representing the end-points of the TCP connection is placed above the hosts.
@@ -109,7 +125,7 @@ When the simulation is run and the connections are established, the network look
 <img src="port80.png">
 
 <p>
-A node can have multiple connections. Here, <var>host1</var> has two, and <var>server</var> has 3.
+A node can have multiple connections. Here, <var>host1</var> has two, and <var>server</var> has three.
 Thus there are multiple icons placed above each other at these hosts. Connections can be differentiated
 by their icon color.
 </p>
@@ -134,7 +150,7 @@ When both filters are set to "*" (their default), all 5 connections are visualiz
 
 <img src="all.png">
 
-<p>TODO: screenshot where there are 2 colors and numbers</p>
+<p>TODO: screenshot where there are 2 colors and letters</p>
 
 <pre>
 So now host2 has 2 port80 connections and host1 has 1
@@ -143,6 +159,7 @@ So now host2 has 2 port80 connections and host1 has 1
 2. figure: screenshot only...set portfilter to 22. 1 connection for each host, 2 for the server.
 3. figure: screenshot only...also set nodefilter to host2. 1 connection.
 4. figure: screenshot only...display all connections. 3 for host1, 2 for host2, and 5 for the server.
+5. figure: screenshot where there is only 2 colors, to demonstrate the letters in the icons.
 
 will have to explain that there can be multiple connections. And that they are color coded.
 and that you can use node and port filters.
