@@ -54,8 +54,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents a transport connection between two network nodes");
     iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
-    auto darkColorsLength = sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color);
-    iconFigure->setTintColor(cFigure::GOOD_DARK_COLORS[connectionVisualizations.size() % darkColorsLength]);
+    iconFigure->setTintColor(iconColorSet.getColor(connectionVisualizations.size()));
     iconFigure->setTintAmount(1);
     auto labelFigure = labeledIconFigure->getLabelFigure();
     labelFigure->setTooltip("This label represents a transport connection between two network nodes");
@@ -63,7 +62,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
     char label[32];
-    sprintf(label, "%ld", 1 + connectionVisualizations.size() / darkColorsLength);
+    sprintf(label, "%ld", 1 + connectionVisualizations.size() / iconColorSet.getSize());
     labelFigure->setText(label);
     return labeledIconFigure;
 }
