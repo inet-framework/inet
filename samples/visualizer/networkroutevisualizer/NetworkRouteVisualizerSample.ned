@@ -80,7 +80,7 @@ network NetworkRouteExtended
             @display("p=250,50");
         }
         destination: StandardHost {
-            @display("p=950,550");
+            @display("p=922.425,517.06");
         }
 
         router0: Router {
