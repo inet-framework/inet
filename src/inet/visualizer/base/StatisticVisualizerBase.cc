@@ -36,6 +36,33 @@ StatisticVisualizerBase::~StatisticVisualizerBase()
         unsubscribe();
 }
 
+const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 's':
+            result = visualizer->signalName;
+            break;
+        case 'n':
+            result = visualizer->statisticName;
+            break;
+        case 'v':
+            if (std::isnan(visualization->printValue))
+                result = "-";
+            else {
+                char temp[32];
+                sprintf(temp, "%.2g", visualization->printValue);
+                result = temp;
+            }
+            break;
+        case 'u':
+            result = visualization->printUnit;
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 void StatisticVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
@@ -45,8 +72,10 @@ void StatisticVisualizerBase::initialize(int stage)
         sourceFilter.setPattern(par("sourceFilter"));
         signalName = par("signalName");
         statisticName = par("statisticName");
-        prefix = par("prefix");
-        unit = par("unit");
+        format.parseFormat(par("format"));
+        cStringTokenizer tokenizer(par("unit"));
+        while (tokenizer.hasMoreTokens())
+            units.push_back(tokenizer.nextToken());
         minValue = par("minValue");
         maxValue = par("maxValue");
         font = cFigure::parseFont(par("font"));
@@ -63,6 +92,8 @@ void StatisticVisualizerBase::handleParameterChange(const char *name)
     if (name != nullptr) {
         if (!strcmp(name, "sourceFilter"))
             sourceFilter.setPattern(par("sourceFilter"));
+        else if (!strcmp(name, "format"))
+            format.parseFormat(par("format"));
         removeAllStatisticVisualizations();
     }
 }
@@ -116,27 +147,8 @@ cResultFilter *StatisticVisualizerBase::findResultFilter(cResultFilter *parentRe
 
 std::string StatisticVisualizerBase::getText(const StatisticVisualization *statisticVisualization)
 {
-    char temp[128];
-    double value = statisticVisualization->recorder->getLastValue();
-    if (std::isnan(value))
-        sprintf(temp, "%s: -", prefix);
-    else {
-        auto valueUnit = statisticVisualization->unit;
-        if (*unit != '\0') {
-            cStringTokenizer tokenizer(unit);
-            while (tokenizer.hasMoreTokens()) {
-                auto printUnit = tokenizer.nextToken();
-                double printValue = cNEDValue::convertUnit(value, valueUnit, printUnit);
-                if (printValue > 1 || !tokenizer.hasMoreTokens()) {
-                    sprintf(temp, "%s: %.2g %s", prefix, printValue, printUnit);
-                    break;
-                }
-            }
-        }
-        else
-            sprintf(temp, "%s: %.2g %s", prefix, value, valueUnit == nullptr ? "" : valueUnit);
-    }
-    return temp;
+    DirectiveResolver directiveResolver(this, statisticVisualization);
+    return format.formatString(&directiveResolver);
 }
 
 const char *StatisticVisualizerBase::getUnit(cComponent *source)
@@ -199,6 +211,27 @@ void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t sign
                 resultFilter->addDelegate(statisticVisualization->recorder);
             addStatisticVisualization(statisticVisualization);
             refreshStatisticVisualization(statisticVisualization);
+        }
+    }
+}
+
+void StatisticVisualizerBase::refreshStatisticVisualization(const StatisticVisualization *statisticVisualization)
+{
+    double value = statisticVisualization->recorder->getLastValue();
+    if (std::isnan(value))
+        statisticVisualization->printValue = value;
+    else {
+        if (!units.empty()) {
+            for (auto& unit : units) {
+                statisticVisualization->printUnit = unit.c_str();
+                statisticVisualization->printValue = cNEDValue::convertUnit(value, statisticVisualization->unit, statisticVisualization->printUnit);
+                if (statisticVisualization->printValue > 1)
+                    break;
+            }
+        }
+        else {
+            statisticVisualization->printValue = value;
+            statisticVisualization->printUnit = statisticVisualization->unit == nullptr ? "" : statisticVisualization->unit;
         }
     }
 }

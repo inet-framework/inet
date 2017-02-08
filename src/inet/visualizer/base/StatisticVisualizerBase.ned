@@ -27,6 +27,12 @@ package inet.visualizer.base;
 // passes the check it determines the last value of the statistic specified by
 // the statisticName parameter.
 //
+// The format string can contain the following directives:
+//  - %s signal name
+//  - %n statistic name
+//  - %v statistic value
+//  - %u statistic unit
+//
 // @see ~StatisticCanvasVisualizer, ~StatisticOsgVisualizer, ~IStatisticVisualizer, ~VisualizerBase
 //
 simple StatisticVisualizerBase extends VisualizerBase
@@ -41,7 +47,7 @@ simple StatisticVisualizerBase extends VisualizerBase
         string signalName = default(""); // signal name to subscribe, no signal name by default
         string statisticName = default(signalName); // statistic name to get the value, signal name by default
 
-        string prefix = default(statisticName); // display this string as the prefix of the value, statistic name by default
+		string format = default("%n: %v %u"); // determines what is displayed, info by default
         string unit = default(""); // display the value in this unit, statistic unit by default
         double minValue = default(-1/0); // minimum value of the statistic, negative infinity by default
         double maxValue = default(1/0); // maximum value of the statistic, positive infinity by default
