@@ -81,7 +81,7 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 }
 
 template<class T>
-const std::shared_ptr<T>& __checknull(const std::shared_ptr<T>& p, const char *expr, const char *file, int line)
+std::shared_ptr<T> __checknull(const std::shared_ptr<T>& p, const char *expr, const char *file, int line)
 {
     if (p == nullptr)
         throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);
