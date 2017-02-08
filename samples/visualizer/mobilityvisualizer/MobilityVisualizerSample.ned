@@ -58,4 +58,3 @@ network MobilityVisualizerExtended extends MobilityVisualizerSimple
             @display("p=552,345");
         }
 }
-
