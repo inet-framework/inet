@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
@@ -111,6 +112,7 @@ void PacketDropVisualizerBase::subscribe()
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     subscriptionModule->subscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
     subscriptionModule->subscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
+    subscriptionModule->subscribe(PassiveQueueBase::dropPkByQueueSignal, this);
 }
 
 void PacketDropVisualizerBase::unsubscribe()
@@ -120,13 +122,14 @@ void PacketDropVisualizerBase::unsubscribe()
     if (subscriptionModule != nullptr) {
         subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
         subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
+        subscriptionModule->unsubscribe(PassiveQueueBase::dropPkByQueueSignal, this);
     }
 }
 
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal) {
+    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal || PassiveQueueBase::dropPkByQueueSignal) {
         auto packet = check_and_cast<cPacket *>(object);
         if (packetFilter.matches(packet))
             addPacketDropVisualization(createPacketDropVisualization(check_and_cast<cModule*>(source), packet->dup()));
