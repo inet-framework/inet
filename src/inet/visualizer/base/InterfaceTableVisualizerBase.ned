@@ -27,6 +27,15 @@ package inet.visualizer.base;
 // NF_INTERFACE_CONFIG_CHANGED, and NF_INTERFACE_IPv4CONFIG_CHANGED on the
 // module determined by the subscriptionModule parameter.
 //
+// The format string can contain the following directives:
+//  - %N interface name
+//  - %4 IPv4 address
+//  - %6 IPv6 address
+//  - %m MAC address
+//  - %n network address
+//  - %i InterfaceEntry::info()
+//  - %s InterfaceEntry::str()
+//
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableOsgVisualizer, ~IInterfaceTableVisualizer, ~VisualizerBase
 //
 simple InterfaceTableVisualizerBase extends VisualizerBase
@@ -40,7 +49,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
 
-        string content @enum("networkAddress", "macAddress", "info", "str") = default("networkAddress"); // determines what interface data is displayed 
+        string format = default("%N: %n (%m)"); // determines what interface data is displayed 
 
         string font = default("<default>"); // interface text font, automatic by default
         string textColor = default("black"); // interface text font color
