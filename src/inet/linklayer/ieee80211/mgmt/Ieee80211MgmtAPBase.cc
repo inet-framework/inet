@@ -25,15 +25,9 @@
 #include <string.h>
 
 #ifdef WITH_ETHERNET
+#include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
-
-
-//FIXME KLUDGE:
-#ifdef WITH_ETHERNET
-#undef WITH_ETHERNET
-#endif
-//end of KLUDGE
 
 
 namespace inet {
@@ -122,60 +116,58 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
     sendUp(outFrame);
 }
 
-EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
+Packet *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 {
 #ifdef WITH_ETHERNET
     Ieee80211DataFrameWithSNAP *frame = check_and_cast<Ieee80211DataFrameWithSNAP *>(frame_);
 
     // create a matching ethernet frame
-    EthernetIIFrame *ethframe = new EthernetIIFrame(frame->getName());    //TODO option to use EtherFrameWithSNAP instead
+    const auto& ethframe = std::make_shared<EthernetIIFrame>();    //TODO option to use EtherFrameWithSNAP instead
     ethframe->setDest(frame->getAddress3());
     ethframe->setSrc(frame->getTransmitterAddress());
     ethframe->setEtherType(frame->getEtherType());
-    ethframe->setByteLength(ETHER_MAC_FRAME_BYTES);
+    ethframe->setChunkLength(byte(ETHER_MAC_FRAME_BYTES));
 
     // encapsulate the payload in there
-    cPacket *payload = frame->decapsulate();
+    Packet *pk = check_and_cast<Packet*>(frame->decapsulate());
     delete frame;
-    ASSERT(payload != nullptr);
-    ethframe->encapsulate(payload);
-    if (ethframe->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        ethframe->setByteLength(MIN_ETHERNET_FRAME_BYTES);
+    ethframe->markImmutable();
+    pk->pushHeader(ethframe);
+    EtherEncap::addPaddingAndFcs(pk);
 
-    ethframe->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    pk->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    pk->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
 
     // done
-    return ethframe;
+    return pk;
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET
 }
 
-Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethframe)
+Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
 {
 #ifdef WITH_ETHERNET
+    const auto& ethframe = CHK(EtherEncap::decapsulate(packet));
     // create new frame
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(ethframe->getName());
     frame->setFromDS(true);
+    packet->removePoppedChunks();
 
     // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
     frame->setReceiverAddress(ethframe->getDest());
     frame->setAddress3(ethframe->getSrc());
 
     // copy EtherType from original frame
-    if (dynamic_cast<EthernetIIFrame *>(ethframe))
-        frame->setEtherType(((EthernetIIFrame *)ethframe)->getEtherType());
-    else if (dynamic_cast<EtherFrameWithSNAP *>(ethframe))
-        frame->setEtherType(((EtherFrameWithSNAP *)ethframe)->getLocalcode());
+    if (const auto& eth2frame = std::dynamic_pointer_cast<EthernetIIFrame>(ethframe))
+        frame->setEtherType(eth2frame->getEtherType());
+    else if (const auto& snapframe = std::dynamic_pointer_cast<EtherFrameWithSNAP>(ethframe))
+        frame->setEtherType(snapframe->getLocalcode());
     else
         throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", ethframe->getClassName());
 
     // encapsulate payload
-    cPacket *payload = ethframe->decapsulate();
-    if (!payload)
-        throw cRuntimeError("received empty EtherFrame from upper layer");
-    frame->encapsulate(payload);
-    delete ethframe;
+    frame->encapsulate(packet);
 
     // done
     return frame;
@@ -189,7 +181,7 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:
 #ifdef WITH_ETHERNET
-            return convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
+            return convertFromEtherFrame(check_and_cast<Packet *>(msg));
 #else // ifdef WITH_ETHERNET
             throw cRuntimeError("INET compiled without ETHERNET feature, but the 'encapDecap' parameter is set to 'eth'!");
 #endif // ifdef WITH_ETHERNET

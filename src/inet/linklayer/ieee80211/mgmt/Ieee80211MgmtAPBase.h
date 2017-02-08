@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
 namespace inet {
@@ -63,14 +64,14 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      * because MACRelayUnit which we use for LAN bridging functionality deals
      * with EtherFrames.
      */
-    virtual Ieee80211DataFrame *convertFromEtherFrame(EtherFrame *ethframe);
+    virtual Ieee80211DataFrame *convertFromEtherFrame(Packet *packet);
 
     /**
      * Utility function: converts Ieee80211Frame to EtherFrame. This is needed
      * because MACRelayUnit which we use for LAN bridging functionality deals
      * with EtherFrames.
      */
-    virtual EtherFrame *convertToEtherFrame(Ieee80211DataFrame *frame);
+    virtual Packet *convertToEtherFrame(Ieee80211DataFrame *frame);
 
     /**
      * Utility function: send a frame to upperLayerOut.
