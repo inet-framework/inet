@@ -4,6 +4,7 @@
 
 package inet.samples.visualizer.interfacetablevisualizer;
 
+import inet.node.inet.AdhocHost;
 import inet.node.aodv.AODVRouter;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
@@ -79,7 +80,7 @@ network Complex
         wirelessHost: WirelessHost {
             @display("p=438,55");
         }
-        mobileHost: AODVRouter {
+        mobileHost: AdhocHost {
             @display("p=447,288");
         }
         configurator: IPv4NetworkConfigurator {
@@ -96,6 +97,5 @@ network Complex
         host2.ethg++ <--> Eth100M <--> switch.ethg++;
         switch.ethg++ <--> Eth100M <--> router.ethg++;
         router.ethg++ <--> Eth100M <--> accessPoint.ethg++;
-        accessPoint.ethg++ <--> Eth100M <--> wirelessHost.ethg++;
 }
 
