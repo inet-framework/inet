@@ -35,11 +35,11 @@ class INET_API StringFormat
 
   protected:
     std::string format;
-    std::string result;
+    mutable std::string result;
 
   public:
     void parseFormat(const char *format);
-    const char *formatString(IDirectiveResolver *resolver);
+    const char *formatString(IDirectiveResolver *resolver) const;
 };
 
 } // namespace visualizer
