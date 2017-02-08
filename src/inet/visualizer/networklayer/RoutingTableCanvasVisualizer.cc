@@ -79,7 +79,8 @@ const RoutingTableVisualizerBase::RouteVisualization *RoutingTableCanvasVisualiz
     auto labelFigure = figure->getLabelFigure();
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
-    labelFigure->setText(route->info().c_str());
+    auto text = getRouteVisualizationText(route);
+    labelFigure->setText(text.c_str());
     auto routeVisualization = new RouteCanvasVisualization(figure, node->getId(), nextHop->getId());
     routeVisualization->shiftPriority = 0.5;
     return routeVisualization;
@@ -99,6 +100,14 @@ void RoutingTableCanvasVisualizer::removeRouteVisualization(const RouteVisualiza
     auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
     lineManager->removeModuleLine(routeVisualization);
     routeGroup->removeFigure(routeCanvasVisualization->figure);
+}
+
+void RoutingTableCanvasVisualizer::refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route)
+{
+    auto routeCanvasVisualization = static_cast<const RouteCanvasVisualization *>(routeVisualization);
+    auto labelFigure = routeCanvasVisualization->figure->getLabelFigure();
+    auto text = getRouteVisualizationText(route);
+    labelFigure->setText(text.c_str());
 }
 
 } // namespace visualizer

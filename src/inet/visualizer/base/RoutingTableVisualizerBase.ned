@@ -27,6 +27,14 @@ package inet.visualizer.base;
 // NF_INTERFACE_IPv4CONFIG_CHANGED on the module determined by the subscriptionModule
 // parameter.
 //
+// The format string can contain the following directives:
+//  - %m mask
+//  - %g gateway
+//  - %d destination
+//  - %n interface name
+//  - %i IRoute::info()
+//  - %s IRoute::str()
+//
 // @see ~RoutingTableCanvasVisualizer, ~RoutingTableOsgVisualizer, ~IRoutingTableVisualizer, ~VisualizerBase
 //
 simple RoutingTableVisualizerBase extends VisualizerBase
@@ -49,9 +57,9 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
 
+        string labelFormat = default("%d/%m -> %g (%n)"); // determines what route data is displayed
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
-        string labelContent @enum("info") = default("info"); // label content, route info by default
 
         @class(RoutingTableVisualizerBase);
 }

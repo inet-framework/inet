@@ -73,6 +73,13 @@ void RoutingTableOsgVisualizer::removeRouteVisualization(const RouteVisualizatio
     node->getParent(0)->removeChild(node);
 }
 
+void RoutingTableOsgVisualizer::refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route)
+{
+    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
+    auto text = getRouteVisualizationText(route);
+    // TODO:
+}
+
 #endif // ifdef WITH_OSG
 
 } // namespace visualizer
