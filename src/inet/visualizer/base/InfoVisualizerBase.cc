@@ -27,6 +27,30 @@ InfoVisualizerBase::InfoVisualization::InfoVisualization(int moduleId) :
 {
 }
 
+const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'n':
+            result = module->getFullName();
+            break;
+        case 'p':
+            result = module->getFullPath();
+            break;
+        case 'd':
+            result = module->getDisplayString().getTagArg("t", 0);
+            break;
+        case 'i':
+            result = module->info();
+            break;
+        case 's':
+            result = module->str();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 void InfoVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
@@ -34,7 +58,7 @@ void InfoVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         displayInfos = par("displayInfos");
         modules.setPattern(par("modules"));
-        content = par("content");
+        format.parseFormat(par("format"));
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));
@@ -51,8 +75,8 @@ void InfoVisualizerBase::handleParameterChange(const char *name)
     if (name != nullptr) {
         if (!strcmp(name, "modules"))
             modules.setPattern(par("modules"));
-        else if (!strcmp(name, "content"))
-            content = par("content");
+        else if (!strcmp(name, "format"))
+            format.parseFormat(par("format"));
         removeAllInfoVisualizations();
         addInfoVisualizations();
     }
@@ -64,7 +88,7 @@ void InfoVisualizerBase::refreshDisplay() const
     for (auto infoVisualization : infoVisualizations) {
         auto module = simulation->getModule(infoVisualization->moduleId);
         if (module != nullptr)
-            refreshInfoVisualization(infoVisualization, getInfoText(module));
+            refreshInfoVisualization(infoVisualization, getInfoVisualizationText(module));
     }
 }
 
@@ -98,16 +122,10 @@ void InfoVisualizerBase::removeAllInfoVisualizations()
     }
 }
 
-const char* InfoVisualizerBase::getInfoText(omnetpp::cModule* module) const
+const char* InfoVisualizerBase::getInfoVisualizationText(cModule *module) const
 {
-    const char* info;
-    if (!strcmp(content, "str"))
-        info = module->str().c_str();
-    else if (!strcmp(content, "displayStringText"))
-        info = module->getDisplayString().getTagArg("t", 0);
-    else
-        throw cRuntimeError("Unknown content parameter value: %s", content);
-    return info;
+    DirectiveResolver directiveResolver(module);
+    return format.formatString(&directiveResolver);
 }
 
 } // namespace visualizer
