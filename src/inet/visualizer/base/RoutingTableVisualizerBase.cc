@@ -33,6 +33,33 @@ RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(int nodeModul
 {
 }
 
+const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'm':
+            result = route->getNetmask().isUnspecified() ? "*" : std::to_string(route->getNetmask().getNetmaskLength());
+            break;
+        case 'g':
+            result = route->getGateway().isUnspecified() ? "*" : route->getGateway().str();
+            break;
+        case 'd':
+            result = route->getDestination().isUnspecified() ? "*" : route->getDestination().str();
+            break;
+        case 'n':
+            result = route->getInterface()->getName();
+            break;
+        case 'i':
+            result = route->info();
+            break;
+        case 's':
+            result = route->str();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 RoutingTableVisualizerBase::~RoutingTableVisualizerBase()
 {
     if (displayRoutingTables)
@@ -55,9 +82,9 @@ void RoutingTableVisualizerBase::initialize(int stage)
         lineContactSpacing = par("lineContactSpacing");
         lineContactMode = par("lineContactMode");
         lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
+        labelFormat.parseFormat(par("labelFormat"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
-        labelContent = par("labelContent");
         if (displayRoutingTables)
             subscribe();
     }
@@ -70,6 +97,8 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
             destinationFilter.setPattern(par("destinationFilter"));
         else if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));
+        else if (!strcmp(name, "labelFormat"))
+            labelFormat.parseFormat(par("labelFormat"));
         updateAllRouteVisualizations();
     }
 }
@@ -211,6 +240,12 @@ void RoutingTableVisualizerBase::updateAllRouteVisualizations()
                 addRouteVisualizations(routingTable);
         }
     }
+}
+
+std::string RoutingTableVisualizerBase::getRouteVisualizationText(const IPv4Route *route) const
+{
+    DirectiveResolver directiveResolver(route);
+    return labelFormat.formatString(&directiveResolver);
 }
 
 } // namespace visualizer

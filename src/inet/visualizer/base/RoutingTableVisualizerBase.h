@@ -23,6 +23,7 @@
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -41,6 +42,17 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
         virtual ~RouteVisualization() {}
     };
 
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const IPv4Route *route = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const IPv4Route *route) : route(route) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   protected:
     /** @name Parameters */
     //@{
@@ -54,9 +66,9 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     double lineWidth = NaN;
     double lineContactSpacing = NaN;
     const char *lineContactMode = nullptr;
+    StringFormat labelFormat;
     cFigure::Font labelFont;
     cFigure::Color labelColor;
-    const char *labelContent = nullptr;
     //@}
 
     LineManager *lineManager = nullptr;
@@ -82,6 +94,9 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
     virtual void removeAllRouteVisualizations();
     virtual void updateRouteVisualizations(IIPv4RoutingTable *routingTable);
     virtual void updateAllRouteVisualizations();
+
+    virtual std::string getRouteVisualizationText(const IPv4Route *route) const;
+    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization, const IPv4Route *route) = 0;
 
   public:
     virtual ~RoutingTableVisualizerBase();
