@@ -204,8 +204,15 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     // check for local delivery
     if (routingTable->isLocalAddress(destAddr)) {
         EV_INFO << "local delivery\n";
-        if (header->getSourceAddress().isUnspecified())
+        if (fromHL && header->getSourceAddress().isUnspecified()) {
+            // KLUDGE: TODO: factor out
+            datagram->removeFromBeginning(header->getChunkLength());
+            header = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
+            // TODO: dup or mark header->markMutableIfExclusivelyOwned();
             header->setSourceAddress(destAddr); // allows two apps on the same host to communicate
+            header->markImmutable();
+            datagram->pushHeader(header);
+        }
         numLocalDeliver++;
 
         if (datagramLocalInHook(datagram, getSourceInterfaceFrom(datagram)) != INetfilter::IHook::ACCEPT)
@@ -221,6 +228,10 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         numDropped++;
         delete datagram;
         return;
+    }
+
+    if (!fromHL) {
+        datagram->removePoppedChunks();
     }
 
     // if output port was explicitly requested, use that, otherwise use GenericNetworkProtocol routing
@@ -249,19 +260,20 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     }
 
     if (!fromHL) {
-        datagram->popHeader<GenericDatagramHeader>();
-        auto newPacket = new Packet(datagram->getName());
-        auto newHeader = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
-        newPacket->append(newHeader);
-        newPacket->append(datagram->peekDataAt(bit(0), datagram->getDataLength()));
-        delete datagram;
-        datagram = newPacket;
-        header = newHeader;
+        datagram->removeFromBeginning(header->getChunkLength());
+        header = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
+        header->setHopLimit(header->getHopLimit() - 1);
+        header->markImmutable();
+        datagram->pushHeader(header);
     }
-    header->setHopLimit(header->getHopLimit() - 1);
     // set datagram source address if not yet set
-    if (header->getSourceAddress().isUnspecified())
+    if (header->getSourceAddress().isUnspecified()) {
+        datagram->removeFromBeginning(header->getChunkLength());
+        header = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
         header->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
+        header->markImmutable();
+        datagram->pushHeader(header);
+    }
 
     // default: send datagram to fragmentation
     EV_INFO << "output interface is " << destIE->getName() << ", next-hop address: " << nextHop << "\n";
@@ -447,8 +459,6 @@ GenericDatagramHeader *GenericNetworkProtocol::encapsulate(Packet *transportPack
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
 
-    transportPacket->prepend(header);
-
     // set source and destination address
     header->setDestinationAddress(dest);
 
@@ -481,6 +491,11 @@ GenericDatagramHeader *GenericNetworkProtocol::encapsulate(Packet *transportPack
     // setting GenericNetworkProtocol options is currently not supported
 
     delete transportPacket->removeControlInfo();
+
+    header->markImmutable();
+    transportPacket->pushHeader(header);
+    transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+
     return header.get();
 }
 
