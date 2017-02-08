@@ -32,7 +32,8 @@ void SceneCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
-        canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
+        canvasProjection.setScale(parse2D(par("viewScale")));
+        canvasProjection.setTranslation(parse2D(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
         axisLayer = new cGroupFigure("axisLayer");
         axisLayer->setZIndex(zIndex);
@@ -98,8 +99,12 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
         canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
         // TODO: update all visualizers
     }
+    else if (name && !strcmp(name, "viewScale")) {
+        canvasProjection.setScale(parse2D(par("viewScale")));
+        // TODO: update all visualizers
+    }
     else if (name && !strcmp(name, "viewTranslation")) {
-        canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
+        canvasProjection.setTranslation(parse2D(par("viewTranslation")));
         // TODO: update all visualizers
     }
 }
@@ -152,16 +157,11 @@ EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
     return EulerAngles(x, y, z);
 }
 
-cFigure::Point SceneCanvasVisualizer::computeViewTranslation(const char* viewTranslation)
+cFigure::Point SceneCanvasVisualizer::parse2D(const char* text)
 {
     double x, y;
-    if (sscanf(viewTranslation, "%lf %lf", &x, &y) == 2)
-    {
-        x = math::deg2rad(x);
-        y = math::deg2rad(y);
-    }
-    else
-        throw cRuntimeError("The viewTranslation parameter must be a pair of doubles");
+    if (sscanf(text, "%lf %lf", &x, &y) != 2)
+        throw cRuntimeError("The parameter must be a pair of doubles: %s", text);
     return cFigure::Point(x, y);
 }
 
