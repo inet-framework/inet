@@ -48,6 +48,7 @@ void TransportConnectionVisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         portFilter.setPattern(par("portFilter"));
         icon = par("icon");
+        iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));
         if (displayTransportConnections)
