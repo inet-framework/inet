@@ -37,6 +37,26 @@ network Simple
         hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
 }
 
+network SimpleV2
+{
+    @display("bgb=400,400");
+    submodules:
+        hostA: StandardHost {
+            @display("p=166,124");
+        }
+        hostB: StandardHost {
+            @display("p=166,299");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=328,38");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=328,93");
+        }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
 network Complex
 {
     @display("bgb=732,417");
