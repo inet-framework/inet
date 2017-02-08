@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/ipv4/IPv4Header.h"
+#include "inet/networklayer/contract/INetworkHeader.h"
 
 namespace inet {
 
@@ -129,7 +129,7 @@ class INET_API NetfilterBase : public INetfilter {
 
       protected:
         // TODO: move?
-        std::shared_ptr<INetworkHeader> peekNetworkHeader(Packet *packet) { return packet->peekHeader<IPv4Header>(); }
+        std::shared_ptr<INetworkHeader> peekNetworkHeader(Packet *packet);
 
       public:
         virtual ~HookBase() { if (netfilter) netfilter->unregisterHook(this); };
