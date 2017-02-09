@@ -16,10 +16,7 @@
 package inet.samples.visualizer.physicallinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.ethernet.Eth100M;
-import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.AdhocHost;
-import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -33,65 +30,56 @@ network PhysicallinkVisualizerSimple
 {
     @display("bgb=900,300");
     submodules:
+        linkVisualizer: PhysicalLinkVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,250");
+        }
         wirelessSource: AdhocHost {
             @display("p=316,80");
         }
         wirelessDestination: AdhocHost {
             @display("p=630,80");
         }
-        configurator: IPv4NetworkConfigurator {
-            parameters:
-                @display("p=100,150");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,250");
-        }
-        linkVisualizer: PhysicalLinkVisualizer {
-            parameters:
-                @display("p=100,50");
-        }
-    connections:
 }
 
 
 //
 // TODO documentation
 //
-network ComplexPhysicalLinkVisualizerInfrastructure
+network PhysicalLinkVisualizerSimpleV2
 {
-    @display("bgb=900,600");
+    @display("bgb=780,450");
     submodules:
-        linkVisualizer1: PhysicalLinkVisualizer {
+        linkVisualizer: PhysicalLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
-        linkVisualizer2: PhysicalLinkVisualizer {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=100,150");
         }
-        configurator: IPv4NetworkConfigurator {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,250");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,350");
-        }
         accessPoint: AccessPoint {
-            @display("p=545,266");
+            @display("p=500,200");
         }
-        wirelessSource1: WirelessHost {
-            @display("p=305,182");
+        wirelesshost1: WirelessHost {
+            @display("p=500,50");
         }
-        wirelessDestination1: WirelessHost {
-            @display("p=785,182");
+        wirelesshost2: WirelessHost {
+            @display("p=680, 350");
         }
-        wirelessSource2: WirelessHost {
-            @display("p=305,351");
+        wirelesshost3: WirelessHost {
+            @display("p=320,350");
         }
-        wirelessDestination2: WirelessHost {
-            @display("p=785,351");
-        }
-
 }
