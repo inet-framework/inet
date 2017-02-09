@@ -62,7 +62,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createI
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     std::hash<std::string> hasher;
-    auto color = cFigure::GOOD_DARK_COLORS[hasher(ssid) % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    auto color = iconColorSet.getColor(hasher(ssid));
     auto colorArray = new osg::Vec4Array();
     colorArray->push_back(osg::Vec4((double)color.red / 255.0, (double)color.green / 255.0, (double)color.blue / 255.0, 1));
     geometry->setColorArray(colorArray, osg::Array::BIND_OVERALL);
