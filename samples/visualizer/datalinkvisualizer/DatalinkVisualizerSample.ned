@@ -17,7 +17,9 @@ package inet.samples.visualizer.datalinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.AdhocHost;
+import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
@@ -29,40 +31,109 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 // TODO documentation
 //
-network DatalinkVisualizerSimple
+network DatalinkVisualizerWirelessSimple
 {
-    @display("bgb=900,400");
+    @display("bgb=700,350");
     submodules:
-        linkVisualizer1: DataLinkVisualizer {
+        linkVisualizer: DataLinkVisualizer {
             parameters:
                 @display("p=100,50");
         }
-        linkVisualizer2: DataLinkVisualizer {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=100,150");
         }
-        configurator: IPv4NetworkConfigurator {
+        radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,250");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("p=100,350");
-        }
         wirelessSource: AdhocHost {
-            @display("p=300,80");
+            @display("p=300,150");
         }
         wirelessDestination: AdhocHost {
-            @display("p=600,80");
+            @display("p=600,150");
+        }
+}
+
+//
+// TODO documentation
+//
+network DatalinkVisualizerWiredSimple
+{
+    @display("bgb=700,350");
+    submodules:
+        linkVisualizer: DataLinkVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
         }
         wiredSource: StandardHost {
-            @display("p=300,280");
+            @display("p=300,150");
         }
         wiredDestination: StandardHost {
-            @display("p=600,280");
+            @display("p=600,150");
         }
     connections:
         wiredSource.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
 }
 
+
+//
+// TODO documentation
+//
+network DatalinkVisualizerComplex
+{
+    @display("bgb=900,600");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        etherSwitch0: EtherSwitch {
+            @display("p=300,100");
+        }
+        etherSwitch1: EtherSwitch {
+            @display("p=700,100");
+        }
+        etherSwitch2: EtherSwitch {
+            @display("p=300,450");
+        }
+        etherSwitch3: EtherSwitch {
+            @display("p=700,450");
+        }
+        standardHost0: StandardHost {
+            @display("p=300,30");
+        }
+        standardHost1: StandardHost {
+            @display("p=700,30");
+        }
+        standardHost2: StandardHost {
+            @display("p=300,550");
+        }
+        standardHost3: StandardHost {
+            @display("p=700,550");
+        }
+        etherSwitch5: EtherSwitch {
+            @display("p=598,273");
+        }
+        etherSwitch4: EtherSwitch {
+            @display("p=416,273");
+        }
+    connections:
+        etherSwitch0.ethg++ <--> Eth100M <--> standardHost0.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> standardHost1.ethg++;
+        etherSwitch3.ethg++ <--> Eth100M <--> standardHost3.ethg++;
+        etherSwitch2.ethg++ <--> Eth100M <--> standardHost2.ethg++;
+        etherSwitch0.ethg++ <--> Eth100M <--> etherSwitch4.ethg++;
+        etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
+        etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch5.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> etherSwitch5.ethg++;
+        etherSwitch5.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
+}
 
