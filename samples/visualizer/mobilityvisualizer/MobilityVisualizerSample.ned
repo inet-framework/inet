@@ -24,12 +24,18 @@ import inet.visualizer.integrated.IntegratedVisualizer;
 //
 // TODO documentation
 //
-network MobilityVisualizerSimple
+network MobilityVisualizerSample
 {
     @display("bgb=800,600");
     submodules:
         host: AdhocHost {
             @display("p=400,300");
+        }
+        host1: AdhocHost {
+            @display("p=538,158");
+        }
+        host2: AdhocHost {
+            @display("p=552,345");
         }
         visualizer: IntegratedVisualizer {
             parameters:
@@ -42,19 +48,5 @@ network MobilityVisualizerSimple
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,250");
-        }
-}
-
-//
-// TODO documentation
-//
-network MobilityVisualizerExtended extends MobilityVisualizerSimple
-{
-    submodules:
-        host1: AdhocHost {
-            @display("p=538,158");
-        }
-        host2: AdhocHost {
-            @display("p=552,345");
         }
 }
