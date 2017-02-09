@@ -122,6 +122,7 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
             orientationFigure->setZIndex(zIndex);
             orientationFigure->setBounds(cFigure::Rectangle(-size, -size, 2 * size, 2 * size));
             orientationFigure->setLineColor(orientationLineColor);
+            orientationFigure->setLineStyle(orientationLineStyle);
             orientationFigure->setLineWidth(orientationLineWidth);
             visualization->addFigure(orientationFigure);
         }
@@ -134,8 +135,8 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
             velocityFigure->setVisible(false);
             velocityFigure->setEndArrowhead(cFigure::ARROW_SIMPLE);
             velocityFigure->setLineColor(velocityLineColor);
-            velocityFigure->setLineWidth(velocityLineWidth);
             velocityFigure->setLineStyle(velocityLineStyle);
+            velocityFigure->setLineWidth(velocityLineWidth);
             visualization->addFigure(velocityFigure);
         }
         TrailFigure *trailFigure = nullptr;
@@ -168,10 +169,10 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
         movementLine->setTooltip("This line represents the recent movement trail of the mobility model");
         movementLine->setStart(startPosition);
         movementLine->setEnd(endPosition);
-        movementLine->setLineWidth(1);
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
-        cFigure::Color color = autoMovementTrailLineColor ? cFigure::GOOD_DARK_COLORS[module->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))] : movementTrailLineColor;
-        movementLine->setLineColor(color);
+        movementLine->setLineColor(movementTrailLineColorSet.getColor(module->getId()));
+        movementLine->setLineStyle(movementTrailLineStyle);
+        movementLine->setLineWidth(movementTrailLineWidth);
         movementLine->setZoomLineWidth(false);
         trailFigure->addFigure(movementLine);
     }

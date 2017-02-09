@@ -82,8 +82,7 @@ MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMo
     if (mobilityVisualization == nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
         auto trail = new osg::Geode();
-        cFigure::Color color = cFigure::GOOD_DARK_COLORS[module->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-        trail->setStateSet(inet::osg::createStateSet(color, 1.0));
+        trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
         auto networkNode = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(trail);

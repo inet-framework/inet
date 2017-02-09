@@ -31,7 +31,7 @@ simple MobilityVisualizerBase extends VisualizerBase
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for mobility signals, root module by default
         
-        bool displayMovements = default(true); // display mobility movement, disabled by default
+        bool displayMovements = default(true); // display mobility movement, enabled by default
         double animationSpeed = default(0); // animation speed while objects are moving around, value must be in the range (0, +inf)
         
         string moduleFilter = default("*"); // which mobilities are considered, matches all mobilities by default
@@ -39,16 +39,18 @@ simple MobilityVisualizerBase extends VisualizerBase
         bool displayOrientations = default(false); // display an arc indicating the current orientation, disabled by default
         double orientationArcSize = default(0.25); // relative size of the arc compared to the full circle 
         string orientationLineColor = default("black"); // orientation line color, black by default
+        string orientationLineStyle = default("solid"); // orientation line style (solid, dashed, dotted)
         double orientationLineWidth = default(1); // orientation line width
 
         bool displayVelocities = default(false); // display an arrow indicating the current velocity, disabled by default
         double velocityArrowScale = default(1); // velocity scaling factor to pixels
         string velocityLineColor = default("black"); // velocity line color, black by default
-        double velocityLineWidth = default(1); // velocity line width
         string velocityLineStyle = default("solid"); // velocity line style (solid, dashed, dotted)
+        double velocityLineWidth = default(1); // velocity line width
 
         bool displayMovementTrails = default(false); // display a line along the recent path of mobilities, disabled by default
-        string movementTrailLineColor = default("auto"); // movement trail line color
+        string movementTrailLineColor @enum("light", "dark") = default("dark"); // movement trail line color is a list of colors, a set of dark colors by default
+        string movementTrailLineStyle = default("solid"); // movement trail line style (solid, dashed, dotted)
         double movementTrailLineWidth = default(1); // movement trail line width
         int trailLength = default(100); // number of sections in the trail
 
