@@ -93,18 +93,18 @@ network DatalinkVisualizerComplex
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                @display("p=80,100");
+                @display("p=80,120");
         }
-        SW1: EtherSwitch {
+        etherSwitch1: EtherSwitch {
             @display("p=150,200");
         }
-        SW3: EtherSwitch {
+        etherSwitch3: EtherSwitch {
             @display("p=750,200");
         }
         host1: StandardHost {
             @display("p=50,400");
         }
-        SW2: EtherSwitch {
+        etherSwitch4: EtherSwitch {
             @display("p=450,150");
         }
         host3: StandardHost {
@@ -122,18 +122,18 @@ network DatalinkVisualizerComplex
         host6: StandardHost {
             @display("p=850,400");
         }
-        SW4: EtherSwitch {
+        etherSwitch2: EtherSwitch {
             @display("p=450,250");
         }
     connections:
-        SW1.ethg++ <--> Eth100M <--> host1.ethg++;
-        SW1.ethg++ <--> Eth100M <--> SW2.ethg++;
-        SW2.ethg++ <--> Eth100M <--> SW3.ethg++;
-        SW1.ethg++ <--> Eth100M <--> host2.ethg++;
-        SW3.ethg++ <--> Eth100M <--> host6.ethg++;
-        SW3.ethg++ <--> Eth100M <--> host5.ethg++;
-        SW2.ethg++ <--> Eth100M <--> SW4.ethg++;
-        SW4.ethg++ <--> Eth100M <--> host3.ethg++;
-        SW4.ethg++ <--> Eth100M <--> host4.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> host1.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> etherSwitch4.ethg++;
+        etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> host2.ethg++;
+        etherSwitch3.ethg++ <--> Eth100M <--> host6.ethg++;
+        etherSwitch3.ethg++ <--> Eth100M <--> host5.ethg++;
+        etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
+        etherSwitch2.ethg++ <--> Eth100M <--> host3.ethg++;
+        etherSwitch2.ethg++ <--> Eth100M <--> host4.ethg++;
 }
 
