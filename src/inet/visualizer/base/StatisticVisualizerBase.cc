@@ -50,7 +50,7 @@ const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char di
                 result = "-";
             else {
                 char temp[32];
-                sprintf(temp, "%.2g", visualization->printValue);
+                sprintf(temp, "%.4g", visualization->printValue);
                 result = temp;
             }
             break;
