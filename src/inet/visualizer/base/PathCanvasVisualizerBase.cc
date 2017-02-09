@@ -113,10 +113,7 @@ const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPat
     figure->setLineWidth(lineWidth);
     figure->setLineStyle(lineStyle);
     figure->setEndArrowhead(cFigure::ARROW_BARBED);
-    if (!strcmp(par("lineColor"), "auto"))
-        figure->setLineColor(cFigure::GOOD_DARK_COLORS[pathVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
-    else
-        figure->setLineColor(lineColor);
+    figure->setLineColor(lineColorSet.getColor(pathVisualizations.size()));
     return new PathCanvasVisualization(path, figure);
 }
 

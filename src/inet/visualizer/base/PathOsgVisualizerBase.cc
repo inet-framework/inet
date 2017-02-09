@@ -58,12 +58,7 @@ const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVi
         points.push_back(getPosition(node));
     }
     auto node = inet::osg::createPolyline(points, cFigure::ARROW_NONE, cFigure::ARROW_BARBED);
-    cFigure::Color color;
-    if (!strcmp(par("lineColor"), "auto"))
-        color = cFigure::GOOD_DARK_COLORS[pathVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-    else
-        color = lineColor;
-    node->setStateSet(inet::osg::createLineStateSet(color, lineStyle, lineWidth));
+    node->setStateSet(inet::osg::createLineStateSet(lineColorSet.getColor(pathVisualizations.size()), lineStyle, lineWidth));
     return new PathOsgVisualization(path, node);
 }
 
