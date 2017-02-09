@@ -89,51 +89,51 @@ network DatalinkVisualizerComplex
     @display("bgb=900,600");
     submodules:
         visualizer: IntegratedVisualizer {
-            @display("p=100,50");
+            @display("p=80,50");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=80,100");
         }
-        etherSwitch0: EtherSwitch {
-            @display("p=300,100");
+        SW1: EtherSwitch {
+            @display("p=150,200");
         }
-        etherSwitch1: EtherSwitch {
-            @display("p=700,100");
+        SW3: EtherSwitch {
+            @display("p=750,200");
         }
-        etherSwitch2: EtherSwitch {
-            @display("p=300,450");
+        host1: StandardHost {
+            @display("p=50,400");
         }
-        etherSwitch3: EtherSwitch {
-            @display("p=700,450");
+        SW2: EtherSwitch {
+            @display("p=450,150");
         }
-        standardHost0: StandardHost {
-            @display("p=300,30");
+        host3: StandardHost {
+            @display("p=350,350");
         }
-        standardHost1: StandardHost {
-            @display("p=700,30");
+        host5: StandardHost {
+            @display("p=750,500");
         }
-        standardHost2: StandardHost {
-            @display("p=300,550");
+        host2: StandardHost {
+            @display("p=150,500");
         }
-        standardHost3: StandardHost {
-            @display("p=700,550");
+        host4: StandardHost {
+            @display("p=550,350");
         }
-        etherSwitch5: EtherSwitch {
-            @display("p=598,273");
+        host6: StandardHost {
+            @display("p=850,400");
         }
-        etherSwitch4: EtherSwitch {
-            @display("p=416,273");
+        SW4: EtherSwitch {
+            @display("p=450,250");
         }
     connections:
-        etherSwitch0.ethg++ <--> Eth100M <--> standardHost0.ethg++;
-        etherSwitch1.ethg++ <--> Eth100M <--> standardHost1.ethg++;
-        etherSwitch3.ethg++ <--> Eth100M <--> standardHost3.ethg++;
-        etherSwitch2.ethg++ <--> Eth100M <--> standardHost2.ethg++;
-        etherSwitch0.ethg++ <--> Eth100M <--> etherSwitch4.ethg++;
-        etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
-        etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch5.ethg++;
-        etherSwitch1.ethg++ <--> Eth100M <--> etherSwitch5.ethg++;
-        etherSwitch5.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
+        SW1.ethg++ <--> Eth100M <--> host1.ethg++;
+        SW1.ethg++ <--> Eth100M <--> SW2.ethg++;
+        SW2.ethg++ <--> Eth100M <--> SW3.ethg++;
+        SW1.ethg++ <--> Eth100M <--> host2.ethg++;
+        SW3.ethg++ <--> Eth100M <--> host6.ethg++;
+        SW3.ethg++ <--> Eth100M <--> host5.ethg++;
+        SW2.ethg++ <--> Eth100M <--> SW4.ethg++;
+        SW4.ethg++ <--> Eth100M <--> host3.ethg++;
+        SW4.ethg++ <--> Eth100M <--> host4.ethg++;
 }
 
