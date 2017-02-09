@@ -21,6 +21,7 @@
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/ColorSet.h"
 
 namespace inet {
 
@@ -46,17 +47,19 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     bool displayOrientations = false;
     double orientationArcSize = NaN;
     cFigure::Color orientationLineColor;
+    cFigure::LineStyle orientationLineStyle;
     double orientationLineWidth = NaN;
     // velocity
     bool displayVelocities = false;
     double velocityArrowScale = NaN;
     cFigure::Color velocityLineColor;
-    double velocityLineWidth = NaN;
     cFigure::LineStyle velocityLineStyle;
+    double velocityLineWidth = NaN;
     // movement trail
     bool displayMovementTrails = false;
     bool autoMovementTrailLineColor = false;
-    cFigure::Color movementTrailLineColor;
+    ColorSet movementTrailLineColorSet;
+    cFigure::LineStyle movementTrailLineStyle;
     double movementTrailLineWidth = NaN;
     int trailLength = -1;
     //@}

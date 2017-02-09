@@ -45,19 +45,18 @@ void MobilityVisualizerBase::initialize(int stage)
         displayOrientations = par("displayOrientations");
         orientationArcSize = par("orientationArcSize");
         orientationLineColor = cFigure::parseColor(par("orientationLineColor"));
+        orientationLineStyle = cFigure::parseLineStyle(par("orientationLineStyle"));
         orientationLineWidth = par("orientationLineWidth");
         // velocity
         displayVelocities = par("displayVelocities");
         velocityArrowScale = par("velocityArrowScale");
         velocityLineColor = cFigure::parseColor(par("velocityLineColor"));
-        velocityLineWidth = par("velocityLineWidth");
         velocityLineStyle = cFigure::parseLineStyle(par("velocityLineStyle"));
+        velocityLineWidth = par("velocityLineWidth");
         // movement trail
         displayMovementTrails = par("displayMovementTrails");
-        const char *movementTrailLineColorString = par("movementTrailLineColor");
-        autoMovementTrailLineColor = !strcmp("auto", movementTrailLineColorString);
-        if (!autoMovementTrailLineColor)
-            movementTrailLineColor = cFigure::parseColor(movementTrailLineColorString);
+        movementTrailLineColorSet.parseColors(par("movementTrailLineColor"));
+        movementTrailLineStyle = cFigure::parseLineStyle(par("movementTrailLineStyle"));
         movementTrailLineWidth = par("movementTrailLineWidth");
         trailLength = par("trailLength");
         if (displayMovements)
