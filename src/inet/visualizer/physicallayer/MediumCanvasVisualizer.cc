@@ -170,6 +170,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     SignalFigure* signalFigure = new SignalFigure("bubble");
     signalFigure->setTags("propagating_signal");
     signalFigure->setTooltip("These rings represents a signal propagating through the medium");
+    signalFigure->setAssociatedObject(const_cast<cObject *>(check_and_cast<const cObject *>(transmission)));
     signalFigure->setRingCount(signalRingCount);
     signalFigure->setRingSize(signalRingSize);
     signalFigure->setFadingDistance(signalFadingDistance);
