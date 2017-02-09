@@ -584,6 +584,12 @@ class INET_API TCPConnection : public cObject
      */
     virtual ~TCPConnection();
 
+    int getLocalPort() const { return localPort; }
+    L3Address getLocalAddress() const { return localAddr; }
+
+    int getRemotePort() const { return remotePort; }
+    L3Address getRemoteAddress() const { return remoteAddr; }
+
     /**
      * This method gets invoked from TCP when a segment arrives which
      * doesn't belong to an existing connection. TCP creates a temporary
