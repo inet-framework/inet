@@ -37,7 +37,6 @@ simple MediumCanvasVisualizer extends MediumVisualizerBase like IMediumVisualize
 
         string signalShape @enum("ring", "sphere") = default("ring"); // shape for displaying signals
         double signalOpacity = default(0.5); // signal opacity, value must be in the range [0, 1]
-        string signalColor @enum("light", "dark") = default("dark"); // signal color is a list of colors, a set of dark colors by default
         int signalRingCount = default(20); // number of stationary rings around the transmitter, value must be in the range [0, +inf)
         double signalRingSize = default(50); // width of stationary rings, value must be in the range (0, +inf)
         double signalFadingDistance = default(50); // distance parameter for exponential opacity decreasing, value must be in the range (0, +inf)
