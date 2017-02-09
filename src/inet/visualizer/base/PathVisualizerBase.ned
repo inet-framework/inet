@@ -51,8 +51,8 @@ simple PathVisualizerBase extends VisualizerBase
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
 
-        string lineColor = default("auto"); // route line color, automatic by default
-        string lineStyle = default("solid"); // link line style (solid, dashed, dotted)
+        string lineColor @enum("light", "dark") = default("dark"); // route color is a list of colors, a set of dark colors by default
+        string lineStyle = default("solid"); // route line style (solid, dashed, dotted)
         double lineWidth = default(3); // route line width
 
         double lineShift = default(10); // route line shift to avoid overlapping routes

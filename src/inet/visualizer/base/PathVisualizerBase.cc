@@ -44,8 +44,7 @@ void PathVisualizerBase::initialize(int stage)
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         packetFilter.setPattern(par("packetFilter"));
-        if (strcmp(par("lineColor"), "auto"))
-            lineColor = cFigure::Color(par("lineColor"));
+        lineColorSet.parseColors(par("lineColor"));
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         lineWidth = par("lineWidth");
         lineShift = par("lineShift");

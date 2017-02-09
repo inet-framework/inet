@@ -21,6 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
+#include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
@@ -49,7 +50,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
-    cFigure::Color lineColor;
+    ColorSet lineColorSet;
     cFigure::LineStyle lineStyle;
     double lineWidth = NaN;
     double lineShift = NaN;
