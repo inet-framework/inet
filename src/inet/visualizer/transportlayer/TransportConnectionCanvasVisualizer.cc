@@ -62,7 +62,7 @@ LabeledIconFigure *TransportConnectionCanvasVisualizer::createConnectionEndFigur
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
     char label[2];
-    label[0] = 'a' + (char)(connectionVisualizations.size() / iconColorSet.getSize());
+    label[0] = 'A' + (char)(connectionVisualizations.size() / iconColorSet.getSize());
     label[1] = '\0';
     labelFigure->setText(label);
     return labeledIconFigure;
