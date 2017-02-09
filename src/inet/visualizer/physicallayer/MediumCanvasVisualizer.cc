@@ -39,7 +39,6 @@ void MediumCanvasVisualizer::initialize(int stage)
         else
             throw cRuntimeError("Unknown signalShape parameter value: '%s'", signalShapeString);
         signalOpacity = par("signalOpacity");
-        signalColorSet.parseColors(par("signalColor"));
         signalRingCount = par("signalRingCount");
         signalRingSize = par("signalRingSize");
         signalFadingDistance = par("signalFadingDistance");

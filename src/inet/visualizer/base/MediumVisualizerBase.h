@@ -20,6 +20,7 @@
 
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
 #include "inet/visualizer/util/PacketFilter.h"
@@ -48,6 +49,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
     bool displaySignals = false;
+    ColorSet signalColorSet;
     double signalPropagationAnimationSpeed = NaN;
     double signalTransmissionAnimationSpeed = NaN;
     double signalPropagationAdditionalTime = NaN;
