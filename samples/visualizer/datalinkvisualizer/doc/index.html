@@ -57,18 +57,23 @@
             Több visualizer-t is elhelyezhetünk a szimulációban, ezzel jobban áttekinthetővé téve az adatkapcsolati rétegben létrejött kapcsolatokat.
         -->
 
-	<p><h2>Enabling data links</h2></p>
+	<p><h2>Enabling data links on wireless network and on wired network</h2></p>
 
     <p>
         In this configuration we show how to enable the visualization.
         We will see the default look of the visualization.
     </p>
     <p>
-        For this configuration the network contains two wireless nodes (<code><strong>AdhocHost</strong></code>), two wired hosts (<code><strong>StandardHost</strong></code>). Besides these nodes, the network has an <code><strong>IPv4NetworkConfigurator</strong></code>, an <code><strong>Ieee80211ScalarRadioMedium</strong></code> and a <code><strong>DataLinkVisualizer</strong></code> module.
-        The network will not change in the other configurations.
+        For the wireless configuration the network contains two wireless nodes (<code><strong>AdhocHost</strong></code>), an <code><strong>IPv4NetworkConfigurator</strong></code>, an <code><strong>Ieee80211ScalarRadioMedium</strong></code> and a <code><strong>DataLinkVisualizer</strong></code> module.
     </p>
     <p>
-        <img src="datalinkVisuSimpNet.png">
+        <img width=660 src="DLinkVisuWlessSimple.png">
+    </p>
+    <p>
+        For the wired configuration the network contains two wired hosts (<code><strong>StandardHost</strong></code>) instead of wireless nodes and it doesn't have <code><strong>Ieee80211ScalarRadioMedium</strong></code>. Every other modules are the same as in the wireless configuration.
+    </p>
+    <p>
+        <img width=660 src="DLinkVisuWiredSimple.png">
     </p>
     <p>
         The <code><strong>wirelessSource</strong></code> pings the <code><strong>wirelessDestination</strong></code>, the <code><strong>wiredSource</strong></code> pings the <code><strong>wiredDestination</strong></code>.
@@ -80,12 +85,15 @@
         When we start the simulation, here is what happens:
     </p>
     <p>
-        <img src="enablingDatalinks.gif">
+        <img src="enablingDatalinksWless.gif">
+    </p>
+    <p>
+        <img src="enablingDatalinksWired.gif">
     </p>
     <p>
         The communication starts between the nodes.
         When a message reaches its destination's data link layer, the data link is activated between the nodes and an arrow is shown from the sender towards the receiver.
-        Then the arrows fade out in real time.
+        Then the arrow fades out in real time.
     </p>
         <!--
             Mit csinálunk / mi a sample célja?
@@ -103,69 +111,6 @@
                 gif
                 megjelenítődnek az összes datalinkek
                 valós időben elhalványulnak
-        -->
-
-    <p><h2>Filtering data links</h2></p>
-    
-    <p>
-        This configuration demonstrates the <code><strong>datalinkVisualizer</strong></code>'s filtering function.
-        Our goal is visualize the filtered data links.
-    </p>
-    <p>
-        We set <i>packetFilter</i> parameter to <i>ping* and not *reply*</i> to customize the showed data links.
-        The source sends ping messages per second.
-        To see better the ping echos we set the <i>fadeOutMode</i> to <i>simulationTime</i> and we adjust the <i>fadeOutTime</i> to <i>1.5s</i>.
-        With these settings the arrow will not completely disappear and the sample will be more understandable.
-    </p>
-    <p>
-        The following animation shows what happens when we start the simulation:
-    </p>
-    <p>
-        <img src="filteringDatalinks.gif">
-    </p>
-    <p>
-        Altough the data link is activated between the nodes, an arrow is shown from the sender towards the receiver only, if the packet is a ping echo message.
-        The arrows fade out in simulation time, but don't disappear completely, because the next ping message is sent within a second.
-    </p>
-        <!--
-            Mit csinálunk / mi a sample célja?
-                a filter funkciót mutatjuk meg
-                ezzel meg tudjuk mondani, hogy mely eszközök, mely interfacek vagy mely típusú packetek esetén akarjuk látni a data linkeket
-                
-            Mi a konfig?
-                Beállítunk packetfilter-t, hogy csak a ping üzenetek data link-jeit lássuk. A reply-okat sem már.
-                Hozzáfinomítjuk a fadeOut értékét a ping-ek időzítéséhez.
-
-            Mi az eredmény?
-                gif
-        -->
-
-    <p><h2>Using Multiple visualizers</h2></p>
-
-    <p>
-        
-    </p>
-    <p>
-        
-    </p>
-    <p>
-        
-    </p>
-    <p>
-        <img src="usingMultipleVisualizers.gif">
-    </p>
-    <p>
-        
-    </p>
-        <!--
-            Mit csinálunk / mi a sample célja?
-                
-                
-            Mi a konfig?
-                
-
-            Mi az eredmény?
-                
         -->
 
 <!-- Alcim minta   
