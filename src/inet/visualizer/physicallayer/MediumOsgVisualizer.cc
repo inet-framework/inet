@@ -199,7 +199,7 @@ osg::Node *MediumOsgVisualizer::createSignalNode(const ITransmission *transmissi
 
 osg::Node *MediumOsgVisualizer::createRingSignalNode(const ITransmission *transmission) const
 {
-    cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    auto color = signalColorSet.getColor(transmission->getId());
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
     auto stateSet = inet::osg::createStateSet(color, 1.0, false);
@@ -277,7 +277,7 @@ osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *tran
     auto transmissionStart = transmission->getStartPosition();
     auto startSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
     auto endSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
-    cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());;
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
     auto startStateSet = inet::osg::createStateSet(color, 1.0, false);

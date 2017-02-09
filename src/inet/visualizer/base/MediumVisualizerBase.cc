@@ -48,6 +48,7 @@ void MediumVisualizerBase::initialize(int stage)
         interfaceFilter.setPattern(par("interfaceFilter"));
         packetFilter.setPattern(par("packetFilter"));
         displaySignals = par("displaySignals");
+        signalColorSet.parseColors(par("signalColor"));
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         signalPropagationAdditionalTime = par("signalPropagationAdditionalTime");
