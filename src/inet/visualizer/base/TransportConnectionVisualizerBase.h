@@ -46,8 +46,10 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     /** @name Parameters */
     //@{
     bool displayTransportConnections = false;
-    NetworkNodeFilter nodeFilter;
-    PortFilter portFilter;
+    NetworkNodeFilter sourceNodeFilter;
+    PortFilter sourcePortFilter;
+    NetworkNodeFilter destinationNodeFilter;
+    PortFilter destinationPortFilter;
     const char *icon = nullptr;
     ColorSet iconColorSet;
     cFigure::Font labelFont;

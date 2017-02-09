@@ -45,8 +45,10 @@ void TransportConnectionVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayTransportConnections = par("displayTransportConnections");
-        nodeFilter.setPattern(par("nodeFilter"));
-        portFilter.setPattern(par("portFilter"));
+        sourceNodeFilter.setPattern(par("sourceNodeFilter"));
+        sourcePortFilter.setPattern(par("sourcePortFilter"));
+        destinationNodeFilter.setPattern(par("destinationNodeFilter"));
+        destinationPortFilter.setPattern(par("destinationPortFilter"));
         icon = par("icon");
         iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
@@ -59,10 +61,14 @@ void TransportConnectionVisualizerBase::initialize(int stage)
 void TransportConnectionVisualizerBase::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "nodeFilter"))
-            nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "portFilter"))
-            portFilter.setPattern(par("portFilter"));
+        if (!strcmp(name, "sourceNodeFilter"))
+            sourceNodeFilter.setPattern(par("sourceNodeFilter"));
+        else if (!strcmp(name, "sourcePortFilter"))
+            sourcePortFilter.setPattern(par("sourcePortFilter"));
+        else if (!strcmp(name, "destinationNodeFilter"))
+            sourceNodeFilter.setPattern(par("destinationNodeFilter"));
+        else if (!strcmp(name, "destinationPortFilter"))
+            sourcePortFilter.setPattern(par("destinationPortFilter"));
         removeAllConnectionVisualizations();
     }
 }
@@ -110,8 +116,10 @@ void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsig
         L3AddressResolver resolver;
         auto source = resolver.findHostWithAddress(tcpConnection->localAddr);
         auto destination = resolver.findHostWithAddress(tcpConnection->remoteAddr);
-        if (source != nullptr && nodeFilter.matches(source) && destination != nullptr && nodeFilter.matches(destination) &&
-            portFilter.matches(tcpConnection->localPort) && portFilter.matches(tcpConnection->remotePort))
+        if (source != nullptr && sourceNodeFilter.matches(source) &&
+            destination != nullptr && destinationNodeFilter.matches(destination) &&
+            sourcePortFilter.matches(tcpConnection->localPort) &&
+            destinationPortFilter.matches(tcpConnection->remotePort))
         {
             addConnectionVisualization(createConnectionVisualization(source, destination, tcpConnection));
         }
