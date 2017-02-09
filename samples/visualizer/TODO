@@ -10,7 +10,6 @@ MobilityVisualizer:
 - MobilityVisualizerBase:
 	bool displayMovements = default(true); // display mobility movement, disabled by default --> A komment, vagy az ertek rossz
 - *.visualizer.*.mobilityVisualizer.movementTrailLineWidth nem mukodik
-- Orientation: az arc pont az elfordulási szög ellentettjével fordul
 
 MediumVisualizer
 - X távolsággal menjen tovább a signal rajzolása, mint az utolsó receiver
@@ -49,3 +48,13 @@ ObstacleLossVisualizer
 
 SceneVisualizer
 - viewScalar parameter
+
+DatalinkVisualizer:
+- *.visualizer.*.dataLinkVisualizer.interfaceFilter = "not eth*"	# -- Nem szur
+
+PhysicallinkVisualizer:
+- *.linkVisualizer.*.interfaceFilter = "not wlan*"	# -- Nem szur
+
+NetworkRouteVisualizer:
+- *.routeVisualizer.*.interfaceFilter = "not(*eth* or *ppp*)"	# -- Nem szur
+- *.routeVisualizer.*.nodeFilter = ""				# -- Nem szur
