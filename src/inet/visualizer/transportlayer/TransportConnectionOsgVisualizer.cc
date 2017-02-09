@@ -56,7 +56,7 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TCPCon
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    auto color = cFigure::GOOD_DARK_COLORS[connectionVisualizations.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    auto color = iconColorSet.getColor(connectionVisualizations.size());
     auto colorArray = new osg::Vec4Array();
     colorArray->push_back(osg::Vec4((double)color.red / 255.0, (double)color.green / 255.0, (double)color.blue / 255.0, 1));
     geometry->setColorArray(colorArray, osg::Array::BIND_OVERALL);
