@@ -26,15 +26,15 @@ It can display the magnitude of power loss in dB. Additionally, the face normal 
 
 <p>TODO: how to enable these?</p>
 
-<h2>The visualization</h2>
+<h2>Enabling the visualization</h2>
 
 <p>The configuration uses the following network:</p>
 
 <img src="obstaclelossnetwork.png">
 
 <p>
-It contains 2 <var>AdhocHosts</var> that are configured to move back and forth horizontally on the opposite sides of a wall in the middle of the
-playground. The <var>source</var> is configured to ping <var>destination</var>. The wall obstructs the signals. The configuration also contains an
+It contains 2 <var>AdhocHosts</var>, and a wall between them. The hosts are stationary, and one of them is configured to ping the other.
+The wall obstructs the signals. The configuration also contains an
 <var>IPv4NetworkConfigurator</var>, an <var>IntegratedVisualizer</var>, an <var>Ieee80211ScalarRadioMedium</var>, and a 
 <var>PhysicalEnvironment</var> module.
 </p>
@@ -49,6 +49,18 @@ with the <i>intersectionLineColor</i> parameter:
 *.visualizer.*.obstacleLossVisualizer.displayFaceNormalVectors = true
 *.visualizer.*.obstacleLossVisualizer.intersectionLineColor = "yellow"
 </div>
+
+<p>
+When the simulation is run, and <var>source</var> starts pinging <var>destination</var>, the signals go through the wall:
+</p>
+
+<img src="simple.png">
+
+<p>
+The intersection of the wall and the transmission is indicated with a yellow line.
+</p>
+
+<h2>Advanced features</h2>
 
 
 
