@@ -57,29 +57,25 @@
             Több visualizer-t is elhelyezhetünk a szimulációban, ezzel jobban áttekinthetővé téve az adatkapcsolati rétegben létrejött kapcsolatokat.
         -->
 
-	<p><h2>Enabling data links in wireless network and on wired network</h2></p>
+	<p><h2>Enabling data links</h2></p>
 
     <p>
-        In this configuration we show how to enable the visualization.
-        We will see the default look of the visualization.
+        In this configuration we show how to enable the visualization's default look.
+        TODO
     </p>
     <p>
-        For the wireless configuration the network contains two wireless nodes (<code><strong>AdhocHost</strong></code>), an <code><strong>IPv4NetworkConfigurator</strong></code>, an <code><strong>Ieee80211ScalarRadioMedium</strong></code> and a <code><strong>DataLinkVisualizer</strong></code> module.
+        Both networks contain two hosts, an <code><strong>IPv4NetworkConfigurator</strong></code>, an <code><strong>Ieee80211ScalarRadioMedium</strong></code> and a <code><strong>DataLinkVisualizer</strong></code> module.
+        There is only one difference between the networks. In the wireless configuration the nodes' type is <code><strong>AdhocHost</strong></code>, howewer in the wired network the nodes' type is <code><strong>StandardHost</strong></code>.
     </p>
     <p>
-        <img width=660 src="DLinkVisuWlessSimple.png">
+        <img width=600 src="DLinkVisuWlessSimple.png">
     </p>
     <p>
-        For the wired configuration the network contains two wired hosts (<code><strong>StandardHost</strong></code>) instead of wireless nodes and it doesn't have <code><strong>Ieee80211ScalarRadioMedium</strong></code>. Every other modules are the same as in the wireless configuration.
+        <img width=600 src="DLinkVisuWiredSimple.png">
     </p>
     <p>
-        <img width=660 src="DLinkVisuWiredSimple.png">
-    </p>
-    <p>
-        The <code><strong>wirelessSource</strong></code> pings the <code><strong>wirelessDestination</strong></code>, the <code><strong>wiredSource</strong></code> pings the <code><strong>wiredDestination</strong></code>.
-        The configuration is really simple.
-        It consists of one line which enables the <code><strong>DatalinkVisualizer</strong></code> with the <i>displayLinks</i> parameter.
-        We don't set any other parameters, we use the visualizer's default options.
+        In both configurations the source host pings the destination host, and an additional line of code enables the <code><strong>DatalinkVisualizer</strong></code> with the <i>displayLinks</i> parameter.
+        All other parameters left on their default.
     </p>
     <p>
         When we start the simulation, here is what happens:
@@ -92,13 +88,14 @@
     </p>
     <p>
         The communication starts between the nodes.
-        When a message reaches its destination's data link layer, the datalink is activated between the nodes and an arrow is shown from the sender towards the receiver.
+        When a message reaches its destination's data link layer, the datalink is activated between the nodes and an arrow is shown pointing from the sender towards the receiver.
         Then the arrow fades out in real time.
     </p>
         <!--
             Mit csinálunk / mi a sample célja?
                 Ebben a példában megmutatjuk hogy kell bekapcsolni a visualizer-t
                 A default kinézetét fogjuk látni
+                TODO: Egy wired és egy wireless példán keresztül is megmutatjuk a vizualizációt
                 
             Mi a konfig?
                 Ez a network végig ugyanaz marad
@@ -113,6 +110,7 @@
                 valós időben elhalványulnak
         -->
 
+   
     <p><h2>Data link visualization in a complex network</h2></p>
 
     <p>
