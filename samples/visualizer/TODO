@@ -39,6 +39,7 @@ Ieee80211
 InfoVisualizer
 - Amikor a statistic value-ja 0, akkor '-' van kiírva
 - when content = "str" some strange symbols appear
+- the default for displayInfos parameter is true
 
 StatisticVisualizer
 - Kicsi egész számoknál scientific notation-t használ
