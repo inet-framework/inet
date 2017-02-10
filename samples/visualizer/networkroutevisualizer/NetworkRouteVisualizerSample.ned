@@ -73,11 +73,8 @@ network NetworkRouteExtended
             parameters:
                 @display("p=100,150");
         }
-        standardHost0: StandardHost {
+        source1: StandardHost {
             @display("p=250,50");
-        }
-        standardHost4: StandardHost {
-            @display("p=980.15497,557.22");
         }
         router0: Router {
             @display("p=451.8,144.325");
@@ -94,13 +91,13 @@ network NetworkRouteExtended
         router2: Router {
             @display("p=249.745,346.38");
         }
-        standardHost2: StandardHost {
+        destination2: StandardHost {
             @display("p=90.36,534.63");
         }
-        standardHost1: StandardHost {
+        source2: StandardHost {
             @display("p=947.52496,110.439995");
         }
-        standardHost3: StandardHost {
+        destination1: StandardHost {
             @display("p=749.235,611.185");
         }
         etherSwitch0: EtherSwitch {
@@ -118,17 +115,16 @@ network NetworkRouteExtended
     connections:
         router0.pppg++ <--> Eth100M <--> router4.pppg++;
         router4.pppg++ <--> Eth100M <--> router3.pppg++;
-        standardHost0.ethg++ <--> Eth100M <--> etherSwitch0.ethg++;
+        source1.ethg++ <--> Eth100M <--> etherSwitch0.ethg++;
         etherSwitch0.ethg++ <--> Eth100M <--> router0.ethg++;
         router3.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
-        etherSwitch3.ethg++ <--> Eth100M <--> standardHost3.ethg++;
-        etherSwitch3.ethg++ <--> Eth100M <--> standardHost4.ethg++;
+        etherSwitch3.ethg++ <--> Eth100M <--> destination1.ethg++;
         router4.pppg++ <--> Eth100M <--> router1.pppg++;
         etherSwitch1.ethg++ <--> Eth100M <--> router1.ethg++;
-        etherSwitch1.ethg++ <--> Eth100M <--> standardHost1.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> source2.ethg++;
         router2.pppg++ <--> Eth100M <--> router0.pppg++;
         router2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
-        standardHost2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
+        destination2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
 }
 
 //
