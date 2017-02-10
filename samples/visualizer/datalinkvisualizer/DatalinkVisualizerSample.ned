@@ -96,44 +96,36 @@ network DatalinkVisualizerComplex
                 @display("p=80,120");
         }
         etherSwitch1: EtherSwitch {
-            @display("p=150,200");
+            @display("p=402.264,167.912");
         }
         etherSwitch3: EtherSwitch {
             @display("p=750,200");
         }
-        host1: StandardHost {
-            @display("p=50,400");
+        source1: StandardHost {
+            @display("p=231.936,49.528");
         }
         etherSwitch4: EtherSwitch {
-            @display("p=450,150");
+            @display("p=509.776,282.672");
         }
-        host3: StandardHost {
-            @display("p=350,350");
+        destination1: StandardHost {
+            @display("p=582.256,484.408");
         }
-        host5: StandardHost {
-            @display("p=750,500");
+        destination2: StandardHost {
+            @display("p=823.856,341.86398");
         }
-        host2: StandardHost {
-            @display("p=150,500");
-        }
-        host4: StandardHost {
-            @display("p=550,350");
-        }
-        host6: StandardHost {
-            @display("p=850,400");
+        source2: StandardHost {
+            @display("p=199.31999,225.896");
         }
         etherSwitch2: EtherSwitch {
-            @display("p=450,250");
+            @display("p=355.152,427.632");
         }
     connections:
-        etherSwitch1.ethg++ <--> Eth100M <--> host1.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> source1.ethg++;
         etherSwitch1.ethg++ <--> Eth100M <--> etherSwitch4.ethg++;
         etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
-        etherSwitch1.ethg++ <--> Eth100M <--> host2.ethg++;
-        etherSwitch3.ethg++ <--> Eth100M <--> host6.ethg++;
-        etherSwitch3.ethg++ <--> Eth100M <--> host5.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> source2.ethg++;
+        etherSwitch3.ethg++ <--> Eth100M <--> destination2.ethg++;
         etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
-        etherSwitch2.ethg++ <--> Eth100M <--> host3.ethg++;
-        etherSwitch2.ethg++ <--> Eth100M <--> host4.ethg++;
+        etherSwitch2.ethg++ <--> Eth100M <--> destination1.ethg++;
 }
 
