@@ -32,13 +32,11 @@ open at a node, thus there can be multiple icons.
 </p>
 
 <p>
-The <var>nodeFilter</var> parameter specifies which hosts' connections should be visualized.
-The <var>portFilter</var> parameter selects connections to be visualized based on their port numbers.
+The <var>sourceNodeFilter</var> and <var>destinationNodeFilter</var> parameters specify which connections should be visualized, depending
+on the connection's source and destination node, respectively.
+The <var>sourcePortFilter</var> and <var>destinationPortFilter</var> parameters select connections to be visualized based on the connection's
+source and destination port number, respectively.
 By default, connections with all port numbers in all hosts are visualized.
-</p>
-
-<p>
-The <var>iconColor</var> parameter sets the colors used for differentiating various connections.
 </p>
 
 <p>
@@ -112,10 +110,10 @@ There are multiple TCP applications set up in the hosts that connect to the serv
 <li><var>host2</var>: 1 connection on port 80, 1 connection on port 22</li>
 </ul>
 
-<p>The visualizer is instructed to only visualize connections on port 80:</p>
+<p>The visualizer is instructed to only visualize connections with destination port 80:</p>
 
 <div class="snippet">
-*.visualizer.*.transportConnectionVisualizer.portFilter = "80"
+*.visualizer.*.transportConnectionVisualizer.destinationPortFilter = "80"
 </div>
 
 <p>
@@ -131,21 +129,21 @@ by their icon color.
 </p>
 
 <p>
-To visualize the connections that use port 22 at the server, the <var>portFilter</var> should be set to 22. The
+To visualize the connections that use port 22 at the server, the <var>sourcePortFilter</var> should be set to 22. The
 network would look like this:
 </p>
 
 <img src="port22.png">
 
 <p>
-Additionally, to visualize port 22 connections at <var>host2</var> only, the <var>nodeFilter</var> parameter should be set to <var>host2</var>.
+Additionally, to visualize port 22 connections at <var>host2</var> only, the <var>sourceNodeFilter</var> parameter should be set to <var>host2</var>.
 It would look like this:
 </p>
 
 <p>TODO: img...nodeFilter doesnt work now</p>
 
 <p>
-When both filters are set to "*" (their default), all 5 connections are visualized:
+When all node and port filters are set to "*" (their default), all 5 connections are visualized:
 </p>
 
 <img src="all.png">
