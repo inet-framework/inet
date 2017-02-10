@@ -140,7 +140,7 @@ Additionally, to visualize port 22 connections at <var>host2</var> only, the <va
 It would look like this:
 </p>
 
-<p>TODO: img...nodeFilter doesnt work now</p>
+<img src="port22host2.png">
 
 <p>
 When all node and port filters are set to "*" (their default), all 5 connections are visualized:
@@ -148,23 +148,20 @@ When all node and port filters are set to "*" (their default), all 5 connections
 
 <img src="all.png">
 
-<p>TODO: screenshot where there are 2 colors and letters</p>
+<p>
+To illustrate what happens in a large network when there are more connections than available colors, the <var>iconColor</var> parameter
+is set to use only two colors, blue and red. Here is what the network would look like, with all connections visualized:
+</p>
 
-<pre>
-So now host2 has 2 port80 connections and host1 has 1
+<img src="letters.png">
 
-1. figure: only the port 80 connectons are visualized. 2 for host1 and 1 for host2 and 3 for the server. portfilter = 80
-2. figure: screenshot only...set portfilter to 22. 1 connection for each host, 2 for the server.
-3. figure: screenshot only...also set nodefilter to host2. 1 connection.
-4. figure: screenshot only...display all connections. 3 for host1, 2 for host2, and 5 for the server.
-5. figure: screenshot where there is only 2 colors, to demonstrate the letters in the icons.
+<p>
+To differentiate connections with the same icon color, capital letters are displayed in the icon.
+</p>
 
-will have to explain that there can be multiple connections. And that they are color coded.
-and that you can use node and port filters.
+<h2>Further information</h2>
 
-here is an idea: have a big network, maybe as a third config, or just a screenshot. big network, lots of connections,
-and lots of routes -> this visualizer is not concerned with routes.
-</pre>
+For more information, refer to the <var>TransportConnectionVisualizer</var> NED documentation.
 
 </body>
 
