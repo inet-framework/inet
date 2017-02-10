@@ -16,10 +16,12 @@
 package inet.samples.visualizer.physicallinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.aodv.AODVRouter;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 
 
@@ -83,3 +85,57 @@ network PhysicalLinkVisualizerSimpleV2
             @display("p=320,350");
         }
 }
+//
+// TODO documentation
+//
+network PhysicalLinkVisualizerComplex
+{
+    @display("bgb=1000,800");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=100,250");
+        }
+        destination: AODVRouter {
+            @display("p=895,716");
+        }
+        source: AODVRouter {
+            @display("p=229,46");
+        }
+        aodvRouter2: AODVRouter {
+            @display("p=368,279");
+        }
+        aodvRouter3: AODVRouter {
+            @display("p=438,150");
+        }
+        aodvRouter4: AODVRouter {
+            @display("p=772,524");
+        }
+        aodvRouter5: AODVRouter {
+            @display("p=632,449");
+        }
+        aodvRouter6: AODVRouter {
+            @display("p=792,635");
+        }
+        aodvRouter7: AODVRouter {
+            @display("p=517,524");
+        }
+        aodvRouter8: AODVRouter {
+            @display("p=468,685");
+        }
+        aodvRouter9: AODVRouter {
+            @display("p=668,273");
+        }
+        aodvRouter10: AODVRouter {
+            @display("p=281,426");
+        }
+        aodvRouter11: AODVRouter {
+            @display("p=503,401");
+        }
+}
+
