@@ -28,14 +28,14 @@ network MobilityVisualizerSample
 {
     @display("bgb=800,600");
     submodules:
-        host: AdhocHost {
-            @display("p=400,300");
+        host3: AdhocHost {
+            @display("p=357.568,276.632");
         }
         host1: AdhocHost {
             @display("p=538,158");
         }
         host2: AdhocHost {
-            @display("p=552,345");
+            @display("p=573.8,384.14398");
         }
         visualizer: IntegratedVisualizer {
             parameters:
