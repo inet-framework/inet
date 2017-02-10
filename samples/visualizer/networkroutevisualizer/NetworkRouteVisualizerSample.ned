@@ -158,10 +158,10 @@ network NetworkRouteComplex
             @display("p=100,450");
         }
         wiredSource: StandardHost {
-            @display("p=240.672,389.784");
+            @display("p=273.36002,514.56");
         }
         wiredDestination: StandardHost {
-            @display("p=941.76,290.376");
+            @display("p=984.096,194.568");
         }
         router0: Router {
             @display("p=383.73126,279.6875");
@@ -187,15 +187,22 @@ network NetworkRouteComplex
         wirelessDestination: WirelessHost {
             @display("p=787.41595,604.29596");
         }
-
+        etherSwitch0: EtherSwitch {
+            @display("p=897.264,313.56");
+        }
+        etherSwitch1: EtherSwitch {
+            @display("p=297.48,369.84");
+        }
     connections:
-        wiredSource.ethg++ <--> Eth100M <--> router0.ethg++;
         router0.pppg++ <--> Eth100M <--> router1.pppg++;
-        router1.pppg++ <--> Eth100M <--> router2.pppg++;
-        router2.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
         router0.pppg++ <--> Eth100M <--> router3.pppg++;
-        router3.pppg++ <--> Eth100M <--> router2.pppg++;
-        router0.ethg++ <--> Eth100M <--> accessPoint0.ethg++;
+        router1.pppg++ <--> Eth100M <--> router2.pppg++;
+        router2.pppg++ <--> Eth100M <--> router3.pppg++;
+        router2.ethg++ <--> Eth100M <--> etherSwitch0.ethg++;
+        etherSwitch0.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
         router2.ethg++ <--> Eth100M <--> accessPoint1.ethg++;
+        router0.ethg++ <--> Eth100M <--> etherSwitch1.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> wiredSource.ethg++;
+        router0.ethg++ <--> Eth100M <--> accessPoint0.ethg++;
 }
 
