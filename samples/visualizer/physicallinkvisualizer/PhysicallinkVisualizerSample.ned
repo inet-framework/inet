@@ -90,7 +90,7 @@ network PhysicalLinkVisualizerSimpleV2
 //
 network PhysicalLinkVisualizerComplex
 {
-    @display("bgb=1000,800");
+    @display("bgb=660,630");
     submodules:
         visualizer: IntegratedVisualizer {
             @display("p=100,50");
@@ -102,40 +102,25 @@ network PhysicalLinkVisualizerComplex
             @display("p=100,250");
         }
         destination: AODVRouter {
-            @display("p=895,716");
+            @display("p=488.832,512.952");
         }
         source: AODVRouter {
             @display("p=229,46");
         }
+        aodvRouter1: AODVRouter {
+            @display("p=421.296,295.872");
+        }
         aodvRouter2: AODVRouter {
-            @display("p=368,279");
+            @display("p=273.36002,440.592");
         }
         aodvRouter3: AODVRouter {
-            @display("p=438,150");
+            @display("p=305.52,188.136");
         }
         aodvRouter4: AODVRouter {
-            @display("p=772,524");
+            @display("p=562.8,328.032");
         }
         aodvRouter5: AODVRouter {
-            @display("p=632,449");
-        }
-        aodvRouter6: AODVRouter {
-            @display("p=792,635");
-        }
-        aodvRouter7: AODVRouter {
-            @display("p=517,524");
-        }
-        aodvRouter8: AODVRouter {
-            @display("p=468,685");
-        }
-        aodvRouter9: AODVRouter {
-            @display("p=668,273");
-        }
-        aodvRouter10: AODVRouter {
-            @display("p=281,426");
-        }
-        aodvRouter11: AODVRouter {
-            @display("p=503,401");
+            @display("p=421.296,77.184");
         }
 }
 
