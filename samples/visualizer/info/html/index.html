@@ -14,7 +14,7 @@
 
 <p>
 Various compound modules in INET contain submodules that display information about their state in the graphical runtime environment.
-This is of limited use, since one has to enter the compound modules to see this information. States of important
+This is of limited use, since one has to enter the compound modules or drill down in the object inspector to see this information. States of important
 submodules can be visualized at containing network nodes, at the top level of the network. This makes such information conveniently
 available at a glance, without the need to open graphical views or go into compound modules.
 This example contains a configuration that demonstrates visualization of nodes' IEEE 802.11 channel access state.
@@ -42,10 +42,16 @@ Wildcards can be used to select a certain submodule in multiple nodes. Additiona
 </p>
 
 <p>
-The visualizer can display module states in one of two ways, selected with the <var>content</var> parameter.
-When set to <i>str</i>, it displays the return value of the module's str() function. When set to <i>displayStringText</i>,
-it displays the 't' tag of the submodule's display string. The default is <i>str</i>. TODO: do we need this ?
-</p>
+The visualizer can display module information in various ways, selected with the <var>format</var> parameter.
+This parameter takes a format string, which can contain the following directives:
+
+<ul>
+<li>%n: module full name</li>
+<li>%p: module full path</li>
+<li>%d: display string text - the 't' tag of the submodule's display string</li>
+<li>%i: the return value of the module's info() function</li>
+<li>%s: the return value of the module's str() function, this is the default</li>
+</ul>
 
 <h2>The visualization</h2>
 
@@ -83,11 +89,11 @@ The location of the Contention module is <var>AdhocHost/wlan/mac</var>:
 </div>
 
 <p>
-The <var>content</var> parameter is set to display the submodule's display string text:
+The <var>format</var> parameter is set to display the submodule's display string text:
 </p>
 
 <div class="snippet">
-*.visualizer.*.infoVisualizer.content = "displayStringText"
+*.visualizer.*.infoVisualizer.format = "%d"
 </div>
 
 <p>
