@@ -9,9 +9,10 @@
 	<h1><center>Physical link visualizer example</center></h1>
 
 	<p><h2>Goals</h2></p>
-    <p> Visualizing physical links is useful, because based on this we can determine the first layer links in the network.
-        We can identify at a glance which nodes received a packet.
-        It is especially helpful in wireless networks e.g we can see which nodes are able to receive a packet from the access point.
+    <p> 
+        In wireless networks we can't identify physical connections between the nodes, because we don't see radio signals. It is important to determine which nodes received the sent packet and whether the destination host or hosts received the packet through the wireless channel. 
+        Visualizing physical links we can determine the first layer links in the network.
+        We can identify at a glance which nodes received a packet from another node.
     </p>
     <p>    
         The example consists of 3 simulation models, each demonstrating different features of physical link visualization.
@@ -19,6 +20,7 @@
 	    
         <!--
             Miért jó ez a visualizer?
+            Problem: (Főleg wireless) hálózatokban nem látjuk, hogy egy packetet vett-e hibátlanul a fogadó állomás, illetve, hogy melyik node(ok) vette(k) hibátlanul az adott packetet.
             A physicalLinkVisualizer-rel ránézésre meg tudjuk állapítani, hogy melyek az aktív első rétegbeli linkek a hálózatban.
             Könnyen azonosítani tudjuk a hálózatban lévő fizikai rétegben létrejött kapcsolatokat.
             Meg tudjuk állapítani, hogy egy adott üzenetet mely eszköz vett. Ez wireless hálózatoknál hasznos pl., mert látjuk, 
