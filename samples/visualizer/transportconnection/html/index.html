@@ -12,13 +12,16 @@
 <h2>Goals</h2>
 
 <p>
+complex topogy or network, many applications, difficult to see who commmunicates with whom, if there's any
+
+
 Transport connection visualization makes it easy to get information about the active transport connections in the network at a glance, without drilling down in the GUI.
 It makes it easy to identify connections by their two end-hosts, and to tell different connections apart. It also gives a quick overview about
-the number of connections in certain nodes and the whole network. This example demonstrates such visualization of TCP connections.
+the number of connections in individual nodes and the whole network. This example demonstrates such visualization of TCP connections.
 </p>
 
 <p>
-The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration shows the more advanced features.
+The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration shows more advanced features.
 </p>
 
 <h2>About the visualizer</h2>
@@ -36,7 +39,7 @@ source and destination port number, respectively.
 By default, connections with all port numbers in all hosts are visualized.
 The <var>iconColor</var> parameter specifies what icon colors to use for differentiating various connections.
 It takes a list of colors, e.g. <i>"blue, red, green"</i>. It also takes a set of colors, either <i>"light"</i> or <i>"dark"</i>.
-The default setting <i>"dark"</i>.
+The default setting is <i>"dark"</i>.
 </p>
 
 <p>
@@ -44,7 +47,7 @@ It is important to note that packet paths belonging to the connection have no ef
 The transport connection visualization doesn't indicate anything about what paths packets take.
 </p>
 
-<h2>1. Enabling the visualization of transport connections</h2>
+<h2>Enabling the visualization of transport connections</h2>
 
 This configuration uses the following simple network:
 
@@ -60,18 +63,16 @@ The visualization of transport connections is enabled with the visualizer's <var
 </p>
 
 <div class="snippet">
-*.visualizer.*.transportConnectionVisualizer.displayTransportConnections = true
+*.visualizer.*.displayTransportConnections = true
 </div>
 
 <p>TODO: include this in the routingtable sample</p>
 
 <p>
-When the simulation is run for a while and TCP connection is established, the network looks like this:
+After the simulation is run for a while and the TCP connection is established, the network looks like this:
 </p>
 
-<img src="simpleconnection.png">
-
-<p>TODO: update screenshots</p>
+<img src="simpleconnection.png" style="h-align: center;">
 
 <p>
 The icon representing the end-points of the TCP connection is placed above the hosts.
@@ -114,20 +115,20 @@ When the simulation is run and the connections are established, the network look
 
 <p>
 A node can have multiple connections. Here, <var>host1</var> has two, and <var>server</var> has three.
-Thus there are multiple icons placed above each other at these hosts. Connections can be differentiated
+Thus there are multiple icons placed vertically at these hosts. Connections can be differentiated
 by their icon color.
 </p>
 
 <p>
 To visualize the connections that use port 22 at the server, the <var>destinationPortFilter</var> should be set to 22. The
-network would look like this:
+network looks like this:
 </p>
 
 <img src="port22.png">
 
 <p>
 Additionally, to visualize port 22 connections at <var>host2</var> only, the <var>sourceNodeFilter</var> parameter should be set to <var>host2</var>.
-It would look like this:
+It looks like this:
 </p>
 
 <img src="port22host2.png">
@@ -140,13 +141,13 @@ When all node and port filters are set to "*" (their default), all 5 connections
 
 <p>
 To illustrate what happens in a large network when there are more connections than available colors, the <var>iconColor</var> parameter
-is set to use only two colors, blue and red. Here is what the network would look like, with all connections visualized:
+is set to use only two colors, blue and red. Here is what the network looks like, with all connections visualized:
 </p>
 
 <img src="letters.png">
 
 <p>
-To differentiate connections with the same icon color, capital letters are displayed in the icon.
+To differentiate connections with the same icon color, capital letters are displayed on the icon.
 </p>
 
 <h2>Further information</h2>
