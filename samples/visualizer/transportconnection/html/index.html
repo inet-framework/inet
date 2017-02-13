@@ -51,7 +51,7 @@ The transport connection visualization doesn't indicate anything about what path
 
 This configuration uses the following simple network:
 
-<img src="simplenetwork.png">
+<img class="screen" src="simplenetwork.png">
 
 <p>
 It consist of 2 <var>StandardHosts</var> connected to each other. It also contains a <var>IPv4NetworkConfigurator</var> and a <var>TransportConnectionVisualizer</var> module.
@@ -72,7 +72,7 @@ The visualization of transport connections is enabled with the visualizer's <var
 After the simulation is run for a while and the TCP connection is established, the network looks like this:
 </p>
 
-<img src="simpleconnection.png" style="h-align: center;">
+<img class="screen" src="simpleconnection.png">
 
 <p>
 The icon representing the end-points of the TCP connection is placed above the hosts.
@@ -84,7 +84,7 @@ The icon representing the end-points of the TCP connection is placed above the h
 This configuration demonstrates the visualization of multiple connections, and the filtering of nodes and ports. It uses the following network:
 </p>
 
-<img src="complexnetwork.png">
+<img class="screen" src="complexnetwork.png">
 
 <p>
 There are two <var>StandardHosts</var> connected to a switch, which is connected via a <var>router</var>
@@ -111,7 +111,7 @@ There are multiple TCP applications set up in the hosts that connect to the serv
 When the simulation is run and the connections are established, the network looks like the following:
 </p>
 
-<img src="port80.png">
+<img class="screen" src="port80.png">
 
 <p>
 A node can have multiple connections. Here, <var>host1</var> has two, and <var>server</var> has three.
@@ -124,27 +124,27 @@ To visualize the connections that use port 22 at the server, the <var>destinatio
 network looks like this:
 </p>
 
-<img src="port22.png">
+<img class="screen" src="port22.png">
 
 <p>
 Additionally, to visualize port 22 connections at <var>host2</var> only, the <var>sourceNodeFilter</var> parameter should be set to <var>host2</var>.
 It looks like this:
 </p>
 
-<img src="port22host2.png">
+<img class="screen" src="port22host2.png">
 
 <p>
 When all node and port filters are set to "*" (their default), all 5 connections are visualized:
 </p>
 
-<img src="all.png">
+<img class="screen" src="all.png">
 
 <p>
 To illustrate what happens in a large network when there are more connections than available colors, the <var>iconColor</var> parameter
 is set to use only two colors, blue and red. Here is what the network looks like, with all connections visualized:
 </p>
 
-<img src="letters.png">
+<img class="screen" src="letters.png">
 
 <p>
 To differentiate connections with the same icon color, capital letters are displayed on the icon.
