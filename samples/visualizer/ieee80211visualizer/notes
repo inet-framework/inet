@@ -1,0 +1,38 @@
+the ieee80211 visualizer thing
+
+there should be a simple
+
+where there is an accesspoint
+
+and a wirelesshost
+
+and it connects and associates with it
+
+the more complex should be like the one in the example
+
+yeah
+
+basically yeah
+
+can a wireless host have 2 wireless cards and be associated to two different APs?
+simultaneously ?
+
+
+
+and what is it about?
+
+its good because of convenience
+
+you dont have to drill down in the inspectors to find out the association state
+
+its presented at a glance
+
+very convenient
+
+the bubble tell you that it got associated but not if they are still, or associated to what
+
+it also can tell the signal strenght
+
+which you can find out from the logs
+
+so basically it tells the association state, what ap it is associated with (ssid) and the signal strength

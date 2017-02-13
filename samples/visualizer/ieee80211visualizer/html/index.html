@@ -13,7 +13,9 @@
 <h2>Goals</h2>
 
 <p>
+<pre>
 wireless networks often overlap in space, difficult to see which node belongs to which subnet, it may even change over time
+</pre>
 
 This example demonstrates the visualization of the association and signal strengths in IEEE 802.11 infrastructure mode wireless networks.
 Visualizing these gives an overview about access points' associated nodes and wireless signal quality. It is very conventient to get this information
@@ -46,7 +48,7 @@ is <i>"dark"</i>.
 This configuration demonstrates the visualization with the default visualizer settings. It uses this simple network:
 </p>
 
-<img src="simplenetwork.png">
+<img class="screen" src="simplenetwork.png">
 
 <p>
 It contains a <var>WirelessHost</var> and an <var>AccessPoint</var>. Additionally, there is an <var>IPv4NetworkConfigurator</var>, 
@@ -66,7 +68,7 @@ The visualization is activated with the visualizer's <i>displayAssociations</i> 
 When the simulation is run, and the host has been associated with the access point, the network looks like this:
 </p>
 
-<img src="displayassoc.png">
+<img class="screen" src="displayassoc.png">
 
 <p>
 The wifi icon is placed above the host and the access point. The default SSID of the access point is left on default,
@@ -92,7 +94,7 @@ This configuration examines how a handover happens while the association state i
 The handover is demonstrated using the following network:
 </p>
 
-<img src="handovernetwork.png">
+<img class="screen" src="handovernetwork.png">
 
 <p>
 There are two <var>AccessPoints</var>. The access points are configured to create wireless networks with different SSIDs, these are <var>alpha</var> and <var>bravo</var> for <var>accessPointA</var> and <var>accessPointB</var>, respectively. A <var>WirelessHost</var> moves horizontally back and forth, going out of the range
@@ -105,13 +107,13 @@ of one access point and into the range of the other. When that happens, it gets 
 When the simulation is run and the host has been associated to an access point, the network looks like this:
 </p>
 
-<img src="handover.png">
+<img class="screen" src="handover.png">
 
 <p>
 The communication ranges of the access points are visualized as blue circles. The following animation illustrates the handover:
 </p>
 
-<img src="handover2.gif">
+<video controls loop autoplay src="handover.mp4" width="540px" height="270px" onclick="this.paused ? this.play() : this.pause();"></video>
 
 <p>
 When the handover happens, the association indicator icon changes to reflect the new association.
