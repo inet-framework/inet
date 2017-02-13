@@ -156,3 +156,21 @@ network PacketDropE
                 @display("p=250,150");
         }
 }
+
+network PacketDropF
+{
+    @display("bgb=400,400");
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            @display("p=60,40");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=60,101");
+        }
+        host1: StandardHost {
+            @display("p=110,223");
+        }
+        host2: StandardHost {
+            @display("p=269,223");
+        }
+}
