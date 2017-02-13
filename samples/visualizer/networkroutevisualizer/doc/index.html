@@ -12,11 +12,10 @@
 	<p><h2>Goals</h2></p>
 
 	<p>
-        Visualizing network routes is advantageous, because we can trace a packet's route from the source node toward to the destination node without inspect routing tables.
+        Visualizing network routes is advantageous, because we can trace a packet's route from the source node toward to the destination node without inspect multiple routing tables.
         It is especially helpful if there is a dynamic routing protocol in the network.
         If there is a change in the routes e.g a router go wrong, we get information immediately about that.
-	</p>
-	
+	</p>	
     <p>    
         The example consists of 3 simulation models, each demonstrating different features of network route visualization.
     </p>	
@@ -26,7 +25,6 @@
             Ez dinamikus routing protokolloknál különösen hasznos...
             Router meghibásodása esetén azonnal értesülünk az útvonal megváltozásáról.
             
-
             Mit mutat be a sample?
             A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.        
         -->
@@ -35,11 +33,10 @@
 
     <p>
         The <code><strong>NetworkRouteVisualizer</strong></code> keeps track of active network routes.
-        A route between two node is considered active if a packet reach the destination's network layer.
+        A route between two node is considered active if a packet reaches the destination's network layer.
         Network routes may be established not only between adjacent devices, it also can be established between remote devices.
         By default routes are not displayed, we can enable their vsisualization by switching the <i>displayRoutes</i> parameter to true.
 	</p>   
-
     <p> 
         The links are represented visually by solid arrows.
         The arrow's starting point is the source node and its endpoint is the destination node.
@@ -62,10 +59,23 @@
             Több networkRouteVisualizert is beállíthatunk.
         -->
 
-	<p><h2>Sample 1</h2></p>
+	<p><h2>Enabling network routes</h2></p>
 
     <p>
     </p>
+        <!--
+            Mit csinálunk / mi a sample célja?
+                Ebben a példában megmutatjuk, hogyan kell bekapcsolni a visualization default kinézetét.
+                
+            Mi a konfig?
+                A konfiguráció két host-ot tartalmaz, egy configuratort és a visualizert
+                A source pingeli a destinationt.
+                Bekapcsoljuk a vizualizációt.
+
+            Mi az eredmény?
+                gif
+                a ping üzenetek aktiválják a network route-ot, más nem történik a harmadik rétegben
+        -->
 
     <p><h2>More information</h2></p>
 

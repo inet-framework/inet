@@ -14,6 +14,7 @@
 // 
 
 package inet.samples.visualizer.networkroutevisualizer;
+import inet.node.inet.AdhocHost;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
@@ -101,7 +102,7 @@ network NetworkRouteExtended
             @display("p=749.235,611.185");
         }
         etherSwitch0: EtherSwitch {
-            @display("p=230.92,143.06999");
+            @display("p=249.24,160.8");
         }
         etherSwitch1: EtherSwitch {
             @display("p=947.52496,229.665");
