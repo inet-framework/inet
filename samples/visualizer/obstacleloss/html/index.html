@@ -60,6 +60,21 @@ The intersection of the wall and the transmission is indicated with a yellow lin
 
 <h2>Advanced features</h2>
 
+<p>
+This configuration uses a more complex network:
+</p>
+
+<img src="advancednetwork.png">
+
+<p>
+It contains two <var>AdhocHosts</var>. In the middle of the playground, there is a rectangular brick wall,
+with a hollow interior. The hosts are configured to go around the wall on a rectangular path. They circle the wall
+in the clockwise direction. The <var>destinationHost</var> is configured to move with a higher speed than the <var>sourceHost</var>.
+The <var>sourceHost</var> is configured to ping <var>destinationHost</var>.
+</p>
+
+<video controls autoplay loop onclick="this.paused ? this.play() : this.pause();"><source src="obstacleloss3.mp4"></video>
+
 
 
 </body>
