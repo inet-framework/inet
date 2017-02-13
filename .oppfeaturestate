@@ -62,7 +62,7 @@
     <feature enabled="false" id="HttpTools_examples_socket"/>
     <feature enabled="false" id="DiffServ"/>
     <feature enabled="false" id="DiffServ_examples"/>
-    <feature enabled="false" id="InternetCloud"/>
+    <feature enabled="true" id="InternetCloud"/>
     <feature enabled="false" id="InternetCloud_examples"/>
     <feature enabled="true" id="Ieee8021d"/>
     <feature enabled="false" id="Ieee8021d_examples"/>
