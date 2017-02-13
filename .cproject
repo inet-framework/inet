@@ -56,7 +56,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/node/packetdrill|inet/applications/packetdrill|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/routing/pim|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/common/serializer/sctp|inet/transportlayer/sctp|inet/applications/sctpapp|inet/transportlayer/tcp_lwip|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/node/packetdrill|inet/applications/packetdrill|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/routing/pim|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/common/serializer/sctp|inet/transportlayer/sctp|inet/applications/sctpapp|inet/transportlayer/tcp_lwip|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -113,7 +113,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/node/packetdrill|inet/applications/packetdrill|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/applications/voip|inet/routing/pim|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/common/serializer/sctp|inet/transportlayer/sctp|inet/applications/sctpapp|inet/transportlayer/tcp_lwip|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="inet/node/rtp|inet/transportlayer/rtp|inet/applications/rtpapp|inet/node/packetdrill|inet/applications/packetdrill|inet/networklayer/diffserv|inet/node/httptools|inet/applications/httptools|inet/routing/pim|inet/node/bgp|inet/routing/bgpv4|inet/node/ospfv2|inet/routing/ospfv2|inet/networklayer/ted|inet/networklayer/rsvp_te|inet/networklayer/ldp|inet/node/mpls|inet/networklayer/mpls|inet/common/serializer/sctp|inet/transportlayer/sctp|inet/applications/sctpapp|inet/transportlayer/tcp_lwip|inet/linklayer/ext|inet/transportlayer/tcp_nsc|inet/routing/extras|transport/tcp_nsc|transport/tcp_lwip" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

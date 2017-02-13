@@ -55,7 +55,7 @@
     <feature enabled="false" id="visualization_examples"/>
     <feature enabled="true" id="VoIPStream"/>
     <feature enabled="false" id="VoIPStream_examples"/>
-    <feature enabled="false" id="SimpleVoIP"/>
+    <feature enabled="true" id="SimpleVoIP"/>
     <feature enabled="false" id="SimpleVoIP_examples"/>
     <feature enabled="false" id="HttpTools"/>
     <feature enabled="false" id="HttpTools_examples_direct"/>
