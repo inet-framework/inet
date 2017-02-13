@@ -94,7 +94,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 
-#if KLUDGE != 1
+#if TCPRECEIVEQUEUE_KLUDGE != 1
     if (reorderBuffer.isEmpty())
         return nullptr;
 #endif
@@ -102,7 +102,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     auto chunk = reorderBuffer.popData();
     ASSERT(reorderBuffer.getExpectedOffset() <= seqToOffset(seq));
 
-#if KLUDGE == 1
+#if TCPRECEIVEQUEUE_KLUDGE == 1
     // TODO: KLUDGE1: to match fingerprints with packet containing objects
     // send up chunk by chunk
     if (chunk)
@@ -118,7 +118,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
 #endif
 
     if (chunk) {
-#if KLUDGE == 2
+#if TCPRECEIVEQUEUE_KLUDGE == 2
         // TODO: KLUDGE: to match fingerprints with packet containing objects
         kludgeQueue.push(chunk);
         auto data = kludgeQueue.peekAt(0, kludgeQueue.getBufferLength());
@@ -142,7 +142,6 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     }
 
     return nullptr;
-#undef TCPRECEIVEQUEUE_KLUDGE
 }
 
 uint32 TCPReceiveQueue::getAmountOfBufferedBytes()
