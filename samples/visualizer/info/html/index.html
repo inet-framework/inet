@@ -23,7 +23,6 @@ This example contains a configuration that demonstrates visualization of nodes' 
 <h2>About the visualizer</h2>
 
 <p>
-The <var>InfoVisualizer</var> module can visualize information of submodules for a network node on the top level canvas.
 The <var>InfoVisualizer</var> module can visualize state information displayed by various submodules. This information is
 visualized at the contaning network node, on the top level canvas. The following image illustrates this with the example of
 the UDP submodule:
@@ -52,6 +51,10 @@ This parameter takes a format string, which can contain the following directives
 <li>%i: the return value of the module's info() function</li>
 <li>%s: the return value of the module's str() function, this is the default</li>
 </ul>
+
+<p>
+On the example image above, the display string text is visualized, selected with the '%d' directive.
+</p>
 
 <h2>The visualization</h2>
 
