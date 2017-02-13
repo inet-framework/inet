@@ -98,7 +98,7 @@ class INET_API SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
 
     double eModel(double delay, double loss);
     void evaluateTalkspurt(bool finish);
-    void startTalkspurt(SimpleVoIPPacket *packet);
+    void startTalkspurt(Packet *packet);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

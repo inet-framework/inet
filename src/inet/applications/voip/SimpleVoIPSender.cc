@@ -145,13 +145,17 @@ void SimpleVoIPSender::sendVoIPPacket()
     if (destAddress.isUnspecified())
         destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
 
-    SimpleVoIPPacket *packet = new SimpleVoIPPacket("VoIP");
-    packet->setTalkspurtID(talkspurtID - 1);
-    packet->setTalkspurtNumPackets(talkspurtNumPackets);
-    packet->setPacketID(packetID);
-    packet->setVoipTimestamp(simTime() - packetizationInterval);    // start time of voice in this packet
-    packet->setVoiceDuration(packetizationInterval);
-    packet->setByteLength(talkPacketSize);
+    Packet *packet = new Packet("VoIP");
+    const auto& voice = std::make_shared<SimpleVoIPPacket>();
+    voice->setTalkspurtID(talkspurtID - 1);
+    voice->setTalkspurtNumPackets(talkspurtNumPackets);
+    voice->setPacketID(packetID);
+    voice->setVoipTimestamp(simTime() - packetizationInterval);    // start time of voice in this packet
+    voice->setVoiceDuration(packetizationInterval);
+    voice->setChunkLength(byte(talkPacketSize));
+    voice->markImmutable();
+    packet->append(voice);
+
     EV_INFO << "TALKSPURT " << talkspurtID - 1 << " sending packet " << packetID << "\n";
 
     socket.sendTo(packet, destAddress, destPort);

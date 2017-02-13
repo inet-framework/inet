@@ -16,13 +16,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
+}}
+
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 //
 // Represents a voice packet used by SimpleVoIPSender / SimpleVoIPReceiver 
 //
-packet SimpleVoIPPacket
+class SimpleVoIPPacket extends FieldsChunk
 {
+    bit chunkLength @overridegetter = bit(0);
     unsigned int talkspurtID;          // identifies the talkspurt
     unsigned int talkspurtNumPackets;  // number of all packets of current talkspurt
     unsigned int packetID;             // 0..talkspurtNumPackets-1

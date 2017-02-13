@@ -103,10 +103,11 @@ void SimpleVoIPReceiver::initialize(int stage)
     }
 }
 
-void SimpleVoIPReceiver::startTalkspurt(SimpleVoIPPacket *packet)
+void SimpleVoIPReceiver::startTalkspurt(Packet *packet)
 {
-    currentTalkspurt.startTalkspurt(packet);
-    simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - packet->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
+    const auto& voice = CHK(packet->peekHeader<SimpleVoIPPacket>());
+    currentTalkspurt.startTalkspurt(voice.get());
+    simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - voice->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
     scheduleAt(endTime, selfTalkspurtFinished);
 }
 
@@ -118,19 +119,20 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         return;
     }
 
-    SimpleVoIPPacket *packet = dynamic_cast<SimpleVoIPPacket *>(msg);
+    Packet *packet = dynamic_cast<Packet *>(msg);
     if (packet == nullptr) {
         // TODO: throw exception instead?
         EV_ERROR << "VoIPReceiver: Unknown incoming message: " << msg->getClassName() << endl;
         delete msg;
         return;
     }
+    const auto& voice = CHK(packet->peekHeader<SimpleVoIPPacket>());
 
     if (currentTalkspurt.status == TalkspurtInfo::EMPTY) {
         // first talkspurt
         startTalkspurt(packet);
     }
-    else if (packet->getTalkspurtID() > currentTalkspurt.talkspurtID) {
+    else if (voice->getTalkspurtID() > currentTalkspurt.talkspurtID) {
         // old talkspurt finished, new talkspurt started
         if (currentTalkspurt.isActive()) {
             cancelEvent(selfTalkspurtFinished);
@@ -138,22 +140,22 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         }
         startTalkspurt(packet);
     }
-    else if (currentTalkspurt.talkspurtID == packet->getTalkspurtID() && currentTalkspurt.status == TalkspurtInfo::ACTIVE) {
+    else if (currentTalkspurt.talkspurtID == voice->getTalkspurtID() && currentTalkspurt.status == TalkspurtInfo::ACTIVE) {
         // talkspurt continued
-        if (!currentTalkspurt.checkPacket(packet))
+        if (!currentTalkspurt.checkPacket(voice.get()))
             throw cRuntimeError("Talkspurt parameters not equals");
-        currentTalkspurt.addPacket(packet);
+        currentTalkspurt.addPacket(voice.get());
     }
     else {
         // packet from older talkspurt, ignore
-        EV_DEBUG << "PACKET ARRIVED TOO LATE: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << ", IGNORED\n\n";
+        EV_DEBUG << "PACKET ARRIVED TOO LATE: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << ", IGNORED\n\n";
         delete msg;
         return;
     }
 
-    EV_DEBUG << "PACKET ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << "\n\n";
+    EV_DEBUG << "PACKET ARRIVED: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << "\n\n";
 
-    simtime_t delay = packet->getArrivalTime() - packet->getVoipTimestamp();
+    simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
     emit(packetDelaySignal, delay);
 
     delete msg;
