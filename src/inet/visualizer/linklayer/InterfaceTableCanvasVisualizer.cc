@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/linklayer/InterfaceTableCanvasVisualizer.h"
 
 namespace inet {
@@ -62,18 +63,50 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisual
     return new InterfaceCanvasVisualization(networkNodeVisualization, figure, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 
+cGate *InterfaceTableCanvasVisualizer::getOutputGate(const InterfaceVisualization *interfaceVisualization)
+{
+    L3AddressResolver addressResolver;
+    auto networkNode = getSimulation()->getModule(interfaceVisualization->networkNodeId);
+    if (networkNode == nullptr)
+        return nullptr;
+    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+    if (interfaceTable == nullptr)
+        return nullptr;
+    auto interfaceEntry = interfaceTable->getInterfaceById(interfaceVisualization->interfaceId);
+    if (interfaceEntry == nullptr || interfaceEntry->getNodeOutputGateId() == -1)
+        return nullptr;
+    cGate *outputGate = networkNode->gate(interfaceEntry->getNodeOutputGateId());
+    if (outputGate == nullptr || outputGate->getChannel() == nullptr)
+        return nullptr;
+    else
+        return outputGate;
+}
+
 void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization)
 {
     InterfaceTableVisualizerBase::addInterfaceVisualization(interfaceVisualization);
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
-    interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize());
+    auto gate = getOutputGate(interfaceVisualization);
+    if (gate != nullptr) {
+        cDisplayString& displayString = gate->getDisplayString();
+        displayString.setTagArg("t", 0, interfaceCanvasVisualization->figure->getText());
+        displayString.setTagArg("t", 1, "l");
+    }
+    else
+        interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize());
 }
 
 void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization)
 {
     InterfaceTableVisualizerBase::removeInterfaceVisualization(interfaceVisualization);
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
-    interfaceCanvasVisualization->networkNodeVisualization->removeAnnotation(interfaceCanvasVisualization->figure);
+    auto gate = getOutputGate(interfaceVisualization);
+    if (gate != nullptr) {
+        cDisplayString& displayString = gate->getDisplayString();
+        displayString.setTagArg("t", 0, "");
+    }
+    else
+        interfaceCanvasVisualization->networkNodeVisualization->removeAnnotation(interfaceCanvasVisualization->figure);
 }
 
 void InterfaceTableCanvasVisualizer::refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry)
