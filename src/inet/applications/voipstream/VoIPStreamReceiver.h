@@ -59,10 +59,10 @@ class INET_API VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual void createConnection(VoIPStreamPacket *vp);
-    virtual void checkSourceAndParameters(VoIPStreamPacket *vp);
+    virtual void createConnection(Packet *vp);
+    virtual void checkSourceAndParameters(Packet *vp);
     virtual void closeConnection();
-    virtual void decodePacket(VoIPStreamPacket *vp);
+    virtual void decodePacket(Packet *vp);
 
     class Connection
     {

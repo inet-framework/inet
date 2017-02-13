@@ -142,7 +142,7 @@ void VoIPStreamSender::initialize(int stage)
 void VoIPStreamSender::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        VoIPStreamPacket *packet;
+        Packet *packet;
 
         if (msg == timer) {
             packet = generatePacket();
@@ -162,7 +162,7 @@ void VoIPStreamSender::handleMessage(cMessage *msg)
             }
         }
         else {
-            packet = check_and_cast<VoIPStreamPacket *>(msg);
+            packet = check_and_cast<Packet *>(msg);
             emit(sentPkSignal, packet);
             socket.sendTo(packet, destAddress, destPort);
         }
@@ -301,7 +301,7 @@ void VoIPStreamSender::openSoundFile(const char *name)
     sampleBuffer.clear(samplesPerPacket * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
 }
 
-VoIPStreamPacket *VoIPStreamSender::generatePacket()
+Packet *VoIPStreamSender::generatePacket()
 {
     readFrame();
 
@@ -312,7 +312,8 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
     int samples = std::min(sampleBuffer.length() / (bytesPerInSample), samplesPerPacket);
     int inBytes = samples * bytesPerInSample;
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
-    VoIPStreamPacket *vp = new VoIPStreamPacket();
+    Packet *pk = new Packet();
+    const auto& vp = std::make_shared<VoIPStreamPacket>();
 
     AVPacket opacket;
     av_init_packet(&opacket);
@@ -345,14 +346,14 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
     vp->getBytes().setDataFromBuffer(opacket.data, opacket.size);
 
     if (isSilent) {
-        vp->setName("SILENCE");
+        pk->setName("SILENCE");
         vp->setType(SILENCE);
-        vp->setByteLength(voipSilencePacketSize);
+        vp->setChunkLength(byte(voipSilencePacketSize));
     }
     else {
-        vp->setName("VOICE");
+        pk->setName("VOICE");
         vp->setType(VOICE);
-        vp->setByteLength(voipHeaderSize + opacket.size);
+        vp->setChunkLength(byte(voipHeaderSize + opacket.size));
     }
 
     vp->setTimeStamp(pktID);
@@ -362,6 +363,8 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
     vp->setSampleBits(pEncoderCtx->bits_per_coded_sample);
     vp->setSamplesPerPacket(samplesPerPacket);
     vp->setTransmitBitrate(compressedBitRate);
+    vp->markImmutable();
+    pk->append(vp);
 
     pktID++;
 
@@ -371,7 +374,7 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
 #else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     av_freep(&frame);
 #endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    return vp;
+    return pk;
 }
 
 bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void *_buf, int samples)

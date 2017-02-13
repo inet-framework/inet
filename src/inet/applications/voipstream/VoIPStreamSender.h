@@ -67,7 +67,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     virtual void finish() override;
 
     virtual void openSoundFile(const char *name);
-    virtual VoIPStreamPacket *generatePacket();
+    virtual Packet *generatePacket();
     virtual bool checkSilence(AVSampleFormat sampleFormat, void *_buf, int samples);
     virtual void readFrame();
 

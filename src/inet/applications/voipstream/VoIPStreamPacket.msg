@@ -21,10 +21,14 @@ cplusplus {{
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
 
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/common/ByteArray.h"
 }};
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 //
 // For the type field of VoIPPacket
@@ -40,8 +44,10 @@ class noncobject ByteArray;
 //
 // Packet type used by VoIPSourceApp and VoIPSinkApp
 //
-packet VoIPStreamPacket
+class VoIPStreamPacket extends FieldsChunk
 {
+    bit chunkLength @overridegetter = bit(0);
+
     int type @enum(VoIPStreamPacketType);
 
     int codec;  // FFmpeg identifier of the codec

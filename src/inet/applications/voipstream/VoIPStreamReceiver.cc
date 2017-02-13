@@ -79,18 +79,19 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
         return;
     }
 
-    VoIPStreamPacket *vp = check_and_cast<VoIPStreamPacket *>(msg);
+    Packet *pk = check_and_cast<Packet *>(msg);
+    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
     bool ok = true;
     if (curConn.offline)
-        createConnection(vp);
+        createConnection(pk);
     else {
-        checkSourceAndParameters(vp);
+        checkSourceAndParameters(pk);
         ok = vp->getSeqNo() > curConn.seqNo && vp->getTimeStamp() > curConn.timeStamp;
     }
 
     if (ok) {
-        emit(rcvdPkSignal, vp);
-        decodePacket(vp);
+        emit(rcvdPkSignal, pk);
+        decodePacket(pk);
     }
     else
         emit(dropPkSignal, msg);
@@ -140,12 +141,13 @@ void VoIPStreamReceiver::Connection::closeAudio()
     outFile.close();
 }
 
-void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
+void VoIPStreamReceiver::createConnection(Packet *pk)
 {
     ASSERT(curConn.offline);
 
-    auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
-    auto ports = vp->getMandatoryTag<L4PortInd>();
+    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
+    auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
+    auto ports = pk->getMandatoryTag<L4PortInd>();
 
     curConn.srcAddr = l3Addresses->getSrcAddress();
     curConn.srcPort = ports->getSrcPort();
@@ -180,12 +182,13 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     emit(connStateSignal, 1);
 }
 
-void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
+void VoIPStreamReceiver::checkSourceAndParameters(Packet *pk)
 {
     ASSERT(!curConn.offline);
 
-    auto l3Addresses = vp->getMandatoryTag<L3AddressInd>();
-    auto ports = vp->getMandatoryTag<L4PortInd>();
+    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
+    auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
+    auto ports = pk->getMandatoryTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
     L3Address destAddr = l3Addresses->getDestAddress();
 
@@ -216,8 +219,9 @@ void VoIPStreamReceiver::closeConnection()
     }
 }
 
-void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
+void VoIPStreamReceiver::decodePacket(Packet *pk)
 {
+    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
     switch (vp->getType()) {
         case VOICE:
             emit(packetHasVoiceSignal, 1);
@@ -243,7 +247,7 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
         curConn.lastPacketFinish += lostSamples * (1.0 / curConn.sampleRate);
         FINGERPRINT_ADD_EXTRA_DATA(lostSamples);
     }
-    emit(delaySignal, curConn.lastPacketFinish - vp->getCreationTime());
+    emit(delaySignal, curConn.lastPacketFinish - pk->getCreationTime());
     curConn.seqNo = newSeqNo;
 
     int len = vp->getBytes().getDataArraySize();
