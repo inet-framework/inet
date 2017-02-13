@@ -33,8 +33,9 @@ selects which interfaces are considered in the visualization. By default, all in
 </p>
 
 <p>
-The <var>iconColor</var> specifies which colors to use for the icons. The possible values are "light" or "dark", for sets of
-light or dark colors, respectively. It is also possible to specify a list of colors, e.g. "green, yellow, blue".
+The <var>iconColor</var> specifies which colors to use for the icons. The possible values are <i>"light"</i> or <i>"dark"</i>, for sets of
+light or dark colors, respectively. It is also possible to specify a list of colors, e.g. <i>"green, yellow, blue"</i>. The default setting
+is <i>"dark"</i>.
 </p>
 
 <h2>Displaying associations</h2>
@@ -93,7 +94,7 @@ The handover is demonstrated using the following network:
 
 <p>
 There are two <var>AccessPoints</var>. The access points are configured to create wireless networks with different SSIDs, these are <var>alpha</var> and <var>bravo</var> for <var>accessPointA</var> and <var>accessPointB</var>, respectively. A <var>WirelessHost</var> moves horizontally back and forth, going out of the range
-of one access point and into the range of another. When that happens, it gets associated with the other access point, i.e. it is
+of one access point and into the range of the other. When that happens, it gets associated with the other access point, i.e. it is
 "handed over". There are also an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and an
 <var>IntegratedVisualizer</var> module.
 </p>
