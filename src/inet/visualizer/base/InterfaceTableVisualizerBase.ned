@@ -35,6 +35,7 @@ package inet.visualizer.base;
 //  - %n network address
 //  - %i InterfaceEntry::info()
 //  - %s InterfaceEntry::str()
+//  - %\ conditional newline for wired interfaces
 //
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableOsgVisualizer, ~IInterfaceTableVisualizer, ~VisualizerBase
 //
@@ -49,7 +50,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
 
-        string format = default("%N: %n (%m)"); // determines what interface data is displayed
+        string format = default("%N %\\%n"); // determines what interface data is displayed
 
         string font = default("<default>"); // interface text font, automatic by default
         string textColor = default("black"); // interface text font color

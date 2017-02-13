@@ -57,6 +57,9 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 's':
             result = interfaceEntry->str();
             break;
+        case '\\':
+            result = interfaceEntry->getNodeOutputGateId() == -1 ? "" : "\n";
+            break;
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
