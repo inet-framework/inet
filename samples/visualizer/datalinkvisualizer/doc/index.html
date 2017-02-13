@@ -37,6 +37,7 @@
     <p> 
         The <code><strong>DatalinkVisualizer</strong></code> keeps track of active data links in a network.
         A link becomes active between two nodes when a packet arrives at the receiver node's data link layer from the source node's data link layer.
+        Data links can be established only between adjacent devices.
         By default links are not displayed, we can enable their visualization by switching the <i>displayLinks</i> parameter to true.
     </p>   
     <p> 
@@ -61,11 +62,11 @@
 
     <p>
         In this configuration we show how to enable the visualization's default look.
-        TODO
+        We visualize data links both in a wired and in a wireless network. 
     </p>
     <p>
-        Both networks contain two hosts, an <code><strong>IPv4NetworkConfigurator</strong></code>, an <code><strong>Ieee80211ScalarRadioMedium</strong></code> and a <code><strong>DataLinkVisualizer</strong></code> module.
-        There is only one difference between the networks. In the wireless configuration the nodes' type is <code><strong>AdhocHost</strong></code>, howewer in the wired network the nodes' type is <code><strong>StandardHost</strong></code>.
+        Both networks contain two hosts, an <code><strong>IPv4NetworkConfigurator</strong></code> module and a <code><strong>DataLinkVisualizer</strong></code> module.
+        There is only two difference between the networks. In the wireless configuration there is an <code><strong>Ieee80211ScalarRadioMedium</strong></code> module and the nodes' type is <code><strong>AdhocHost</strong></code>, howewer in the wired network <code><strong>StandardHost</strong></code> type of nodes communicate with each other.
     </p>
     <p>
         <img width=600 src="DLinkVisuWlessSimple.png">
@@ -75,7 +76,7 @@
     </p>
     <p>
         In both configurations the source host pings the destination host, and an additional line of code enables the <code><strong>DatalinkVisualizer</strong></code> with the <i>displayLinks</i> parameter.
-        All other parameters left on their default.
+        All other parameters are left on their default.
     </p>
     <p>
         When we start the simulation, here is what happens:
@@ -95,7 +96,7 @@
             Mit csinálunk / mi a sample célja?
                 Ebben a példában megmutatjuk hogy kell bekapcsolni a visualizer-t
                 A default kinézetét fogjuk látni
-                TODO: Egy wired és egy wireless példán keresztül is megmutatjuk a vizualizációt
+                Egy wired és egy wireless példán keresztül is megmutatjuk a vizualizációt
                 
             Mi a konfig?
                 Ez a network végig ugyanaz marad
