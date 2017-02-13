@@ -215,7 +215,12 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             if (fieldId == InterfaceEntry::F_IPV4_DATA || fieldId == IPv4InterfaceData::F_IP_ADDRESS) {
                 if (interfaceFilter.matches(interfaceEntry)) {
                     auto interfaceVisualization = getInterfaceVisualization(networkNode, interfaceEntry);
-                    refreshInterfaceVisualization(interfaceVisualization, interfaceEntry);
+                    if (interfaceVisualization == nullptr) {
+                        interfaceVisualization = createInterfaceVisualization(networkNode, interfaceEntry);
+                        addInterfaceVisualization(interfaceVisualization);
+                    }
+                    else
+                        refreshInterfaceVisualization(interfaceVisualization, interfaceEntry);
                 }
             }
         }
