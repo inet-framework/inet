@@ -18,8 +18,7 @@ the number of connections in certain nodes and the whole network. This example d
 </p>
 
 <p>
-The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration
-showcases a more advanced use-case. TODO: The second, more complex configuration shows the more advanced features.
+The example consist of 2 simulation models. The first one demonstrates the basic use of the visualization. The second, more complex configuration shows the more advanced features.
 </p>
 
 <h2>About the visualizer</h2>
@@ -32,21 +31,11 @@ open at a node, thus there can be multiple icons.
 </p>
 
 <p>
-The <var>sourceNodeFilter</var> and <var>destinationNodeFilter</var> parameters specify which connections should be visualized, depending
-on the connection's source and destination node, respectively.
 The <var>sourcePortFilter</var> and <var>destinationPortFilter</var> parameters select connections to be visualized based on the connection's
 source and destination port number, respectively.
 By default, connections with all port numbers in all hosts are visualized.
-</p>
-
-<p>
 The <var>iconColor</var> parameter specifies what icon colors to use for differentiating various connections.
-It takes a list of colors, e.g. "blue, red, green". It also takes a set of colors, either "light" or "dark".
-</p>
-
-<p>
-This parameter takes a set of colors, which is either "light" or "dark", using light or dark colors, respectively.
-Colors can also be listed, e.g. "blue, red, green", to use just these colors for the icons.
+It takes a list of colors, e.g. <i>"blue, red, green"</i>. It also takes a set of colors, either <i>"light"</i> or <i>"dark"</i>.
 </p>
 
 <p>
@@ -90,15 +79,15 @@ The icon representing the end-points of the TCP connection is placed above the h
 <h2>Advanced features of the visualization</h2>
 
 <p>
-This configuration demonstrates the visualization of multiple connections, and filtering nodes and ports. It uses the following network:
+This configuration demonstrates the visualization of multiple connections, and the filtering of nodes and ports. It uses the following network:
 </p>
 
 <img src="complexnetwork.png">
 
 <p>
-There are two <var>StandardHosts</var> connected to a switch, which is connected via a router
+There are two <var>StandardHosts</var> connected to a switch, which is connected via a <var>router</var>
 to another <var>StandardHost</var>, the server. The hosts are configured to connect to the
-server via TCP and send packets to it.
+server via TCP and send packets to it. There is also an <var>IPv4NetworkConfigurator</var> and an <var>IntegratedVisualizer</var> module.
 </p>
 
 <p>
@@ -129,7 +118,7 @@ by their icon color.
 </p>
 
 <p>
-To visualize the connections that use port 22 at the server, the <var>sourcePortFilter</var> should be set to 22. The
+To visualize the connections that use port 22 at the server, the <var>destinationPortFilter</var> should be set to 22. The
 network would look like this:
 </p>
 
