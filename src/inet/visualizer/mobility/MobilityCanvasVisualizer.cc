@@ -115,12 +115,13 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
         auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
         cArcFigure *orientationFigure = nullptr;
         if (displayOrientations) {
-            int size = 32;
+            auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);
+            int radius = rectangle.getSize().getLength() * 1.25 / 2;
             orientationFigure = new cArcFigure("orientation");
             orientationFigure->setTags("orientation");
             orientationFigure->setTooltip("This arc represents the current orientation of the mobility model");
             orientationFigure->setZIndex(zIndex);
-            orientationFigure->setBounds(cFigure::Rectangle(-size, -size, 2 * size, 2 * size));
+            orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
             orientationFigure->setLineColor(orientationLineColor);
             orientationFigure->setLineStyle(orientationLineStyle);
             orientationFigure->setLineWidth(orientationLineWidth);
