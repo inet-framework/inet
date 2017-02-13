@@ -36,7 +36,7 @@ package inet.networklayer.common;
 simple InterfaceTable
 {
     parameters:
-        bool displayAddresses = default(true);  // whether to display IP addresses on links
+        bool displayAddresses = default(false);  // whether to display IP addresses on links
         @display("i=block/table");
         @signal[NF_INTERFACE_CREATED](type=InterfaceEntry);
         @signal[NF_INTERFACE_DELETED](type=InterfaceEntry);
