@@ -47,6 +47,7 @@ class INET_API InterfaceTableCanvasVisualizer : public InterfaceTableVisualizerB
   protected:
     virtual void initialize(int stage) override;
 
+    virtual cGate *getOutputGate(const InterfaceVisualization *interfaceVisualization);
     virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry) override;
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
