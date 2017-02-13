@@ -219,6 +219,7 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
     IPv4InterfaceData *ipv4Data() const { return ipv4data; }
+    IPv4Address getIPv4Address() const;
     IPv6InterfaceData *ipv6Data() const { return ipv6data; }
     GenericNetworkProtocolInterfaceData *getGenericNetworkProtocolData() const { return genericNetworkProtocolData; }
     TRILLInterfaceData *trillData() const { return trilldata; }
