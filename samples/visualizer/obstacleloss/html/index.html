@@ -71,11 +71,21 @@ It contains two <var>AdhocHosts</var>. In the middle of the playground, there is
 with a hollow interior. The hosts are configured to go around the wall on a rectangular path. They circle the wall
 in the clockwise direction. The <var>destinationHost</var> is configured to move with a higher speed than the <var>sourceHost</var>.
 The <var>sourceHost</var> is configured to ping <var>destinationHost</var>.
+The following animation illustrates what happens when the simulation is run:
 </p>
 
-<video controls autoplay loop onclick="this.paused ? this.play() : this.pause();"><source src="obstacleloss3.mp4"></video>
+<video controls autoplay loop onclick="this.paused ? this.play() : this.pause();" src="obstacleloss3.mp4" width=586px height=410px></video>
 
+<p>
+The hosts send ping packets through the structure. The intersections are indicated with yellow. Even when the obstacles are not contiguous,
+the yellow lines are drawn whereever transmissions and the obstacles intersect.
+</p>
 
+<p>
+TODO: the face normal vectors
+</p>
+
+<h2>Further information</h2>
 
 </body>
 
