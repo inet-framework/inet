@@ -16,13 +16,11 @@
 package inet.samples.visualizer.datalinkvisualizer;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.aodv.AODVRouter;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.AdhocHost;
-import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.node.inet.WirelessHost;
-import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.linklayer.DataLinkVisualizer;
@@ -127,5 +125,44 @@ network DatalinkVisualizerComplex
         etherSwitch3.ethg++ <--> Eth100M <--> destination2.ethg++;
         etherSwitch4.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
         etherSwitch2.ethg++ <--> Eth100M <--> destination1.ethg++;
+}
+
+//
+// TODO documentation
+//
+network DynamicDatalinks
+{
+    @display("bgb=660,630");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=100,250");
+        }
+        destination: AODVRouter {
+            @display("p=488.832,512.952");
+        }
+        source: AODVRouter {
+            @display("p=229,46");
+        }
+        aodvRouter1: AODVRouter {
+            @display("p=421.296,295.872");
+        }
+        aodvRouter2: AODVRouter {
+            @display("p=273.36002,440.592");
+        }
+        aodvRouter3: AODVRouter {
+            @display("p=305.52,188.136");
+        }
+        aodvRouter4: AODVRouter {
+            @display("p=562.8,328.032");
+        }
+        aodvRouter5: AODVRouter {
+            @display("p=421.296,77.184");
+        }
 }
 
