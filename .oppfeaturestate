@@ -53,7 +53,7 @@
     <feature enabled="false" id="wireless_examples"/>
     <feature enabled="true" id="visualization"/>
     <feature enabled="false" id="visualization_examples"/>
-    <feature enabled="false" id="VoIPStream"/>
+    <feature enabled="true" id="VoIPStream"/>
     <feature enabled="false" id="VoIPStream_examples"/>
     <feature enabled="false" id="SimpleVoIP"/>
     <feature enabled="false" id="SimpleVoIP_examples"/>
