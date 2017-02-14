@@ -70,15 +70,19 @@
         We visualize data links both in a wired and in a wireless network.
     </p>
     <p>
+        The wired network contains two <var>Standardhost</var> nodes, an <var>IPv4NetworkConfigurator</var> module and a <var>DataLinkVisualizer</var> module.
+        In wireless network the type of the hosts is <var>AdhocHost</var> and there is an additional <var>Ieee80211ScalarRadioMedium</var> module.
+    </p>
+ <!--   <p>
         Both networks contain two hosts, an <var>IPv4NetworkConfigurator</var> module and a <var>DataLinkVisualizer</var> module.
         There is only two difference between the networks. In the wireless configuration there is an <var>Ieee80211ScalarRadioMedium</var> module and the nodes' type is <var>AdhocHost</var>. Howewer in the wired network <var>StandardHost</var> type of nodes communicate with each other.
-    </p>
-    <p align="center">
-        <img width=600 src="DLinkVisuWlessSimple.png">
-    </p>
+    </p>    -->
     <p align="center">
         <img width=600 src="DLinkVisuWiredSimple.png">
     </p>
+    <p align="center">
+        <img width=600 src="DLinkVisuWlessSimple.png">
+    </p>    
     <p>
         In both configurations the source host pings the destination host, and an additional line of code enables the <var>DatalinkVisualizer</var> with the <i>displayLinks</i> parameter.
         <div class="snippet">
@@ -131,10 +135,10 @@
         <img width=600 src="DatalinkVisualizerComplex.png">
     </p>
     <p>
-        The network contains four switches and four hosts, two of which the source and the other two hosts are the destinations.
+        The network contains four switches and four endpoints, two source hosts and two destination hosts.
         The source hosts pings the destination hosts.
-        Data links are enabled by <i>displayLinks</i> parameter.
-        Only the data links of ping messages are shown. To this we use the visualizer's <i>packetFilter</i> parameter.
+        Data links are enabled, but they are filtered. They are displayed only if a ping message is sent.
+        We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters to see better the active links.
         Here is the configuration:
         <div class="snippet">
             # Application parameters<br>
@@ -151,9 +155,17 @@
         </div>
     </p>
     <p>
-        The following animation showed what happens when we start the simulation:
+        The following animation shows what happens when we start the simulation:
+    </p>
+    <p align="center">        
         TODO: gif
-        
+    </p>
+    <p>
+        Only ping messages activate the data links between the nodes because of the <i>packetFilter</i>.
+        The data links are represented by solid arrows.
+        The arrows start to fade out in simulation time, but they don't disappear completely, because the fadeOutTime is greater than the sending interval of ping messages.
+        Only one data link can be activated per direction between the nodes.
+        When another packet is sent between the same nodes, the same data link is activated.
     </p>
 
     <!--
@@ -170,15 +182,35 @@
 
             Mi az eredmény?
                 gif
-                A ping üzenetek aktiválják a node-ok között a data linkeket.
+                A packetFilter miatt csak a ping üzenetek aktiválják a node-ok között a data linkeket, az ARP üzenetek nem.
                 Ezek folytonos nyilakként jelennek meg és a fadeOutTime-nak megfelelő idő alatt elhalványodnak.
-                
+                A node-ok között egy irányba csak egy aktív data link aktiválódhat, másik ping üzenet ugyanazt a linket aktiválja újra.
         -->
 
     <p><h2>Displaying dynamic data links</h2></p>
 
     <p>
+        The goal of this configuration is to demonstrates 
     </p>
+
+    <!--
+            Mit csinálunk / mi a sample célja?
+                A cél a DatalinkVisualizer működésének bemutatása komplex hálózatban
+                Megmutatjuk a szűrő funkció(kat)
+                Megmutatjuk, hogy mi történik, ha több csomag is ugyanazok között a pontok között több data link aktiválódik
+                
+            Mi a konfig?
+                A hálózatban 4 switch és 4 host van, amiből kettő source és kettő dest.
+                A source-ok pingelik a dest-eket.
+                A data linkeket bekapcsoljuk a displayLinks-el.
+                Csak a ping data link-jeit mutatjuk meg, használjuk a szűrő funkciót.
+
+            Mi az eredmény?
+                gif
+                A packetFilter miatt csak a ping üzenetek aktiválják a node-ok között a data linkeket, az ARP üzenetek nem.
+                Ezek folytonos nyilakként jelennek meg és a fadeOutTime-nak megfelelő idő alatt elhalványodnak.
+                A node-ok között egy irányba csak egy aktív data link aktiválódhat, másik ping üzenet ugyanazt a linket aktiválja újra.
+        -->
 
 <!-- Alcim minta   
     <p><h2>Sample</h2></p>
