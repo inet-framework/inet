@@ -60,6 +60,8 @@ void MediumCanvasVisualizer::initialize(int stage)
             communicationHeat->setTags("successful_reception heat");
             canvas->addFigure(communicationHeat, 0);
         }
+        animationSpeedInterpolator.setCurrentAnimationSpeed(0);
+        animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, 0, 0);
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
     }
     else if (stage == INITSTAGE_LAST) {
@@ -87,28 +89,66 @@ void MediumCanvasVisualizer::initialize(int stage)
 
 void MediumCanvasVisualizer::refreshDisplay() const
 {
-    if (displaySignals)
+    if (displaySignals) {
         for (auto transmission : transmissions)
             if (matchesTransmission(transmission))
                 refreshSignalFigure(transmission);
+        const_cast<MediumCanvasVisualizer *>(this)->setAnimationSpeed();
+    }
     if (displayCommunicationHeat)
         communicationHeat->coolDown();
 }
 
-void MediumCanvasVisualizer::setAnimationSpeed() const
+void MediumCanvasVisualizer::setAnimationSpeed()
 {
-    double animationSpeed = DBL_MAX;
+    AnimationPosition currentPosition;
+    SignalInProgress newSignalInProgress = SIP_NONE;
     if (displaySignals) {
         for (auto transmission : transmissions) {
             if (matchesTransmission(transmission)) {
-                if (isSignalPropagationInProgress(transmission))
-                    animationSpeed = std::min(animationSpeed, signalPropagationAnimationSpeed);
-                else if (isSignalTransmissionInProgress(transmission))
-                    animationSpeed = std::min(animationSpeed, signalTransmissionAnimationSpeed);
+                if (isSignalPropagationInProgress(transmission)) {
+                    newSignalInProgress = SIP_PROPAGATION;
+                    break;
+                }
+                if (isSignalTransmissionInProgress(transmission)) {
+                    newSignalInProgress = SIP_TRANSMISSION;
+                }
             }
         }
     }
-    animationSpeed = animationSpeed == DBL_MAX ? 0 : animationSpeed;
+    if (lastSignalInProgress == SIP_NONE) {
+        if (newSignalInProgress == SIP_NONE) {
+            if (animationSpeedInterpolator.getCurrentAnimationSpeed() == animationSpeedInterpolator.getTargetAnimationSpeed())
+                animationSpeedInterpolator.setAnimationSpeed(0);
+        }
+        else if (newSignalInProgress == SIP_PROPAGATION)
+            animationSpeedInterpolator.setAnimationSpeed(signalPropagationAnimationSpeed);
+        else if (newSignalInProgress == SIP_TRANSMISSION)
+            animationSpeedInterpolator.setAnimationSpeed(signalTransmissionAnimationSpeed);
+    }
+    else if (lastSignalInProgress == SIP_PROPAGATION) {
+        if (newSignalInProgress == SIP_NONE) {
+            animationSpeedInterpolator.setCurrentAnimationSpeed(signalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, signalTransmissionAnimationSpeed);
+        }
+        else if (newSignalInProgress == SIP_PROPAGATION)
+            ; // void
+        else if (newSignalInProgress == SIP_TRANSMISSION) {
+            animationSpeedInterpolator.setCurrentAnimationSpeed(signalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, signalTransmissionAnimationSpeed);
+        }
+    }
+    else if (lastSignalInProgress == SIP_TRANSMISSION) {
+        if (newSignalInProgress == SIP_NONE)
+            animationSpeedInterpolator.setAnimationSpeed(0);
+        else if (newSignalInProgress == SIP_PROPAGATION)
+            animationSpeedInterpolator.setAnimationSpeed(signalPropagationAnimationSpeed);
+        else if (newSignalInProgress == SIP_TRANSMISSION)
+            ; // void
+    }
+    lastSignalInProgress = newSignalInProgress;
+    double animationSpeed = animationSpeedInterpolator.getCurrentAnimationSpeed();
+    ASSERT(!std::isnan(animationSpeed));
     visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
 }
 
@@ -227,7 +267,7 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
                 signalFigure->setInnerRx(endRadius);
                 signalFigure->setInnerRy(endRadius);
                 signalFigure->setWaveOffset(offset);
-                signalFigure->setWaveOpacityFactor(std::min(1.0, signalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor) / 2);
+                signalFigure->setWaveOpacityFactor(std::min(1.0, signalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor));
                 signalFigure->refresh();
                 break;
             }

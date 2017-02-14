@@ -26,6 +26,13 @@ namespace visualizer {
 
 class INET_API AnimationPosition
 {
+  public:
+    enum TimeType {
+        SIMULATION_TIME,
+        ANIMATION_TIME,
+        REAL_TIME
+    };
+
   protected:
     simtime_t simulationTime;
     double animationTime;
@@ -41,6 +48,8 @@ class INET_API AnimationPosition
     simtime_t getSimulationTime() const { return simulationTime; }
     double getAnimationTime() const { return animationTime; }
     double getRealTime() const { return realTime; }
+
+    double getTime(TimeType type) const;
 
     AnimationPosition& operator=(const AnimationPosition& other);
 };

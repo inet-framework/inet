@@ -51,6 +51,7 @@ void MediumVisualizerBase::initialize(int stage)
         signalColorSet.parseColors(par("signalColor"));
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+        signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
         signalPropagationAdditionalTime = par("signalPropagationAdditionalTime");
         displayTransmissions = par("displayTransmissions");
         displayReceptions = par("displayReceptions");

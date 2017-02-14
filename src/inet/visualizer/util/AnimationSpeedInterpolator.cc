@@ -30,12 +30,12 @@ static double smootherstep(double edge0, double edge1, double x)
 double AnimationSpeedInterpolator::getCurrentAnimationSpeed() const
 {
     AnimationPosition currentAnimationPosition;
-    double currentRealTime = currentAnimationPosition.getRealTime();
-    if (currentRealTime >= targetRealTime)
+    double currentTime = currentAnimationPosition.getTime(targetType);
+    if (currentTime >= targetTime)
         return targetAnimationSpeed;
     else {
-        double lastRealTime = lastAnimationPosition.getRealTime();
-        double alpha = smootherstep(lastRealTime, targetRealTime, currentRealTime);
+        double lastTime = lastAnimationPosition.getTime(targetType);
+        double alpha = smootherstep(lastTime, targetTime, currentTime);
         return (1 - alpha) * lastAnimationSpeed + alpha * targetAnimationSpeed;
     }
 }
@@ -46,17 +46,17 @@ void AnimationSpeedInterpolator::setCurrentAnimationSpeed(double currentAnimatio
     lastAnimationSpeed = currentAnimationSpeed;
 }
 
-void AnimationSpeedInterpolator::setTargetAnimationSpeed(double realTimeDelta, double targetAnimationSpeed)
+void AnimationSpeedInterpolator::setTargetAnimationSpeed(AnimationPosition::TimeType targetType, double targetTime, double targetAnimationSpeed)
 {
-    AnimationPosition currentAnimationPosition;
-    targetRealTime = currentAnimationPosition.getRealTime() + realTimeDelta;
+    this->targetType = targetType;
+    this->targetTime = targetTime;
     this->targetAnimationSpeed = targetAnimationSpeed;
 }
 
 void AnimationSpeedInterpolator::setAnimationSpeed(double animationSpeed)
 {
     setCurrentAnimationSpeed(animationSpeed);
-    setTargetAnimationSpeed(0, animationSpeed);
+    setTargetAnimationSpeed(AnimationPosition::REAL_TIME, 0, animationSpeed);
 }
 
 } // namespace visualizer

@@ -26,6 +26,7 @@
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/util/AnimationSpeedInterpolator.h"
 
 namespace inet {
 
@@ -54,6 +55,13 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
 
     /** @name Internal state */
     //@{
+    enum SignalInProgress {
+        SIP_NONE,
+        SIP_PROPAGATION,
+        SIP_TRANSMISSION,
+    };
+    SignalInProgress lastSignalInProgress = SIP_NONE;
+    AnimationSpeedInterpolator animationSpeedInterpolator;
     NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
     /**
      * The list of ongoing transmissions.
@@ -84,7 +92,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-    virtual void setAnimationSpeed() const;
+    virtual void setAnimationSpeed();
 
     virtual cFigure *getRadioFigure(const IRadio *radio) const;
     virtual void setRadioFigure(const IRadio *radio, cFigure *figure);
