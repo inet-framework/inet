@@ -78,13 +78,22 @@
         There is only two difference between the networks. In the wireless configuration there is an <var>Ieee80211ScalarRadioMedium</var> module and the nodes' type is <var>AdhocHost</var>. Howewer in the wired network <var>StandardHost</var> type of nodes communicate with each other.
     </p>    -->
     <p align="center">
-        <img width=600 src="DLinkVisuWiredSimple.png">
+        <img width=600 src="DatalinkVisualizerWiredSimple.png">
     </p>
     <p align="center">
-        <img width=600 src="DLinkVisuWlessSimple.png">
+        <img width=600 src="DatalinkVisualizerWirelessSimple.png">
     </p>    
     <p>
-        In both configurations the source host pings the destination host, and an additional line of code enables the <var>DatalinkVisualizer</var> with the <i>displayLinks</i> parameter.
+        In both configurations the source host pings the destination host:
+        <div class="snippet">
+            *.wiredSource.numPingApps = 1<br>
+            *.wiredSource.pingApp[0].destAddr = "wiredDestination"
+        </div>
+        <div class="snippet">
+            *.wirelessSource.numPingApps = 1<br>
+            *.wirelessSource.pingApp[0].destAddr = "wirelessDestination"
+        </div>
+        An additional line of code enables the <var>DatalinkVisualizer</var>.
         <div class="snippet">
             *.linkVisualizer.*.displayLinks = true
         </div>
@@ -128,16 +137,17 @@
 
     <p>
         This configuration demonstrates the visualization of data links in a non-trivial network.
-        In this simulation we also show how the filters work.
+        In this simulation we also show how the <i>packetFilter</i> work.
         The network for this configuration is here:
     </p>
     <p align="center">
         <img width=600 src="DatalinkVisualizerComplex.png">
     </p>
     <p>
-        The network contains four switches and four endpoints, two source hosts and two destination hosts.
-        The source hosts pings the destination hosts.
-        Data links are enabled, but they are filtered. They are displayed only if a ping message is sent.
+        The network has an <var>IPv4NetworkConfigurator</var> module and an <var>IntegratedVisualizer</var> module.
+        The topology consists of four switches and four endpoints: two source hosts and two destination hosts.
+        The sources ping the destinations.
+        Data links are enabled, but they are filtered. Links are displayed only if a ping message is sent.
         We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters to see better the active links.
         Here is the configuration:
         <div class="snippet">
@@ -190,26 +200,68 @@
     <p><h2>Displaying dynamic data links</h2></p>
 
     <p>
-        The goal of this configuration is to demonstrates 
+        The goal of this configuration is displaying dynamically built data links in a wireless environment.
+        Here is the network for this configuration:
     </p>
-
+    <p align="center">
+        <img src="DynamicDatalinks.png">
+    </p>
+    <p>
+        The type of all nodes is <var>AODVRouter</var>.
+        These ad hoc nodes are placed randomly on the playground and they move also randomly between borders.
+        The source node has a ping application, that sends ping messages in every seconds.
+        Communication range is reduced to get a non-trivial path between source and destination.
+        Here is the configuration:
+        <div class="snippet">
+            # Application parameters<br>
+            *.source.numPingApps = 1<br>
+            *.source.pingApp[0].destAddr = "destination"<br>
+            <br>
+            # mobility parameters<br>
+            *.*.mobilityType = "MassMobility"<br>
+            *.*.mobility.speed = 5mps<br>
+            *.*.mobility.changeAngleBy = uniform(-45deg, 45deg)<br>
+            *.*.mobility.changeInterval = exponential(100s)<br>
+            *.*.mobility.constraintAreaMinX = 200m<br>
+            *.*.mobility.constraintAreaMinY = 40m<br>
+            *.*.mobility.constraintAreaMinZ = 0m<br>
+            *.*.mobility.constraintAreaMaxX = 650m<br>
+            *.*.mobility.constraintAreaMaxY = 600m<br>
+            *.*.mobility.constraintAreaMaxZ = 0m<br>
+            <br>
+            # wlan parameters<br>
+            *.*.wlan[*].radio.transmitter.power = 2mW<br>
+            <br>
+            # Visualizer parameters<br>
+            *.visualizer.*.dataLinkVisualizer.displayLinks = true<br>
+            *.visualizer.*.dataLinkVisualizer.packetFilter = "ping*"<br>
+            *.visualizer.*.dataLinkVisualizer.fadeOutMode = "simulationTime"<br>
+            *.visualizer.*.dataLinkVisualizer.fadeOutTime = 1.4s<br>
+        </div>
+    </p>
+    <p>
+        The following animation illustrates what happens when the simulation is run: 
+    </p>
+    <p align="center">        
+        TODO: gif
+    </p>
+    <p>
+        The nodes exchange routing informations, then the source starts to ping the destination.
+        When a ping message reaches the next node's data link layer, the link is shown between the nodes.
+        If the route is changed between the source and the destination new data links are activated.
+    </p>
     <!--
             Mit csinálunk / mi a sample célja?
-                A cél a DatalinkVisualizer működésének bemutatása komplex hálózatban
-                Megmutatjuk a szűrő funkció(kat)
-                Megmutatjuk, hogy mi történik, ha több csomag is ugyanazok között a pontok között több data link aktiválódik
+                A cél a dinamikusan felépülő data linkek kirajzolása.
                 
             Mi a konfig?
-                A hálózatban 4 switch és 4 host van, amiből kettő source és kettő dest.
-                A source-ok pingelik a dest-eket.
-                A data linkeket bekapcsoljuk a displayLinks-el.
-                Csak a ping data link-jeit mutatjuk meg, használjuk a szűrő funkciót.
+                Az összes node aodvrouter, ezeket raktuk le a playgroundra.
+                Van egy source és van egy destination, ping üzenetek mennek, erre szűr a DatalinkVisualizer.
+                
 
             Mi az eredmény?
                 gif
-                A packetFilter miatt csak a ping üzenetek aktiválják a node-ok között a data linkeket, az ARP üzenetek nem.
-                Ezek folytonos nyilakként jelennek meg és a fadeOutTime-nak megfelelő idő alatt elhalványodnak.
-                A node-ok között egy irányba csak egy aktív data link aktiválódhat, másik ping üzenet ugyanazt a linket aktiválja újra.
+                
         -->
 
 <!-- Alcim minta   
