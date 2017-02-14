@@ -35,6 +35,20 @@ AnimationPosition::AnimationPosition(simtime_t simulationTime, double animationT
 {
 }
 
+double AnimationPosition::getTime(TimeType type) const
+{
+    switch (type) {
+        case SIMULATION_TIME:
+            return simulationTime.dbl();
+        case ANIMATION_TIME:
+            return animationTime;
+        case REAL_TIME:
+            return realTime;
+        default:
+            throw cRuntimeError("Unknown time type");
+    }
+}
+
 double AnimationPosition::computeRealTime() const
 {
     struct timeval tv;

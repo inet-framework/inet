@@ -31,15 +31,19 @@ class INET_API AnimationSpeedInterpolator
     double lastAnimationSpeed = NaN;
     AnimationPosition lastAnimationPosition;
 
+    AnimationPosition::TimeType targetType;
+    double targetTime = NaN;
     double targetAnimationSpeed = NaN;
-    double targetRealTime = NaN;
 
   public:
     double getCurrentAnimationSpeed() const;
     void setCurrentAnimationSpeed(double currentAnimationSpeed);
 
+    AnimationPosition::TimeType getTargetType() const { return targetType; }
+    double getTargetTime() const { return targetTime; }
+
     double getTargetAnimationSpeed() const { return targetAnimationSpeed; }
-    void setTargetAnimationSpeed(double realTimeDelta, double targetAnimationSpeed);
+    void setTargetAnimationSpeed(AnimationPosition::TimeType targetType, double targetTime, double targetAnimationSpeed);
 
     void setAnimationSpeed(double animationSpeed);
 };

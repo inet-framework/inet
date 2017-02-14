@@ -52,6 +52,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     ColorSet signalColorSet;
     double signalPropagationAnimationSpeed = NaN;
     double signalTransmissionAnimationSpeed = NaN;
+    double signalAnimationSpeedChangeTime = NaN;
     double signalPropagationAdditionalTime = NaN;
     bool displayTransmissions = false;
     bool displayReceptions = false;
