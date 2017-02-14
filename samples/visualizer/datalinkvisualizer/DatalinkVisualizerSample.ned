@@ -29,6 +29,32 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 // TODO documentation
 //
+network DatalinkVisualizerWiredSimple
+{
+    @display("bgb=700,350");
+    submodules:
+        linkVisualizer: DataLinkVisualizer {
+            parameters:
+                @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=100,150");
+        }
+        wiredSource: StandardHost {
+            @display("p=300,150");
+        }
+        wiredDestination: StandardHost {
+            @display("p=600,150");
+        }
+    connections:
+        wiredSource.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
+}
+
+
+//
+// TODO documentation
+//
 network DatalinkVisualizerWirelessSimple
 {
     @display("bgb=700,350");
@@ -51,31 +77,6 @@ network DatalinkVisualizerWirelessSimple
         wirelessDestination: AdhocHost {
             @display("p=600,150");
         }
-}
-
-//
-// TODO documentation
-//
-network DatalinkVisualizerWiredSimple
-{
-    @display("bgb=700,350");
-    submodules:
-        linkVisualizer: DataLinkVisualizer {
-            parameters:
-                @display("p=100,50");
-        }
-        configurator: IPv4NetworkConfigurator {
-            parameters:
-                @display("p=100,150");
-        }
-        wiredSource: StandardHost {
-            @display("p=300,150");
-        }
-        wiredDestination: StandardHost {
-            @display("p=600,150");
-        }
-    connections:
-        wiredSource.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
 }
 
 
