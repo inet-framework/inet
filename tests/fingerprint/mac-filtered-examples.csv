@@ -1,0 +1,439 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            76b0-9ba8/tplx
+/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            230c-2515/tplx
+# /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,           0000-0000    # interactive config, needed a *.numHosts parameter
+/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           ccf4-1be0/tplx
+# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
+# /examples/adhoc/qos/,                -f omnetpp.ini -c MacBase -r 0,                100s,            0000-0000   # MacBase extended
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             4e75-d54a/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             82c5-6430/tplx
+# /examples/adhoc/qos/,                -f omnetpp.ini -c Edca -r 0,                   100s,            0000-0000   # Edca extended
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             5d81-187c/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             520d-4173/tplx
+
+/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          8b6a-6824/tplx
+/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          6153-37e1/tplx
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          4f88-7ce4/tplx
+/examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,          92b3-3134/tplx
+/examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,          f885-3594/tplx
+/examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0,              100s,          a966-4764/tplx
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ -r 0,               100s,          3190-dd05/tplx
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0,              100s,          9856-c0c7/tplx
+/examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          3c8f-6fac/tplx
+/examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          9947-3bb7/tplx
+
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           429f-ff5b/tplx
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           5f8a-e029/tplx
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           2cad-0e7e/tplx
+/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             e0d4-e38c/tplx
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             1880-4c37/tplx
+/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           f63d-8b14/tplx
+/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           2ddc-15a5/tplx
+
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           fd0f-6c4c/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            3249-28f9/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            00bb-3a7f/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            baea-6c2a/tplx
+
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             6f98-b9d9/tplx
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             1e85-cd69/tplx
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             9fa8-8d10/tplx
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp51 -r 0,                  10s,             ed9e-62d6/tplx
+
+# /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0000-0000    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0,       100s,         0000-0000    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0000-0000    # pcap devices not supported
+# /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0000-0000    # pcap devices not supported
+
+/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            4448-9eb4/tplx
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            726c-d1ea/tplx
+/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            b61d-8d72/tplx
+# /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0000-0000   ,# not a complete simulations, defaults.ini included by other ini files
+/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             8004-ed8b/tplx
+/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            3682-ecd7/tplx
+/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             71a3-6014/tplx
+/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            3682-ecd7/tplx
+/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            3682-ecd7/tplx
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              1039-318e/tplx
+/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            ab7d-1a9c/tplx
+/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            80b6-e1d7/tplx
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           8e25-3130/tplx
+/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            ebc8-853c/tplx
+
+/examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            5b8f-14e1/tplx
+
+/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,     33b7-ed9b/tplx
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,      b012-af31/tplx
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,      ddd3-2194/tplx
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,      f43c-c122/tplx
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,      7930-7cc0/tplx
+/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,      1e88-b1c5/tplx
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,           50000s,      d94a-b6ef/tplx
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,         50000s,      6382-4d81/tplx
+
+# /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0000-0000   # LargeNet extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0000-0000   # RSTP extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c STP -r 0,                    100s,            0000-0000   # STP extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c Switch3RootByPriority -r 0,  100s,            0000-0000   # Switch3RootByPriority extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c Switch7to4BySrcPriority -r 0, 100s,           0000-0000   # Switch7to4BySrcPriority extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c TopologyChange -r 0,         100s,            0000-0000   # TopologyChange extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c LinkReconnect -r 0,          100s,            0000-0000   # LinkReconnect extended
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,          5fc8-ce61/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,          d014-1543/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,       682c-1e29/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,        5fcb-3cc3/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,     ba5f-26e3/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 180s,      586e-abd4/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,          6a0d-f912/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,          d872-dfe4/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,          db42-c52d/tplx
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,          b75b-61c4/tplx
+
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             efc4-eff5/tplx
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             9317-7aeb/tplx
+
+/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             8ae4-9979/tplx
+
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             54aa-1dfa/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             f433-5d56/tplx
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             85ac-df6f/tplx
+
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            5b36-f82f/tplx
+/examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             7349-3e4f/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             9d93-9160/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             96bb-654a/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             f3f1-9633/tplx
+/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        2567-d386/tplx
+
+/examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            049f-3c69/tplx
+
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          b314-eb7d/tplx
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          3374-226d/tplx
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             5570-562f/tplx
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              2ceb-dd4e/tplx
+# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
+
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          1f99-0a66/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          0e06-8d2a/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          786a-d7bf/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          3173-7645/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          507a-714c/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          e2ac-4b55/tplx
+/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          d0bd-2554/tplx
+/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          3e43-e78c/tplx
+
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            a690-63c2/tplx
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            38d5-d7c6/tplx
+
+/examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4edf-9714/tplx
+
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             852a-c464/tplx
+
+/examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           6f41-65fd/tplx
+
+/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           82df-6ad1/tplx
+
+/examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         d718-76dc/tplx
+/examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           50s,             f2c0-8a0b/tplx
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             6cdd-f008/tplx
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             86f4-8488/tplx
+/examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             da60-1129/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            f7c1-5932/tplx
+/examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           1523-72fa/tplx
+/examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             dbcf-43c2/tplx
+
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,          458d-5335/tplx
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,          0958-258f/tplx
+
+/examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           f042-928b/tplx
+
+/examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            8457-a7ed/tplx
+
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0,                   100s,            6fab-4b9a/tplx
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            4f9f-6cc2/tplx
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            8a00-1828/tplx
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            8f40-9c16/tplx
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            0000-0000   # TCP_common extended
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            8d66-beaf/tplx
+
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              ed86-c129/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 1, 5s,              ed86-c129/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0, 5s,              f19b-9808/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 1, 5s,              f19b-9808/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0, 3s,             26d7-b9ce/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 1, 3s,             26d7-b9ce/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 0, 3s,             b315-c124/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 1, 3s,             b315-c124/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 0, 2s,             5239-e1eb/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 1, 2s,             0f0f-37a1/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 0, 2s,             e957-a478/tplx
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 1, 2s,             2030-3382/tplx
+
+/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_externalqueue -r 0,     5s,              bbad-3ab9/tplx
+/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_internalQueue -r 0,     5s,              b0cf-2f48/tplx
+
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            b177-0c3a/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            b177-0c3a/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            1c17-462c/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            b177-0c3a/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 0,              500s,            7531-c1dd/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 1,              500s,            2803-dd6e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 2,              500s,            c88b-723f/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 3,              500s,            0deb-8697/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 4,              500s,            0b0f-d414/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 5,              500s,            b609-959e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 6,              500s,            61a6-f98e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 0,           500s,            742d-d50e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 1,           500s,            0641-3377/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 2,           500s,            db7f-f39d/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 3,           500s,            cf8a-44b8/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 4,           500s,            366f-4b6e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 5,           500s,            549b-1522/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 6,           500s,            b95e-410e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 0,             500s,            7531-c1dd/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 1,             500s,            2803-dd6e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 2,             500s,            c88b-723f/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 3,             500s,            0deb-8697/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 4,             500s,            0b0f-d414/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 5,             500s,            b609-959e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 6,             500s,            61a6-f98e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 0,             500s,            7988-4970/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 1,             500s,            b21a-9c70/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 2,             500s,            2313-931c/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 3,             500s,            1456-5916/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 4,             500s,            7d1f-1c75/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 5,             500s,            66d6-fa7a/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 6,             500s,            5378-f70f/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0,          500s,            112f-568f/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 1,          500s,            1b5a-fc2b/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 2,          500s,            750c-21ac/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 3,          500s,            7a86-08a0/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 4,          500s,            4c1f-67d2/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 5,          500s,            ccc5-9543/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 6,          500s,            95db-9b56/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 0,              500s,            dc5e-c01f/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 1,              500s,            0da8-f5da/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 2,              500s,            1a93-dae6/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 3,              500s,            05f2-7c6e/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 4,              500s,            09e0-af64/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            5958-7425/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            16fb-db69/tplx
+
+/examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0,                    1.5s,            da02-c329/tplx
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0,                    1.5s,            d4ab-c679/tplx
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0,                  1.5s,            1836-aa46/tplx
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Four -r 0,                   1.5s,            9fce-a3e4/tplx
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Five -r 0,                   1.5s,            dca7-2c0a/tplx
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Six -r 0,                    1.5s,            887d-e6d4/tplx
+
+/examples/inet/tcptimestamps/,       -f omnetpp.ini -c One -r 0,                    1.5s,            a5a4-9e9f/tplx
+/examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0,                    1.5s,            667f-ddca/tplx
+
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            06de-6975/tplx
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            c29e-9fab/tplx
+
+/examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           f627-7ba6/tplx
+
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,              100s,            f7b6-1ac5/tplx
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,         100s,            6a82-56be/tplx
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,         100s,            9cde-e714/tplx
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,            100s,            d47e-4544/tplx
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,       100s,            d14d-e2fa/tplx
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,       100s,            340e-74f2/tplx
+/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            96a9-64b7/tplx
+
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          896a-68de/tplx
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             d98f-3a25/tplx
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             2092-041f/tplx
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             db5f-b8ff/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           cd51-cd0a/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           26de-bc68/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            4c11-bb60/tplx
+
+### /examples/manetrouting/* : see manet.csv
+
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             615b-d512/tplx
+
+/examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          72f8-5c0b/tplx
+/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          ce84-30b6/tplx
+/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    10000s,          5e8f-b884/tplx      # do not move nodes simtime always 0 at all events
+/examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0,         10000s,          4b3c-6272/tplx
+/examples/mobility/,                 -f omnetpp.ini -c CircleMobility1 -r 0,        10000s,          910a-0363/tplx
+/examples/mobility/,                 -f omnetpp.ini -c CircleMobility2 -r 0,        10000s,          910a-0363/tplx
+# /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility -r 0,     ---100s,          0000-0000   # ConstSpeedMobility extended
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility01 -r 0,   10000s,          2f65-d1f5/tplx
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1 -r 0,    10000s,          2d97-5865/tplx
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility10 -r 0,   10000s,          063d-aae4/tplx
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility100 -r 0,  10000s,          e07c-cf8a/tplx
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1000 -r 0, 10000s,          e07c-cf8a/tplx
+/examples/mobility/,                 -f omnetpp.ini -c GaussMarkovMobility -r 0,    10000s,          4b3c-6272/tplx
+# /examples/mobility/,                 -f omnetpp.ini -c LinearMobility -r 0,         ---100s,         0000-0000   # LinearMobility extended
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility01 -r 0,       10000s,          4860-beb1/tplx
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility1 -r 0,        10000s,          c433-b32d/tplx
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility10 -r 0,       10000s,          ecf3-5334/tplx
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility100 -r 0,      10000s,          fcd5-da2e/tplx
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility1000 -r 0,     10000s,          380f-162e/tplx
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accdown -r 0, 10000s,          ce84-30b6/tplx
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accup -r 0,   10000s,          4860-beb1/tplx
+/examples/mobility/,                 -f omnetpp.ini -c MassMobility -r 0,           5000s,           b764-ab4a/tplx
+/examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,        bb94-612c/tplx
+/examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0,         10000s,          7e9a-4c42/tplx
+/examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0,         10000s,          5717-6286/tplx
+/examples/mobility/,                 -f omnetpp.ini -c RandomWPMobility -r 0,       5000s,           fb98-8029/tplx
+/examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          4860-beb1/tplx
+/examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0000         # (zero time simulated)
+/examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0000         # (zero time simulated)
+/examples/mobility/,                 -f omnetpp.ini -c TractorMobility -r 0,        10000s,          4b3c-6272/tplx
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility1 -r 0,        10000s,          0e28-b6e3/tplx
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility2 -r 0,        10000s,          67c8-fee0/tplx
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility3 -r 0,        10000s,          a39d-5092/tplx
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility4 -r 0,        10000s,          9511-7d84/tplx
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0,        10000s,          9511-7d84/tplx
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          0e4c-de72/tplx
+
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             fbc3-72aa/tplx
+# /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0000-0000    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
+/examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             bed9-0d53/tplx
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            ed8d-6154/tplx
+/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             195a-f44b/tplx
+/examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             6155-9c14/tplx
+/examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             0754-d9a0/tplx
+
+/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         6364-0369/tplx
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         1001-eb3d/tplx
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         8f7c-9834/tplx
+/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         38f9-dbc9/tplx
+
+/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,          1b3b-abbd/tplx
+/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,          1b3b-abbd/tplx
+/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,          1b3b-abbd/tplx
+
+/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,             18ad-3cda/tplx
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,             00c1-0e10/tplx
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,             2da2-c5f4/tplx
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,             2452-5e4e/tplx
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,             1d6d-0cfa/tplx
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,             0546-fb09/tplx
+# /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0000-0000    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0,                 1000s,            28b7-2098/tplx
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,            e718-ddc0/tplx
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,            2953-84e7/tplx
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,             3e3f-8ee3/tplx
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,             e3a2-2e79/tplx
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,             cb19-6f8d/tplx
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,             cb19-6f8d/tplx
+
+/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            d77e-7210/tplx
+/examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            87f6-d555/tplx
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            9f3d-6868/tplx
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            6bd8-ee17/tplx
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario1 -r 0,              100s,            fa67-565f/tplx
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario2 -r 0,              150s,            811c-1e3d/tplx
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            baec-0b7c/tplx
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            4037-93cf/tplx
+
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            1306-177a/tplx
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            5437-2061/tplx
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            9c21-f898/tplx
+/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,          0389-dd1d/tplx
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,          0b75-0a6b/tplx
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,          a88b-4231/tplx
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,          c4d3-d03d/tplx
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,          af18-4f01/tplx
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,          2624-d0b8/tplx
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,          905b-6989/tplx
+
+# /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
+# /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0000-0000    # unstable fingerprint
+# /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           0000-0000    # unstable fingerprint
+# /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
+
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,             93e9-5083/tplx
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,             7fd4-8fbe/tplx
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,             96c9-198d/tplx
+
+/examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,             a19f-1323/tplx
+/examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,             219a-0a01/tplx
+/examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,             2bcd-3dec/tplx
+
+### /examples/voipstream/* : see voipstream.csv
+
+/examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           c881-2bc9/tplx
+
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         1ad6-bb33/tplx
+
+/examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         9d1f-07b8/tplx
+
+/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        105b-ae76/tplx
+
+/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                100s,         ac77-41a1/tplx
+
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           a3e7-9311/tplx
+
+/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         a46c-a0c4/tplx
+# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,          20df-6d1e/tplx
+# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
+/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,          71b3-f83f/tplx
+# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000   # [Config Ping2] # __interactive__
+
+/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      64be-1bdc/tplx
+/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0, 100s,   0184-24c6/tplx
+
+/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            eccb-6432/tplx
+
+/examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            4163-3a1d/tplx
+/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            8955-9a2e/tplx
+/examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            89b7-e354/tplx
+
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractBMac -r 0,           ---100s,         0000-0000   # AbstractBMac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractLMac -r 0,           ---100s,         0000-0000   # AbstractLMac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractCSMA -r 0,           ---100s,         0000-0000   # AbstractCSMA extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211Mac -r 0,   ---100s,         0000-0000   # AbstractIeee80211Mac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIdealRadio -r 0,     ---100s,         0000-0000   # AbstractIdealRadio extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractAPSKScalarRadio -r 0, ---100s,        0000-0000   # AbstractAPSKScalarRadio extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractAPSKDimensionalRadio -r 0, ---100s,   0000-0000   # AbstractAPSKDimensionalRadio extended
+/examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithIdealRadio -r 0,               100s,     7c33-6e96/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKScalarRadio -r 0,          100s,     7c33-6e96/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKDimensionalRadio -r 0,     100s,     7c33-6e96/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithIdealRadio -r 0,                   100s,     7c2c-2ab4/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithAPSKScalarRadio -r 0,              100s,     7c2c-2ab4/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithAPSKDimensionalRadio -r 0,         100s,     7c2c-2ab4/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithIdealRadio -r 0,                   100s,     3026-d7c6/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKScalarRadio -r 0,              100s,     3026-d7c6/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKDimensionalRadio -r 0,         100s,     3026-d7c6/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,                   100s,     8e20-ac8b/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0,              100s,     8e20-ac8b/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0,         100s,     8e20-ac8b/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,           100s,     5dc0-273e/tplx
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     b541-ad61/tplx
+
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            423c-57af/tplx
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            dee1-9525/tplx
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            ceaf-7ebd/tplx
+
+/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            6655-975a/tplx
+
+# /examples/wireless/qos/,             -f omnetpp.ini -c MacBase -r 0,                100s,         0000-0000   # MacBase extended
+/examples/wireless/qos/,             -f omnetpp.ini -c Mac -r 0,                    10s,         4659-86e3/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacEdca -r 0,                10s,         ce7d-6871/tplx
+
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            7883-8d98/tplx
+
+# /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0000-0000   # AbstractIdealMac extended
+# /examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       50s,         0000-0000
+# /examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      100s,         0000-0000
+# /examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 200s,         0000-0000
+
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              c255-6bbc/tplx
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              9a5f-5c7d/tplx
+
+/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    100s,          fe07-949a/tplx
+
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           7588-5b0c/tplx
+# /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0000-0000   # Throughput2 extended
+/examples/wireless/throughput/,      -f omnetpp.ini -c Mac -r 0,                    10s,         880f-5777/tplx
+
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      6f07-545c/tplx
