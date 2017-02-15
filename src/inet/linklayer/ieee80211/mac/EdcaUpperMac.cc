@@ -83,10 +83,10 @@ void EdcaUpperMac::initialize()
 
     int numACs = params->isEdcaEnabled() ? 4 : 1;
     acData = new AccessCategoryData[numACs];
-    // XXX: validation CompareFunc compareFunc = par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData;
+    CompareFunc compareFunc = par("prioritizeMulticast") ? (CompareFunc)MacUtils::cmpMgmtOverMulticastOverUnicast : (CompareFunc)MacUtils::cmpMgmtOverData;
     for (int i = 0; i < numACs; i++) {
         acData[i].transmissionQueue.setName(suffix("txQueue-", i).c_str());
-        // acData[i].transmissionQueue.setup(compareFunc);
+        acData[i].transmissionQueue.setup(compareFunc);
     }
 
     statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
