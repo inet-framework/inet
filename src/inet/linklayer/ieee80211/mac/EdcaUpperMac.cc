@@ -181,17 +181,16 @@ void EdcaUpperMac::enqueue(Ieee80211DataOrMgmtFrame *frame, AccessCategory ac)
 
 AccessCategory EdcaUpperMac::classifyFrame(Ieee80211DataOrMgmtFrame *frame)
 {
-    if (frame->getType() == ST_DATA || dynamic_cast<Ieee80211ManagementFrame*>(frame)) {
+    if (frame->getType() == ST_DATA) {
         return AC_BE;  // non-QoS frames are Best Effort
     }
     else if (frame->getType() == ST_DATA_WITH_QOS) {
         Ieee80211DataFrame *dataFrame = check_and_cast<Ieee80211DataFrame*>(frame);
         return mapTidToAc(dataFrame->getTid());  // QoS frames: map TID to AC
     }
-    // XXX: for validation
-//    else {
-//        return AC_VO; // management frames travel in the Voice category
-//    }
+    else {
+        return AC_VO; // management frames travel in the Voice category
+    }
 }
 
 AccessCategory EdcaUpperMac::mapTidToAc(int tid)
