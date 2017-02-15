@@ -31,7 +31,7 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 network DatalinkVisualizerWiredSimple
 {
-    @display("bgb=700,350");
+    @display("bgb=700,250");
     submodules:
         linkVisualizer: DataLinkVisualizer {
             parameters:
@@ -42,10 +42,10 @@ network DatalinkVisualizerWiredSimple
                 @display("p=100,150");
         }
         wiredSource: StandardHost {
-            @display("p=300,150");
+            @display("p=300,110");
         }
         wiredDestination: StandardHost {
-            @display("p=600,150");
+            @display("p=600,110");
         }
     connections:
         wiredSource.ethg++ <--> Eth100M <--> wiredDestination.ethg++;
@@ -95,28 +95,28 @@ network DatalinkVisualizerComplex
                 @display("p=80,120");
         }
         etherSwitch1: EtherSwitch {
-            @display("p=402.264,167.912");
+            @display("p=376.896,169.12");
         }
         etherSwitch3: EtherSwitch {
-            @display("p=750,200");
+            @display("p=723.592,200.528");
         }
         source1: StandardHost {
-            @display("p=231.936,49.528");
+            @display("p=206.568,50.736");
         }
         etherSwitch4: EtherSwitch {
-            @display("p=509.776,282.672");
+            @display("p=484.408,283.88");
         }
         destination1: StandardHost {
-            @display("p=582.256,484.408");
+            @display("p=556.888,485.616");
         }
         destination2: StandardHost {
-            @display("p=823.856,341.86398");
+            @display("p=798.488,343.072");
         }
         source2: StandardHost {
-            @display("p=199.31999,225.896");
+            @display("p=173.952,227.104");
         }
         etherSwitch2: EtherSwitch {
-            @display("p=355.152,427.632");
+            @display("p=329.784,428.84");
         }
     connections:
         etherSwitch1.ethg++ <--> Eth100M <--> source1.ethg++;
@@ -133,37 +133,43 @@ network DatalinkVisualizerComplex
 //
 network DynamicDatalinks
 {
-    @display("bgb=660,630");
+    @display("bgb=620,500");
     submodules:
         visualizer: IntegratedVisualizer {
-            @display("p=100,50");
+            @display("p=70,50");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=100,150");
+            @display("p=70,150");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=100,250");
+            @display("p=70,250");
         }
         destination: AODVRouter {
-            @display("p=488.832,512.952");
+            @display("p=512.272,249.796");
         }
         source: AODVRouter {
-            @display("p=229,46");
+            @display("p=187.664,207.952");
         }
         aodvRouter1: AODVRouter {
-            @display("p=421.296,295.872");
+            @display("p=201.612,311.928");
         }
         aodvRouter2: AODVRouter {
-            @display("p=273.36002,440.592");
+            @display("p=465.356,158.5");
         }
         aodvRouter3: AODVRouter {
-            @display("p=305.52,188.136");
+            @display("p=426.048,311.928");
         }
         aodvRouter4: AODVRouter {
-            @display("p=562.8,328.032");
+            @display("p=400.688,88.76");
         }
         aodvRouter5: AODVRouter {
-            @display("p=421.296,77.184");
+            @display("p=333.484,177.52");
+        }
+        aodvRouter6: AODVRouter {
+            @display("p=323.34,262.476");
+        }
+        aodvRouter7: AODVRouter {
+            @display("p=265.012,109.048");
         }
 }
 
