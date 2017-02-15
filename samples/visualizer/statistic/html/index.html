@@ -115,8 +115,19 @@ This animation illustrates what happens when the simulation is run:
 <video controls autoplay loop onclick="this.paused ? this.play() : this.pause();" width="662px" height="240px"><source src="statisticvisualizer3.mp4" type="video/mp4"></video>
 
 <p>
-TODO: what happens? class=screen
+After the initial ARP exchange, the packet error rate statistic is displayed above both hosts.
+The <var>destination</var> host starts moving away from the <var>source</var> host, while the <var>source</var> is sending UDP packets to <var>destination</var>.
+At first, <var>destination's</var> the packet error rate statistic is 0, because the hosts are close to each other, and the transmissions are received correctly.
+As their distance increases, the packet error rate begins to grow. It becomes 1 near the edge of <var>source's</var> communication range (displayed as a blue circle). A packet rate of 1 means that no packets can be received correctly. The packet error rate doesn't become 1 at exactly the communication range circle,
+because the circle is an estimation of <var>source's</var> communication range. When <var>destination</var> turns back and gets into the range again,
+the packet error rate starts to decrease, getting to 0 when it gets close to <var>source</var>.
+The packet error rate displayed above <var>source</var> remains 0 for the entire simulation, because it doesn't receive any UDP packets, just the ACKs.
+It is displayed only because at the beginning of the simulation, <var>source</var> received an ARP reply packet.
 </p>
+
+<h2>Further information</h2>
+
+For further information, refer to the <var>InfoVisualizer</var> NED documentation.
 
 </body>
 
