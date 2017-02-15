@@ -69,7 +69,6 @@
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0    # Skip this. The defaults.ini is just an included file.
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0
-/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0
 /examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0
 /examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0
 /examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0
