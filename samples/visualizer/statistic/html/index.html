@@ -16,21 +16,14 @@
 <h2>Goals</h2>
 
 <p>
-Statistics collected by submodules can be visualized at nodes, on the top level canvas. Usually statistics are analyzed after that
-the simulation has concluded, but it can be useful to see the values of a statistic as the simulation is running. This could help
+Usually statistics are analyzed after that
+the simulation has concluded, but it can be useful to see the values of a statistic as the simulation is running. 
+Statistics collected by submodules can be visualized at nodes, on the top level canvas. This could help
 in troubleshooting and verifying simulation models. 
 This example contains two configurations, showing the basics and the more advanced features of the visualization.
 </p>
 
 <h2>About the visualizer</h2>
-
-<p>
-The <var>StatisticVisualizer</var> displays and keeps track of the last value of a statistic.
-The <i>sourceFilter</i> parameter selects the submodule which has the statistic.
-The <i>signalName</i> parameter sets a signal to subscribe to.
-The <i>statisticName</i> parameter selects the statistic to display. By default, this is the same
-as the <i>signalName</i> parameter.
-</p>
 
 <p>
 The <var>StatisticVisualizer</var> displays and keeps track of the last value of a statistic.
@@ -41,8 +34,19 @@ to be displayed. By default, this is the same as the <i>signalName</i> parameter
 </p>
 
 <p>
-The visualizer displays the statistic value with a string prefix, selected with the <i>prefix</i> parameter.
-By default, the prefix is the statistic name. The <i>unit</i> parameter selects what unit to display the value in.
+The <i>format</i> parameter specifies the format string, which sets how the visualizer displays the statistic value.
+The format string can contain the following directives:
+
+<ul>
+<li>%s: signal name</li>
+<li>%n: statistic name</li>
+<li>%v: statistic value</li>
+<li>%u: statistic unit</li>
+</ul>
+
+The default setting for the format string is <var>"%n %v %u"</var>, i.e. it displays the statistic name, followed by the value and the unit.
+
+The <i>unit</i> parameter selects what unit to display the value in.
 By default, it's the unit of the statistic. Additionally, the displayed value can be limited by the <i>minValue</i>
 and <i>maxValue</i> parameters.
 </p>
@@ -79,9 +83,40 @@ statistic name specified, it is also the statistic name. The unit of the statist
 set to display it in milliseconds. There is also min and max value limits set to the displayed value.
 </p>
 
-<h2>Trying video</h2>
+<h2>Displaying packet error rate</h2>
+
+<p>
+This configuration uses the following network:
+</p>
+
+<img class="screen" src="pernetwork.png">
+
+<p>
+It contains 2 <var>AdhocHosts</var>. One of them, the <var>source</var>, is stationary, while the <var>destination</var> is configured to move horizontally
+back and forth between its stating position and the right border of the playground. The <var>source</var> is configured to send UDP packets to
+<var>destination</var>. The network also contains an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>,
+and an <var>IntegratedVisualizer</var> module.
+</p>
+
+<p>
+The visualizer is configured to display the packet error rate statistic of the <var>radio</var> module:
+</p>
+
+<pre class="snippet">
+*.visualizer.*.statisticVisualizer.sourceFilter = "**.radio"
+*.visualizer.*.statisticVisualizer.signalName = "packetErrorRate"
+</pre>
+
+
+<p>
+This animation illustrates what happens when the simulation is run:
+</p>
 
 <video controls autoplay loop onclick="this.paused ? this.play() : this.pause();" width="662px" height="240px"><source src="statisticvisualizer3.mp4" type="video/mp4"></video>
+
+<p>
+TODO: what happens?
+</p>
 
 </body>
 
