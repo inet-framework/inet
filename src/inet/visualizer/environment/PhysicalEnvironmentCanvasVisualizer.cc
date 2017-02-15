@@ -36,7 +36,11 @@ void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         objectsLayer = new cGroupFigure("objectsLayer");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
+#if OMNETPP_VERSION < 0x0501
         canvas->addFigureBelow(objectsLayer, canvas->getSubmodulesLayer());
+#else
+        objectsLayer->insertBelow(canvas->getSubmodulesLayer());
+#endif
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
     }
 }

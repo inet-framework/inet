@@ -34,7 +34,11 @@ void SceneCanvasVisualizer::initialize(int stage)
         canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
         axisLayer = new cGroupFigure("axisLayer");
+#if OMNETPP_VERSION < 0x0501
         canvas->addFigureBelow(axisLayer, canvas->getSubmodulesLayer());
+#else
+        axisLayer->insertBelow(canvas->getSubmodulesLayer());
+#endif
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
             initializeAxis(axisLength);

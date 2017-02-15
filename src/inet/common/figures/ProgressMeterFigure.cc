@@ -188,7 +188,11 @@ void ProgressMeterFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
+#if OMNETPP_VERSION < 0x0501
     setBounds(parseBounds(property));
+#else
+    setBounds(parseBounds(property, getBounds()));
+#endif
 
     const char *s;
     if ((s = property->getValue(PKEY_BACKGROUND_COLOR)) != nullptr)

@@ -44,11 +44,19 @@ void MediumCanvasVisualizer::initialize(int stage)
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         if (displaySignals) {
             communicationLayer = new cGroupFigure("communication");
+#if OMNETPP_VERSION < 0x0501
             canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
+#else
+            communicationLayer->insertBelow(canvas->getSubmodulesLayer());
+#endif
         }
         if (displayRadioFrames) {
             radioFrameLayer = new cGroupFigure("radioFrameLayer");
+#if OMNETPP_VERSION < 0x0501
             canvas->addFigureAbove(radioFrameLayer, canvas->getSubmodulesLayer());
+#else
+            radioFrameLayer->insertAbove(canvas->getSubmodulesLayer());
+#endif
         }
         displayCommunicationHeat = par("displayCommunicationHeat");
         if (displayCommunicationHeat) {

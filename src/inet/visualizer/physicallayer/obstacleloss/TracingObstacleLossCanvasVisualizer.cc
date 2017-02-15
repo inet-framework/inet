@@ -31,7 +31,11 @@ void TracingObstacleLossCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         intersectionTrail = new TrailFigure(100, true, "obstacle intersection trail");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
+#if OMNETPP_VERSION < 0x0501
         canvas->addFigureBelow(intersectionTrail, canvas->getSubmodulesLayer());
+#else
+        intersectionTrail->insertBelow(canvas->getSubmodulesLayer());
+#endif
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
