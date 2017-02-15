@@ -185,8 +185,8 @@ void EtherAppCli::sendPacket()
 {
     seqNum++;
 
-    char msgname[150];
-    sprintf(msgname, "req-%s-%ld", getFullPath().c_str(), seqNum);
+    char msgname[30];
+    sprintf(msgname, "req-%d-%ld", getId(), seqNum);
     EV_INFO << "Generating packet `" << msgname << "'\n";
 
     EtherAppReq *datapacket = new EtherAppReq(msgname, IEEE802CTRL_DATA);
