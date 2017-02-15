@@ -174,3 +174,30 @@ network PacketDropF
             @display("p=269,223");
         }
 }
+
+network PacketDropG
+{
+    @display("bgb=400,400");
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            @display("p=60,40");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=60,101");
+        }
+        host1: StandardHost {
+            @display("p=110,223");
+        }
+        host2: StandardHost {
+            @display("p=110,326");
+        }
+        host3: StandardHost {
+            @display("p=301,223");
+        }
+        host4: StandardHost {
+            @display("p=301,326");
+        }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+        host3.ethg++ <--> Eth100M <--> host4.ethg++;
+}
