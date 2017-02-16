@@ -1,0 +1,5 @@
+<scenario>
+    <at t="0.5">
+        <tell module="lifecycleController" target="adhocHost1" operation="NodeShutdownOperation"/>
+    </at>
+</scenario>
