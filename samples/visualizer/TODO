@@ -59,3 +59,7 @@ PhysicallinkVisualizer:
 NetworkRouteVisualizer:
 - *.routeVisualizer.*.interfaceFilter = "not(*eth* or *ppp*)"	# -- Nem szur
 - *.routeVisualizer.*.nodeFilter = ""				# -- Nem szur
+
+PacketDropVisualizer:
+
+- nincs subscribe-olva a dropPkFromHLIfaceDownSignal-ra és a dropPkIfaceDownSignal-ra ? A hibaüzenet "Interface is not connected -- dropping packet"
