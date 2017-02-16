@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../samples.css">
+<title>Visualizing Packet Drops Example</title>
+</head>
+
+<body>
+
+<h1><center>Visualizing Dropped Packets Example</center></h1>
+
+<h2>Goals</h2>
+
+<pre>
+Dropped packets are a sign of network congestion, or a connection problem. Visualizing dropped packets can help identify problems
+with simulation models. There is no need...to check the logs to see that there are lost packets. Thats good because its hard.
+
+This is very convenient
+
+It shows that there are packets that dont make it to the destination.
+
+Visualizing packet loss? Should that be a better title?
+</pre>
+
+<p>
+Data flow in the network might not work as planned, with less throughput than what was estimated. The cause could be that
+packets are getting dropped somewhere in the network.
+Visualizing dropped packets can help identify problems in simulation models, like network bottlenecks and connection problems.
+It makes this convenient, because one doesn't have to analyze the logs to see what happened with packets.
+The visualization gives information about where packets are getting lost.
+This example contains four simulation models, each demonstrating a typical cause of lost packets.
+</p>
+
+<h2>About the visualizer</h2>
+
+<p>
+The <var>PacketDropVisualizer</var> module can indicate dropped packets by displaying an animation at the node,
+where the packet drop happens. In the animation, a packet icon gets thrown out from the node icon, and fades away.
+The visualization of packet drops can be enabled with the visualizer's <var>displayPacketDrops</var> parameter.
+By default, all dropped packets at all nodes are visualized. This selection can be narrowed with the
+<var>nodeFilter</var>, <var>interfaceFilter</var> and <var>packetFilter</var> parameters.
+</p>
+
+<h2>Queue full</h2>
+
+<p>
+This configuration uses this network:
+</p>
+
+<img class="screen" src="queuefullnetwork.png">
+
+<p>
+It contains a <var>StandardHost</var>, an <var>EtherSwitch</var>, a <var>Router</var>, an <var>AccessPoint</var>, and a <var>WirelessHost</var>.
+Additionally, there is an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and a <var>IntegratedVisualizer</var> module.
+</p>
+
+<p>
+The <var>source</var> is configured to send
+a stream of UDP packets to <var>destination</var>.
+The cause of packet drop in this case is that the queue in <var>etherSwitch</var> fills up.
+The <var>source</var> is connected to the <var>etherSwitch</var> via a high speed, 100 Gbit/s ethernet cable,
+while the <var>etherSwitch</var> and the <var>router</var> is connected with a low speed, 10 MBit/s cable.
+This creates a bottleneck in the network, between the switch and the router. The source host is configured to generate more
+UDP traffic than the 10Mbit/s channel can put through.
+</p>
+
+<p>
+The packets should be dropped at the switch. The queue type in the switch's ethernet interfaces are set to be <var>DropTailQueue</var>,
+which a default length of 100 (the default, internal queue type has infinite length, which wouldn't drop packets). TODO: is the correct?
+</p>
+
+<p>TODO: IDEA: the switch should be connected with a 100M cable so the AP becomes the bottleneck</p>
+
+<p>TODO: an animation of what happens. explanation. maybe a screenshot of the dropped packets at the queue.</p>
+
+<h2>ARP resolution pending</h2>
+
+</body>
+
+</html>

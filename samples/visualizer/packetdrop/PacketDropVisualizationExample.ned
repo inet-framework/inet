@@ -19,7 +19,7 @@ network PacketDropA
 {
     @display("bgb=720,400");
     submodules:
-        standardHost: StandardHost {
+        source: StandardHost {
             @display("p=80,198");
         }
         etherSwitch: EtherSwitch {
@@ -31,7 +31,7 @@ network PacketDropA
         accessPoint: AccessPoint {
             @display("p=449,197");
         }
-        wirelessHost: WirelessHost {
+        destination: WirelessHost {
             @display("p=589,194");
         }
         configurator: IPv4NetworkConfigurator {
@@ -45,7 +45,7 @@ network PacketDropA
         }
     connections:
         router.ethg++ <--> Eth100M <--> accessPoint.ethg++;
-        standardHost.ethg++ <--> Eth100G <--> etherSwitch.ethg++;
+        source.ethg++ <--> Eth100G <--> etherSwitch.ethg++;
         etherSwitch.ethg++ <--> Eth10M <--> router.ethg++;
 }
 
@@ -116,7 +116,7 @@ network PacketDropD
             @display("p=269,223");
         }
     connections:
-        host1.ethg++ <--> Eth100M {  disabled = true; @display("t=disabled");} <--> host2.ethg++;
+        host1.ethg++ <--> Eth100M {  disabled = true;@display("t=disabled"); } <--> host2.ethg++;
 }
 
 
