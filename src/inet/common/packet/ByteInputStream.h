@@ -17,7 +17,9 @@
 #define __INET_BYTEINPUTSTREAM_H_
 
 #include <assert.h>
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
 
@@ -143,6 +145,24 @@ class INET_API ByteInputStream {
         if (checkReadBeyondEnd()) return 0;
         value |= ((uint64_t)(bytes[position++]) << 0);
         return value;
+    }
+
+    MACAddress readMACAddress() {
+        MACAddress address;
+        for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
+            address.setAddressByte(i, readByte());
+        return address;
+    }
+
+    IPv4Address readIPv4Address() {
+        return IPv4Address(readUint32());
+    }
+
+    IPv6Address readIPv6Address() {
+        uint32_t d[4];
+        for (auto & element : d)
+            element = readUint32();
+        return IPv6Address(d[0], d[1], d[2], d[3]);
     }
 };
 

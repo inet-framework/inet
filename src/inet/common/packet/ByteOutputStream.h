@@ -103,6 +103,19 @@ class INET_API ByteOutputStream {
         bytes.push_back((uint8_t)(value >> 8));
         bytes.push_back((uint8_t)(value >> 0));
     }
+
+    void writeMACAddress(MACAddress address) {
+        writeUint64(address.getInt());
+    }
+
+    void writeIPv4Address(IPv4Address address) {
+        writeUint32(address.getInt());
+    }
+
+    void writeIPv6Address(IPv6Address address) {
+        for (int i = 0; i < 4; i++)
+            writeUint32(address.words()[i]);
+    }
 };
 
 } // namespace
