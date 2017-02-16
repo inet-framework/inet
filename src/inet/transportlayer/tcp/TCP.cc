@@ -137,7 +137,7 @@ void TCP::handleMessage(cMessage *msg)
         }
         else {
             // must be a TCPSegment
-            TcpHeader *tcpseg = packet->peekHeader<TcpHeader>().get();
+            TcpHeader *tcpHeader = packet->peekHeader<TcpHeader>().get();
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;
@@ -147,14 +147,14 @@ void TCP::handleMessage(cMessage *msg)
             //interfaceId = controlInfo->getInterfaceId();
 
             // process segment
-            TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
+            TCPConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
             if (conn) {
-                bool ret = conn->processTCPSegment(packet, tcpseg, srcAddr, destAddr);
+                bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
             else {
-                segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
+                segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
             }
         }
     }

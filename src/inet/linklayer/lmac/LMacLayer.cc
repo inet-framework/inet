@@ -651,10 +651,10 @@ void LMacLayer::findNewSlot()
 
 void LMacLayer::decapsulate(Packet *packet)
 {
-    const auto& msg = packet->popHeader<LMacHeader>();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
+    const auto& lmacHeader = packet->popHeader<LMacHeader>();
+    packet->ensureTag<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol()));
     EV_DETAIL << " message decapsulated " << endl;
 }
 

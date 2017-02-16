@@ -863,8 +863,8 @@ void IPv4::sendDatagramToOutput(Packet *packet, const InterfaceEntry *ie, IPv4Ad
         else {
             if (nextHopAddr.isUnspecified()) {
                 IPv4InterfaceData *ipv4Data = ie->ipv4Data();
-                const auto& ipv4hdr = packet->peekHeader<IPv4Header>();
-                IPv4Address destAddress = ipv4hdr->getDestAddress();
+                const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+                IPv4Address destAddress = ipv4Header->getDestAddress();
                 if (IPv4Address::maskedAddrAreEqual(destAddress, ie->ipv4Data()->getIPAddress(), ipv4Data->getNetmask()))
                     nextHopAddr = destAddress;
                 else if (useProxyARP) {

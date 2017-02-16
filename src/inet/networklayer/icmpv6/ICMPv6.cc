@@ -74,8 +74,8 @@ void ICMPv6::processICMPv6Message(Packet *packet)
     if (type < 128) {
         // ICMP errors are delivered to the appropriate higher layer protocols
         EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
-        auto bogusPacket = packet->peekHeader<IPv6Datagram>();
-        int transportProtocol = bogusPacket->getTransportProtocol();
+        auto bogusIpv6Header = packet->peekHeader<IPv6Datagram>();
+        int transportProtocol = bogusIpv6Header->getTransportProtocol();
         if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
             errorOut(icmpv6msg);
@@ -286,17 +286,17 @@ Packet *ICMPv6::createParamProblemMsg(int code)
 
 bool ICMPv6::validateDatagramPromptingError(Packet *packet)
 {
-    auto origDatagram = packet->peekHeader<IPv6Datagram>();
+    auto ipv6Header = packet->peekHeader<IPv6Datagram>();
     // don't send ICMP error messages for multicast messages
-    if (origDatagram->getDestAddress().isMulticast()) {
-        EV_INFO << "won't send ICMP error messages for multicast message " << origDatagram << endl;
+    if (ipv6Header->getDestAddress().isMulticast()) {
+        EV_INFO << "won't send ICMP error messages for multicast message " << ipv6Header << endl;
         delete packet;
         return false;
     }
 
     // do not reply with error message to error message
-    if (origDatagram->getTransportProtocol() == IP_PROT_IPv6_ICMP) {
-        auto recICMPMsg = packet->peekDataAt<ICMPv6Message>(origDatagram->getChunkLength());
+    if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6_ICMP) {
+        auto recICMPMsg = packet->peekDataAt<ICMPv6Message>(ipv6Header->getChunkLength());
         if (recICMPMsg->getType() < 128) {
             EV_INFO << "ICMP error received -- do not reply to it" << endl;
             delete packet;

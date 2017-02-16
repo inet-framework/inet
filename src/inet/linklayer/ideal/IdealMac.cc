@@ -199,15 +199,15 @@ void IdealMac::handleUpperPacket(cPacket *msg)
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    auto frame = packet->peekHeader<IdealMacHeader>();
+    auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     if (msg->hasBitError()) {
-        EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
+        EV << "Received " << idealMacHeader << " contains bit errors or collision, dropping it\n";
         // TODO: add reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
         return;
     }
 
     if (!dropFrameNotForUs(packet)) {
-        int senderModuleId = frame->getSrcModuleId();
+        int senderModuleId = idealMacHeader->getSrcModuleId();
         IdealMac *senderMac = dynamic_cast<IdealMac *>(getSimulation()->getModule(senderModuleId));
         // TODO: this whole out of bounds ack mechanism is fishy
         if (senderMac && senderMac->useAck)
@@ -274,7 +274,7 @@ void IdealMac::encapsulate(Packet *packet)
 
 bool IdealMac::dropFrameNotForUs(Packet *packet)
 {
-    auto frame = packet->peekHeader<IdealMacHeader>();
+    auto idealMacHeader = packet->peekHeader<IdealMacHeader>();
     // Current implementation does not support the configuration of multicast
     // MAC address groups. We rather accept all multicast frames (just like they were
     // broadcasts) and pass it up to the higher layer where they will be dropped
@@ -282,13 +282,13 @@ bool IdealMac::dropFrameNotForUs(Packet *packet)
     // All frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
-    if (frame->getDest().equals(address))
+    if (idealMacHeader->getDest().equals(address))
         return false;
 
-    if (frame->getDest().isBroadcast())
+    if (idealMacHeader->getDest().isBroadcast())
         return false;
 
-    if (promiscuous || frame->getDest().isMulticast())
+    if (promiscuous || idealMacHeader->getDest().isMulticast())
         return false;
 
     EV << "Frame `" << packet->getName() << "' not destined to us, discarding\n";

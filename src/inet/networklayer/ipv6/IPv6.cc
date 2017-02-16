@@ -216,7 +216,7 @@ void IPv6::endService(cPacket *msg)
     else {
         // datagram from network or from ND: localDeliver and/or route
         auto packet = check_and_cast<Packet *>(msg);
-        auto datagram = packet->peekHeader<IPv6Datagram>();
+        auto ipv6Header = packet->peekHeader<IPv6Datagram>();
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
             IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
@@ -257,8 +257,8 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
 
 void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
 {
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
-    IPv6Address& destAddr = datagram->getDestAddress();
+    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    IPv6Address& destAddr = ipv6Header->getDestAddress();
     // remove control info
     delete packet->removeControlInfo();
 
@@ -293,14 +293,14 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     }
 #endif /* WITH_xMIPv6 */
 
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
-    IPv6Address destAddress = datagram->getDestAddress();
+    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    IPv6Address destAddress = ipv6Header->getDestAddress();
 
     // check for local delivery
     if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress)) {
         EV_INFO << "local delivery\n";
-        if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
+        if (ipv6Header->getSrcAddress().isUnspecified())
+            ipv6Header->setSrcAddress(destAddress); // allows two apps on the same host to communicate
 
         if (destIE && !destIE->isLoopback()) {
             EV_INFO << "datagram destination address is local, ignoring destination interface specified in the control info\n";
@@ -317,11 +317,11 @@ void IPv6::handleMessageFromHL(cPacket *msg)
 
 void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress)
 {
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
     // route packet
     if (destIE != nullptr)
         fragmentAndSend(packet, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
-    else if (!datagram->getDestAddress().isMulticast())
+    else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
         routeMulticastPacket(packet, destIE, nullptr, true);
@@ -432,18 +432,18 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
 
 void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6Address nextHop, bool fromHL)
 {
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie != nullptr);
     ASSERT(!nextHop.isUnspecified());
-    IPv6Address destAddress = datagram->getDestAddress();
+    IPv6Address destAddress = ipv6Header->getDestAddress();
     EV_INFO << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
 
 #ifdef WITH_xMIPv6
     if (rt->isMobileNode()) {
         // if the source address is the HoA and we have a CoA then drop the packet
         // (address is topologically incorrect!)
-        if (datagram->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
+        if (ipv6Header->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
             && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
         {
             EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;
@@ -707,20 +707,20 @@ void IPv6::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     auto ipv6HeaderPos = packet->getHeaderPopOffset();
-    auto datagram = packet->popHeader<IPv6Datagram>();
+    auto ipv6Header = packet->popHeader<IPv6Datagram>();
 
     // create and fill in control info
-    packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(datagram->getDiffServCodePoint());
-    packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(datagram->getExplicitCongestionNotification());
+    packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
+    packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
     packet->ensureTag<NetworkProtocolInd>()->setPosition(ipv6HeaderPos);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
-    l3AddressInd->setSrcAddress(datagram->getSrcAddress());
-    l3AddressInd->setDestAddress(datagram->getDestAddress());
-    packet->ensureTag<HopLimitInd>()->setHopLimit(datagram->getHopLimit());
+    l3AddressInd->setSrcAddress(ipv6Header->getSrcAddress());
+    l3AddressInd->setDestAddress(ipv6Header->getDestAddress());
+    packet->ensureTag<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 }
 
 void IPv6::encapsulate(Packet *transportPacket)

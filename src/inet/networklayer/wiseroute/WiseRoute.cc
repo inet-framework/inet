@@ -134,17 +134,17 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 void WiseRoute::handleLowerPacket(cPacket *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    auto netwMsg = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
-    const L3Address& finalDestAddr = netwMsg->getFinalDestAddr();
-    const L3Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
-    const L3Address& srcAddr = netwMsg->getSrcAddr();
+    auto wiseRouteHeader = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
+    const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
+    const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
+    const L3Address& srcAddr = wiseRouteHeader->getSrcAddr();
     // KLUDGE: TODO: get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
     double rssi = 1;    // TODO: ctrlInfo->getRSSI();
     double ber = 0;    // TODO: ctrlInfo->getBitErrorRate();
     // Check whether the message is a flood and if it has to be forwarded.
-    floodTypes floodType = updateFloodTable(netwMsg->getIsFlood(), initialSrcAddr, finalDestAddr,
-                netwMsg->getSeqNum());
+    floodTypes floodType = updateFloodTable(wiseRouteHeader->getIsFlood(), initialSrcAddr, finalDestAddr,
+                wiseRouteHeader->getSeqNum());
     allReceivedRSSI.record(rssi);
     allReceivedBER.record(ber);
     if (floodType == DUPLICATE) {
@@ -166,14 +166,14 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                 // at origin, as well as the MAC control info. Hence only update
                 // local hop source address.
                 packetCopy = packet->dup();
-                netwMsg->setSrcAddr(myNetwAddr);
+                wiseRouteHeader->setSrcAddr(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
-                netwMsg->setNbHops(netwMsg->getNbHops() + 1);
+                wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
-                netwMsg->markImmutable();
-                p->pushHeader(netwMsg);
+                wiseRouteHeader->markImmutable();
+                p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -194,14 +194,14 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
         else {
             // not for me. if flood, forward as flood. else select a route
             if (floodType == FORWARD) {
-                netwMsg->setSrcAddr(myNetwAddr);
+                wiseRouteHeader->setSrcAddr(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
-                netwMsg->setNbHops(netwMsg->getNbHops() + 1);
+                wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
-                netwMsg->markImmutable();
-                p->pushHeader(netwMsg);
+                wiseRouteHeader->markImmutable();
+                p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, MACAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -214,18 +214,18 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                     nextHop = finalDestAddr;
                     nbGetRouteFailures++;
                 }
-                netwMsg->setSrcAddr(myNetwAddr);
-                netwMsg->setDestAddr(nextHop);
+                wiseRouteHeader->setSrcAddr(myNetwAddr);
+                wiseRouteHeader->setDestAddr(nextHop);
                 pCtrlInfo = packet->removeControlInfo();
                 MACAddress nextHopMacAddr = arp->resolveL3Address(nextHop, nullptr);    //FIXME interface entry pointer needed
                 if (nextHopMacAddr.isUnspecified())
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
-                netwMsg->setNbHops(netwMsg->getNbHops() + 1);
+                wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->append(packet->peekDataAt(bit(0), packet->getDataLength()));
-                netwMsg->markImmutable();
-                p->pushHeader(netwMsg);
+                wiseRouteHeader->markImmutable();
+                p->pushHeader(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -352,12 +352,12 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 
 void WiseRoute::decapsulate(Packet *packet)
 {
-    auto msg = packet->popHeader<WiseRouteHeader>();
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(msg->getTransportProtocol()));
+    auto wiseRouteHeader = packet->popHeader<WiseRouteHeader>();
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(wiseRouteHeader->getTransportProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(wiseRouteHeader->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    packet->ensureTag<L3AddressInd>()->setSrcAddress(msg->getInitialSrcAddr());
-    nbHops = nbHops + msg->getNbHops();
+    packet->ensureTag<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
+    nbHops = nbHops + wiseRouteHeader->getNbHops();
 }
 
 WiseRoute::floodTypes WiseRoute::updateFloodTable(bool isFlood, const tFloodTable::key_type& srcAddr, const tFloodTable::key_type& destAddr, unsigned long seqNum)

@@ -187,13 +187,13 @@ void xMIPv6::handleMessage(cMessage *msg)
     // CB on 29.08.07
     // normal datagram with an extension header
     else if (auto packet = dynamic_cast<Packet *>(msg)) {
-        auto msg = packet->peekHeader<IPv6Datagram>();
+        auto ipv6Header = packet->peekHeader<IPv6Datagram>();
         IPv6ExtensionHeader *eh = (IPv6ExtensionHeader *)packet->getContextPointer();
 
         if (dynamic_cast<IPv6RoutingHeader *>(eh))
-            processType2RH(packet, (IPv6Datagram *)msg.get(), (IPv6RoutingHeader *)eh);
+            processType2RH(packet, (IPv6Datagram *)ipv6Header.get(), (IPv6RoutingHeader *)eh);
         else if (dynamic_cast<HomeAddressOption *>(eh))
-            processHoAOpt(packet, (IPv6Datagram *)msg.get(), (HomeAddressOption *)eh);
+            processHoAOpt(packet, (IPv6Datagram *)ipv6Header.get(), (HomeAddressOption *)eh);
         else
             throw cRuntimeError("Unknown Extension Header.");
     }

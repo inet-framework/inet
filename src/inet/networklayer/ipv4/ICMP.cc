@@ -64,13 +64,13 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    const auto& origDatagram = packet->peekHeader<IPv4Header>();
-    IPv4Address origSrcAddr = origDatagram->getSrcAddress();
-    IPv4Address origDestAddr = origDatagram->getDestAddress();
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    IPv4Address origSrcAddr = ipv4Header->getSrcAddress();
+    IPv4Address origDestAddr = ipv4Header->getDestAddress();
 
     // don't send ICMP error messages in response to broadcast or multicast messages
     if (origDestAddr.isMulticast() || origDestAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origDestAddr, inputInterfaceId)) {
-        EV_DETAIL << "won't send ICMP error messages for broadcast/multicast message " << origDatagram << endl;
+        EV_DETAIL << "won't send ICMP error messages for broadcast/multicast message " << ipv4Header << endl;
         delete packet;
         return;
     }
@@ -80,14 +80,14 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
             || origSrcAddr.isMulticast()
             || origSrcAddr.isLimitedBroadcastAddress()
             || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId)) {
-        EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << origDatagram << endl;
+        EV_DETAIL << "won't send ICMP error messages to broadcast/multicast address, message " << ipv4Header << endl;
         delete packet;
         return;
     }
 
     // do not reply with error message to error message
-    if (origDatagram->getTransportProtocol() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekDataAt<ICMPMessage>(byte(origDatagram->getHeaderLength()));
+    if (ipv4Header->getTransportProtocol() == IP_PROT_ICMP) {
+        const auto& recICMPMsg = packet->peekDataAt<ICMPMessage>(byte(ipv4Header->getHeaderLength()));
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -113,7 +113,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     errorPacket->append(icmpHeader);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
-    errorPacket->append(packet->peekDataAt(byte(0), byte(origDatagram->getHeaderLength() + 8)));
+    errorPacket->append(packet->peekDataAt(byte(0), byte(ipv4Header->getHeaderLength() + 8)));
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
@@ -125,7 +125,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
         processICMPMessage(errorPacket);
     }
     else {
-        sendToIP(errorPacket, origDatagram->getSrcAddress());
+        sendToIP(errorPacket, ipv4Header->getSrcAddress());
     }
     delete packet;
 }

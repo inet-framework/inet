@@ -492,10 +492,10 @@ void UDP::processICMPv4Error(Packet *packet)
     int localPort = -1, remotePort = -1;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpMsg = packet->popHeader<ICMPMessage>();
-    ASSERT(icmpMsg);
-    type = icmpMsg->getType();
-    code = icmpMsg->getCode();
+    const auto& icmpHeader = packet->popHeader<ICMPMessage>();
+    ASSERT(icmpHeader);
+    type = icmpHeader->getType();
+    code = icmpHeader->getCode();
     const auto& ipv4Header = packet->popHeader<IPv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
         if (const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8))) {
@@ -539,10 +539,10 @@ void UDP::processICMPv6Error(Packet *packet)
     ushort localPort, remotePort;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpMsg = packet->popHeader<ICMPv6Message>();
-    ASSERT(icmpMsg);
+    const auto& icmpHeader = packet->popHeader<ICMPv6Message>();
+    ASSERT(icmpHeader);
 
-    type = icmpMsg->getType();
+    type = icmpHeader->getType();
     code = -1;    // FIXME this is dependent on getType()...
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
     const auto& ipv6Header = packet->popHeader<IPv6Datagram>();

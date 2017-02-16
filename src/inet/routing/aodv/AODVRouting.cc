@@ -995,8 +995,8 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
         // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac. etc
         Packet *datagram = check_and_cast<Packet *>(obj);
         if (datagram->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-            const auto& networkHeader = datagram->peekHeader<IPv4Header>();
-            L3Address unreachableAddr = networkHeader->getDestinationAddress();
+            const auto& ipv4Header = datagram->peekHeader<IPv4Header>();
+            L3Address unreachableAddr = ipv4Header->getDestinationAddress();
             if (unreachableAddr.getAddressType() == addressType) {
                 // A node initiates processing for a RERR message in three situations:
                 //

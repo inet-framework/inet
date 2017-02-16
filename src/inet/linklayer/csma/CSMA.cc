@@ -842,12 +842,12 @@ void CSMA::handleSelfMessage(cMessage *msg)
 void CSMA::handleLowerPacket(cPacket *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
-    const auto& macPkt = packet->peekHeader<CSMAHeader>();
-    const MACAddress& src = macPkt->getSrcAddr();
-    const MACAddress& dest = macPkt->getDestAddr();
+    const auto& csmaHeader = packet->peekHeader<CSMAHeader>();
+    const MACAddress& src = csmaHeader->getSrcAddr();
+    const MACAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;
 
-    EV_DETAIL << "Received frame name= " << macPkt->getName()
+    EV_DETAIL << "Received frame name= " << csmaHeader->getName()
               << ", myState=" << macState << " src=" << src
               << " dst=" << dest << " myAddr="
               << address << endl;
@@ -859,9 +859,9 @@ void CSMA::handleLowerPacket(cPacket *msg)
             executeMac(EV_FRAME_RECEIVED, packet);
         }
         else {
-            long SeqNr = macPkt->getSequenceId();
+            long SeqNr = csmaHeader->getSequenceId();
 
-            if (strcmp(macPkt->getName(), "CSMA-Ack") != 0) {
+            if (strcmp(csmaHeader->getName(), "CSMA-Ack") != 0) {
                 // This is a data message addressed to us
                 // and we should send an ack.
                 // we build the ack packet here because we need to

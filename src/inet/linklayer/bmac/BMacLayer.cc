@@ -728,10 +728,10 @@ void BMacLayer::refreshDisplay() const
 
 void BMacLayer::decapsulate(Packet *packet)
 {
-    const auto& msg = packet->popHeader<BMacHeader>();
-    packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
+    const auto& bmacHeader = packet->popHeader<BMacHeader>();
+    packet->ensureTag<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol()));
     EV_DETAIL << " message decapsulated " << endl;
 }
 

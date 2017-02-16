@@ -43,12 +43,12 @@ IPv4FragBuf::~IPv4FragBuf()
 
 Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
 {
-    const auto& datagram = packet->peekHeader<IPv4Header>();
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     // find datagram buffer
     Key key;
-    key.id = datagram->getIdentification();
-    key.src = datagram->getSrcAddress();
-    key.dest = datagram->getDestAddress();
+    key.id = ipv4Header->getIdentification();
+    key.src = ipv4Header->getSrcAddress();
+    key.dest = ipv4Header->getDestAddress();
 
     auto i = bufs.find(key);
 
@@ -65,17 +65,17 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     }
 
     // add fragment into reassembly buffer
-    int bytes = datagram->getTotalLengthField() - datagram->getHeaderLength();
-    buf->buf.replace(byte(datagram->getFragmentOffset()), packet->peekDataAt(byte(datagram->getHeaderLength()), byte(bytes)));
-    if (datagram->getFragmentOffset() == 0 || buf->packet == nullptr) {
+    int bytes = ipv4Header->getTotalLengthField() - ipv4Header->getHeaderLength();
+    buf->buf.replace(byte(ipv4Header->getFragmentOffset()), packet->peekDataAt(byte(ipv4Header->getHeaderLength()), byte(bytes)));
+    if (ipv4Header->getFragmentOffset() == 0 || buf->packet == nullptr) {
         delete buf->packet;
         buf->packet = packet;
     }
     else {
         delete packet;
     }
-    if (!datagram->getMoreFragments()) {
-        buf->buf.setExpectedLength(byte(datagram->getFragmentOffset() + bytes));
+    if (!ipv4Header->getMoreFragments()) {
+        buf->buf.setExpectedLength(byte(ipv4Header->getFragmentOffset() + bytes));
     }
 
     // do we have the complete datagram?

@@ -36,7 +36,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     const auto& icmpv6Header = packet->popHeader<ICMPv6Message>();
-    const auto& ipv6Datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
     int type = (int)icmpv6Header->getType();
 
     EV_ERROR << " Type: " << type;
@@ -86,9 +86,9 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
             break;
     }
 
-    EV_DETAIL << "Datagram: length: " << ipv6Datagram->getChunkLength()
-              << " Src: " << ipv6Datagram->getSrcAddress()
-              << " Dest: " << ipv6Datagram->getDestAddress()
+    EV_DETAIL << "Datagram: length: " << ipv6Header->getChunkLength()
+              << " Src: " << ipv6Header->getSrcAddress()
+              << " Dest: " << ipv6Header->getDestAddress()
               << " Time: " << simTime()
               << endl;
 

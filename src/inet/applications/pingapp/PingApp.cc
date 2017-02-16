@@ -214,8 +214,8 @@ void PingApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
-            const auto& icmpMessage = packet->popHeader<ICMPMessage>();
-            if (icmpMessage->getType() == ICMP_ECHO_REPLY) {
+            const auto& icmpHeader = packet->popHeader<ICMPMessage>();
+            if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
                 processPingResponse(packet);
             }
             else {
@@ -241,8 +241,8 @@ void PingApp::handleMessage(cMessage *msg)
 #endif
 #ifdef WITH_GENERIC
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
-            const auto& icmpMessage = packet->popHeader<EchoPacket>();
-            if (icmpMessage->getType() == ECHO_PROTOCOL_REPLY) {
+            const auto& icmpHeader = packet->popHeader<EchoPacket>();
+            if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
                 processPingResponse(packet);
             }
             else {
