@@ -57,7 +57,7 @@ Additionally, there is an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211S
 
 <p>
 The <var>source</var> is configured to send
-a stream of UDP packets to <var>destination</var>.
+a stream of UDP packets to <var>destination</var>. The packet stream starts at two seconds, after <var>destination</var> got associated with the access point.
 The cause of packet drop in this case is that the queue in <var>etherSwitch</var> fills up.
 The <var>source</var> is connected to the <var>etherSwitch</var> via a high speed, 100 Gbit/s ethernet cable,
 while the <var>etherSwitch</var> and the <var>router</var> is connected with a low speed, 10 MBit/s cable.
@@ -70,11 +70,32 @@ The packets should be dropped at the switch. The queue type in the switch's ethe
 which a default length of 100 (the default, internal queue type has infinite length, which wouldn't drop packets). TODO: is the correct?
 </p>
 
+<p>
+The visualization is activated with the <var>displayPacketDrops</var> parameter. The fade out time is set to 3 seconds, so the packet
+drop animation is more visible:
+</p>
+
+<pre class="snippet">
+*.visualizer.*.packetDropVisualizer.displayPacketDrops = true
+*.visualizer.*.packetDropVisualizer.fadeOutTime = 3s
+</pre>
+
 <p>TODO: IDEA: the switch should be connected with a 100M cable so the AP becomes the bottleneck</p>
 
 <p>TODO: an animation of what happens. explanation. maybe a screenshot of the dropped packets at the queue.</p>
 
-<video autoplay="" loop="" controls="" onclick="this.paused ? this.play() : this.pause();" src="packetdrop4.mp4" width="628" height="220">
+<p>
+When the simulation is run, at around 2 seconds the UDP stream starts, and packets start accumulating in the queue of the switch.
+When the queue fills up, the switch starts dropping packets. This is illustrated in this animation:
+</p>
+
+<video autoplay="" loop="" controls="" onclick="this.paused ? this.play() : this.pause();" src="packetdrop4.mp4" width="628" height="220"></video>
+
+<p>
+Here is the queue in the switch's eth1 interface, showing the number of dropped packets:
+</p>
+
+<img class="screen" src="ethqueue.png">
 
 <h2>ARP resolution pending</h2>
 
