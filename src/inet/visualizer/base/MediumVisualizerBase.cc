@@ -50,9 +50,11 @@ void MediumVisualizerBase::initialize(int stage)
         displaySignals = par("displaySignals");
         signalColorSet.parseColors(par("signalColor"));
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
-        signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
-        signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
+        signalPropagationAnimationTime = par("signalPropagationAnimationTime");
         signalPropagationAdditionalTime = par("signalPropagationAdditionalTime");
+        signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+        signalTransmissionAnimationTime = par("signalTransmissionAnimationTime");
+        signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
         displayTransmissions = par("displayTransmissions");
         displayReceptions = par("displayReceptions");
         displayInterferenceRanges = par("displayInterferenceRanges");
@@ -76,6 +78,12 @@ void MediumVisualizerBase::initialize(int stage)
             radioMediumModule->subscribe(IRadioMedium::transmissionEndedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::receptionStartedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::receptionEndedSignal, this);
+        }
+    }
+    else if (stage == INITSTAGE_LAST) {
+        if (std::isnan(signalPropagationAnimationSpeed)) {
+            double maxPropagationDuration = radioMedium->getMediumLimitCache()->getMaxConstraintArea().distance(radioMedium->getMediumLimitCache()->getMinConstraintArea()) / mps(radioMedium->getPropagation()->getPropagationSpeed()).get();
+            defaultSignalPropagationAnimationSpeed = maxPropagationDuration / signalPropagationAnimationTime;
         }
     }
 }
