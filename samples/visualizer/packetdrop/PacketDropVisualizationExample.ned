@@ -51,8 +51,6 @@ network PacketDropA
 
 network PacketDropB
 {
-    parameters:
-        @figure[description](type=text; pos=300,10; font=Arial,20; text="TODO");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:

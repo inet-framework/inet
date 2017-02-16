@@ -99,6 +99,42 @@ Here is the queue in the switch's eth1 interface, showing the number of dropped 
 
 <h2>ARP resolution pending</h2>
 
+<h2>Mac retry limit reached</h2>
+
+<p>
+This configuration uses the following network:
+</p>
+
+<img class="screen" src="maclimitnetwork.png">
+
+<p>
+It contains two <var>AdhocHosts</var>, an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and an <var>IntegratedVisualizer</var> module. The hosts' communication ranges are set up so they are out of range of each other. The source host is configured to ping the destination host.
+The reason for dropped packets in this case is that the hosts are not in range, thus they can't reach each other. The <var>source</var> transmits the ping packets,
+but it doesn't receive any replies. The <var>source's</var> Mac module drops the packets after the retry limit has been reached.
+</p>
+
+<p>
+This is illustrated in the following animation: TODO
+</p>
+
+<h2>No route to destination</h2>
+
+<p>
+This configuration uses this network:
+</p>
+
+<img class="screen" src="unroutablenetwork.png">
+
+<p>
+It contains two <var>StandardHosts</var>, connected with an ethernet cable. The ethernet cable is disabled. It also contains an <var>IPv4NetworkConfigurator</var> and an <var>IntegratedVisualizer</var> module. Additionally, <var>host1</var> is configured to ping <var>host2</var>.
+</p>
+
+<p>
+Since the cable between the hosts is disabled, the Mac module is not able to route the packets.
+</p>
+
+
+
 </body>
 
 </html>
