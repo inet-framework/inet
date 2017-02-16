@@ -34,7 +34,7 @@ import inet.visualizer.networklayer.NetworkRouteVisualizer;
 //
 network NetworkRouteSimple
 {
-    @display("bgb=800,300");
+    @display("bgb=600,300");
     submodules:
         routeVisualizer: NetworkRouteVisualizer {
             parameters:
@@ -49,10 +49,10 @@ network NetworkRouteSimple
                 @display("p=100,250");
         }
         source: StandardHost {
-            @display("p=300,150");
+            @display("p=215,150");
         }
         destination: StandardHost {
-            @display("p=700,150");
+            @display("p=515,150");
         }
 
     connections:
@@ -78,13 +78,13 @@ network NetworkRouteExtended
             @display("p=250,50");
         }
         router0: Router {
-            @display("p=451.8,144.325");
+            @display("p=484.008,180.09601");
         }
         router4: Router {
-            @display("p=535.885,292.41498");
+            @display("p=575.664,313.56");
         }
         router3: Router {
-            @display("p=535.885,445.525");
+            @display("p=461.496,448.632");
         }
         router1: Router {
             @display("p=749.235,230.92");
@@ -115,7 +115,6 @@ network NetworkRouteExtended
         }
     connections:
         router0.pppg++ <--> Eth100M <--> router4.pppg++;
-        router4.pppg++ <--> Eth100M <--> router3.pppg++;
         source1.ethg++ <--> Eth100M <--> etherSwitch0.ethg++;
         etherSwitch0.ethg++ <--> Eth100M <--> router0.ethg++;
         router3.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
@@ -123,9 +122,12 @@ network NetworkRouteExtended
         router4.pppg++ <--> Eth100M <--> router1.pppg++;
         etherSwitch1.ethg++ <--> Eth100M <--> router1.ethg++;
         etherSwitch1.ethg++ <--> Eth100M <--> source2.ethg++;
-        router2.pppg++ <--> Eth100M <--> router0.pppg++;
         router2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
         destination2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
+        router4.pppg++ <--> Eth100M <--> router2.pppg++;
+        router4.pppg++ <--> Eth100M <--> router3.pppg++;
+        router0.pppg++ <--> Eth100M <--> router2.pppg++;
+        router1.pppg++ <--> Eth100M <--> router0.pppg++;
 }
 
 //
