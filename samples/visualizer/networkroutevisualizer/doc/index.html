@@ -2,41 +2,40 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../../samples.css">
-	<title>Network route visualizer example</title>
+	<title>Network Route Visualizer example</title>
 
 </head>
 
 <body>
-	<h1><center>Network route visualizer example</center></h1>
+	<h1><center>Network Route Visualizer example</center></h1>
 
 	<p><h2>Goals</h2></p>
 
 	<p>
-        In complex, non-trivial networks it is difficult to determine the path of a packet between remote hosts.
-        Visualizing network routes is advantageous, because we can trace a packet's route from the source node toward to the destination node.
+        In complex, non-trivial or in ad hoc networks it is difficult to determine the path of a packet between remote hosts.
+        Visualizing network routes is advantageous, because we can trace a packet's route from the source to the destination.
         It is especially helpful if there is a dynamic routing protocol in the network.
-        If there is a change in the routes e.g a router go wrong, we get information immediately about that.
+        If there is a change in the routes e.g because a router go wrong, we get information immediately about the network route changes.
 	</p>	
     <p>    
-        The example consists of 3 simulation models, each demonstrating different features of network route visualization.
+        The example consists of 4 simulation models, each demonstrating different features of network route visualization.
     </p>	
-        <!--
-            Miért jó ez a visualizer?
-            Problem: Non-trivial/redundáns útvonalakat tartalmazó/Ad-hoc hálózatokban nehéz megállapítani a csomagok útvonalát két olyan állomás között, amelyek különböző hálózatokban vannak.
-            Routing táblák nézegetése nélkül látjuk az útvonalakat teljes hosszában.
-            Ez dinamikus routing protokolloknál különösen hasznos...
-            Router meghibásodása esetén azonnal értesülünk az útvonal megváltozásáról.
+    <!--
+        Miért jó ez a visualizer?
+        Problem: Non-trivial/redundáns útvonalakat tartalmazó/Ad-hoc hálózatokban nehéz megállapítani a csomagok útvonalát két olyan állomás között, amelyek különböző hálózatokban vannak.
+        Routing táblák nézegetése nélkül látjuk az útvonalakat teljes hosszában.
+        Ez dinamikus routing protokolloknál különösen hasznos...
+        Router meghibásodása esetén azonnal értesülünk az útvonal megváltozásáról.
             
-            Mit mutat be a sample?
-            A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.        
-        -->
+        Mit mutat be a sample?
+        A sample-ön belül 3 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.        
+    -->
 
     <p><h2>About the visualizer</h2></p>
 
     <p>
-        The <code><strong>NetworkRouteVisualizer</strong></code> keeps track of active network routes.
-        A route between two node is considered active if a packet reaches the destination's network layer.
-        Network routes may be established not only between adjacent devices, it also can be established between remote devices.
+        The <var>NetworkRouteVisualizer</var> keeps track of active network routes.
+        A network route between two nodes is considered active if a packet reaches the destination's network layer.
         By default routes are not displayed, we can enable their vsisualization by switching the <i>displayRoutes</i> parameter to true.
 	</p>   
     <p> 
@@ -49,42 +48,126 @@
         Using these we can specify which network routes are shown. By default all nodes, all interfaces and all packets are considered for displaying network routes.
         It is possible to use logical expressions as the filter's parameter, e.g <i>packetFilter = "ping* or tcp*"</i> shows the ping and the tcp network routes.
     </p>       
-        <!--
-            Mi ez a visualizer?
-            A networkRouteVisualizer nyilvántartja a harmadik rétegbeli kapcsolatokat.
-            Akkor válik aktívvá egy network route két pont között, amikor a csomag eléri a cél állomás hálózati rétegét.
+    <!--
+        Mi ez a visualizer?
+        A networkRouteVisualizer nyilvántartja a harmadik rétegbeli kapcsolatokat.
+        Akkor válik aktívvá egy network route két pont között, amikor a csomag eléri a cél állomás hálózati rétegét.
 
-            A kapcsolatokat folytonos nyilak reprezentálják.
-            A nyilak kezdőpontja a forrás, végpontja a cél állomás.
-            A nyíl keresztülmegy azokon a közbülső eszközökön, melyek részei a harmadik rétegbeli útvonalnak.
-            A nyilak stílusát, filtereket lehet testreszabni.
-            Több networkRouteVisualizert is beállíthatunk.
-        -->
+        A kapcsolatokat folytonos nyilak reprezentálják.
+        A nyilak kezdőpontja a forrás, végpontja a cél állomás.
+        A nyíl keresztülmegy azokon a közbülső eszközökön, melyek részei a harmadik rétegbeli útvonalnak.
+        A nyilak stílusát, filtereket lehet testreszabni.
+        Több networkRouteVisualizert is beállíthatunk.
+    -->
 
 	<p><h2>Enabling network routes</h2></p>
-
+    
     <p>
+        This simulation demonstrates how to enable the default look of the visualization of network routes.
+    </p>
+    <p>
+        The network for this configuration contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module and a <var>NetworkRouteVisualizer</var> module.
+    </p>
+    <p>
+        <img class="screen" src="NetworkRouteSimple.png">
+    </p>
+    <p>
+        The source pings the destination and an additional line enables the visualizer with the <i>displayRoutes</i> parameter:
+        <div class="snippet">
+            # Application parameters<br>
+            *.source.numPingApps = 1<br>
+            *.source.pingApp[0].destAddr = "destination"<br>
+            <br>
+            # Visualizer parameters<br>
+            *.routeVisualizer.*.displayRoutes = true<br>
+        </div>
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=658 height=376 src="NetworkRouteSimple.mp4">
+    </p>
+    <p>
+        The ping messages activate a network routes between the devices. The further packets, like ARP messages go up to the second layer only, so they don't activate a network route. After 1 second in real time, the network routes fade out.
+    </p>
+    <!--
+        Mit csinálunk / mi a sample célja?
+            Ebben a példában megmutatjuk, hogyan kell bekapcsolni a visualization default kinézetét.
+                
+        Mi a konfig?
+            A konfiguráció két host-ot tartalmaz, egy configuratort és a visualizert
+            A source pingeli a destinationt.
+            Bekapcsoljuk a vizualizációt.
+
+        Mi az eredmény?
+            gif
+            A ping üzenetek aktiválják a network route-ot, más nem történik a harmadik rétegben
+    -->
+
+
+    <p><h2>Static Network Routes</h2></p>
+    <p>
+        The simulation demonstrates the visualization of static routes in a non-trivial network.
+        We also show how the <i>packetFilter</i> parameter works.
+        Here is the network for this configuration:
+        <img class="screen" src="NetworkRouteExtended.png">
+    </p>
+    <p>
+        The topology consists of five routers, four switches and four hosts. 
+        There are two sources and two destinations.
+        Similarily to the previous configuration, the sources ping the destinations.
+        We enable network routes with the <i>displayRoutes</i> parameter, but only when the message type is ping.
+        TODO
+        <div class="snippet">
+            # Application parameters<br>
+            *.source*.numPingApps = 1<br>
+            *.source1.pingApp[0].destAddr = "destination1"<br>
+            *.source2.pingApp[0].destAddr = "destination2"<br>
+            <br>
+            # Visualizer parameters<br>
+            *.visualizer.*.networkRouteVisualizer.displayRoutes = true<br>
+            *.visualizer.*.networkRouteVisualizer.packetFilter = "ping*"<br>
+            *.visualizer.*.networkRouteVisualizer.fadeOutMode = "simulationTime"<br>
+            *.visualizer.*.networkRouteVisualizer.fadeOutTime = 1.4s<br>
+        </div>
+    </p>
+    <p>
+        The following video shows what happens, when we start the simulation:
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=820 height=526 src="StaticNetworkRoute.mp4">
+    </p>
+    <p>
+        Only the network routes of the ping messages are displayed because of the <i>packetFilter</i> parameter.
+        Each arrow represents a different route.
         
     </p>
-        <!--
-            Mit csinálunk / mi a sample célja?
-                Ebben a példában megmutatjuk, hogyan kell bekapcsolni a visualization default kinézetét.
-                
-            Mi a konfig?
-                A konfiguráció két host-ot tartalmaz, egy configuratort és a visualizert
-                A source pingeli a destinationt.
-                Bekapcsoljuk a vizualizációt.
+    <!--
+        Mit csinálunk/mi a cél?
+            A szimuláció azt demonstrálja, hogy hogyan vizualizálódnak a static route-ok egy non-trivial networkben.
+            A packetFilter paraméter működését is bemutatjuk.
 
-            Mi az eredmény?
-                gif
-                a ping üzenetek aktiválják a network route-ot, más nem történik a harmadik rétegben
-        -->
+        Mi a konfig?
+            A topologia 5 routerből, 4 switchből és 4 hostból épül fel.
+            A két source host pingeli a két destination host-ot.
+            A visualizer a ping üzenetek esetén mutatja a network route-okat.
+            TODO: finomítjuk a fadeOut paramétereket, hogy a network route-ok ne fade-eljenek el teljesen, mielőtt jön a következő csomag
 
+        Mi az eredmény?
+            gif
+            A ping üzenetek network route-jai rajzolódnak ki.
+            Mindegyik nyíl egy-egy útvonalat jelent
+
+    -->
+
+
+    <p><h2>Changing network routes</h2></p>
+
+
+    <p><h2>Displaying dynamic network routes</h2></p>
     <p><h2>More information</h2></p>
 
     <p>
         This example only demonstrated the key features of network route visualization. For more information, refer to the 
-<code><strong>NetworkRouteVisualizer</strong></code> NED documentation.
+<var>NetworkRouteVisualizer</var> NED documentation.
     </p>
 
 </body>
