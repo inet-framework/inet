@@ -63,3 +63,7 @@ NetworkRouteVisualizer:
 PacketDropVisualizer:
 
 - nincs subscribe-olva a dropPkFromHLIfaceDownSignal-ra és a dropPkIfaceDownSignal-ra ? A hibaüzenet "Interface is not connected -- dropping packet"
+
+IPv4NetworkConfigurator
+
+- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
