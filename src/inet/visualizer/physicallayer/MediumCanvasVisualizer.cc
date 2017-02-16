@@ -101,48 +101,53 @@ void MediumCanvasVisualizer::refreshDisplay() const
 
 void MediumCanvasVisualizer::setAnimationSpeed()
 {
-    AnimationPosition currentPosition;
     SignalInProgress newSignalInProgress = SIP_NONE;
-    if (displaySignals) {
-        for (auto transmission : transmissions) {
-            if (matchesTransmission(transmission)) {
-                if (isSignalPropagationInProgress(transmission)) {
-                    newSignalInProgress = SIP_PROPAGATION;
-                    break;
-                }
-                if (isSignalTransmissionInProgress(transmission)) {
+    double newSignalTransmissionAnimationSpeed = DBL_MAX;
+    for (auto transmission : transmissions) {
+        if (matchesTransmission(transmission)) {
+            if (isSignalPropagationInProgress(transmission))
+                newSignalInProgress = SIP_PROPAGATION;
+            if (isSignalTransmissionInProgress(transmission)) {
+                if (newSignalInProgress == SIP_NONE)
                     newSignalInProgress = SIP_TRANSMISSION;
-                }
+                // TODO: overwrite only...
+                if (std::isnan(signalTransmissionAnimationSpeed))
+                    newSignalTransmissionAnimationSpeed = std::min(newSignalTransmissionAnimationSpeed, transmission->getDuration().dbl() / signalTransmissionAnimationTime);
             }
         }
     }
+    if (newSignalTransmissionAnimationSpeed != DBL_MAX)
+        defaultSignalTransmissionAnimationSpeed = newSignalTransmissionAnimationSpeed;
+    double currentSignalPropagationAnimationSpeed = std::isnan(signalPropagationAnimationSpeed) ? defaultSignalPropagationAnimationSpeed : signalPropagationAnimationSpeed;
+    double currentSignalTransmissionAnimationSpeed = std::isnan(signalTransmissionAnimationSpeed) ? defaultSignalTransmissionAnimationSpeed : signalTransmissionAnimationSpeed;
+    AnimationPosition currentPosition;
     if (lastSignalInProgress == SIP_NONE) {
         if (newSignalInProgress == SIP_NONE) {
             if (animationSpeedInterpolator.getCurrentAnimationSpeed() == animationSpeedInterpolator.getTargetAnimationSpeed())
                 animationSpeedInterpolator.setAnimationSpeed(0);
         }
         else if (newSignalInProgress == SIP_PROPAGATION)
-            animationSpeedInterpolator.setAnimationSpeed(signalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setAnimationSpeed(currentSignalPropagationAnimationSpeed);
         else if (newSignalInProgress == SIP_TRANSMISSION)
-            animationSpeedInterpolator.setAnimationSpeed(signalTransmissionAnimationSpeed);
+            animationSpeedInterpolator.setAnimationSpeed(currentSignalTransmissionAnimationSpeed);
     }
     else if (lastSignalInProgress == SIP_PROPAGATION) {
         if (newSignalInProgress == SIP_NONE) {
-            animationSpeedInterpolator.setCurrentAnimationSpeed(signalPropagationAnimationSpeed);
-            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, signalTransmissionAnimationSpeed);
+            animationSpeedInterpolator.setCurrentAnimationSpeed(currentSignalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
         }
         else if (newSignalInProgress == SIP_PROPAGATION)
             ; // void
         else if (newSignalInProgress == SIP_TRANSMISSION) {
-            animationSpeedInterpolator.setCurrentAnimationSpeed(signalPropagationAnimationSpeed);
-            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, signalTransmissionAnimationSpeed);
+            animationSpeedInterpolator.setCurrentAnimationSpeed(currentSignalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
         }
     }
     else if (lastSignalInProgress == SIP_TRANSMISSION) {
         if (newSignalInProgress == SIP_NONE)
             animationSpeedInterpolator.setAnimationSpeed(0);
         else if (newSignalInProgress == SIP_PROPAGATION)
-            animationSpeedInterpolator.setAnimationSpeed(signalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setAnimationSpeed(currentSignalPropagationAnimationSpeed);
         else if (newSignalInProgress == SIP_TRANSMISSION)
             ; // void
     }
@@ -267,7 +272,8 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
                 signalFigure->setInnerRx(endRadius);
                 signalFigure->setInnerRy(endRadius);
                 signalFigure->setWaveOffset(offset);
-                signalFigure->setWaveOpacityFactor(std::min(1.0, signalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor));
+                double currentSignalPropagationAnimationSpeed = std::isnan(signalPropagationAnimationSpeed) ? defaultSignalPropagationAnimationSpeed : signalPropagationAnimationSpeed;
+                signalFigure->setWaveOpacityFactor(std::min(1.0, currentSignalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor));
                 signalFigure->refresh();
                 break;
             }

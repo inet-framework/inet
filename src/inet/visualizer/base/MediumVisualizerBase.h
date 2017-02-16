@@ -51,9 +51,11 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     bool displaySignals = false;
     ColorSet signalColorSet;
     double signalPropagationAnimationSpeed = NaN;
-    double signalTransmissionAnimationSpeed = NaN;
-    double signalAnimationSpeedChangeTime = NaN;
+    double signalPropagationAnimationTime = NaN;
     double signalPropagationAdditionalTime = NaN;
+    double signalTransmissionAnimationSpeed = NaN;
+    double signalTransmissionAnimationTime = NaN;
+    double signalAnimationSpeedChangeTime = NaN;
     bool displayTransmissions = false;
     bool displayReceptions = false;
     bool displayInterferenceRanges = false;
@@ -64,6 +66,12 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color communicationRangeLineColor;
     cFigure::LineStyle communicationRangeLineStyle;
     double communicationRangeLineWidth = NaN;
+    //@}
+
+    /** @name State */
+    //@{
+    double defaultSignalPropagationAnimationSpeed = NaN;
+    double defaultSignalTransmissionAnimationSpeed = NaN;
     //@}
 
   protected:
