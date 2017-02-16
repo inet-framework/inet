@@ -30,7 +30,7 @@
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
 
@@ -74,7 +74,7 @@ void ICMPv6::processICMPv6Message(Packet *packet)
     if (type < 128) {
         // ICMP errors are delivered to the appropriate higher layer protocols
         EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
-        auto bogusIpv6Header = packet->peekHeader<IPv6Datagram>();
+        auto bogusIpv6Header = packet->peekHeader<IPv6Header>();
         int transportProtocol = bogusIpv6Header->getTransportProtocol();
         if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
@@ -210,7 +210,7 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
-    const auto& ipv6Header = origDatagram->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = origDatagram->peekHeader<IPv6Header>();
     if (ipv6Header->getSrcAddress().isUnspecified()) {
         // pretend it came from the IP layer
         errorMsg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
@@ -286,7 +286,7 @@ Packet *ICMPv6::createParamProblemMsg(int code)
 
 bool ICMPv6::validateDatagramPromptingError(Packet *packet)
 {
-    auto ipv6Header = packet->peekHeader<IPv6Datagram>();
+    auto ipv6Header = packet->peekHeader<IPv6Header>();
     // don't send ICMP error messages for multicast messages
     if (ipv6Header->getDestAddress().isMulticast()) {
         EV_INFO << "won't send ICMP error messages for multicast message " << ipv6Header << endl;

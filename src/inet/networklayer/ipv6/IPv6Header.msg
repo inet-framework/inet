@@ -49,7 +49,7 @@ class FieldsChunk extends cObject;
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
-class IPv6Datagram extends FieldsChunk
+class IPv6Header extends FieldsChunk
 {
     @customize(true);
     bit chunkLength @overridegetter;

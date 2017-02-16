@@ -44,7 +44,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/common/serializer/ipv6/IPv6Serializer.h"
 #endif // ifdef WITH_IPv6
 
@@ -140,7 +140,7 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Header *ipPacket)
 #endif // ifdef WITH_IPv4
 }
 
-void PcapDump::writeIPv6Frame(simtime_t stime, const IPv6Datagram *ipPacket)
+void PcapDump::writeIPv6Frame(simtime_t stime, const IPv6Header *ipPacket)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");

@@ -63,7 +63,7 @@ IPv6::~IPv6()
 }
 
 #ifdef WITH_xMIPv6
-IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, IPv6Datagram *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
+IPv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, IPv6Header *datagram, const InterfaceEntry *ie, MACAddress macAddr, bool fromHL) :
         packet(packet),
         datagram(datagram),
         ie(ie),
@@ -216,7 +216,7 @@ void IPv6::endService(cPacket *msg)
     else {
         // datagram from network or from ND: localDeliver and/or route
         auto packet = check_and_cast<Packet *>(msg);
-        auto ipv6Header = packet->peekHeader<IPv6Datagram>();
+        auto ipv6Header = packet->peekHeader<IPv6Header>();
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
             IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
@@ -257,7 +257,7 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *packet)
 
 void IPv6::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
 {
-    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Header>();
     IPv6Address& destAddr = ipv6Header->getDestAddress();
     // remove control info
     delete packet->removeControlInfo();
@@ -293,7 +293,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     }
 #endif /* WITH_xMIPv6 */
 
-    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Header>();
     IPv6Address destAddress = ipv6Header->getDestAddress();
 
     // check for local delivery
@@ -317,7 +317,7 @@ void IPv6::handleMessageFromHL(cPacket *msg)
 
 void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress)
 {
-    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Header>();
     // route packet
     if (destIE != nullptr)
         fragmentAndSend(packet, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
@@ -329,7 +329,7 @@ void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Ad
 
 void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL)
 {
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& datagram = packet->peekHeader<IPv6Header>();
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
 
@@ -373,7 +373,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         // KLUDGE: TODO
         packet->removePoppedChunks();
         packet->removeFromBeginning(datagram->getChunkLength());
-        auto ipv6Header = std::static_pointer_cast<IPv6Datagram>(datagram->dupShared());
+        auto ipv6Header = std::static_pointer_cast<IPv6Header>(datagram->dupShared());
         // TODO: dup or mark datagram->markMutableIfExclusivelyOwned();
         ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
         ipv6Header->markImmutable();
@@ -432,7 +432,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
 
 void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6Address nextHop, bool fromHL)
 {
-    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Header>();
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie != nullptr);
     ASSERT(!nextHop.isUnspecified());
@@ -477,7 +477,7 @@ void IPv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, IPv6A
 
 void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL)
 {
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& datagram = packet->peekHeader<IPv6Header>();
     const IPv6Address& destAddr = datagram->getDestAddress();
 
     EV_INFO << "destination address " << destAddr << " is multicast, doing multicast routing\n";
@@ -514,7 +514,7 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
         // KLUDGE: TODO
         packet->removePoppedChunks();
         packet->removeFromBeginning(datagram->getChunkLength());
-        auto ipv6Header = std::static_pointer_cast<IPv6Datagram>(datagram->dupShared());
+        auto ipv6Header = std::static_pointer_cast<IPv6Header>(datagram->dupShared());
         // TODO: dup or mark datagram->markMutableIfExclusivelyOwned();
         ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
         ipv6Header->markImmutable();
@@ -607,7 +607,7 @@ void IPv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
 void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 {
     auto ipv6HeaderPosition = packet->getHeaderPopOffset();
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& datagram = packet->peekHeader<IPv6Header>();
     // Defragmentation. skip defragmentation if datagram is not fragmented
 #if 0 // KLUDGE: TODO
     IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
@@ -707,7 +707,7 @@ void IPv6::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     auto ipv6HeaderPos = packet->getHeaderPopOffset();
-    auto ipv6Header = packet->popHeader<IPv6Datagram>();
+    auto ipv6Header = packet->popHeader<IPv6Header>();
 
     // create and fill in control info
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
@@ -725,7 +725,7 @@ void IPv6::decapsulate(Packet *packet)
 
 void IPv6::encapsulate(Packet *transportPacket)
 {
-    auto datagram = std::make_shared<IPv6Datagram>(); // TODO: transportPacket->getName());
+    auto datagram = std::make_shared<IPv6Header>(); // TODO: transportPacket->getName());
 
     L3AddressReq *addresses = transportPacket->removeMandatoryTag<L3AddressReq>();
     IPv6Address src = addresses->getSrcAddress().toIPv6();
@@ -786,7 +786,7 @@ void IPv6::encapsulate(Packet *transportPacket)
 
 void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
 {
-    const auto& datagram = packet->peekHeader<IPv6Datagram>();
+    const auto& datagram = packet->peekHeader<IPv6Header>();
     // hop counter check
     if (datagram->getHopLimit() <= 0) {
         // drop datagram, destruction responsibility in ICMP
@@ -805,7 +805,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
 
         // TODO: factor out
         packet->removeFromBeginning(datagram->getChunkLength());
-        auto ipv6HeaderCopy = std::static_pointer_cast<IPv6Datagram>(datagram->dupShared());
+        auto ipv6HeaderCopy = std::static_pointer_cast<IPv6Header>(datagram->dupShared());
         // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
         ipv6HeaderCopy->setSrcAddress(srcAddr);
         ipv6HeaderCopy->markImmutable();
@@ -863,7 +863,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         fh->setFragmentOffset(offset);
         fh->setMoreFragments(!lastFragment);
 
-        IPv6Datagram *fragment = datagram->dup();
+        IPv6Header *fragment = datagram->dup();
         if (offset == 0)
             fragment->encapsulate(encapsulatedPacket);
         fragment->setName(fragMsgName.c_str());
@@ -930,7 +930,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
 }
 
 #ifdef WITH_xMIPv6
-bool IPv6::processExtensionHeaders(Packet *packet, IPv6Datagram *datagram)
+bool IPv6::processExtensionHeaders(Packet *packet, IPv6Header *datagram)
 {
     int noExtHeaders = datagram->getExtensionHeaderArraySize();
     EV_INFO << noExtHeaders << " extension header(s) for processing..." << endl;

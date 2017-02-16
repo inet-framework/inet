@@ -23,7 +23,7 @@
 #include "inet/networklayer/ipv6/IPv6FragBuf.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"    // for TIME_EXCEEDED
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 
 namespace inet {
@@ -45,7 +45,7 @@ void IPv6FragBuf::init(ICMPv6 *icmp)
     icmpModule = icmp;
 }
 
-IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeader *fh, simtime_t now)
+IPv6Header *IPv6FragBuf::addFragment(IPv6Header *datagram, IPv6FragmentHeader *fh, simtime_t now)
 {
     // find datagram buffer
     Key key;
@@ -114,7 +114,7 @@ IPv6Datagram *IPv6FragBuf::addFragment(IPv6Datagram *datagram, IPv6FragmentHeade
     // do we have the complete datagram?
     if (isComplete) {
         // datagram complete: deallocate buffer and return complete datagram
-        IPv6Datagram *ret = buf->datagram;
+        IPv6Header *ret = buf->datagram;
         if (!ret)
             throw cRuntimeError("Model error: completed datagram without datagram pointer.");
         ret->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);

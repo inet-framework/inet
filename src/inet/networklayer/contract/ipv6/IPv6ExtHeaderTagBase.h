@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class IPv6Datagram;
+class IPv6Header;
 class IPv6ExtensionHeader;
 
 /**

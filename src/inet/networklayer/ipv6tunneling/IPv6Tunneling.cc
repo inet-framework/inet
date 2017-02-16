@@ -38,7 +38,7 @@
 
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -362,7 +362,7 @@ int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress, TunnelType
 
 void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 {
-    auto ipv6Header = packet->peekHeader<IPv6Datagram>();
+    auto ipv6Header = packet->peekHeader<IPv6Header>();
     int vIfIndex = -1;
 
     if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6EXT_MOB) {
@@ -413,7 +413,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
         }
 
         // get rid of the encapsulation of the IPv6 module
-        packet->popHeader<IPv6Datagram>();
+        packet->popHeader<IPv6Header>();
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
 
         if (tunnels[vIfIndex].tunnelType == T2RH) {
@@ -475,7 +475,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 
 void IPv6Tunneling::decapsulateDatagram(Packet *packet)
 {
-    auto ipv6Header = packet->popHeader<IPv6Datagram>();
+    auto ipv6Header = packet->popHeader<IPv6Header>();
     // decapsulation is performed in IPv6 module
     IPv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 

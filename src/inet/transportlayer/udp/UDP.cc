@@ -51,7 +51,7 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 #include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
@@ -545,7 +545,7 @@ void UDP::processICMPv6Error(Packet *packet)
     type = icmpHeader->getType();
     code = -1;    // FIXME this is dependent on getType()...
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-    const auto& ipv6Header = packet->popHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->popHeader<IPv6Header>();
     IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (!fh || fh->getFragmentOffset() == 0) {
         if (const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8))) {

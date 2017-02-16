@@ -27,7 +27,7 @@
 namespace inet {
 
 class ICMPv6;
-class IPv6Datagram;
+class IPv6Header;
 class IPv6FragmentHeader;
 
 /**
@@ -57,7 +57,7 @@ class INET_API IPv6FragBuf
     struct DatagramBuffer
     {
         OldReassemblyBuffer buf;    // reassembly buffer
-        IPv6Datagram *datagram = nullptr;    // the actual datagram
+        IPv6Header *datagram = nullptr;    // the actual datagram
         simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
@@ -92,7 +92,7 @@ class INET_API IPv6FragBuf
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise nullptr.
      */
-    IPv6Datagram *addFragment(IPv6Datagram *datagram, IPv6FragmentHeader *fh, simtime_t now);
+    IPv6Header *addFragment(IPv6Header *datagram, IPv6FragmentHeader *fh, simtime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their

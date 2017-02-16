@@ -27,7 +27,7 @@ namespace inet {
 
 // Foreign declarations:
 class IPv4Header;
-class IPv6Datagram;
+class IPv6Header;
 namespace tcp { class TcpHeader; }
 class UdpHeader;
 class ARPPacket;
@@ -99,7 +99,7 @@ class INET_API PacketDump
      * Dumps info about the given IPv6 datagram. The l2r parameter denotes
      * the direction of the packet.
      */
-    void dumpIPv6(bool l2r, const char *label, IPv6Datagram *dgram, const char *comment = nullptr);
+    void dumpIPv6(bool l2r, const char *label, IPv6Header *dgram, const char *comment = nullptr);
 
     /**
      * Dumps info about the given SCTP message.

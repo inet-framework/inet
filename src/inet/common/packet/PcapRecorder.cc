@@ -26,7 +26,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {
@@ -136,7 +136,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     IPv4Header *ip4Packet = nullptr;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-    IPv6Datagram *ip6Packet = nullptr;
+    IPv6Header *ip6Packet = nullptr;
 #endif // ifdef WITH_IPv6
     while (msg) {
         if (msg->hasBitError())
@@ -147,7 +147,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (nullptr != (ip6Packet = dynamic_cast<IPv6Datagram *>(msg))) {
+        if (nullptr != (ip6Packet = dynamic_cast<IPv6Header *>(msg))) {
             break;
         }
 #endif // ifdef WITH_IPv6

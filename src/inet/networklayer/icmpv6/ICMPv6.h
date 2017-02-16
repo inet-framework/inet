@@ -27,7 +27,7 @@ namespace inet {
 
 //foreign declarations:
 class IPv6Address;
-class IPv6Datagram;
+class IPv6Header;
 class PingPayload;
 
 /**

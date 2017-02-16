@@ -21,7 +21,7 @@
 //  Implementation of IPv6 version: Wei Yang, Ng, 2005
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ErrorHandling.h"
 
 namespace inet {
@@ -36,7 +36,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     const auto& icmpv6Header = packet->popHeader<ICMPv6Message>();
-    const auto& ipv6Header = packet->peekHeader<IPv6Datagram>();
+    const auto& ipv6Header = packet->peekHeader<IPv6Header>();
     int type = (int)icmpv6Header->getType();
 
     EV_ERROR << " Type: " << type;

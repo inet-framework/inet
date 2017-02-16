@@ -35,7 +35,7 @@ namespace inet {
 class ICMPv6;
 class IInterfaceTable;
 class InterfaceEntry;
-class IPv6Datagram;
+class IPv6Header;
 class IPv6RoutingTable;
 
 #ifdef WITH_xMIPv6

@@ -18,7 +18,7 @@
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTagBase.h"
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6Header.h"
 #endif // ifdef WITH_IPv6
 
 namespace inet {
