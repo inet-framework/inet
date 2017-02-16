@@ -21,6 +21,8 @@
 #include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
+#include "inet/linklayer/ethernet/EtherMACBase.h"
+
 
 namespace inet {
 
@@ -113,6 +115,8 @@ void PacketDropVisualizerBase::subscribe()
     subscriptionModule->subscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
     subscriptionModule->subscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
     subscriptionModule->subscribe(PassiveQueueBase::dropPkByQueueSignal, this);
+    subscriptionModule->subscribe(EtherMACBase::dropPkIfaceDownSignal, this);
+    subscriptionModule->subscribe(EtherMACBase::dropPkFromHLIfaceDownSignal, this);
 }
 
 void PacketDropVisualizerBase::unsubscribe()
@@ -123,13 +127,15 @@ void PacketDropVisualizerBase::unsubscribe()
         subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromLowerDroppedSignal, this);
         subscriptionModule->unsubscribe(LayeredProtocolBase::packetFromUpperDroppedSignal, this);
         subscriptionModule->unsubscribe(PassiveQueueBase::dropPkByQueueSignal, this);
+        subscriptionModule->unsubscribe(EtherMACBase::dropPkIfaceDownSignal, this);
+        subscriptionModule->unsubscribe(EtherMACBase::dropPkFromHLIfaceDownSignal, this);
     }
 }
 
 void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal || PassiveQueueBase::dropPkByQueueSignal) {
+    if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal || PassiveQueueBase::dropPkByQueueSignal || EtherMACBase::dropPkIfaceDownSignal || EtherMACBase::dropPkFromHLIfaceDownSignal) {
         auto packet = check_and_cast<cPacket *>(object);
         if (packetFilter.matches(packet))
             addPacketDropVisualization(createPacketDropVisualization(check_and_cast<cModule*>(source), packet->dup()));
