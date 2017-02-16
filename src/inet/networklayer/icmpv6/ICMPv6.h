@@ -21,7 +21,7 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 
 namespace inet {
 
@@ -92,7 +92,7 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
      */
     virtual bool validateDatagramPromptingError(Packet *packet);
 
-    virtual void errorOut(const std::shared_ptr<ICMPv6Message>& header);
+    virtual void errorOut(const std::shared_ptr<ICMPv6Header>& header);
 
   protected:
     typedef std::map<long, int> PingMap;

@@ -29,7 +29,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 
@@ -69,7 +69,7 @@ void ICMPv6::handleMessage(cMessage *msg)
 
 void ICMPv6::processICMPv6Message(Packet *packet)
 {
-    auto icmpv6msg = packet->popHeader<ICMPv6Message>();
+    auto icmpv6msg = packet->popHeader<ICMPv6Header>();
     int type = icmpv6msg->getType();
     if (type < 128) {
         // ICMP errors are delivered to the appropriate higher layer protocols
@@ -296,7 +296,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
 
     // do not reply with error message to error message
     if (ipv6Header->getTransportProtocol() == IP_PROT_IPv6_ICMP) {
-        auto recICMPMsg = packet->peekDataAt<ICMPv6Message>(ipv6Header->getChunkLength());
+        auto recICMPMsg = packet->peekDataAt<ICMPv6Header>(ipv6Header->getChunkLength());
         if (recICMPMsg->getType() < 128) {
             EV_INFO << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -306,7 +306,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
     return true;
 }
 
-void ICMPv6::errorOut(const std::shared_ptr<ICMPv6Message>& icmpv6msg)
+void ICMPv6::errorOut(const std::shared_ptr<ICMPv6Header>& icmpv6msg)
 {
 }
 

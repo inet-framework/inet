@@ -44,7 +44,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
@@ -227,7 +227,7 @@ void PingApp::handleMessage(cMessage *msg)
 #endif
 #ifdef WITH_IPv6
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
-            ICMPv6Message *icmpMessage = dynamic_cast<ICMPv6Message *>(msg);
+            ICMPv6Header *icmpMessage = dynamic_cast<ICMPv6Header *>(msg);
             if (icmpMessage->getType() == ICMPv6_ECHO_REPLY) {
                 check_and_cast<ICMPv6EchoReplyMsg *>(msg);
                 processPingResponse(packet);

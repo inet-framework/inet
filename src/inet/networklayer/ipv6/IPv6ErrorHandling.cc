@@ -35,7 +35,7 @@ void IPv6ErrorHandling::initialize()
 void IPv6ErrorHandling::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
-    const auto& icmpv6Header = packet->popHeader<ICMPv6Message>();
+    const auto& icmpv6Header = packet->popHeader<ICMPv6Header>();
     const auto& ipv6Header = packet->peekHeader<IPv6Header>();
     int type = (int)icmpv6Header->getType();
 

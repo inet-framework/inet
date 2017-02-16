@@ -37,7 +37,7 @@
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #endif // ifdef WITH_IPv6
 
 

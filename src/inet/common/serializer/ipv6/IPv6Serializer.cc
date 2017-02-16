@@ -24,7 +24,7 @@
 #include "inet/common/serializer/headers/defs.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/common/serializer/ipv6/headers/ip6.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"

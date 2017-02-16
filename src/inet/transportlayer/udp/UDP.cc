@@ -50,7 +50,7 @@
 
 #ifdef WITH_IPv6
 #include "inet/networklayer/icmpv6/ICMPv6.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
@@ -539,7 +539,7 @@ void UDP::processICMPv6Error(Packet *packet)
     ushort localPort, remotePort;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpHeader = packet->popHeader<ICMPv6Message>();
+    const auto& icmpHeader = packet->popHeader<ICMPv6Header>();
     ASSERT(icmpHeader);
 
     type = icmpHeader->getType();

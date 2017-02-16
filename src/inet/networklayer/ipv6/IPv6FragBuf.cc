@@ -22,7 +22,7 @@
 
 #include "inet/networklayer/ipv6/IPv6FragBuf.h"
 #include "inet/networklayer/icmpv6/ICMPv6.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"    // for TIME_EXCEEDED
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6Header.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 

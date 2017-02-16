@@ -185,7 +185,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv6) {
             //This information will serve as input parameters to various processors.
-            const auto& ndMsg = packet->peekHeader<ICMPv6Message>();
+            const auto& ndMsg = packet->peekHeader<ICMPv6Header>();
             processNDMessage(packet, ndMsg.get()); // KLUDGE: remove get()
         }
         else {    // not ND message
@@ -196,7 +196,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown message type received.\n");
 }
 
-void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, ICMPv6Message *msg)
+void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, ICMPv6Header *msg)
 {
     if (dynamic_cast<IPv6RouterSolicitation *>(msg)) {
         IPv6RouterSolicitation *rs = (IPv6RouterSolicitation *)msg;

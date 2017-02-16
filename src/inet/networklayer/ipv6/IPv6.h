@@ -35,7 +35,7 @@
 
 namespace inet {
 
-class ICMPv6Message;
+class ICMPv6Header;
 
 /**
  * IPv6 implementation.

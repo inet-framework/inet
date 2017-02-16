@@ -40,7 +40,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 
 #ifdef WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader.h"
@@ -692,7 +692,7 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 
 void IPv6::handleReceivedICMP(Packet *msg)
 {
-    const auto& icmpHeader = msg->peekHeader<ICMPv6Message>();
+    const auto& icmpHeader = msg->peekHeader<ICMPv6Header>();
     if (std::dynamic_pointer_cast<IPv6NDMessage>(icmpHeader) != nullptr) {
         EV_INFO << "Neigbour Discovery packet: passing it to ND module\n";
         send(msg, "ndOut");

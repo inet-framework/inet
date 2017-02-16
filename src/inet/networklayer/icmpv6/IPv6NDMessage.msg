@@ -17,14 +17,14 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
+#include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
 
-class ICMPv6Message extends cObject;
+class ICMPv6Header extends cObject;
 
 class noncobject IPv6Address;
 
@@ -82,14 +82,14 @@ class MIPv6HAInformation
 // Neighbour Discovery for IPv6.
 // RFC 2461
 //
-// ICMP fields inherited from ~ICMPv6Message:
+// ICMP fields inherited from ~ICMPv6Header:
 //    - Type
 //
 // ICMP fields not implemented:
 //    - Checksum
 //    - Reserved
 //
-class IPv6NDMessage extends ICMPv6Message
+class IPv6NDMessage extends ICMPv6Header
 {
     //customize=true;
     int code = 0;
