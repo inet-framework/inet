@@ -80,15 +80,17 @@ class INET_API ByteInputStream {
         else return bytes[position++];
     }
 
-    void readByteRepeatedly(uint8_t byte, int64_t count) {
+    bool readByteRepeatedly(uint8_t byte, int64_t count) {
+        bool success = true;
         for (int64_t i = 0; i < count; i++) {
             if (position == bytes.size()) {
                 isReadBeyondEnd_ = true;
-                return;
+                return false;
             }
             auto readByte = bytes[position++];
-            assert(byte == readByte);
+            success &= (byte == readByte);
         }
+        return success;
     }
 
     void readBytes(std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
