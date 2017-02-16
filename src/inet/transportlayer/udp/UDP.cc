@@ -43,7 +43,7 @@
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMP.h"
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
@@ -492,7 +492,7 @@ void UDP::processICMPv4Error(Packet *packet)
     int localPort = -1, remotePort = -1;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpHeader = packet->popHeader<ICMPMessage>();
+    const auto& icmpHeader = packet->popHeader<ICMPHeader>();
     ASSERT(icmpHeader);
     type = icmpHeader->getType();
     code = icmpHeader->getCode();

@@ -26,11 +26,11 @@
 #endif
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #else // ifdef WITH_IPv4
 namespace inet {
-class ICMPMessage;
+class ICMPHeader;
 class IPv4Header;
 } // namespace inet
 #endif // ifdef WITH_IPv4
@@ -54,7 +54,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
   protected:
     void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TcpHeader *tcpSeg) const;
     void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UdpHeader *udpHeader) const;
-    void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
+    void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPHeader *packet) const;
 
   public:
     InetPacketPrinter() {}
@@ -99,7 +99,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-        else if (ICMPMessage *icmpPacket = dynamic_cast<ICMPMessage *>(pk)) {
+        else if (ICMPHeader *icmpPacket = dynamic_cast<ICMPHeader *>(pk)) {
             printICMPPacket(os, srcAddr, destAddr, icmpPacket);
             return;
         }
@@ -171,7 +171,7 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Ad
 #endif // ifdef WITH_UDP
 }
 
-void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPHeader *packet) const
 {
 #ifdef WITH_IPv4
     switch (packet->getType()) {

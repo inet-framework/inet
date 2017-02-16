@@ -39,7 +39,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
@@ -214,7 +214,7 @@ void PingApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
-            const auto& icmpHeader = packet->popHeader<ICMPMessage>();
+            const auto& icmpHeader = packet->popHeader<ICMPHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
                 processPingResponse(packet);
             }
@@ -359,7 +359,7 @@ void PingApp::sendPingRequest()
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
-            const auto& request = std::make_shared<ICMPMessage>();
+            const auto& request = std::make_shared<ICMPHeader>();
             request->setChunkLength(byte(4));
             request->setType(ICMP_ECHO_REQUEST);
             request->markImmutable();

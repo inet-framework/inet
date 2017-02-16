@@ -87,7 +87,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // do not reply with error message to error message
     if (ipv4Header->getTransportProtocol() == IP_PROT_ICMP) {
-        const auto& recICMPMsg = packet->peekDataAt<ICMPMessage>(byte(ipv4Header->getHeaderLength()));
+        const auto& recICMPMsg = packet->peekDataAt<ICMPHeader>(byte(ipv4Header->getHeaderLength()));
         if (!isIcmpInfoType(recICMPMsg->getType())) {
             EV_DETAIL << "ICMP error received -- do not reply to it" << endl;
             delete packet;
@@ -105,7 +105,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
 
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
-    const auto& icmpHeader = std::make_shared<ICMPMessage>();
+    const auto& icmpHeader = std::make_shared<ICMPHeader>();
     icmpHeader->setChunkLength(byte(8));      //FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
@@ -159,7 +159,7 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
 
 void ICMP::processICMPMessage(Packet *packet)
 {
-    const auto& icmpmsg = packet->peekHeader<ICMPMessage>();
+    const auto& icmpmsg = packet->peekHeader<ICMPHeader>();
     switch (icmpmsg->getType()) {
         case ICMP_REDIRECT:
             // TODO implement redirect handling
@@ -219,9 +219,9 @@ void ICMP::errorOut(Packet *packet)
 void ICMP::processEchoRequest(Packet *request)
 {
     // turn request into a reply
-    const auto& icmpReq = request->popHeader<ICMPMessage>();
+    const auto& icmpReq = request->popHeader<ICMPHeader>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
-    const auto& icmpReply = std::make_shared<ICMPMessage>();
+    const auto& icmpReply = std::make_shared<ICMPHeader>();
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv4Address src = addressInd->getSrcAddress().toIPv4();
     IPv4Address dest = addressInd->getDestAddress().toIPv4();

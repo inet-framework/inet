@@ -21,7 +21,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/routing/ospfv2/router/OSPFRouter.h"
 
 namespace inet {

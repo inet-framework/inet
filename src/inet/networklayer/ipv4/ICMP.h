@@ -26,7 +26,7 @@
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 
 namespace inet {
 

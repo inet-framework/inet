@@ -32,14 +32,14 @@ namespace inet { class EtherFrame; }
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #else // ifdef WITH_IPv4
 
 namespace inet {
 
 class ARPPacket;
-class ICMPMessage;
+class ICMPHeader;
 class IPv4Header;
 
 } // namespace inet
@@ -93,7 +93,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
 
   protected:
     std::string formatARPPacket(ARPPacket *packet) const;
-    std::string formatICMPPacket(ICMPMessage *packet) const;
+    std::string formatICMPPacket(ICMPHeader *packet) const;
     std::string formatIeee80211Frame(ieee80211::Ieee80211Frame *packet) const;
     std::string formatPingPayload(PingPayload *packet) const;
     std::string formatRIPPacket(RIPPacket *packet) const;
@@ -167,8 +167,8 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
                 out << pk->getClassName() << ": " << header->getClassName() << ": " << pk->getByteLength() << " bytes";
         }
 #ifdef WITH_IPv4
-        else if (dynamic_cast<ICMPMessage *>(pk)) {
-            out << formatICMPPacket(static_cast<ICMPMessage *>(pk));
+        else if (dynamic_cast<ICMPHeader *>(pk)) {
+            out << formatICMPPacket(static_cast<ICMPHeader *>(pk));
         }
         else if (dynamic_cast<ARPPacket *>(pk)) {
             out << formatARPPacket(static_cast<ARPPacket *>(pk));
@@ -415,7 +415,7 @@ std::string InetPacketPrinter2::formatPingPayload(PingPayload *packet) const
     std::ostringstream os;
     os << "PING ";
 #ifdef WITH_IPv4
-    ICMPMessage *owner = dynamic_cast<ICMPMessage *>(packet->getOwner());
+    ICMPHeader *owner = dynamic_cast<ICMPHeader *>(packet->getOwner());
     if (owner) {
         switch (owner->getType()) {
             case ICMP_ECHO_REQUEST:
@@ -438,7 +438,7 @@ std::string InetPacketPrinter2::formatPingPayload(PingPayload *packet) const
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatICMPPacket(ICMPMessage *packet) const
+std::string InetPacketPrinter2::formatICMPPacket(ICMPHeader *packet) const
 {
     std::ostringstream os;
 #ifdef WITH_IPv4

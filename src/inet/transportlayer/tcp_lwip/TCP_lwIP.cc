@@ -24,7 +24,7 @@
 #include "lwip/lwip_tcp.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#include "inet/networklayer/ipv4/ICMPHeader_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6

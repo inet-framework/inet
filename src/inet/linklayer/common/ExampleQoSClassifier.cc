@@ -24,7 +24,7 @@
 
 #ifdef WITH_IPv4
 #  include "inet/networklayer/ipv4/IPv4Header.h"
-#  include "inet/networklayer/ipv4/ICMPMessage_m.h"
+#  include "inet/networklayer/ipv4/ICMPHeader_m.h"
 #endif
 #ifdef WITH_IPv6
 #  include "inet/networklayer/ipv6/IPv6Datagram.h"

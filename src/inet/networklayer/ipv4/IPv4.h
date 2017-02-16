@@ -35,7 +35,7 @@
 namespace inet {
 
 class ARPPacket;
-class ICMPMessage;
+class ICMPHeader;
 class IInterfaceTable;
 class IIPv4RoutingTable;
 

@@ -20,7 +20,7 @@
 
 #include "inet/networklayer/ipv4/ErrorHandling.h"
 
-#include "inet/networklayer/ipv4/ICMPMessage.h"
+#include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
