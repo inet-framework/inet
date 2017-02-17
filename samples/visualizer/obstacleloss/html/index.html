@@ -12,7 +12,10 @@
 <h2>Goals</h2>
 
 <p>
-When radio transmissions go through objects in the physical environment, the objects might reflect and absorb the electromagnetic energy,
+When radio signals go through objects in the physical environment, the objects might reflect and absorb the electromagnetic energy.
+The loss of energy often results in incorrectly received packets. This may alter the course of the simulation significantly.
+Seeing where the propagation path of radio signals and obstacles intersect gives some information about power loss....
+
 depending on the obstacle loss model. This visualization makes it easy to see where radio waves and obstacles intersect, and to have some
 information about power loss, which is proportional to the length of the intersection. (TODO: is that correct? the dielectric loss is proportional to that, but not the reflection loss) Additinally, the loss is indicated at the intersection in dB's.
 </p>
@@ -78,8 +81,8 @@ The following animation illustrates what happens when the simulation is run:
 
 <p>
 The hosts send ping packets through the structure. The intersections are indicated in yellow. Even when the obstacles are not contiguous,
-the yellow lines are drawn whereever transmissions and the obstacles intersect. The face normal vectors are displayed at both edges of the
-intersections, their relative length indicate the length of the intersection, and the magnitude of absorption power loss.
+the yellow lines are drawn whereever transmissions and the obstacles intersect. The face normal vectors are displayed at both ends of the
+intersections, their relative length indicate the length of the intersection.
 TODO: is the correct?
 </p>
 
