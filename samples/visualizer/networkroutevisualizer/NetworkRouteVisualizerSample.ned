@@ -133,6 +133,45 @@ network NetworkRouteExtended
 //
 // TODO documentation
 //
+network DynamicNetworkRoutes
+{
+    @display("bgb=660,630");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            @display("p=100,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=100,150");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=100,250");
+        }
+        destination: AODVRouter {
+            @display("p=488.832,512.952");
+        }
+        source: AODVRouter {
+            @display("p=229,46");
+        }
+        aodvRouter1: AODVRouter {
+            @display("p=421.296,295.872");
+        }
+        aodvRouter2: AODVRouter {
+            @display("p=273.36002,440.592");
+        }
+        aodvRouter3: AODVRouter {
+            @display("p=305.52,188.136");
+        }
+        aodvRouter4: AODVRouter {
+            @display("p=562.8,328.032");
+        }
+        aodvRouter5: AODVRouter {
+            @display("p=421.296,77.184");
+        }
+}
+
+//
+// TODO documentation
+//
 network NetworkRouteComplex
 {
     @display("bgb=1100,800");
@@ -203,44 +242,5 @@ network NetworkRouteComplex
         router0.ethg++ <--> Eth100M <--> etherSwitch1.ethg++;
         etherSwitch1.ethg++ <--> Eth100M <--> wiredSource.ethg++;
         router0.ethg++ <--> Eth100M <--> accessPoint0.ethg++;
-}
-
-//
-// TODO documentation
-//
-network DynamicNetworkRoutes
-{
-    @display("bgb=660,630");
-    submodules:
-        visualizer: IntegratedVisualizer {
-            @display("p=100,50");
-        }
-        configurator: IPv4NetworkConfigurator {
-            @display("p=100,150");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=100,250");
-        }
-        destination: AODVRouter {
-            @display("p=488.832,512.952");
-        }
-        source: AODVRouter {
-            @display("p=229,46");
-        }
-        aodvRouter1: AODVRouter {
-            @display("p=421.296,295.872");
-        }
-        aodvRouter2: AODVRouter {
-            @display("p=273.36002,440.592");
-        }
-        aodvRouter3: AODVRouter {
-            @display("p=305.52,188.136");
-        }
-        aodvRouter4: AODVRouter {
-            @display("p=562.8,328.032");
-        }
-        aodvRouter5: AODVRouter {
-            @display("p=421.296,77.184");
-        }
 }
 
