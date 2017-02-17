@@ -161,17 +161,34 @@
     
     <p><h2>Displaying dynamic network routes</h2></p>
     <p>
-
+        In this simulation we show how the network route establishes and how it changes between moving nodes.
+        Here is the network that we use for this configuration:
+        <img class="screen" src="DynamicNetworkRoutes.png">
     </p>
     <p>
-
+        The network contains a <var>source</var>, a <var>destination</var> and five more <var>AODVRouters</var>.
+        The <var>source</var> pings the <var>destination</var>. In additional there is an <var>IPv4NetworkConfigurator</var> module an <var>IntegratedVisualizer</var> module and an <var>Ieee80211ScalarRadioMedium</var> module. These modules are required for the appropriate network operation.
     </p>
     <p>
-
+        The following video depicts what happens, when the simulation is run:
     </p>
     <p>
-
+        <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=820 height=526 src="DynamicNetworkRoute.mp4">
     </p>
+    </p>
+
+    <!--
+        Mit csinálunk/mi a cél?
+            A szimulációban megmutatjuk, hogy mozgó node-ok között hogy alakul ki, illetve hogyan változik meg a network route
+            
+
+        Mi a konfig?
+            
+
+        Mi az eredmény?
+            
+    -->
 
     <p><h2>Changing network routes</h2></p>
 
