@@ -26,10 +26,10 @@ Visualizing packet loss? Should that be a better title?
 <p>
 Data flow in the network might not work as planned, with less throughput than what was estimated. The cause could be that
 packets are getting dropped somewhere in the network.
-Visualizing dropped packets can help identify problems in simulation models, like network bottlenecks and connection problems.
-It makes this convenient, because one doesn't have to analyze the logs to see what happened with packets.
+Visualizing dropped packets can help identify problems in simulation models, like network bottlenecks and connection issues.
+It makes this convenient, because one doesn't have to analyze the logs to see what happened with the packets.
 The visualization gives information about where packets are getting lost.
-This example contains four simulation models, each demonstrating a typical cause of lost packets.
+This example contains four simulation models, each demonstrating a typical cause of dropped packets.
 </p>
 
 <h2>About the visualizer</h2>
@@ -89,7 +89,7 @@ When the simulation is run, at around 2 seconds the UDP stream starts, and packe
 When the queue fills up, the switch starts dropping packets. This is illustrated in this animation:
 </p>
 
-<video autoplay="" loop="" controls="" onclick="this.paused ? this.play() : this.pause();" src="packetdrop4.mp4" width="628" height="220"></video>
+<video autoplay="" loop="" controls="" onclick="this.paused ? this.play() : this.pause();" src="packetdrop4.mp4" width="628" height="260"></video>
 
 <p>
 Here is the queue in the switch's eth1 interface, showing the number of dropped packets:
