@@ -1,7 +1,6 @@
 InterfaceTableVisualizer:
-- ne legyen kiírva alapból a wired interface-ek neve és IP címe a connectionokre...ezt a visualizernek kéne csinálnia
-- a visualizerrel reprodukálni kellene ugyanezt a wired esetben
-- interface filter for interfaces which have IP address
+- a sárga doboz helyett lehetne olyan, mint a wired interface-eknél
+- interfaceFilter = "not(lo*)" <- ez lehetne a default
 
 RoutingTableVisualizer:
 - nem fordul el a label a nyillal
