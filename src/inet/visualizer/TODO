@@ -1,3 +1,6 @@
+ - interfaceFilter in LinkVisualizerBase doesn't work
+ - interfaceFilter && nodeFilter in PathVisualizerBase doesn't work
+
 2D:
  - route visualizer labels don't rotate with the arrows
  - zoom in/out breaks layout of network node annotations
