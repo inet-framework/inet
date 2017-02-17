@@ -12,10 +12,10 @@
 	<p><h2>Goals</h2></p>
 
 	<p>
-        In complex, non-trivial or in ad hoc networks it is difficult to determine the path of a packet between remote hosts.
+        In complex, non-trivial or in ad hoc networks it is difficult/(almost impossible???) to determine the path of a packet between remote hosts.
         Visualizing network routes is advantageous, because we can trace a packet's route from the source to the destination.
         It is especially helpful if there is a dynamic routing protocol in the network.
-        If there is a change in the routes e.g because a router go wrong, we get information immediately about the network route changes.
+        If there is a change in the routes e.g because a router go wrong, we get information immediately about the route change.
 	</p>	
     <p>    
         The example consists of 4 simulation models, each demonstrating different features of network route visualization.
@@ -72,7 +72,7 @@
         <img class="screen" src="NetworkRouteSimple.png">
     </p>
     <p>
-        The source pings the destination and an additional line enables the visualizer with the <i>displayRoutes</i> parameter:
+        The <var>source</var> pings the <var>destination</var> and an additional line enables the visualizer with the <i>displayRoutes</i> parameter:
         <div class="snippet">
             # Application parameters<br>
             *.source.numPingApps = 1<br>
@@ -86,7 +86,7 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=658 height=376 src="NetworkRouteSimple.mp4">
     </p>
     <p>
-        The ping messages activate a network routes between the devices. The further packets, like ARP messages go up to the second layer only, so they don't activate a network route. After 1 second in real time, the network routes fade out.
+        The ping message activates a network route between the devices. The further packets, like ARP messages go up to the second layer only, so they don't activate a network route. After 1 second in real time, the network route fades out.
     </p>
     <!--
         Mit csinálunk / mi a sample célja?
@@ -112,10 +112,10 @@
     </p>
     <p>
         The topology consists of five routers, four switches and four hosts. 
-        There are two sources and two destinations.
-        Similarily to the previous configuration, the sources ping the destinations.
+        There are two <var>source</var> hosts and two <var>destination</var> hosts.
+        Similarily to the previous configuration, the <var>sources</var> ping the <var>destinations</var>.
         We enable network routes with the <i>displayRoutes</i> parameter, but only when the message type is ping.
-        TODO
+        We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters, so the data link doesn't fade out completely before the next ping message arrives.
         <div class="snippet">
             # Application parameters<br>
             *.source*.numPingApps = 1<br>
@@ -138,7 +138,7 @@
     <p>
         Only the network routes of the ping messages are displayed because of the <i>packetFilter</i> parameter.
         Each arrow represents a different route.
-        
+        The arrows fade out gradually in simulation time, but not completely, because the <i>fadeOutTime</i> is greater than the sending interval of ping messages.
     </p>
     <!--
         Mit csinálunk/mi a cél?
@@ -149,20 +149,33 @@
             A topologia 5 routerből, 4 switchből és 4 hostból épül fel.
             A két source host pingeli a két destination host-ot.
             A visualizer a ping üzenetek esetén mutatja a network route-okat.
-            TODO: finomítjuk a fadeOut paramétereket, hogy a network route-ok ne fade-eljenek el teljesen, mielőtt jön a következő csomag
+            finomítjuk a fadeOut paramétereket, hogy a network route-ok ne fade-eljenek el teljesen, mielőtt jön a következő csomag
 
         Mi az eredmény?
             gif
             A ping üzenetek network route-jai rajzolódnak ki.
             Mindegyik nyíl egy-egy útvonalat jelent
-
+            A folytonos nyilak megjelennek és a fadeOutTime-nak megfelelő idő alatt elhalványodnak.
     -->
 
+    
+    <p><h2>Displaying dynamic network routes</h2></p>
+    <p>
+
+    </p>
+    <p>
+
+    </p>
+    <p>
+
+    </p>
+    <p>
+
+    </p>
 
     <p><h2>Changing network routes</h2></p>
 
-
-    <p><h2>Displaying dynamic network routes</h2></p>
+    
     <p><h2>More information</h2></p>
 
     <p>
