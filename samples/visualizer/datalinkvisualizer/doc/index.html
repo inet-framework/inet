@@ -68,11 +68,8 @@
     <p>
         The wired network contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module and a <var>DataLinkVisualizer</var> module.
         In wireless network the type of the hosts is <var>AdhocHost</var> and there is an additional <var>Ieee80211ScalarRadioMedium</var> module.
+        TODO: 1 mondatban, hogy mit csinal a configurator, visualizer, radiomedium
     </p>
- <!--   <p>
-        Both networks contain two hosts, an <var>IPv4NetworkConfigurator</var> module and a <var>DataLinkVisualizer</var> module.
-        There is only two difference between the networks. In the wireless configuration there is an <var>Ieee80211ScalarRadioMedium</var> module and the nodes' type is <var>AdhocHost</var>. Howewer in the wired network <var>StandardHost</var> type of nodes communicate with each other.
-    </p>    -->
     <p align="center">
         <img width=600 src="DatalinkVisualizerWiredSimple.png">
     </p>
@@ -171,7 +168,7 @@
         The visualized data links are represented by solid arrows.
         The arrows start to fade out in simulation time, but they don't disappear completely, because the fadeOutTime is greater than the sending interval of ping messages.
         Only one data link can be activated per direction between the nodes.
-        If a data link is visualized already between two nodes and another packet activates the same data link, the arrow between those nodes is only reinforced.
+        If a data link is visualized already between two nodes and another packet activates a data link between the same nodes, the arrow between those nodes is only reinforced.
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=546 src="DatalinkVisualizerFadeOut.mp4">
