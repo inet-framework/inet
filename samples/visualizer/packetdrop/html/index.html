@@ -114,8 +114,12 @@ but it doesn't receive any replies. The <var>source's</var> Mac module drops the
 </p>
 
 <p>
-This is illustrated in the following animation: TODO
+This is illustrated in the following animation:
 </p>
+
+<video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" src="packetdrop6.mp4" width="512" height="350"></video>
+
+<p>TODO: redo animation without the TODO</p>
 
 <h2>No route to destination</h2>
 
@@ -130,9 +134,14 @@ It contains two <var>StandardHosts</var>, connected with an ethernet cable. The 
 </p>
 
 <p>
-Since the cable between the hosts is disabled, the Mac module is not able to route the packets.
+Since the cable between the hosts is disabled, the Mac module is not able to route the packets, and drops them. This is illustrated on the following animation:
 </p>
 
+<video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" src="packetdrop7.mp4" width="406" height="440"></video>
+
+<p>
+Because there is no connection between the nodes, all packets are dropped.
+</p>
 
 
 </body>
