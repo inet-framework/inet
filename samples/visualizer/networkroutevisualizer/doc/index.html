@@ -167,15 +167,19 @@
     </p>
     <p>
         The network contains a <var>source</var>, a <var>destination</var> and five more <var>AODVRouters</var>.
+        All nodes move randomly between borders.
         The <var>source</var> pings the <var>destination</var>. In additional there is an <var>IPv4NetworkConfigurator</var> module an <var>IntegratedVisualizer</var> module and an <var>Ieee80211ScalarRadioMedium</var> module. These modules are required for the appropriate network operation.
     </p>
     <p>
         The following video depicts what happens, when the simulation is run:
     </p>
-    <p>
-        <p align="center">        
+    <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=610 height=630 src="DynamicNetworkRoute.mp4">
     </p>
+    <p>
+        When the ping reaches the destination's network layer, the visualizer draws the packet's network route.
+        The nodes move randomly and their communication range is small, so the route will change between the source and the destination sooner or later.
+        The visualizer displays the network route after the packet arrives to the destination, so we get information about the route changes.
     </p>
 
     <!--
@@ -188,6 +192,9 @@
             Van benne integratedvisu, radiomedium meg configurator, ezek szükségesek a megfelelő működéshez
 
         Mi az eredmény?
+            Amikor a ping eléri a destination network layer-ét, akkor a visualizer kirajzolja a route-ot.
+            A node-ok összevissza mozognak, a kis communication range-ek miatt előbb-utóbb megváltozik a source és a destination közötti útvonal.
+            A network route a csomag beérkezése után rajzolja ki annak útvonalát, így - közvetetten - tudomást szerzünk az útvonalak változásáról.
             
     -->
 
