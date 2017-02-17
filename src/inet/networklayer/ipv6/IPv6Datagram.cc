@@ -24,7 +24,7 @@ Register_Class(IPv6Datagram);
 
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
 {
-    return os << "(" << eh->getClassName() << ") " << eh->STR_COMPAT();
+    return os << "(" << eh->getClassName() << ") " << eh->str();
 }
 
 IPv6Datagram& IPv6Datagram::operator=(const IPv6Datagram& other)

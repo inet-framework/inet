@@ -1073,12 +1073,12 @@ void IPv4::stop()
 void IPv4::flush()
 {
     delete cancelService();
-    EV_DEBUG << "IPv4::flush(): packets in queue: " << queue.STR_COMPAT() << endl;
+    EV_DEBUG << "IPv4::flush(): packets in queue: " << queue.str() << endl;
     queue.clear();
 
     EV_DEBUG << "IPv4::flush(): pending packets:\n";
     for (auto & elem : pendingPackets) {
-        EV_DEBUG << "IPv4::flush():    " << elem.first << ": " << elem.second.STR_COMPAT() << endl;
+        EV_DEBUG << "IPv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
         elem.second.clear();
     }
     pendingPackets.clear();

@@ -157,11 +157,7 @@ void ThermometerFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-#if OMNETPP_VERSION < 0x0501
-    setBounds(parseBounds(property));
-#else
     setBounds(parseBounds(property, getBounds()));
-#endif
 
 
     // Set default

@@ -190,12 +190,7 @@ void PlotFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-#if OMNETPP_VERSION < 0x0501
-    setBounds(parseBounds(property));
-#else
     setBounds(parseBounds(property, getBounds()));
-#endif
-
 
     const char *s;
     if ((s = property->getValue(PKEY_BACKGROUND_COLOR)) != nullptr)
@@ -286,16 +281,9 @@ void PlotFigure::redrawValueTicks()
 
             number->setAnchor(ANCHOR_W);
             number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT));
-
-#if OMNETPP_VERSION < 0x0501
-            addFigureBelow(tick, plotFigure);
-            addFigureBelow(dashLine, plotFigure);
-            addFigureBelow(number, plotFigure);
-#else
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
             number->insertBelow(plotFigure);
-#endif
             valueTicks.push_back(Tick(tick, dashLine, number));
         }
     else
@@ -360,16 +348,9 @@ void PlotFigure::redrawTimeTicks()
 
             number->setAnchor(ANCHOR_N);
             number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT));
-
-#if OMNETPP_VERSION < 0x0501
-            addFigureBelow(tick, plotFigure);
-            addFigureBelow(dashLine, plotFigure);
-            addFigureBelow(number, plotFigure);
-#else
             tick->insertBelow(plotFigure);
             dashLine->insertBelow(plotFigure);
             number->insertBelow(plotFigure);
-#endif
             timeTicks.push_back(Tick(tick, dashLine, number));
         }
     else

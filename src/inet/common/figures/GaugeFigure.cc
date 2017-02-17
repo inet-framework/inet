@@ -191,11 +191,7 @@ void GaugeFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-#if OMNETPP_VERSION < 0x0501
-    setBounds(parseBounds(property));
-#else
     setBounds(parseBounds(property, getBounds()));
-#endif
 
     // Set default
     redrawTicks();
@@ -403,12 +399,7 @@ void GaugeFigure::redrawTicks()
     }
     for (int i = prevNumTicks; i < numTicks; ++i) {
         addFigure(tickFigures[i]);
-
-#if OMNETPP_VERSION < 0x0501
-        addFigureBelow(numberFigures[i], needle);
-#else
         numberFigures[i]->insertBelow(needle);
-#endif
     }
 
     for (int i = 0; i < numTicks; ++i) {
@@ -469,11 +460,7 @@ void GaugeFigure::redrawCurves()
 
     // Add or remove figures from canvas according to previous number of curves
     for (int i = prevCurvesOnCanvas; i < curvesOnCanvas; ++i) {
-#if OMNETPP_VERSION < 0x0501
-        addFigureBelow(curveFigures[i], needle);
-#else
         curveFigures[i]->insertBelow(needle);
-#endif
     }
     for (int i = curvesOnCanvas; i < prevCurvesOnCanvas; ++i)
         removeFigure(curveFigures[index]);

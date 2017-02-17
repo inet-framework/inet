@@ -35,11 +35,11 @@
 
 using namespace omnetpp;
 
-#if OMNETPP_VERSION < 0x0500 || OMNETPP_BUILDNUM < 1006
-#  error At least OMNeT++/OMNEST version 5.0 required
-#endif // if OMNETPP_VERSION < 0x0500
+#if OMNETPP_VERSION < 0x0501 || OMNETPP_BUILDNUM < 1010
+#  error At least OMNeT++/OMNEST version 5.1 required
+#endif // if OMNETPP_VERSION < 0x0501
 
-#define INET_VERSION  0x0304
+#define INET_VERSION  0x0305
 #define INET_PATCH_LEVEL 0x00
 
 #if defined(INET_EXPORT)

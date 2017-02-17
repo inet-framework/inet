@@ -182,11 +182,7 @@ void LinearGaugeFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-#if OMNETPP_VERSION < 0x0501
-    setBounds(parseBounds(property));
-#else
     setBounds(parseBounds(property, getBounds()));
-#endif
 
     // Set default
     redrawTicks();
@@ -337,13 +333,8 @@ void LinearGaugeFigure::redrawTicks()
         removeFigure(numberFigures[i]);
     }
     for (int i = prevNumTicks; i < numTicks; ++i) {
-#if OMNETPP_VERSION < 0x0501
-        addFigureBelow(tickFigures[i], needle);
-        addFigureBelow(numberFigures[i], needle);
-#else
         tickFigures[i]->insertBelow(needle);
         numberFigures[i]->insertBelow(needle);
-#endif
     }
 
     for (int i = 0; i < numTicks; ++i) {
