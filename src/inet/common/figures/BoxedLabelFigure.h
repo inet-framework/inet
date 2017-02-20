@@ -25,7 +25,7 @@ namespace inet {
 class INET_API BoxedLabelFigure : public cGroupFigure
 {
   protected:
-    double spacing = 3;
+    double inset = 3;
     cLabelFigure *labelFigure;
     cRectangleFigure *rectangleFigure;
 
@@ -34,6 +34,9 @@ class INET_API BoxedLabelFigure : public cGroupFigure
 
     cLabelFigure *getLabelFigure() const { return labelFigure; }
     cRectangleFigure *getRectangleFigure() const { return rectangleFigure; }
+
+    double getInset() const { return inset; }
+    void setInset(double inset);
 
     void setTags(const char *tags);
     void setTooltip(const char *tooltip);
