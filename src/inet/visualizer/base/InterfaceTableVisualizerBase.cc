@@ -78,6 +78,8 @@ void InterfaceTableVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayInterfaceTables = par("displayInterfaceTables");
+        displayWiredInterfacesAtConnections = par("displayWiredInterfacesAtConnections");
+        displayBackground = par("displayBackground");
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
         format.parseFormat(par("format"));

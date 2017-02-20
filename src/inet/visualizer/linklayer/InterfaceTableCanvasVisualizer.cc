@@ -49,31 +49,49 @@ void InterfaceTableCanvasVisualizer::initialize(int stage)
 
 InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableCanvasVisualizer::createInterfaceVisualization(cModule *networkNode, InterfaceEntry *interfaceEntry)
 {
-    auto figure = new BoxedLabelFigure("networkInterface");
-    figure->setTags("network_interface");
-    figure->setTooltip("This label represents a network interface in a network node");
-    figure->setAssociatedObject(interfaceEntry);
-    figure->setZIndex(zIndex);
-    figure->setFont(font);
-    figure->setText(getVisualizationText(interfaceEntry).c_str());
-    figure->setLabelColor(textColor);
-    figure->setBackgroundColor(backgroundColor);
-    figure->setOpacity(opacity);
+    BoxedLabelFigure *figure = nullptr;
+    auto gate = displayWiredInterfacesAtConnections ? getOutputGate(networkNode, interfaceEntry) : nullptr;
+    if (gate == nullptr) {
+        figure = new BoxedLabelFigure("networkInterface");
+        figure->setTags("network_interface");
+        figure->setTooltip("This label represents a network interface in a network node");
+        figure->setAssociatedObject(interfaceEntry);
+        figure->setZIndex(zIndex);
+        figure->setFont(font);
+        figure->setText(getVisualizationText(interfaceEntry).c_str());
+        figure->setLabelColor(textColor);
+        figure->setBackgroundColor(backgroundColor);
+        figure->setOpacity(opacity);
+        if (!displayBackground) {
+            figure->setInset(0);
+            figure->getRectangleFigure()->setVisible(false);
+        }
+    }
     auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
     return new InterfaceCanvasVisualization(networkNodeVisualization, figure, networkNode->getId(), interfaceEntry->getInterfaceId());
 }
 
-cGate *InterfaceTableCanvasVisualizer::getOutputGate(const InterfaceVisualization *interfaceVisualization)
+cModule *InterfaceTableCanvasVisualizer::getNetworkNode(const InterfaceVisualization *interfaceVisualization)
 {
     L3AddressResolver addressResolver;
-    auto networkNode = getSimulation()->getModule(interfaceVisualization->networkNodeId);
+    return getSimulation()->getModule(interfaceVisualization->networkNodeId);
+}
+
+InterfaceEntry *InterfaceTableCanvasVisualizer::getInterfaceEntry(const InterfaceVisualization *interfaceVisualization)
+{
+    L3AddressResolver addressResolver;
+    auto networkNode = getNetworkNode(interfaceVisualization);
     if (networkNode == nullptr)
         return nullptr;
     auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
     if (interfaceTable == nullptr)
         return nullptr;
-    auto interfaceEntry = interfaceTable->getInterfaceById(interfaceVisualization->interfaceId);
-    if (interfaceEntry == nullptr || interfaceEntry->getNodeOutputGateId() == -1)
+    return interfaceTable->getInterfaceById(interfaceVisualization->interfaceId);
+}
+
+cGate *InterfaceTableCanvasVisualizer::getOutputGate(cModule *networkNode, InterfaceEntry *interfaceEntry)
+{
+    if (interfaceEntry->getNodeOutputGateId() == -1)
         return nullptr;
     cGate *outputGate = networkNode->gate(interfaceEntry->getNodeOutputGateId());
     if (outputGate == nullptr || outputGate->getChannel() == nullptr)
@@ -82,14 +100,24 @@ cGate *InterfaceTableCanvasVisualizer::getOutputGate(const InterfaceVisualizatio
         return outputGate;
 }
 
+cGate *InterfaceTableCanvasVisualizer::getOutputGate(const InterfaceVisualization *interfaceVisualization)
+{
+    auto networkNode = getNetworkNode(interfaceVisualization);
+    auto interfaceEntry = getInterfaceEntry(interfaceVisualization);
+    if (interfaceEntry == nullptr)
+        return nullptr;
+    else
+        return getOutputGate(networkNode, interfaceEntry);
+}
+
 void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization)
 {
     InterfaceTableVisualizerBase::addInterfaceVisualization(interfaceVisualization);
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
-    auto gate = getOutputGate(interfaceVisualization);
+    auto gate = displayWiredInterfacesAtConnections ? getOutputGate(interfaceVisualization) : nullptr;
     if (gate != nullptr) {
         cDisplayString& displayString = gate->getDisplayString();
-        displayString.setTagArg("t", 0, interfaceCanvasVisualization->figure->getText());
+        displayString.setTagArg("t", 0, getVisualizationText(getInterfaceEntry(interfaceVisualization)).c_str());
         displayString.setTagArg("t", 1, "l");
     }
     else
@@ -100,11 +128,9 @@ void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const Interfac
 {
     InterfaceTableVisualizerBase::removeInterfaceVisualization(interfaceVisualization);
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
-    auto gate = getOutputGate(interfaceVisualization);
-    if (gate != nullptr) {
-        cDisplayString& displayString = gate->getDisplayString();
-        displayString.setTagArg("t", 0, "");
-    }
+    auto gate = displayWiredInterfacesAtConnections ? getOutputGate(interfaceVisualization) : nullptr;
+    if (gate != nullptr)
+        gate->getDisplayString().setTagArg("t", 0, "");
     else
         interfaceCanvasVisualization->networkNodeVisualization->removeAnnotation(interfaceCanvasVisualization->figure);
 }
@@ -112,9 +138,14 @@ void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const Interfac
 void InterfaceTableCanvasVisualizer::refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const InterfaceEntry *interfaceEntry)
 {
     auto interfaceCanvasVisualization = static_cast<const InterfaceCanvasVisualization *>(interfaceVisualization);
-    auto figure = interfaceCanvasVisualization->figure;
-    figure->setText(getVisualizationText(interfaceEntry).c_str());
-    interfaceCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, figure->getBounds().getSize());
+    auto gate = displayWiredInterfacesAtConnections ? getOutputGate(interfaceVisualization) : nullptr;
+    if (gate != nullptr)
+        gate->getDisplayString().setTagArg("t", 0, getVisualizationText(interfaceEntry).c_str());
+    else {
+        auto figure = interfaceCanvasVisualization->figure;
+        figure->setText(getVisualizationText(interfaceEntry).c_str());
+        interfaceCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, figure->getBounds().getSize());
+    }
 }
 
 } // namespace visualizer
