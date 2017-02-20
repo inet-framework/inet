@@ -26,7 +26,7 @@ network Simple
             @display("p=92,203");
         }
         hostB: StandardHost {
-            @display("p=233,203");
+            @display("p=284,203");
         }
         visualizer: IntegratedVisualizer {
             @display("p=328,38");
