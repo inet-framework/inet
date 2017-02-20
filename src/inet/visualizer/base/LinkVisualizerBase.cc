@@ -181,13 +181,13 @@ void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *desti
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    // TODO: use interfaceFilter
     if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
         if (isLinkEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
+            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
                 setLastModule(treeId, module);
             }
@@ -197,8 +197,9 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         if (isLinkEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
+            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
                 auto lastModule = getLastModule(treeId);
                 if (lastModule != nullptr) {

@@ -19,6 +19,7 @@
 #include "inet/common/geometry/shape/Cuboid.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
@@ -72,6 +73,15 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
     }
     else
         throw cRuntimeError("Unknown contact mode: %s", contactMode);
+}
+
+InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule *module) const
+{
+    L3AddressResolver addressResolver;
+    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+    if (interfaceTable == nullptr)
+        return nullptr;
+    return interfaceTable->getInterfaceByInterfaceModule(module);
 }
 
 } // namespace visualizer
