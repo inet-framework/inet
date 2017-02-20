@@ -36,11 +36,6 @@ var {
 	font-style: normal;
 }
 
-video {
-	object-fit: none;
-	object-position: 0 0;
-}
-
 video, .screen {
 	display: block;
 	margin: auto;
