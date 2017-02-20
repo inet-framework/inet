@@ -114,6 +114,7 @@ void ICMP::sendErrorMessage(Packet *packet, int inputInterfaceId, ICMPType type,
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
     errorPacket->append(packet->peekDataAt(byte(0), byte(ipv4Header->getHeaderLength() + 8)));
+    errorPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
 
     // if srcAddr is not filled in, we're still in the src node, so we just
     // process the ICMP message locally, right away
@@ -184,6 +185,7 @@ void ICMP::processICMPMessage(Packet *packet)
                 }
                 else {
                     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+                    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
                     send(packet, "transportOut");
                 }
             }
