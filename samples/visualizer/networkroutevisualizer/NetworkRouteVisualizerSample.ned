@@ -34,7 +34,7 @@ import inet.visualizer.networklayer.NetworkRouteVisualizer;
 //
 network NetworkRouteSimple
 {
-    @display("bgb=600,300");
+    @display("bgb=600,250");
     submodules:
         routeVisualizer: NetworkRouteVisualizer {
             parameters:
@@ -44,15 +44,11 @@ network NetworkRouteSimple
             parameters:
                 @display("p=100,150");
         }
-        visualizer: IntegratedVisualizer {
-            parameters:
-                @display("p=100,250");
-        }
         source: StandardHost {
-            @display("p=215,150");
+            @display("p=200,125");
         }
         destination: StandardHost {
-            @display("p=515,150");
+            @display("p=500,125");
         }
 
     connections:
