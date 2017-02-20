@@ -211,7 +211,11 @@
         The network contains four RIP routers. Later it turns out, why the RIP is neccessary.
         They are placed and connected so as to create redundant paths.
         The source and destination networks are connected to the <var>router0</var> and to the <var>router2</var>.
-        
+        There is a wired and a wireless source-destination pair.
+        The wired source and destination connect to the router via a swtich.
+        The wireless source and destination connect to the router via an access point.
+        Similarily to the previous configuration, the <var>wiredSource</var> pings the <var>wiredDestination</var> and the <var>wirelessSource</var> pings the <var>wirelessDestination</var>.
+        We assign IP addresses manually by creating an xml configuaration file.
     </p>  
     <p>
         A halozat gerince 4 routerbol all, amelyeken RIP routing protokoll mukodik. A kesobbiekben kiderul, hogy ez miert szukseges.
