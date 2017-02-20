@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
 2016-07-01  Florian Kauer
 
 	gpsr: allow specifying output interface for GPSR

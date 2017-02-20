@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
 2017-01-26  Rudolf Hornig
 
     - the TCP_lwIP and TCP_NSC features now add their include dirs in the makefrag file
