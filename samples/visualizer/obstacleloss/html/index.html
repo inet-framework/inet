@@ -14,10 +14,8 @@
 <p>
 When radio signals go through objects in the physical environment, the objects might reflect and absorb the electromagnetic energy.
 The loss of energy often results in incorrectly received packets. This may alter the course of the simulation significantly.
-Seeing where the propagation path of radio signals and obstacles intersect gives some information about power loss....
-
-depending on the obstacle loss model. This visualization makes it easy to see where radio waves and obstacles intersect, and to have some
-information about power loss, which is proportional to the length of the intersection. (TODO: is that correct? the dielectric loss is proportional to that, but not the reflection loss) Additinally, the loss is indicated at the intersection in dB's.
+Seeing where the propagation path of radio signals and obstacles intersect gives some information about power loss, as it depends on the
+length of the intersection, and the obstacle material.
 </p>
 
 <h2>About the visualizer</h2>
@@ -70,8 +68,8 @@ This configuration uses a more complex network:
 <img class="screen" src="advancednetwork.png">
 
 <p>
-It contains two <var>AdhocHosts</var>. In the middle of the playground, there is a rectangular brick wall,
-with a hollow interior. The hosts are configured to go around the wall on a rectangular path. They circle the wall
+It contains two <var>AdhocHosts</var>. In the middle of the playground, there is a rectangular brick structure,
+with a hollow interior. The hosts are configured to go around the structure on a rectangular path. They circle the wall
 in the clockwise direction. The <var>destinationHost</var> is configured to move with a higher speed than the <var>sourceHost</var>.
 The <var>sourceHost</var> is configured to ping <var>destinationHost</var>.
 The following animation illustrates what happens when the simulation is run:
