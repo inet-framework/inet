@@ -47,7 +47,7 @@ ObstacleLossVisualizer
 - Az intersectionnél ki lehetne írni hogy hány dB-el csökkent a jel
 
 SceneVisualizer
-- viewScalar parameter
+- viewScale parameter
 
 DatalinkVisualizer:
 - *.visualizer.*.dataLinkVisualizer.interfaceFilter = "not eth*"	# -- Nem szur
