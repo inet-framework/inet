@@ -19,20 +19,6 @@
     <p>    
         The example consists of 4 simulation models, each demonstrating different features of data link visualization.
     </p>
-        <!--
-            Visualizing data links is useful, because based on this we can determine the second layer links in the network.
-            Miért jó ez a visualizer?
-            problem: Komplex hálózatokban (főleg wireless) nehéz meghatározni, hogy melyik node-ok között van aktív 2. rétegbeli kapcsolat.
-            A datalinkVisualizer-rel ránézésre meg tudjuk állapítani, hogy melyek az aktív második rétegbeli linkek a hálózatban.
-            Könnyen azonosítani tudjuk a hálózatban lévő adatkapcsolati rétegben létrejött kapcsolatokat.
-            Wireless hálózatokban különösen hasznos, mert láthatjuk, hogy melyik eszköz melyik eszköznek küldött vmilyen csomagot.
-            Vezetékes kapcsolatoknál is segít, ha pl. egy csomag nem jut el egy állomástól egy másik távoli állomáshoz, 
-            akkor könnyedén azonosíthatjuk, hogy hol akad el a csomag.
-            A visualizer két szomszédos eszköz között működik, így lépésről-lépésre követhetjük a csomag útvonalát.
-
-            Mit mutat be a sample?
-            A sample-ön belül 4 szimulációt találunk, egyre bonyolultabbakat. Mindegyikben különböző funkciókat mutatunk be.         
-        -->
 	
     <p><h2>About the visualizer</h2></p>
     
@@ -48,16 +34,7 @@
         Using these we can specify which data links are shown. By default all nodes, all interfaces and all packets are considered for displaying data links.
         It is possible to use logical expressions as the filter's parameter, e.g <i>packetFilter = "ping* or tcp*"</i> shows the ping and the tcp data links.
     </p>
-        
-        <!--
-            Mi ez a visualizer?
-            A datalinkVisualizer-rel nyilvántarthatjuk az aktív kapcsolatokat a hálózatunkban.
-            Akkor alakul ki link két eszköz között, amikor egy csomag az egyik eszköz adatkapcs. rétegétől a másik eszköz adatkapcs. rétegébe érkezik.
-            A kapcsolatokat folyamatos nyilak reprezentálják.
-            Szűrni tudjuk, hogy milyen típusú csomagok esetén figyelje a link kialakulását.
-            A linkVisualizer leszármazottja, ebből adódóan az összes ilyen tulajdonságát testreszabhatjuk, mint pl. nyíl típusa, packet/nodefilter...
-            Több visualizer-t is elhelyezhetünk a szimulációban, ezzel jobban áttekinthetővé téve az adatkapcsolati rétegben létrejött kapcsolatokat.
-        -->
+
 
 	<p><h2>Enabling data links in wired and wireless network</h2></p>
 
@@ -105,27 +82,6 @@
         When a message reaches its destination's data link layer, the data link is activated between the nodes and an arrow is shown pointing from the sender towards the receiver.
         Then the arrow fades out in real time.
     </p>
-        <!--
-            Mit csinálunk / mi a sample célja?
-                Ebben a példában megmutatjuk hogy kell bekapcsolni a visualizer-t
-                A default kinézetét fogjuk látni
-                Egy wired és egy wireless példán keresztül is megmutatjuk a vizualizációt
-                
-            Mi a konfig?
-                Ez a network végig ugyanaz marad
-                2 wreless host, 2 wired host
-                wirelessSource a wirelessDestination-t pingeli, ugyanez a wired-nél
-                bekapcsoljuk a visualizert
-                default paramétereket használjuk
-                configurator:
-                radioMedium:
-                visualizer:
-
-            Mi az eredmény?
-                gif
-                megjelenítődnek az összes datalinkek
-                valós időben elhalványulnak
-        -->
 
    
     <p><h2>Data link visualization in a complex network</h2></p>
@@ -176,25 +132,6 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerFadeOut.mp4">
     </p>
 
-    <!--
-            Mit csinálunk / mi a sample célja?
-                A cél a DatalinkVisualizer működésének bemutatása komplex hálózatban
-                Megmutatjuk a szűrő funkció(kat)
-                Megmutatjuk, hogy mi történik, ha több csomag is ugyanazok között a pontok között több data link aktiválódik
-                
-            Mi a konfig?
-                A hálózatban 4 switch és 4 host van, amiből kettő source és kettő dest.
-                A source-ok pingelik a dest-eket.
-                A data linkeket bekapcsoljuk a displayLinks-el.
-                Csak a ping data link-jeit mutatjuk meg, használjuk a szűrő funkciót.
-
-            Mi az eredmény?
-                gif
-                A packetFilter miatt csak a ping üzenetek aktiválják a node-ok között a data linkeket, az ARP üzenetek nem.
-                Ezek folytonos nyilakként jelennek meg és a fadeOutTime-nak megfelelő idő alatt elhalványodnak.
-                A node-ok között egy irányba csak egy aktív data link aktiválódhat, másik ping üzenet ugyanazt a linket aktiválja újra.
-                Ha egy data link már vizualizálva van két node között, akkor egy másik packet csak megerősíteni tudja azt a nyilat
-        -->
 
     <p><h2>Displaying dynamic data links</h2></p>
 
@@ -249,26 +186,7 @@
         When a ping message reaches the next node's data link layer, the link is shown between the nodes.
         If the route is changed between the source and the destination new data links are activated.
     </p>
-    <!--
-            Mit csinálunk / mi a sample célja?
-                A cél a dinamikusan felépülő data linkek kirajzolása.
-                
-            Mi a konfig?
-                Az összes node aodvrouter, ezeket raktuk le a playgroundra.
-                Van egy source és van egy destination, ping üzenetek mennek, erre szűr a DatalinkVisualizer.
-                
 
-            Mi az eredmény?
-                gif
-                
-        -->
-
-<!-- Alcim minta   
-    <p><h2>Sample</h2></p>
-
-    <p>
-    </p>
--->    
 
     <p><h2>More information</h2></p>
 
