@@ -24,7 +24,7 @@ namespace visualizer {
 
 Define_Module(TracingObstacleLossCanvasVisualizer);
 
-TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::ObstacleLossCanvasVisualization(cLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2) :
+TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::ObstacleLossCanvasVisualization(LabeledLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2) :
     intersectionFigure(intersectionFigure),
     faceNormalFigure1(faceNormalFigure1),
     faceNormalFigure2(faceNormalFigure2)
@@ -59,24 +59,35 @@ void TracingObstacleLossCanvasVisualizer::refreshDisplay() const
     visualizerTargetModule->getCanvas()->setAnimationSpeed(obstacleLossVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObstacleLossCanvasVisualizer::createObstacleLossVisualization(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const
+const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObstacleLossCanvasVisualizer::createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const
 {
+    auto object = obstaclePenetratedEvent->object;
+    auto intersection1 = obstaclePenetratedEvent->intersection1;
+    auto intersection2 = obstaclePenetratedEvent->intersection2;
+    auto normal1 = obstaclePenetratedEvent->normal1;
+    auto normal2 = obstaclePenetratedEvent->normal2;
+    auto loss = obstaclePenetratedEvent->loss;
     const Rotation rotation(object->getOrientation());
     const Coord& position = object->getPosition();
     const Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
     const Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
     double intersectionDistance = intersection2.distance(intersection1);
-    cLineFigure *intersectionLine = nullptr;
+    LabeledLineFigure *intersectionLine = nullptr;
     if (displayIntersections) {
-        intersectionLine = new cLineFigure("intersection");
+        intersectionLine = new LabeledLineFigure("intersection");
         intersectionLine->setTags("obstacle_loss");
         intersectionLine->setTooltip("This line represents the intersection of a propagating signal and an obstructing physical object.");
         intersectionLine->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position));
         intersectionLine->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position));
-        intersectionLine->setLineColor(intersectionLineColor);
-        intersectionLine->setLineStyle(intersectionLineStyle);
-        intersectionLine->setLineWidth(intersectionLineWidth);
-        intersectionLine->setZoomLineWidth(false);
+        auto lineFigure = intersectionLine->getLineFigure();
+        lineFigure->setLineColor(intersectionLineColor);
+        lineFigure->setLineStyle(intersectionLineStyle);
+        lineFigure->setLineWidth(intersectionLineWidth);
+        lineFigure->setZoomLineWidth(false);
+        auto labelFigure = intersectionLine->getLabelFigure();
+        char tmp[32];
+        sprintf(tmp, "%.4g dB", inet::math::fraction2dB(loss));
+        labelFigure->setText(tmp);
     }
     cLineFigure *faceNormal1Line = nullptr;
     cLineFigure *faceNormal2Line = nullptr;
@@ -133,7 +144,7 @@ void TracingObstacleLossCanvasVisualizer::setAlpha(const ObstacleLossVisualizati
 {
     auto obstacleLossCanvasVisualization = static_cast<const ObstacleLossCanvasVisualization *>(obstacleLossVisualization);
     if (displayIntersections)
-        obstacleLossCanvasVisualization->intersectionFigure->setLineOpacity(alpha);
+        obstacleLossCanvasVisualization->intersectionFigure->getLineFigure()->setLineOpacity(alpha);
     if (displayFaceNormalVectors) {
         obstacleLossCanvasVisualization->faceNormalFigure1->setLineOpacity(alpha);
         obstacleLossCanvasVisualization->faceNormalFigure2->setLineOpacity(alpha);

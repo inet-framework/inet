@@ -55,7 +55,7 @@ bool IdealObstacleLoss::isObstacle(const IPhysicalObject *object, const Coord& t
     bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
     bool isObstacle = hasIntersections && intersection1 != intersection2;
     if (isObstacle) {
-        ObstaclePenetratedEvent event(object, intersection1, intersection2, normal1, normal2);
+        ObstaclePenetratedEvent event(object, intersection1, intersection2, normal1, normal2, isObstacle ? 1 : 0);
         const_cast<IdealObstacleLoss *>(this)->emit(obstaclePenetratedSignal, &event);
     }
     return isObstacle;
