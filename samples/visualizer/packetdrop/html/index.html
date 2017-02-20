@@ -12,17 +12,6 @@
 
 <h2>Goals</h2>
 
-<pre>
-Dropped packets are a sign of network congestion, or a connection problem. Visualizing dropped packets can help identify problems
-with simulation models. There is no need...to check the logs to see that there are lost packets. Thats good because its hard.
-
-This is very convenient
-
-It shows that there are packets that dont make it to the destination.
-
-Visualizing packet loss? Should that be a better title?
-</pre>
-
 <p>
 Data flow in the network might not work as planned. For example, when throughput is less than what was estimated. The cause could be that
 packets are getting dropped somewhere in the network.
@@ -80,9 +69,7 @@ drop animation is more visible:
 *.visualizer.*.packetDropVisualizer.fadeOutTime = 3s
 </pre>
 
-<p>TODO: IDEA: the switch should be connected with a 100M cable so the AP becomes the bottleneck</p>
-
-<p>TODO: an animation of what happens. explanation. maybe a screenshot of the dropped packets at the queue.</p>
+<p>TODO: IDEA: the switch should be connected with a 100M cable so the AP becomes the bottleneck. but do we need that?</p>
 
 <p>
 When the simulation is run, at around 2 seconds the UDP stream starts, and packets start accumulating in the queue of the switch.
@@ -97,7 +84,39 @@ Here is the queue in the switch's eth1 interface, showing the number of dropped 
 
 <img class="screen" src="ethqueue.png">
 
-<h2>ARP resolution pending</h2>
+<p>
+This log excerpt shows the packet drop:
+</p>
+
+<img class="screen" src="log_queuefull_2.png">
+
+<p>TODO: do we need this? do we need the underline?</p>
+
+<h2>ARP resolution failed</h2>
+
+<p>
+This configuration uses the following network:
+</p>
+
+<img class="screen" src="arpfailednetwork.png">
+
+<p>
+It contains only one host, an <var>AdhocHost</var>. There is also an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and
+an <var>IntegratedVisualizer</var> module.
+</p>
+
+<p>
+The host is configured to ping the IP address 10.0.0.2. It will try to resolve the destination's MAC address with ARP. Since there are no other hosts,
+the ARP resolution will fail, and the ping packet will be dropped.
+</p>
+
+<p>TODO: you can click on the dropped packet boxes and check the packet in the inspector</p>
+
+<p>
+The following animation illustrates this:
+</p>
+
+<video id="vid" autoplay loop controls onclick="this.paused ? this.play() : this.pause();" src="packetdrop9.mp4" width="360" height="380"></video>
 
 <h2>Mac retry limit reached</h2>
 
