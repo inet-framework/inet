@@ -1,6 +1,3 @@
- - interfaceFilter in LinkVisualizerBase doesn't work
- - interfaceFilter && nodeFilter in PathVisualizerBase doesn't work
-
 2D:
  - route visualizer labels don't rotate with the arrows
  - zoom in/out breaks layout of network node annotations
@@ -18,7 +15,3 @@
 Feature:
  - add separate queue visualizers that display queue icons next to network nodes
  - IEEE 802.11 association visualizer should display signal strength
- - obstacle loss visualizer could display loss dB as a label
- - medium visualizer should display signal power for transmission and reception icons
- - changing animation speed from transmission to propagation should be smooth
- 
