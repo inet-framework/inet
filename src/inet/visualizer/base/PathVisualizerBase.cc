@@ -42,7 +42,6 @@ void PathVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         displayRoutes = par("displayRoutes");
         nodeFilter.setPattern(par("nodeFilter"));
-        interfaceFilter.setPattern(par("interfaceFilter"));
         packetFilter.setPattern(par("packetFilter"));
         lineColorSet.parseColors(par("lineColor"));
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
@@ -65,8 +64,6 @@ void PathVisualizerBase::handleParameterChange(const char *name)
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));
-        else if (!strcmp(name, "interfaceFilter"))
-            interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
             packetFilter.setPattern(par("packetFilter"));
         removeAllPathVisualizations();
@@ -199,8 +196,10 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
     Enter_Method_Silent();
     if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
+            auto module = check_and_cast<cModule *>(source);
+            auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (packetFilter.matches(packet)) {
+            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
                 auto module = check_and_cast<cModule *>(source);
                 addToIncompletePath(treeId, getContainingNode(module));
@@ -230,8 +229,10 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
+            auto module = check_and_cast<cModule *>(source);
+            auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (packetFilter.matches(packet)) {
+            if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
                 auto path = getIncompletePath(treeId);
                 updatePath(*path);
