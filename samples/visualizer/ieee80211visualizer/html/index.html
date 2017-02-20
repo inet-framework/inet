@@ -27,8 +27,8 @@ just by looking at the network, without needing to dig deep in the inspector win
 <p>
 The <var>Ieee80211Visualizer</var> displays a wifi network symbol above network nodes when they are associated with a wireless network.
 This icon indicates the SSID of the network the given node is connected to. The icons for networks with different SSID's are colored differently.
-The icon is also displayed above nodes that create the networks, e.g. access points. Additionally, the icon indicates the signal strength present at the
-location of a given node. TODO: how is it indicated? and how does it work?
+The icon is also displayed above nodes that create the networks, e.g. access points. <!Additionally, the icon indicates the signal strength present at the
+location of a given node. TODO: how is it indicated? and how does it work?>
 </p>
 
 <p>
@@ -52,8 +52,7 @@ This configuration demonstrates the visualization with the default visualizer se
 
 <p>
 It contains a <var>WirelessHost</var> and an <var>AccessPoint</var>. Additionally, there is an <var>IPv4NetworkConfigurator</var>, 
-an <var>Ieee80211Visualizer</var> and a <var>Ieee80211ScalarRadioMedium</var> module. TODO: replace Integrated with Ieee80211Visualizer
-update: doesnt work
+an <var>IntegratedVisualizer</var> and a <var>Ieee80211ScalarRadioMedium</var> module.
 </p>
 
 <p>
@@ -77,15 +76,34 @@ which is 'SSID'. This is displayed with both icons.
 
 <h2>Advanced features</h2>
 
-TODO
+<p>
+This configuration demonstrates some advanced features of the visualization. It uses the following network:
+</p>
 
-<pre>
+<img class="screen" src="advancednetwork2.png">
+
+<p>
+It contains two <var>AccessPoints</var>, four <var>WirelessHosts</var>. Additionally, there is an <var>IPv4NetworkConfigurator</var>,
+an <var>Ieee80211ScalarRadioMedium</var>, and an <var>IntegratedVisualizer</var> module.
+</p>
+
+<p>
+The <var>accessPointA</var> and <var>accessPointB</var> create the wireless networks with SSIDs <var>alpha</var> and <var>bravo</var>,
+respectively. Hosts <var>A1 and A2</var> is configured to connect to network alpha, hosts <var>B1 and B2</var> to network bravo.
+When the hosts are associated with the access points, the network looks like this:
+</p>
+
+<img class="screen" src="advanced.png">
+
+<p>TODO</p>
+
+<!
 There are 2 wireless networks, with different colors.
 The icon indicates signal strength. The node close to access point alpha has the strongest signal,
 the node farther away from access point alpha has the second strongest.
 The wall reduces the strength of the signal from access point bravo. It depends on distance as well.
 So, A1 has 4 bars, A2 3 bars, B1 2 bars, B2 one bar. Or something like that.
-</pre>
+>
 
 <h2>Visualizing handover</h2>
 

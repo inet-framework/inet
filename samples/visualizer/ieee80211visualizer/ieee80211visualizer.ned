@@ -51,30 +51,27 @@ network Ieee80211visualizerB
         }
         accessPointA: AccessPoint {
             parameters:
-                @display("p=300,50");
+                @display("p=259,49");
         }
         accessPointB: AccessPoint {
             parameters:
-                @display("p=500,50");
+                @display("p=459,49");
         }
         hostA1: WirelessHost {
             parameters:
-                @display("p=300,249");
+                @display("p=259,248");
         }
         hostA2: WirelessHost {
             parameters:
-                @display("p=300,349");
+                @display("p=259,348");
         }
         hostB1: WirelessHost {
             parameters:
-                @display("p=500,249");
+                @display("p=459,248");
         }
         hostB2: WirelessHost {
             parameters:
-                @display("p=500,349");
-        }
-        physicalEnvironment: PhysicalEnvironment {
-            @display("p=100,250");
+                @display("p=459,348");
         }
 }
 
