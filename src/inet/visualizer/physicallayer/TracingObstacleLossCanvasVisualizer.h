@@ -18,6 +18,7 @@
 #ifndef __INET_TRACINGOBSTACLELOSSCANVASVISUALIZER_H
 #define __INET_TRACINGOBSTACLELOSSCANVASVISUALIZER_H
 
+#include "inet/common/figures/LabeledLineFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
 
@@ -32,12 +33,12 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
   protected:
     class INET_API ObstacleLossCanvasVisualization : public ObstacleLossVisualization {
       public:
-        cLineFigure *intersectionFigure = nullptr;
+        LabeledLineFigure *intersectionFigure = nullptr;
         cLineFigure *faceNormalFigure1 = nullptr;
         cLineFigure *faceNormalFigure2 = nullptr;
 
       public:
-        ObstacleLossCanvasVisualization(cLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2);
+        ObstacleLossCanvasVisualization(LabeledLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2);
         virtual ~ObstacleLossCanvasVisualization();
     };
 
@@ -63,7 +64,7 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const override;
+    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override;
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override;

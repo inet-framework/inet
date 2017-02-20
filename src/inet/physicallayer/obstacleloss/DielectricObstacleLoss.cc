@@ -114,7 +114,7 @@ double DielectricObstacleLoss::computeObjectLoss(const IPhysicalObject *object, 
 //            if (!std::isnan(angle2))
 //                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
 //        }
-        ObstaclePenetratedEvent event(object, intersection1, intersection2, normal1, normal2);
+        ObstaclePenetratedEvent event(object, intersection1, intersection2, normal1, normal2, totalLoss);
         const_cast<DielectricObstacleLoss *>(this)->emit(obstaclePenetratedSignal, &event);
     }
     return totalLoss;

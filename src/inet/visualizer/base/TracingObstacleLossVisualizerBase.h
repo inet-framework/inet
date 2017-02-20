@@ -27,6 +27,7 @@ namespace inet {
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
+using namespace inet::physicallayer;
 
 class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public cListener
 {
@@ -66,7 +67,7 @@ class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public
     virtual void unsubscribe();
 
     // TODO: use ITransmission for identification?
-    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const = 0;
+    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const = 0;
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const = 0;

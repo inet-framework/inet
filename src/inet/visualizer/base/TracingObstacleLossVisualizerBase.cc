@@ -97,7 +97,7 @@ void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsig
     if (signal == ITracingObstacleLoss::obstaclePenetratedSignal) {
         if (displayIntersections || displayFaceNormalVectors) {
             auto event = static_cast<ITracingObstacleLoss::ObstaclePenetratedEvent *>(object);
-            auto obstacleLossVisualization = createObstacleLossVisualization(event->object, event->intersection1, event->intersection2, event->normal1, event->normal2);
+            auto obstacleLossVisualization = createObstacleLossVisualization(event);
             addObstacleLossVisualization(obstacleLossVisualization);
         }
     }
