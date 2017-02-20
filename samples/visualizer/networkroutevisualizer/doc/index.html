@@ -72,6 +72,7 @@
         <img class="screen" src="NetworkRouteSimple.png">
     </p>
     <p>
+        The configuration is really simple.
         The <var>source</var> pings the <var>destination</var> and an additional line enables the visualizer with the <i>displayRoutes</i> parameter:
         <div class="snippet">
             # Application parameters<br>
@@ -86,7 +87,7 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=630 height=276 src="NetworkRouteSimple.mp4">
     </p>
     <p>
-        The ping message activates a network route between the devices. The further packets, like ARP messages go up to the second layer only, so they don't activate a network route. After 1 second in real time, the network route fades out.
+        The ping message activates a network route between the devices. The further packets, like ARP messages go up to the data link layer only, so they don't activate a network route. After 1 second in real time, the network route fades out.
     </p>
     <!--
         Mit csinálunk / mi a sample célja?
@@ -108,10 +109,12 @@
         The simulation demonstrates the visualization of static routes in a non-trivial network.
         We also show how the <i>packetFilter</i> parameter works.
         Here is the network for this configuration:
+    </p>
+    <p>
         <img class="screen" src="NetworkRouteExtended.png">
     </p>
     <p>
-        The topology consists of five routers, four switches and four hosts. 
+        The topology consists of five routers, four switches and four <var>StandardHosts</var>. 
         There are two <var>source</var> hosts and two <var>destination</var> hosts.
         Similarily to the previous configuration, the <var>sources</var> ping the <var>destinations</var>.
         We enable network routes with the <i>displayRoutes</i> parameter, but only when the message type is ping.
@@ -163,6 +166,8 @@
     <p>
         In this simulation we show how the network route establishes and how it changes between moving nodes.
         Here is the network that we use for this configuration:
+    </p>
+    <p>
         <img class="screen" src="DynamicNetworkRoutes.png">
     </p>
     <p>
@@ -198,9 +203,37 @@
             
     -->
 
-    <p><h2>Changing network routes</h2></p>
+    <p><h2>Displaying Changing Network Routes</h2></p>
+    <p>
+        This configuration demonstartes that, how the visualizer reacts to the routing changes in a complex network.        
+    </p>  
+    <p>
+        
+    </p>  
+    <p>
+        A halozat gerince 4 routerbol all, amelyeken RIP routing protokoll mukodik. A kesobbiekben kiderul, hogy ez miert szukseges.
+        A router0 es a router2 tartalmazza a forras es a cel halozatokat. 1-1 vezetekes es vezetek nelkuli forras-cel par van a topologiaban.
+        A vezetekes forras-cel part egy-egy switch koti ossze a routerrel, mig a vezetek nelkuli forras-cel par egy-egy access pointhoz kapcsolodik.
+        Az elozo konfiguraciokhoz hasonloan a source-ok pingelik a destination-okat.
+        A configurator modulnak ezuttal kezzel adjuk meg, hogy hogyan ossza ki az ip cimeket.
+        A radioMedium kezeli a wireless csatornat. 
+        Tovabba van egy scenarioManager es egy lifecycleController modulunk. Ezek beallitasaval kapcsoljuk ki - es a kesobbiekben vissza - a router1-et es router3-at, hogy megvaltozzanak az utvonalak.
+        Ehhez kell bekapcsolnunk a RIP-et, hogy a kikapcsolas utan az addig hasznalatlan router vegye at a kikapcsolt router szerepet.
+        Itt van a halozat:
+    </p>
+    <p>
+        
+    </p>
+    <p>
+        Ha elinditjuk a szimulaciot, akkor a kovetkezoket latjuk:
+        Eloszor minden packet a router1 fele megy.
+        5 masodperc utan leall a router1, a packetek  a router3 fele mennek.
+        A 10. masodpercben visszakapcsol a router1, de nem befolyasolja a packet-ek utvonalat.
+        A 15. masodpercben lekapcsol a router3, ezert az utvonalak ujbol a router 1-en fognak keresztul menni.
+        A 20. masodpercben visszakapcsol a router3, de ez nem befolyasolja a packetek utvonalat.
+    </p>
 
-    
+
     <p><h2>More information</h2></p>
 
     <p>
