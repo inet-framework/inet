@@ -250,6 +250,7 @@ void SendDataWithAckFrameExchange::retry()
     else {
         statistics->frameTransmissionUnsuccessfulGivingUp(dataFrame, retryCount);
         fail();
+        EV << "Retry limit reached, dropping packet\n";
         ownerModule->emit(LayeredProtocolBase::packetFromUpperDroppedSignal, dataFrame);
         ownerModule->emit(NF_LINK_BREAK, dataFrame);
 
