@@ -57,6 +57,8 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     /** @name Parameters */
     //@{
     bool displayInterfaceTables = false;
+    bool displayWiredInterfacesAtConnections = false;
+    bool displayBackground = false;
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     StringFormat format;

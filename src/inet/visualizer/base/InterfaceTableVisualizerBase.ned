@@ -46,6 +46,8 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for interface changed signals, root module by default
         
         bool displayInterfaceTables = default(false); // display interface table data, disabled by default
+        bool displayWiredInterfacesAtConnections = default(true); // specifies where wired interfaces are displayed
+        bool displayBackground = default(false); // specifies whether the text should have a background or not
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
@@ -53,8 +55,8 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string format = default("%N %\\%n"); // determines what interface data is displayed
 
         string font = default("<default>"); // interface text font, automatic by default
-        string textColor = default("black"); // interface text font color
-        string backgroundColor = default("yellow"); // interface text background color
+        string textColor = default("#005030"); // interface text font color
+        string backgroundColor = default("white"); // interface text background color
         double opacity = default(1.0); // opacity of the visualization
 
         @class(InterfaceTableVisualizerBase);
