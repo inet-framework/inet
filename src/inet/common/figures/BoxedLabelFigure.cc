@@ -23,15 +23,21 @@ BoxedLabelFigure::BoxedLabelFigure(const char *name) :
     cGroupFigure(name)
 {
     labelFigure = new cLabelFigure("label");
-    labelFigure->setPosition(cFigure::Point(spacing, spacing));
     rectangleFigure = new cRectangleFigure("box");
-    rectangleFigure->setCornerRx(spacing);
-    rectangleFigure->setCornerRy(spacing);
     rectangleFigure->setFilled(true);
     rectangleFigure->setLineColor(cFigure::BLACK);
     addFigure(rectangleFigure);
     addFigure(labelFigure);
+    setInset(inset);
     setText(" "); // TODO: empty string causes negative width/height in Tkenv
+}
+
+void BoxedLabelFigure::setInset(double inset)
+{
+    this->inset = inset;
+    labelFigure->setPosition(cFigure::Point(inset, inset));
+    rectangleFigure->setCornerRx(inset);
+    rectangleFigure->setCornerRy(inset);
 }
 
 void BoxedLabelFigure::setTags(const char *tags)
@@ -96,7 +102,7 @@ void BoxedLabelFigure::setText(const char *text)
 {
     double width, height, ascent;
     getSimulation()->getEnvir()->getTextExtent(labelFigure->getFont(), text, width, height, ascent);
-    rectangleFigure->setBounds(cFigure::Rectangle(0, 0, width + spacing * 2, height + spacing * 2));
+    rectangleFigure->setBounds(cFigure::Rectangle(0, 0, width + inset * 2, height + inset * 2));
     labelFigure->setText(text);
 }
 
