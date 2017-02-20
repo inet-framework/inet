@@ -13,7 +13,7 @@
 
 	<p> 
         In complex networks there are a lot of communication between the nodes. It is difficult to ascertain between which nodes there is communication in the second layer.
-        By visualizing data links we can determine the active second layer links in the network easily.
+        By visualizing data links we can determine the active second layer links in the network easily and we can follow the communication node by node.
         It is especially helpful if a packet doesn't reach the destination node. In this case we can see at a glance where the communication is jammed.
     </p>
     <p>    
@@ -66,9 +66,8 @@
         We visualize data links both in a wired and in a wireless network.
     </p>
     <p>
-        The wired network contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module and a <var>DataLinkVisualizer</var> module.
-        In wireless network the type of the hosts is <var>AdhocHost</var> and there is an additional <var>Ieee80211ScalarRadioMedium</var> module.
-        TODO: 1 mondatban, hogy mit csinal a configurator, visualizer, radiomedium
+        The wired network contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module which prepares hosts for communication and a <var>DataLinkVisualizer</var> module which displays the data links.
+        In wireless network the type of the hosts is <var>AdhocHost</var> and there is an additional <var>Ieee80211ScalarRadioMedium</var> module which handles the radio channel.
     </p>
     <p align="center">
         <img width=600 src="DatalinkVisualizerWiredSimple.png">
@@ -96,10 +95,10 @@
         When we start the simulation, here is what happens:
     </p>
     <p align="center">
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=216 src="DatalinkVisualizerWiredSimple.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=246 src="DatalinkVisualizerWiredSimple.mp4">
     </p>
     <p align="center">
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=298 src="DatalinkVisualizerWirelessSimple.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=328 src="DatalinkVisualizerWirelessSimple.mp4">
     </p>
     <p>
         The communication starts between the nodes.
@@ -118,6 +117,9 @@
                 wirelessSource a wirelessDestination-t pingeli, ugyanez a wired-nél
                 bekapcsoljuk a visualizert
                 default paramétereket használjuk
+                configurator:
+                radioMedium:
+                visualizer:
 
             Mi az eredmény?
                 gif
@@ -161,7 +163,7 @@
         The following animation shows what happens when we start the simulation:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=546 src="DatalinkVisualizerComplex.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerComplex.mp4">
     </p>
     <p>
         Only ping messages activate the visualization of data links between the nodes, because of the <i>packetFilter</i>.
@@ -171,7 +173,7 @@
         If a data link is visualized already between two nodes and another packet activates a data link between the same nodes, the arrow between those nodes is only reinforced.
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=546 src="DatalinkVisualizerFadeOut.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerFadeOut.mp4">
     </p>
 
     <!--
@@ -240,7 +242,7 @@
         The following animation illustrates what happens when the simulation is run: 
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=582 height=488 src="DatalinkVisualizerDynamic.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=582 height=518 src="DatalinkVisualizerDynamic.mp4">
     </p>
     <p>
         The nodes exchange routing informations, then the source starts to ping the destination.
