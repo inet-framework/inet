@@ -15,8 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/common/figures/SignalFigure.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"
 
 namespace inet {
@@ -327,25 +330,31 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             cFigure::Rectangle bounds;
             if (displayTransmissions) {
                 std::string imageName = par("transmissionImage");
-                auto transmissionImage = new cIconFigure("transmission");
-                transmissionImage->setTags("transmission");
-                transmissionImage->setTooltip("This icon represents an ongoing transmission in a wireless interface");
-                transmissionImage->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
-                transmissionImage->setAnchor(cFigure::ANCHOR_NW);
-                transmissionImage->setVisible(false);
-                group->addFigure(transmissionImage);
-                bounds = transmissionImage->getBounds();
+                auto transmissionFigure = new LabeledIconFigure("transmission");
+                transmissionFigure->setTags("transmission");
+                transmissionFigure->setTooltip("This icon represents an ongoing transmission in a wireless interface");
+                transmissionFigure->setVisible(false);
+                auto iconFigure = transmissionFigure->getIconFigure();
+                iconFigure->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
+                iconFigure->setAnchor(cFigure::ANCHOR_NW);
+                auto labelFigure = transmissionFigure->getLabelFigure();
+                labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
+                group->addFigure(transmissionFigure);
+                bounds = transmissionFigure->getBounds();
             }
             if (displayReceptions) {
                 std::string imageName = par("receptionImage");
-                auto receptionImage = new cIconFigure("reception");
-                receptionImage->setTags("reception");
-                receptionImage->setTooltip("This icon represents an ongoing reception in a wireless interface");
-                receptionImage->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
-                receptionImage->setAnchor(cFigure::ANCHOR_NW);
-                receptionImage->setVisible(false);
-                group->addFigure(receptionImage);
-                bounds = receptionImage->getBounds();
+                auto receptionFigure = new LabeledIconFigure("reception");
+                receptionFigure->setTags("reception");
+                receptionFigure->setTooltip("This icon represents an ongoing reception in a wireless interface");
+                receptionFigure->setVisible(false);
+                auto iconFigure = receptionFigure->getIconFigure();
+                iconFigure->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
+                iconFigure->setAnchor(cFigure::ANCHOR_NW);
+                auto labelFigure = receptionFigure->getLabelFigure();
+                labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
+                group->addFigure(receptionFigure);
+                bounds = receptionFigure->getBounds();
             }
             networkNodeVisualization->addAnnotation(group, bounds.getSize());
             setRadioFigure(radio, group);
@@ -399,6 +408,14 @@ void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmissi
             auto transmitter = transmission->getTransmitter();
             auto figure = getRadioFigure(transmitter);
             figure->getFigure(0)->setVisible(true);
+            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(0))->getLabelFigure();
+            if (auto scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission)) {
+                char tmp[32];
+                sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarTransmission->getPower()).get()));
+                labelFigure->setText(tmp);
+            }
+            else
+                labelFigure->setText("");
         }
     }
 }
@@ -427,6 +444,14 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
             auto receiver = reception->getReceiver();
             auto figure = getRadioFigure(receiver);
             figure->getFigure(1)->setVisible(true);
+            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(1))->getLabelFigure();
+            if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
+                char tmp[32];
+                sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarReception->getPower()).get()));
+                labelFigure->setText(tmp);
+            }
+            else
+                labelFigure->setText("");
         }
         if (displayCommunicationHeat) {
             const ITransmission *transmission = reception->getTransmission();
