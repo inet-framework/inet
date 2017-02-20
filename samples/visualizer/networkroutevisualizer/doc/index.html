@@ -206,25 +206,22 @@
     <p><h2>Displaying Changing Network Routes</h2></p>
     <p>
         This configuration demonstartes that, how the visualizer reacts to the routing changes in a complex network.        
+        Here is the network for this configuration:
     </p>  
+    <p>
+        IMG
+    </p>
     <p>
         The network contains four RIP routers. Later it turns out, why the RIP is neccessary.
         They are placed and connected so as to create redundant paths.
-        The source and destination networks are connected to the <var>router0</var> and to the <var>router2</var>.
         There is a wired and a wireless source-destination pair.
-        The wired source and destination connect to the router via a swtich.
-        The wireless source and destination connect to the router via an access point.
         Similarily to the previous configuration, the <var>wiredSource</var> pings the <var>wiredDestination</var> and the <var>wirelessSource</var> pings the <var>wirelessDestination</var>.
-        We assign IP addresses manually by creating an xml configuaration file.
+        We assign IP addresses manually by creating an xml configuaration file. Here is the network configuration for this topology:
+        CONFIGURATOR
+        We create a lifecycle for this configuration. By configuring lifecycleController we shut down and start the routers at a given time.
+        TODO: For this reason, we use RIP, so the path is changed between the source and the destination.
     </p>  
     <p>
-        A halozat gerince 4 routerbol all, amelyeken RIP routing protokoll mukodik. A kesobbiekben kiderul, hogy ez miert szukseges.
-        A router0 es a router2 tartalmazza a forras es a cel halozatokat. 1-1 vezetekes es vezetek nelkuli forras-cel par van a topologiaban.
-        A vezetekes forras-cel part egy-egy switch koti ossze a routerrel, mig a vezetek nelkuli forras-cel par egy-egy access pointhoz kapcsolodik.
-        Az elozo konfiguraciokhoz hasonloan a source-ok pingelik a destination-okat.
-        A configurator modulnak ezuttal kezzel adjuk meg, hogy hogyan ossza ki az ip cimeket.
-        A radioMedium kezeli a wireless csatornat. 
-        Tovabba van egy scenarioManager es egy lifecycleController modulunk. Ezek beallitasaval kapcsoljuk ki - es a kesobbiekben vissza - a router1-et es router3-at, hogy megvaltozzanak az utvonalak.
         Ehhez kell bekapcsolnunk a RIP-et, hogy a kikapcsolas utan az addig hasznalatlan router vegye at a kikapcsolt router szerepet.
         Itt van a halozat:
     </p>
