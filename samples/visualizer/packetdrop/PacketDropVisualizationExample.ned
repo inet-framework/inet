@@ -117,4 +117,24 @@ network PacketDropD
         host1.ethg++ <--> Eth100M {  disabled = true;@display("t=disabled"); } <--> host2.ethg++;
 }
 
+network PacketDropE
+{
+    @display("bgb=400,400");
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            @display("p=60,40");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=60,101");
+        }
+        host1: StandardHost {
+            @display("p=110,223");
+        }
+        host2: StandardHost {
+            @display("p=269,223");
+        }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
 

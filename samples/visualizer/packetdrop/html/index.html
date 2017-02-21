@@ -90,8 +90,6 @@ This log excerpt shows the packet drop:
 
 <img class="screen" src="log_queuefull_2.png">
 
-<p>TODO: do we need this? do we need the underline?</p>
-
 <h2>ARP resolution failed</h2>
 
 <p>
@@ -118,6 +116,12 @@ The following animation illustrates this:
 
 <video id="vid" autoplay loop controls onclick="this.paused ? this.play() : this.pause();" src="packetdrop9.mp4" width="360" height="380"></video>
 
+<p>
+This excerpt shows this in the log:
+</p>
+
+<img class="screen" src="log_arpfailed.png">
+
 <h2>Mac retry limit reached</h2>
 
 <p>
@@ -140,7 +144,34 @@ This is illustrated in the following animation:
 
 <p>TODO: redo animation without the TODO</p>
 
+<p>
+This looks like the following in the logs:
+</p>
+
+<img class="screen" src="log_macretrylimit.png">
+
+<p>TODO: redo this</p>
+
 <h2>No route to destination</h2>
+
+<p>
+This configuration uses this simple network:
+</p>
+
+<img class="screen" src="noroutenetwork.png">
+
+<p>
+It contains two connected <var>StandardHosts</var>, an <var>IPv4NetworkConfigurator</var> and an <var>IntegratedVisualizer</var> module.
+The configurator is instructed not to add any static routes, and <var>host1</var> is configured to ping <var>host2</var>.
+</p>
+
+<p>
+The ping packets cant be routes, thus the IP module drops them. This is illustrated on the following video:
+</p>
+
+<video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" src="packetdrop12.mp4" width="414" height="480"></video>
+
+<h2>Interface not connected</h2>
 
 <p>
 This configuration uses this network:
