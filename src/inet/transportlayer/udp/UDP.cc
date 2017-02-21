@@ -130,6 +130,16 @@ void UDP::initialize(int stage)
         WATCH_PTRMAP(socketsByIdMap);
         WATCH_MAP(socketsByPortMap);
 
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declaredCorrect"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "declaredIncorrect"))
+            crcMode = CRC_DECLARED_INCORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         icmp = nullptr;
@@ -356,7 +366,7 @@ void UDP::processPacketFromApp(Packet *packet)
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
     udpHeader->setTotalLengthField(packet->getByteLength());
-    udpHeader->setCrcMode(CRC_DECLARED_CORRECT);       //FIXME choose CRC_DECLARED_CORRECT, CRC_DECLARED_INCORRECT, CRC_COMPUTED
+    udpHeader->setCrcMode(crcMode);
     uint16_t crc = 0;
     if (udpHeader->getCrcMode() == CRC_COMPUTED) {
         TransportPseudoHeader pseudoHeader; //TODO fill the pseudoHeader: (srcAddr, destAddr, 0, protocol=17, udpLength)
