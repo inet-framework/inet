@@ -217,7 +217,6 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
     cXMLElementList list = paths->getChildrenByTagName("path");
     for (auto path : list) {
-        
         checkTags(path, "sender lspid bandwidth max_delay route permanent owner color");
 
         int lspid = getParameterIntValue(path, "lspid");
@@ -434,7 +433,8 @@ void RSVP::processHELLO_TIMER(HelloTimerMsg *msg)
     HelloState_t *h = findHello(peer);
     ASSERT(h);
 
-    RSVPHelloMsg *hMsg = new RSVPHelloMsg("hello message");
+    Packet *pk = new Packet("hello message");
+    const auto& hMsg = std::make_shared<RSVPHelloMsg>();
 
     hMsg->setSrcInstance(h->srcInstance);
     hMsg->setDstInstance(h->dstInstance);
@@ -447,9 +447,11 @@ void RSVP::processHELLO_TIMER(HelloTimerMsg *msg)
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    hMsg->setByteLength(length);
+    hMsg->setChunkLength(byte(length));
+    hMsg->markImmutable();
+    pk->append(hMsg);
 
-    sendToIP(hMsg, peer);
+    sendToIP(pk, peer);
 
     h->ack = false;
 
@@ -547,7 +549,8 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
     ASSERT(!OI.isUnspecified());
     ASSERT(tedmod->isLocalAddress(OI));
 
-    RSVPPathMsg *pm = new RSVPPathMsg("Path");
+    Packet *pk = new Packet("Path");
+    const auto& pm = std::make_shared<RSVPPathMsg>();
 
     pm->setSession(psbEle->Session_Object);
     pm->setSenderTemplate(psbEle->Sender_Template_Object);
@@ -563,13 +566,15 @@ void RSVP::refreshPath(PathStateBlock_t *psbEle)
 
     int length = 85 + (ERO.size() * 5);
 
-    pm->setByteLength(length);
+    pm->setChunkLength(byte(length));
+    pm->markImmutable();
+    pk->append(pm);
 
     IPv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
 
     ASSERT(ERO.size() == 0 || ERO[0].node.equals(nextHop) || ERO[0].L);
 
-    sendToIP(pm, nextHop);
+    sendToIP(pk, nextHop);
 }
 
 void RSVP::refreshResv(ResvStateBlock_t *rsbEle)
@@ -602,7 +607,8 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
 {
     EV_INFO << "refresh reservation (RSB " << rsbEle->id << ") PHOP " << PHOP << endl;
 
-    RSVPResvMsg *msg = new RSVPResvMsg("    Resv");
+    Packet *pk = new Packet("    Resv");
+    const auto& msg = std::make_shared<RSVPResvMsg>();
 
     FlowDescriptorVector flows;
 
@@ -652,9 +658,11 @@ void RSVP::refreshResv(ResvStateBlock_t *rsbEle, IPv4Address PHOP)
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    msg->setByteLength(length);
+    msg->setChunkLength(byte(length));
+    msg->markImmutable();
+    pk->append(msg);
 
-    sendToIP(msg, PHOP);
+    sendToIP(pk, PHOP);
 }
 
 void RSVP::preempt(IPv4Address OI, int priority, double bandwidth)
@@ -890,7 +898,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
     }
 }
 
-RSVP::ResvStateBlock_t *RSVP::createRSB(RSVPResvMsg *msg)
+RSVP::ResvStateBlock_t *RSVP::createRSB(const std::shared_ptr<RSVPResvMsg>& msg)
 {
     ResvStateBlock_t rsbEle;
 
@@ -1115,7 +1123,7 @@ bool RSVP::evalNextHopInterface(IPv4Address destAddr, const EroVector& ERO, IPv4
     }
 }
 
-RSVP::PathStateBlock_t *RSVP::createPSB(RSVPPathMsg *msg)
+RSVP::PathStateBlock_t *RSVP::createPSB(const std::shared_ptr<RSVPPathMsg>& msg)
 {
     const EroVector& ERO = msg->getERO();
     IPv4Address destAddr = msg->getDestAddress();
@@ -1245,56 +1253,53 @@ RSVP::ResvStateBlock_t *RSVP::createEgressRSB(PathStateBlock_t *psb)
 
 void RSVP::handleMessage(cMessage *msg)
 {
-    SignallingMsg *sMsg = dynamic_cast<SignallingMsg *>(msg);
-    RSVPMessage *rMsg = dynamic_cast<RSVPMessage *>(msg);
-
-    if (sMsg) {
+    if (msg->isSelfMessage()) {
+        SignallingMsg *sMsg = check_and_cast<SignallingMsg *>(msg);
         processSignallingMessage(sMsg);
+    }
+    else {
+        Packet *pk = check_and_cast<Packet *>(msg);
+        processRSVPMessage(pk);
         return;
     }
-    else if (rMsg) {
-        processRSVPMessage(rMsg);
-        return;
-    }
-    else
-        ASSERT(false);
 }
 
-void RSVP::processRSVPMessage(RSVPMessage *msg)
+void RSVP::processRSVPMessage(Packet *pk)
 {
+    const auto& msg = pk->peekHeader<RSVPMessage>();
     int kind = msg->getRsvpKind();
     switch (kind) {
         case PATH_MESSAGE:
-            processPathMsg(check_and_cast<RSVPPathMsg *>(msg));
+            processPathMsg(pk);
             break;
 
         case RESV_MESSAGE:
-            processResvMsg(check_and_cast<RSVPResvMsg *>(msg));
+            processResvMsg(pk);
             break;
 
         case PTEAR_MESSAGE:
-            processPathTearMsg(check_and_cast<RSVPPathTear *>(msg));
+            processPathTearMsg(pk);
             break;
 
         case HELLO_MESSAGE:
-            processHelloMsg(check_and_cast<RSVPHelloMsg *>(msg));
+            processHelloMsg(pk);
             break;
 
         case PERROR_MESSAGE:
-            processPathErrMsg(check_and_cast<RSVPPathError *>(msg));
+            processPathErrMsg(pk);
             break;
 
         default:
-            throw cRuntimeError("Invalid RSVP kind of message '%s': %d", msg->getName(), kind);
+            throw cRuntimeError("Invalid RSVP kind of message '%s': %d", pk->getName(), kind);
     }
 }
 
-void RSVP::processHelloMsg(RSVPHelloMsg *msg)
+void RSVP::processHelloMsg(Packet *pk)
 {
     EV_INFO << "Received RSVP_HELLO" << endl;
     //print(msg);
-
-    IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    const auto& msg = pk->peekHeader<RSVPHelloMsg>();
+    IPv4Address sender = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address peer = tedmod->primaryAddress(sender);
 
     bool request = msg->getRequest();
@@ -1310,7 +1315,7 @@ void RSVP::processHelloMsg(RSVPHelloMsg *msg)
     int rcvSrcInstance = msg->getSrcInstance();
     int rcvDstInstance = msg->getDstInstance();
 
-    delete msg;
+    delete pk;
 
     HelloState_t *h = findHello(peer);
     ASSERT(h);
@@ -1374,26 +1379,28 @@ void RSVP::processHelloMsg(RSVPHelloMsg *msg)
     scheduleAt(simTime() + helloTimeout, h->timeout);
 }
 
-void RSVP::processPathErrMsg(RSVPPathError *msg)
+void RSVP::processPathErrMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_ERROR" << endl;
     //print(msg);
 
+    const auto& msg = pk->peekHeader<RSVPPathError>();
     //int lspid = msg->getLspId();
     int errCode = msg->getErrorCode();
 
     PathStateBlock_t *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
     if (!psb) {
         EV_INFO << "matching PSB not found, ignoring error message" << endl;
-        delete msg;
+        delete pk;
         return;
     }
 
     if (psb->Previous_Hop_Address != routerId) {
         EV_INFO << "forwarding error message to PHOP (" << psb->Previous_Hop_Address << ")" << endl;
 
-        delete msg->removeControlInfo();
-        sendToIP(msg, psb->Previous_Hop_Address);
+        delete pk->removeControlInfo();         //FIXME
+        pk->removePoppedChunks();
+        sendToIP(pk, psb->Previous_Hop_Address);
     }
     else {
         EV_INFO << "error reached ingress router" << endl;
@@ -1415,21 +1422,22 @@ void RSVP::processPathErrMsg(RSVPPathError *msg)
                 throw cRuntimeError("Invalid errorcode %d in message '%s'", errCode, msg->getName());
         }
 
-        delete msg;
+        delete pk;
     }
 }
 
-void RSVP::processPathTearMsg(RSVPPathTear *msg)
+void RSVP::processPathTearMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_TEAR" << endl;
     //print(msg);
 
+    const auto& msg = pk->peekHeader<RSVPPathTear>();
     int lspid = msg->getLspId();
 
     PathStateBlock_t *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
     if (!psb) {
         EV_DETAIL << "received PATH_TEAR for nonexisting lspid=" << lspid << endl;
-        delete msg;
+        delete pk;
         return;
     }
 
@@ -1445,7 +1453,7 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
         if (!msg->getForce()) {
             EV_DETAIL << "merging backup tunnel exists and force flag is not set, ignoring teardown" << endl;
-            delete msg;
+            delete pk;
             return;
         }
 
@@ -1473,13 +1481,14 @@ void RSVP::processPathTearMsg(RSVPPathTear *msg)
 
     removePSB(psb);
 
-    delete msg;
+    delete pk;
 }
 
-void RSVP::processPathMsg(RSVPPathMsg *msg)
+void RSVP::processPathMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_MESSAGE" << endl;
-    print(msg);
+    auto msg = std::dynamic_pointer_cast<RSVPPathMsg>(CHK(pk->peekHeader<RSVPPathMsg>())->dupShared());
+    print(msg.get());
 
     // process ERO *************************************************************
 
@@ -1500,7 +1509,7 @@ void RSVP::processPathMsg(RSVPPathMsg *msg)
         if (!psb) {
             sendPathErrorMessage(msg->getSession(), msg->getSenderTemplate(),
                     msg->getSenderTspec(), msg->getNHOP(), PATH_ERR_UNFEASIBLE);
-            delete msg;
+            delete pk;
             return;
         }
         scheduleRefreshTimer(psb, 0.0);
@@ -1532,13 +1541,14 @@ void RSVP::processPathMsg(RSVPPathMsg *msg)
     if (rsb)
         scheduleRefreshTimer(rsb, 0.0);
 
-    delete msg;
+    delete pk;
 }
 
-void RSVP::processResvMsg(RSVPResvMsg *msg)
+void RSVP::processResvMsg(Packet *pk)
 {
     EV_INFO << "Received RESV_MESSAGE" << endl;
-    print(msg);
+    const auto& msg = pk->peekHeader<RSVPResvMsg>();
+    print(msg.get());
 
     IPv4Address OI = msg->getLIH();
 
@@ -1557,7 +1567,7 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
 
     if (msg->getFlowDescriptor().size() == 0) {
         EV_INFO << "no matching PSB found" << endl;
-        delete msg;
+        delete pk;
         return;
     }
 
@@ -1587,11 +1597,11 @@ void RSVP::processResvMsg(RSVPResvMsg *msg)
         scheduleRefreshTimer(rsb, 0.0);
     }
     else
-        updateRSB(rsb, msg);
+        updateRSB(rsb, msg.get());
 
     scheduleTimeout(rsb);
 
-    delete msg;
+    delete pk;
 }
 
 void RSVP::recoveryEvent(IPv4Address peer)
@@ -1822,7 +1832,8 @@ void RSVP::processCommand(const cXMLElement& node)
 
 void RSVP::sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, const SenderTemplateObj_t& sender, IPv4Address LIH, IPv4Address NHOP, bool force)
 {
-    RSVPPathTear *msg = new RSVPPathTear("PathTear");
+    Packet *pk = new Packet("PathTear");
+    const auto& msg = std::make_shared<RSVPPathTear>();
     msg->setSenderTemplate(sender);
     msg->setSession(session);
     RsvpHopObj_t hop;
@@ -1830,12 +1841,12 @@ void RSVP::sendPathTearMessage(IPv4Address peerIP, const SessionObj_t& session, 
     hop.Next_Hop_Address = NHOP;
     msg->setHop(hop);
     msg->setForce(force);
-
     int length = 44;
+    msg->setChunkLength(byte(length));
+    msg->markImmutable();
+    pk->append(msg);
 
-    msg->setByteLength(length);
-
-    sendToIP(msg, peerIP);
+    sendToIP(pk, peerIP);
 }
 
 void RSVP::sendPathErrorMessage(PathStateBlock_t *psb, int errCode)
@@ -1845,7 +1856,8 @@ void RSVP::sendPathErrorMessage(PathStateBlock_t *psb, int errCode)
 
 void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender, SenderTspecObj_t tspec, IPv4Address nextHop, int errCode)
 {
-    RSVPPathError *msg = new RSVPPathError("PathErr");
+    Packet *pk = new Packet("PathErr");
+    const auto& msg = std::make_shared<RSVPPathError>();
     msg->setErrorCode(errCode);
     msg->setErrorNode(routerId);
     msg->setSession(session);
@@ -1857,9 +1869,11 @@ void RSVP::sendPathErrorMessage(SessionObj_t session, SenderTemplateObj_t sender
     // see comment elsewhere (in TED.cc)
     length /= 10;
 
-    msg->setByteLength(length);
+    msg->setChunkLength(byte(length));
+    msg->markImmutable();
+    pk->append(msg);
 
-    sendToIP(msg, nextHop);
+    sendToIP(pk, nextHop);
 }
 
 void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)

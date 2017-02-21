@@ -15,6 +15,7 @@
 
 
 cplusplus {{
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/rsvp_te/IntServ_m.h"
 
 #define PATH_MESSAGE   1
@@ -48,13 +49,14 @@ struct FlowDescriptor_t;
 
 struct EroObj_t;
 
-
+class FieldsChunk extends cObject;
 
 //
 // RSVP message common part
 //
-packet RSVPMessage
+class RSVPMessage extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     int rsvpKind;
 }
 

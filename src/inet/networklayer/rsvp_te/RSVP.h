@@ -200,17 +200,17 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual void processHELLO_TIMER(HelloTimerMsg *msg);
     virtual void processHELLO_TIMEOUT(HelloTimeoutMsg *msg);
     virtual void processPATH_NOTIFY(PathNotifyMsg *msg);
-    virtual void processRSVPMessage(RSVPMessage *msg);
-    virtual void processHelloMsg(RSVPHelloMsg *msg);
-    virtual void processPathMsg(RSVPPathMsg *msg);
-    virtual void processResvMsg(RSVPResvMsg *msg);
-    virtual void processPathTearMsg(RSVPPathTear *msg);
-    virtual void processPathErrMsg(RSVPPathError *msg);
+    virtual void processRSVPMessage(Packet *pk);
+    virtual void processHelloMsg(Packet *pk);
+    virtual void processPathMsg(Packet *pk);
+    virtual void processResvMsg(Packet *pk);
+    virtual void processPathTearMsg(Packet *pk);
+    virtual void processPathErrMsg(Packet *pk);
 
-    virtual PathStateBlock_t *createPSB(RSVPPathMsg *msg);
+    virtual PathStateBlock_t *createPSB(const std::shared_ptr<RSVPPathMsg>& msg);
     virtual PathStateBlock_t *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
     virtual void removePSB(PathStateBlock_t *psb);
-    virtual ResvStateBlock_t *createRSB(RSVPResvMsg *msg);
+    virtual ResvStateBlock_t *createRSB(const std::shared_ptr<RSVPResvMsg>& msg);
     virtual ResvStateBlock_t *createEgressRSB(PathStateBlock_t *psb);
     virtual void updateRSB(ResvStateBlock_t *rsb, RSVPResvMsg *msg);
     virtual void removeRSB(ResvStateBlock_t *rsb);

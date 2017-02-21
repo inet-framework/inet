@@ -14,14 +14,17 @@
 
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/ted/TED_m.h"
 }}
 
 namespace inet;
 
+class FieldsChunk extends cObject;
+
 // Represents a link in the ~TED and in ~LinkStateMsg packets; from TED.msg.
 struct TELinkStateInfo;
-
 
 
 //
@@ -29,8 +32,9 @@ struct TELinkStateInfo;
 // ~LinkStateRouting module which implements a minimalistic link state routing
 // protocol.
 //
-packet LinkStateMsg
+class LinkStateMsg extends FieldsChunk
 {
+    bit chunkLength @overridegetter = bit(0);
     TELinkStateInfo linkInfo[];
 
     bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?

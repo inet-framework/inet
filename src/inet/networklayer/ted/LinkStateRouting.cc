@@ -80,7 +80,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
         EV_INFO << "Processing message from IPv4: " << msg << endl;
         IPv4Address sender = msg->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-        processLINK_STATE_MESSAGE(check_and_cast<LinkStateMsg *>(msg), sender);
+        processLINK_STATE_MESSAGE(check_and_cast<Packet *>(msg), sender);
     }
     else
         ASSERT(false);
@@ -113,10 +113,11 @@ void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, c
     sendToPeers(links, false, IPv4Address());
 }
 
-void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg *msg, IPv4Address sender)
+void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, IPv4Address sender)
 {
     EV_INFO << "received LINK_STATE message from " << sender << endl;
 
+    const auto& msg = pk->peekHeader<LinkStateMsg>();
     TELinkStateInfoVector forward;
 
     unsigned int n = msg->getLinkInfoArraySize();
@@ -170,7 +171,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(LinkStateMsg *msg, IPv4Address 
         sendToPeers(forward, false, sender);
     }
 
-    delete msg;
+    delete pk;
 }
 
 void LinkStateRouting::sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer)
@@ -200,22 +201,24 @@ void LinkStateRouting::sendToPeer(IPv4Address peer, const std::vector<TELinkStat
 {
     EV_INFO << "sending LINK_STATE message to " << peer << endl;
 
-    LinkStateMsg *out = new LinkStateMsg("link state");
+    Packet *pk = new Packet("link state");
+    const auto& out = std::make_shared<LinkStateMsg>();
 
     out->setLinkInfoArraySize(list.size());
     for (unsigned int j = 0; j < list.size(); j++)
         out->setLinkInfo(j, list[j]);
 
     out->setRequest(req);
+    int length = out->getLinkInfoArraySize() * 72;
+    out->setChunkLength(byte(length));
+    out->markImmutable();
+    pk->append(out);
 
-    sendToIP(out, peer);
+    sendToIP(pk, peer);
 }
 
-void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
+void LinkStateRouting::sendToIP(Packet *msg, IPv4Address destAddr)
 {
-    int length = msg->getLinkInfoArraySize() * 72;
-    msg->setByteLength(length);
-
     msg->addPar("color") = TED_TRAFFIC;
 
     msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);

@@ -12,6 +12,8 @@
 
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 // base header: version, length, LSR ID, Label space
@@ -24,6 +26,7 @@ cplusplus {{
 
 namespace inet;
 
+class FieldsChunk extends cObject;
 class noncobject IPv4Address;
 
 //
@@ -60,8 +63,9 @@ struct FEC_TLV
 //
 // Base class for LDP packets
 //
-packet LDPPacket
+class LDPPacket extends FieldsChunk
 {
+    bit chunkLength @overridegetter;
     int type;
     IPv4Address senderAddress;
     IPv4Address receiverAddress;
@@ -71,7 +75,7 @@ packet LDPPacket
 //
 // LDP Label Mapping Message
 //
-packet LDPLabelMapping extends LDPPacket
+class LDPLabelMapping extends LDPPacket
 {
     FEC_TLV fec;
     int label;
@@ -80,7 +84,7 @@ packet LDPLabelMapping extends LDPPacket
 //
 // LDP Label Request Message
 //
-packet LDPLabelRequest extends LDPPacket
+class LDPLabelRequest extends LDPPacket
 {
     FEC_TLV fec;
 }
@@ -89,7 +93,7 @@ packet LDPLabelRequest extends LDPPacket
 //
 // LDP Hello Message
 //
-packet LDPHello extends LDPPacket
+class LDPHello extends LDPPacket
 {
     double holdTime;
     bool tbit;
@@ -99,7 +103,7 @@ packet LDPHello extends LDPPacket
 //
 // LDP notification message
 //
-packet LDPNotify extends LDPPacket
+class LDPNotify extends LDPPacket
 {
     int status;
     FEC_TLV fec;
@@ -109,7 +113,7 @@ packet LDPNotify extends LDPPacket
 // LDP Ini Message
 //
 //# FIXME currently unused
-packet LDPIni extends LDPPacket
+class LDPIni extends LDPPacket
 {
     double keepAliveTime;
     bool abit;
@@ -122,7 +126,7 @@ packet LDPIni extends LDPPacket
 // LDP Address Message
 //
 //# FIXME currently unused
-packet LDPAddress extends LDPPacket
+class LDPAddress extends LDPPacket
 {
     bool isWithdraw;
     string family;

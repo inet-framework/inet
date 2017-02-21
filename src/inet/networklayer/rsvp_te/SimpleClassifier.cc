@@ -53,11 +53,12 @@ void SimpleClassifier::handleMessage(cMessage *)
 
 // IClassifier implementation (method invoked by MPLS)
 
-bool SimpleClassifier::lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool SimpleClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
     // never label OSPF(TED) and RSVP traffic
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
 
-    switch (ipdatagram->getTransportProtocol()) {
+    switch (ipv4Header->getTransportProtocol()) {
         case IP_PROT_OSPF:
         case IP_PROT_RSVP:
             return false;
@@ -69,10 +70,10 @@ bool SimpleClassifier::lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLab
     // forwarding decision for non-labeled datagrams
 
     for (auto & elem : bindings) {
-        if (!elem.dest.isUnspecified() && !elem.dest.equals(ipdatagram->getDestAddress()))
+        if (!elem.dest.isUnspecified() && !elem.dest.equals(ipv4Header->getDestAddress()))
             continue;
 
-        if (!elem.src.isUnspecified() && !elem.src.equals(ipdatagram->getSrcAddress()))
+        if (!elem.src.isUnspecified() && !elem.src.equals(ipv4Header->getSrcAddress()))
             continue;
 
         EV_DETAIL << "packet belongs to fecid=" << elem.id << endl;

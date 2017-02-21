@@ -28,13 +28,13 @@ class noncobject IPv4Address;
 
 class noncobject FlowDescriptorVector;
 
-class RSVPPacket;
+class RSVPPacket extends cObject;
 
 
 //
 // FIXME missing documentation
 //
-packet RSVPResvMsg extends RSVPPacket
+class RSVPResvMsg extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -45,7 +45,7 @@ packet RSVPResvMsg extends RSVPPacket
 //
 // FIXME missing documentation
 //
-packet RSVPResvTear extends RSVPPacket
+class RSVPResvTear extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -56,7 +56,7 @@ packet RSVPResvTear extends RSVPPacket
 //
 // FIXME missing documentation
 //
-packet RSVPResvError extends RSVPPacket
+class RSVPResvError extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;

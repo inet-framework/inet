@@ -34,13 +34,13 @@ class noncobject IPv4Address;
 
 class noncobject EroVector;
 
-class RSVPPacket;
+class RSVPPacket extends cObject;
 
 
 //
 // FIXME missing documentation
 //
-packet RSVPPathMsg extends RSVPPacket
+class RSVPPathMsg extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -55,7 +55,7 @@ packet RSVPPathMsg extends RSVPPacket
 //
 // FIXME missing documentation
 //
-packet RSVPPathTear extends RSVPPacket
+class RSVPPathTear extends RSVPPacket
 {
     @customize(true);
     RsvpHopObj_t hop;
@@ -68,7 +68,7 @@ packet RSVPPathTear extends RSVPPacket
 //
 // FIXME missing documentation
 //
-packet RSVPPathError extends RSVPPacket
+class RSVPPathError extends RSVPPacket
 {
     @customize(true);
     IPv4Address errorNode;
@@ -77,3 +77,4 @@ packet RSVPPathError extends RSVPPacket
 
     rsvpKind = PERROR_MESSAGE;
 }
+

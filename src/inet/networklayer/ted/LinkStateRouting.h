@@ -17,6 +17,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
 #include "inet/networklayer/rsvp_te/IntServ.h"
 
@@ -70,14 +71,14 @@ class INET_API LinkStateRouting : public cSimpleModule, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void processLINK_STATE_MESSAGE(LinkStateMsg *msg, IPv4Address sender);
+    virtual void processLINK_STATE_MESSAGE(Packet *msg, IPv4Address sender);
 
     // cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer);
     virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo>& list, bool req);
-    virtual void sendToIP(LinkStateMsg *msg, IPv4Address destAddr);
+    virtual void sendToIP(Packet *msg, IPv4Address destAddr);
 };
 
 } // namespace inet

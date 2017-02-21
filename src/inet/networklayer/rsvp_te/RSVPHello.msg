@@ -20,13 +20,13 @@ cplusplus {{
 
 namespace inet;
 
-class RSVPMessage;
+class RSVPMessage extends cObject;
 
 
 //
 // FIXME missing documentation
 //
-packet RSVPHelloMsg extends RSVPMessage
+class RSVPHelloMsg extends RSVPMessage
 {
     @customize(true);
     bool request;

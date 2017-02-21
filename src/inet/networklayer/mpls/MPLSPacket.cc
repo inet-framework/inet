@@ -19,32 +19,21 @@
 
 namespace inet {
 
-// constructors
-MPLSPacket::MPLSPacket(const char *name) : cPacket(name)
-{
-}
-
-MPLSPacket::MPLSPacket(const MPLSPacket& p)
-    : cPacket(p)
-{
-    copy(p);
-}
-
 // assignment operator
-MPLSPacket& MPLSPacket::operator=(const MPLSPacket& p)
+MplsHeader& MplsHeader::operator=(const MplsHeader& other)
 {
-    if (this == &p)
+    if (this == &other)
         return *this;
-    cPacket::operator=(p);
-    copy(p);
+    MplsHeader_Base::operator=(other);
+    copy(other);
     return *this;
 }
 
-std::string MPLSPacket::info() const
+std::string MplsHeader::info() const
 {
     std::stringstream out;
     for (int i = (int)labels.size() - 1; i >= 0; i--)
-        out << labels[i] << (i == 0 ? "" : " ");
+        out << labels[i].getLabel() << (i == 0 ? "" : " ");
     return out.str();
 }
 

@@ -25,7 +25,7 @@
     <feature enabled="true" id="PPP"/>
     <feature enabled="false" id="ExternalInterface"/>
     <feature enabled="false" id="ExternalInterface_examples"/>
-    <feature enabled="false" id="MPLS"/>
+    <feature enabled="true" id="MPLS"/>
     <feature enabled="false" id="MPLS_examples"/>
     <feature enabled="false" id="OSPFv2"/>
     <feature enabled="false" id="OSPFv2_examples"/>

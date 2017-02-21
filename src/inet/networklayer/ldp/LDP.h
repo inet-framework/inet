@@ -187,21 +187,21 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     virtual void sendHelloTo(IPv4Address dest);
     virtual void openTCPConnectionToPeer(int peerIndex);
 
-    virtual void processLDPHello(LDPHello *msg);
+    virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
     virtual void processMessageFromTCP(cMessage *msg);
-    virtual void processLDPPacketFromTCP(LDPPacket *ldpPacket);
+    virtual void processLDPPacketFromTCP(Packet *packet);
 
-    virtual void processLABEL_MAPPING(LDPLabelMapping *packet);
-    virtual void processLABEL_REQUEST(LDPLabelRequest *packet);
-    virtual void processLABEL_RELEASE(LDPLabelMapping *packet);
-    virtual void processLABEL_WITHDRAW(LDPLabelMapping *packet);
-    virtual void processNOTIFICATION(LDPNotify *packet);
+    virtual void processLABEL_MAPPING(Packet *packet);
+    virtual void processLABEL_REQUEST(Packet *packet);
+    virtual void processLABEL_RELEASE(Packet *packet);
+    virtual void processLABEL_WITHDRAW(Packet *packet);
+    virtual void processNOTIFICATION(Packet *packet);
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{
     virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
     virtual void socketPeerClosed(int connId, void *yourPtr) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
@@ -209,7 +209,7 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     //@}
 
     // IClassifier
-    virtual bool lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
+    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

@@ -29,7 +29,7 @@ namespace inet {
 class INET_API RSVPResvMsg : public RSVPResvMsg_Base
 {
   public:
-    RSVPResvMsg(const char *name = nullptr, int kind = RESV_MESSAGE) : RSVPResvMsg_Base(name, kind) {}
+    RSVPResvMsg(/* const char *name = nullptr, int kind = RESV_MESSAGE */) : RSVPResvMsg_Base(/* name, kind */) {}      //FIXME KLUDGE
     RSVPResvMsg(const RSVPResvMsg& other) : RSVPResvMsg_Base(other) {}
     RSVPResvMsg& operator=(const RSVPResvMsg& other) { RSVPResvMsg_Base::operator=(other); return *this; }
     virtual RSVPResvMsg *dup() const override { return new RSVPResvMsg(*this); }
@@ -47,7 +47,7 @@ class INET_API RSVPResvMsg : public RSVPResvMsg_Base
 class INET_API RSVPResvTear : public RSVPResvTear_Base
 {
   public:
-    RSVPResvTear(const char *name = nullptr, int kind = RTEAR_MESSAGE) : RSVPResvTear_Base(name, kind) {}
+    RSVPResvTear(/* const char *name = nullptr, int kind = RTEAR_MESSAGE */) : RSVPResvTear_Base(/* name, kind */) {}
     RSVPResvTear(const RSVPResvTear& other) : RSVPResvTear_Base(other) {}
     RSVPResvTear& operator=(const RSVPResvTear& other) { RSVPResvTear_Base::operator=(other); return *this; }
     virtual RSVPResvTear *dup() const override { return new RSVPResvTear(*this); }
@@ -65,7 +65,7 @@ class INET_API RSVPResvTear : public RSVPResvTear_Base
 class INET_API RSVPResvError : public RSVPResvError_Base
 {
   public:
-    RSVPResvError(const char *name = nullptr, int kind = RERROR_MESSAGE) : RSVPResvError_Base(name, kind) {}
+    RSVPResvError(/* const char *name = nullptr, int kind = RERROR_MESSAGE */) : RSVPResvError_Base(/* name, kind */) {}
     RSVPResvError(const RSVPResvError& other) : RSVPResvError_Base(other) {}
     RSVPResvError& operator=(const RSVPResvError& other) { RSVPResvError_Base::operator=(other); return *this; }
     virtual RSVPResvError *dup() const override { return new RSVPResvError(*this); }

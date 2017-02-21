@@ -19,33 +19,33 @@
 #include <stack>
 
 #include "inet/common/INETDefs.h"
+#include "inet/networklayer/mpls/MplsPacket_m.h"
 
 namespace inet {
 
 /**
  * Represents a packet with MPLS headers
  */
-class INET_API MPLSPacket : public cPacket
+class INET_API MplsHeader : public MplsHeader_Base
 {
   protected:
-    typedef std::vector<int> LabelStack;    // note: last element is the top of stack
+    typedef std::vector<MplsLabel> LabelStack;    // note: last element is the top of stack
     LabelStack labels;
 
   private:
-    void copy(const MPLSPacket& other) { labels = other.labels; }
+    void copy(const MplsHeader& other) { labels = other.labels; }
 
   public:
     /* constructors*/
-    MPLSPacket(const char *name = nullptr);
-    MPLSPacket(const MPLSPacket& p);
+    MplsHeader() : MplsHeader_Base() {}
 
     /* assignment operator*/
-    virtual MPLSPacket& operator=(const MPLSPacket& p);
+    MplsHeader& operator=(const MplsHeader& other);
 
     /**
      * cloning function
      */
-    virtual MPLSPacket *dup() const override { return new MPLSPacket(*this); }
+    virtual MplsHeader *dup() const override { return new MplsHeader(*this); }
 
     /**
      * Returns a string with the labels, starting with the top of stack.
@@ -55,17 +55,17 @@ class INET_API MPLSPacket : public cPacket
     /**
      * Swap Label operation
      */
-    inline void swapLabel(int newLabel) { labels.back() = newLabel; }
+    inline void swapLabel(MplsLabel newLabel) { labels.back() = newLabel; }
 
     /**
      * Pushes new label on the label stack
      */
-    inline void pushLabel(int newLabel) { labels.push_back(newLabel); addBitLength(32); }
+    inline void pushLabel(MplsLabel newLabel) { labels.push_back(newLabel); }
 
     /**
      * Pops the top label
      */
-    inline void popLabel() { labels.pop_back(); addBitLength(-32); }
+    inline void popLabel() { labels.pop_back(); }
 
     /**
      * Returns true if the label stack is not empty
@@ -75,7 +75,15 @@ class INET_API MPLSPacket : public cPacket
     /**
      * Returns the top label
      */
-    inline int getTopLabel() { return labels.back(); }
+    inline MplsLabel getTopLabel() { return labels.back(); }
+
+    virtual bit getChunkLength() const override { return bit(32) * labels.size(); }
+
+    virtual void setLabelsArraySize(unsigned int size) override { throw cRuntimeError("do not use it"); }
+    virtual unsigned int getLabelsArraySize() const override { return labels.size(); }
+    virtual MplsLabel& getLabels(unsigned int k) override { throw cRuntimeError("do not use it"); }
+    virtual const MplsLabel& getLabels(unsigned int k) const override { throw cRuntimeError("do not use it"); }
+    virtual void setLabels(unsigned int k, const MplsLabel& labels) override { throw cRuntimeError("do not use it"); }
 };
 
 } // namespace inet

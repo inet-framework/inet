@@ -34,7 +34,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ted/TED.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-
+#include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 namespace inet {
 
 Define_Module(LDP);
@@ -182,12 +182,12 @@ void LDP::handleMessage(cMessage *msg)
             processHelloTimeout(msg);
         }
         else {
-            processNOTIFICATION(check_and_cast<LDPNotify *>(msg));
+            processNOTIFICATION(check_and_cast<Packet *>(msg));
         }
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "udpIn")) {
         // we can only receive LDP Hello from UDP (everything else goes over TCP)
-        processLDPHello(check_and_cast<LDPHello *>(msg));
+        processLDPHello(check_and_cast<Packet *>(msg));
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "tcpIn")) {
         processMessageFromTCP(msg);
@@ -230,8 +230,9 @@ void LDP::sendToPeer(IPv4Address dest, cMessage *msg)
 
 void LDP::sendMappingRequest(IPv4Address dest, IPv4Address addr, int length)
 {
-    LDPLabelRequest *requestMsg = new LDPLabelRequest("Lb-Req");
-    requestMsg->setByteLength(LDP_HEADER_BYTES);    // FIXME find out actual length
+    Packet *pk = new Packet("Lb-Req");
+    const auto& requestMsg = std::make_shared<LDPLabelRequest>();
+    requestMsg->setChunkLength(byte(LDP_HEADER_BYTES));    // FIXME find out actual length
     requestMsg->setType(LABEL_REQUEST);
 
     FEC_TLV fec;
@@ -241,8 +242,10 @@ void LDP::sendMappingRequest(IPv4Address dest, IPv4Address addr, int length)
 
     requestMsg->setReceiverAddress(dest);
     requestMsg->setSenderAddress(rt->getRouterId());
+    requestMsg->markImmutable();
+    pk->append(requestMsg);
 
-    sendToPeer(dest, requestMsg);
+    sendToPeer(dest, pk);
 }
 
 void LDP::updateFecListEntry(LDP::fec_t oldItem)
@@ -422,24 +425,25 @@ void LDP::updateFecList(IPv4Address nextHop)
 
 void LDP::sendHelloTo(IPv4Address dest)
 {
-    LDPHello *hello = new LDPHello("LDP-Hello");
-    hello->setByteLength(LDP_HEADER_BYTES);
+    Packet *pk = new Packet("LDP-Hello");
+    const auto& hello = std::make_shared<LDPHello>();
+    hello->setChunkLength(byte(LDP_HEADER_BYTES));
     hello->setType(HELLO);
     hello->setSenderAddress(rt->getRouterId());
     //hello->setReceiverAddress(...);
     hello->setHoldTime(SIMTIME_DBL(holdTime));
     //hello->setRbit(...);
     //hello->setTbit(...);
-    hello->addPar("color") = LDP_HELLO_TRAFFIC;
+    pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
     if (dest.isMulticast()) {
         for (int i = 0; i < (int)udpSockets.size(); ++i) {
-            LDPHello *msg = i == (int)udpSockets.size() - 1 ? hello : hello->dup();
+            Packet *msg = (i == (int)udpSockets.size() - 1) ? pk : pk->dup();
             udpSockets[i].sendTo(msg, dest, LDP_PORT);
         }
     }
     else
-        udpSocket.sendTo(hello, dest, LDP_PORT);
+        udpSocket.sendTo(pk, dest, LDP_PORT);
 }
 
 void LDP::processHelloTimeout(cMessage *msg)
@@ -510,10 +514,11 @@ void LDP::processHelloTimeout(cMessage *msg)
     tedmod->rebuildRoutingTable();
 }
 
-void LDP::processLDPHello(LDPHello *msg)
+void LDP::processLDPHello(Packet *msg)
 {
+    const auto& ldpHello = CHK(msg->peekHeader<LDPHello>());
     //IPv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
-    IPv4Address peerAddr = msg->getSenderAddress();
+    IPv4Address peerAddr = ldpHello->getSenderAddress();
     int interfaceId = msg->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
@@ -622,13 +627,13 @@ void LDP::socketEstablished(int, void *yourPtr)
     // FIXME start LDP session setup (if we're on the active side?)
 }
 
-void LDP::socketDataArrived(int, void *yourPtr, cPacket *msg, bool)
+void LDP::socketDataArrived(int, void *yourPtr, Packet *msg, bool)
 {
     peer_info& peer = myPeers[(uintptr_t)yourPtr];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
     delete msg->removeControlInfo();
-    processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
+    processLDPPacketFromTCP(msg);
 }
 
 void LDP::socketPeerClosed(int, void *yourPtr)
@@ -668,8 +673,9 @@ void LDP::socketFailure(int, void *yourPtr, int code)
     // FIXME what now? reconnect after a delay?
 }
 
-void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
+void LDP::processLDPPacketFromTCP(Packet *packet)
 {
+    const auto& ldpPacket = packet->peekHeader<LDPPacket>();
     switch (ldpPacket->getType()) {
         case HELLO:
             throw cRuntimeError("Received LDP HELLO over TCP (should arrive over UDP)");
@@ -686,23 +692,23 @@ void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
             break;
 
         case LABEL_MAPPING:
-            processLABEL_MAPPING(check_and_cast<LDPLabelMapping *>(ldpPacket));
+            processLABEL_MAPPING(packet);
             break;
 
         case LABEL_REQUEST:
-            processLABEL_REQUEST(check_and_cast<LDPLabelRequest *>(ldpPacket));
+            processLABEL_REQUEST(packet);
             break;
 
         case LABEL_WITHDRAW:
-            processLABEL_WITHDRAW(check_and_cast<LDPLabelMapping *>(ldpPacket));
+            processLABEL_WITHDRAW(packet);
             break;
 
         case LABEL_RELEASE:
-            processLABEL_RELEASE(check_and_cast<LDPLabelMapping *>(ldpPacket));
+            processLABEL_RELEASE(packet);
             break;
 
         case NOTIFICATION:
-            processNOTIFICATION(check_and_cast<LDPNotify *>(ldpPacket));
+            processNOTIFICATION(packet);
             break;
 
         default:
@@ -830,8 +836,9 @@ LDP::FecVector::iterator LDP::findFecEntry(FecVector& fecs, IPv4Address addr, in
 void LDP::sendNotify(int status, IPv4Address dest, IPv4Address addr, int length)
 {
     // Send NOTIFY message
-    LDPNotify *lnMessage = new LDPNotify("Lb-Notify");
-    lnMessage->setByteLength(LDP_HEADER_BYTES);    // FIXME find out actual length
+    Packet *packet = new Packet("Lb-Notify");
+    const auto& lnMessage = std::make_shared<LDPNotify>();
+    lnMessage->setChunkLength(byte(LDP_HEADER_BYTES));    // FIXME find out actual length
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(NO_ROUTE);
     lnMessage->setReceiverAddress(dest);
@@ -842,15 +849,18 @@ void LDP::sendNotify(int status, IPv4Address dest, IPv4Address addr, int length)
     fec.length = length;
 
     lnMessage->setFec(fec);
+    lnMessage->markImmutable();
+    packet->append(lnMessage);
 
-    sendToPeer(dest, lnMessage);
+    sendToPeer(dest, packet);
 }
 
 void LDP::sendMapping(int type, IPv4Address dest, int label, IPv4Address addr, int length)
 {
     // Send LABEL MAPPING downstream
-    LDPLabelMapping *lmMessage = new LDPLabelMapping("Lb-Mapping");
-    lmMessage->setByteLength(LDP_HEADER_BYTES);    // FIXME find out actual length
+    Packet *packet = new Packet("Lb-Mapping");
+    const auto& lmMessage = std::make_shared<LDPLabelMapping>();
+    lmMessage->setChunkLength(byte(LDP_HEADER_BYTES));    // FIXME find out actual length
     lmMessage->setType(type);
     lmMessage->setReceiverAddress(dest);
     lmMessage->setSenderAddress(rt->getRouterId());
@@ -861,12 +871,15 @@ void LDP::sendMapping(int type, IPv4Address dest, int label, IPv4Address addr, i
     fec.length = length;
 
     lmMessage->setFec(fec);
+    lmMessage->markImmutable();
+    packet->append(lmMessage);
 
-    sendToPeer(dest, lmMessage);
+    sendToPeer(dest, packet);
 }
 
-void LDP::processNOTIFICATION(LDPNotify *packet)
+void LDP::processNOTIFICATION(Packet *pk)
 {
+    const auto& packet = pk->peekHeader<LDPNotify>();
     FEC_TLV fec = packet->getFec();
     IPv4Address srcAddr = packet->getSenderAddress();
     int status = packet->getStatus();
@@ -874,7 +887,7 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
     // XXX FIXME NO_ROUTE processing should probably be split into two functions,
     // this is not the cleanest thing I ever wrote :)   --Vojta
 
-    if (packet->isSelfMessage()) {
+    if (pk->isSelfMessage()) {
         // re-scheduled by ourselves
         EV_INFO << "notification retry for peer=" << srcAddr << " fec=" << fec << " status=" << status << endl;
     }
@@ -890,10 +903,10 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
             auto it = findFecEntry(fecList, fec.addr, fec.length);
             if (it != fecList.end()) {
                 if (it->nextHop == srcAddr) {
-                    if (!packet->isSelfMessage()) {
+                    if (!pk->isSelfMessage()) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
 
-                        scheduleAt(simTime() + 1.0    /* XXX FIXME */, packet);
+                        scheduleAt(simTime() + 1.0    /* XXX FIXME */, pk);
                         return;
                     }
                     else {
@@ -916,11 +929,12 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
             break;
     }
 
-    delete packet;
+    delete pk;
 }
 
-void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
+void LDP::processLABEL_REQUEST(Packet *pk)
 {
+    const auto& packet = pk->peekHeader<LDPLabelRequest>();
     FEC_TLV fec = packet->getFec();
     IPv4Address srcAddr = packet->getSenderAddress();
 
@@ -932,7 +946,7 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         sendNotify(NO_ROUTE, srcAddr, fec.addr, fec.length);
 
-        delete packet;
+        delete pk;
         return;
     }
 
@@ -1006,11 +1020,12 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         pending.push_back(newItem);
     }
 
-    delete packet;
+    delete pk;
 }
 
-void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
+void LDP::processLABEL_RELEASE(Packet *pk)
 {
+    const auto& packet = pk->peekHeader<LDPLabelMapping>();
     FEC_TLV fec = packet->getFec();
     int label = packet->getLabel();
     IPv4Address fromIP = packet->getSenderAddress();
@@ -1024,7 +1039,7 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
     auto it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end()) {
         EV_INFO << "FEC no longer recognized here, ignoring" << endl;
-        delete packet;
+        delete pk;
         return;
     }
 
@@ -1034,7 +1049,7 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
         // neighbour withdrew its mapping. we sent withdraw upstream as well and
         // this is upstream's response
         EV_INFO << "mapping not found among sent mappings, ignoring" << endl;
-        delete packet;
+        delete pk;
         return;
     }
 
@@ -1044,11 +1059,12 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
     EV_DETAIL << "removing label from list of sent mappings" << endl;
     fecUp.erase(uit);
 
-    delete packet;
+    delete pk;
 }
 
-void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
+void LDP::processLABEL_WITHDRAW(Packet *pk)
 {
+    const auto& packet = pk->peekHeader<LDPLabelMapping>();
     FEC_TLV fec = packet->getFec();
     int label = packet->getLabel();
     IPv4Address fromIP = packet->getSenderAddress();
@@ -1062,7 +1078,7 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
     auto it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end()) {
         EV_INFO << "matching FEC not found, ignoring withdraw message" << endl;
-        delete packet;
+        delete pk;
         return;
     }
 
@@ -1070,7 +1086,7 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
 
     if (dit == fecDown.end() || label != dit->label) {
         EV_INFO << "matching mapping not found, ignoring withdraw message" << endl;
-        delete packet;
+        delete pk;
         return;
     }
 
@@ -1084,13 +1100,14 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
     packet->setType(LABEL_RELEASE);
 
     // send msg to peer over TCP
-    sendToPeer(fromIP, packet);
+    sendToPeer(fromIP, pk);
 
     updateFecListEntry(*it);
 }
 
-void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
+void LDP::processLABEL_MAPPING(Packet *pk)
 {
+    const auto& packet = pk->peekHeader<LDPLabelMapping>();
     FEC_TLV fec = packet->getFec();
     int label = packet->getLabel();
     IPv4Address fromIP = packet->getSenderAddress();
@@ -1144,7 +1161,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
         pit = pending.erase(pit);
     }
 
-    delete packet;
+    delete pk;
 }
 
 int LDP::findPeer(IPv4Address peerAddr)
@@ -1174,10 +1191,11 @@ TCPSocket *LDP::getPeerSocket(IPv4Address peerAddr)
     return sock;
 }
 
-bool LDP::lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool LDP::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
-    IPv4Address destAddr = ipdatagram->getDestAddress();
-    int protocol = ipdatagram->getTransportProtocol();
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    IPv4Address destAddr = ipv4Header->getDestAddress();
+    int protocol = ipv4Header->getTransportProtocol();
 
     // never match and always route via L3 if:
 
@@ -1187,17 +1205,16 @@ bool LDP::lookupLabel(IPv4Header *ipdatagram, LabelOpVector& outLabel, std::stri
 
     // LDP traffic (both discovery...
     if (protocol == IP_PROT_UDP) {
-        FlatPacket *udpPacket = check_and_cast<FlatPacket *>(ipdatagram->getEncapsulatedPacket());
-        UdpHeader *udpHeader = check_and_cast<UdpHeader *>(udpPacket->peekHeader());
+        const auto& udpHeader = CHK(packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength()));
         if (udpHeader->getDestinationPort() == LDP_PORT)
             return false;
     }
-
+    else if (protocol == IP_PROT_TCP) {
     // ...and session)
-    if (protocol == IP_PROT_TCP && check_and_cast<tcp::TcpHeader *>(ipdatagram->getEncapsulatedPacket())->getDestPort() == LDP_PORT)
-        return false;
-    if (protocol == IP_PROT_TCP && check_and_cast<tcp::TcpHeader *>(ipdatagram->getEncapsulatedPacket())->getSrcPort() == LDP_PORT)
-        return false;
+        const auto& tcpHeader = CHK(packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength()));
+        if (tcpHeader->getDestPort() == LDP_PORT || tcpHeader->getSrcPort() == LDP_PORT)
+            return false;
+    }
 
     // regular traffic, classify, label etc.
 
