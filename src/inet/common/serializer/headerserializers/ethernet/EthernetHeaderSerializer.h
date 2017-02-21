@@ -34,6 +34,15 @@ class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer
     virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
+class INET_API EthernetPaddingSerializer : public FieldsChunkSerializer
+{
+  public:
+    EthernetPaddingSerializer() : FieldsChunkSerializer() {}
+
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
+};
+
 class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
 {
   public:
