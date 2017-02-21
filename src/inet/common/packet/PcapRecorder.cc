@@ -149,9 +149,12 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         msg = msg->getEncapsulatedPacket();
     }
 #endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
-    if (packet && packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ethernet && (dumpBadFrames || !hasBitError)) {
-        const simtime_t stime = simTime();
-        pcapDumper.writeFrame(stime, packet);
+    if (packet && (dumpBadFrames || !hasBitError)) {
+        auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::ethernet || protocol == &Protocol::ppp || protocol == &Protocol::ieee80211) {
+            const simtime_t stime = simTime();
+            pcapDumper.writeFrame(stime, packet);
+        }
     }
 #ifdef WITH_IPv6
     if (ip6Packet && (dumpBadFrames || !hasBitError)) {
