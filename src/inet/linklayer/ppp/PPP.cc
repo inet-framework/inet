@@ -270,6 +270,7 @@ void PPP::handleMessage(cMessage *msg)
         notifDetails.setPacket(PK(msg));
         emit(NF_PP_RX_END, &notifDetails);
 
+        msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
         emit(packetReceivedFromLowerSignal, msg);
 
         // check for bit errors
