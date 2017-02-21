@@ -367,7 +367,7 @@ Packet *PPP::encapsulate(cPacket *msg)
 {
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = std::make_shared<PppHeader>();
-    pppHeader->setProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
+    pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     pppHeader->markImmutable();
     packet->prepend(pppHeader);
     auto pppTrailer = std::make_shared<PppTrailer>();
@@ -384,7 +384,7 @@ cPacket *PPP::decapsulate(Packet *packet)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(pppHeader->getProtocol()));
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol()));
     return packet;
 }
 
