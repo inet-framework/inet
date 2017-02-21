@@ -22,6 +22,7 @@ cplusplus {{
 #include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/transportlayer/common/CRC_m.h"
 }}
 
 namespace inet;
@@ -32,6 +33,7 @@ class noncobject TLVOptions;
 
 class noncobject IPv4Address;
 
+enum CrcMode;
 enum IPProtocolId;
 
 cplusplus {{
@@ -172,6 +174,7 @@ class IPv4OptionUnknown extends IPv4Option
 //
 // Only one of the option fields can exist at a time.
 //
+// TODO: cleanup order of fields
 class IPv4Header extends FieldsChunk
 {
     @customize(true);
@@ -181,6 +184,9 @@ class IPv4Header extends FieldsChunk
 
     IPv4Address srcAddress;
     IPv4Address destAddress;
+
+    uint16_t crc = 0;
+    int crcMode @enum(CrcMode) = -1;
 
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
     short timeToLive;
