@@ -20,7 +20,6 @@
 
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 
-#include "inet/common/RawPacket.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/BytesChunk.h"
 #include "inet/common/serializer/SerializerBase.h"

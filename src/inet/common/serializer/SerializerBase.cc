@@ -62,9 +62,11 @@ cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
 
 SerializerBase & SerializerBase::lookupSerializer(const cPacket *pkt, Context& context, ProtocolGroup group, int id)
 {
+#if 0
     const RawPacket *bam = dynamic_cast<const RawPacket *>(pkt);
     if (bam != nullptr)
         return serializers.byteArraySerializer;
+#endif
     SerializerBase *serializer = serializers.lookup(group, id);
     if (serializer != nullptr)
         return *serializer;
@@ -132,6 +134,7 @@ cPacket *DefaultSerializer::deserialize(const Buffer &b, Context& context)
 
 void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& context)
 {
+#if 0
     const RawPacket *bam = check_and_cast<const RawPacket *>(pkt);
     unsigned int length = bam->getByteLength();
     unsigned int wl = std::min(length, b.getRemainingSize());
@@ -141,10 +144,14 @@ void ByteArraySerializer::serialize(const cPacket *pkt, Buffer &b, Context& cont
         b.fillNBytes(length - wl, '?');
     if (pkt->getEncapsulatedPacket())
         throw cRuntimeError("Serializer: encapsulated packet in ByteArrayPacket is not allowed");
+#else
+    throw cRuntimeError("Serializer: ByteArrayPacket is not allowed");
+#endif
 }
 
 cPacket *ByteArraySerializer::deserialize(const Buffer &b, Context& context)
 {
+#if 0
     RawPacket *bam = nullptr;
     unsigned int bytes = b.getRemainingSize();
     if (bytes) {
@@ -153,6 +160,9 @@ cPacket *ByteArraySerializer::deserialize(const Buffer &b, Context& context)
         bam->setByteLength(bytes);
     }
     return bam;
+#else
+    return nullptr;
+#endif
 }
 
 //

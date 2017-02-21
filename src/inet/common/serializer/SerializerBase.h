@@ -21,7 +21,6 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/RawPacket.h"
 #include "inet/common/serializer/Buffer.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"

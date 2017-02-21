@@ -25,7 +25,6 @@
 #include "inet/common/serializer/headers/in_systm.h"
 #include "inet/common/serializer/udp/headers/udphdr.h"
 
-#include "inet/common/RawPacket.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
