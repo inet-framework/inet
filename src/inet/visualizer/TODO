@@ -1,3 +1,10 @@
+Change:
+ - review how LinkBreakVisualizer visualizes link breaks
+   - use empty arrow filled when there's activity
+   - separately mark uplink and downlink at both ends (showing what they think about the link)
+   - keep link state information
+ - remove updateInterval from MovingMobilityBase
+
 2D:
  - route visualizer labels don't rotate with the arrows
  - zoom in/out breaks layout of network node annotations
