@@ -77,14 +77,14 @@ std::shared_ptr<Chunk> ARPPacketSerializer::deserialize(ByteInputStream& stream)
         arpPacket->markIncorrect();
     if (stream.readUint16() != ETHERTYPE_IPv4)
         arpPacket->markIncorrect();
-    uint8_t n = stream.readByte();     //ar_hln
-    uint8_t m = stream.readByte();     //ar_pln
+    uint8_t macAddressLength = stream.readByte();     //ar_hln
+    uint8_t ipAddressLength = stream.readByte();     //ar_pln
     arpPacket->setOpcode(stream.readUint16());   // arphdr->ar_op
-    arpPacket->setSrcMACAddress(readMACAddress(stream, n));
-    arpPacket->setSrcIPAddress(readIPv4Address(stream, m));    // ar_spa
-    arpPacket->setDestMACAddress(readMACAddress(stream, n));
-    arpPacket->setDestIPAddress(readIPv4Address(stream, m));   // ar_tpa
-    arpPacket->setChunkLength(byte(stream.getPosition()));
+    arpPacket->setSrcMACAddress(readMACAddress(stream, macAddressLength));
+    arpPacket->setSrcIPAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
+    arpPacket->setDestMACAddress(readMACAddress(stream, macAddressLength));
+    arpPacket->setDestIPAddress(readIPv4Address(stream, ipAddressLength));   // ar_tpa
+    // TODO: arpPacket->setChunkLength(header + m * ... n * ...);
     return arpPacket;
 }
 
