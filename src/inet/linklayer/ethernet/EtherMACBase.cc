@@ -22,8 +22,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/BytesChunk.h"
-#include "inet/common/serializer/SerializerBase.h"
-#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/common/ModuleAccess.h"

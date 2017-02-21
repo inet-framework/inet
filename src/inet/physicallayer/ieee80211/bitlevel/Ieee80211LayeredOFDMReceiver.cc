@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/packet/BytesChunk.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarAnalogModel.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
@@ -43,8 +42,6 @@
 namespace inet {
 
 namespace physicallayer {
-
-using namespace serializer;
 
 Define_Module(Ieee80211LayeredOFDMReceiver);
 
@@ -345,8 +342,8 @@ const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketM
     const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekAt<BytesChunk>(bit(0), dataFieldPacketModel->getPacket()->getPacketLength())->getBytes());
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
-    Ieee80211PhySerializer deserializer;
-    Packet *phyFrame = check_and_cast<Packet *>(deserializer.deserialize(mergedBits)); // TODO: type was cPacket
+    throw cRuntimeError("Obsoleted"); // KLUDGE:
+    Packet *phyFrame = nullptr; // TODO: check_and_cast<Packet *>(deserializer.deserialize(mergedBits)); // TODO: type was cPacket
     bool isReceptionSuccessful = true;
     cPacket *packet = phyFrame;
     while (packet != nullptr) {

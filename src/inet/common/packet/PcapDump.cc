@@ -24,7 +24,6 @@
 #include "inet/common/packet/PcapDump.h"
 #include "inet/common/packet/BytesChunk.h"
 
-#include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
 #ifdef WITH_UDP
@@ -37,7 +36,6 @@
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"
-#include "inet/common/serializer/ipv4/IPv4Serializer.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6

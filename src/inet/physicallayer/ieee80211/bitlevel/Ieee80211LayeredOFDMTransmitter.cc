@@ -16,8 +16,6 @@
 //
 
 #include "inet/common/packet/BytesChunk.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211PhySerializer.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
@@ -43,8 +41,6 @@ namespace inet {
 namespace physicallayer {
 
 Define_Module(Ieee80211LayeredOFDMTransmitter);
-
-using namespace serializer;
 
 void Ieee80211LayeredOFDMTransmitter::initialize(int stage)
 {
@@ -101,10 +97,10 @@ std::ostream& Ieee80211LayeredOFDMTransmitter::printToStream(std::ostream& strea
 
 BitVector *Ieee80211LayeredOFDMTransmitter::serialize(const cPacket *packet) const
 {
-    Ieee80211PhySerializer phySerializer;
     BitVector *serializedPacket = new BitVector();
     const Ieee80211OFDMPLCPFrame *phyFrame = check_and_cast<const Ieee80211OFDMPLCPFrame *>(packet);
-    phySerializer.serialize(phyFrame, serializedPacket);
+    throw cRuntimeError("Obsoleted"); // KLUDGE:
+    // TODO: phySerializer.serialize(phyFrame, serializedPacket);
     unsigned int byteLength = phyFrame->getLength();
     appendPadding(serializedPacket, byteLength);
     return serializedPacket;
