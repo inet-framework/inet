@@ -155,18 +155,48 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     packet->pushTrailer(ethFcs);
 }
 
+std::shared_ptr<EtherFrame> EtherEncap::decapsulate(Packet *packet)
+{
+    EV_STATICCONTEXT;
+
+    auto ethHeader = CHK(packet->peekHeader<EtherFrame>());
+    const auto& ethTrailer = CHK(packet->peekTrailer<EthernetFcs>());
+
+    switch(ethTrailer->getFcsMode()) {
+        case FCS_DECLARED_CORRECT:
+            break;
+        case FCS_DECLARED_INCORRECT:
+            EV_ERROR << "incorrect fcs in ethernet frame\n";
+            return nullptr;
+        case FCS_COMPUTED:
+            //FIXME check the Fcs in ethTrailer
+            break;
+        default:
+            throw cRuntimeError("invalid FCS mode in ethernet frame");
+    }
+
+    packet->popHeader<EtherFrame>();
+    packet->popTrailer<EthernetFcs>();
+
+    bit payloadLength = bit(-1);
+    //FIXME get payload length from ethHeader for drop padding
+
+    if (payloadLength == bit(-1)) {
+        //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
+        // this code needed for unchanged fingerprints
+        while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
+            packet->popTrailer<EthernetPadding>();
+    }
+    else {
+        packet->popTrailer(packet->getDataLength() - payloadLength);
+    }
+    return ethHeader;
+}
+
 void EtherEncap::processFrameFromMAC(Packet *packet)
 {
     // decapsulate and attach control info
-    const auto& ethHeader = packet->popHeader<EtherFrame>();
-    const auto& ethTrailer = packet->popTrailer<EthernetFcs>();
-    //FIXME check the Fcs in ethTrailer
-
-    //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
-    // this code needed for unchanged fingerprints
-    while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
-        packet->popTrailer<EthernetPadding>();
-
+    const auto& ethHeader = decapsulate(packet);
     // add Ieee802Ctrl to packet
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(ethHeader->getSrc());

@@ -149,14 +149,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
 void EtherLLC::processFrameFromMAC(Packet *packet)
 {
     // decapsulate it and pass up to higher layer
-    const auto& ethHeader = packet->popHeader<EtherFrame>();
-    const auto& ethTrailer = packet->popTrailer<EthernetFcs>();
-    //FIXME check the Fcs in ethTrailer
-
-    //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
-    // this code needed for unchanged fingerprints
-    while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
-        packet->popTrailer<EthernetPadding>();
+    const auto& ethHeader = EtherEncap::decapsulate(packet);
 
 
     EtherFrameWithLLC *frame = dynamic_cast<EtherFrameWithLLC *>(ethHeader.get());

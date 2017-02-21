@@ -226,13 +226,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 
 void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
-    const auto& eth = CHK(packet->popHeader<EtherFrame>());
-    const auto& fcs = CHK(packet->popTrailer<EthernetFcs>());
-    //FIXME verify fcs
-    //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
-    // this code needed for unchanged fingerprints
-    while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
-        packet->popTrailer<EthernetPadding>();
+    const auto& eth = EtherEncap::decapsulate(packet);
 
     const auto& bpdu = CHK(packet->peekHeader<BPDU>());
 
