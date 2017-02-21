@@ -18,9 +18,8 @@
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
-#include "inet/common/INETDefs.h"
-
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 
 namespace inet {
@@ -34,6 +33,7 @@ class EtherFrame;
 class INET_API EtherEncap : public cSimpleModule
 {
   protected:
+    EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
     int seqNum;
 
     // statistics
@@ -57,7 +57,7 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void refreshDisplay() const override;
 
   public:
-    static void addPaddingAndFcs(Packet *packet, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
+    static void addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode = FCS_DECLARED_CORRECT, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
 };
 
 } // namespace inet

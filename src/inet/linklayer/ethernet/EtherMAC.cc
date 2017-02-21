@@ -492,7 +492,7 @@ void EtherMAC::startFrameTransmission()
 
     if (frame->getByteLength() < minFrameLength) {
         frame->removeFromEnd(byte(ETHER_FCS_BYTES));  // remove old FCS
-        EtherEncap::addPaddingAndFcs(frame, minFrameLength);
+        EtherEncap::addPaddingAndFcs(frame, FCS_DECLARED_CORRECT, minFrameLength);
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out

@@ -24,7 +24,6 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -42,6 +41,16 @@ simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 void EtherEncap::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        const char *fcsModeString = par("fcsMode");
+        if (!strcmp(fcsModeString, "declaredCorrect"))
+            fcsMode = FCS_DECLARED_CORRECT;
+        else if (!strcmp(fcsModeString, "declaredIncorrect"))
+            fcsMode = FCS_DECLARED_INCORRECT;
+        else if (!strcmp(fcsModeString, "computed"))
+            fcsMode = FCS_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", fcsModeString);
+
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
@@ -124,13 +133,13 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
         msg->pushHeader(eth2Frame);
     }
 
-    EtherEncap::addPaddingAndFcs(msg);
+    EtherEncap::addPaddingAndFcs(msg, fcsMode);
 
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     send(msg, "lowerLayerOut");
 }
 
-void EtherEncap::addPaddingAndFcs(Packet *packet, int64_t requiredMinBytes)
+void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64_t requiredMinBytes)
 {
     int64_t paddingLength = requiredMinBytes - ETHER_FCS_BYTES - packet->getByteLength();
     if (paddingLength > 0) {
@@ -140,6 +149,7 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, int64_t requiredMinBytes)
         packet->pushTrailer(ethPadding);
     }
     const auto& ethFcs = std::make_shared<EthernetFcs>();
+    ethFcs->setFcsMode(fcsMode);
     //FIXME calculate Fcs if needed
     ethFcs->markImmutable();
     packet->pushTrailer(ethFcs);
@@ -207,7 +217,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     frame->setDest(dest);
     packet->pushHeader(frame);
 
-    EtherEncap::addPaddingAndFcs(packet);
+    EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
    EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");
