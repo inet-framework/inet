@@ -73,6 +73,8 @@ const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
 const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
+    { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
+    { 0x0281, &Protocol::mpls },        // MPLS unicast
 });
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
