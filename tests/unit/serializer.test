@@ -10,9 +10,9 @@ Test serializing frames
 #include <stdio.h>
 #include <iostream>
 #include "inet/common/serializer/SerializerBase.h"
-#include "inet/common/serializer/headerserializers/EthernetCRC.h"
-#include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
-#include "inet/common/serializer/headerserializers/ieee80211/Ieee80211Serializer.h"
+#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/serializer/ethernet/EthernetSerializer.h"
+#include "inet/common/serializer/ieee80211/Ieee80211Serializer.h"
 
 %global:
 

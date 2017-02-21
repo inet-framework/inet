@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/SerializerRegistry.h"
-#include "inet/common/serializer/headerserializers/ppp/PPPHeaderSerializer.h"
+#include "inet/common/serializer/ppp/PPPHeaderSerializer.h"
 #include "inet/linklayer/ppp/PPPFrame_m.h"
 
 namespace inet {

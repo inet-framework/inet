@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/serializer/headerserializers/EthernetCRC.h"
+#include "inet/common/serializer/EthernetCRC.h"
 
 namespace inet {
 namespace serializer {

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/serializer/headerserializers/EthernetCRC.h"
+#include "inet/common/serializer/EthernetCRC.h"
 #include "inet/physicallayer/apskradio/bitlevel/APSKPhyHeaderSerializer.h"
 
 namespace inet {

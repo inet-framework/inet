@@ -15,7 +15,7 @@
 
 #include "inet/common/packet/SerializerRegistry.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
-#include "inet/common/serializer/headerserializers/arp/ARPPacketSerializer.h"
+#include "inet/common/serializer/arp/ARPPacketSerializer.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
