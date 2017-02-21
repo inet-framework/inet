@@ -452,7 +452,7 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
     }
 
     if (!destIE) {    // no route found
-        EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
+        EV_WARN << "unroutable, sending ICMP_DESTINATION_UNREACHABLE, dropping packet\n";
         numUnroutable++;
         emit(LayeredProtocolBase::packetFromUpperDroppedSignal, datagram);
         icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
