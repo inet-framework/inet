@@ -53,11 +53,13 @@ simple PcapRecorder
     parameters:
         bool verbose = default(false);  // whether to log packets on the module output
         string pcapFile = default(""); // the PCAP file to be written
+        int pcapNetwork = default(0); // the network type header field in the PCAP file, see http://www.tcpdump.org/linktypes.html
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool dumpBadFrames = default(true); // enable dump of frames with hasBitError
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*] ext[*]"); // space-separated list of sibling module names to listen on
         string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
         string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
+        string dumpProtocols = default("ethernet ppp ieee80211"); // space-separated list of protocol names as defined in the Protocol class
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         @display("i=block/blackboard");
 }

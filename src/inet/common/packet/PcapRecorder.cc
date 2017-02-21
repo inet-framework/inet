@@ -67,6 +67,13 @@ void PcapRecorder::initialize()
             signalList[registerSignal(signalTokenizer.nextToken())] = false;
     }
 
+    {
+        cStringTokenizer protocolTokenizer(par("dumpProtocols"));
+
+        while (protocolTokenizer.hasMoreTokens())
+            dumpProtocols.push_back(Protocol::getProtocol(protocolTokenizer.nextToken()));
+    }
+
     const char *moduleNames = par("moduleNamePatterns");
     cStringTokenizer moduleTokenizer(moduleNames);
 
@@ -100,7 +107,7 @@ void PcapRecorder::initialize()
     }
 
     if (*file) {
-        pcapDumper.openPcap(file, snaplen);
+        pcapDumper.openPcap(file, snaplen, par("pcapNetwork"));
         pcapDumper.setFlushParameter((bool)par("alwaysFlush"));
     }
 }
@@ -151,9 +158,11 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 #endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
     if (packet && (dumpBadFrames || !hasBitError)) {
         auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-        if (protocol == &Protocol::ethernet || protocol == &Protocol::ppp || protocol == &Protocol::ieee80211) {
-            const simtime_t stime = simTime();
-            pcapDumper.writeFrame(stime, packet);
+        for (auto dumpProtocol : dumpProtocols) {
+            if (protocol == dumpProtocol) {
+                pcapDumper.writeFrame(simTime(), packet);
+                break;
+            }
         }
     }
 #ifdef WITH_IPv6

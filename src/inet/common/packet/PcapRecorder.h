@@ -35,6 +35,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
 {
   protected:
     typedef std::map<simsignal_t, bool> SignalList;
+    std::vector<const Protocol *> dumpProtocols;
     SignalList signalList;
     PacketDump packetDumper;
     PcapDump pcapDumper;
