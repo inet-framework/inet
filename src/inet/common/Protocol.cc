@@ -92,6 +92,7 @@ const Protocol Protocol::manet("manet");
 const Protocol Protocol::mpls("mpls");
 const Protocol Protocol::ospf("ospf");
 const Protocol Protocol::pim("pim");
+const Protocol Protocol::ppp("ppp");
 const Protocol Protocol::rsvp("rsvp");
 const Protocol Protocol::sctp("sctp");
 const Protocol Protocol::tcp("tcp");

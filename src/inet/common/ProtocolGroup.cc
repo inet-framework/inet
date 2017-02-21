@@ -69,6 +69,11 @@ const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x8847, &Protocol::mpls },
 });
 
+// excerpt from https://tools.ietf.org/html/rfc1340#page-65
+const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
+    { 0x0021, &Protocol::ipv4 },
+});
+
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 1, &Protocol::icmpv4 },

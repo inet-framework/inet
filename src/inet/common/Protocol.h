@@ -71,6 +71,7 @@ class INET_API Protocol
     static const Protocol mpls;
     static const Protocol ospf;
     static const Protocol pim;
+    static const Protocol ppp;
     static const Protocol rsvp;
     static const Protocol sctp;
     static const Protocol tcp;

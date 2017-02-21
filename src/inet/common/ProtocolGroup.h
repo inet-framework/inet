@@ -42,6 +42,7 @@ class INET_API ProtocolGroup
   public:
     // in alphanumeric order
     static const ProtocolGroup ethertype;
+    static const ProtocolGroup pppprotocol;
     static const ProtocolGroup ipprotocol;
 };
 
