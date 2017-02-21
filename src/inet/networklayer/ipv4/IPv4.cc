@@ -690,7 +690,7 @@ void IPv4::fragmentPostRouting(Packet *packet, const InterfaceEntry *destIe, IPv
 
 void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
-    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    auto ipv4Header = packet->peekHeader<IPv4Header>();
     // fill in source address
     if (ipv4Header->getSrcAddress().isUnspecified()) {
         // KLUDGE: TODO: factor out
@@ -700,6 +700,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         ipv4HeaderCopy->setSrcAddress(destIe->ipv4Data()->getIPAddress());
         ipv4HeaderCopy->markImmutable();
         packet->pushHeader(ipv4HeaderCopy);
+        ipv4Header = ipv4HeaderCopy;
     }
 
     // hop counter check
@@ -730,7 +731,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
     // FIXME some IP options should not be copied into each fragment, check their COPY bit
     int headerLength = ipv4Header->getHeaderLength();
-    int payloadLength = byte(packet->getDataLength()).get();
+    int payloadLength = byte(packet->getDataLength()).get() - headerLength;
     int fragmentLength = ((mtu - headerLength) / 8) * 8;    // payload only (without header)
     int offsetBase = ipv4Header->getFragmentOffset();
     if (fragmentLength <= 0)
@@ -763,7 +764,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
         ASSERT(fragment->getByteLength() == 0);
         const auto& fraghdr = std::make_shared<IPv4Header>(*ipv4Header.get()->dup());
-        const auto& fragData = packet->peekDataAt(byte(offset), byte(thisFragmentLength));
+        const auto& fragData = packet->peekDataAt(byte(headerLength + offset), byte(thisFragmentLength));
         ASSERT(byte(fragData->getChunkLength()).get() == thisFragmentLength);
         fragment->append(fragData);
 
