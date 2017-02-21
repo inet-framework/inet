@@ -74,24 +74,24 @@ std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(ByteInputStream& stream
         buffer[i] = stream.readByte();
     auto ipv4Header = std::make_shared<IPv4Header>();
     unsigned int bufsize = stream.getRemainingSize();
-    const struct ip *iphdr = static_cast<const struct ip *>((void *)&buffer);
+    const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
     unsigned int totalLength, headerLength;
 
-    ipv4Header->setVersion(iphdr->ip_v);
+    ipv4Header->setVersion(iphdr.ip_v);
     ipv4Header->setHeaderLength(IP_HEADER_BYTES);
-    ipv4Header->setSrcAddress(IPv4Address(ntohl(iphdr->ip_src.s_addr)));
-    ipv4Header->setDestAddress(IPv4Address(ntohl(iphdr->ip_dst.s_addr)));
-    ipv4Header->setTransportProtocol(iphdr->ip_p);
-    ipv4Header->setTimeToLive(iphdr->ip_ttl);
-    ipv4Header->setIdentification(ntohs(iphdr->ip_id));
-    uint16_t ip_off = ntohs(iphdr->ip_off);
+    ipv4Header->setSrcAddress(IPv4Address(ntohl(iphdr.ip_src.s_addr)));
+    ipv4Header->setDestAddress(IPv4Address(ntohl(iphdr.ip_dst.s_addr)));
+    ipv4Header->setTransportProtocol(iphdr.ip_p);
+    ipv4Header->setTimeToLive(iphdr.ip_ttl);
+    ipv4Header->setIdentification(ntohs(iphdr.ip_id));
+    uint16_t ip_off = ntohs(iphdr.ip_off);
     ipv4Header->setMoreFragments((ip_off & IP_MF) != 0);
     ipv4Header->setDontFragment((ip_off & IP_DF) != 0);
-    ipv4Header->setFragmentOffset((ntohs(iphdr->ip_off) & IP_OFFMASK) * 8);
-    ipv4Header->setTypeOfService(iphdr->ip_tos);
-    totalLength = ntohs(iphdr->ip_len);
+    ipv4Header->setFragmentOffset((ntohs(iphdr.ip_off) & IP_OFFMASK) * 8);
+    ipv4Header->setTypeOfService(iphdr.ip_tos);
+    totalLength = ntohs(iphdr.ip_len);
     ipv4Header->setTotalLengthField(totalLength);
-    headerLength = iphdr->ip_hl << 2;
+    headerLength = iphdr.ip_hl << 2;
 
     if (headerLength < IP_HEADER_BYTES) {
         ipv4Header->markIncorrect();
