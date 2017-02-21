@@ -21,6 +21,7 @@
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 
 #include "inet/common/RawPacket.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/SerializerBase.h"
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -406,7 +407,9 @@ Packet *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
     cPacket *frame = phyFrame->decapsulate();
     delete phyFrame;
 
-    return check_and_cast<Packet *>(frame);
+    auto packet = check_and_cast<Packet *>(frame);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    return packet;
 }
 
 void EtherMACBase::flushQueue()
