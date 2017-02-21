@@ -19,6 +19,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/PcapRecorder.h"
 
 #ifdef WITH_IPv4
@@ -131,21 +132,14 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         return;
 
     bool hasBitError = false;
+    auto packet = dynamic_cast<Packet *>(msg);
 
-#ifdef WITH_IPv4
-    IPv4Header *ip4Packet = nullptr;
-#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     IPv6Header *ip6Packet = nullptr;
 #endif // ifdef WITH_IPv6
     while (msg) {
         if (msg->hasBitError())
             hasBitError = true;
-#ifdef WITH_IPv4
-        if (nullptr != (ip4Packet = dynamic_cast<IPv4Header *>(msg))) {
-            break;
-        }
-#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         if (nullptr != (ip6Packet = dynamic_cast<IPv6Header *>(msg))) {
             break;
@@ -155,12 +149,10 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         msg = msg->getEncapsulatedPacket();
     }
 #endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
-#ifdef WITH_IPv4
-    if (ip4Packet && (dumpBadFrames || !hasBitError)) {
+    if (packet && packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ethernet && (dumpBadFrames || !hasBitError)) {
         const simtime_t stime = simTime();
-        pcapDumper.writeFrame(stime, ip4Packet);
+        pcapDumper.writeFrame(stime, packet);
     }
-#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ip6Packet && (dumpBadFrames || !hasBitError)) {
         const simtime_t stime = simTime();

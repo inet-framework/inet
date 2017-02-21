@@ -21,7 +21,7 @@
 #ifndef __INET_PCAPDUMP_H
 #define __INET_PCAPDUMP_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -69,7 +69,7 @@ class INET_API PcapDump
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writeFrame(simtime_t time, const IPv4Header *ipPacket);
+    void writeFrame(simtime_t time, const Packet *ipPacket);
     void writeIPv6Frame(simtime_t stime, const IPv6Header *ipPacket);
 
     /**

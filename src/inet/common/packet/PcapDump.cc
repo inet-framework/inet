@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "inet/common/packet/PcapDump.h"
+#include "inet/common/packet/BytesChunk.h"
 
 #include "inet/common/serializer/SerializerBase.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
@@ -29,10 +30,6 @@
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif // ifdef WITH_UDP
-
-#ifdef WITH_IPv4
-#undef WITH_IPv4        //FIXME //KLUDGE
-#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #undef WITH_IPv6        //FIXME //KLUDGE
@@ -102,11 +99,11 @@ void PcapDump::openPcap(const char *filename, unsigned int snaplen_par)
     fh.thiszone = 0;
     fh.sigfigs = 0;
     fh.snaplen = snaplen;
-    fh.network = 0;
+    fh.network = 1;
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
-void PcapDump::writeFrame(simtime_t stime, const IPv4Header *ipPacket)
+void PcapDump::writeFrame(simtime_t stime, const Packet *ipPacket)
 {
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
@@ -118,21 +115,17 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Header *ipPacket)
     struct pcaprec_hdr ph;
     ph.ts_sec = (int32)stime.inUnit(SIMTIME_S);
     ph.ts_usec = (uint32)(stime.inUnit(SIMTIME_US) - (uint32)1000000 * stime.inUnit(SIMTIME_S));
-    // Write Ethernet header
-    uint32 hdr = 2;    //AF_INET
 
-    serializer::Buffer b(buf, sizeof(buf));
-    serializer::Context c;
-    c.throwOnSerializerNotFound = false;
-    serializer::IPv4Serializer().serializePacket(ipPacket, b, c);
-    int32 serialized_ip = b.getPos();
+    auto data = ipPacket->peekDataAt<BytesChunk>(bit(0), ipPacket->getPacketLength());
+    auto bytes = data->getBytes();
+    for (int i = 0; i < bytes.size(); i++)
+        buf[i] = bytes[i];
 
-    ph.orig_len = serialized_ip + sizeof(uint32);
+    ph.orig_len = byte(data->getChunkLength()).get();
 
     ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
     fwrite(&ph, sizeof(ph), 1, dumpfile);
-    fwrite(&hdr, sizeof(uint32), 1, dumpfile);
-    fwrite(buf, ph.incl_len - sizeof(uint32), 1, dumpfile);
+    fwrite(buf, ph.incl_len, 1, dumpfile);
     if (flush)
         fflush(dumpfile);
 #else // ifdef WITH_IPv4
