@@ -77,7 +77,7 @@ PcapDump::~PcapDump()
     closePcap();
 }
 
-void PcapDump::openPcap(const char *filename, unsigned int snaplen_par)
+void PcapDump::openPcap(const char *filename, unsigned int snaplen_par, uint32 network)
 {
     struct pcap_hdr fh;
 
@@ -99,7 +99,7 @@ void PcapDump::openPcap(const char *filename, unsigned int snaplen_par)
     fh.thiszone = 0;
     fh.sigfigs = 0;
     fh.snaplen = snaplen;
-    fh.network = 1;
+    fh.network = network;
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 

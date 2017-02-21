@@ -58,7 +58,7 @@ class INET_API PcapDump
      * is the length that packets will be truncated to. Throws an exception
      * if the file cannot be opened.
      */
-    void openPcap(const char *filename, unsigned int snaplen);
+    void openPcap(const char *filename, unsigned int snaplen, uint32 network);
 
     /**
      * Returns true if the pcap file is currently open.
