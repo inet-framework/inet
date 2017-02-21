@@ -22,6 +22,7 @@
 
 #include "inet/common/RawPacket.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/serializer/SerializerBase.h"
 #include "inet/common/serializer/headerserializers/ethernet/EthernetSerializer.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -235,6 +236,7 @@ void EtherMACBase::initializeMACAddress()
 
 void EtherMACBase::initializeFlags()
 {
+    sendRawBytes = par("sendRawBytes");
     duplexMode = true;
 
     // initialize connected flag
@@ -394,7 +396,13 @@ void EtherMACBase::processConnectDisconnect()
 EtherPhyFrame *EtherMACBase::encapsulate(Packet* frame)
 {
     EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
-    phyFrame->encapsulate(frame);
+    if (sendRawBytes) {
+        auto rawFrame = new Packet(frame->getName(), frame->peekDataAt<BytesChunk>(bit(0), frame->getPacketLength()));
+        phyFrame->encapsulate(rawFrame);
+        delete frame;
+    }
+    else
+        phyFrame->encapsulate(frame);
     phyFrame->setSrcMacFullDuplex(duplexMode);
     return phyFrame;
 }

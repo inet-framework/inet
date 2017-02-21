@@ -111,6 +111,7 @@ simple EtherMAC like IEtherMAC
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
         string address = default("auto");   // MAC address as hex string (12 hex digits), or

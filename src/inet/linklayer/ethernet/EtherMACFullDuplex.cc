@@ -118,7 +118,7 @@ void EtherMACFullDuplex::startFrameTransmission()
     EtherPhyFrame *phyFrame = encapsulate(frame);
 
     // send
-    EV_INFO << "Transmission of " << frame << " started.\n";
+    EV_INFO << "Transmission of " << phyFrame << " started.\n";
     phyFrame->clearTags();
     send(phyFrame, physOutGate);
 

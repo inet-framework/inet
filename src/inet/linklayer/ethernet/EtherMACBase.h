@@ -130,6 +130,7 @@ class INET_API EtherMACBase : public MACBase
     static const EtherDescr nullEtherDescr;
 
     // configuration
+    bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
     MACAddress address;    // own MAC address
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
