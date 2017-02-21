@@ -47,6 +47,7 @@ simple PPP
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
         string queueModule = default("");  // path of external (QoS,RED,etc) queue module
         int mtu @unit("B") = default(4470B);

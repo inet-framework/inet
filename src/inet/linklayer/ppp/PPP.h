@@ -37,6 +37,7 @@ class IPassiveQueue;
 class INET_API PPP : public MACBase
 {
   protected:
+    bool sendRawBytes = false;
     long txQueueLimit = -1;
     cGate *physOutGate = nullptr;
     cChannel *datarateChannel = nullptr;    // nullptr if we're not connected

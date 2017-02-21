@@ -24,6 +24,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/BytesChunk.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -54,6 +55,7 @@ void PPP::initialize(int stage)
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
+        sendRawBytes = par("sendRawBytes");
         txQueue.setName("txQueue");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
 
@@ -219,7 +221,13 @@ void PPP::startTransmitting(cPacket *msg)
     emit(txStateSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     pppFrame->clearTags();
-    send(pppFrame, physOutGate);
+    if (sendRawBytes) {
+        auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekDataAt<BytesChunk>(bit(0), pppFrame->getPacketLength()));
+        send(rawFrame, physOutGate);
+        delete pppFrame;
+    }
+    else
+        send(pppFrame, physOutGate);
 
     ASSERT(datarateChannel == physOutGate->getTransmissionChannel());    //FIXME reread datarateChannel when changed
 
