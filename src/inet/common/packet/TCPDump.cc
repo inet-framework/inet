@@ -22,6 +22,10 @@
 #include "inet/common/packet/TCPDump.h"
 
 #ifdef WITH_IPv4
+#undef WITH_IPv4        //FIXME //KLUDGE
+#endif // ifdef WITH_IPv4
+
+#ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
 
