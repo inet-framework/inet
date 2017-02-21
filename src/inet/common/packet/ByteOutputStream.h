@@ -105,7 +105,8 @@ class INET_API ByteOutputStream {
     }
 
     void writeMACAddress(MACAddress address) {
-        writeUint64(address.getInt());
+        for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
+            writeByte(address.getAddressByte(i));
     }
 
     void writeIPv4Address(IPv4Address address) {
