@@ -76,6 +76,7 @@ class EthernetIIFrame extends EtherFrame
 class EtherFrameWithLLC extends EtherFrame
 {
     chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - 4);    // -4 for FCS
+    int payloadLength;
     int dsap;
     int ssap;
     int control;
