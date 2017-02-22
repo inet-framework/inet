@@ -31,22 +31,55 @@
     </p>
 
 
-	<p><h2>Sample 1</h2></p>
+	<p><h2>Displaying mobility</h2></p>
     <p>
+        This example demonstrates, how the customized parameters change the visualization.
+    </p>
+    <p>
+        We place two <var>Adhochosts</var> on the playground.
+        Because of the mobility settings, they move randomly between the predefined borders.
+        There is one difference between the nodes. The host1 speed is 15mps, the host2 speed is 30mps.
+    </p>
+    <p>
+        The visualization of mobility is enabled, because the <i>displayMovements</i> parameter is true by default.
+        It is really confusing, if we run the simulation now:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="ShowNothing.mp4">
     </p>
+
+    <p>
+        We display the movement trail, the velocity vector and the orientation arc of the node.
+        Here is the configuration:
+        <div class="snippet">
+            # Visualizer parameters<br>
+            # Movement trail<br>
+            *.visualizer.*.mobilityVisualizer.displayMovementTrails = true<br>
+            <br>
+            # Velocity vector<br>
+            *.visualizer.*.mobilityVisualizer.displayVelocities = true<br>
+            <br>
+            # Orientation<br>
+            *.visualizer.*.mobilityVisualizer.displayOrientations = true<br>
+        </div>
+        Now it is easy to follow the nodes' movement:
+    </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="DefaultParams.mp4">
+    </p>
+
+    <p>
+        It could happen that, we want to customize the visualization e.g. we want to highlight any parameter.
+        Now we specifiy the parameters of velocity arrow:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="CustomParams.mp4">
     </p>
 
+
     <p><h2>More information</h2></p>
     <p>
-        This example only demonstrated the key features of mobility visualization. For more information, refer to the 
+        This example only demonstrated some features of mobility visualization. For more information, refer to the 
 <var>MobilityVisualizer</var> NED documentation.
     </p>
 
