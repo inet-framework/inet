@@ -10,52 +10,44 @@
 	<h1><center>Mobility visualizer example</center></h1>
 
 	<p><h2>Goals</h2></p>
-
 	<p>
-		When nodes roam in a network, it's often difficult to follow their movement. Using <code><strong>MobilityVisualizer</strong></code> we can track their movement trajectory, orientation and their speed. Orientation is really important if the node is a directional antenna.
+		When nodes roam in a network, it's often difficult to follow their movement.
+        Using <var>MobilityVisualizer</var> is really helpful, because we can track their movement with this visualizer.
+        Another problem is we don't know the orientation of the directional antennas.
+        
     </p>
-    <p>
     <p>    
-        The example consists of 7 simulation models, each demonstrating different features of mobility visualization.
+        The example consists of 1 simulation model, that demonstrates some features of mobility visualization.
     </p>
-        <!--
-            Miért jó ez a visualizer?
-            Sokszor nehéz meghatározni, hogy a mozgó hálózati végpontok honnan jöttek, merre tartanak, hogyan mozognak. 
-            A mobilityVisualizerrel könnyedén átláthatjuk a node-ok mozgását, hogy honnan jöttek, merre tartanak, és milyen sebességgel.
 
-            Mit mutat be a sample?
-            A sample-ön belül 7 szimulációt találunk, melyek mindegyike a mobilityVisualizer valamely funkcióját mutatja be.          
-        -->
 
     <p><h2>About the visualizer</h2></p>
-        <p>
-            The <code><strong>MobilityVisualizer</strong></code> displays data about wireless nodes movements such as movement trail, velocity vector and orientation.
-            The visualizer has three main parameters: Movement trail, velocity and orientation.
-            Movement trail shows the node's recent movement trajectory. We can set its length using the <i>trailLength</i> parameter.
-            Velocity is represented visually by a solid arrow. Its length is proportional to the speed, but we can modify this ratio with a velocity scaling factor called <i>velocityArrowScale</i>.
-            Orientation represented by an arc. Its size can be modified.
-        </p>
+    <p>
+        The <var>MobilityVisualizer</var> displays data about movements of the wireless nodes.
+        The visualizer has three main parameters: Movement trail, velocity and orientation.
+        Movement trail shows the node's recent movement trajectory. We can set its length using the <i>trailLength</i> parameter.
+        Velocity is represented visually by a solid arrow. Its length is proportional to the speed, but we can modify this ratio with a velocity scaling factor called <i>velocityArrowScale</i>.
+        Orientation represented by an arc. Its size can be modified.
+    </p>
 
-        <!--
-            Mi ez a visualizer?
-            A mobilityVisualizer megjeleníti a node-ok mozgását, merről jöttek, merre mennek, merre néznek.
-            Három fontos paramétere van: movement trail, velocity és az orientation.
-            A mov trail-el az előző mozgást tudjuk megnézni, amit egy vonal reprezentál. Be lehet állítani, hogy mennyire visszamenőleg legyen látható.
-            A velocity a sebesség irányát és nagyságát mutatja egy nyíllal, arányosan tudjuk növelni a nyíl nagyságát.
-            Az orientation megmutatja, hogy merre néz a node antennája. Ez irányított antennáknál fontos, omnidirectionnál nem nagyon.
-            Szűrni is lehet, hogy melyik node mozgása érdekel.
-        -->
 
 	<p><h2>Sample 1</h2></p>
-
     <p>
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="ShowNothing.mp4">
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="DefaultParams.mp4">
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="CustomParams.mp4">
     </p>
 
     <p><h2>More information</h2></p>
-
     <p>
         This example only demonstrated the key features of mobility visualization. For more information, refer to the 
-<code><strong>MobilityVisualizer</strong></code> NED documentation.
+<var>MobilityVisualizer</var> NED documentation.
     </p>
 
 </body>

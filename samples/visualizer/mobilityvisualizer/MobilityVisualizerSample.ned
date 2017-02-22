@@ -28,9 +28,6 @@ network MobilityVisualizerSample
 {
     @display("bgb=800,600");
     submodules:
-        host3: AdhocHost {
-            @display("p=357.568,276.632");
-        }
         host1: AdhocHost {
             @display("p=538,158");
         }
