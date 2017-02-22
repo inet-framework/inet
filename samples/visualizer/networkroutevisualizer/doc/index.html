@@ -148,34 +148,64 @@
         They are placed and connected so as to create redundant paths.
         There is a wired and a wireless source-destination pair.
         Similarily to the previous configuration, the <var>wiredSource</var> pings the <var>wiredDestination</var> and the <var>wirelessSource</var> pings the <var>wirelessDestination</var>.
-        We assign IP addresses manually by creating an xml configuaration file. Here is the network configuration for this topology:
-        <div class="snippet">
-            IPV4CONFIG
-        </div>
+    </p>
+    <p>
+        We assign IP addresses manually by creating an xml configuaration file.<!-- Here is the network configuration for this topology:
+
+        <pre class="snippet">
+&ltconfig&gt
+    &lt!-- routers eth interfaces --&gt
+        &ltinterface hosts="router0" names="eth0" address="192.168.0.1" netmask="255.255.255.x"/&gt
+        &ltinterface hosts="router0" names="eth1" address="192.168.1.1" netmask="255.255.255.x"/&gt
+        &ltinterface hosts="router2" names="eth0" address="192.168.2.1" netmask="255.255.255.x"/&gt
+        &ltinterface hosts="router2" names="eth1" address="192.168.3.1" netmask="255.255.255.x"/&gt
+    &lt!-- routers ppp interfaces --&gt
+        &ltinterface hosts='router*' names='ppp*' address='10.x.x.x' netmask='255.x.x.x'/&gt
+    &lt!-- sources and destinations --&gt
+        &ltinterface hosts='**' address="192.168.x.x" /&gt
+&lt/config&gt
+</pre>
+-->
         We create a lifecycle for this configuration. By configuring lifecycleController we turn off and on the routers at a given time.
-        <div class="snippet">
-            LIFECYCLE
-        </div>
+<!--        
+<pre class="snippet">
+&ltscenario&gt
+    &ltat t="5"&gt
+        &lttell module="lifecycleController" target="router1" operation="NodeShutdownOperation"/&gt
+        &lt!-- &ltdisconnect src-module="router1" src-gate="pppg$o[0]" /&gt --&gt
+    &lt/at&gt
+    &ltat t="10"&gt
+        &lttell module="lifecycleController" target="router1" operation="NodeStartOperation"/&gt
+    &lt/at&gt
+    &ltat t="15"&gt
+        &lttell module="lifecycleController" target="router3" operation="NodeShutdownOperation"/&gt
+    &lt/at&gt
+    &ltat t="20"&gt
+        &lttell module="lifecycleController" target="router3" operation="NodeStartOperation"/&gt
+    &lt/at&gt
+&lt/scenario&gt
+</pre>
+-->
         We use RIP, so the network routes change dynamically between the source and the destination, when a router is offline.
-        Here is the configuration:
+        Here is the configuration of the <var>MobilityVisualizer</var>:
         <div class="snippet">
             CONFIG
         </div>        
     </p>  
     <p>
-        When we start the simulation this happens:
+        Here is what happens, when we start the simulation:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=704 height=586 src="ChangingNetworkRoutes.mp4">
     </p>
     <p>
-        <ol>
+        <ul>
             <li>Firstly, all ping packets go through <var>router1</var>.</li>
             <li>After a little time <var>router1</var> turns off and the network routes between sources and destinations are changed.
                 The new routes go towards <var>router3</var>. During this time <var>router1</var> turns on again.</li>
             <li>After a few seconds the <var>router3</var> turns off and the routes are changed.
                 The new routes go towards <var>router1</var> again.</li>
-        </ol>
+        </ul>
         A networkroutevisualizer vegig az aktualis csomag halozati utvonalat mutatja
         <br>
         Firstly all ping packets go through <var>router1</var>.
