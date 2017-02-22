@@ -17,6 +17,7 @@ MediumVisualizer
 - a fade legyen aranyos az automatic-hoz, ha az van megadva
 - signal power for transmissions and receptions
 - associated object
+- power label-t lehessen kikapcsolni
 
 TransportConnectionVisualizer
 
@@ -35,6 +36,7 @@ InfoVisualizer
 StatisticVisualizer
 
 ObstacleLossVisualizer
+- loss label-t lehessen kikapcsolni
 
 SceneVisualizer
 - viewScale parameter
