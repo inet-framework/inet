@@ -52,7 +52,7 @@
         <img width=600 src="DatalinkVisualizerWirelessSimple.png">
     </p>    
     <p>
-        In both configurations the source host pings the destination host:
+<!--        In both configurations the source host pings the destination host:
         <div class="snippet">
             *.wiredSource.numPingApps = 1<br>
             *.wiredSource.pingApp[0].destAddr = "wiredDestination"
@@ -60,15 +60,15 @@
         <div class="snippet">
             *.wirelessSource.numPingApps = 1<br>
             *.wirelessSource.pingApp[0].destAddr = "wirelessDestination"
-        </div>
-        An additional line of code enables the <var>DatalinkVisualizer</var>.
+        </div> -->
+        In both configurations the source host pings the destination host and an additional line of code enables the <var>DatalinkVisualizer</var>.
+        All other parameters are left on their default.
         <div class="snippet">
             *.linkVisualizer.*.displayLinks = true
         </div>
-        All other parameters are left on their default.
     </p>
     <p>
-        When we start the simulation, here is what happens:
+        When we start the simulations, here is what happens:
     </p>
     <p align="center">
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=246 src="DatalinkVisualizerWiredSimple.mp4">
@@ -84,7 +84,6 @@
 
    
     <p><h2>Data link visualization in a complex network</h2></p>
-
     <p>
         This configuration demonstrates the visualization of data links in a complex network.
         In this simulation we also show how the <i>packetFilter</i> works.
@@ -117,8 +116,11 @@
     <p>
         The following animation shows what happens when we start the simulation:
     </p>
-    <p align="center">        
+<!--    <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerComplex.mp4">
+    </p>    -->
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=566 height=470 src="DatalinkVisualizerComplexv2.mp4">
     </p>
     <p>
         Only ping messages activate the visualization of data links between the nodes, because of the <i>packetFilter</i>.
@@ -127,13 +129,12 @@
         Only one data link can be activated per direction between the nodes.
         If a data link is visualized already between two nodes and another packet activates a data link between the same nodes, the arrow between those nodes is only reinforced.
     </p>
-    <p align="center">        
+<!--    <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerFadeOut.mp4">
     </p>
-
+-->
 
     <p><h2>Displaying dynamic data links</h2></p>
-
     <p>
         The goal of this configuration is displaying dynamically changing active data links in a wireless environment.
         Here is the network for this configuration:
@@ -188,7 +189,6 @@
 
 
     <p><h2>More information</h2></p>
-
     <p>
         This example only demonstrated the key features of data link visualization. For more information, refer to the 
 <var>DatalinkVisualizer</var> NED documentation.
