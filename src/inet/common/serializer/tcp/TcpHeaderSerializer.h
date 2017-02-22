@@ -17,10 +17,13 @@
 #define __INET_TCPHEADERSERIALIZER_H
 
 #include "inet/common/packet/Serializer.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 
 namespace serializer {
+
+using namespace inet::tcp;
 
 /**
  * Converts between TcpHeader and binary (network byte order) Tcp header.
@@ -28,14 +31,14 @@ namespace serializer {
 class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    MACAddress readMACAddress(ByteInputStream& stream, unsigned int size) const;
-    IPv4Address readIPv4Address(ByteInputStream& stream, unsigned int size) const;
+    virtual void serializeOption(ByteOutputStream& stream, const TCPOption *option) const;
+    virtual TCPOption *deserializeOption(ByteInputStream& stream) const;
+
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
 
   public:
     TcpHeaderSerializer() : FieldsChunkSerializer() {}
-
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
 } // namespace serializer
