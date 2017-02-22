@@ -5,9 +5,6 @@ RoutingTableVisualizer:
 - nem fordul el a label a nyillal
 
 MobilityVisualizer:
-- MobilityVisualizerBase:
-	bool displayMovements = default(true); // display mobility movement, disabled by default --> A komment, vagy az ertek rossz
-- *.visualizer.*.mobilityVisualizer.movementTrailLineWidth nem mukodik
 
 MediumVisualizer
 - X távolsággal menjen tovább a signal rajzolása, mint az utolsó receiver
@@ -42,14 +39,10 @@ SceneVisualizer
 - viewScale parameter
 
 DatalinkVisualizer:
-- *.visualizer.*.dataLinkVisualizer.interfaceFilter = "not eth*"	# -- Nem szur
 
 PhysicallinkVisualizer:
-- *.linkVisualizer.*.interfaceFilter = "not wlan*"	# -- Nem szur
 
 NetworkRouteVisualizer:
-- *.routeVisualizer.*.interfaceFilter = "not(*eth* or *ppp*)"	# -- Nem szur
-- *.routeVisualizer.*.nodeFilter = ""				# -- Nem szur
 
 PacketDropVisualizer:
 
