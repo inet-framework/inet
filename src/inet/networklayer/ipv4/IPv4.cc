@@ -79,6 +79,16 @@ void IPv4::initialize(int stage)
 
         transportInGateBaseId = gateBaseId("transportIn");
 
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declaredCorrect"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "declaredIncorrect"))
+            crcMode = CRC_DECLARED_INCORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+
         defaultTimeToLive = par("timeToLive");
         defaultMCTimeToLive = par("multicastTimeToLive");
         fragmentTimeoutTime = par("fragmentTimeout");
@@ -848,6 +858,12 @@ void IPv4::encapsulate(Packet *transportPacket)
         ttl = defaultTimeToLive;
     ipv4Header->setTimeToLive(ttl);
     ipv4Header->setTotalLengthField(byte(ipv4Header->getChunkLength()).get() + transportPacket->getByteLength());
+    ipv4Header->setCrcMode(crcMode);
+    uint16_t crc = 0;
+    if (crcMode == CRC_COMPUTED) {
+        // TODO:
+    }
+    ipv4Header->setCrc(crc);
     ipv4Header->markImmutable();
     transportPacket->pushHeader(ipv4Header);
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
