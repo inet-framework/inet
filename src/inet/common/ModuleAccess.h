@@ -111,6 +111,18 @@ T *getModuleFromPar(cPar& par, const cModule *from, bool required)
     return m;
 }
 
+/**
+ * Find the nic module (inside the networkNode) containing the given module.
+ * Returns nullptr, if no containing nic module.
+ */
+INET_API cModule *findContainingNicModule(cModule *from);
+
+/**
+ * Find the nic module (inside the networkNode) containing the given module.
+ * throws error if no containing nic module.
+ */
+INET_API cModule *getContainingNicModule(cModule *from);
+
 } // namespace inet
 
 #endif // ifndef __INET_MODULEACCESS_H

@@ -351,13 +351,13 @@ packet Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
     Ieee80211ProbeResponseFrameBody body;
 }
 
-//
+// TODO
 // Action frames
 //
-packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
-{
-    type = ST_ACTION;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
-    Ieee80211ActionFrameBody body;
-}
-
+//packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
+//{
+//    type = ST_ACTION;
+//    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+//    Ieee80211ActionFrameBody body;
+//}
+//

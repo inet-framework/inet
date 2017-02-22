@@ -81,5 +81,25 @@ cModule *findModuleUnderContainingNode(const cModule *from)
     return nullptr;
 }
 
+cModule *findContainingNicModule(cModule *from)
+{
+    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
+        cProperties *props = curmod->getProperties();
+        if (props && props->getAsBool("nic"))
+            return curmod;
+        if (props && props->getAsBool("networkNode"))
+            break;
+    }
+    return nullptr;
+}
+
+cModule *getContainingNicModule(cModule *from)
+{
+    cModule *curmod = findContainingNicModule(from);
+    if (!curmod)
+        throw cRuntimeError("getContainingNicModule(): nic module not found (it should have a property named nic) for module '%s'", from ? from->getFullPath().c_str() : "<nullptr>");
+    return curmod;
+}
+
 } // namespace inet
 

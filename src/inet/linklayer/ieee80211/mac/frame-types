@@ -1,0 +1,42 @@
+00 Management 0000 Association request
+00 Management 0001 Association response
+00 Management 0010 Reassociation request
+00 Management 0011 Reassociation response
+00 Management 0100 Probe request
+00 Management 0101 Probe response
+00 Management 0110 Timing Advertisement
+00 Management 0111 Reserved
+00 Management 1000 Beacon
+00 Management 1001 ATIM
+00 Management 1010 Disassociation
+00 Management 1011 Authentication
+00 Management 1100 Deauthentication
+00 Management 1101 Action
+00 Management 1110 Action No Ack
+00 Management 1111 Reserved
+01 Control 0000–0110 Reserved
+01 Control 0111 Control Wrapper
+01 Control 1000 Block Ack Request (BlockAckReq)
+01 Control 1001 Block Ack (BlockAck)
+01 Control 1010 PS-Poll
+01 Control 1011 RTS
+01 Control 1100 CTS
+01 Control 1101 ACK
+01 Control 1110 CF-End
+01 Control 1111 CF-End + CF-Ack
+10 Data 0000 Data
+10 Data 0001 Data + CF-Ack
+10 Data 0010 Data + CF-Poll
+10 Data 0011 Data + CF-Ack + CF-Poll
+10 Data 0100 Null (no data)
+10 Data 0101 CF-Ack (no data)
+10 Data 0110 CF-Poll (no data)
+10 Data 0111 CF-Ack + CF-Poll (no data)
+10 Data 1000 QoS Data
+10 Data 1001 QoS Data + CF-Ack
+10 Data 1010 QoS Data + CF-Poll
+10 Data 1011 QoS Data + CF-Ack + CF-Poll
+10 Data 1100 QoS Null (no data)
+10 Data 1101 Reserved
+10 Data 1110 QoS CF-Poll (no data)
+10 Data 1111 QoS CF-Ack

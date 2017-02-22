@@ -28,6 +28,8 @@ namespace inet {
 
 namespace physicallayer {
 
+Register_Abstract_Class(Ieee80211ModeSet);
+
 const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { return new std::vector<Ieee80211ModeSet> {
     Ieee80211ModeSet("a", {
         { true, &Ieee80211OFDMCompliantModes::ofdmMode6MbpsCS20MHz },
@@ -45,6 +47,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
     }),
+    // TODO: slotTime, cwMin, cwMax must be identical in all modes
     Ieee80211ModeSet("g", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
@@ -142,6 +145,16 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
 {
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
+    auto referenceMode = entries[0].mode;
+    for (auto entry : entries) {
+        auto mode = entry.mode;
+        if (mode->getSifsTime() != referenceMode->getSifsTime() ||
+            mode->getSlotTime() != referenceMode->getSlotTime() ||
+            mode->getPhyRxStartDelay() != referenceMode->getPhyRxStartDelay())
+        {
+            // FIXME: throw cRuntimeError("Sifs, slot and phyRxStartDelay time must be identical within a ModeSet");
+        }
+    }
 }
 
 int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
