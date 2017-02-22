@@ -187,9 +187,13 @@
 </pre>
 -->
         We use RIP, so the network routes change dynamically between the source and the destination, when a router is offline.
-        Here is the configuration of the <var>MobilityVisualizer</var>:
+        Here is the configuration of the <var>NetworkRouteVisualizer</var>:
         <div class="snippet">
-            CONFIG
+            # Visualizer parameters<br>
+            *.visualizer.*.networkRouteVisualizer.displayRoutes = true<br>
+            *.visualizer.*.networkRouteVisualizer.packetFilter = "ping* and not *reply"<br>
+            *.visualizer.*.networkRouteVisualizer.fadeOutMode = "simulationTime"<br>
+            *.visualizer.*.networkRouteVisualizer.fadeOutTime = 1.4s<br>
         </div>        
     </p>  
     <p>
@@ -207,13 +211,6 @@
                 The new routes go towards <var>router1</var> again.</li>
         </ul>
         A networkroutevisualizer vegig az aktualis csomag halozati utvonalat mutatja
-        <br>
-        Firstly all ping packets go through <var>router1</var>.
-        After 5 seconds <var>router1</var> turns off and the network route between sources and destinations is changed.
-        The new route goes towards <var>router3</var> until 15s.
-        During this time <var>router1</var> turns on again.
-        After that the <var>router3</var> turns off and the routes are changed.
-        The new routes go towards <var>router1</var> again.
     </p>
 
 
