@@ -10,18 +10,17 @@
 	<h1><center>Data Link Visualization Example</center></h1>
 
 	<p><h2>Goals</h2></p>
-
 	<p> 
-        In complex networks there are a lot of communication between the nodes. It is difficult to ascertain between which nodes there is communication in the second layer.
-        By visualizing data links we can determine the active second layer links in the network easily and we can follow the communication node by node.
-        It is especially helpful if a packet doesn't reach the destination node. In this case we can see at a glance where the communication is jammed.
+        In complex networks it is difficult to ascertain between which nodes there is communication in the second layer.
+        Data link visualization is really helpful, because it shows the active data links in the network.
+        It displays the communication node by node.
+        It is especially helpful if a packet doesn't reach its destination. In this case we can see at a glance where the communication is jammed.
     </p>
     <p>    
         The example consists of 4 simulation models, each demonstrating different features of data link visualization.
     </p>
 	
     <p><h2>About the visualizer</h2></p>
-    
     <p> 
         The <var>DatalinkVisualizer</var> keeps track of active data links in a network.
         A link becomes active between two nodes when a packet arrives at the receiver node's data link layer from the source node's data link layer.
@@ -146,7 +145,7 @@
         The type of all nodes is <var>AODVRouter</var>.
         These ad hoc nodes are placed randomly on the playground and they move also randomly between borders.
         The source node has a ping application, that sends ping messages in every seconds.
-        The communication range is reduced to get a non-trivial path between source and destination.
+        The communication range is reduced to get a non-trivial path between <var>source</var> and <var>destination</var>.
         Here is the configuration:
         <div class="snippet">
             # Application parameters<br>
@@ -182,9 +181,9 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=582 height=518 src="DatalinkVisualizerDynamic.mp4">
     </p>
     <p>
-        The nodes exchange routing informations, then the source starts to ping the destination.
+        The nodes exchange routing informations, then the <var>source</var> starts to ping the <var>destination</var>.
         When a ping message reaches the next node's data link layer, the link is shown between the nodes.
-        If the route is changed between the source and the destination new data links are activated.
+        If the route is changed between the <var>source</var> and the <var>destination</var> new data links are activated.
     </p>
 
 
