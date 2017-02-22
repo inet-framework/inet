@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ICMPHEADERSERIALIZER_H
-#define __INET_ICMPHEADERSERIALIZER_H
+#ifndef __INET_PINGPAYLOADSERIALIZER_H
+#define __INET_PINGPAYLOADSERIALIZER_H
 
 #include "inet/common/packet/Serializer.h"
 
@@ -26,16 +26,15 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between ICMPHeader and binary (network byte order) ICMP header.
+ * Converts between PingPayload and binary (network byte order) ping payload.
  */
-class INET_API ICMPHeaderSerializer : public FieldsChunkSerializer
+class INET_API PingPayloadSerializer : public FieldsChunkSerializer
 {
-  protected:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
-
   public:
-    ICMPHeaderSerializer() : FieldsChunkSerializer() {}
+    PingPayloadSerializer() : FieldsChunkSerializer() {}
+
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
 } // namespace serializer
@@ -43,5 +42,5 @@ class INET_API ICMPHeaderSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 
-#endif // ifndef __INET_ICMPHEADERSERIALIZER_H
+#endif // ifndef __INET_PINGPAYLOADSERIALIZER_H
 
