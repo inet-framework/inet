@@ -17,6 +17,7 @@
 #define __INET_IPV4HEADERSERIALIZER_H
 
 #include "inet/common/packet/Serializer.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 
 namespace inet {
 
@@ -27,11 +28,15 @@ namespace serializer {
  */
 class INET_API IPv4HeaderSerializer : public FieldsChunkSerializer
 {
+  protected:
+    virtual void serializeOption(ByteOutputStream& stream, const TLVOptionBase *option) const;
+    virtual TLVOptionBase *deserializeOption(ByteInputStream& stream) const;
+
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+
   public:
     IPv4HeaderSerializer() : FieldsChunkSerializer() {}
-
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
 } // namespace serializer
