@@ -27,11 +27,12 @@ namespace serializer {
  */
 class INET_API PppHeaderSerializer : public FieldsChunkSerializer
 {
+  protected:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+
   public:
     PppHeaderSerializer() : FieldsChunkSerializer() {}
-
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
 /**
@@ -39,11 +40,12 @@ class INET_API PppHeaderSerializer : public FieldsChunkSerializer
  */
 class INET_API PppTrailerSerializer : public FieldsChunkSerializer
 {
+  protected:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+
   public:
     PppTrailerSerializer() : FieldsChunkSerializer() {}
-
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
 } // namespace serializer

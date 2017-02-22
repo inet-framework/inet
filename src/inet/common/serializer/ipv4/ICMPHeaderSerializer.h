@@ -30,11 +30,12 @@ namespace serializer {
  */
 class INET_API ICMPHeaderSerializer : public FieldsChunkSerializer
 {
+  protected:
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+
   public:
     ICMPHeaderSerializer() : FieldsChunkSerializer() {}
-
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const;
 };
 
 /**
