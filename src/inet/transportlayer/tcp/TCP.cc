@@ -137,7 +137,9 @@ void TCP::handleMessage(cMessage *msg)
         }
         else {
             // must be a TCPSegment
-            TcpHeader *tcpHeader = packet->peekHeader<TcpHeader>().get();
+            // KLUDGE: just use a pointer instead of a shared reference
+            auto tcpHeader = packet->peekHeader<TcpHeader>();
+            TcpHeader *tcpHeaderPtr = tcpHeader.get();
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;
@@ -147,14 +149,14 @@ void TCP::handleMessage(cMessage *msg)
             //interfaceId = controlInfo->getInterfaceId();
 
             // process segment
-            TCPConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
+            TCPConnection *conn = findConnForSegment(tcpHeaderPtr, srcAddr, destAddr);
             if (conn) {
-                bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
+                bool ret = conn->processTCPSegment(packet, tcpHeaderPtr, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
             else {
-                segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
+                segmentArrivalWhileClosed(packet, tcpHeaderPtr, srcAddr, destAddr);
             }
         }
     }
