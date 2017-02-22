@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../samples.css">
+<title>Visualizing Interface Information Example</title>
+</head>
+
+<body>
+
+<h1>Visualizing Interface Information Example</h1>
+
+<h2>Goals</h2>
+
+<p>
+In a large network topology with many nodes, routing can be quite complex. To see if routing tables and network addresses are configured as intended
+(or to even start making sense of routing tables), one needs to know the addresses of the interfaces of various network nodes. This information
+can be accessed by diving deep in the inspector panel and checking interface tables individually, which is tedious.
+Visualizing interface tables makes understanding easier by indicating the interface names and addresses belonging to individual nodes,
+on the top level canvas. It helps to make sense of inherently hard to grasp numeric data, by giving an overview of interfaces and addresses
+in the network.
+</p>
+
+<p>
+This example contains two configurations. The first one demonstrates the visualization with the visualizer's default settings,
+the second one is about the advanced features.
+</p>
+
+<h2>About the visualizer</h2>
+
+<p>
+The <var>InterfaceTableVisualizer</var> visualizes hosts' interfaces contained in their interface tables.
+By default, the interface name and address is indicated. Wired interfaces are visualized at the corresponding gates,
+wireless interfaces are displayed above the node icon. The visualization is enabled with the
+<var>displayInterfaceTables</var> parameter. By default, all interfaces of all nodes are visualized.
+The set of visualized interfaces can be narrowed with the configurator's <var>nodeFilter</var> and <var>interfaceFilter</var>
+parameters. The <var>format</var> parameter specifies what information is displayed about interfaces.
+It takes a format string, which can contain the following directives:
+</p>
+
+<ul style="font-family: monospace;">
+<li>%N: interface name</li>
+<li>%4 or %6: IPv4 or IPv6 address, respectively</li>
+<li>%n: network address. This is either the IPv4 or the IPv6 address</li>
+<li>%m: MAC address</li>
+<li>%\: conditional newline for wired interfaces. The '\' needs to be escaped with another '\', i.e. '%\\'</li>
+<li>%i and %s: the info() and str() functions for the interfaceEntry class, respectively</li>
+</ul>
+
+<p>
+The default format string is <code>"%N %\\%n"</code>.
+</p>
+
+
+
+
+
+
+
+
+
+</body>
