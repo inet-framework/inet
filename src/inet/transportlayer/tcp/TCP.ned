@@ -199,6 +199,7 @@ import inet.transportlayer.contract.ITCP;
 simple TCP like ITCP
 {
     parameters:
+        string crcMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
         int advertisedWindow = default(14*this.mss); // in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(false); // delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled

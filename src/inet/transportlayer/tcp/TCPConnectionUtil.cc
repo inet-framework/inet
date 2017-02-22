@@ -266,6 +266,8 @@ void TCPConnection::sendToIP(Packet *packet, const std::shared_ptr<TcpHeader>& t
     auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
+    tcpseg->setCrc(0);
+    tcpseg->setCrcMode(tcpMain->crcMode);
     tcpseg->markImmutable();
     packet->pushHeader(tcpseg);
     tcpMain->send(packet, "ipOut");
@@ -285,6 +287,8 @@ void TCPConnection::sendToIP(Packet *pkt, const std::shared_ptr<TcpHeader>& tcps
     auto addresses = pkt->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(src);
     addresses->setDestAddress(dest);
+    tcpseg->setCrc(0);
+    // TODO: tcpseg->setCrcMode(tcpMain->crcMode);
     tcpseg->markImmutable();
     pkt->pushHeader(tcpseg);
     check_and_cast<TCP *>(getSimulation()->getContextModule())->send(pkt, "ipOut");

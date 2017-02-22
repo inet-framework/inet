@@ -27,6 +27,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 
 namespace inet {
@@ -156,6 +157,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     bool isOperational = false;    // lifecycle: node is up/down
 
     bool useDataNotification = false;
+    CrcMode crcMode = (CrcMode)-1;
 
   public:
     TCP() {}

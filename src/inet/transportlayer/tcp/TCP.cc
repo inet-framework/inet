@@ -95,6 +95,16 @@ void TCP::initialize(int stage)
 
         recordStatistics = par("recordStats");
         useDataNotification = par("useDataNotification");
+
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declaredCorrect"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "declaredIncorrect"))
+            crcMode = CRC_DECLARED_INCORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *host = findContainingNode(this);
