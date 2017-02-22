@@ -51,6 +51,33 @@ It takes a format string, which can contain the following directives:
 The default format string is <code>"%N %\\%n"</code>.
 </p>
 
+<p>TODO: about that you can specify expressions in nodeFilter</p>
+
+<h2>Enabling the visualization</h2>
+
+<p>
+This configuration uses this simple network:
+</p>
+
+<img class="screen" src="simplenetwork.png">
+
+<p>
+It contains two connected <var>StandardHosts</var>, an <var>IPv4NetworkConfigurator</var> and an <var>IntegratedVisualizer</var> module.
+There are no application configured in the hosts, the configuration is just the one line enabling the visualization of interface tables:
+</p>
+
+<div class="snippet">
+*.visualizer.*.interfaceTableVisualizer.displayInterfaceTables = true
+</div>
+
+<p>
+When the simulation is run, the network looks like this:
+</p>
+
+<img class="screen" src="simple.png">
+
+<p>TODO: redo this</p>
+
 
 
 
