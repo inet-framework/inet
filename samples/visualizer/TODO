@@ -1,5 +1,4 @@
 InterfaceTableVisualizer:
-- a sárga doboz helyett lehetne olyan, mint a wired interface-eknél
 - interfaceFilter = "not(lo*)" <- ez lehetne a default
 
 RoutingTableVisualizer:
@@ -20,31 +19,22 @@ MediumVisualizer
 - associated object
 
 TransportConnectionVisualizer
-- Szám helyett NAGY betűk
-- portFilter egyszerre szűr local és remote portra
-- nodeFilter úgy tűnik nem működik
 
 Propagation
-- beírni valamit az route, connection, etc. msg fileba, hogy ne legyen ures az inspector
 
 Általános
-- Size probléma: nagyon nagyok a sample-ök a gifek miatt
 - Mindenhova: ned doc link -> a visualizerekre
 
 Ieee80211
 - a jelerősség függvényében változzon az icon, ez legyen kikapcsolható
-- Ieee80211Visualizer-rel nem működik, csak Integrated-el
 
 InfoVisualizer
 - Amikor a statistic value-ja 0, akkor '-' van kiírva
 - when content = "str" some strange symbols appear
-- the default for displayInfos parameter is true
 
 StatisticVisualizer
-- Kicsi egész számoknál scientific notation-t használ
 
 ObstacleLossVisualizer
-- Az intersectionnél ki lehetne írni hogy hány dB-el csökkent a jel
 
 SceneVisualizer
 - viewScale parameter
