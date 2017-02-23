@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../samples.css">
+<title>Environment Visualization Example</title>
+</head>
+
+<body>
+
+<h1>Environment Visualization Example</h1>
+
+<h2>Goals</h2>
+
+<pre>
+There are situations in real life when the environment has an effect on the communication. For example, wireless communication in buildings.
+Obstacles like walls can obstruct radio waves. The physical environment module is responsible for simulating the effect of objects that
+have an effect on the communication. And thus the course of the simulation. These objects are visualized by the xy visualizer module.
+</pre>
+
+<p>
+There are situations in real life when the environment has an effect on communication.
+For example, this is the case when wireless devices communicate in buildings.
+Obstacles like walls can obstruct radio waves. The physical environment module is responsible for simulating the effect of objects on the communication. Visualizing the objects in the enviroment is essential to understanding what is happening in the simulation.
+</p>
+
+<p>
+Physical objects like walls can obstruct radio waves, having a profound effect on the communication of wireless nodes. The PhysicalEnvironment
+module is responsible for placing physical objects in simulation models. Visualizing these objects is essential to understanding how the environment
+interacts with transmissions.
+</p>
+
+<p>
+Physical objects can obstruct radio waves, having a profound effect on the communication of wireless nodes, e.g. wireless devices communicating
+in a building. Physical objects can be placed in simulation models. Visualizing these objects is essential to understanding how the environment
+interacts with transmissions.
+</p>
+
+<h2>About the visualizer</h2>
+
+<pre>
+It provides the 3D coordinate
+// system's 2D projection for other visualizers.
+</pre>
+
+<p>
+The <var>PhysicalEnvironmentVisualizer</var> is responsible for displaying the physical objects on the canvas. The objects themselves
+are provided by the <var>PhysicalEnvironment</var> module. Objects are represented in 3 dimensions, their 2 dimensional projections
+are handled by the <var>SceneCanvasVisualizer</var> module. By default, objects are projected to the 2 dimensional plane "from above",
+i.e. the view angle is the x axis.
+</p>
+
+<h2>The default view</h2>
+
+<p>
+This configuration demonstrates the default visualization of objects. The objects are defined in the <var>indoor.xml</var> file,
+and represent an appartment with 3 rooms. The network contains just two modules, a <var>PhysicalEnvironment</var> and
+an <var>IntegratedVisualizer</var> module.
+</p>
+
+<p>
+When the simulation is run, the network looks like this:
+</p>
+
+<img class="screen" src="default.png">
+
+<h2>The isometric view</h2>
+
+
+</body>
