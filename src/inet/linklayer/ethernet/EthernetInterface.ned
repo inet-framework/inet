@@ -69,7 +69,7 @@ module EthernetInterface like IWiredNic
         mac: <macType> like IEtherMAC {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
-                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
+                txQueueLimit = default(queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=182,321");
         }
         encap: <encapType> like IEtherEncap {
