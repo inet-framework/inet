@@ -10,9 +10,14 @@
 
 	<p><h2>Goals</h2></p>
     <p> 
-        In wireless networks we can't identify physical connections between the nodes, because we don't see radio signals. It is important to determine which nodes received the sent packet and whether the destination host or hosts received the packet through the wireless channel. 
-        Visualizing physical links we can determine the first layer links in the network.
-        We can identify at a glance which nodes received a packet from another node.
+        In wireless networks we can't identify physical connections between the nodes, because we don't see which nodes received flawless the radio signals.
+        By visualizing active physical links, we can determine the first layer links in the network, so we can identify at a glance which nodes received a packet flawless from another node.
+        It is important to determine whether the destination host or hosts are received the packet and which nodes are received the sent packet.
+    </p>
+    <p>
+        Physical link visualization is good because:<br>
+            - it displays which nodes is received the sent packet flawless.<br>
+            - it displays whether the destination node is received the sent packet flawless.<br>
     </p>
     <p>    
         The example consists of 3 simulation models, each demonstrating different features of physical link visualization.
@@ -34,8 +39,41 @@
     </p>     
 
 
-	<p><h2>Sample 1</h2></p>
+	<p><h2>Enabling physical links</h2></p>
+    <p>
+        This configuration demonstrates how to enable the visualization of physical links.
+    </p>
+    <p>
+        We use this simple network for this configuration:
+    </p>
+    <p>
+        <img class="screen" src="PhysicalLinkVisualizerSimple.png">
+    </p>
+    <p>
+        The network contains 2 <var>Adhochosts</var>. The network also has a <var>PhysicalLinkVisualizer</var>, an <var>IPv4NetworkConfigurator</var> and an <var>Ieee80211ScalarRadioMedium</var> module.<br>
+        The <var>source</var> has one ping application, its destination is the <var>destination</var>.<br>
+        An additional line of code enables the visualization:
+        <div class="snippet">
+            *.linkVisualizer.*.displayLinks = true
+        </div>
+    </p>
+    <p>
+        The following animation depicts what happens, when we start the simulation:
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=544 height=318 src="EnablingPhysicalLinks.mp4">
+    </p>
+    <p>
+        When one node receives any packet from the other node, a physical link is activated between the nodes.
+        It's represented by an arrow, that starts from the transmitter node and points to the receiver node.
+    </p>
 
+	<p><h2>Sample 1</h2></p>
+    <p>
+    </p>
+
+
+	<p><h2>Sample 1</h2></p>
     <p>
     </p>
 

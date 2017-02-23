@@ -28,9 +28,9 @@ import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 //
 // TODO documentation
 //
-network PhysicallinkVisualizerSimple
+network PhysicalLinkVisualizerSimple
 {
-    @display("bgb=900,300");
+    @display("bgb=600,300");
     submodules:
         linkVisualizer: PhysicalLinkVisualizer {
             parameters:
@@ -44,11 +44,11 @@ network PhysicallinkVisualizerSimple
             parameters:
                 @display("p=100,250");
         }
-        wirelessSource: AdhocHost {
-            @display("p=316,80");
+        source: AdhocHost {
+            @display("p=250,150");
         }
-        wirelessDestination: AdhocHost {
-            @display("p=630,80");
+        destination: AdhocHost {
+            @display("p=500,150");
         }
 }
 
@@ -56,7 +56,7 @@ network PhysicallinkVisualizerSimple
 //
 // TODO documentation
 //
-network PhysicalLinkVisualizerSimpleV2
+network PhysicalLinkVisualizerFiltering
 {
     @display("bgb=780,450");
     submodules:
@@ -75,13 +75,13 @@ network PhysicalLinkVisualizerSimpleV2
         accessPoint: AccessPoint {
             @display("p=500,200");
         }
-        wirelesshost1: WirelessHost {
+        host1: WirelessHost {
             @display("p=500,50");
         }
-        wirelesshost2: WirelessHost {
+        host2: WirelessHost {
             @display("p=680, 350");
         }
-        wirelesshost3: WirelessHost {
+        host3: WirelessHost {
             @display("p=320,350");
         }
 }
