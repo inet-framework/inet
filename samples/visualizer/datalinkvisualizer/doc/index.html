@@ -17,9 +17,11 @@
 
         - komplex halozatokban, ahol nagy a forgalom, nehez eldonteni, hogy melyik node-ok kozott van kommunikacio<br>
         - ha egy eszkoz egy masik eszkoznek csomagot kuld, amelyet kozvetlenul eler, kozottuk data link epul fel<br>
-        - ha nincs data link az eszkozok kozott, akkor nem tortenhet kommunikacio kozottuk<br><br>
+        - ha nincs data link az eszkozok kozott, akkor nem tortenhet kommunikacio kozottuk<br>
+        - a datalinkek megjelenitese hasznos, mert ezzel latjuk a masodik retegbeli linkeket a halozatban<br>
+        - tudni akarom, hogy hol vannak data linkek, mert... <br><br>
 
-        In complex networks there is heavy traffic. It is really difficult to identify between which nodes there is communication.
+        In complex networks there is heavy traffic and it is really difficult to identify between which nodes there is communication.
         When a network node receives a packet successfully from another device, a data link is established between the nodes.
         Visualizing data links helps identify active second layer links in the network.
         
@@ -85,8 +87,7 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=328 src="DatalinkVisualizerWirelessSimple.mp4">
     </p>
     <p>
-        The communication starts between the nodes.
-        When a message reaches its destination's data link layer, the data link is activated between the nodes and an arrow is shown pointing from the sender towards the receiver.
+        When a packet reaches its destination's data link layer, the data link is activated between the nodes and an arrow is shown pointing from the sender towards the receiver.
         Then the arrow fades out in real time.
     </p>
 
