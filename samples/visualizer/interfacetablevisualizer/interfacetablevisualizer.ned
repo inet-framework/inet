@@ -18,7 +18,7 @@ import inet.node.inet.StandardHost;
 import inet.visualizer.linklayer.InterfaceTableVisualizer;
 
 
-network Simple
+network InterfaceTableVisualizationA
 {
     @display("bgb=400,400");
     submodules:
@@ -38,50 +38,30 @@ network Simple
         hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
 }
 
-network SimpleV2
-{
-    @display("bgb=400,400");
-    submodules:
-        hostA: StandardHost {
-            @display("p=166,124");
-        }
-        hostB: StandardHost {
-            @display("p=166,299");
-        }
-        visualizer: IntegratedVisualizer {
-            @display("p=328,38");
-        }
-        configurator: IPv4NetworkConfigurator {
-            @display("p=328,93");
-        }
-    connections:
-        hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
-}
-
-network Complex
+network InterfaceTableVisualizationB
 {
     @display("bgb=732,417");
     submodules:
         host1: StandardHost {
-            @display("p=58,103");
+            @display("p=79,128");
         }
         host2: StandardHost {
-            @display("p=59,193");
+            @display("p=80,218");
         }
         switch: EtherSwitch {
-            @display("p=175,156");
+            @display("p=196,181");
         }
         router: Router {
-            @display("p=283,157");
+            @display("p=304,182");
         }
         accessPoint: AccessPoint {
-            @display("p=418,156");
+            @display("p=439,181");
         }
         wirelessHost: WirelessHost {
-            @display("p=438,55");
+            @display("p=459,80");
         }
         mobileHost: AdhocHost {
-            @display("p=447,288");
+            @display("p=468,313");
         }
         configurator: IPv4NetworkConfigurator {
             @display("p=631,50");

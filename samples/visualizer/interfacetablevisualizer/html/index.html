@@ -13,7 +13,7 @@
 <h2>Goals</h2>
 
 <p>
-In a large network topology with many nodes, routing can be quite complex. To see if routing tables and network addresses are configured as intended
+In a large network topology with many nodes, IP routes can be quite complex. To see if routing tables and network addresses are configured as intended
 (or to even start making sense of routing tables), one needs to know the addresses of the interfaces of various network nodes. This information
 can be accessed by diving deep in the inspector panel and checking interface tables individually, which is tedious.
 Visualizing interface tables makes understanding easier by indicating the interface names and addresses belonging to individual nodes,
@@ -30,8 +30,9 @@ the second one is about the advanced features.
 
 <p>
 The <var>InterfaceTableVisualizer</var> visualizes hosts' interfaces contained in their interface tables.
-By default, the interface name and address is indicated. Wired interfaces are visualized at the corresponding gates,
-wireless interfaces are displayed above the node icon. The visualization is enabled with the
+By default, the interface name and address is indicated. By default, indicators of wired interfaces are positioned at the corresponding gates.
+This can be disabled with the <var>displayWiredInterfacesAtConnections</var> parameter.
+The indicators for wireless interfaces are displayed above the node icon. The visualization is enabled with the
 <var>displayInterfaceTables</var> parameter. By default, all interfaces of all nodes are visualized.
 The set of visualized interfaces can be narrowed with the configurator's <var>nodeFilter</var> and <var>interfaceFilter</var>
 parameters. The <var>format</var> parameter specifies what information is displayed about interfaces.
@@ -51,7 +52,10 @@ It takes a format string, which can contain the following directives:
 The default format string is <code>"%N %\\%n"</code>.
 </p>
 
+<p>By clicking on an interface indicator, details are displayed in the inspector panel.</p>
+
 <p>TODO: about that you can specify expressions in nodeFilter</p>
+<p>TODO: you can click interfaces and see info in the inspector</p>
 
 <h2>Enabling the visualization</h2>
 
@@ -76,7 +80,65 @@ When the simulation is run, the network looks like this:
 
 <img class="screen" src="simple.png">
 
-<p>TODO: redo this</p>
+<p>// assuming the default is not(lo*)</p>
+
+<p>
+The interface names and the assigned IP addresses are displayed at the gates where the interfaces are connected.
+</p>
+
+<h2>Advanced features</h2>
+
+<p>
+This configuration used the following network:
+</p>
+
+<img class="screen" src="advancednetwork.png">
+
+<p>
+It contains two <var>StandardHosts</var> connected to an <var>EtherSwitch</var>. The switch is connected to a <var>Router</var>, which is connected
+to an <var>AccessPoint</var>. There is a <var>WirelessHost</var> and an <var>AdhocHost</var> near the access point. Additionally, there is an
+<var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>, and an <var>IntegratedVisualizer</var> module.
+The configurator is instructed not to assign addresses to the wireless hosts, these get their addresses from a DHCP server in the router.
+</p>
+
+<p>TODO: visualizer config</p>
+
+<p>
+The visualizer is configured with this format string:
+</p>
+
+<div class="snippet">
+*.visualizer.*.interfaceTableVisualizer.interfaceFilter = "not(lo*) and not(ipv4Address(&ltunspec&gt))"
+</div>
+
+<p>
+The visualizer is set to not visualize the loopback addresses and unspecified IP addresses.
+</p>
+
+<p>
+Before the beginning of the simulation, the network looks like this:
+</p>
+
+<img class="screen" src="advancedbeginning.png">
+
+<p>
+The addresses of the wired interfaces of <var>host1</var>, <var>host2</var> and the router, are visualized.
+The wireless hosts have unspecified addresses, thus no interface indicator is displayed.
+After the wireless hosts associated with the access point and received their addresses from
+the DHCP server, the network looks like this:
+</p>
+
+<img class="screen" src="advanced.png">
+
+<p>
+The addresses for the wireless interfaces are also visualized.
+</p>
+
+<h2>Further information</h2>
+
+<p>TODO</p>
+
+<p>TODO: redo screenshots</p>
 
 
 
