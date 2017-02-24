@@ -9,14 +9,13 @@
 <body>
 	<h1><center>Data Link Visualization Example</center></h1>
 
-	<p><h2>Goals - WIP</h2></p>
+	<p><h2>Goals</h2></p>
 	<p> 
         In computer networks, networked computing devices exchange data with each other using a data link.
         The connections between nodes are established using either cable media or wireless media.
+        If we look at a network topology, we dont't know whether there is a data link between two nodes.
         When a network node receives a packet successfully from another device, a data link is established between the nodes.
-
-        Visualizing data links helps identify active second layer links in the network.
-        
+        This is shown by the DatalinkVisualizer.
     </p>
     <p>    
         The example consists of 4 simulation models, each demonstrating different features of data link visualization.
@@ -64,7 +63,13 @@
             *.wirelessSource.pingApp[0].destAddr = "wirelessDestination"
         </div> -->
         In both configurations the source host pings the destination host and an additional line of code enables the <var>DatalinkVisualizer</var>.
-        All other parameters are left on their default.
+        Here is how to use ping:
+        <div class="snippet">
+            # Application parameters
+            *.wiredSource.numPingApps = 1
+            *.wiredSource.pingApp[0].destAddr = "wiredDestination"
+        </div>
+        And this line activates the visualizer:
         <div class="snippet">
             *.linkVisualizer.*.displayLinks = true
         </div>
@@ -87,7 +92,7 @@
     <p><h2>Data link visualization in a complex network</h2></p>
     <p>
         This configuration demonstrates the visualization of data links in a complex network.
-        In this simulation we also show how the <i>packetFilter</i> works.
+        In this simulation we also show how the <i>packetFilter</i> and the <i>nodeFilter</i> works.
         Here is the network for this configuration:
     </p>
     <p align="center">
@@ -99,14 +104,8 @@
         The sources ping the destinations.
         The visualization of data links is enabled, but it is filtered. Links are displayed only if a ping message is sent.
         We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters, so the data links don't fade out before the next ping messages aren't sent.
-        Here is the configuration:
+        Here is the configuration for the visualization:
         <div class="snippet">
-            # Application parameters<br>
-            *.source*.numPingApps = 1<br>
-            <br>
-            *.source1.pingApp[0].destAddr = "destination1"<br>
-            *.source2.pingApp[0].destAddr = "destination2"<br>
-            <br>
             # Visualizer parameters<br>
             *.visualizer.*.dataLinkVisualizer.displayLinks = true<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutMode = "simulationTime"<br>
@@ -117,9 +116,6 @@
     <p>
         The following animation shows what happens when we start the simulation:
     </p>
-<!--    <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerComplex.mp4">
-    </p>    -->
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=566 height=470 src="DatalinkVisualizerComplexv2.mp4">
     </p>
@@ -130,10 +126,25 @@
         Only one data link can be activated per direction between the nodes.
         If a data link is visualized already between two nodes and another packet activates a data link between the same nodes, the arrow between those nodes is only reinforced.
     </p>
-<!--    <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=830 height=576 src="DatalinkVisualizerFadeOut.mp4">
+    <p>
+        It is possible to display ping data links between given nodes.
+        For that we use <i>nodeFilter</i> parameter.
+        In this example we display the data links only between the <var>source1</var> and the <var>destination1</var>.
+        Here is how to configure the visualizer:
+        <div class="snippet">
+            # Visualizer parameters<br>
+            *.visualizer.*.dataLinkVisualizer.displayLinks = true<br>
+            *.visualizer.*.dataLinkVisualizer.fadeOutMode = "simulationTime"<br>
+            *.visualizer.*.dataLinkVisualizer.fadeOutTime = 1.4s<br>
+            *.visualizer.*.dataLinkVisualizer.packetFilter = "ping*"<br>
+            *.visualizer.*.dataLinkVisualizer.nodeFilter = "(source1 or etherSwitch* or destination1) and not etherSwitch3"
+        </div>
     </p>
--->
+    <p align="center">        
+        <!--<video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=566 height=470 src="DatalinkVisualizerComplexv2.mp4">-->
+        VIDEO
+    </p>
+
 
     <p><h2>Displaying dynamic data links</h2></p>
     <p>
