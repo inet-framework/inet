@@ -75,13 +75,13 @@ network PhysicalLinkVisualizerFiltering
         accessPoint: AccessPoint {
             @display("p=500,200");
         }
-        host1: WirelessHost {
-            @display("p=500,50");
+        source: WirelessHost {
+            @display("p=517,89");
         }
-        host2: WirelessHost {
-            @display("p=680, 350");
+        host: WirelessHost {
+            @display("p=642,178");
         }
-        host3: WirelessHost {
+        destination: WirelessHost {
             @display("p=320,350");
         }
 }
