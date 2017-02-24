@@ -11,10 +11,10 @@
 
 	<p><h2>Goals</h2></p>
 	<p>
-        In complex, non-trivial or in ad hoc networks, without detailed routing informations it is impossible to determine the path of a packet between remote hosts.
-        Visualizing network routes is advantageous, because we can trace a packet's route from the source to the destination.
-        It is especially helpful if there is a dynamic routing protocol in the network.
-        If there is a change in the routes e.g because a router go wrong, we get information immediately about the changing routes.
+        In complex or in ad hoc networks, we have to track a packet's path step by step, if we want to determine its network route.
+        We can't be sure either that, the route does not change between two nodes, because a router goes wrong or there is a dynamic routing protocol in the network for example.
+        With the visualization of network routes we display any packet's network path from the source to the destination.
+        It gives a clear picture to us about a packet's network path.
 	</p>	
     <p>    
         The example consists of 4 simulation models, each demonstrating different features of network route visualization.
@@ -43,7 +43,7 @@
         This simulation demonstrates how to enable the default look of the visualization of network routes.
     </p>
     <p>
-        The network for this configuration contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module which enables the hosts to communicate and a <var>NetworkRouteVisualizer</var> module which shows the network routes.
+        The network for this configuration contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module and a <var>NetworkRouteVisualizer</var> module.
     </p>
     <p>
         <img class="screen" src="NetworkRouteSimple.png">
@@ -120,7 +120,7 @@
     <p>
         The network contains a <var>source</var>, a <var>destination</var> and five more <var>AODVRouters</var>.
         All nodes move randomly between borders.
-        The <var>source</var> pings the <var>destination</var>. In additional there is an <var>IPv4NetworkConfigurator</var> module, an <var>IntegratedVisualizer</var> module and an <var>Ieee80211ScalarRadioMedium</var> module.
+        The <var>source</var> pings the <var>destination</var>. In addition, there is an <var>IPv4NetworkConfigurator</var> module, an <var>IntegratedVisualizer</var> module and an <var>Ieee80211ScalarRadioMedium</var> module.
     </p>
     <p>
         The following video depicts what happens, when the simulation is run:
@@ -150,44 +150,11 @@
         Similarily to the previous configuration, the <var>wiredSource</var> pings the <var>wiredDestination</var> and the <var>wirelessSource</var> pings the <var>wirelessDestination</var>.
     </p>
     <p>
-        We assign IP addresses manually by creating an xml configuaration file.<!-- Here is the network configuration for this topology:
-
-        <pre class="snippet">
-&ltconfig&gt
-    &lt!-- routers eth interfaces --&gt
-        &ltinterface hosts="router0" names="eth0" address="192.168.0.1" netmask="255.255.255.x"/&gt
-        &ltinterface hosts="router0" names="eth1" address="192.168.1.1" netmask="255.255.255.x"/&gt
-        &ltinterface hosts="router2" names="eth0" address="192.168.2.1" netmask="255.255.255.x"/&gt
-        &ltinterface hosts="router2" names="eth1" address="192.168.3.1" netmask="255.255.255.x"/&gt
-    &lt!-- routers ppp interfaces --&gt
-        &ltinterface hosts='router*' names='ppp*' address='10.x.x.x' netmask='255.x.x.x'/&gt
-    &lt!-- sources and destinations --&gt
-        &ltinterface hosts='**' address="192.168.x.x" /&gt
-&lt/config&gt
-</pre>
--->
-        We create a lifecycle for this configuration. By configuring lifecycleController we turn off and on the routers at a given time.
-<!--        
-<pre class="snippet">
-&ltscenario&gt
-    &ltat t="5"&gt
-        &lttell module="lifecycleController" target="router1" operation="NodeShutdownOperation"/&gt
-        &lt!-- &ltdisconnect src-module="router1" src-gate="pppg$o[0]" /&gt --&gt
-    &lt/at&gt
-    &ltat t="10"&gt
-        &lttell module="lifecycleController" target="router1" operation="NodeStartOperation"/&gt
-    &lt/at&gt
-    &ltat t="15"&gt
-        &lttell module="lifecycleController" target="router3" operation="NodeShutdownOperation"/&gt
-    &lt/at&gt
-    &ltat t="20"&gt
-        &lttell module="lifecycleController" target="router3" operation="NodeStartOperation"/&gt
-    &lt/at&gt
-&lt/scenario&gt
-</pre>
--->
-        We use RIP, so the network routes change dynamically between the source and the destination, when a router is offline.
-        Here is the configuration of the <var>NetworkRouteVisualizer</var>:
+        We assign IP addresses manually by creating an xml configuaration file.
+        We create a lifecycle for this configuration to turn off and on the routers at a given time.
+        RIP is used for this configuration so the network routes change dynamically between the sources and the destinations, when a router goes offline.
+        In this configuration we display only the ping echo messages.
+        Here is the configuration for the visualization:
         <div class="snippet">
             # Visualizer parameters<br>
             *.visualizer.*.networkRouteVisualizer.displayRoutes = true<br>
