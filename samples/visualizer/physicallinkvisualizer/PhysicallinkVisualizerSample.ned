@@ -60,7 +60,7 @@ network PhysicalLinkVisualizerFiltering
 {
     @display("bgb=780,450");
     submodules:
-        linkVisualizer: PhysicalLinkVisualizer {
+        visualizer: IntegratedVisualizer {
             parameters:
                 @display("p=100,50");
         }
@@ -89,7 +89,7 @@ network PhysicalLinkVisualizerFiltering
 //
 // TODO documentation
 //
-network PhysicalLinkVisualizerComplex
+network PhysicalLinkVisualizerDynamic
 {
     @display("bgb=660,630");
     submodules:
