@@ -46,6 +46,7 @@
 
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {
 
@@ -287,6 +288,7 @@ void UDP::processCommandFromApp(cMessage *msg)
 
 void UDP::processPacketFromApp(cPacket *appData)
 {
+    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, appData);
     UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
 
     SockDesc *sd = getOrCreateSocket(ctrl->getSockId(), appData->getArrivalGate()->getIndex());
@@ -741,6 +743,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->setKind(UDP_I_DATA);
 
     emit(passedUpPkSignal, payload);
+    emit(LayeredProtocolBase::packetSentToUpperSignal, payload);
     send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }

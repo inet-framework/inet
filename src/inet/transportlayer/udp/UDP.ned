@@ -56,6 +56,10 @@ simple UDP like IUDP
         string icmpModule = default("^.networkLayer.icmp");
         string icmpv6Module = default("^.networkLayer.icmpv6");
         @display("i=block/transport");
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
         @signal[passedUpPk](type=cPacket);
