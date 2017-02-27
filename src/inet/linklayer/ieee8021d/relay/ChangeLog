@@ -1,5 +1,12 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-08-08  Zoltan Bojthe
+
+	Ieee8021dRelay: fixed nullptr issue; arrivalPortData is nullptr when
+	isStpAvare false
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-04-19  Levente Meszaros

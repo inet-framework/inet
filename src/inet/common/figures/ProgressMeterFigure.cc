@@ -188,7 +188,7 @@ void ProgressMeterFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-    setBounds(parseBounds(property));
+    setBounds(parseBounds(property, getBounds()));
 
     const char *s;
     if ((s = property->getValue(PKEY_BACKGROUND_COLOR)) != nullptr)

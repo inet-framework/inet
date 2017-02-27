@@ -22,7 +22,7 @@ import inet.applications.ethernet.EtherAppCli;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 
 module ThroughputClient
@@ -60,7 +60,7 @@ network Throughput
         int numCli;
         @display("b=297,203");
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
                 @display("p=100,50");
         }

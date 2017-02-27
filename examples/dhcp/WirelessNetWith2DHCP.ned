@@ -23,7 +23,7 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 
 network WirelessNetWith2DHCP
@@ -31,7 +31,7 @@ network WirelessNetWith2DHCP
     @display("bgb=590,407;bgl=2");
     int numHosts;
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             @display("p=305,35");
         }
         radioMedium: Ieee80211ScalarRadioMedium {

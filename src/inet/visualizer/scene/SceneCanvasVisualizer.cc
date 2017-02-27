@@ -34,7 +34,7 @@ void SceneCanvasVisualizer::initialize(int stage)
         canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
         axisLayer = new cGroupFigure("axisLayer");
-        canvas->addFigureBelow(axisLayer, canvas->getSubmodulesLayer());
+        axisLayer->insertBelow(canvas->getSubmodulesLayer());
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
             initializeAxis(axisLength);

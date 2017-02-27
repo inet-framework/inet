@@ -1,5 +1,26 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-05  Zoltan Bojthe
+
+	lwIP: added KLUDGE for eliminate compiler warnings
+
+	when using precompiled header, netinet/in.h always included and defines
+	INADDR_NONE, ... etc. macros
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
+2016-07-20  Zoltan Bojthe
+
+	tcp extras: fixed compiler warnings
+
+2016-09-19  Zoltan Bojthe
+
+	omnetpp5: remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500)
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

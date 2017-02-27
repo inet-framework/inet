@@ -1,5 +1,19 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-26  Rudolf Hornig
+
+    - the TCP_lwIP and TCP_NSC features now add their include dirs in the makefrag file
+
+2016-09-22  Zoltan Bojthe
+
+    omnetpp5: add/use refreshDisplay()
+
+2016-07-20  Zoltan Bojthe
+
+    tcp extras: fixed compiler warnings
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------
@@ -24,11 +38,11 @@
 
 2015-04-16  Zoltan Bojthe
 
-    Refactored and cleaned up TCP header options
+	Refactored and cleaned up TCP header options
 
 2015-03-12  Zoltan Bojthe
 
-    Fixed TCP/UDP checksum.
+	Fixed TCP/UDP checksum.
 
 2015-01-21  Zoltan Bojthe
 

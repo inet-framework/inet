@@ -1,5 +1,22 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-09  Rudolf Hornig
+
+	build: fixed various message files not to redefine a field on inheritance
+
+2017-01-04  Levente Meszaros
+
+	Routing: Fixed stateRefreshAttr comparison bug in PIMInterfaceTable.
+
+	See https://github.com/inet-framework/inet/issues/220
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

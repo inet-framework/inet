@@ -1,5 +1,31 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-02-17  Rudolf Hornig
+
+	build: removed OMNeT 5.0 compatibility code
+
+2016-12-23  Rudolf Hornig
+
+	build: removed deprecation warings
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
+2016-07-20  Zoltan Bojthe
+
+	bugfix: IPv6RoutingTable::getInterfaceByAddress(const L3Address& address)
+	const function was infinity recursion
+
+	"const" was missed from getInterfaceByAddress(const IPv6Address& address)
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

@@ -1,5 +1,14 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-07-12  Levente Meszaros
+
+	Power: Fixed capacity update mechanism.
+
+	When the capacity didn't change the last update time was not set, and
+	there was no signal.
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

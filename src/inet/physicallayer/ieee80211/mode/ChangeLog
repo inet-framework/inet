@@ -1,5 +1,16 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-12  gutipeon
+
+	Fixed wrong modulation parameters
+
+	Changed modulation on streams belonging to MCS 13, 21 and 29 in both 20
+	MHz and 40 MHz band. Some of them were set to QAM16, while in reality
+	they should be QAM64. More info
+	https://en.wikipedia.org/wiki/IEEE_802.11n-2009
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-04-19  Levente Meszaros

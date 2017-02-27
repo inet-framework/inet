@@ -1,5 +1,11 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-09-22  Zoltan Bojthe
+
+	NetPerfMeter: added refreshDisplay()
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

@@ -1,111 +1,118 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-03  Andras Varga
 
-    * Added support for priority queueing, based on 802.1d UP.
+	* Added support for priority queueing, based on 802.1d UP.
 
-    * Changed internal queue from std::list to cPacketQueue.
-    Advantages: inspectability, support for priority queueing.
+	* Changed internal queue from std::list to cPacketQueue.
+	Advantages: inspectability, support for priority queueing.
 
 2016-05-20  Levente Meszaros
 
-    * Added CsmaCaMac, based on the original Ieee80211Mac (802.11b) from 2006
+	* Added CsmaCaMac, based on the original Ieee80211Mac (802.11b) from 2006
 
-    Steps:
+	Steps:
 
-    CSMA: Took over the original Ieee80211Mac as the basis of a new CSMA implementation.
-    CSMA: Dropped Ieee80211ASFTuple.
-    CSMA: Dropped RTS/CTS mechanism.
-    CSMA: Dropped managment frames.
-    CSMA: Dropped sequence number.
-    CSMA: Dropped unused function.
-    CSMA: Dropped EIFS.
-    CSMA: Dropped NAV and reserve period.
-    CSMA: Dropped sequence number.
-    CSMA: Dropped DCF/PCF mode.
-    CSMA: Dropped basicBitrate.
-    CSMA: Dropped fragmentation threshold.
-    CSMA: Dropped explicit state vectors.
-    CSMA: Fixed previous drops.
-    CSMA: Dropped Register_Enums.
-    CSMA: Dropped separate consts file.
-    CSMA: Dropped BITERROR and COLLISION constants.
-    CSMA: Dropped unused frame fields.
-    CSMA: Simplified frame format.
-    CSMA: Dropped comments.
-    CSMA: Renamed to NewCsma.
-    CSMA: Dropped logState.
-    CSMA: Dropped WirelessMacBase.
-    CSMA: Renamed frame class.
-    CSMA: Updated comments, TODOs.
-    CSMA: Cleanup.
-    CSMA: More cleanup.
-    CSMA: Dropped handleCommand.
-    CSMA: Replaced radioState with signaling mechanism.
-    Csma: Fixed issues.
-    CSMA: Dropped sendDownPendingRadioConfig.
-    CSMA: First Data-Ack works.
-    CSMA: Renamed to CsmaMac.
-    CSMA: Dropped retry flag.
-    CSMA: Formatting.
-    CSMA: Dropped type field.
-    CSMA: Decreased frame size.
-    CSMA: Fixed.
-    CSMA: Moved byte length into C++.
-    CSMA: Renamed to camelcase.
-    CSMA: Renamed a few things.
-    CSMA: Cleaned up.
-    CSMA: Added default values.
-    CSMA: Added link break.
-    CSMA: Cleaned up comments.
-    CSMA: Added header length parameter.
-    CSMA: Cleaned up minor things.
-    CSMA: Fixed headerLength.
-    CSMA: Added slotTime, sifsTime, difsTime parameters.
-    CSMA: Added useAck parameter.
-    Csma: Moved upper frame deferring code fragment.
-    Csma: Renamed WAITBROADCAST to TRANSMIT.
-    Csma: Separated WAITACK and WAITTRANSMIT to implement useAck.
-    Csma: Inlined computeFrameDuration.
-    Csma: Inlided function.
-    Csma: Moved function.
-    Csma: Minor cleanup.
-    Csma: Simplified timing functions.
-    Csma: Inlined sendAckFrame. variant
-    Csma: Inlined builder functions.
-    Csma: Merged with sendDataFrame.
-    Csma: Changed order.
-    Csma: Moved.
-    Csma: Renamed frames to be consistent.
-    Csma: Added recording scalar statistics in finish.
-    Csma: Fixed memory management issues.
-    Csma: Merged two transitions.
-    Csma: Renamed transitions.
-    Csma: Merged two transitions.
-    CsmaMac renamed to CsmaCaMac
-    CsmaCaMac: ack frame renamed
-    Csma: Dropped backoff member variable.
-    Csma: Renamed some functions.
-    Csma: Updated messages to reflect rename.
-    Csma: Inlined computeBackoffPeriod.
-    Csma: Added ackLength parameter.
-    Csma: Added ackTimeout parameter.
-    Csma: Renamed member.
-    Csma: Added cwMulticast parameter.
-    Csma: Changed retryLimit to limit the number of retries.
-    Csma: Simplified expression.
-    Csma: Avoid DIFS period when not using acks.
-    Csma: Renamed to TRANSMIT state.
-    Csma: Changed order according to time.
-    Csma: Moved backoff period generation.
-    Csma: Fixed units.
-    Csma: Dropped empty statements.
-    Csma: Fixed ackTimeout computation.
-    Csma: Added transition for unknown ack.
-    Csma: Refactored.
-    Csma: Change maxQueueSize to -1 (unlimited) by default.
-    Csma: Cleaned up backoff period.
-    Csma: Refactored state machine.
-    Csma: Dropped useless comments.
+	CSMA: Took over the original Ieee80211Mac as the basis of a new CSMA implementation.
+	CSMA: Dropped Ieee80211ASFTuple.
+	CSMA: Dropped RTS/CTS mechanism.
+	CSMA: Dropped managment frames.
+	CSMA: Dropped sequence number.
+	CSMA: Dropped unused function.
+	CSMA: Dropped EIFS.
+	CSMA: Dropped NAV and reserve period.
+	CSMA: Dropped sequence number.
+	CSMA: Dropped DCF/PCF mode.
+	CSMA: Dropped basicBitrate.
+	CSMA: Dropped fragmentation threshold.
+	CSMA: Dropped explicit state vectors.
+	CSMA: Fixed previous drops.
+	CSMA: Dropped Register_Enums.
+	CSMA: Dropped separate consts file.
+	CSMA: Dropped BITERROR and COLLISION constants.
+	CSMA: Dropped unused frame fields.
+	CSMA: Simplified frame format.
+	CSMA: Dropped comments.
+	CSMA: Renamed to NewCsma.
+	CSMA: Dropped logState.
+	CSMA: Dropped WirelessMacBase.
+	CSMA: Renamed frame class.
+	CSMA: Updated comments, TODOs.
+	CSMA: Cleanup.
+	CSMA: More cleanup.
+	CSMA: Dropped handleCommand.
+	CSMA: Replaced radioState with signaling mechanism.
+	Csma: Fixed issues.
+	CSMA: Dropped sendDownPendingRadioConfig.
+	CSMA: First Data-Ack works.
+	CSMA: Renamed to CsmaMac.
+	CSMA: Dropped retry flag.
+	CSMA: Formatting.
+	CSMA: Dropped type field.
+	CSMA: Decreased frame size.
+	CSMA: Fixed.
+	CSMA: Moved byte length into C++.
+	CSMA: Renamed to camelcase.
+	CSMA: Renamed a few things.
+	CSMA: Cleaned up.
+	CSMA: Added default values.
+	CSMA: Added link break.
+	CSMA: Cleaned up comments.
+	CSMA: Added header length parameter.
+	CSMA: Cleaned up minor things.
+	CSMA: Fixed headerLength.
+	CSMA: Added slotTime, sifsTime, difsTime parameters.
+	CSMA: Added useAck parameter.
+	Csma: Moved upper frame deferring code fragment.
+	Csma: Renamed WAITBROADCAST to TRANSMIT.
+	Csma: Separated WAITACK and WAITTRANSMIT to implement useAck.
+	Csma: Inlined computeFrameDuration.
+	Csma: Inlided function.
+	Csma: Moved function.
+	Csma: Minor cleanup.
+	Csma: Simplified timing functions.
+	Csma: Inlined sendAckFrame. variant
+	Csma: Inlined builder functions.
+	Csma: Merged with sendDataFrame.
+	Csma: Changed order.
+	Csma: Moved.
+	Csma: Renamed frames to be consistent.
+	Csma: Added recording scalar statistics in finish.
+	Csma: Fixed memory management issues.
+	Csma: Merged two transitions.
+	Csma: Renamed transitions.
+	Csma: Merged two transitions.
+	CsmaMac renamed to CsmaCaMac
+	CsmaCaMac: ack frame renamed
+	Csma: Dropped backoff member variable.
+	Csma: Renamed some functions.
+	Csma: Updated messages to reflect rename.
+	Csma: Inlined computeBackoffPeriod.
+	Csma: Added ackLength parameter.
+	Csma: Added ackTimeout parameter.
+	Csma: Renamed member.
+	Csma: Added cwMulticast parameter.
+	Csma: Changed retryLimit to limit the number of retries.
+	Csma: Simplified expression.
+	Csma: Avoid DIFS period when not using acks.
+	Csma: Renamed to TRANSMIT state.
+	Csma: Changed order according to time.
+	Csma: Moved backoff period generation.
+	Csma: Fixed units.
+	Csma: Dropped empty statements.
+	Csma: Fixed ackTimeout computation.
+	Csma: Added transition for unknown ack.
+	Csma: Refactored.
+	Csma: Change maxQueueSize to -1 (unlimited) by default.
+	Csma: Cleaned up backoff period.
+	Csma: Refactored state machine.
+	Csma: Dropped useless comments.

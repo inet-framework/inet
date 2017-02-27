@@ -1,5 +1,24 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-10-19  Zoltan Bojthe
+
+	ModuleAccess: getters/finders let const functions
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
+2016-07-22  Zoltan Bojthe
+
+	BMacLayer: removed hasPar() calls - parameters specified in NED
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-05-19  Andras Varga

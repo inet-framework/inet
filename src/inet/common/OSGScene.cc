@@ -21,7 +21,7 @@ namespace inet {
 
 namespace osg {
 
-#ifdef WITH_OSG
+#if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
 
 template<typename T>
 void FindNodesVisitor<T>::apply(Node& node) {

@@ -181,7 +181,8 @@ void LinearGaugeFigure::setCornerRadius(double radius)
 void LinearGaugeFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
-    setBounds(parseBounds(property));
+
+    setBounds(parseBounds(property, getBounds()));
 
     // Set default
     redrawTicks();
@@ -332,8 +333,8 @@ void LinearGaugeFigure::redrawTicks()
         removeFigure(numberFigures[i]);
     }
     for (int i = prevNumTicks; i < numTicks; ++i) {
-        addFigureBelow(tickFigures[i], needle);
-        addFigureBelow(numberFigures[i], needle);
+        tickFigures[i]->insertBelow(needle);
+        numberFigures[i]->insertBelow(needle);
     }
 
     for (int i = 0; i < numTicks; ++i) {

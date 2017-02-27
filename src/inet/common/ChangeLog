@@ -1,5 +1,145 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-02-17  Rudolf Hornig
+
+	build: removed OMNeT 5.0 compatibility code
+
+2017-01-27  Rudolf Hornig
+
+	build: platdep/sockets.h is removed from INETDefs.h (precompiled.h)
+
+2017-02-15  Zoltan Bojthe
+
+	omnetpp5.1 ccanvas compatibility changes: do not use deprecated functions
+
+2017-01-30  Levente Meszaros
+
+	Common: Added hasVisualizer NED function.
+
+2017-01-30  Levente Meszaros
+
+	Common: Added hasModule NED function.
+
+2017-01-16  Rudolf Hornig
+
+	build: osg specific code requires visualizer feature for now.
+
+	Later OSGScene and OSGUtils should move under the visualizer subtree
+	while OsgCoordinateSystem should have its own separate feature.
+
+2017-01-04  Zoltan Bojthe
+
+	Omnetpp 5.1 compatibility: Register_Figure
+
+2016-11-24  Irene Ruengeler
+
+	Packetdrill: Add StreamReconfig support for SCTP
+
+2017-01-04  Levente Meszaros
+
+	Common: Removed unused include from OSGUtils.
+
+	Related to https://github.com/inet-framework/inet/issues/223
+
+2016-12-23  Rudolf Hornig
+
+	build: removed deprecation warings
+
+2016-11-25  Zoltan Bojthe
+
+	omnetpp compatibility change: Register_Figure
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-10-19  Zoltan Bojthe
+
+	ModuleAccess: getters/finders let const functions
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
+2016-08-03  Zoltan Bojthe
+
+	MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
+
+2016-07-20  Zoltan Bojthe
+
+	omnetpp5: replace deprecated cQueue functions: operator(), length(),
+	empty()
+
+2016-09-19  Zoltan Bojthe
+
+	omnetpp5: remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500)
+
+2016-10-14  Rudolf Hornig
+
+	build: build error on MinGW-64 becuase size_type is defined as unsigned
+	long long which does not have a proper parsim pack/unpack function in
+	omnetpp/parsim.h or an appropriate callback function with long long type.
+
+2016-10-14  Rudolf Hornig
+
+	build: force the INETDefs.h as the first include (instead of using
+	omnetpp.h directly)
+
+2016-10-14  Rudolf Hornig
+
+	build: fix build errors on Windows introduced by the precompiled header
+	support.
+
+2016-10-14  Rudolf Hornig
+
+	build: compatibility macros moved to Compat.h
+
+2016-09-13  Andras Varga
+
+	common: fix IndexedImageFigure
+
+2016-09-08  Andras Varga
+
+	instruments: code formatting
+
+2016-06-23  Mihály Palenik
+
+	instruments: Fix ticks in LinearGaugeFigure and ThermometerFigure
+
+2016-06-22  Mihaly Palenik
+
+	instruments: Fix ticks in GaugeFigure
+
+2016-06-17  Mihaly Palenik
+
+	instruments: add PlotFigure
+
+2016-06-17  Mihaly Palenik
+
+	instruments: change to const ref in getters/setters
+
+2016-07-25  Andras Varga
+
+	compatibility: in omnetpp-5.1, cResultFilterDescriptor was renamed to
+	cResultFilterType
+
+2016-07-06  Rudolf Hornig
+
+	build: create and include an opp_defines.h file that contains the
+	WITH_OSG macro defined by OMNET so the IDE can better highlight the
+	active code if conditional compilation is used + added two INFO lines at
+	the beginning of the build to display the compile and link flags.
+
+2016-06-27  Rudolf Hornig
+
+	build: create a precompiled header file when using gcc or clang This
+	speeds up the build speed considerably. A precompiled.h.[pch|gch] file is
+	created on demand. All .cc files are implicitly including the
+	precompiled.h file as the first include.
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-06  Andras Varga

@@ -50,7 +50,7 @@ class INET_API Sack : public Sack_Base
     virtual bool contains(const Sack& other) const;
     virtual void clear();
     virtual void setSegment(unsigned int start_par, unsigned int end_par);
-    virtual std::string str() const STR_COMPAT_OVERRIDE;
+    virtual std::string str() const override;
 };
 
 /**

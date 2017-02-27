@@ -21,7 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
 
-#ifdef WITH_OSG
+#if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 #include <osgEarth/MapNode>
 #endif
 
@@ -73,7 +73,7 @@ class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public I
     virtual GeoCoord computeGeographicCoordinate(const Coord& playgroundCoordinate) const override;
 };
 
-#ifdef WITH_OSG
+#if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 
 class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeographicCoordinateSystem
 {
@@ -95,7 +95,7 @@ class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeo
     virtual GeoCoord computeGeographicCoordinate(const Coord& playgroundCoordinate) const override;
 };
 
-#endif // WITH_OSG
+#endif // WITH_OSGEARTH
 
 } // namespace inet
 

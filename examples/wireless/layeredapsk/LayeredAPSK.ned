@@ -20,14 +20,14 @@ package inet.examples.wireless.layeredapsk;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.apskradio.bitlevel.APSKLayeredScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 network LayeredAPSK
 {
     parameters:
         int numHosts;
     submodules:
-        visualizer: IntegratedCanvasVisualizer {
+        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
                 @display("p=100,250");
         }

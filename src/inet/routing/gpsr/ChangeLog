@@ -1,5 +1,24 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-07-01  Florian Kauer
+
+	gpsr: allow specifying output interface for GPSR
+
+	Previously there was a hardcoded 1 for choosing the output interface. Now
+	the interface will be specified by the ned file.
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-07-20  Zoltan Bojthe
+
+	gpsr: bugfix: infinity recursion was in
+	findGpsrOptionFromNetworkDatagram() function
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------
