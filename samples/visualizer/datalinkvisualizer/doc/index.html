@@ -121,7 +121,6 @@
         In this example we display the data links only between the <var>source1</var> and the <var>destination1</var>.
         Here is how to configure the visualizer:
         <div class="snippet">
-            # Visualizer parameters<br>
             *.visualizer.*.dataLinkVisualizer.displayLinks = true<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutMode = "simulationTime"<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutTime = 1.4s<br>
@@ -149,26 +148,6 @@
         The communication range is reduced to get a non-trivial path between <var>source</var> and <var>destination</var>.
         Here is the configuration:
         <div class="snippet">
-            # Application parameters<br>
-            *.source.numPingApps = 1<br>
-            *.source.pingApp[0].destAddr = "destination"<br>
-            <br>
-            # Mobility parameters<br>
-            *.*.mobilityType = "MassMobility"<br>
-            *.*.mobility.speed = 8mps<br>
-            *.*.mobility.changeAngleBy = uniform(-60deg, 60deg)<br>
-            *.*.mobility.changeInterval = exponential(1s)<br>
-            *.*.mobility.constraintAreaMinX = 170m<br>
-            *.*.mobility.constraintAreaMinY = 40m<br>
-            *.*.mobility.constraintAreaMinZ = 0m<br>
-            *.*.mobility.constraintAreaMaxX = 570m<br>
-            *.*.mobility.constraintAreaMaxY = 470m<br>
-            *.*.mobility.constraintAreaMaxZ = 0m<br>
-            <br>
-            # Wlan parameters<br>
-            *.*.wlan[*].radio.transmitter.power = 1mW<br>
-            <br>
-            # Visualizer parameters<br>
             *.visualizer.*.dataLinkVisualizer.displayLinks = true<br>
             *.visualizer.*.dataLinkVisualizer.packetFilter = "ping*"<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutMode = "simulationTime"<br>
