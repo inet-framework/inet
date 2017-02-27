@@ -4,13 +4,13 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-//#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
 #include "inet/networklayer/ipv4/IGMPMessage.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
@@ -385,12 +385,12 @@ void IGMPTester::sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest
 {
     ASSERT(ie->isMulticast());
 
-    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setProtocol(IP_PROT_IGMP);
-    controlInfo->setTimeToLive(1);
-    msg->setControlInfo(controlInfo);
     msg->ensureTag<InterfaceInd>()->setInterfaceId(ie->getInterfaceId());
-    msg->ensureTag<L3AddressInd>()->setDestination(dest);
+    msg->ensureTag<L3AddressInd>()->setDestAddress(dest);
+    msg->ensureTag<HopLimitInd>()->setHopLimit(1);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::igmp);
+    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
 
     EV << "IGMPTester: Sending: " << msg << ".\n";
     send(msg, "igmpOut");
