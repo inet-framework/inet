@@ -1288,6 +1288,7 @@ void AODVRouting::handleWaitForRREP(WaitForRREP *rrepTimer)
 
     ASSERT(addressToRreqRetries.find(destAddr) != addressToRreqRetries.end());
     if (addressToRreqRetries[destAddr] == rreqRetries) {
+        cancelRouteDiscovery(destAddr);
         EV_WARN << "Re-discovery attempts for node " << destAddr << " reached RREQ_RETRIES= " << rreqRetries << " limit. Stop sending RREQ." << endl;
         return;
     }
@@ -1621,6 +1622,11 @@ void AODVRouting::cancelRouteDiscovery(const L3Address& destAddr)
         networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
 
     targetAddressToDelayedPackets.erase(lt, ut);
+
+    auto waitRREPIter = waitForRREPTimers.find(destAddr);
+    ASSERT(waitRREPIter != waitForRREPTimers.end());
+    cancelAndDelete(waitRREPIter->second);
+    waitForRREPTimers.erase(waitRREPIter);
 }
 
 bool AODVRouting::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime)
