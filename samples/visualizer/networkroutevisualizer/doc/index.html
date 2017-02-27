@@ -52,16 +52,11 @@
         The configuration is really simple.
         The <var>source</var> pings the <var>destination</var> and an additional line enables the visualizer with the <i>displayRoutes</i> parameter:
         <div class="snippet">
-            # Application parameters<br>
-            *.source.numPingApps = 1<br>
-            *.source.pingApp[0].destAddr = "destination"<br>
-            <br>
-            # Visualizer parameters<br>
             *.routeVisualizer.*.displayRoutes = true<br>
         </div>
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=630 height=276 src="NetworkRouteSimple.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=630 height=281 src="NetworkRouteSimple.mp4">
     </p>
     <p>
         The ping message activates a network route between the devices. The further packets, like ARP messages go up to the data link layer only, so they don't activate a network route. After 1 second in real time, the network route fades out completely.
@@ -84,23 +79,17 @@
         We enable network routes with the <i>displayRoutes</i> parameter, but only when the message type is ping.
         We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters, so the data link doesn't fade out completely before the next ping message arrives.
         <div class="snippet">
-            # Application parameters<br>
-            *.source*.numPingApps = 1<br>
-            *.source1.pingApp[0].destAddr = "destination1"<br>
-            *.source2.pingApp[0].destAddr = "destination2"<br>
-            <br>
-            # Visualizer parameters<br>
             *.visualizer.*.networkRouteVisualizer.displayRoutes = true<br>
             *.visualizer.*.networkRouteVisualizer.packetFilter = "ping*"<br>
             *.visualizer.*.networkRouteVisualizer.fadeOutMode = "simulationTime"<br>
-            *.visualizer.*.networkRouteVisualizer.fadeOutTime = 1.4s<br>
+            *.visualizer.*.networkRouteVisualizer.fadeOutTime = 1.4s
         </div>
     </p>
     <p>
         The following video shows what happens, when we start the simulation:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=820 height=556 src="StaticNetworkRoute.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=820 height=561 src="StaticNetworkRoute.mp4">
     </p>
     <p>
         Only the network routes of the ping messages are displayed because of the <i>packetFilter</i> parameter.
@@ -126,7 +115,7 @@
         The following video depicts what happens, when the simulation is run:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=610 height=660 src="DynamicNetworkRoute.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=610 height=665 src="DynamicNetworkRoute.mp4">
     </p>
     <p>
         When the ping reaches the destination's network layer, the visualizer shows the packet's network route.
@@ -156,18 +145,17 @@
         In this configuration we display only the ping echo messages.
         Here is the configuration for the visualization:
         <div class="snippet">
-            # Visualizer parameters<br>
             *.visualizer.*.networkRouteVisualizer.displayRoutes = true<br>
             *.visualizer.*.networkRouteVisualizer.packetFilter = "ping* and not *reply"<br>
             *.visualizer.*.networkRouteVisualizer.fadeOutMode = "simulationTime"<br>
-            *.visualizer.*.networkRouteVisualizer.fadeOutTime = 1.4s<br>
+            *.visualizer.*.networkRouteVisualizer.fadeOutTime = 1.4s
         </div>        
     </p>  
     <p>
         Here is what happens, when we start the simulation:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=704 height=586 src="ChangingNetworkRoutes.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=704 height=591 src="ChangingNetworkRoutes.mp4">
     </p>
     <p>
         <ul>
