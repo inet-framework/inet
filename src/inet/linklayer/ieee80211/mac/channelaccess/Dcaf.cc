@@ -104,6 +104,18 @@ void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
     else ;
 }
 
+void Dcaf::requestChannel(int cw, IChannelAccess::ICallback* callback)
+{
+    this->callback = callback;
+    if (owning)
+        callback->channelGranted(this);
+    else if (!contentionInProgress) {
+        contentionInProgress = true;
+        contention->startContention(cw, ifs, eifs, slotTime, this);
+    }
+    else ;
+}
+
 void Dcaf::expectedChannelAccess(simtime_t time)
 {
     // don't care

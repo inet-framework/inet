@@ -189,9 +189,10 @@ void NonQoSRecoveryProcedure::rtsFrameTransmissionFailed(Ieee80211DataOrMgmtFram
 //
 bool NonQoSRecoveryProcedure::isRetryLimitReached(Ieee80211DataOrMgmtFrame* failedFrame)
 {
-    if (failedFrame->getByteLength() >= rtsThreshold)
-        return getRc(failedFrame, longRetryCounter) >= longRetryLimit;
-    else
+    // XXX: validation
+//    if (failedFrame->getByteLength() >= rtsThreshold)
+//        return getRc(failedFrame, longRetryCounter) >= longRetryLimit;
+//    else
         return getRc(failedFrame, shortRetryCounter) >= shortRetryLimit;
 }
 

@@ -52,6 +52,7 @@ void Hcf::initialize(int stage)
         recipientAckPolicy = check_and_cast<IRecipientQoSAckPolicy*>(getSubmodule("recipientAckPolicy"));
         edcaMgmtAndNonQoSRecoveryProcedure = check_and_cast<NonQoSRecoveryProcedure *>(getSubmodule("edcaMgmtAndNonQoSRecoveryProcedure"));
         singleProtectionMechanism = check_and_cast<SingleProtectionMechanism*>(getSubmodule("singleProtectionMechanism"));
+        dummyProtectionMechanism = check_and_cast<DummyProtectionMechanism*>(getSubmodule("dummyProtectionMechanism"));
         rtsProcedure = new RtsProcedure();
         rtsPolicy = check_and_cast<IRtsPolicy*>(getSubmodule("rtsPolicy"));
         recipientAckProcedure = new RecipientAckProcedure();
@@ -71,6 +72,7 @@ void Hcf::initialize(int stage)
             edcaTxops.push_back(check_and_cast<TxopProcedure *>(getSubmodule("edcaTxopProcedures", ac)));
             stationRetryCounters.push_back(new StationRetryCounters());
         }
+        dummyRecoveryProcedure = new DummyRecoveryProcedure(edcaInProgressFrames);
     }
 }
 
@@ -118,6 +120,7 @@ void Hcf::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
             EV_DETAIL << "Requesting channel for access category " << printAccessCategory(ac) << endl;
             edca->requestChannelAccess(ac, this);
         }
+        edcaInProgressFrames[ac]->getFrameToTransmit(); // TODO: validiation
     }
     else {
         EV_INFO << "Frame " << frame->getName() << " has been dropped because the PendingQueue is full." << endl;
@@ -199,6 +202,8 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
         Ieee80211DataOrMgmtFrame *internallyCollidedFrame = edcaInProgressFrames[ac]->getFrameToTransmit();
         EV_INFO << printAccessCategory(ac) << " (" << internallyCollidedFrame->getName() << ")" << endl;
         bool retryLimitReached = false;
+        // XXX: validation
+        dummyRecoveryProcedure->increaseRetryCount(internallyCollidedFrame);
         if (auto dataFrame = dynamic_cast<Ieee80211DataFrame *>(internallyCollidedFrame)) { // TODO: QoSDataFrame
             edcaDataRecoveryProcedures[ac]->dataFrameTransmissionFailed(dataFrame);
             retryLimitReached = edcaDataRecoveryProcedures[ac]->isRetryLimitReached(dataFrame);
@@ -218,11 +223,18 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(mgmtFrame);
             else ; // TODO: + NonQoSDataFrame
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
-            if (hasFrameToTransmit(ac))
-                edcaf->requestChannel(this);
+            if (hasFrameToTransmit(ac)) {
+                EV_DETAIL << printAccessCategory(ac) << " still has frames to transmit" << std::endl;
+                // XXX: only for validation edcaf->requestChannel(this);
+                edcaf->requestChannel(this, dummyRecoveryProcedure->computeCw(ac, edcaf->getCwMin(), edcaf->getCwMax()));
+            }
         }
-        else
-            edcaf->requestChannel(this);
+        else {
+            EV_DETAIL << "The frame has not reached its retry limit." << std::endl;
+            // edcaf->requestChannel(this); XXX: only for validation
+            // std::cout << simTime() << " " << internallyCollidedFrame->getName() << " " << rc << std::endl;
+            edcaf->requestChannel(this, dummyRecoveryProcedure->computeCw(ac, edcaf->getCwMin(), edcaf->getCwMax()));
+        }
     }
 }
 
@@ -235,8 +247,11 @@ void Hcf::frameSequenceFinished()
         mac->sendDownPendingRadioConfigMsg(); // TODO: review
         AccessCategory ac = edcaf->getAccessCategory();
         edcaTxops[ac]->stopTxop();
-        if (startContention)
-            edcaf->requestChannel(this);
+        if (startContention) {
+            EV_DETAIL << printAccessCategory(ac) << " queue still has frames to transmit" << std::endl;
+            // XXX: only for validation edcaf->requestChannel(this);
+            edcaf->requestChannel(this, dummyRecoveryProcedure->computeCw(ac, edcaf->getCwMin(), edcaf->getCwMax()));
+        }
     }
     else if (hcca->isOwning()) {
         hcca->releaseChannel(this);
@@ -408,6 +423,7 @@ void Hcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         bool retryLimitReached = false;
+        dummyRecoveryProcedure->increaseRetryCount(failedFrame); // XXX: only for validation
         if (auto dataFrame = dynamic_cast<Ieee80211DataFrame *>(failedFrame)) {
             EV_INFO << "Data frame transmission failed\n";
             if (dataFrame->getAckPolicy() == NORMAL_ACK) {
@@ -578,12 +594,15 @@ void Hcf::transmitFrame(Ieee80211Frame* frame, simtime_t ifs)
             dataFrame->setAckPolicy(ackPolicy);
         }
         setFrameMode(frame, rateSelection->computeMode(frame, txop));
-        if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION)
-            frame->setDuration(singleProtectionMechanism->computeDurationField(frame, edcaInProgressFrames[ac]->getPendingFrameFor(frame), edcaTxops[ac], recipientAckPolicy));
-        else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::MULTIPLE_PROTECTION)
-            throw cRuntimeError("Multiple protection is unsupported");
-        else
-            throw cRuntimeError("Undefined protection mechanism");
+
+        frame->setDuration(dummyProtectionMechanism->computeDurationField(frame, edcaInProgressFrames[ac]->getPendingFrameFor(frame), edcaTxops[ac], recipientAckPolicy));
+//        FIXME: validation
+//        if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION)
+//            frame->setDuration(singleProtectionMechanism->computeDurationField(frame, edcaInProgressFrames[ac]->getPendingFrameFor(frame), edcaTxops[ac], recipientAckPolicy));
+//        else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::MULTIPLE_PROTECTION)
+//            throw cRuntimeError("Multiple protection is unsupported");
+//        else
+//            throw cRuntimeError("Undefined protection mechanism");
         tx->transmitFrame(frame, ifs, this);
     }
     else
