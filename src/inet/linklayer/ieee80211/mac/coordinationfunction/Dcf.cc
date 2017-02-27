@@ -54,7 +54,6 @@ void Dcf::initialize(int stage)
         stationRetryCounters = new StationRetryCounters();
         inProgressFrames = new InProgressFrames(pendingQueue, originatorDataService, ackHandler);
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism*>(getSubmodule("originatorProtectionMechanism"));
-        dummyRecoveryProcedure = new DummyDcfRecoveryProcedure(inProgressFrames);
     }
 }
 
@@ -82,7 +81,6 @@ void Dcf::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
     if (pendingQueue->insert(frame)) {
         EV_INFO << "Frame " << frame->getName() << " has been inserted into the PendingQueue." << endl;
         EV_DETAIL << "Requesting channel" << endl;
-        inProgressFrames->getFrameToTransmit(); // TODO: validiation
         dcfChannelAccess->requestChannel(this);
     }
     else {
@@ -158,12 +156,9 @@ void Dcf::transmitFrame(Ieee80211Frame* frame, simtime_t ifs)
 void Dcf::frameSequenceFinished()
 {
     dcfChannelAccess->releaseChannel(this);
+    if (hasFrameToTransmit())
+        dcfChannelAccess->requestChannel(this);
     mac->sendDownPendingRadioConfigMsg(); // TODO: review
-    if (hasFrameToTransmit()) {
-        // XXX: validation dcfChannelAccess->requestChannel(this);
-        auto dcaf = check_and_cast<Dcaf*>(dcfChannelAccess);
-        dcaf->requestChannel(dummyRecoveryProcedure->computeCw(dcaf->getCwMin(), dcaf->getCwMax()), this);
-    }
 }
 
 bool Dcf::isReceptionInProgress()
@@ -279,7 +274,6 @@ void Dcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
     ackHandler->processFailedFrame(failedFrame);
     recoveryProcedure->dataOrMgmtFrameTransmissionFailed(failedFrame, stationRetryCounters);
     bool retryLimitReached = recoveryProcedure->isRetryLimitReached(failedFrame);
-    dummyRecoveryProcedure->increaseRetryCount(failedFrame);
     if (dataAndMgmtRateControl) {
         int retryCount = recoveryProcedure->getRetryCount(failedFrame);
         dataAndMgmtRateControl->frameTransmitted(failedFrame, retryCount, false, retryLimitReached);

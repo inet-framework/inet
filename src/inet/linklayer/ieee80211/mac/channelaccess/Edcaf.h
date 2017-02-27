@@ -69,7 +69,6 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
 
     public:
         // IChannelAccess
-        void requestChannel(IChannelAccess::ICallback *callback, int cw); // XXX: only for validation
 
         virtual void requestChannel(IChannelAccess::ICallback *callback) override;
         virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
@@ -86,9 +85,6 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
         virtual bool isOwning() { return owning; }
         virtual bool isInternalCollision();
         virtual AccessCategory getAccessCategory() { return ac; }
-
-        virtual int getCwMax() { return cwMax; } // XXX: only for validation
-        virtual int getCwMin() { return cwMin; } // XXX: only for validation
 };
 
 } /* namespace ieee80211 */
