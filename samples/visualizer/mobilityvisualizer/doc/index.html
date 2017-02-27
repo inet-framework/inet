@@ -39,35 +39,18 @@
         Because of the mobility settings, they move randomly between the predefined borders.
         There is one difference between the nodes. The <var>host1</var> speed is 15mps, the <var>host2</var> speed is 30mps.
         Here is the configuration of the mobility:
-        <div class="snippet">
-            # Mobility parameters<br>
-            *.host*.mobilityType = "MassMobility"<br>
-            *.host*.mobility.changeInterval = 0.5s<br>
-            *.host*.mobility.changeAngleBy = uniform(-30deg, 30deg)<br>
-            *.host*.mobility.constraintAreaMinX = 150m<br>
-            *.host*.mobility.constraintAreaMinY = 100m<br>
-            *.host*.mobility.constraintAreaMinZ = 0m<br>
-            *.host*.mobility.constraintAreaMaxX = 700m<br>
-            *.host*.mobility.constraintAreaMaxY = 500m<br>
-            *.host*.mobility.constraintAreaMaxZ = 0m<br>
-            <br>
-            *.host1.mobility.speed = 15mps<br>
-            *.host2.mobility.speed = 30mps<br>
-        </div>
     </p>
     <p>
         The visualization of mobility is enabled, because the <i>displayMovements</i> parameter is true by default.
         It is really confusing, if we run the simulation now:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="ShowNothing.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=621 src="ShowNothing.mp4">
     </p>
-
     <p>
         We display the movement trail, the velocity vector and the orientation arc of the node.
         Here is the configuration:
         <div class="snippet">
-            # Visualizer parameters<br>
             # Movement trail<br>
             *.visualizer.*.mobilityVisualizer.displayMovementTrails = true<br>
             <br>
@@ -80,7 +63,7 @@
         Now it is easy to follow the nodes' movement:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="DefaultParams.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=621 src="DefaultParams.mp4">
     </p>
 
     <p>
@@ -99,7 +82,7 @@
         Here is the result of these settings:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=616 src="CustomParams.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=621 src="CustomParams.mp4">
     </p>
 
 
