@@ -47,8 +47,7 @@ void QoSRecoveryProcedure::initialize(int stage)
 
 void QoSRecoveryProcedure::incrementStationSrc()
 {
-    // FIXME: Kludge for validation
-    // stationShortRetryCounter++;
+    stationShortRetryCounter++;
     if (stationShortRetryCounter == shortRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow(); // TODO: + stationShortRetryCounter = 0??
     else
@@ -57,7 +56,7 @@ void QoSRecoveryProcedure::incrementStationSrc()
 
 void QoSRecoveryProcedure::incrementStationLrc()
 {
-    // stationLongRetryCounter++;
+    stationLongRetryCounter++;
     if (stationLongRetryCounter == longRetryLimit) // 9.3.3 Random backoff time
         resetContentionWindow(); // TODO: + stationLongRetryCounter = 0??
     else
@@ -190,10 +189,9 @@ void QoSRecoveryProcedure::rtsFrameTransmissionFailed(Ieee80211DataFrame* protec
 //
 bool QoSRecoveryProcedure::isRetryLimitReached(Ieee80211DataFrame* failedFrame)
 {
-    // XXX: validation
-//    if (failedFrame->getByteLength() >= rtsThreshold)
-//        return getRc(failedFrame, longRetryCounter) >= longRetryLimit;
-//    else
+    if (failedFrame->getByteLength() >= rtsThreshold)
+        return getRc(failedFrame, longRetryCounter) >= longRetryLimit;
+    else
         return getRc(failedFrame, shortRetryCounter) >= shortRetryLimit;
 }
 

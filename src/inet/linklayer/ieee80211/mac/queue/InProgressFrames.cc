@@ -68,24 +68,20 @@ Ieee80211DataOrMgmtFrame* InProgressFrames::getPendingFrameFor(Ieee80211Frame *f
             if (ackHandler->isEligibleToTransmit(frame) && frameToTransmit != frame)
                 return frame;
         }
-        if (pendingQueue->length() > 0)
-            return pendingQueue->front();
-        return nullptr;
-// TODO: validation
-//        auto frames = dataService->extractFramesToTransmit(pendingQueue);
-//        if (frames) {
-//            auto firstFrame = (*frames)[0];
-//            for (auto frame : *frames) {
-//                ackHandler->frameGotInProgress(frame);
-//                inProgressFrames.push_back(frame);
-//            }
-//            delete frames;
-//            // FIXME: If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
-//            // a wrong pending frame.
-//            return firstFrame;
-//        }
-//        else
-//            return nullptr;
+        auto frames = dataService->extractFramesToTransmit(pendingQueue);
+        if (frames) {
+            auto firstFrame = (*frames)[0];
+            for (auto frame : *frames) {
+                ackHandler->frameGotInProgress(frame);
+                inProgressFrames.push_back(frame);
+            }
+            delete frames;
+            // FIXME: If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
+            // a wrong pending frame.
+            return firstFrame;
+        }
+        else
+            return nullptr;
     }
 }
 

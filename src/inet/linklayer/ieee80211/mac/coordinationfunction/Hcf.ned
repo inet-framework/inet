@@ -28,7 +28,6 @@ import inet.linklayer.ieee80211.mac.originator.OriginatorQoSMacDataService;
 import inet.linklayer.ieee80211.mac.originator.QoSRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.QoSRtsPolicy;
 import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
-import inet.linklayer.ieee80211.mac.protectionmechanism.DummyProtectionMechanism;
 import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
 import inet.linklayer.ieee80211.mac.rateselection.QoSRateSelection;
 import inet.linklayer.ieee80211.mac.recipient.QoSCtsPolicy;
@@ -87,9 +86,6 @@ module Hcf
         singleProtectionMechanism: SingleProtectionMechanism {
             parameters:
                 @display("p=400,300");
-        }
-        dummyProtectionMechanism: DummyProtectionMechanism {
-            @display("p=150,561");
         }
         edcaMgmtAndNonQoSRecoveryProcedure: NonQoSRecoveryProcedure {
             parameters:

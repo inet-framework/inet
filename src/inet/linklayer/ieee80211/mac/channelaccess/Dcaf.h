@@ -55,7 +55,6 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
     public:
         // IChannelAccess::ICallback
         virtual void requestChannel(IChannelAccess::ICallback* callback) override;
-        virtual void requestChannel(int cw, IChannelAccess::ICallback* callback); // XXX: validation
         virtual void releaseChannel(IChannelAccess::ICallback* callback) override;
 
         // IContention::ICallback
@@ -65,10 +64,6 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
         // IRecoveryProcedure::ICallback
         virtual void incrementCw() override;
         virtual void resetCw() override;
-
-        // XXX: validation
-        virtual int getCwMin() { return cwMin; }
-        virtual int getCwMax() { return cwMax; }
 };
 
 } /* namespace ieee80211 */

@@ -44,10 +44,8 @@
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQoSMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/QoSAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QoSRecoveryProcedure.h"
-#include "inet/linklayer/ieee80211/mac/originator/DummyRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
-#include "inet/linklayer/ieee80211/mac/protectionmechanism/DummyProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 
@@ -96,7 +94,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
         std::vector<QoSRecoveryProcedure*> edcaDataRecoveryProcedures;
         NonQoSRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
-        DummyRecoveryProcedure *dummyRecoveryProcedure = nullptr;
 
         // Block Ack Agreement Handlers
         IOriginatorBlockAckAgreementHandler *originatorBlockAckAgreementHandler = nullptr;
@@ -125,7 +122,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
         // Protection mechanisms
         SingleProtectionMechanism *singleProtectionMechanism = nullptr;
-        DummyProtectionMechanism *dummyProtectionMechanism = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
