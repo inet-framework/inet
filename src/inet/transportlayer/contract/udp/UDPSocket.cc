@@ -320,7 +320,7 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     std::stringstream os;
     os << pk << " (" << pk->getByteLength() << " bytes) ";
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
-    os << " TTL=" << ttl << " DSCP =" << dscp << " on ifID=" << interfaceID;
+    os << " TTL=" << ttl << " DSCP=" << dscp << " on ifID=" << interfaceID;
     return os.str();
 }
 
