@@ -69,7 +69,7 @@ std::vector<Edcaf*> Edca::getInternallyCollidedEdcafs()
 
 void Edca::requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback* callback)
 {
-    edcafs[ac]->requestChannel(callback);
+    edcafs[ac]->requestChannel(callback, edcafs[ac]->getCwMin());
 }
 
 void Edca::releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback* callback)

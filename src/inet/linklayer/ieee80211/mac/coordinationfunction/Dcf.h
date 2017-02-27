@@ -37,6 +37,7 @@
 #include "inet/linklayer/ieee80211/mac/lifetime/DcfTransmitLifetimeHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQoSRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/DummyDcfRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
@@ -97,6 +98,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         // Station counters
         StationRetryCounters *stationRetryCounters = nullptr;
 
+        DummyDcfRecoveryProcedure *dummyRecoveryProcedure = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

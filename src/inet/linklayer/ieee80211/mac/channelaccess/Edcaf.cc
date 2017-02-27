@@ -138,6 +138,21 @@ void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
         updateDisplayString();
 }
 
+void Edcaf::requestChannel(IChannelAccess::ICallback* callback, int cw)
+{
+    this->callback = callback;
+    ASSERT(!owning);
+    if (contention->isContentionInProgress())
+        EV_DETAIL << "Contention has already been started" << std::endl;
+    else {
+//        EV_DETAIL << "Starting contention with cw = " << cw << ", ifs = " << ifs << ", eifs = "
+//                  << eifs << ", slotTime = " << slotTime << std::endl;
+        contention->startContention(cw, ifs, eifs, slotTime, this);
+    }
+    if (hasGUI())
+        updateDisplayString();
+}
+
 void Edcaf::expectedChannelAccess(simtime_t time)
 {
     collisionController->expectedChannelAccess(this, time);
