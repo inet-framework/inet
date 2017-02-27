@@ -1,5 +1,62 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-02-17  Rudolf Hornig
+
+	build: removed OMNeT 5.0 compatibility code
+
+2017-01-12  Zoltan Bojthe
+
+	ipv4: use result of dynamic_cast (instead of using c-style cast when
+	dynamic_cast returns not nullptr)
+
+2017-01-12  Zoltan Bojthe
+
+	ipv4: fixed ttl off-by-one error
+
+2017-01-11  Julius Flohr
+
+	fixed invalid TTL reuse for ICMP Echo Reply
+
+2017-01-05  Zoltan Bojthe
+
+	IIPv4RoutingTable: fixed override problems
+
+	- override pure virtual function with pure virtual function
+	- override function with different parameter type
+	- missing override
+
+	ICMP: send up icmp error when original packet received from higher layer
+	- fingerprint changed
+
+	icmp: fixing bug #64: Buffer Overflow Error in ICMP.cc
+
+2015-06-15  Levente Meszaros
+
+	IPv4: Dropped obsolete manet kludge.
+
+2015-08-28  Zoltan Bojthe
+
+	IPv4RoutingTable: added EV output for add/delete route
+
+2016-12-23  Rudolf Hornig
+
+	build: removed deprecation warings
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
+2016-08-03  Zoltan Bojthe
+
+	MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-01-08  Levente Meszaros

@@ -17,7 +17,7 @@
 
 #include "inet/common/OSGUtils.h"
 
-#ifdef WITH_OSG
+#if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
 #include <osg/CullFace>
 #include <osg/Depth>
 #include <osg/Light>
@@ -29,7 +29,7 @@ namespace inet {
 
 namespace osg {
 
-#ifdef WITH_OSG
+#if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
 
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize)
 {

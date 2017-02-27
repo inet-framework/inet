@@ -1,5 +1,18 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-06-30  Florian Kauer
+
+	mobility: Fixing bug in StaticConcentricMobility
+
+	The calculation was unnecessary complex, leading to rounding errors
+	during the node positioning so nodes were positioned above each other.
+	This approach is maybe insignificantly slower, but probably not since the
+	sqrt is no longer necessary.
+
+	Signed-off-by: Florian Kauer <florian.kauer@koalo.de>
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-04-19  Levente Meszaros

@@ -1,5 +1,49 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-15  xiabin
+
+	typo: s/wirless/wireless
+
+2016-11-21  Zoltan Bojthe
+
+	dhcp client - refactoring: function rename
+
+2016-11-23  Zoltan Bojthe
+
+	dhcp client: fixes: used was wrong netmask, routeMatches() was wrong
+
+2016-11-21  Zoltan Bojthe
+
+	dhcp client: drop old config (ip address, routing entry) before send a
+	DHCPDISCOVER
+
+2016-11-21  Zoltan Bojthe
+
+	dhcp server: fixed destination address in DHCPOFFER and DHCPACK
+
+2016-11-18  Zoltan Bojthe
+
+	dhcp server: modified ned parameters: removed subnetMask (get from
+	interface), ipAddressStart replaced to numReservedAddresses, gateway has
+	default value, removed dns parameter
+
+2016-11-17  Zoltan Bojthe
+
+	DHCPServer: bugfixes, checking parameters
+
+	sendAck, sendOffer was used wrong netmask
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

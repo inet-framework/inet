@@ -20,6 +20,8 @@
 #define __INET_PACKETDRILLUTILS_H
 
 #include "inet/common/INETDefs.h"
+#include "omnetpp/platdep/sockets.h"
+
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/common/ByteArray.h"
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)

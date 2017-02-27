@@ -44,11 +44,11 @@ void MediumCanvasVisualizer::initialize(int stage)
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         if (displaySignals) {
             communicationLayer = new cGroupFigure("communication");
-            canvas->addFigureBelow(communicationLayer, canvas->getSubmodulesLayer());
+            communicationLayer->insertBelow(canvas->getSubmodulesLayer());
         }
         if (displayRadioFrames) {
             radioFrameLayer = new cGroupFigure("radioFrameLayer");
-            canvas->addFigureAbove(radioFrameLayer, canvas->getSubmodulesLayer());
+            radioFrameLayer->insertAbove(canvas->getSubmodulesLayer());
         }
         displayCommunicationHeat = par("displayCommunicationHeat");
         if (displayCommunicationHeat) {

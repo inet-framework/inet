@@ -20,6 +20,7 @@
 #define __INET_PACKETDRILL_H
 
 #include "inet/common/INETDefs.h"
+#include "omnetpp/platdep/sockets.h"
 
 #include "PacketDrillUtils.h"
 #include "inet/transportlayer/udp/UDPPacket.h"

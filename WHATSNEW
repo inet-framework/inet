@@ -1,11 +1,11 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.5.0 (Jan, 2017) - stable
+INET-3.5.0 (Feb, 2017) - stable
 -------------------------------
 
 This release contains mostly bug fixes and compatibility changes. It requires 
-OMNeT++ 5.0 or 5.1 Preview 2. Earlier versions of OMNeT++ are *not* compatible.
+OMNeT++ 5.1. Earlier versions of OMNeT++ are *not* compatible.
 
 Highligts in this release:
 
@@ -62,7 +62,7 @@ Fixes:
 
   - Ieee8021dRelay: fixed a null pointer crash
 
-  - StaticCOncentricMobility: fixed a rounding issue
+  - StaticConcentricMobility: fixed a rounding issue
 
   - ICMP: fixed "icmp error answer to a fragmented udp packet" problem
 

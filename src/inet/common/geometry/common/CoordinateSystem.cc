@@ -17,7 +17,7 @@
 
 #include "inet/common/geometry/common/CoordinateSystem.h"
 
-#ifdef WITH_OSG
+#if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 #include <osgEarthUtil/ObjectLocator>
 #endif
 
@@ -50,7 +50,7 @@ GeoCoord SimpleGeographicCoordinateSystem::computeGeographicCoordinate(const Coo
     return GeoCoord(geograpicLatitude, geograpicLongitude, playgroundCoordinate.z - playgroundAltitude);
 }
 
-#ifdef WITH_OSG
+#if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 
 Define_Module(OsgGeographicCoordinateSystem);
 
@@ -96,7 +96,7 @@ GeoCoord OsgGeographicCoordinateSystem::computeGeographicCoordinate(const Coord&
     return GeoCoord(geographicCoordinate.y(), geographicCoordinate.x(), geographicCoordinate.z());
 }
 
-#endif // WITH_OSG
+#endif // WITH_OSGEARTH
 
 } // namespace inet
 

@@ -1,5 +1,42 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-27  Rudolf Hornig
+
+	build: platdep/sockets.h is removed from INETDefs.h (precompiled.h)
+
+2017-01-05  Zoltan Bojthe
+
+	PacketDrill: fixed printf format for Int64
+
+2017-01-09  Rudolf Hornig
+
+	packetdrill: fixed build failures on windows
+
+2016-11-24  Irene Ruengeler
+
+	Packetdrill: Add StreamReconfig support for SCTP
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-07-20  Zoltan Bojthe
+
+	omnetpp5: replace deprecated cQueue functions: operator(), length(),
+	empty()
+
+2016-09-19  Zoltan Bojthe
+
+	omnetpp5: remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500)
+
+2016-10-14  Rudolf Hornig
+
+	build: fix build errors on Windows introduced by the precompiled header
+	support.
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

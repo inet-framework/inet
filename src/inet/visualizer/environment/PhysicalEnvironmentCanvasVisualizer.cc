@@ -36,7 +36,7 @@ void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         objectsLayer = new cGroupFigure("objectsLayer");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
-        canvas->addFigureBelow(objectsLayer, canvas->getSubmodulesLayer());
+        objectsLayer->insertBelow(canvas->getSubmodulesLayer());
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
     }
 }

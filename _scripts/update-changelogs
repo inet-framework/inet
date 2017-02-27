@@ -9,11 +9,11 @@ import string
 import subprocess
 
 # configuration
-since = '2014-03-19'
+since = '2016-06-18'
 entriesToIgnore = [
-"""2014-03-12  Rudolf Hornig
+"""2016-12-23  Rudolf Hornig
 
-    updated changelogs for v2.3
+	build: ChangeLogs tagged
 
 """,
 """2014-03-14  Rudolf Hornig
@@ -23,16 +23,12 @@ entriesToIgnore = [
     This reverts commit 1bf7ee83a4677760c23c55cb7ce2b004a2bde193.
 
 """,
-"""2014-02-05  Zoltan Bojthe
-
-    backport: reduce differences in code
-
-""",
 ]
 addMarker = True
 
 isWindows = ('OS' in os.environ) and os.environ['OS']=='Windows_NT'
 isMSYS = isWindows and ('OSTYPE' in os.environ) and os.environ['OSTYPE']=='msys'
+changedFiles = []
 
 def formatChangeLog(txt):
     txt = re.sub('(?m)^    (    )?', "\t", txt) # spaces-to-tab
@@ -44,10 +40,11 @@ def formatChangeLog(txt):
     return txt
 
 def updateChangeLogIn(dir):
-    global since, addMarker, isWindows, isMSYS
+    global since, addMarker, isWindows, isMSYS, changedFiles
 
     # read existing ChangeLog file
-    f = open(os.path.join(dir,'ChangeLog'), 'r')
+    changelogFile = os.path.join(dir,'ChangeLog')
+    f = open(changelogFile, 'r')
     oldLog = f.read()
     f.close()
 
@@ -80,14 +77,16 @@ def updateChangeLogIn(dir):
     updatedLog = formatChangeLog(updatedLog)
 
     # write to disk
-    f = open(os.path.join(dir,'ChangeLog'), 'w')
+    f = open(changelogFile, 'w')
     f.write(updatedLog)
     f.close()
+    changedFiles.append(changelogFile)
 
 # find those directories that contain ChangeLogs, and update them
 for root, dirs, files in os.walk('.'):
     if 'ChangeLog' in files:
         print root, "contains ChangeLog, updating..."
         updateChangeLogIn(root)
+print "\nUpdated ChangeLog files:\n", " ".join(changedFiles)
 
 

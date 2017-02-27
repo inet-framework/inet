@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-15  xiabin
+
+	typo: s/wirless/wireless
+
+2016-11-17  Zoltan Bojthe
+
+	Router.ned: added dhcp server conditionally
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2015-09-29  Levente Meszaros

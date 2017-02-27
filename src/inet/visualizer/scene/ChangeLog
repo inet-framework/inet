@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-02-17  Rudolf Hornig
+
+	build: removed OMNeT 5.0 compatibility code
+
+2017-02-15  Zoltan Bojthe
+
+	omnetpp5.1 ccanvas compatibility changes: do not use deprecated functions
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-05-31  Levente Meszaros

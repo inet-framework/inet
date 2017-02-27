@@ -190,7 +190,7 @@ void PlotFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-    setBounds(parseBounds(property));
+    setBounds(parseBounds(property, getBounds()));
 
     const char *s;
     if ((s = property->getValue(PKEY_BACKGROUND_COLOR)) != nullptr)
@@ -281,10 +281,9 @@ void PlotFigure::redrawValueTicks()
 
             number->setAnchor(ANCHOR_W);
             number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT));
-
-            addFigureBelow(tick, plotFigure);
-            addFigureBelow(dashLine, plotFigure);
-            addFigureBelow(number, plotFigure);
+            tick->insertBelow(plotFigure);
+            dashLine->insertBelow(plotFigure);
+            number->insertBelow(plotFigure);
             valueTicks.push_back(Tick(tick, dashLine, number));
         }
     else
@@ -349,10 +348,9 @@ void PlotFigure::redrawTimeTicks()
 
             number->setAnchor(ANCHOR_N);
             number->setFont(Font("", bounds.height * NUMBER_SIZE_PERCENT));
-
-            addFigureBelow(tick, plotFigure);
-            addFigureBelow(dashLine, plotFigure);
-            addFigureBelow(number, plotFigure);
+            tick->insertBelow(plotFigure);
+            dashLine->insertBelow(plotFigure);
+            number->insertBelow(plotFigure);
             timeTicks.push_back(Tick(tick, dashLine, number));
         }
     else

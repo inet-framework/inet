@@ -29,6 +29,43 @@ namespace inet {
 
 namespace utils {
 
+cNEDValue nedf_hasVisualizer(cComponent *context, cNEDValue argv[], int argc)
+{
+#ifdef WITH_VISUALIZERS
+    return true;
+#else
+    return false;
+#endif
+}
+
+Define_NED_Function2(nedf_hasVisualizer,
+        "bool hasVisualizer()",
+        "",
+        "Returns true if the visualizer feature is available"
+        );
+
+cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
+{
+    cRegistrationList *types = componentTypes.getInstance();
+    if (argv[0].getType() != cNEDValue::STR)
+        throw cRuntimeError("hasModule(): string arguments expected");
+    const char *name = argv[0].stringValue();
+    cComponentType *c;
+    c = dynamic_cast<cComponentType *>(types->lookup(name)); // by qualified name
+    if (c && c->isAvailable())
+        return true;
+    c = dynamic_cast<cComponentType *>(types->find(name)); // by simple name
+    if (c && c->isAvailable())
+        return true;
+    return false;
+}
+
+Define_NED_Function2(nedf_hasModule,
+        "bool hasModule(string nedTypeName)",
+        "string",
+        "Returns true if the given NED type exists"
+        );
+
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
     return classes.getInstance()->lookup(argv[0].stringValue()) != nullptr;

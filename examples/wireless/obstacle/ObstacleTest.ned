@@ -22,7 +22,7 @@ import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.contract.IIntegratedVisualizer;
 
 network ObstacleTest
 {
@@ -30,7 +30,7 @@ network ObstacleTest
         int numHosts;
         @display("bgb=0,0");
     submodules:
-        visualizer: IntegratedVisualizer {
+        visualizer: <default("IntegratedVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
                 @display("p=100,50");
         }

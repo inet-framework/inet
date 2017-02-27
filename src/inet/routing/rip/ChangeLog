@@ -1,5 +1,22 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-11-21  Zoltan Bojthe
+
+	RIPRouting: fixed emit type
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-10-14  Rudolf Hornig
+
+	build: fixed build error on MinGW-64 becuase size_type is defined as unsigned
+	long long which does not have a proper parsim pack/unpack function in
+	omnetpp/parsim.h or an appropriate callback function with long long type.
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

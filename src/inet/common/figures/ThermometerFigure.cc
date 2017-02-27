@@ -156,7 +156,9 @@ void ThermometerFigure::setTickSize(double value)
 void ThermometerFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
-    setBounds(parseBounds(property));
+
+    setBounds(parseBounds(property, getBounds()));
+
 
     // Set default
     redrawTicks();

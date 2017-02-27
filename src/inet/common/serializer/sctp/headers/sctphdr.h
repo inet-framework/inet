@@ -395,7 +395,7 @@ struct random_parameter
 {
     uint16_t type;
     uint16_t length;
-    uint8_t random[];
+    uint8_t random[0];
 } __PACKED__;
 
 struct tlv
@@ -412,7 +412,7 @@ struct heartbeat_info
     uint16_t length;
     union
     {
-        uint8_t info[];
+        uint8_t info[0];
         struct
         {
             union

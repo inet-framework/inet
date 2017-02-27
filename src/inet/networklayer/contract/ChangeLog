@@ -1,5 +1,15 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-08-01  Zoltan Bojthe
+
+	IInterfaceTable/InterfaceTable: getter functions made const
+
+2016-08-03  Zoltan Bojthe
+
+	MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------

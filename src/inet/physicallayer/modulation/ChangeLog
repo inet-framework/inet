@@ -1,5 +1,17 @@
 ====== inet-3.x ======
 
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-06-30  Florian Kauer
+
+	Fixing DSSSOQPSK16Modulation
+
+	The calculation does not make any sense if bitrate and bandwidth do not
+	match the conventional values. Furthermore, the base class requires an
+	existing symbol vector.
+
+	Signed-off-by: Florian Kauer <florian.kauer@koalo.de>
+
 2016-06-15  ------ inet-3.4.0 released ------
 
 2016-06-01  ------ inet-3.3.0 released ------
