@@ -428,7 +428,7 @@ CsmaCaMacDataFrame *CsmaCaMac::encapsulate(cPacket *msg)
     frame->setArrival(msg->getArrivalModuleId(), msg->getArrivalGateId());
 
     frame->setTransmitterAddress(address);
-    frame->setReceiverAddress(frame->getMandatoryTag<MacAddressReq>()->getDestAddress());
+    frame->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
     auto upp = frame->getTag<UserPriorityReq>();
     int up = upp == nullptr ? UP_BE : upp->getUserPriority();
     frame->setPriority(up == -1 ? UP_BE : up);  // -1 is unset
