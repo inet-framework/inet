@@ -38,9 +38,9 @@ ObstacleLossVisualizer
 SceneVisualizer
 - viewScale parameter
 
-DatalinkVisualizer:
+DatalinkVisualizer & PhysicallinkVisualizer:
 
-PhysicallinkVisualizer:
+- Csak akkor legyen nyíl 2 node között, ha a csomag közvetlenül megy át közöttük és nincs más node ahol megjelenik
 
 NetworkRouteVisualizer:
 
