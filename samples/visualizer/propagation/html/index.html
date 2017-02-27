@@ -30,7 +30,55 @@ and what transmissions are present at various nodes.
 </p>
 
 <p>
+In a large network, there might be multiple wireless nodes transmitting simultaneously, resulting in interference at
+receiving nodes, and incorrecly received packets. The logs contain the clues as to what happened to various packets,
+but scanning through the logs is a tedious process. By visualizing radio signals as they propagate through space,
+it is easier to see which nodes are transmitting and which are receiving at any given time,
+and what transmissions are present at various nodes.
+</p>
+
+<p>
 This example contains 3 configurations of increasing complexity, each showing different features of the visualization.
+</p>
+
+<pre>
+config 1 - default settings, all visualizations enabled (except for the communicationheat), simple network
+
+config 2 - more complex network, setting the animation speed parameters, and that the animations are not the same duration
+
+config 3 - interference, an important feature, is that it shows that there are multiple transmissions present at a node
+			at the same time...overlapping transmissions
+</pre>
+
+<h2>About the visualizer</h2>
+
+<p>
+The <var>MediumVisualizer</var> module can visualize various aspects of radio transmissions. It can visualize radio signals as they
+propagate through space as colored disks with a wave pattern, originating at the signal source node. The disk representing the
+signal fades with distance, e.g. as the signal gets weaker further out from the transmitter. By default, different transmissions are colored
+differently. The name of the packet in the transmission is indicated on the disk. The visualization of propagating signals is
+enabled with the <var>displaySignals</var> parameter. 
+</p>
+
+<p>
+The visualizer can indicate that nodes are currently receiving or transmitting a signal, by placing an icon over the node, on the top level
+canvas. The power of the transmitted/received signal is indicated in dBW. The visualization of transmissions and receptions are enabled
+with the visualizer's <var>displayTransmissions</var> and <var>displayReceptions</var> parameter, respectively.
+</p>
+
+<p>
+The communication and interference ranges of nodes can be visualized as blue and grey circles, respectively. These are enabled
+with the <var>displayCommunicationRanges</var> and <var>displayInterferenceRanges</var> parameters.
+</p>
+
+<h2>Displaying signal propagation, transmissions and receptions</h2>
+
+<p>
+In this configuration, all features of the visualizer are enabled. Parameters are left on default.
+</p>
+
+<p>
+This configuration demonstrates the visualization, with the visualizer's default settings.
 </p>
 
 </body>
