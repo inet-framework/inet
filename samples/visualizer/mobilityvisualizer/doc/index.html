@@ -12,21 +12,23 @@
 	<p><h2>Goals - WIP</h2></p>
 	<p>
 		When wireless nodes roam in the network, it's often difficult to follow their movement.        
-        By displaying nodes' movement trajectory, velocity and orientation, we see enough information to track them.
+        By displaying nodes' movement trajectory, velocity and orientation, we can see enough information to track them.
         <!--TODO: There must be something I can write. But what...-->
     </p>
     <p>    
-        The example consists of 1 simulation model, that demonstrates some features of mobility visualization.
+        The example consists of one simulation model, that demonstrates important features of mobility visualization.
     </p>
 
 
     <p><h2>About the visualizer</h2></p>
     <p>
-        The <var>MobilityVisualizer</var> displays data about movements of the wireless nodes.
+        The <var>MobilityVisualizer</var> displays data about the movements of wireless nodes.
         The visualizer has three main parameters: Movement trail, velocity and orientation.
         Movement trail shows the node's recent movement trajectory. We can set its length using the <i>trailLength</i> parameter.
         Velocity is represented visually by a solid arrow. Its length is proportional to the speed, but we can modify this ratio with a velocity scaling factor called <i>velocityArrowScale</i>.
-        Orientation represented by an arc. Its size can be modified.
+        Orientation is represented by an arc. The arc's size is specified by the <var>orientationArcSize</var> parameter.
+        This value is the relative size of the arc compared to a full circle.
+        Its default value is 0.25, i.e. a quarter or a circle.
     </p>
 
 
@@ -37,8 +39,7 @@
     <p>
         We place two <var>Adhochosts</var> on the playground.
         Because of the mobility settings, they move randomly between the predefined borders.
-        There is one difference between the nodes. The <var>host1</var> speed is 15mps, the <var>host2</var> speed is 30mps.
-        Here is the configuration of the mobility:
+        There is one difference between the nodes. The <var>host1's</var> speed is 15 mps, <var>host2's</var> speed is 30 mps.
     </p>
     <p>
         The visualization of mobility is enabled, because the <i>displayMovements</i> parameter is true by default.
@@ -67,8 +68,10 @@
     </p>
 
     <p>
-        It could happen that, we want to customize the visualization e.g. we want to highlight any parameter.
-        Now we specifiy the parameters of velocity arrow:
+        Sometimes it's useful to highlight a certain feature of the visualization. For example, we highlight
+        the velocity arrow by customizing its appearance parameters:
+        </p>
+
         <div class="snippet">
             # Velocity vector<br>
             *.visualizer.*.mobilityVisualizer.displayVelocities = true<br>
@@ -77,7 +80,7 @@
             *.visualizer.*.mobilityVisualizer.velocityLineStyle = "solid"<br>
             *.visualizer.*.mobilityVisualizer.velocityLineWidth = 2<br>
         </div>
-    </p>
+    
     <p>
         Here is the result of these settings:
     </p>
