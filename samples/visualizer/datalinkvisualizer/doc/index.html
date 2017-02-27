@@ -12,10 +12,9 @@
 	<p><h2>Goals</h2></p>
 	<p> 
         In computer networks, networked computing devices exchange data with each other using a data link.
-        The connections between nodes are established using either cable media or wireless media.
-        If we look at a network topology, we dont't know whether there is a data link between two nodes.
-        When a network node receives a packet successfully from another device, a data link is established between the nodes.
-        This is shown by the DatalinkVisualizer.
+        The connections between nodes are established using either cable or wireless media.
+        If we look at a network topology, we don't know whether there is a data link between two nodes.
+        When a network node receives a packet successfully from another device on the second layer, a data link is established between the nodes.
     </p>
     <p>    
         The example consists of 4 simulation models, each demonstrating different features of data link visualization.
@@ -36,15 +35,16 @@
     </p>
 
 
-	<p><h2>Enabling data links in wired and wireless network</h2></p>
+	<p><h2>Enabling data links in wired and wireless networks</h2></p>
 
     <p>
-        In this configuration we show how to enable the visualization's default look.
+        TODO: In this configuration we show how to enable the visualization's default look.
+<!-- Hogyan kapcsoljuk be a visualizert a default settings-ekkel. or whatever -->
         We visualize data links both in a wired and in a wireless network.
     </p>
     <p>
-        The wired network contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module which prepares hosts for communication and a <var>DataLinkVisualizer</var> module which displays the data links.
-        In wireless network the type of the hosts is <var>AdhocHost</var> and there is an additional <var>Ieee80211ScalarRadioMedium</var> module which handles the radio channel.
+        The wired network contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module and a <var>DataLinkVisualizer</var> module.
+        In the wireless network the type of the hosts is <var>AdhocHost</var> and there is an additional <var>Ieee80211ScalarRadioMedium</var> module.
     </p>
     <p align="center">
         <img width=600 src="DatalinkVisualizerWiredSimple.png">
@@ -65,8 +65,8 @@
         In both configurations the source host pings the destination host and an additional line of code enables the <var>DatalinkVisualizer</var>.
         Here is how to use ping:
         <div class="snippet">
-            # Application parameters
-            *.wiredSource.numPingApps = 1
+            # Application parameters<br>
+            *.wiredSource.numPingApps = 1<br>
             *.wiredSource.pingApp[0].destAddr = "wiredDestination"
         </div>
         And this line activates the visualizer:
