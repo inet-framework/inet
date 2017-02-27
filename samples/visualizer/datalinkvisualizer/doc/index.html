@@ -53,38 +53,24 @@
         <img width=600 src="DatalinkVisualizerWirelessSimple.png">
     </p>    
     <p>
-<!--        In both configurations the source host pings the destination host:
-        <div class="snippet">
-            *.wiredSource.numPingApps = 1<br>
-            *.wiredSource.pingApp[0].destAddr = "wiredDestination"
-        </div>
-        <div class="snippet">
-            *.wirelessSource.numPingApps = 1<br>
-            *.wirelessSource.pingApp[0].destAddr = "wirelessDestination"
-        </div> -->
-        In both configurations the source host pings the destination host and an additional line of code enables the <var>DatalinkVisualizer</var>.
-        Here is how to use ping:
-        <div class="snippet">
-            # Application parameters<br>
-            *.wiredSource.numPingApps = 1<br>
-            *.wiredSource.pingApp[0].destAddr = "wiredDestination"
-        </div>
-        And this line activates the visualizer:
+        In both configurations the source host pings the destination host. The visualization is enabled by
+        setting the <var>displayLinks</var> parameter to true:
+    </p>
+        
         <div class="snippet">
             *.linkVisualizer.*.displayLinks = true
         </div>
-    </p>
     <p>
         When we start the simulations, here is what happens:
     </p>
     <p align="center">
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=246 src="DatalinkVisualizerWiredSimple.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=250 src="DatalinkVisualizerWiredSimple.mp4">
     </p>
     <p align="center">
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=328 src="DatalinkVisualizerWirelessSimple.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=618 height=333 src="DatalinkVisualizerWirelessSimple.mp4">
     </p>
     <p>
-        When a packet reaches its destination's data link layer, the data link is activated between the nodes and an arrow is shown pointing from the sender towards the receiver.
+        When a packet reaches its destination's data link layer, a data link becomes active between the nodes and an arrow is shown pointing from the sender towards the receiver.
         Then the arrow fades out in real time.
     </p>
 
@@ -92,21 +78,20 @@
     <p><h2>Data link visualization in a complex network</h2></p>
     <p>
         This configuration demonstrates the visualization of data links in a complex network.
-        In this simulation we also show how the <i>packetFilter</i> and the <i>nodeFilter</i> works.
+        In this simulation we also show how the <i>packetFilter</i> and the <i>nodeFilter</i> parameters work.
         Here is the network for this configuration:
     </p>
     <p align="center">
         <img width=600 src="DatalinkVisualizerComplex.png">
     </p>
     <p>
-        The network has an <var>IPv4NetworkConfigurator</var> module and an <var>IntegratedVisualizer</var> module.
+        The network contains an <var>IPv4NetworkConfigurator</var> module and an <var>IntegratedVisualizer</var> module.
         The topology consists of four switches and four endpoints: two source hosts and two destination hosts.
         The sources ping the destinations.
         The visualization of data links is enabled, but it is filtered. Links are displayed only if a ping message is sent.
-        We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters, so the data links don't fade out before the next ping messages aren't sent.
+        We adjust the <i>fadeOutMode</i> and the <i>fadeOutTime</i> parameters, so the data links don't fade out completely before the next ping messages are sent.
         Here is the configuration for the visualization:
         <div class="snippet">
-            # Visualizer parameters<br>
             *.visualizer.*.dataLinkVisualizer.displayLinks = true<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutMode = "simulationTime"<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutTime = 1.4s<br>
@@ -117,18 +102,19 @@
         The following animation shows what happens when we start the simulation:
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=566 height=470 src="DatalinkVisualizerComplexv2.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=566 height=475 src="DatalinkVisualizerComplexv2.mp4">
     </p>
     <p>
-        Only ping messages activate the visualization of data links between the nodes, because of the <i>packetFilter</i>.
+        Only ping messages activate the visualization of data links between the nodes, as set by the <i>packetFilter</i>
+        parameter.
         The visualized data links are represented by solid arrows.
         The arrows start to fade out in simulation time, but they don't disappear completely, because the fadeOutTime is greater than the sending interval of ping messages.
-        Only one data link can be activated per direction between the nodes.
-        If a data link is visualized already between two nodes and another packet activates a data link between the same nodes, the arrow between those nodes is only reinforced.
+        Only one data link can be activated per direction between any two nodes.
+        If a data link is already visualized between two nodes and another packet activates a data link between the same nodes, the arrow between those nodes is reinforced.
     </p>
     <p>
-        It is possible to display ping data links between given nodes.
-        For that we use <i>nodeFilter</i> parameter.
+        It is possible to display ping data links between a selected set of nodes.
+        Nodes can be selected with the <i>nodeFilter</i> parameter.
         In this example we display the data links only between the <var>source1</var> and the <var>destination1</var>.
         Here is how to configure the visualizer:
         <div class="snippet">
@@ -156,8 +142,8 @@
     </p>
     <p>
         The type of all nodes is <var>AODVRouter</var>.
-        These ad hoc nodes are placed randomly on the playground and they move also randomly between borders.
-        The source node has a ping application, that sends ping messages in every seconds.
+        These ad hoc nodes are placed randomly on the playground and they move randomly between borders.
+        The source node has a ping application, that sends ping messages in every second.
         The communication range is reduced to get a non-trivial path between <var>source</var> and <var>destination</var>.
         Here is the configuration:
         <div class="snippet">
@@ -191,12 +177,12 @@
         The following animation illustrates what happens when the simulation is run: 
     </p>
     <p align="center">        
-        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=582 height=518 src="DatalinkVisualizerDynamic.mp4">
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=582 height=523 src="DatalinkVisualizerDynamic.mp4">
     </p>
     <p>
-        The nodes exchange routing informations, then the <var>source</var> starts to ping the <var>destination</var>.
-        When a ping message reaches the next node's data link layer, the link is shown between the nodes.
-        If the route is changed between the <var>source</var> and the <var>destination</var> new data links are activated.
+        The nodes exchange routing information, then the <var>source</var> starts to ping the <var>destination</var>.
+        When a ping message reaches the next node's data link layer, the link is visualized between the nodes.
+        If the route is changed between the <var>source</var> and the <var>destination</var>, new data links are activated.
     </p>
 
 
