@@ -11,16 +11,22 @@
 
 	<p><h2>Goals</h2></p>
 	<p>
-    keywords: complex network with complex topology, many nodes sending packets to many other nodes simulataneously,
-    difficult to track individual packet paths, the effects of topology changes on packets' routes. 
+    keywords: complex network with complex topology, many nodes sending packets to many other nodes simultaneously,
+    difficult to track individual packet paths, the effects of topology changes on packets' routes. <br>
     why is the visualization good: gives an overview of packet paths, highlight the routes, (different packet flows
     are visualized with different colors), (it indicates correctly receives packets on the 3rd layer)
+    </p>
+    <p>
+        In complex or adhoc networks, there are a lot of simultaneous communication.
+        It is difficult to track individual packet paths, because we have to pay attention to more than one message at the same time.
+        The network topology changes e.g  also affects on the packets' routes.
+        The network route visualization gives a clear overview of the individual packet paths.
+        It highlights the network routes, when a Layer 3 route is changed, it changes too.
     </p>
 
     <p>
         In complex or ad hoc networks, we have to track a packet's path step by step, if we want to determine its network route.
         We can't be sure either that the route between two nodes does not change, because a router goes wrong or there is a dynamic routing protocol in the network for example.
-
         With the visualization of network routes we display any packet's network path from the source to the destination.
         It gives a clear picture to us about a packet's network path.
 	</p>	
@@ -38,6 +44,7 @@
         The links are represented visually by solid arrows.
         The arrow's starting point is the source node and its endpoint is the destination node.
         The line goes through those intermediate devices which are the part of the third layer path.
+        (It doesn't go through on switches, because they are Layer 2 devices.
     </p>
     <p>    
         The visualizer has filtering parameters, like <i>nodeFilter</i>, <i>interfaceFilter</i> and <i>packetFilter</i>.
@@ -48,7 +55,7 @@
 
 	<p><h2>Enabling Visualization of Network Routes</h2></p>
     <p>
-        TODO: This simulation demonstrates how to enable the default look of the visualization of network routes.
+        In this simulation we show how to enable the network route visualization with its default settings.
     </p>
     <p>
         The network for this configuration contains two <var>Standardhosts</var>, an <var>IPv4NetworkConfigurator</var> module and a <var>NetworkRouteVisualizer</var> module.
