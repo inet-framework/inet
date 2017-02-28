@@ -47,7 +47,7 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
   public:
     LinkStateUpdateHandler(Router *containingRouter);
 
-    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor) override;
+    void processPacket(Packet *packet, Interface *intf, Neighbor *neighbor) override;
 };
 
 } // namespace ospf

@@ -28,12 +28,12 @@ LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(Router *contain
 {
 }
 
-void LinkStateAcknowledgementHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
+void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
-        OSPFLinkStateAcknowledgementPacket *lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket *>(packet);
+        const auto& lsAckPacket = CHK(packet->peekHeader<OSPFLinkStateAcknowledgementPacket>());
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 

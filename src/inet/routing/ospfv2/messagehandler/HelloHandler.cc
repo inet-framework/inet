@@ -32,9 +32,9 @@ HelloHandler::HelloHandler(Router *containingRouter) :
 {
 }
 
-void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *unused)
+void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unused)
 {
-    OSPFHelloPacket *helloPacket = check_and_cast<OSPFHelloPacket *>(packet);
+    const auto& helloPacket = CHK(packet->peekHeader<OSPFHelloPacket>());
     bool shouldRebuildRoutingTable = false;
 
     /* The values of the Network Mask, HelloInterval,
@@ -61,7 +61,7 @@ void HelloHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *
                ExternalRoutingCapability.
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
-                IPv4Address srcAddress = helloPacket->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+                IPv4Address srcAddress = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;

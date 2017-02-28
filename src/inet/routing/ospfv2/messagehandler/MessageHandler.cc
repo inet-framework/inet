@@ -44,19 +44,15 @@ void MessageHandler::messageReceived(cMessage *message)
     if (message->isSelfMessage()) {
         handleTimer(message);
     }
-    else if (dynamic_cast<ICMPMessage *>(message)) {
-        EV_ERROR << "ICMP error received -- discarding\n";
-        delete message;
-    }
     else {
-        OSPFPacket *packet = check_and_cast<OSPFPacket *>(message);
-        EV_INFO << "Received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
-        if (packet->getRouterID() == IPv4Address(router->getRouterID())) {
-            EV_INFO << "This packet is from ourselves, discarding.\n";
+        Packet *pk = check_and_cast<Packet *>(message);
+        auto protocol = pk->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::icmpv4) {
+            EV_ERROR << "ICMP error received -- discarding\n";
             delete message;
         }
-        else {
-            processPacket(packet);
+        else if (protocol == &Protocol::ospf) {
+            processPacket(pk);
         }
     }
 }
@@ -187,13 +183,20 @@ void MessageHandler::handleTimer(cMessage *timer)
     }
 }
 
-void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neighbor *unused2)
+void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unused2)
 {
+    const auto& packet = CHK(pk->peekHeader<OSPFPacket>());
+    EV_INFO << "Received packet: (" << packet.get()->getClassName() << ")" << pk->getName() << "\n";
+    if (packet->getRouterID() == IPv4Address(router->getRouterID())) {
+        EV_INFO << "This packet is from ourselves, discarding.\n";
+        delete pk;
+        return;
+    }
     // see RFC 2328 8.2
 
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
-        int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+        int interfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
         AreaID areaID = packet->getAreaID();
         Area *area = router->getAreaByID(areaID);
 
@@ -227,8 +230,8 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                 }
             }
             if (intf != nullptr) {
-                IPv4Address sourceAddress = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-                IPv4Address destinationAddress = packet->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
+                IPv4Address sourceAddress = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+                IPv4Address destinationAddress = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
                 IPv4Address allDRouters = IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
 
@@ -244,7 +247,7 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                     )
                 {
                     // packet authentication
-                    if (authenticatePacket(packet)) {
+                    if (authenticatePacket(packet.get())) {
                         OSPFPacketType packetType = static_cast<OSPFPacketType>(packet->getType());
                         Neighbor *neighbor = nullptr;
 
@@ -268,30 +271,30 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
                         }
                         switch (packetType) {
                             case HELLO_PACKET:
-                                helloHandler.processPacket(packet, intf);
+                                helloHandler.processPacket(pk, intf);
                                 break;
 
                             case DATABASE_DESCRIPTION_PACKET:
                                 if (neighbor != nullptr) {
-                                    ddHandler.processPacket(packet, intf, neighbor);
+                                    ddHandler.processPacket(pk, intf, neighbor);
                                 }
                                 break;
 
                             case LINKSTATE_REQUEST_PACKET:
                                 if (neighbor != nullptr) {
-                                    lsRequestHandler.processPacket(packet, intf, neighbor);
+                                    lsRequestHandler.processPacket(pk, intf, neighbor);
                                 }
                                 break;
 
                             case LINKSTATE_UPDATE_PACKET:
                                 if (neighbor != nullptr) {
-                                    lsUpdateHandler.processPacket(packet, intf, neighbor);
+                                    lsUpdateHandler.processPacket(pk, intf, neighbor);
                                 }
                                 break;
 
                             case LINKSTATE_ACKNOWLEDGEMENT_PACKET:
                                 if (neighbor != nullptr) {
-                                    lsAckHandler.processPacket(packet, intf, neighbor);
+                                    lsAckHandler.processPacket(pk, intf, neighbor);
                                 }
                                 break;
 
@@ -303,59 +306,55 @@ void MessageHandler::processPacket(OSPFPacket *packet, Interface *unused1, Neigh
             }
         }
     }
-    delete packet;
+    delete pk;
 }
 
-void MessageHandler::sendPacket(OSPFPacket *packet, IPv4Address destination, int outputIfIndex, short ttl)
+void MessageHandler::sendPacket(Packet *packet, IPv4Address destination, int outputIfIndex, short ttl)
 {
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
     packet->ensureTag<L3AddressReq>()->setDestAddress(destination);
     packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
+    const auto& ospfPacket = CHK(packet->peekHeader<OSPFPacket>());
 
-    switch (packet->getType()) {
+    switch (ospfPacket->getType()) {
         case HELLO_PACKET: {
-            packet->setKind(HELLO_PACKET);
             packet->setName("OSPF_HelloPacket");
 
-            OSPFHelloPacket *helloPacket = check_and_cast<OSPFHelloPacket *>(packet);
-            printHelloPacket(helloPacket, destination, outputIfIndex);
+            const auto& helloPacket = CHK(packet->peekHeader<OSPFHelloPacket>());
+            printHelloPacket(helloPacket.get(), destination, outputIfIndex);
         }
         break;
 
         case DATABASE_DESCRIPTION_PACKET: {
-            packet->setKind(DATABASE_DESCRIPTION_PACKET);
             packet->setName("OSPF_DDPacket");
 
-            OSPFDatabaseDescriptionPacket *ddPacket = check_and_cast<OSPFDatabaseDescriptionPacket *>(packet);
-            printDatabaseDescriptionPacket(ddPacket, destination, outputIfIndex);
+            const auto& ddPacket = CHK(packet->peekHeader<OSPFDatabaseDescriptionPacket>());
+            printDatabaseDescriptionPacket(ddPacket.get(), destination, outputIfIndex);
         }
         break;
 
         case LINKSTATE_REQUEST_PACKET: {
-            packet->setKind(LINKSTATE_REQUEST_PACKET);
             packet->setName("OSPF_LSReqPacket");
 
-            OSPFLinkStateRequestPacket *requestPacket = check_and_cast<OSPFLinkStateRequestPacket *>(packet);
-            printLinkStateRequestPacket(requestPacket, destination, outputIfIndex);
+            const auto& requestPacket = CHK(packet->peekHeader<OSPFLinkStateRequestPacket>());
+            printLinkStateRequestPacket(requestPacket.get(), destination, outputIfIndex);
         }
         break;
 
         case LINKSTATE_UPDATE_PACKET: {
-            packet->setKind(LINKSTATE_UPDATE_PACKET);
             packet->setName("OSPF_LSUpdPacket");
 
-            OSPFLinkStateUpdatePacket *updatePacket = check_and_cast<OSPFLinkStateUpdatePacket *>(packet);
-            printLinkStateUpdatePacket(updatePacket, destination, outputIfIndex);
+            const auto& updatePacket = CHK(packet->peekHeader<OSPFLinkStateUpdatePacket>());
+            printLinkStateUpdatePacket(updatePacket.get(), destination, outputIfIndex);
         }
         break;
 
         case LINKSTATE_ACKNOWLEDGEMENT_PACKET: {
-            packet->setKind(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
             packet->setName("OSPF_LSAckPacket");
 
-            OSPFLinkStateAcknowledgementPacket *ackPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket *>(packet);
-            printLinkStateAcknowledgementPacket(ackPacket, destination, outputIfIndex);
+            const auto& ackPacket = CHK(packet->peekHeader<OSPFLinkStateAcknowledgementPacket>());
+            printLinkStateAcknowledgementPacket(ackPacket.get(), destination, outputIfIndex);
         }
         break;
 

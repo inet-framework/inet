@@ -21,6 +21,7 @@
 #include <list>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/routing/ospfv2/router/LSA.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/OSPFPacket_m.h"
@@ -114,7 +115,7 @@ class INET_API Neighbor
     std::list<OSPFLSAHeader *> databaseSummaryList;
     std::list<OSPFLSAHeader *> linkStateRequestList;
     std::list<TransmittedLSA> transmittedLSAs;
-    OSPFDatabaseDescriptionPacket *lastTransmittedDDPacket = nullptr;
+    Packet *lastTransmittedDDPacket = nullptr;
 
     Interface *parentInterface = nullptr;
 

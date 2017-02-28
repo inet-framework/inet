@@ -31,7 +31,7 @@ LinkStateRequestHandler::LinkStateRequestHandler(Router *containingRouter) :
 {
 }
 
-void LinkStateRequestHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
+void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Request packet received", intf, neighbor);
 
@@ -41,7 +41,7 @@ void LinkStateRequestHandler::processPacket(OSPFPacket *packet, Interface *intf,
         (neighborState == Neighbor::LOADING_STATE) ||
         (neighborState == Neighbor::FULL_STATE))
     {
-        OSPFLinkStateRequestPacket *lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket *>(packet);
+        const auto& lsRequestPacket = packet->peekHeader<OSPFLinkStateRequestPacket>();
 
         unsigned long requestCount = lsRequestPacket->getRequestsArraySize();
         bool error = false;
@@ -79,7 +79,7 @@ void LinkStateRequestHandler::processPacket(OSPFPacket *packet, Interface *intf,
             MessageHandler *messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {
-                OSPFLinkStateUpdatePacket *updatePacket = intf->createUpdatePacket(lsas[j]);
+                Packet *updatePacket = intf->createUpdatePacket(lsas[j]);
                 if (updatePacket != nullptr) {
                     if (intf->getType() == Interface::BROADCAST) {
                         if ((intf->getState() == Interface::DESIGNATED_ROUTER_STATE) ||

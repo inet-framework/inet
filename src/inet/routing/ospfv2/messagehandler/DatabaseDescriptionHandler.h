@@ -33,7 +33,7 @@ class INET_API DatabaseDescriptionHandler : public IMessageHandler
   public:
     DatabaseDescriptionHandler(Router *containingRouter);
 
-    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor) override;
+    void processPacket(Packet *packet, Interface *intf, Neighbor *neighbor) override;
 };
 
 } // namespace ospf

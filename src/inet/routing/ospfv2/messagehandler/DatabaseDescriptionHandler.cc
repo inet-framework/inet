@@ -31,11 +31,11 @@ DatabaseDescriptionHandler::DatabaseDescriptionHandler(Router *containingRouter)
 {
 }
 
-void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
+void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
-    OSPFDatabaseDescriptionPacket *ddPacket = check_and_cast<OSPFDatabaseDescriptionPacket *>(packet);
+    const auto& ddPacket = CHK(packet->peekHeader<OSPFDatabaseDescriptionPacket>());
 
     Neighbor::NeighborStateType neighborState = neighbor->getState();
 
@@ -67,7 +67,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                         neighbor->setDDSequenceNumber(packetID.sequenceNumber);
                         neighbor->setLastReceivedDDPacket(packetID);
 
-                        if (!processDDPacket(ddPacket, intf, neighbor, true)) {
+                        if (!processDDPacket(ddPacket.get(), intf, neighbor, true)) {
                             break;
                         }
 
@@ -97,7 +97,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                     neighbor->setDatabaseExchangeRelationship(Neighbor::MASTER);
                     neighbor->setLastReceivedDDPacket(packetID);
 
-                    if (!processDDPacket(ddPacket, intf, neighbor, true)) {
+                    if (!processDDPacket(ddPacket.get(), intf, neighbor, true)) {
                         break;
                     }
 
@@ -136,7 +136,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                              (packetID.sequenceNumber == (neighbor->getDDSequenceNumber() + 1))))
                         {
                             neighbor->setLastReceivedDDPacket(packetID);
-                            if (!processDDPacket(ddPacket, intf, neighbor, false)) {
+                            if (!processDDPacket(ddPacket.get(), intf, neighbor, false)) {
                                 break;
                             }
                             if (!neighbor->isLinkStateRequestListEmpty() &&

@@ -44,11 +44,11 @@ LinkStateUpdateHandler::LinkStateUpdateHandler(Router *containingRouter) :
 /**
  * @see RFC2328 Section 13.
  */
-void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
+void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State update packet received", intf, neighbor);
 
-    OSPFLinkStateUpdatePacket *lsUpdatePacket = check_and_cast<OSPFLinkStateUpdatePacket *>(packet);
+    const auto& lsUpdatePacket = CHK(packet->peekHeader<OSPFLinkStateUpdatePacket>());
     bool shouldRebuildRoutingTable = false;
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
@@ -250,7 +250,7 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
                     continue;
                 }
                 if (!neighbor->isOnTransmittedLSAList(lsaKey)) {
-                    OSPFLinkStateUpdatePacket *updatePacket = intf->createUpdatePacket(lsaInDatabase);
+                    Packet *updatePacket = intf->createUpdatePacket(lsaInDatabase);
                     if (updatePacket != nullptr) {
                         int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
@@ -329,7 +329,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
     }
 
     if (sendDirectAcknowledgment) {
-        OSPFLinkStateAcknowledgementPacket *ackPacket = new OSPFLinkStateAcknowledgementPacket();
+        const auto& ackPacket = std::make_shared<OSPFLinkStateAcknowledgementPacket>();
 
         ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
         ackPacket->setRouterID(IPv4Address(router->getRouterID()));
@@ -343,7 +343,10 @@ void LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
         ackPacket->setLsaHeadersArraySize(1);
         ackPacket->setLsaHeaders(0, lsaHeader);
 
-        ackPacket->setByteLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
+        ackPacket->setChunkLength(byte(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
+        ackPacket->markImmutable();
+        Packet *pk = new Packet();
+        pk->pushHeader(ackPacket);
 
         int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
@@ -352,20 +355,20 @@ void LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
                 (intf->getState() == Interface::BACKUP_STATE) ||
                 (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
             {
-                router->getMessageHandler()->sendPacket(ackPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(pk, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
             }
             else {
-                router->getMessageHandler()->sendPacket(ackPacket, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(pk, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf->getIfIndex(), ttl);
             }
         }
         else {
             if (intf->getType() == Interface::POINTTOPOINT) {
-                router->getMessageHandler()->sendPacket(ackPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(pk, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
             }
             else {
                 Neighbor *neighbor = intf->getNeighborByID(lsaSource);
                 ASSERT(neighbor);
-                router->getMessageHandler()->sendPacket(ackPacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
+                router->getMessageHandler()->sendPacket(pk, neighbor->getAddress(), intf->getIfIndex(), ttl);
             }
         }
     }

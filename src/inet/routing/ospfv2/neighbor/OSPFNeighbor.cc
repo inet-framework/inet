@@ -179,7 +179,7 @@ const char *Neighbor::getStateString(Neighbor::NeighborStateType stateType)
 
 void Neighbor::sendDatabaseDescriptionPacket(bool init)
 {
-    OSPFDatabaseDescriptionPacket *ddPacket = new OSPFDatabaseDescriptionPacket();
+    const auto& ddPacket = std::make_shared<OSPFDatabaseDescriptionPacket>();
 
     ddPacket->setType(DATABASE_DESCRIPTION_PACKET);
     ddPacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -240,27 +240,30 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     }
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setByteLength(packetSize);
+    ddPacket->setChunkLength(byte(packetSize));
+    ddPacket->markImmutable();
+    Packet *pk = new Packet();
+    pk->pushHeader(ddPacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
     if (lastTransmittedDDPacket != nullptr)
         delete lastTransmittedDDPacket;
-    lastTransmittedDDPacket = ddPacket->dup();
+    lastTransmittedDDPacket = pk->dup();
 
     if (parentInterface->getType() == Interface::POINTTOPOINT) {
-        messageHandler->sendPacket(ddPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, IPv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
     }
     else {
-        messageHandler->sendPacket(ddPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
     }
 }
 
 bool Neighbor::retransmitDatabaseDescriptionPacket()
 {
     if (lastTransmittedDDPacket != nullptr) {
-        OSPFDatabaseDescriptionPacket *ddPacket = new OSPFDatabaseDescriptionPacket(*lastTransmittedDDPacket);
+        Packet *ddPacket = new Packet(*lastTransmittedDDPacket);
         MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
         int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
@@ -329,7 +332,7 @@ void Neighbor::createDatabaseSummary()
 
 void Neighbor::sendLinkStateRequestPacket()
 {
-    OSPFLinkStateRequestPacket *requestPacket = new OSPFLinkStateRequestPacket();
+    const auto& requestPacket = std::make_shared<OSPFLinkStateRequestPacket>();
 
     requestPacket->setType(LINKSTATE_REQUEST_PACKET);
     requestPacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -368,15 +371,18 @@ void Neighbor::sendLinkStateRequestPacket()
         }
     }
 
-    requestPacket->setByteLength(packetSize);
+    requestPacket->setChunkLength(byte(packetSize));
+    requestPacket->markImmutable();
+    Packet *pk = new Packet();
+    pk->pushHeader(requestPacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
     if (parentInterface->getType() == Interface::POINTTOPOINT) {
-        messageHandler->sendPacket(requestPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, IPv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
     }
     else {
-        messageHandler->sendPacket(requestPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
     }
 }
 
@@ -609,7 +615,7 @@ void Neighbor::ageTransmittedLSAList()
 
 void Neighbor::retransmitUpdatePacket()
 {
-    OSPFLinkStateUpdatePacket *updatePacket = new OSPFLinkStateUpdatePacket();
+    const auto& updatePacket = std::make_shared<OSPFLinkStateUpdatePacket>();
 
     updatePacket->setType(LINKSTATE_UPDATE_PACKET);
     updatePacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
@@ -757,11 +763,14 @@ void Neighbor::retransmitUpdatePacket()
         it++;
     }
 
-    updatePacket->setByteLength(packetLength - IP_MAX_HEADER_BYTES);
+    updatePacket->setChunkLength(byte(packetLength - IP_MAX_HEADER_BYTES));
+    updatePacket->markImmutable();
+    Packet *pk = new Packet();
+    pk->pushHeader(updatePacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-    messageHandler->sendPacket(updatePacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+    messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
 }
 
 void Neighbor::deleteLastSentDDPacket()

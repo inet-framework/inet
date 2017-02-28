@@ -24,6 +24,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/routing/ospfv2/router/OSPFcommon.h"
 #include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
 #include "inet/routing/ospfv2/OSPFTimer.h"
@@ -126,7 +127,7 @@ class INET_API Interface
     void sendDelayedAcknowledgements();
     void ageTransmittedLSALists();
 
-    OSPFLinkStateUpdatePacket *createUpdatePacket(OSPFLSA *lsa);
+    Packet *createUpdatePacket(OSPFLSA *lsa);
 
     void setType(OSPFInterfaceType ifType) { interfaceType = ifType; }
     OSPFInterfaceType getType() const { return interfaceType; }

@@ -16,8 +16,13 @@
 //
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
+
+namespace inet;
+class FieldsChunk extends cObject;
 
 namespace inet::ospf;
 
@@ -48,8 +53,9 @@ struct OSPFOptions
 //
 // Represents an OSPF packet header
 //
-packet OSPFPacket
+class OSPFPacket extends FieldsChunk
 {
+    bit chunkLength @overridegetter = byte(0);
     char version = 2;
     char type @enum(OSPFPacketType) = HELLO_PACKET;
 
@@ -63,7 +69,7 @@ packet OSPFPacket
 //
 // Represents an OSPF Hello packet
 //
-packet OSPFHelloPacket extends OSPFPacket
+class OSPFHelloPacket extends OSPFPacket
 {
     IPv4Address networkMask;
 
@@ -212,7 +218,7 @@ struct OSPFDDOptions
 //
 // Represents an OSPF Database Description packet
 //
-packet OSPFDatabaseDescriptionPacket extends OSPFPacket
+class OSPFDatabaseDescriptionPacket extends OSPFPacket
 {
     unsigned short interfaceMTU;
     OSPFOptions options;
@@ -239,7 +245,7 @@ packet OSPFLinkStateRequestPacket extends OSPFPacket
 //
 // Represents an OSPF Link State Update packet
 //
-packet OSPFLinkStateUpdatePacket extends OSPFPacket
+class OSPFLinkStateUpdatePacket extends OSPFPacket
 {
     unsigned long numberOfLSAs;
     OSPFRouterLSA routerLSAs[];
@@ -251,7 +257,7 @@ packet OSPFLinkStateUpdatePacket extends OSPFPacket
 //
 // Represents an OSPF Link State Acknowledgement packet
 //
-packet OSPFLinkStateAcknowledgementPacket extends OSPFPacket
+class OSPFLinkStateAcknowledgementPacket extends OSPFPacket
 {
     OSPFLSAHeader lsaHeaders[];
 }
