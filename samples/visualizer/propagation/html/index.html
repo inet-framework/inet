@@ -96,6 +96,58 @@ and an <var>IntegratedVisualizer</var> module. The <var>host1</var> is configure
 
 <p>When the simulation is the networks looks like this:</p>
 
+<img class="screen" src="simple.png" width="850px">
+
+<p>
+Small pieces of the communication range circles are visible in the right corners of the image. When zoomed out,
+the communication range circles are completely visible:
+</p>
+
+<img class="screen" src="commrange.png">
+
+<p>
+The interference ranges are way larger than the communication ranges.
+When even more zoomed out, the interference range cicles are visible as well:
+</p>
+
+<img class="screen" src="interferencerange.png">
+
+<p>TODO: this should be done simpler...the transmitter power should be adjusted</p>
+
+<p>
+This animation illustrates the visualization of propagating signals:
+</p>
+
+<video autoplay loop controls src="propagation2.mp4" width="750" height="540"></video>
+
+<p>
+The <var>host1</var> sends an ARP request packet to <var>host2</var>, which sends an ARP reply.
+The <var>host1</var> ACKs it, then sends the first UDP packet. This is followed by <var>host2's</var> ACK.
+The blue transmission indicator icons are displayed above nodes when they are transmitting. Similarly,
+the red reception indicators are displayed above them when they are receiving. The transmission power
+and power of the received signal is indicated on the transmission/reception icons in dBW.
+</p>
+
+<p>
+The visualization of the propagating signal has two phases.
+One of them is at the beginning and the end of the transmission, visualized with a growing and receeding disk.
+The other is when the transmission is present on the entire playground.
+The animation slows down at the beginning and at the end, when the edges of the signal are propagating. Since
+this happens very fast, with the speed of light, the animation has to be slow in order for it to be visible.
+When the signal is present on the playground (while the disk is still growing fast somewhere far from all the nodes in the network, outside of the playground), keeping this same animation speed would result in the transmission animation being very long. The transmission itself
+has a duration that is a few magnitudes longer than the time it takes for the beginning of the transmission to reach the nodes fathest away
+from the source. Thus a different, faster animation speed is required when the transmission is present at all nodes.
+The animation speed changes smoothly between the two values. This described the default animation speed settings. They can be configured with the visualizer's parameters,
+more on this in the next section.
+</p>
+
+<p>TODO: description of the propagation of signals, the reception and transmission indicators, the power indicator</p>
+
+<pre>
+Where to mention the animation settings? In the about the visualizer part, or the second config?
+This is a minor detail, but important...should be in the second config
+</pre>
+
 </body>
 
 </html>
