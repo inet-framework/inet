@@ -22,6 +22,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/transportlayer/rtp/RTPInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPInterfacePacket_m.h"
 #include "inet/transportlayer/rtp/RTPProfile.h"
@@ -301,7 +302,12 @@ void RTP::dataOut(RTPInnerPacket *rinp)
 {
     RTPPacket *msg = check_and_cast<RTPPacket *>(rinp->getEncapsulatedPacket()->dup());
 
-    _udpSocket.sendTo(msg, _destinationAddress, _port);
+    Packet *pk = new Packet(msg->getName());
+    const auto& chunk = std::make_shared<cPacketChunk>(msg);
+    chunk->markImmutable();
+    pk->append(chunk);
+
+    _udpSocket.sendTo(pk, _destinationAddress, _port);
 
     // RTCP module must be informed about sent rtp data packet
     send(rinp, "rtcpOut");
@@ -340,7 +346,9 @@ void RTP::connectRet()
 void RTP::readRet(cMessage *sifp)
 {
     if (!_leaveSession) {
-        RTPPacket *msg = check_and_cast<RTPPacket *>(sifp);
+        Packet *pk = check_and_cast<Packet *>(sifp);
+        const auto& pkChunk = pk->peekHeader<cPacketChunk>();
+        RTPPacket *msg = check_and_cast<RTPPacket *>(pkChunk->getPacket());
 
         emit(rcvdPkSignal, msg);
 

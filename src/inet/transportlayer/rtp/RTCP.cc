@@ -21,6 +21,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/transportlayer/rtp/RTCPPacket.h"
 #include "inet/transportlayer/rtp/RTPInnerPacket.h"
 #include "inet/transportlayer/rtp/RTPParticipantInfo.h"
@@ -207,8 +208,9 @@ void RTCP::connectRet()
 void RTCP::readRet(cPacket *sifpIn)
 {
     emit(rcvdPkSignal, sifpIn);
-    RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(sifpIn->decapsulate());
-    processIncomingRTCPPacket(packet, IPv4Address(_destinationAddress), _port);
+    const auto& pkChunk = check_and_cast<Packet *>(sifpIn)->peekHeader<cPacketChunk>();
+    RTCPCompoundPacket *packet = check_and_cast<RTCPCompoundPacket *>(pkChunk->getPacket());
+    processIncomingRTCPPacket(packet->dup(), IPv4Address(_destinationAddress), _port);
 }
 
 void RTCP::createSocket()
@@ -312,8 +314,10 @@ void RTCP::createPacket()
 
     calculateAveragePacketSize(compoundPacket->getByteLength());
 
-    cPacket *msg = new cPacket("RTCPCompoundPacket");
-    msg->encapsulate(compoundPacket);
+    Packet *msg = new Packet("RTCPCompoundPacket");
+    const auto& pkchunk = std::make_shared<cPacketChunk>(compoundPacket);
+    pkchunk->markImmutable();
+    msg->append(pkchunk);
     _udpSocket.sendTo(msg, _destinationAddress, _port);
 
     if (_leaveSession) {

@@ -14,7 +14,7 @@
     <feature enabled="true" id="WiseRoute"/>
     <feature enabled="true" id="Flood"/>
     <feature enabled="true" id="UDP"/>
-    <feature enabled="false" id="RTP"/>
+    <feature enabled="true" id="RTP"/>
     <feature enabled="false" id="RTP_examples"/>
     <feature enabled="false" id="SCTP"/>
     <feature enabled="false" id="SCTP_examples"/>
