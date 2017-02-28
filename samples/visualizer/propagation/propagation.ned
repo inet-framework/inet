@@ -36,7 +36,6 @@ network PropagationA
 network PropagationB
 {
     parameters:
-        @figure[description](type=text; pos=30,30; font=Arial,24; text="Demonstrates how to display transmissions, receptions and propagating signals.");
         @display("bgb=1000,500");
     submodules:
         visualizer: IntegratedVisualizer {
@@ -55,7 +54,7 @@ network PropagationB
             parameters:
                 @display("p=300,200");
         }
-        node: AdhocHost {
+        relay: AdhocHost {
             parameters:
                 @display("p=600,300");
         }
@@ -68,7 +67,6 @@ network PropagationB
 network PropagationC
 {
     parameters:
-        @figure[description](type=text; pos=30,30; font=Arial,24; text="Demonstrates how to display transmissions, receptions and propagating signals.");
         @display("bgb=1000,500");
     submodules:
         visualizer: IntegratedVisualizer {

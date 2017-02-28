@@ -128,6 +128,8 @@ the red reception indicators are displayed above them when they are receiving. T
 and power of the received signal is indicated on the transmission/reception icons in dBW.
 </p>
 
+<strong>The propagating signal</strong>
+
 <p>
 The visualization of the propagating signal has two phases.
 One of them is at the beginning and the end of the transmission, visualized with a growing and receeding disk.
@@ -141,12 +143,30 @@ The animation speed changes smoothly between the two values. This described the 
 more on this in the next section.
 </p>
 
-<p>TODO: description of the propagation of signals, the reception and transmission indicators, the power indicator</p>
+<h2>Multiple nodes</h2>
 
-<pre>
-Where to mention the animation settings? In the about the visualizer part, or the second config?
-This is a minor detail, but important...should be in the second config
-</pre>
+<p>
+This configuration contains three nodes, as opposed to two in the previous one. Additionally, this section describes the
+propagation animation settings of the visualizer. The configuration uses the following network:
+</p>
+
+<img class="screen" src="multiplenodesnetwork.png">
+
+<p>
+It contains three <var>AdhocHosts</var>. Additionally, it contains an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>,
+and an <var>IntegratedVisualizer</var> module. The <var>source</var> is configured to ping the <var>destination</var>. The communication ranges
+are configured so that hosts can reach only the adjacent hosts. This the center host relays packets between the hosts on the two sides.
+</p>
+
+<p>TODO: the animation speed settings</p>
+
+<p>TODO: the video</p>
+
+<p>TODO: whats on the video</p>
+
+<p>TODO: the 3rd config</p>
+
+<p>TODO: further info</p>
 
 </body>
 
