@@ -11,9 +11,8 @@
 	<p><h2>Goals</h2></p>
     <p> 
         In computer networks, networked computing devices exchange data with each other over a physical link.
-        The physical connection between nodes are established using either cable media or wireless media.
+        The physical connection between nodes are established using either cable or wireless media.
         In wireless networks we don't see, whether it is possible to communicate through the radio medium.
-        When a packet is received by a node flawlessly, a physical link is established between the sender and the receiver nodes.
         This link displayed by the <var>PhysicalLinkVisualizer</var>.
         Without this visualization we need to examine the console to find out whether the physical link is established between the nodes.
     </p>
@@ -24,6 +23,7 @@
 
     <p><h2>About the visualizer</h2></p>
     <p>
+        When a packet is received by a node flawlessly, a physical link is established between the transmitter and the receiver nodes.
         The <code><strong>PhysicalLinkVisualizer</strong></code> keeps track of active physical links in a network.
         A link becomes active between two nodes when a packet arrives at the receiver node's physical link layer from the source node's physical link layer.
         By default links are not displayed, we can enable their visualization by switching the <i>displayLinks</i> parameter to true.
@@ -49,13 +49,8 @@
     </p>
     <p>
         The network contains 2 <var>Adhochosts</var>. The network also has a <var>PhysicalLinkVisualizer</var>, an <var>IPv4NetworkConfigurator</var> and an <var>Ieee80211ScalarRadioMedium</var> module.<br>
-        The <var>source</var> pings the <var>destination</var>. Here is how to configure that:
-        <div class="snippet">
-            # Application parameters<br>
-            *.source.numPingApps = 1<br>
-            *.source.pingApp[0].destAddr = "destination"
-        </div>
-        An additional line of code enables the visualization:
+        The <var>source</var> pings the <var>destination</var>.
+        This line of code enables the visualization:
         <div class="snippet">
             *.linkVisualizer.*.displayLinks = true
         </div>
@@ -81,7 +76,8 @@
     </p>
     <p>
         The network has 7 <var>AODVRouters</var>, one of these is the <var>source</var> and one of these is the <var>destination</var>.
-        The nodes move randomly between borders.
+        The nodes move randomly between predefined borders.
+        We display only the ping packets' physical links, so we will see that, which node receives a ping message.
         <div class="snippet">
         </div>
     </p>
