@@ -56,7 +56,8 @@ config 3 - interference, an important feature, is that it shows that there are m
 The <var>MediumVisualizer</var> module can visualize various aspects of radio transmissions. It can visualize radio signals as they
 propagate through space as colored disks with a wave pattern, originating at the signal source node. The disk representing the
 signal fades with distance, e.g. as the signal gets weaker further out from the transmitter. By default, different transmissions are colored
-differently. The name of the packet in the transmission is indicated on the disk. The visualization of propagating signals is
+differently. The <var>signalColor</var> parameter specifies a set of colors for the signals. The set of colors is either 'light' or 'dark',
+the latter is the default. Also, a custom set of colors can be specified, e.g. <i>"blue, red, yellow"</i>. The name of the packet in the transmission is indicated on the disk. The visualization of propagating signals is
 enabled with the <var>displaySignals</var> parameter. 
 </p>
 
@@ -74,12 +75,26 @@ with the <var>displayCommunicationRanges</var> and <var>displayInterferenceRange
 <h2>Displaying signal propagation, transmissions and receptions</h2>
 
 <p>
-In this configuration, all features of the visualizer are enabled. Parameters are left on default.
+This configuration demonstrates the visualization, with the visualizer's default settings.
+It uses the following network:
 </p>
 
+<img class="screen" src="simplenetwork.png">
+
 <p>
-This configuration demonstrates the visualization, with the visualizer's default settings.
+It contains two <var>WirelessHosts</var>. Additionally, there is an <var>IPv4NetworkConfigurator</var>, an <var>Ieee80211ScalarRadioMedium</var>,
+and an <var>IntegratedVisualizer</var> module. The <var>host1</var> is configured to send UDP packets to <var>host2</var>. Displaying of transmissions and receptions, propagating signals, communication and interference ranges are enabled with these visualizer settings:
 </p>
+
+<pre class="snippet">
+*.visualizer.*.mediumVisualizer.displaySignals = true
+*.visualizer.*.mediumVisualizer.displayReceptions = true
+*.visualizer.*.mediumVisualizer.displayTransmissions = true
+*.visualizer.*.mediumVisualizer.displayCommunicationRanges = true
+*.visualizer.*.mediumVisualizer.displayInterferenceRanges = true
+</pre>
+
+<p>When the simulation is the networks looks like this:</p>
 
 </body>
 
