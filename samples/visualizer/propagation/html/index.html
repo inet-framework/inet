@@ -158,13 +158,53 @@ and an <var>IntegratedVisualizer</var> module. The <var>source</var> is configur
 are configured so that hosts can reach only the adjacent hosts. This the center host relays packets between the hosts on the two sides.
 </p>
 
-<p>TODO: the animation speed settings</p>
+<p>TODO: the animation speed settings...i think i need some help figuring this out</p>
 
-<p>TODO: the video</p>
+<video autoplay loop controls src="propagation7.mp4" width="784" height="470"></video>
 
-<p>TODO: whats on the video</p>
+<pre>
+Whats on the video...the packet sends
+
+the animation slows down and speeds up, but its not constant duration.
+the ACKs for example, are longer than the pings, despite being smaller packets.
+they are just transmitted with a slower bitrate -> controlbitrate
+the spreading of the signal goes farther than the last node the signal reaches...this amount can be set by a parameter
+and describing the animation speed settings part...how they look like in the video
+
+it takes 1 second to for the signal to travel 500 meters, when the slide is set to the middle position...it is not in this video
+
+the power indicator shows that the signal is stronger at receiving nodes that are closer.
+and actually, energy detection and sensitivity is both -85 dBm by default
+that should be about -115 dBW -> the reception power at the farther node is a bit smaller than that
+</pre>
 
 <p>TODO: the 3rd config</p>
+
+<pre>
+The third config shows the interference
+
+when there are two signals present at a node
+at the same time
+
+it causes interference
+
+there are interfering signals
+
+but it doesnt necessarily cause collisions
+
+that is, the node cannot receive the transmission correctly, because of the other transmission
+
+it garbles up the transmission
+
+there is a transmission close, and it is for the node
+and there is one far, it is not for it
+
+it might be weak the node's position, but it might be enough
+
+to garble up the main transmission
+</pre>
+
+<p>TODO: the comm range and interference range indicators can be used to position nodes</p>
 
 <p>TODO: further info</p>
 
