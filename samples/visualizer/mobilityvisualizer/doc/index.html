@@ -9,7 +9,7 @@
 <body>
 	<h1><center>Mobility visualizer example</center></h1>
 
-	<p><h2>Goals - WIP</h2></p>
+	<p><h2>Goals</h2></p>
 	<p>
 		When wireless nodes roam in the network, it's often difficult to follow their movement.        
         By displaying nodes' movement trajectory, velocity and orientation, we can see enough information to track them.
@@ -23,12 +23,35 @@
     <p><h2>About the visualizer</h2></p>
     <p>
         The <var>MobilityVisualizer</var> displays data about the movements of wireless nodes.
-        The visualizer has three main parameters: Movement trail, velocity and orientation.
-        Movement trail shows the node's recent movement trajectory. We can set its length using the <i>trailLength</i> parameter.
-        Velocity is represented visually by a solid arrow. Its length is proportional to the speed, but we can modify this ratio with a velocity scaling factor called <i>velocityArrowScale</i>.
-        Orientation is represented by an arc. The arc's size is specified by the <var>orientationArcSize</var> parameter.
+        The visualization is enabled by <i>displayMovements</i> parameter, which is true by default.
+    </p>
+    <p>
+        The visualizer has three main features: Movement trail, velocity vector and orientation.
+        By default, these features are turned off.
+        Each of these features has a parameter, which enables its visualization by setting it true.
+        These parameters are the <i>displayMovementTrails</i>, the <i>displayVelocities</i> and the <i>displayOrientations</i>.
+    </p>
+    <p>
+        Movement trail shows the node's recent movement trajectory.
+        We can set its length using the <i>trailLength</i> parameter.
+        When the trail's length is longer than the <i>trailLength's</i> value, the end of the line starts to fade out.
+        The trail's color is different for each node, because of the <i>movementTrailLineColor = "auto"</i> parameter.
+        This option makes the nodes' traceability easier.
+    </p>
+    <p>
+        Velocity is represented visually by a solid arrow.
+        Its length is proportional to the speed.
+        By modifying the <i>velocityArrowScale</i> parameter we multiply the arrow's size.
+        The arrow's direction coincides with the movement's direction.
+    </p>
+    <p>
+        Orientation is represented by an arc. The arc's size is specified by the <i>orientationArcSize</i> parameter.
         This value is the relative size of the arc compared to a full circle.
         Its default value is 0.25, i.e. a quarter or a circle.
+    </p>
+    <p>
+        The visualizer has a <i>moduleFilter</i> parameter which determines which mobilities are considered at the visualization.
+        It matches all mobilities by default.
     </p>
 
 
@@ -42,8 +65,8 @@
         There is one difference between the nodes. The <var>host1's</var> speed is 15 mps, <var>host2's</var> speed is 30 mps.
     </p>
     <p>
-        The visualization of mobility is enabled, because the <i>displayMovements</i> parameter is true by default.
-        It is really confusing, if we run the simulation now:
+        When we start the simulation with the visualization's default settings, we can see nodes which move randomly on the playground.
+        It is really confusing we can't trace their movement:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=621 src="ShowNothing.mp4">
@@ -66,12 +89,15 @@
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=621 src="DefaultParams.mp4">
     </p>
-
+    <p>
+        Each node has a movement trail, a velocity vector and an orientation arc.
+        The trails line colors are different, because the trail's line color is <i>"auto"</i>.
+        The <var>host2's</var> velocity vector is longer, because its speed is twice than the <var>host1's</var> speed.
+        The orientation arcs are turned to the movement's direction in every moment.
+    </p>
     <p>
         Sometimes it's useful to highlight a certain feature of the visualization. For example, we highlight
         the velocity arrow by customizing its appearance parameters:
-        </p>
-
         <div class="snippet">
             # Velocity vector<br>
             *.visualizer.*.mobilityVisualizer.displayVelocities = true<br>
@@ -80,12 +106,16 @@
             *.visualizer.*.mobilityVisualizer.velocityLineStyle = "solid"<br>
             *.visualizer.*.mobilityVisualizer.velocityLineWidth = 2<br>
         </div>
-    
+    </p>   
     <p>
         Here is the result of these settings:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=736 height=621 src="CustomParams.mp4">
+    </p>
+    <p>
+        The arrow turned blue because of the <i>velocityLineColor</i> is set to <i>blue</i> and the arrow has become two times longer and it has became twice as wide than the default velocity vector.
+        
     </p>
 
 
