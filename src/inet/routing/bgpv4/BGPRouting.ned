@@ -59,7 +59,6 @@ simple BGPRouting like IBGPRouting
         string ospfRoutingModule;
         @display("i=block/network2");
         xml bgpConfig;
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
     gates:
         input socketIn;
         output socketOut;

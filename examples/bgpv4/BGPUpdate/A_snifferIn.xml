@@ -5,12 +5,18 @@
 <checker>
     <message occurence="4"/> <!-- CONNECTION_RESET, CLOSED, AVAILABLE, ESTABLISHED -->
     <message occurence="1">
+<!--
         <fieldValue name="className" value="inet::bgp::BGPOpenMessage"/>
+-->
     </message>
     <message occurence="1">
+<!--
         <fieldValue name="className" value="inet::bgp::BGPKeepAliveMessage"/>
+-->
     </message>
     <message occurence="1">
+<!--
         <fieldValue name="className" value="inet::bgp::BGPUpdate"/>
+-->
     </message>
 </checker>

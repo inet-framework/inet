@@ -5,13 +5,22 @@
 <checker>
     <message occurence="2"/> <!-- PassiveOPEN, ActiveOPEN -->
     <message occurence="1">
+        <fieldValue name="name" value="BGPOpen"/>
+<!--
         <fieldValue name="className" value="inet::bgp::BGPOpenMessage"/>
+-->
     </message>
     <message occurence="1"/> <!-- ABORT -->
     <message occurence="1">
+        <fieldValue name="name" value="BGPKeepAlive"/>
+<!--
         <fieldValue name="className" value="inet::bgp::BGPKeepAliveMessage"/>
+-->
     </message>
     <message occurence="1">
+        <fieldValue name="name" value="BGPUpdate"/>
+<!--
         <fieldValue name="className" value="inet::bgp::BGPUpdate"/>
+-->
     </message>
 </checker>

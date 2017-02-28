@@ -137,7 +137,6 @@ void BGPRouting::listenConnectionFromPeer(SessionID sessionID)
     }
     if (_BGPSessions[sessionID]->getSocketListen()->getState() != TCPSocket::LISTENING) {
         _BGPSessions[sessionID]->getSocketListen()->setOutputGate(gate("socketOut"));
-        _BGPSessions[sessionID]->getSocketListen()->readDataTransferModePar(*this);
         _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
         _BGPSessions[sessionID]->getSocketListen()->listen();
         _socketMap.addSocket(_BGPSessions[sessionID]->getSocketListen());
@@ -155,7 +154,6 @@ void BGPRouting::openTCPConnectionToPeer(SessionID sessionID)
     }
     socket->setCallbackObject(this, (void *)sessionID);
     socket->setOutputGate(gate("socketOut"));
-    socket->readDataTransferModePar(*this);
     socket->bind(intfEntry->ipv4Data()->getIPAddress(), 0);
     _socketMap.addSocket(socket);
 
@@ -167,7 +165,6 @@ void BGPRouting::processMessageFromTCP(cMessage *msg)
     TCPSocket *socket = _socketMap.findSocketFor(msg);
     if (!socket) {
         socket = new TCPSocket(msg);
-        socket->readDataTransferModePar(*this);
         socket->setOutputGate(gate("socketOut"));
         IPv4Address peerAddr = socket->getRemoteAddress().toIPv4();
         SessionID i = findIdFromPeerAddr(_BGPSessions, peerAddr);
@@ -213,23 +210,24 @@ void BGPRouting::socketEstablished(int connId, void *yourPtr)
     }
 }
 
-void BGPRouting::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
+void BGPRouting::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != (SessionID)-1) {
-        BGPHeader *ptrHdr = check_and_cast<BGPHeader *>(msg);
+        //TODO: should queuing incoming payloads, and peek from the queue
+        const auto& ptrHdr = CHK(msg->peekHeader<BGPHeader>());
         switch (ptrHdr->getType()) {
             case BGP_OPEN:
                 //BGPOpenMessage* ptrMsg = check_and_cast<BGPOpenMessage*>(msg);
-                processMessage(*check_and_cast<BGPOpenMessage *>(msg));
+                processMessage(*check_and_cast<BGPOpenMessage *>(ptrHdr.get()));
                 break;
 
             case BGP_KEEPALIVE:
-                processMessage(*check_and_cast<BGPKeepAliveMessage *>(msg));
+                processMessage(*check_and_cast<BGPKeepAliveMessage *>(ptrHdr.get()));
                 break;
 
             case BGP_UPDATE:
-                processMessage(*check_and_cast<BGPUpdateMessage *>(msg));
+                processMessage(*check_and_cast<BGPUpdateMessage *>(ptrHdr.get()));
                 break;
 
             default:
@@ -433,11 +431,14 @@ void BGPRouting::updateSendProcess(const unsigned char type, SessionID sessionIn
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();
             {
-                BGPUpdateMessage *updateMsg = new BGPUpdateMessage("BGPUpdate");
+                Packet *pk = new Packet("BGPUpdate");
+                const auto& updateMsg = std::make_shared<BGPUpdateMessage>();
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);
-                (elem).second->getSocket()->send(updateMsg);
+                updateMsg->markImmutable();
+                pk->pushHeader(updateMsg);
+                (elem).second->getSocket()->send(pk);
                 (elem).second->addUpdateMsgSent();
             }
         }

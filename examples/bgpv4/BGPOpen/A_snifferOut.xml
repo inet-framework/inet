@@ -5,14 +5,20 @@
 <checker>
     <message occurence="3"/> <!-- tcp: PassiveOPEN, ActiveOPEN Accept -->
     <message occurence="1">
+        <fieldValue name="name" value="BGPOpen"/>
+        <fieldValue name="byteLength" value="29"/>
+<!--
         <fieldValue name="className" value="inet::bgp::BGPOpenMessage"/>
         <fieldValue name="byteLength" value="29"/>
         <fieldValue name="myAS" value="65324"/>
         <fieldValue name="holdTime" value="180"/>
         <fieldValue name="BGPIdentifier" value="10.10.10.1"/>
+-->
     </message>
     <message occurence="1"/> <!-- tcp: ABORT -->
     <message occurence="1">
+<!--
         <fieldValue name="className" value="inet::bgp::BGPKeepAliveMessage"/>
+-->
     </message>
 </checker>

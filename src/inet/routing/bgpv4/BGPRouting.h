@@ -26,8 +26,7 @@
 #include "inet/routing/bgpv4/BGPCommon.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/routing/bgpv4/BGPMessage/BGPOpen.h"
-#include "inet/routing/bgpv4/BGPMessage/BGPKeepAlive.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
 #include "inet/routing/bgpv4/BGPMessage/BGPUpdate.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
@@ -51,7 +50,7 @@ class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPS
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void finish() override;
 
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
     virtual void socketPeerClosed(int connId, void *yourPtr) override {}

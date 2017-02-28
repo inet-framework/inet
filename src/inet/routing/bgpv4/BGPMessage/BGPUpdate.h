@@ -18,7 +18,7 @@
 #ifndef __INET_BGPUPDATE_H
 #define __INET_BGPUPDATE_H
 
-#include "inet/routing/bgpv4/BGPMessage/BGPUpdate_m.h"
+#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
 
 namespace inet {
 
@@ -30,7 +30,7 @@ class INET_API BGPUpdateMessage : public BGPUpdateMessage_Base
     unsigned short computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs);
 
   public:
-    BGPUpdateMessage(const char *name = nullptr, int kind = 0) : BGPUpdateMessage_Base(name, kind) {}
+    BGPUpdateMessage() : BGPUpdateMessage_Base() {}
     virtual BGPUpdateMessage *dup() const override { return new BGPUpdateMessage(*this); }
     void setWithdrawnRoutesArraySize(unsigned int size) override;
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
