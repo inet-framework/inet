@@ -138,7 +138,25 @@
         <img src="DynamicDatalinks.png">
     </p>
     <p>
+        AODV routers, exchange routing informations, video
+        <br><br>
         The type of all nodes is <var>AODVRouter</var>.
+        Before the communication can begin between the <var>source</var> and the <var>destination</var>, the nodes exchange routing informations with each other.
+        To see this process, we filter the AODV packets:
+        <div class="snippet">
+            *.visualizer.*.dataLinkVisualizer.packetFilter = "AODV*"<br>
+            *.visualizer.*.dataLinkVisualizer.fadeOutTime = 0.5s
+        </div>
+        We see the exchange of the routing informations in this video:
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=568 height=527 src="DatalinkVisualizerAodv.mp4">
+    </p>
+    <p>
+        A node-ok egymastol szorasos uzenettel "kerdezik", hogy mi merre van.
+        A folyamat vegen egy graf alakul ki, ami azt mutatja meg, hogy...
+    </p>
+    <p>
         These ad hoc nodes are placed randomly on the playground and they move randomly between borders.
         The source node has a ping application, that sends ping messages in every second.
         The communication range is reduced to get a non-trivial path between <var>source</var> and <var>destination</var>.
