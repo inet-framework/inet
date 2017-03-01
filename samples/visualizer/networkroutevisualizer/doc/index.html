@@ -21,7 +21,7 @@
         It is difficult to track individual packet paths, because we have to pay attention to more than one message at the same time.
         The network topology changes e.g  also affects on the packets' routes.
         The network route visualization gives a clear overview of the individual packet paths.
-        It highlights the network routes, when a Layer 3 route is changed, it changes too.
+        It highlights the network routes, when the network path is changed, it changes too.
     </p>
 <!--
     <p>
@@ -45,8 +45,7 @@
     <p> 
         The links are represented visually by solid arrows.
         The arrow's starting point is the source node and its endpoint is the destination node.
-        The arrow goes through those intermediate devices which are the part of the third layer path.
-        (The arrow doesn't go through on switches, because they are Layer 2 devices.) <!-- de azert most keresztul megy, ugyhogy ezt megkerdezem -->
+        The arrow goes through those intermediate devices which are the part of the packet's network path.
     </p>
     <p>    
         The visualizer has filtering parameters, like <i>nodeFilter</i>, <i>interfaceFilter</i> and <i>packetFilter</i>.
