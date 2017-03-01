@@ -48,7 +48,6 @@ class IGMPMessage extends FieldsChunk
 {
     bit chunkLength = bit(-1) @overridegetter;
     short type @enum(IGMPType);         // 1 byte
-    unsigned short code = 0;            // 1 byte
     uint16_t crc = 0;                   // 2 bytes
     short crcMode @enum(CrcMode) = -1;  // 0 bytes, inet only
 }
@@ -62,7 +61,6 @@ class IGMPQuery extends IGMPMessage
 class IGMPv1Query extends IGMPQuery
 {
     chunkLength = byte(8);
-    code = 0;
 }
 
 class IGMPv1Report extends IGMPMessage
@@ -75,7 +73,6 @@ class IGMPv1Report extends IGMPMessage
 class IGMPv2Query extends IGMPQuery      //FIXME IGMPv1Query and IGMPv2Query differs only value of code field.
 {
     chunkLength = byte(8);
-    code = 0xffff;      // invalid value, correct value is maxRespTime in units of 1/10 second
     simtime_t maxRespTime;      // stored in `code` in units of 1/10 second, 0.1-25.5s
 }
 
