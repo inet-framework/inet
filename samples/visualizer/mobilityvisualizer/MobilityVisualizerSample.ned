@@ -34,6 +34,9 @@ network MobilityVisualizerSample
         host2: AdhocHost {
             @display("p=573.8,384.14398");
         }
+        host3: AdhocHost {
+            @display("p=345.488,271.8");
+        }
         visualizer: IntegratedVisualizer {
             parameters:
                 @display("p=100,50");
