@@ -77,15 +77,25 @@
     <p>
         The network has 7 <var>AODVRouters</var>, one of these is the <var>source</var> and one of these is the <var>destination</var>.
         The nodes move randomly between predefined borders.
-        We display only the ping packets' physical links, so we will see that, which node receives a ping message.
+        We display only the ping echo messages' physical links, so we will see that, which node receives a ping echo message.
         <div class="snippet">
+            *.visualizer.*.physicalLinkVisualizer.displayLinks = true<br>
+            *.visualizer.*.physicalLinkVisualizer.packetFilter = "ping* and not *reply"<br>
+            *.visualizer.*.physicalLinkVisualizer.fadeOutMode = "simulationTime"<br>
+            *.visualizer.*.physicalLinkVisualizer.fadeOutTime = 1.2s<br>
         </div>
     </p>
+    <p>
+        Here is what happens, when we run the simulation:
+    </p>
     <p align="center">        
-        WORKING VIDEO
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=496 height=559 src="PhysicalLinkDynamic.mp4">
     </p>
     <p>
-        WHAT HAPPENS
+        A dotted arrow is displayed from the transmitter node pointing to every node which received the ping echo packet at its physical layer.
+        
+
+        <br>Nem csak afele a node fele jelenik meg nyil, akinek az uzenet szol, hanem mindenkinek, aki hibatlanul veszi a radiojeleket, azaz hibatlanul veszi a csomagot.
     </p>
 
 
