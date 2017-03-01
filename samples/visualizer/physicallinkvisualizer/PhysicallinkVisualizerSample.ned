@@ -78,7 +78,7 @@ network PhysicalLinkVisualizerFiltering
         source: WirelessHost {
             @display("p=517,89");
         }
-        host: WirelessHost {
+        host1: WirelessHost {
             @display("p=642,178");
         }
         destination: WirelessHost {
