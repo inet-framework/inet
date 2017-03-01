@@ -5,6 +5,7 @@ RoutingTableVisualizer:
 - nem fordul el a label a nyillal
 
 MobilityVisualizer:
+- moduleFilter nem mukodik
 
 MediumVisualizer
 - X távolsággal menjen tovább a signal rajzolása, mint az utolsó receiver
