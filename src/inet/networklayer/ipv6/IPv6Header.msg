@@ -55,6 +55,7 @@ class IPv6Header extends FieldsChunk
     bit chunkLength @overridegetter;
     IPv6Address srcAddress;
     IPv6Address destAddress;
+    int payloadLength = -1; // includes extension headers and payload
     unsigned char trafficClass;
     abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
