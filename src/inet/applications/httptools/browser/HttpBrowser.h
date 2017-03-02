@@ -18,6 +18,10 @@
 #ifndef __INET_HTTPBROWSER_H
 #define __INET_HTTPBROWSER_H
 
+#include "inet/common/INETDefs.h"
+
+#include "inet/common/packet/ChunkQueue.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -57,6 +61,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         HttpRequestQueue messageQueue;    // Queue of pending messages.
         TCPSocket *socket = nullptr;    // A reference to the socket object.
         int pending = 0;    // A counter for the number of outstanding replies.
+        ChunkQueue queue;       // incoming queue for slices
     };
 
     TCPSocketMap sockCollection;    // List of active sockets
@@ -77,7 +82,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     /*
      * Send a request to server. Uses the recipient stamped in the request.
      */
-    virtual void sendRequestToServer(HttpRequestMessage *request) override;
+    virtual void sendRequestToServer(Packet *request) override;
 
     /*
      * Sends a generic request to a randomly chosen server
@@ -105,7 +110,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      * virtual method of the parent class. The counter for pending replies is decremented for each one handled.
      * Close is called on the socket once the counter reaches zero.
      */
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
 
     /*
      * Handler for the socket closed by peer event.
@@ -141,7 +146,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      * stored as a myPtr with the socket. The message is transmitted once the socket is established, signaled
      * by a call to socketEstablished.
      */
-    void submitToSocket(const char *moduleName, int connectPort, HttpRequestMessage *msg);
+    void submitToSocket(const char *moduleName, int connectPort, Packet *msg);
 
     /**
      * Establishes a socket and assigns a queue of messages to be transmitted.

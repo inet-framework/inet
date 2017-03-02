@@ -98,19 +98,20 @@ void HttpBrowser::sendRequestToServer(BrowseEvent be)
     submitToSocket(szModuleName, connectPort, generatePageRequest(be.wwwhost, be.resourceName));
 }
 
-void HttpBrowser::sendRequestToServer(HttpRequestMessage *request)
+void HttpBrowser::sendRequestToServer(Packet *pk)
 {
+    const auto& request = pk->peekHeader<HttpRequestMessage>();
     int connectPort;
     char szModuleName[127];
 
     if (controller->getServerInfo(request->targetUrl(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << request->targetUrl() << endl;
-        delete request;
+        delete pk;
         return;
     }
 
     EV_DEBUG << "Sending request to server " << request->targetUrl() << " (" << szModuleName << ") on port " << connectPort << endl;
-    submitToSocket(szModuleName, connectPort, request);
+    submitToSocket(szModuleName, connectPort, pk);
 }
 
 void HttpBrowser::sendRequestToRandomServer()
@@ -136,7 +137,7 @@ void HttpBrowser::sendRequestsToServer(std::string www, HttpRequestQueue queue)
     if (controller->getServerInfo(www.c_str(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << www << endl;
         while (!queue.empty()) {
-            HttpRequestMessage *msg = queue.back();
+            Packet *msg = queue.back();
             queue.pop_back();
             delete msg;
         }
@@ -180,7 +181,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     }
 }
 
-void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
+void HttpBrowser::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
 {
     EV_DEBUG << "Socket data arrived on connection " << connId << ": " << msg->getName() << endl;
     if (yourPtr == nullptr) {
@@ -190,7 +191,17 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
 
     SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
-    handleDataMessage(msg);
+
+    auto chunk = msg->peekDataAt(byte(0));
+    sockdata->queue.push(chunk);
+    msg->removeFromBeginning(msg->getPacketLength());   // remove all content
+
+    while(const auto& appmsg = sockdata->queue.pop<HttpReplyMessage>()) {
+        Packet *pk = msg->dup();
+        pk->append(appmsg);
+        handleDataMessage(pk);
+    }
+    delete msg;
 
     if (--sockdata->pending == 0) {
         EV_DEBUG << "Received last expected reply on this socket. Issuing a close" << endl;
@@ -270,14 +281,14 @@ void HttpBrowser::socketDeleted(int connId, void *yourPtr)
     ASSERT(connId == socket->getConnectionId());
     HttpRequestQueue& queue = sockdata->messageQueue;
     while (!queue.empty()) {
-        HttpRequestMessage *msg = queue.back();
+        Packet *msg = queue.back();
         queue.pop_back();
         delete msg;
     }
     delete sockdata;
 }
 
-void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRequestMessage *msg)
+void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, Packet *msg)
 {
     // Create a queue and push the single message
     HttpRequestQueue queue;

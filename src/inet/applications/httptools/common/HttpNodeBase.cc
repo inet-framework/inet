@@ -58,7 +58,7 @@ double HttpNodeBase::transmissionDelay(cPacket *pckt)
     return pckt->getBitLength() / ((double)linkSpeed);    // The link speed is in bit/s
 }
 
-void HttpNodeBase::logRequest(const HttpRequestMessage *httpRequest)
+void HttpNodeBase::logRequest(const Packet *httpRequest)
 {
     if (!enableLogging)
         return;
@@ -70,7 +70,7 @@ void HttpNodeBase::logRequest(const HttpRequestMessage *httpRequest)
         EV_INFO << "Request:\n" << formatHttpRequestLong(httpRequest);
 }
 
-void HttpNodeBase::logResponse(const HttpReplyMessage *httpResponse)
+void HttpNodeBase::logResponse(const Packet *httpResponse)
 {
     if (!enableLogging)
         return;
@@ -103,12 +103,13 @@ void HttpNodeBase::logEntry(std::string line)
     outfile.close();
 }
 
-std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage *httpRequest)
+std::string HttpNodeBase::formatHttpRequestShort(const Packet *pk)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
-    cModule *originator = findContainingNode(httpRequest->getSenderModule());
+    const auto& httpRequest = pk->peekHeader<HttpRequestMessage>();
+    cModule *originator = findContainingNode(pk->getSenderModule());
     if (originator != nullptr)
         originatorStr = originator->getFullName();
 
@@ -120,12 +121,13 @@ std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage *httpR
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage *httpResponse)
+std::string HttpNodeBase::formatHttpResponseShort(const Packet *pk)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
-    cModule *originator = findContainingNode(httpResponse->getSenderModule());
+    const auto& httpResponse = pk->peekHeader<HttpReplyMessage>();
+    cModule *originator = findContainingNode(pk->getSenderModule());
     if (originator != nullptr)
         originatorStr = originator->getFullName();
 
@@ -138,11 +140,12 @@ std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage *httpRe
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage *httpRequest)
+std::string HttpNodeBase::formatHttpRequestLong(const Packet *pk)
 {
     std::ostringstream str;
+    const auto& httpRequest = pk->peekHeader<HttpRequestMessage>();
 
-    str << "REQUEST: " << httpRequest->getName() << " -- " << httpRequest->getByteLength() << " bytes\n";
+    str << "REQUEST: " << pk->getName() << " -- " << pk->getByteLength() << " bytes\n";
     str << "Target URL:" << httpRequest->targetUrl() << "  Originator URL:" << httpRequest->originatorUrl() << endl;
 
     str << "PROTOCOL:";
@@ -170,11 +173,12 @@ std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage *httpRe
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage *httpResponse)
+std::string HttpNodeBase::formatHttpResponseLong(const Packet *pk)
 {
     std::ostringstream str;
+    const auto& httpResponse = pk->peekHeader<HttpReplyMessage>();
 
-    str << "RESPONSE: " << httpResponse->getName() << " -- " << httpResponse->getByteLength() << " bytes\n";
+    str << "RESPONSE: " << pk->getName() << " -- " << pk->getByteLength() << " bytes\n";
 
     str << "Target URL:" << httpResponse->targetUrl() << "  Originator URL:" << httpResponse->originatorUrl() << endl;
 

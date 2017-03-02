@@ -197,15 +197,15 @@ void HttpServerBase::handleMessage(cMessage *msg)
     // Override in derived classes
 }
 
-cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
+Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 {
-    HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
+    const auto& request = msg->peekHeader<HttpRequestMessage>();
     if (request == nullptr)
         throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
     EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->targetUrl() << endl;
 
-    logRequest(request);
+    logRequest(msg);
 
     if (extractServerName(request->targetUrl()) != hostName) {
         // This should never happen but lets check
@@ -213,7 +213,7 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
         return nullptr;
     }
 
-    HttpReplyMessage *replymsg;
+    Packet *replymsg = nullptr;
 
     // Parse the request string on spaces
     cStringTokenizer tokenizer = cStringTokenizer(request->heading(), " ");
@@ -231,7 +231,7 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
         replymsg = generateErrorReply(request, 404);
     }
     else if (res[0] == "GET") {
-        replymsg = handleGetRequest(request, res[1]);    // Pass in the resource string part
+        replymsg = handleGetRequest(msg, res[1]);    // Pass in the resource string part
     }
     else {
         EV_ERROR << "Unsupported request type " << res[0] << " for " << request->heading() << endl;
@@ -244,8 +244,9 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
     return replymsg;
 }
 
-HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, std::string resource)
+Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
 {
+    const auto& request = pk->peekHeader<HttpRequestMessage>();
     EV_DEBUG << "Handling GET request " << request->getName() << " resource: " << resource << endl;
 
     resource = trimLeft(resource, "/");
@@ -261,12 +262,12 @@ HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
         if (scriptedMode) {
             if (resource.empty() && htmlPages.find("root") != htmlPages.end()) {
                 EV_DEBUG << "Generating root resource" << endl;
-                return generateDocument(request, "root");
+                return generateDocument(pk, "root");
             }
             if (htmlPages.find(resource) == htmlPages.end()) {
                 if (htmlPages.find("default") != htmlPages.end()) {
                     EV_DEBUG << "Generating default resource" << endl;
-                    return generateDocument(request, "default");
+                    return generateDocument(pk, "default");
                 }
                 else {
                     EV_ERROR << "Page not found: " << resource << endl;
@@ -274,7 +275,7 @@ HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
                 }
             }
         }
-        return generateDocument(request, resource.c_str());
+        return generateDocument(pk, resource.c_str());
     }
     else if (cat == CT_TEXT || cat == CT_IMAGE) {
         if (scriptedMode && resources.find(resource) == resources.end()) {
@@ -289,13 +290,15 @@ HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
     }
 }
 
-HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, const char *resource, int size)
+Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int size)
 {
-    EV_DEBUG << "Generating HTML document for request " << request->getName() << " from " << request->getSenderModule()->getName() << endl;
+    const auto& request = pk->peekHeader<HttpRequestMessage>();
+    EV_DEBUG << "Generating HTML document for request " << pk->getName() << " from " << pk->getSenderModule()->getName() << endl;
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    Packet *replyPk = new Packet(szReply);
+    const auto& replymsg = std::make_shared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -303,7 +306,7 @@ HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, 
     replymsg->setSerial(request->serial());
     replymsg->setResult(200);
     replymsg->setContentType(CT_HTML);    // Emulates the content-type header field
-    replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     if (scriptedMode) {
         replymsg->setPayload(htmlPages[resource].body.c_str());
@@ -318,15 +321,18 @@ HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, 
         size = (int)rdHtmlPageSize->draw();
     }
 
-    replymsg->setByteLength(size);
-    EV_DEBUG << "Serving a HTML document of length " << replymsg->getByteLength() << " bytes" << endl;
+    replymsg->setChunkLength(byte(size));
+    replymsg->markImmutable();
+    replyPk->append(replymsg);
+
+    EV_DEBUG << "Serving a HTML document of length " << replyPk->getByteLength() << " bytes" << endl;
 
     htmlDocsServed++;
 
-    return replymsg;
+    return replyPk;
 }
 
-HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category)
+Packet *HttpServerBase::generateResourceMessage(const std::shared_ptr<HttpRequestMessage>& request, std::string resource, HttpContentType category)
 {
     EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
 
@@ -347,7 +353,8 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    Packet *replyPk = new Packet(szReply);
+    const auto& replymsg = std::make_shared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
@@ -355,29 +362,34 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
     replymsg->setSerial(request->serial());
     replymsg->setResult(200);
     replymsg->setContentType(category);    // Emulates the content-type header field
-    replymsg->setByteLength(size); // Set the resource size
-    replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+    replymsg->setChunkLength(byte(size)); // Set the resource size
+    replymsg->markImmutable();
+    replyPk->append(replymsg);
+    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     sprintf(szReply, "RESOURCE-BODY:%s", resource.c_str());
-    return replymsg;
+    return replyPk;
 }
 
-HttpReplyMessage *HttpServerBase::generateErrorReply(HttpRequestMessage *request, int code)
+Packet *HttpServerBase::generateErrorReply(const std::shared_ptr<HttpRequestMessage>& request, int code)
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szErrStr);
+    Packet *replyPk = new Packet(szErrStr);
+    const auto& replymsg = std::make_shared<HttpReplyMessage>();
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
     replymsg->setTargetUrl(request->originatorUrl());
     replymsg->setProtocol(request->protocol());    // MIGRATE40: kvj
     replymsg->setSerial(request->serial());
     replymsg->setResult(code);
-    replymsg->setByteLength((int)rdErrorMsgSize->draw());
-    replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+    replymsg->setChunkLength(byte((int)rdErrorMsgSize->draw()));
+    replymsg->markImmutable();
+    replyPk->append(replymsg);
+    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;
-    return replymsg;
+    return replyPk;
 }
 
 std::string HttpServerBase::generateBody()

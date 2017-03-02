@@ -63,15 +63,27 @@
 //
 
 
+cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/transportlayer/common/CRC_m.h"
+}}
+
+
+namespace inet;
+
+class FieldsChunk extends cObject;
+
 namespace inet::httptools;
 
 //
 // Base class for HTTP messages
 //
-packet HttpBaseMessage
+class HttpBaseMessage extends FieldsChunk
 {
     @omitGetVerb(true);
     @fieldNameSuffix("_var");
+    bit chunkLength @getter("getChunkLength") @overridegetter = byte(0);
     string targetUrl;               // The target URL - request set for browsers, echoed by servers.
     string originatorUrl = "";      // The originator URL. Only applicable for servers.
     int protocol = 11;              // 10 for http/1.0, 11 for http/1.1.
@@ -84,7 +96,7 @@ packet HttpBaseMessage
 //
 // Message class for HTTP requests
 //
-packet HttpRequestMessage extends HttpBaseMessage
+class HttpRequestMessage extends HttpBaseMessage
 {
     @omitGetVerb(true);         // Dont append get to generated getter methods.
     @fieldNameSuffix("_var");
@@ -107,7 +119,7 @@ enum HttpContentType
 //
 // Message class for HTTP replies
 //
-packet HttpReplyMessage extends HttpBaseMessage
+class HttpReplyMessage extends HttpBaseMessage
 {
     @omitGetVerb(true);
     @fieldNameSuffix("_var");

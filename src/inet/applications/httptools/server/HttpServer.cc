@@ -90,7 +90,7 @@ void HttpServer::socketEstablished(int connId, void *yourPtr)
     socketsOpened++;
 }
 
-void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
+void HttpServer::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
 {
     if (yourPtr == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;

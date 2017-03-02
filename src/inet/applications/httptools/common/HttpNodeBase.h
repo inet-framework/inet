@@ -27,6 +27,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/applications/httptools/configurator/HttpController.h"
 #include "inet/applications/httptools/common/HttpMessages_m.h"
 #include "inet/applications/httptools/common/HttpRandom.h"
@@ -84,13 +85,13 @@ class INET_API HttpNodeBase : public cSimpleModule, public ILifecycle
     /*
      * Methods for logging and formatting messages
      */
-    void logRequest(const HttpRequestMessage *httpRequest);
-    void logResponse(const HttpReplyMessage *httpResponse);
+    void logRequest(const Packet *httpRequest);
+    void logResponse(const Packet *httpResponse);
     void logEntry(std::string line);
-    std::string formatHttpRequestShort(const HttpRequestMessage *httpRequest);
-    std::string formatHttpResponseShort(const HttpReplyMessage *httpResponse);
-    std::string formatHttpRequestLong(const HttpRequestMessage *httpRequest);
-    std::string formatHttpResponseLong(const HttpReplyMessage *httpResponse);
+    std::string formatHttpRequestShort(const Packet *httpRequest);
+    std::string formatHttpResponseShort(const Packet *httpResponse);
+    std::string formatHttpRequestLong(const Packet *httpRequest);
+    std::string formatHttpResponseLong(const Packet *httpResponse);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
