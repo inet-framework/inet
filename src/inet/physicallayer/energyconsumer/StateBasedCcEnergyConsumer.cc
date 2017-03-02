@@ -60,7 +60,7 @@ void StateBasedCcEnergyConsumer::initialize(int stage)
     }
 }
 
-void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG)
+void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal ||
         signal == IRadio::receptionStateChangedSignal ||
@@ -75,7 +75,7 @@ void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t s
         throw cRuntimeError("Unknown signal");
 }
 
-void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, double value DETAILS_ARG)
+void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
     if (signal == ICcEnergySource::currentConsumptionChangedSignal) {
         if (energySource->getOutputVoltage() < minSupplyVoltage)

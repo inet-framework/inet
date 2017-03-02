@@ -56,7 +56,7 @@ void StateBasedEpEnergyConsumer::initialize(int stage)
     }
 }
 
-void StateBasedEpEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG)
+void StateBasedEpEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
 {
     if (signal == IRadio::radioModeChangedSignal ||
         signal == IRadio::receptionStateChangedSignal ||

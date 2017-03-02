@@ -72,8 +72,8 @@ class INET_API StateBasedCcEnergyConsumer : public cSimpleModule, public virtual
     virtual IEnergySource *getEnergySource() const override { return energySource; }
     virtual A getCurrentConsumption() const override { return currentConsumption; }
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, double value DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
 };
 
 } // namespace physicallayer
