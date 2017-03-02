@@ -138,27 +138,23 @@
         <img src="DynamicDatalinks.png">
     </p>
     <p>
-        AODV routers, exchange routing informations, video
-        <br><br>
         The type of all nodes is <var>AODVRouter</var>.
-        Before the communication can begin between the <var>source</var> and the <var>destination</var>, the nodes exchange routing informations with each other.
+        As long as the endpoints of a communication connection have valid routes to each other, AODV does not play any role.
+        When a route to a new destination is needed, the node broadcasts a RREQ to find a route to the destination.
+        The route is made available by unicasting a RREP back to the origination of the RREQ.
         To see this process, we filter the AODV packets:
         <div class="snippet">
             *.visualizer.*.dataLinkVisualizer.packetFilter = "AODV*"<br>
             *.visualizer.*.dataLinkVisualizer.fadeOutTime = 0.5s
         </div>
-        We see the exchange of the routing informations in this video:
+        In this video we see how the nodes exchange routing informations:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=568 height=527 src="DatalinkVisualizerAodv.mp4">
     </p>
     <p>
-        A node-ok egymastol szorasos uzenettel "kerdezik", hogy mi merre van.
-        A folyamat vegen egy graf alakul ki, ami azt mutatja meg, hogy...
-    </p>
-    <p>
         These ad hoc nodes are placed randomly on the playground and they move randomly between borders.
-        The source node has a ping application, that sends ping messages in every second.
+        The <var>source</var> node has a ping application, that sends ping messages in every second.
         The communication range is reduced to get a non-trivial path between <var>source</var> and <var>destination</var>.
         Here is the configuration:
         <div class="snippet">
@@ -175,9 +171,9 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=582 height=523 src="DatalinkVisualizerDynamic.mp4">
     </p>
     <p>
-        The nodes exchange routing information, then the <var>source</var> starts to ping the <var>destination</var>.
+        After the route is established towards the <var>destination</var>, the <var>source</var> starts to ping.
         When a ping message reaches the next node's data link layer, the link is visualized between the nodes.
-        If the route is changed between the <var>source</var> and the <var>destination</var>, new data links are activated.
+        When the route is changed between the <var>source</var> and the <var>destination</var>, new data links are activated.
     </p>
 
 
