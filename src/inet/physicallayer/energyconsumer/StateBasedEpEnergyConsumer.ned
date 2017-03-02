@@ -17,14 +17,14 @@
 
 package inet.physicallayer.energyconsumer;
 
-import inet.power.base.EnergyConsumerBase;
+import inet.power.base.EpEnergyConsumerBase;
 
 //
 // This module provides a radio power consumer model. The power consumption is
 // determined by the radio mode, the transmitter state and the receiver state
 // using constant parameters.
 //
-simple StateBasedEnergyConsumer extends EnergyConsumerBase
+simple StateBasedEpEnergyConsumer extends EpEnergyConsumerBase
 {
     parameters:
         string energySourceModule;
@@ -43,5 +43,5 @@ simple StateBasedEnergyConsumer extends EnergyConsumerBase
         double transmitterTransmittingHeaderPowerConsumption @unit(W) = default(transmitterTransmittingPowerConsumption);
         double transmitterTransmittingDataPowerConsumption @unit(W) = default(transmitterTransmittingPowerConsumption);
         @display("i=block/cogwheel");
-        @class(StateBasedEnergyConsumer);
+        @class(StateBasedEpEnergyConsumer);
 }

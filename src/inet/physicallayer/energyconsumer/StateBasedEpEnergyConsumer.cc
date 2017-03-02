@@ -15,40 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/energyconsumer/StateBasedEnergyConsumer.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/energyconsumer/StateBasedEpEnergyConsumer.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(StateBasedEnergyConsumer);
+Define_Module(StateBasedEpEnergyConsumer);
 
-StateBasedEnergyConsumer::StateBasedEnergyConsumer() :
-    offPowerConsumption(W(NaN)),
-    sleepPowerConsumption(W(NaN)),
-    switchingPowerConsumption(W(NaN)),
-    receiverIdlePowerConsumption(W(NaN)),
-    receiverBusyPowerConsumption(W(NaN)),
-    receiverReceivingPowerConsumption(W(NaN)),
-    receiverReceivingPreamblePowerConsumption(W(NaN)),
-    receiverReceivingHeaderPowerConsumption(W(NaN)),
-    receiverReceivingDataPowerConsumption(W(NaN)),
-    transmitterIdlePowerConsumption(W(NaN)),
-    transmitterTransmittingPowerConsumption(W(NaN)),
-    transmitterTransmittingPreamblePowerConsumption(W(NaN)),
-    transmitterTransmittingHeaderPowerConsumption(W(NaN)),
-    transmitterTransmittingDataPowerConsumption(W(NaN)),
-    radio(nullptr),
-    energySource(nullptr),
-    energyConsumerId(-1)
-{
-}
-
-void StateBasedEnergyConsumer::initialize(int stage)
+void StateBasedEpEnergyConsumer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    EV << "Initializing StateBasedEnergyConsumer, stage = " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         offPowerConsumption = W(par("offPowerConsumption"));
         sleepPowerConsumption = W(par("sleepPowerConsumption"));
@@ -71,20 +49,29 @@ void StateBasedEnergyConsumer::initialize(int stage)
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
         radioModule->subscribe(IRadio::transmittedSignalPartChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
-        const char *energySourceModule = par("energySourceModule");
-        energySource = dynamic_cast<IEnergySource *>(getModuleByPath(energySourceModule));
-        if (!energySource)
-            throw cRuntimeError("Cannot find power source");
-        energyConsumerId = energySource->addEnergyConsumer(this);
+        powerConsumption = W(0);
+        energySource = getModuleFromPar<IEpEnergySource>(par("energySourceModule"), this);
+        energySource->addEnergyConsumer(this);
+        WATCH(powerConsumption);
     }
 }
 
-void StateBasedEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+void StateBasedEpEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, long value DETAILS_ARG)
 {
-    energySource->setPowerConsumption(energyConsumerId, getPowerConsumption());
+    if (signal == IRadio::radioModeChangedSignal ||
+        signal == IRadio::receptionStateChangedSignal ||
+        signal == IRadio::transmissionStateChangedSignal ||
+        signal == IRadio::receivedSignalPartChangedSignal ||
+        signal == IRadio::transmittedSignalPartChangedSignal)
+    {
+        powerConsumption = computePowerConsumption();
+        emit(powerConsumptionChangedSignal, powerConsumption.get());
+    }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
-W StateBasedEnergyConsumer::getPowerConsumption() const
+W StateBasedEpEnergyConsumer::computePowerConsumption() const
 {
     IRadio::RadioMode radioMode = radio->getRadioMode();
     if (radioMode == IRadio::RADIO_MODE_OFF)
