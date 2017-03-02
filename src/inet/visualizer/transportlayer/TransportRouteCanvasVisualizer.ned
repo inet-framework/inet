@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,23 +17,23 @@
 
 package inet.visualizer.transportlayer;
 
-import inet.visualizer.base.RouteVisualizerBase;
+import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.ITransportRouteVisualizer;
 
 //
-// This module visualizes network routes on a 2D canvas. It displays an
-// polyline arrow for each active route in the network. See the documentation of
-// the base module for what constitutes an active route. The arrow points from
-// the source towards the destination. If a link is used in both directions then
-// there are arrowheads on both ends of the arrow. Each polyline fades out over
-// time until the route becomes inactive unless it is reinforced by another
-// packet. The polyline automatically follows the movement of mobile nodes.
+// This module visualizes transport layer routes on a 2D canvas. It displays an
+// polyline arrow for each active route in the network. See the documentation
+// of the base module for what constitutes an active route. The arrow points
+// from the source towards the destination. If a route is used in both directions
+// then there are separate pathes for them. Each polyline fades out over time
+// as the route becomes inactive unless it is reinforced by another packet. The
+// polyline automatically follows the movement of mobile nodes.
 //
-// @see ~TransportRouteOsgVisualizer, ~TransportRouteVisualizer, ~RouteVisualizerBase, and
-// ~ITransportRouteVisualizer
+// @see ~TransportRouteOsgVisualizer, ~TransportRouteVisualizer, ~PathVisualizerBase, ~ITransportRouteVisualizer
 //
-simple TransportRouteCanvasVisualizer extends RouteVisualizerBase like ITransportRouteVisualizer
+simple TransportRouteCanvasVisualizer extends PathVisualizerBase like ITransportRouteVisualizer
 {
     parameters:
+        double zIndex = default(4); // determines the drawing order of figures relative to other visualizers
         @class(TransportRouteCanvasVisualizer);
 }

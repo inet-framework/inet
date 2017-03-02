@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -29,11 +29,13 @@ void SceneCanvasVisualizer::initialize(int stage)
     SceneVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
+        zIndex = par("zIndex");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
         canvasProjection.setTranslation(computeViewTranslation(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
         axisLayer = new cGroupFigure("axisLayer");
+        axisLayer->setZIndex(zIndex);
         axisLayer->insertBelow(canvas->getSubmodulesLayer());
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
@@ -52,6 +54,9 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     xAxis->setTags("axis");
     yAxis->setTags("axis");
     zAxis->setTags("axis");
+    xAxis->setTooltip("This arrow represents the X axis of the playground");
+    yAxis->setTooltip("This arrow represents the Y axis of the playground");
+    zAxis->setTooltip("This arrow represents the Z axis of the playground");
     xAxis->setLineWidth(1);
     yAxis->setLineWidth(1);
     zAxis->setLineWidth(1);

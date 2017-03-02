@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 
 namespace inet {
@@ -43,16 +44,24 @@ void MediumVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
+        networkNodeFilter.setPattern(par("nodeFilter"));
+        interfaceFilter.setPattern(par("interfaceFilter"));
+        packetFilter.setPattern(par("packetFilter"));
         displaySignals = par("displaySignals");
-        signalPropagationUpdateInterval = par("signalPropagationUpdateInterval");
+        signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
+        signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         displayTransmissions = par("displayTransmissions");
         displayReceptions = par("displayReceptions");
-        displayRadioFrames = par("displayRadioFrames");
-        radioFrameLineColor = cFigure::Color(par("radioFrameLineColor"));
         displayInterferenceRanges = par("displayInterferenceRanges");
-        interferenceRangeColor = cFigure::Color(par("interferenceRangeColor"));
+        interferenceRangeLineColor = cFigure::Color(par("interferenceRangeLineColor"));
+        interferenceRangeLineStyle = cFigure::parseLineStyle(par("interferenceRangeLineStyle"));
+        interferenceRangeLineWidth = par("interferenceRangeLineWidth");
         displayCommunicationRanges = par("displayCommunicationRanges");
-        communicationRangeColor = cFigure::Color(par("communicationRangeColor"));
+        communicationRangeLineColor = cFigure::Color(par("communicationRangeLineColor"));
+        communicationRangeLineStyle = cFigure::parseLineStyle(par("communicationRangeLineStyle"));
+        communicationRangeLineWidth = par("communicationRangeLineWidth");
+        signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
+        signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         radioMedium = getModuleFromPar<IRadioMedium>(par("mediumModule"), this, false);
         if (radioMedium != nullptr) {
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
@@ -68,37 +77,26 @@ void MediumVisualizerBase::initialize(int stage)
     }
 }
 
-simtime_t MediumVisualizerBase::getNextSignalPropagationUpdateTime(const ITransmission *transmission)
+void MediumVisualizerBase::handleParameterChange(const char *name)
 {
-    simtime_t now = simTime();
-    ICommunicationCache *communicationCache = const_cast<ICommunicationCache *>(radioMedium->getCommunicationCache());
-    const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
-    const simtime_t transmissionStartTime = transmission->getStartTime();
-    const simtime_t transmissionEndTime = transmission->getEndTime();
-    const simtime_t interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
-    simtime_t maxPropagationTime = interferenceEndTime - transmissionEndTime - mediumLimitCache->getMaxTransmissionDuration();
-    if (transmissionStartTime <= now && now < transmissionStartTime + maxPropagationTime) {
-        simtime_t nextUpdateTime = now + signalPropagationUpdateInterval;
-        return nextUpdateTime > transmissionStartTime + maxPropagationTime ? transmissionStartTime + maxPropagationTime : nextUpdateTime;
+    if (name != nullptr) {
+        if (!strcmp(name, "networkNodeFilter"))
+            networkNodeFilter.setPattern(par("nodeFilter"));
+        else if (!strcmp(name, "interfaceFilter"))
+            interfaceFilter.setPattern(par("interfaceFilter"));
+        else if (!strcmp(name, "packetFilter"))
+            packetFilter.setPattern(par("packetFilter"));
+        else if (!strcmp(name, "signalPropagationAnimationSpeed"))
+            signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
+        else if (!strcmp(name, "signalTransmissionAnimationSpeed"))
+            signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
+        // TODO:
     }
-    else if (transmissionEndTime <= now && now < transmissionEndTime + maxPropagationTime) {
-        simtime_t nextUpdateTime = now + signalPropagationUpdateInterval;
-        return nextUpdateTime > transmissionEndTime + maxPropagationTime ? transmissionEndTime + maxPropagationTime : nextUpdateTime;
-    }
-    else if (transmissionStartTime + maxPropagationTime <= now && now < transmissionEndTime) {
-        simtime_t nextUpdateTime = now + signalPropagationUpdateInterval + 2 * (now - transmissionStartTime - maxPropagationTime);
-        return nextUpdateTime > transmissionEndTime ? transmissionEndTime : nextUpdateTime;
-    }
-    else if (transmissionEndTime + maxPropagationTime <= now && now < interferenceEndTime) {
-        simtime_t nextUpdateTime = now + signalPropagationUpdateInterval + 2 * (now - transmissionEndTime - maxPropagationTime);
-        return nextUpdateTime > interferenceEndTime ? interferenceEndTime : nextUpdateTime;
-    }
-    else
-        return SimTime::getMaxTime();
 }
 
 void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method_Silent();
     if (signal == IRadioMedium::radioAddedSignal)
         radioAdded(check_and_cast<IRadio *>(object));
     else if (signal == IRadioMedium::radioRemovedSignal)
@@ -115,6 +113,39 @@ void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal,
         receptionStarted(check_and_cast<IReception *>(object));
     else if (signal == IRadioMedium::receptionEndedSignal)
         receptionEnded(check_and_cast<IReception *>(object));
+    else
+        throw cRuntimeError("Unknown signal");
+}
+
+bool MediumVisualizerBase::isSignalPropagationInProgress(const ITransmission *transmission) const
+{
+    simtime_t now = simTime();
+    ICommunicationCache *communicationCache = const_cast<ICommunicationCache *>(radioMedium->getCommunicationCache());
+    const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
+    const simtime_t transmissionStartTime = transmission->getStartTime();
+    const simtime_t transmissionEndTime = transmission->getEndTime();
+    const simtime_t interferenceEndTime = communicationCache->getCachedInterferenceEndTime(transmission);
+    simtime_t maxPropagationTime = interferenceEndTime - transmissionEndTime - mediumLimitCache->getMaxTransmissionDuration();
+    return (transmissionStartTime <= now && now < transmissionStartTime + maxPropagationTime) ||
+           (transmissionEndTime <= now && now < transmissionEndTime + maxPropagationTime);
+}
+
+bool MediumVisualizerBase::isSignalTransmissionInProgress(const ITransmission *transmission) const
+{
+    simtime_t now = simTime();
+    return transmission->getStartTime() <= now && now < transmission->getEndTime();
+}
+
+bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission) const
+{
+    L3AddressResolver addressResolver;
+    auto transmitter = transmission->getTransmitter();
+    auto radio = check_and_cast<const cModule *>(transmitter);
+    auto networkNode = getContainingNode(radio);
+    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+    auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(radio->getParentModule());
+    auto packet = transmission->getPhyFrame() != nullptr ? transmission->getPhyFrame() : transmission->getMacFrame();
+    return networkNodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet);
 }
 
 } // namespace visualizer

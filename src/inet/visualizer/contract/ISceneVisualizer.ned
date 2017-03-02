@@ -18,11 +18,11 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ISceneVisualizer
+// This module interface allows configuring different ~ISceneVisualizer
 // submodules from INI files. Such a visualizer displays the playground, the
 // coordinate axes, sets up the initial viewpoint, etc.
 //
-// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, and ~SceneVisualizerBase
+// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase
 //
 moduleinterface ISceneVisualizer
 {

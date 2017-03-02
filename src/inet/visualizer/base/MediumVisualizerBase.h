@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,6 +20,9 @@
 
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/InterfaceFilter.h"
+#include "inet/visualizer/util/NetworkNodeFilter.h"
+#include "inet/visualizer/util/PacketFilter.h"
 
 namespace inet {
 
@@ -41,26 +44,32 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     /** @name Parameters */
     //@{
     IRadioMedium *radioMedium = nullptr;
+    NetworkNodeFilter networkNodeFilter;
+    InterfaceFilter interfaceFilter;
+    PacketFilter packetFilter;
     bool displaySignals = false;
-    simtime_t signalPropagationUpdateInterval = NaN;
-
+    double signalPropagationAnimationSpeed = NaN;
+    double signalTransmissionAnimationSpeed = NaN;
     bool displayTransmissions = false;
     bool displayReceptions = false;
-
-    bool displayRadioFrames = false;
-    cFigure::Color radioFrameLineColor;
-
-    bool displayCommunicationRanges = false;
-    cFigure::Color communicationRangeColor;
-
     bool displayInterferenceRanges = false;
-    cFigure::Color interferenceRangeColor;
+    cFigure::Color interferenceRangeLineColor;
+    cFigure::LineStyle interferenceRangeLineStyle;
+    double interferenceRangeLineWidth = NaN;
+    bool displayCommunicationRanges = false;
+    cFigure::Color communicationRangeLineColor;
+    cFigure::LineStyle communicationRangeLineStyle;
+    double communicationRangeLineWidth = NaN;
     //@}
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
 
-    virtual simtime_t getNextSignalPropagationUpdateTime(const ITransmission *transmission);
+    virtual bool isSignalPropagationInProgress(const ITransmission *transmission) const;
+    virtual bool isSignalTransmissionInProgress(const ITransmission *transmission) const;
+
+    virtual bool matchesTransmission(const ITransmission *transmission) const;
 
     virtual void radioAdded(const IRadio *radio) = 0;
     virtual void radioRemoved(const IRadio *radio) = 0;
@@ -75,6 +84,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 
   public:
     virtual ~MediumVisualizerBase();
+
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

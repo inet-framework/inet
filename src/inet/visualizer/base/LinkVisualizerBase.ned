@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,35 +18,44 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for network link visualizer simple modules. It
-// keeps track of active links in a network. A link between two network node is
-// considered active if a packet is sent recently between their link layers.
-// Active links are not displayed by default, see the module parameters for how
-// to enable the visualization. The actual visualization of active links is done
+// This is a base module for link visualizer simple modules. It keeps track of
+// active links in a network. A link between two network node is considered
+// active if a packet is sent recently between the corresponding layers. Active
+// links are not displayed by default, see the module parameters for how to
+// enable the visualization. The actual visualization of active links is done
 // in derived modules.
 //
-// This module subscribes for packetReceivedFromUpperSignal and
-// packetSentToUpperSignal on the module determined by the subscriptionModule
-// parameter. If the visualizer receives a packetReceivedFromUpperSignal from
-// a MAC protocol module, then it stores the corresponding packet id. If later
-// on the visualizer receives a packetSentToUpperSignal from another MAC
-// protocol module with the same packet id, then it adds an active link between
-// the source and the destination nodes. After a certain amount of time the link
-// becomes inactive unless it is reinforced by another packet. This module also
-// subscribes for mobilityStateChangedSignal to be able to follow the movement
-// of mobile nodes.
+// This module subscribes for signals at the provided subscription module. When
+// determining active links, it only considers packets matched by the provided
+// filters. The filters use the format of cMatchExpression with the packet name
+// as the default attribute.
 //
-// @see ~LinkCanvasVisualizer, ~LinkOsgVisualizer, 
-// ~ILinkVisualizer, and ~LinkVisualizerBase
+// @see ~PhysicalLinkVisualizerBase, ~DataLinkVisualizerBase, ~VisualizerBase
 //
 simple LinkVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default(""); // module path where the visualizer subscribes for link layer signals, root module by default
-        string packetNameFilter = default(""); // which packets are considered to determine active links, matches no packets by default
-        string lineColor = default("black"); // link line color, black by default
-        double lineWidth = default(3); // link line width
-        string lineStyle = default("solid"); // link line style (solid, dashed, dotted)
-        double opacityHalfLife @unit(s) = default(1s); // how quickly inactive links fade away, opacity halves every second by default
+        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for signals, root module by default
+
+        bool displayLinks = default(false); // display arrows for active links, disabled by default
+
+        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
+        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
+        string packetFilter = default("*"); // which packets are considered, matches all packets by default
+
+        string lineColor = default("black"); // link arrow color, black by default
+        string lineStyle = default("solid"); // link arrow style (solid, dashed, dotted)
+        double lineWidth = default(3); // link arrow width
+
+        double lineShift = default(10); // line shift to avoid overlapping arrows
+        string lineShiftMode = default("normal"); // determines how overlapping arrows are shifted, possible values are: none, normal, x, y, z; optional prefix + or -
+
+        double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
+        string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
+
+        string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies how inactive links fade out
+        double fadeOutTime @unit(s) = default(1s); // how quickly inactive links fade away, 1 second by default
+        double fadeOutAnimationSpeed = default(0); // animation speed while there are active links, value must be in the range (0, +inf)
+
         @class(LinkVisualizerBase);
 }

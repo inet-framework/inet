@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,8 +22,7 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 //
 // This module integrates canvas and osg data link visualizers into a single module.
 //
-// @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer,
-// ~DataLinkVisualizerBase, and ~IDataLinkVisualizer
+// @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~LinkVisualizerBase, ~IDataLinkVisualizer
 //
 module DataLinkVisualizer like IDataLinkVisualizer
 {

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,14 +27,13 @@ import inet.visualizer.contract.ISceneVisualizer;
 // mapFile parameter. The playground is placed on the map according to the
 // coordinate system module.
 //
-// @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase,
-// ~ISceneVisualizer, ~IGeographicCoordinateSystem,
-// ~SimpleGeographicCoordinateSystem, and ~OsgGeographicCoordinateSystem 
+// @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
+// @see ~IGeographicCoordinateSystem, ~SimpleGeographicCoordinateSystem, ~OsgGeographicCoordinateSystem 
 //
 simple SceneOsgEarthVisualizer extends SceneOsgVisualizerBase like ISceneVisualizer
 {
     parameters:
         @class(SceneOsgEarthVisualizer);
-        string coordinateSystemModule = default("coordinateSystem"); // module path of the geographic coordinate system, refers to a top level module by default
+        string coordinateSystemModule = default("coordinateSystem"); // the geographic coordinate system, refers to a top level module by default
         string mapFile; // map file, e.g. some part of the earth, mandatory parameter
 }

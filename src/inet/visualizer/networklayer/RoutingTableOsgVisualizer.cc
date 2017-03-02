@@ -30,6 +30,8 @@ namespace visualizer {
 
 Define_Module(RoutingTableOsgVisualizer);
 
+#ifdef WITH_OSG
+
 RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Node *node, int nodeModuleId, int nextHopModuleId) :
     RouteVisualization(nodeModuleId, nextHopModuleId),
     node(node)
@@ -70,6 +72,8 @@ void RoutingTableOsgVisualizer::removeRouteVisualization(const RouteVisualizatio
     auto node = routeOsgVisualization->node;
     node->getParent(0)->removeChild(node);
 }
+
+#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 
