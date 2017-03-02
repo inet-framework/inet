@@ -20,7 +20,8 @@ package inet.tutorials.ethernet;
 
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.node.ethernet.EtherHost;
-import inet.node.ethernet.EtherLink;
+import inet.node.ethernet.Eth10M;
+import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 
 
@@ -40,7 +41,7 @@ network TwoHosts
                 @display("p=200,200");
         }
     connections:
-        hostA.ethg <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> hostB.ethg;
+        hostA.ethg <--> Eth100M {  length = 5m; } <--> hostB.ethg;
 }
 
 //
@@ -67,9 +68,9 @@ network HostsWithSwitch
                 @display("p=200,360");
         }
     connections:
-        hostA.ethg <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switch.ethg++;
-        hostB.ethg <--> EtherLink {  length = 5m; datarate = 10Mbps; } <--> switch.ethg++;
-        hostC.ethg <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switch.ethg++;
+        hostA.ethg <--> Eth100M { length = 5m; } <--> switch.ethg++;
+        hostB.ethg <--> Eth10M { length = 5m; } <--> switch.ethg++;
+        hostC.ethg <--> Eth100M { length = 5m; } <--> switch.ethg++;
 }
 
 //
@@ -104,12 +105,12 @@ network HostsWithSwitches
                 @display("p=360,360");
         }
     connections:
-        switchA.ethg++ <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switchB.ethg++;
-        switchA.ethg++ <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switchC.ethg++;
-        switchB.ethg++ <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switchC.ethg++;
-        hostA.ethg <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switchA.ethg++;
-        hostB.ethg <--> EtherLink {  length = 5m; datarate = 10Mbps; } <--> switchB.ethg++;
-        hostC.ethg <--> EtherLink {  length = 5m; datarate = 100Mbps; } <--> switchC.ethg++;
+        switchA.ethg++ <--> Eth100M { length = 5m; } <--> switchB.ethg++;
+        switchA.ethg++ <--> Eth100M { length = 5m; } <--> switchC.ethg++;
+        switchB.ethg++ <--> Eth100M { length = 5m; } <--> switchC.ethg++;
+        hostA.ethg <--> Eth100M { length = 5m; } <--> switchA.ethg++;
+        hostB.ethg <--> Eth10M { length = 5m; } <--> switchB.ethg++;
+        hostC.ethg <--> Eth100M { length = 5m; } <--> switchC.ethg++;
 }
 
 //
@@ -121,7 +122,7 @@ network HostsWithSwitchesSTP extends HostsWithSwitches
     submodules:
         l2NetworkConfigurator: L2NetworkConfigurator {
             parameters:
-                @display("p=60,60");
+                @display("p=80,60");
         }
 }
 
