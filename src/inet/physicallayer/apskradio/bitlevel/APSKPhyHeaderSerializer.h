@@ -19,7 +19,7 @@
 #define __INET_APSKPHYHEADERSERIALIZER_H
 
 #include "inet/common/BitVector.h"
-#include "inet/common/packet/Serializer.h"
+#include "inet/common/packet/serializer/Serializer.h"
 #include "inet/physicallayer/apskradio/packetlevel/APSKPhyHeader_m.h"
 
 namespace inet {

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 #include "inet/common/serializer/ipv6/ICMPv6HeaderSerializer.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"

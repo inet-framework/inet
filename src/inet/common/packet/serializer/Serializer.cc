@@ -14,8 +14,8 @@
 //
 
 #include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/common/packet/Serializer.h"
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 
 namespace inet {
 

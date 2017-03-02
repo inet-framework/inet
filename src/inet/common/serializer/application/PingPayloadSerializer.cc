@@ -16,7 +16,7 @@
 //
 
 #include "inet/applications/pingapp/PingPayload_m.h"
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 #include "inet/common/serializer/application/PingPayloadSerializer.h"
 
 namespace inet {

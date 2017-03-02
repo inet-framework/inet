@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 #include "inet/common/serializer/headers/bsdint.h"
 #include "inet/common/serializer/headers/defs.h"
 #include "inet/common/serializer/headers/in_systm.h"

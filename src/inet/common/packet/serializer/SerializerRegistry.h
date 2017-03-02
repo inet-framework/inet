@@ -16,7 +16,7 @@
 #ifndef __INET_SERIALIZERREGISTRY_H_
 #define __INET_SERIALIZERREGISTRY_H_
 
-#include "inet/common/packet/Serializer.h"
+#include "inet/common/packet/serializer/Serializer.h"
 
 namespace inet {
 

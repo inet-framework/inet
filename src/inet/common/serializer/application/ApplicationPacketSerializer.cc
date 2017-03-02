@@ -14,7 +14,7 @@
 //
 
 #include "inet/applications/base/ApplicationPacket_m.h"
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 #include "inet/common/serializer/application/ApplicationPacketSerializer.h"
 
 namespace inet {

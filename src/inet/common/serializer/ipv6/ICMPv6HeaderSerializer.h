@@ -19,7 +19,7 @@
 #ifndef __INET_ICMPV6HEADERSERIALIZER_H
 #define __INET_ICMPV6HEADERSERIALIZER_H
 
-#include "inet/common/packet/Serializer.h"
+#include "inet/common/packet/serializer/Serializer.h"
 
 namespace inet {
 

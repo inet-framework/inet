@@ -19,7 +19,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/common/packet/ReorderBuffer.h"
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 #include "NewTest.h"
 #include "UnitTest_m.h"
 #include "UnitTest.h"

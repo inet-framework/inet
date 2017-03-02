@@ -16,7 +16,7 @@
 #ifndef __INET_UDPHEADERSERIALIZER_H
 #define __INET_UDPHEADERSERIALIZER_H
 
-#include "inet/common/packet/Serializer.h"
+#include "inet/common/packet/serializer/Serializer.h"
 
 namespace inet {
 

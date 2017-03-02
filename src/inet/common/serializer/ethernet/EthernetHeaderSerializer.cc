@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/SerializerRegistry.h"
+#include "inet/common/packet/serializer/SerializerRegistry.h"
 #include "inet/common/serializer/ethernet/EthernetHeaderSerializer.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame.h"
