@@ -16,8 +16,8 @@
 #ifndef __INET_SERIALIZER_H_
 #define __INET_SERIALIZER_H_
 
-#include "inet/common/packet/ByteInputStream.h"
-#include "inet/common/packet/ByteOutputStream.h"
+#include "inet/common/ByteInputStream.h"
+#include "inet/common/ByteOutputStream.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"

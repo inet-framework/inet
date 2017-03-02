@@ -17,8 +17,8 @@
 #define __INET_CHUNK_H_
 
 #include <memory>
-#include "inet/common/packet/ByteInputStream.h"
-#include "inet/common/packet/ByteOutputStream.h"
+#include "inet/common/ByteInputStream.h"
+#include "inet/common/ByteOutputStream.h"
 #include "inet/common/Units.h"
 
 namespace inet {
