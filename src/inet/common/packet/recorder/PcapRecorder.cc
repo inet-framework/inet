@@ -20,7 +20,7 @@
 //
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/PcapRecorder.h"
+#include "inet/common/packet/recorder/PcapRecorder.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"

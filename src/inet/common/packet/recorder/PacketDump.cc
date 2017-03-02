@@ -21,7 +21,7 @@
 
 #include <errno.h>
 
-#include "inet/common/packet/PacketDump.h"
+#include "inet/common/packet/recorder/PacketDump.h"
 
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader.h"

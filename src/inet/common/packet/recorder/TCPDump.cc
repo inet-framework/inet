@@ -19,7 +19,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/TCPDump.h"
+#include "inet/common/packet/recorder/TCPDump.h"
 
 #ifdef WITH_IPv4
 #undef WITH_IPv4        //FIXME //KLUDGE

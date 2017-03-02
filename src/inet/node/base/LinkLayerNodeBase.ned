@@ -17,7 +17,7 @@
 
 package inet.node.base;
 
-import inet.common.packet.PcapRecorder;
+import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.contract.IExternalNic;
 import inet.linklayer.contract.ITunNic;
 import inet.linklayer.contract.IWiredNic;

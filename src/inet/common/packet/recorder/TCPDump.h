@@ -23,8 +23,8 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/packet/PcapDump.h"
-#include "inet/common/packet/PacketDump.h"
+#include "inet/common/packet/recorder/PcapDump.h"
+#include "inet/common/packet/recorder/PacketDump.h"
 
 namespace inet {
 

@@ -21,7 +21,7 @@ package inet.node.internetcloud;
 
 
 import inet.common.MessageDispatcher;
-import inet.common.packet.PcapRecorder;
+import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.contract.IWiredNic;
 import inet.networklayer.arp.ipv4.ARP;
 import inet.networklayer.common.InterfaceTable;

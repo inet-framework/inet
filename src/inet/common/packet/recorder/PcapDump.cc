@@ -21,7 +21,7 @@
 
 #include <errno.h>
 
-#include "inet/common/packet/PcapDump.h"
+#include "inet/common/packet/recorder/PcapDump.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 
 #include "inet/networklayer/common/IPProtocolId_m.h"
