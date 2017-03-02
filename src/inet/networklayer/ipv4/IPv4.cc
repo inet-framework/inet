@@ -281,9 +281,8 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else {
             // KLUDGE: TODO: factor out
             auto packetCopy = toMutable(packet);
-            const auto& ipv4Header = packetCopy->peekHeader<IPv4Header>();
+            auto ipv4Header = std::dynamic_pointer_cast<IPv4Header>(packetCopy->peekHeader<IPv4Header>()->dupShared());
             packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
-            ipv4Header->markMutableIfExclusivelyOwned();
             ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
             ipv4Header->markImmutable();
             packetCopy->pushHeader(ipv4Header);
@@ -577,7 +576,7 @@ void IPv4::forwardMulticastPacket(Packet *packet, const InterfaceEntry *fromIE)
     }
     else {
         // TODO: no need to emit fromIE when tags will be used in place of control infos
-        emit(NF_IPv4_DATA_ON_RPF, packet, const_cast<InterfaceEntry *>(fromIE));    // forwarding hook
+        emit(NF_IPv4_DATA_ON_RPF, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));    // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
