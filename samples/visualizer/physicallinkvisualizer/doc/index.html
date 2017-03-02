@@ -12,9 +12,8 @@
     <p> 
         In computer networks, networked computing devices exchange data with each other over a physical link.
         The physical connection between nodes are established using either cable or wireless media.
-        In wireless networks we don't see, whether it is possible to communicate through the radio medium.
-        This link displayed by the <var>PhysicalLinkVisualizer</var>.
-        Without this visualization we need to examine the console to find out whether the physical link is established between the nodes.
+        In wireless networks we can't see whether it is possible to communicate through the radio medium.
+        Without displaying physical links, we need to examine the console to find out whether the physical link is established between the nodes.
     </p>
     <p>    
         The example consists of 2 simulation models, each demonstrating different features of physical link visualization.
@@ -23,7 +22,7 @@
 
     <p><h2>About the Visualizer</h2></p>
     <p>
-        When a packet is received by a node flawlessly, a physical link is established between the transmitter and the receiver nodes.
+        When a packet is received by a node flawlessly in the physical layer, a physical link is established between the transmitting and the receiving nodes.
         The <code><strong>PhysicalLinkVisualizer</strong></code> keeps track of active physical links in a network.
         A link becomes active between two nodes when a packet arrives at the receiver node's physical link layer from the source node's physical link layer.
         By default links are not displayed, we can enable their visualization by switching the <i>displayLinks</i> parameter to true.
@@ -56,7 +55,7 @@
         </div>
     </p>
     <p>
-        The following animation depicts what happens, when we start the simulation:
+        The following animation depicts what happens when we start the simulation:
     </p>
     <p align="center">        
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=544 height=318 src="EnablingPhysicalLinks.mp4">
@@ -69,7 +68,7 @@
 
     <p><h2>Filtering Physical Links</h2></p>
     <p>
-        This simulation demonstrates between which nodes can be established a physical link.
+        This simulation demonstrates between which nodes can a physical link be established.
         In addition we show how the <i>packetFilter</i> parameter works.
     </p>
     <p>
@@ -83,7 +82,7 @@
 	<p><h2>Displaying Dynamic Physical Links</h2></p>
     <p>
         The goal of this configuration is displaying dynamically changing active physical links in a wireless environment.
-        The physical links show, which nodes are able to communicate with each other directly.
+        The physical links show which nodes are able to communicate with each other directly.
         Here is the network for this configuration:
     </p>
     <p>
@@ -112,7 +111,7 @@
     </p>
     <p>
         Due to the broadcast packets, dotted arrows appear between the nodes.
-        The arrows points to that node, which received a <i>Broadcast</i> packet in the physical layer.
+        The arrows point to that nodes which received a <i>Broadcast</i> packet in the physical layer.
         As a result of the movement of nodes, some physical links disappear and some new links are established between the nodes.
     </p>
 
