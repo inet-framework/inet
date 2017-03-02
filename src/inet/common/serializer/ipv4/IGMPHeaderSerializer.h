@@ -19,7 +19,7 @@
 #ifndef __INET_IGMPHEADERSERIALIZER_H
 #define __INET_IGMPHEADERSERIALIZER_H
 
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 

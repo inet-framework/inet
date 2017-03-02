@@ -16,7 +16,7 @@
 #ifndef __INET_TCPHEADERSERIALIZER_H
 #define __INET_TCPHEADERSERIALIZER_H
 
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {

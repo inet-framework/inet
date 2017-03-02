@@ -16,7 +16,7 @@
 #ifndef __INET_PPPHEADERSERIALIZER_H
 #define __INET_PPPHEADERSERIALIZER_H
 
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 

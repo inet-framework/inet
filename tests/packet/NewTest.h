@@ -18,7 +18,8 @@
 
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+#include "inet/common/packet/serializer/SequenceChunkSerializer.h"
 #include "NewTest_m.h"
 
 namespace inet {

@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211PHYHEADERSERIALIZER_H
 #define __INET_IEEE80211PHYHEADERSERIALIZER_H
 
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/ChunkSerializer.h"
 
 namespace inet {
 

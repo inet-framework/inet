@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/chunk/Chunk.h"
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
+#include "inet/common/packet/serializer/ChunkSerializer.h"
 #include "inet/common/packet/serializer/SerializerRegistry.h"
 
 namespace inet {

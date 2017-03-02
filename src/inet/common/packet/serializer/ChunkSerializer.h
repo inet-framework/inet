@@ -13,30 +13,29 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SERIALIZERREGISTRY_H_
-#define __INET_SERIALIZERREGISTRY_H_
+#ifndef __INET_CHUNKSERIALIZER_H_
+#define __INET_CHUNKSERIALIZER_H_
 
-#include "inet/common/packet/serializer/ChunkSerializer.h"
+#include "inet/common/ByteInputStream.h"
+#include "inet/common/ByteOutputStream.h"
+#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 
-#define Register_Serializer(TYPE, CLASSNAME) EXECUTE_ON_STARTUP(SerializerRegistry::globalRegistry.registerSerializer(typeid(TYPE), new CLASSNAME()));
-
-class INET_API SerializerRegistry
+class INET_API ChunkSerializer : public cObject
 {
   public:
-    static SerializerRegistry globalRegistry;
-
-  protected:
-    std::map<const std::type_info *, const ChunkSerializer *> serializers;
+    static bit totalSerializedBitCount;
+    static bit totalDeserializedBitCount;
 
   public:
-    void registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer);
+    virtual ~ChunkSerializer() { }
 
-    const ChunkSerializer *getSerializer(const std::type_info& typeInfo) const;
+    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const = 0;
+    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
 } // namespace
 
-#endif // #ifndef __INET_SERIALIZERREGISTRY_H_
+#endif // #ifndef __INET_CHUNKSERIALIZER_H_
 

@@ -19,7 +19,7 @@
 #ifndef __INET_PINGPAYLOADSERIALIZER_H
 #define __INET_PINGPAYLOADSERIALIZER_H
 
-#include "inet/common/packet/serializer/Serializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 

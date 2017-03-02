@@ -13,30 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SERIALIZERREGISTRY_H_
-#define __INET_SERIALIZERREGISTRY_H_
-
 #include "inet/common/packet/serializer/ChunkSerializer.h"
 
 namespace inet {
 
-#define Register_Serializer(TYPE, CLASSNAME) EXECUTE_ON_STARTUP(SerializerRegistry::globalRegistry.registerSerializer(typeid(TYPE), new CLASSNAME()));
-
-class INET_API SerializerRegistry
-{
-  public:
-    static SerializerRegistry globalRegistry;
-
-  protected:
-    std::map<const std::type_info *, const ChunkSerializer *> serializers;
-
-  public:
-    void registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer);
-
-    const ChunkSerializer *getSerializer(const std::type_info& typeInfo) const;
-};
+bit ChunkSerializer::totalSerializedBitCount = bit(0);
+bit ChunkSerializer::totalDeserializedBitCount = bit(0);
 
 } // namespace
-
-#endif // #ifndef __INET_SERIALIZERREGISTRY_H_
-
