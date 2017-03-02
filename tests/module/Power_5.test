@@ -35,31 +35,18 @@ ned-path = .;../../../../src;../../lib
 sim-time-limit = 100s
 cmdenv-express-mode = false
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # status
 **.hasStatus = true
-*.hostSource.status.initialStatus = "down"
-*.hostDestination.status.initialStatus = "up"
 
 # power
-**.energyStorageType = "SimpleEpEnergyStorage"
-**.energyManagementType = "SimpleEpEnergyManagement"
-**.energyConsumerType = "StateBasedEpEnergyConsumer"
-**.energyStorage.nominalCapacity = 1J
-**.energyManagement.nodeShutdownCapacity = 0J
-**.energyManagement.nodeStartCapacity = 0.2J
-*.hostSource.energyStorage.initialCapacity = 0J
-*.hostDestination.energyStorage.initialCapacity = 0.1J
-*.hostSource.energyGeneratorType = "AlternatingEpEnergyGenerator"
-*.hostSource.energyGenerator.energySinkModule = "hostSource.energyStorage"
-*.hostSource.energyGenerator.powerGeneration = 10mW
-*.hostSource.energyGenerator.sleepInterval = 0s
-*.hostSource.energyGenerator.generationInterval = 10s
+**.energyStorageType = "SimpleCcBattery"
+**.energyConsumerType = "StateBasedCcEnergyConsumer"
+**.energyStorage.nominalCapacity = 1C
+**.energyStorage.nominalVoltage = 1.5V
+**.energyStorage.cutoffVoltage = 1.0V
+**.energyStorage.internalResistance = 0.2Ohm
+*.hostSource.energyStorage.initialCapacity = 1C
+*.hostDestination.energyStorage.initialCapacity = 0.1C
 
 # mobility
 **.mobility.constraintAreaMinZ = 0m
@@ -84,9 +71,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 --------------------------------------------------------
 	Test.hostSource.pingApp[0]
 --------------------------------------------------------
-sent: 81   received: 30   loss rate (%): 62.963
-round-trip min/avg/max (ms): 0.4564/0.784147/2.0288
-stddev (ms): 0.29398   variance:8.64243e-08
+sent: 100   received: 49   loss rate (%): 51
+round-trip min/avg/max (ms): 0.4564/0.729102/1.5588
+stddev (ms): 0.218581   variance:4.77778e-08
 --------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -822,7 +822,7 @@ the operation of the radio. The energy consumption model can be specified
 in the `energyConsumerType` parameter of the `Radio` module.
 
 Here, we set the energy consumption model in the node radios to
-`StateBasedEnergyConsumer`. `StateBasedEnergyConsumer` models radio power
+`StateBasedEpEnergyConsumer`. `StateBasedEpEnergyConsumer` models radio power
 consumption based on states like radio mode, transmitter and receiver
 state. Each state has a constant power consumption that can be set by a
 parameter. Energy use depends on how much time the radio spends in a
@@ -839,7 +839,7 @@ layer) _header_, the _data_, or _any_ (we don't know/care). Similarly, the
 transmit state may be _idle_ or _transmitting_, and a sub-state stores
 which part of the signal is being transmitted (if any).
 
-`StateBasedEnergyConsumer` expects the consumption in various states to be
+`StateBasedEpEnergyConsumer` expects the consumption in various states to be
 specified in watts in parameters like `sleep&shy;PowerConsumption`,
 `receiverBusy&shy;PowerConsumption`,
 `transmitterTransmitting&shy;PreamblePowerConsumption` and so on.
@@ -853,7 +853,7 @@ parameter of the host. Also, the radio's energy consumption model is
 preconfigured to draw energy from the host's energy storage. (Hosts with
 more than one energy storage component are also possible.)
 
-In this model, we use `IdealEnergyStorage` in hosts. `IdealEnergyStorage`
+In this model, we use `IdealEpEnergyStorage` in hosts. `IdealEpEnergyStorage`
 provides an infinite amount of energy, can't be fully charged or depleted.
 We use this because we want to concentrate on the power consumption, not
 the storage.
