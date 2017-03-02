@@ -15,8 +15,8 @@
 
 package inet.samples.visualizer.physicallinkvisualizer;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.aodv.AODVRouter;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
@@ -102,26 +102,26 @@ network PhysicalLinkVisualizerDynamic
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=100,250");
         }
-        destination: AODVRouter {
-            @display("p=488.832,512.952");
+        host7: AODVRouter {
+            @display("p=267.548,139.48");
         }
-        source: AODVRouter {
-            @display("p=229,46");
+        host1: AODVRouter {
+            @display("p=509.736,103.976");
         }
-        aodvRouter1: AODVRouter {
-            @display("p=421.296,295.872");
+        host2: AODVRouter {
+            @display("p=365.184,213.024");
         }
-        aodvRouter2: AODVRouter {
-            @display("p=273.36002,440.592");
+        host3: AODVRouter {
+            @display("p=498.324,229.508");
         }
-        aodvRouter3: AODVRouter {
-            @display("p=305.52,188.136");
+        host4: AODVRouter {
+            @display("p=280.228,365.184");
         }
-        aodvRouter4: AODVRouter {
-            @display("p=562.8,328.032");
+        host5: AODVRouter {
+            @display("p=365.184,517.344");
         }
-        aodvRouter5: AODVRouter {
-            @display("p=421.296,77.184");
+        host6: AODVRouter {
+            @display("p=523.684,372.792");
         }
 }
 
