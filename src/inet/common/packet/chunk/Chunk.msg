@@ -14,19 +14,25 @@
 //
 
 cplusplus {{
-#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 }}
 
 namespace inet;
 
-class Chunk extends cObject;
-
-packet Packet
+class Chunk extends cObject
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit headerPopOffset;
-    bit trailerPopOffset;
-    bit dataLength;
-    Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
+    bool mutable @getter("isMutable");
+    bool complete @getter("isComplete");
+    bool correct @getter("isCorrect");
+    bool properlyRepresented @getter("isProperlyRepresented");
+    bit chunkLength;
+}
+
+class cPacketChunk extends Chunk
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    cPacket* _packet @getter(getPacket) @getval(.getPacket());
 }
