@@ -167,60 +167,63 @@ void PIMDM::handleMessageWhenUp(cMessage *msg)
                 throw cRuntimeError("PIMDM: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
         }
     }
-    else if (dynamic_cast<PIMPacket *>(msg)) {
+    else {
+        Packet *pk = check_and_cast<Packet *>(msg);
+        const auto& pkt = pk->peekHeader<PIMPacket>();
+        if (pkt == nullptr)
+            throw cRuntimeError("PIMDM: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
+
         if (!isEnabled) {
             EV_DETAIL << "PIM-DM is disabled, dropping packet.\n";
             delete msg;
             return;
         }
 
-        PIMPacket *pkt = static_cast<PIMPacket *>(msg);
         switch (pkt->getType()) {
             case Hello:
-                processHelloPacket(check_and_cast<PIMHello *>(pkt));
+                processHelloPacket(pk);
                 break;
 
             case JoinPrune:
-                processJoinPrunePacket(check_and_cast<PIMJoinPrune *>(pkt));
+                processJoinPrunePacket(pk);
                 break;
 
             case Assert:
-                processAssertPacket(check_and_cast<PIMAssert *>(pkt));
+                processAssertPacket(pk);
                 break;
 
             case Graft:
-                processGraftPacket(check_and_cast<PIMGraft *>(pkt));
+                processGraftPacket(pk);
                 break;
 
             case GraftAck:
-                processGraftAckPacket(check_and_cast<PIMGraftAck *>(pkt));
+                processGraftAckPacket(pk);
                 break;
 
             case StateRefresh:
-                processStateRefreshPacket(check_and_cast<PIMStateRefresh *>(pkt));
+                processStateRefreshPacket(pk);
                 break;
 
             default:
-                EV_WARN << "Dropping packet " << pkt->getName() << ".\n";
-                delete pkt;
+                EV_WARN << "Dropping packet " << pk->getName() << ".\n";
+                delete pk;
                 break;
         }
     }
-    else
-        throw cRuntimeError("PIMDM: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
 }
 
-void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
+void PIMDM::processJoinPrunePacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->peekHeader<PIMJoinPrune>());
     EV_INFO << "Received JoinPrune packet.\n";
 
-    emit(rcvdJoinPrunePkSignal, pkt);
+    emit(rcvdJoinPrunePkSignal, pk);
 
-    auto ifTag = pkt->getMandatoryTag<InterfaceInd>();
+    auto ifTag = pk->getMandatoryTag<InterfaceInd>();
     InterfaceEntry *incomingInterface = ift->getInterfaceById(ifTag->getInterfaceId());
 
     if (!incomingInterface) {
-        delete pkt;
+        delete pk;
         return;
     }
 
@@ -246,7 +249,7 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
         }
     }
 
-    delete pkt;
+    delete pk;
 }
 
 /**
@@ -380,18 +383,19 @@ void PIMDM::processJoin(Route *route, int intId, int numRpfNeighbors, IPv4Addres
     }
 }
 
-void PIMDM::processGraftPacket(PIMGraft *pkt)
+void PIMDM::processGraftPacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->peekHeader<PIMGraft>());
     EV_INFO << "Received Graft packet.\n";
 
-    emit(rcvdGraftPkSignal, pkt);
+    emit(rcvdGraftPkSignal, pk);
 
-    IPv4Address sender = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    InterfaceEntry *incomingInterface = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    IPv4Address sender = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
     if (pkt->getUpstreamNeighborAddress() != incomingInterface->ipv4Data()->getIPAddress()) {
-        delete pkt;
+        delete pk;
         return;
     }
 
@@ -406,9 +410,9 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
     }
 
     // Send GraftAck for this Graft message
-    sendGraftAckPacket(pkt);
+    sendGraftAckPacket(pk, pkt);
 
-    delete pkt;
+    delete pk;
 }
 
 /**
@@ -533,13 +537,14 @@ void PIMDM::processOlistNonEmptyEvent(Route *route)
     }
 }
 
-void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
+void PIMDM::processGraftAckPacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->peekHeader<PIMGraft>());
     EV_INFO << "Received GraftAck packet.\n";
 
-    emit(rcvdGraftAckPkSignal, pkt);
+    emit(rcvdGraftAckPkSignal, pk);
 
-    IPv4Address destAddress = pkt->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
+    IPv4Address destAddress = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++) {
         JoinPruneGroup& group = pkt->getJoinPruneGroups(i);
@@ -569,7 +574,7 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
         }
     }
 
-    delete pkt;
+    delete pk;
 }
 
 /**
@@ -580,25 +585,26 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
  *
  * State Refresh message is used to stop flooding of network each 3 minutes.
  */
-void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
+void PIMDM::processStateRefreshPacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->peekHeader<PIMStateRefresh>());
     EV << "pimDM::processStateRefreshPacket" << endl;
 
-    emit(rcvdStateRefreshPkSignal, pkt);
+    emit(rcvdStateRefreshPkSignal, pk);
 
     // first check if there is route for given group address and source
     Route *route = findRoute(pkt->getSourceAddress(), pkt->getGroupAddress());
     if (route == nullptr) {
-        delete pkt;
+        delete pk;
         return;
     }
 
     // check if State Refresh msg has came from RPF neighbor
-    auto ifTag = pkt->getMandatoryTag<InterfaceInd>();
-    IPv4Address srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    auto ifTag = pk->getMandatoryTag<InterfaceInd>();
+    IPv4Address srcAddr = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     UpstreamInterface *upstream = route->upstreamInterface;
     if (ifTag->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != srcAddr) {
-        delete pkt;
+        delete pk;
         return;
     }
 
@@ -642,7 +648,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
     // TODO check StateRefreshRateLimit(S,G)
 
     if (pkt->getTtl() == 0) {
-        delete pkt;
+        delete pk;
         return;
     }
 
@@ -676,13 +682,14 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
     AssertMetric receivedMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddr);
     processAssert(upstream, receivedMetric, pkt->getInterval());
 
-    delete pkt;
+    delete pk;
 }
 
-void PIMDM::processAssertPacket(PIMAssert *pkt)
+void PIMDM::processAssertPacket(Packet *pk)
 {
-    int incomingInterfaceId = pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId();
-    IPv4Address srcAddrFromTag = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    const auto& pkt = CHK(pk->peekHeader<PIMAssert>());
+    int incomingInterfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    IPv4Address srcAddrFromTag = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address source = pkt->getSourceAddress();
     IPv4Address group = pkt->getGroupAddress();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
@@ -696,11 +703,11 @@ void PIMDM::processAssertPacket(PIMAssert *pkt)
     EV_INFO << "Received Assert(S=" << source << ", G=" << group
             << ") packet on interface '" << incomingInterface->ie->getName() << "'.\n";
 
-    emit(rcvdAssertPkSignal, pkt);
+    emit(rcvdAssertPkSignal, pk);
 
     processAssert(incomingInterface, receivedMetric, 0);
 
-    delete pkt;
+    delete pk;
 }
 
 /*
@@ -1499,19 +1506,22 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 
     EV_INFO << "Sending Prune(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
-    PIMJoinPrune *packet = new PIMJoinPrune("PIMPrune");
-    packet->setUpstreamNeighborAddress(nextHop);
-    packet->setHoldTime(holdTime);
+    Packet *packet = new Packet("PIMPrune");
+    const auto& msg = std::make_shared<PIMJoinPrune>();
+    msg->setUpstreamNeighborAddress(nextHop);
+    msg->setHoldTime(holdTime);
 
     // set multicast groups
-    packet->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = packet->getJoinPruneGroups(0);
+    msg->setJoinPruneGroupsArraySize(1);
+    JoinPruneGroup& group = msg->getJoinPruneGroups(0);
     group.setGroupAddress(grp);
     group.setPrunedSourceAddressArraySize(1);
     EncodedAddress& address = group.getPrunedSourceAddress(0);
     address.IPaddress = src;
 
-    packet->setByteLength(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->markImmutable();
+    packet->pushHeader(msg);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -1525,19 +1535,22 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
 
     EV_INFO << "Sending Join(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
-    PIMJoinPrune *packet = new PIMJoinPrune("PIMJoin");
-    packet->setUpstreamNeighborAddress(nextHop);
-    packet->setHoldTime(0);    // ignored by the receiver
+    Packet *packet = new Packet("PIMJoin");
+    const auto& msg = std::make_shared<PIMJoinPrune>();
+    msg->setUpstreamNeighborAddress(nextHop);
+    msg->setHoldTime(0);    // ignored by the receiver
 
     // set multicast groups
-    packet->setJoinPruneGroupsArraySize(1);
-    JoinPruneGroup& group = packet->getJoinPruneGroups(0);
+    msg->setJoinPruneGroupsArraySize(1);
+    JoinPruneGroup& group = msg->getJoinPruneGroups(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
     EncodedAddress& address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
 
-    packet->setByteLength(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->markImmutable();
+    packet->pushHeader(msg);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -1554,7 +1567,8 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 {
     EV_INFO << "Sending Graft(S=" << src << ", G=" << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
-    PIMGraft *msg = new PIMGraft("PIMGraft");
+    Packet *packet = new Packet("PIMGraft");
+    const auto& msg = std::make_shared<PIMGraft>();
     msg->setHoldTime(0);
     msg->setUpstreamNeighborAddress(nextHop);
 
@@ -1565,11 +1579,13 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EncodedAddress& address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
 
-    msg->setByteLength(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH);
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->markImmutable();
+    packet->pushHeader(msg);
 
-    emit(sentGraftPkSignal, msg);
+    emit(sentGraftPkSignal, packet);
 
-    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, nextHop, intId);
+    sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, nextHop, intId);
 }
 
 /*
@@ -1578,25 +1594,25 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
  * Neighbor Address field SHOULD be set to the sender of the Graft
  * message and SHOULD be ignored upon receipt.
  */
-void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
+void PIMDM::sendGraftAckPacket(Packet *pk, const std::shared_ptr<PIMGraft>& graftPacket)
 {
     EV_INFO << "Sending GraftAck message.\n";
 
-    auto ifTag = graftPacket->removeMandatoryTag<InterfaceInd>();
-    auto addressInd = graftPacket->removeMandatoryTag<L3AddressInd>();
+    auto ifTag = pk->getMandatoryTag<InterfaceInd>();
+    auto addressInd = pk->getMandatoryTag<L3AddressInd>();
     IPv4Address destAddr = addressInd->getSrcAddress().toIPv4();
     IPv4Address srcAddr = addressInd->getDestAddress().toIPv4();
     int outInterfaceId = ifTag->getInterfaceId();
-    delete ifTag;
 
-    PIMGraftAck *msg = new PIMGraftAck();
-    *((PIMGraft *)msg) = *graftPacket;
-    msg->setName("PIMGraftAck");
+    Packet *packet = new Packet("PIMGraftAck");
+    auto msg = std::dynamic_pointer_cast<PIMGraft>(graftPacket->dupShared());
     msg->setType(GraftAck);
+    msg->markImmutable();
+    packet->pushHeader(msg);
 
-    emit(sentGraftAckPkSignal, msg);
+    emit(sentGraftAckPkSignal, packet);
 
-    sendToIP(msg, srcAddr, destAddr, outInterfaceId);
+    sendToIP(packet, srcAddr, destAddr, outInterfaceId);
 }
 
 void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl)
@@ -1604,7 +1620,8 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
     EV_INFO << "Sending StateRefresh(S=" << route->source << ", G=" << route->group
             << ") message on interface '" << downstream->ie->getName() << "'\n";
 
-    PIMStateRefresh *msg = new PIMStateRefresh("PIMStateRefresh");
+    Packet *packet = new Packet("PIMStateRefresh");
+    const auto& msg = std::make_shared<PIMStateRefresh>();
     msg->setGroupAddress(route->group);
     msg->setSourceAddress(route->source);
     msg->setOriginatorAddress(originator);
@@ -1613,39 +1630,44 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
     msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
     // TODO set metric
 
-    msg->setByteLength(PIM_HEADER_LENGTH
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 12);
+            + 12));
+    msg->markImmutable();
+    packet->pushHeader(msg);
 
-    emit(sentStateRefreshPkSignal, msg);
+    emit(sentStateRefreshPkSignal, packet);
 
-    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
+    sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
 }
 
 void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie)
 {
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
 
-    PIMAssert *pkt = new PIMAssert("PIMAssert");
+    Packet *packet = new Packet("PIMAssert");
+    const auto& pkt = std::make_shared<PIMAssert>();
     pkt->setGroupAddress(group);
     pkt->setSourceAddress(source);
     pkt->setR(false);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
 
-    pkt->setByteLength(PIM_HEADER_LENGTH
+    pkt->setChunkLength(byte(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 8);
+            + 8));
+    pkt->markImmutable();
+    packet->pushHeader(pkt);
 
-    emit(sentAssertPkSignal, pkt);
+    emit(sentAssertPkSignal, packet);
 
-    sendToIP(pkt, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId());
+    sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId());
 }
 
-void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
+void PIMDM::sendToIP(Packet *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
 {
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);

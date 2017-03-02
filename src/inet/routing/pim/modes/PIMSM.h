@@ -245,10 +245,10 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
   private:
     // process PIM messages
-    void processJoinPrunePacket(PIMJoinPrune *pkt);
-    void processRegisterPacket(PIMRegister *pkt);
-    void processRegisterStopPacket(PIMRegisterStop *pkt);
-    void processAssertPacket(PIMAssert *pkt);
+    void processJoinPrunePacket(Packet *pk);
+    void processRegisterPacket(Packet *pk);
+    void processRegisterStopPacket(Packet *pk);
+    void processAssertPacket(Packet *pk);
 
     void processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface);
     void processJoinSG(IPv4Address origin, IPv4Address group, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface);
@@ -271,7 +271,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
     void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
     void multicastPacketArrivedOnRpfInterface(Route *route);
     void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
-    void multicastPacketForwarded(IPv4Header *datagram);
+    void multicastPacketForwarded(Packet *pk);          // pk should begin with IPv4Header
     void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
     void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
 
@@ -281,14 +281,14 @@ class INET_API PIMSM : public PIMBase, protected cListener
     void iAmDRHasChanged(InterfaceEntry *ie, bool iAmDR);
 
     // send pim messages
-    void sendPIMRegister(IPv4Header *datagram, IPv4Address dest, int outInterfaceId);
+    void sendPIMRegister(Packet *pk, IPv4Address dest, int outInterfaceId);     // pk should begin with IPv4Header
     void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
     void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
     void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
     void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
     void sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit);
-    void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
-    void forwardMulticastData(IPv4Header *datagram, int outInterfaceId);
+    void sendToIP(Packet *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
+    void forwardMulticastData(Packet *pk, int outInterfaceId);    // pk should begin with IPv4Header
 
     // computed intervals
     double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; }    // Holdtime in Join/Prune messages

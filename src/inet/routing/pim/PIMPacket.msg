@@ -19,18 +19,22 @@
 
 
 cplusplus {{
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-
-#define PIM_HEADER_LENGTH 4
-#define ENCODED_UNICODE_ADDRESS_LENGTH 6 // IPv4 only
-#define ENCODED_GROUP_ADDRESS_LENGTH   8 // IPv4 only
-#define ENCODED_SOURCE_ADDRESS_LENGTH  8 // IPv4 only
 }}
 
 namespace inet;
 
-//struct IPAddress;
+class FieldsChunk extends cObject;
 class noncobject IPv4Address;
+
+enum PIMContstants {
+    PIM_HEADER_LENGTH = 4;
+    ENCODED_UNICODE_ADDRESS_LENGTH = 6; // IPv4 only
+    ENCODED_GROUP_ADDRESS_LENGTH = 8; // IPv4 only
+    ENCODED_SOURCE_ADDRESS_LENGTH = 8; // IPv4 only
+};
 
 enum PIMPacketType
 {
@@ -113,15 +117,16 @@ class JoinPruneGroup
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Header
-packet PIMPacket
+class PIMPacket extends FieldsChunk
 {
-   short         version = 2;
-   short         type @enum(PIMPacketType);
+    bit chunkLength @overridegetter = byte(0);
+    short         version = 2;
+    short         type @enum(PIMPacketType);
 }
 
 // Hello message
 // DM, SM
-packet PIMHello extends PIMPacket
+class PIMHello extends PIMPacket
 {
     @customize(true);
     type = Hello;
@@ -130,7 +135,7 @@ packet PIMHello extends PIMPacket
 
 // Join/Prune message
 // DM, SM
-packet PIMJoinPrune extends PIMPacket
+class PIMJoinPrune extends PIMPacket
 {
     type= JoinPrune;
     IPv4Address        upstreamNeighborAddress;
@@ -141,7 +146,7 @@ packet PIMJoinPrune extends PIMPacket
 
 // Assert message
 // DM, SM
-packet PIMAssert extends PIMPacket
+class PIMAssert extends PIMPacket
 {
     type = Assert;
     IPv4Address        groupAddress;
@@ -153,7 +158,7 @@ packet PIMAssert extends PIMPacket
 
 // Graft message, only message send by unicast
 // DM
-packet PIMGraft extends PIMJoinPrune
+class PIMGraft extends PIMJoinPrune
 {
     type = Graft;
     holdTime = 0;
@@ -161,14 +166,11 @@ packet PIMGraft extends PIMJoinPrune
 
 // GraftAck message
 // DM
-packet PIMGraftAck extends PIMGraft
-{
-    type = GraftAck;
-}
+// create a PIMGraft, then set type = GraftAck
 
 // State Refresh message
 // DM
-packet PIMStateRefresh extends PIMPacket
+class PIMStateRefresh extends PIMPacket
 {
     type = StateRefresh;
     IPv4Address        groupAddress;
@@ -183,7 +185,7 @@ packet PIMStateRefresh extends PIMPacket
 }
 // Register message
 // SM
-packet PIMRegister extends PIMPacket
+class PIMRegister extends PIMPacket
 {
     type = Register;
     bool            B;
@@ -192,9 +194,10 @@ packet PIMRegister extends PIMPacket
 
 // Register-Stop message
 // SM
-packet PIMRegisterStop extends PIMPacket
+class PIMRegisterStop extends PIMPacket
 {
     type = RegisterStop;
     IPv4Address        groupAddress;
     IPv4Address        sourceAddress;
 }
+

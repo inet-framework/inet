@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -188,7 +189,7 @@ class INET_API PIMBase : public OperationalBase
     void sendHelloPackets();
     void sendHelloPacket(PIMInterface *pimInterface);
     void processHelloTimer(cMessage *timer);
-    void processHelloPacket(PIMHello *pkt);
+    void processHelloPacket(Packet *pk);
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
     virtual bool isNodeStartStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }

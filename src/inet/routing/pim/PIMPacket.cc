@@ -21,7 +21,7 @@ namespace inet {
 
 Register_Class(PIMHello);
 
-PIMHello::PIMHello(const char *name, int kind) : PIMHello_Base(name, kind)
+PIMHello::PIMHello() : PIMHello_Base()
 {
     this->setType(Hello);
 

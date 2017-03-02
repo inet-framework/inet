@@ -105,7 +105,7 @@ simple IPv4
         @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Header);
         @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Header);
         @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Header);
-        @signal[NF_IPv4_MDATA_REGISTER](type=IPv4Header);
+        @signal[NF_IPv4_MDATA_REGISTER](type=Packet);
     gates:
         input transportIn @labels(IPv4ControlInfo/down,TCPSegment,UdpHeader);
         output transportOut @labels(IPv4ControlInfo/up,TCPSegment,UdpHeader);

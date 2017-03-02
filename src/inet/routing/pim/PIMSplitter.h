@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/pim/tables/PIMInterfaceTable.h"
 #include "inet/routing/pim/PIMPacket_m.h"
@@ -52,7 +53,7 @@ class INET_API PIMSplitter : public cSimpleModule
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void processPIMPacket(PIMPacket *pkt);
+    virtual void processPIMPacket(Packet *pkt);
 };
 
 }    // namespace inet

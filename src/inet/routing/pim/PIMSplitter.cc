@@ -56,12 +56,14 @@ void PIMSplitter::handleMessage(cMessage *msg)
     cGate *arrivalGate = msg->getArrivalGate();
 
     if (arrivalGate == ipIn) {
-        if (dynamic_cast<ICMPMessage *>(msg)) {
-            EV_WARN << "Received ICMP error " << msg->getName() << "(" << msg->getClassName() << "), ignored\n";
+        Packet *packet = check_and_cast<Packet *>(msg);
+        auto protocol = msg->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::icmpv4) {
+            EV_WARN << "Received ICMP error " << msg->getName() <<  ", ignored\n";
             delete msg;
         }
-        else if (PIMPacket *pimPacket = dynamic_cast<PIMPacket *>(msg)) {
-            processPIMPacket(pimPacket);
+        else if (protocol == &Protocol::pim) {
+            processPIMPacket(packet);
         }
         else
             throw cRuntimeError("PIMSplitter: received unknown packet '%s (%s)' from the network layer.", msg->getName(), msg->getClassName());
@@ -76,8 +78,9 @@ void PIMSplitter::handleMessage(cMessage *msg)
         throw cRuntimeError("PIMSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
 }
 
-void PIMSplitter::processPIMPacket(PIMPacket *pkt)
+void PIMSplitter::processPIMPacket(Packet *pkt)
 {
+    const auto& pimPkt = CHK(pkt->peekHeader<PIMPacket>());
     InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 

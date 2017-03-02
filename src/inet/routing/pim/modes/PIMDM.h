@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/routing/pim/PIMPacket_m.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/routing/pim/tables/PIMNeighborTable.h"
@@ -204,11 +205,11 @@ class INET_API PIMDM : public PIMBase, protected cListener
     void processAssertTimer(cMessage *timer);
 
     // process PIM packets
-    void processJoinPrunePacket(PIMJoinPrune *pkt);
-    void processGraftPacket(PIMGraft *pkt);
-    void processGraftAckPacket(PIMGraftAck *pkt);
-    void processStateRefreshPacket(PIMStateRefresh *pkt);
-    void processAssertPacket(PIMAssert *pkt);
+    void processJoinPrunePacket(Packet *pk);
+    void processGraftPacket(Packet *pk);
+    void processGraftAckPacket(Packet *pk);
+    void processStateRefreshPacket(Packet *pk);
+    void processAssertPacket(Packet *pk);
 
     void processPrune(Route *route, int intId, int holdTime, int numRpfNeighbors, IPv4Address upstreamNeighborField);
     void processJoin(Route *route, int intId, int numRpfNeighbors, IPv4Address upstreamNeighborField);
@@ -223,10 +224,10 @@ class INET_API PIMDM : public PIMBase, protected cListener
     void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int holdTime, int intId);
     void sendJoinPacket(IPv4Address nextHop, IPv4Address source, IPv4Address group, int interfaceId);
     void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
-    void sendGraftAckPacket(PIMGraft *msg);
+    void sendGraftAckPacket(Packet *pk, const std::shared_ptr<PIMGraft>& graftPacket);
     void sendStateRefreshPacket(IPv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl);
     void sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie);
-    void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
+    void sendToIP(Packet *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
 
     // helpers
     void restartTimer(cMessage *timer, double interval);

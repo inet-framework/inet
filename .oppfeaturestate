@@ -31,7 +31,7 @@
     <feature enabled="false" id="OSPFv2_examples"/>
     <feature enabled="true" id="BGPv4"/>
     <feature enabled="false" id="BGPv4_examples"/>
-    <feature enabled="false" id="PIM"/>
+    <feature enabled="true" id="PIM"/>
     <feature enabled="false" id="PIM_examples"/>
     <feature enabled="true" id="DYMO"/>
     <feature enabled="true" id="AODV"/>

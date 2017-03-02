@@ -155,7 +155,8 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
 {
     EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getName() << "'\n";
 
-    PIMHello *msg = new PIMHello("PIMHello");
+    Packet *pk = new Packet("PIMHello");
+    const auto& msg = std::make_shared<PIMHello>();
 
     int byteLength = PIM_HEADER_LENGTH + 6 + 8;    // HoldTime + GenerationID option
 
@@ -175,25 +176,28 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
         byteLength += 8;
     }
 
-    msg->setByteLength(byteLength);
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
-    msg->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
-    msg->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
-    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->ensureTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
-    msg->ensureTag<HopLimitReq>()->setHopLimit(1);
+    msg->setChunkLength(byte(byteLength));
+    msg->markImmutable();
+    pk->pushHeader(msg);
+    pk->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
+    pk->ensureTag<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
+    pk->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
+    pk->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    pk->ensureTag<L3AddressReq>()->setDestAddress(ALL_PIM_ROUTERS_MCAST);
+    pk->ensureTag<HopLimitReq>()->setHopLimit(1);
 
-    emit(sentHelloPkSignal, msg);
+    emit(sentHelloPkSignal, pk);
 
-    send(msg, "ipOut");
+    send(pk, "ipOut");
 }
 
-void PIMBase::processHelloPacket(PIMHello *packet)
+void PIMBase::processHelloPacket(Packet *packet)
 {
     int interfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     IPv4Address address = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    int version = packet->getVersion();
+    const auto& pimPacket = packet->peekHeader<PIMHello>();
+    int version = pimPacket->getVersion();
 
     emit(rcvdHelloPkSignal, packet);
 
@@ -201,8 +205,8 @@ void PIMBase::processHelloPacket(PIMHello *packet)
     double holdTime = 3.5 * 30;
     long drPriority = -1L;
     unsigned int generationId = 0;
-    for (unsigned int i = 0; i < packet->getOptionsArraySize(); i++) {
-        HelloOption *option = packet->getOptions(i);
+    for (unsigned int i = 0; i < pimPacket->getOptionsArraySize(); i++) {
+        HelloOption *option = pimPacket->getOptions(i);
         if (dynamic_cast<HoldtimeOption *>(option))
             holdTime = (double)static_cast<HoldtimeOption *>(option)->getHoldTime();
         else if (dynamic_cast<DRPriorityOption *>(option))

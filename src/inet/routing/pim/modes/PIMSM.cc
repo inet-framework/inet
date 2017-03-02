@@ -213,64 +213,65 @@ void PIMSM::handleMessageWhenUp(cMessage *msg)
                 throw cRuntimeError("PIMSM: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
         }
     }
-    else if (dynamic_cast<PIMPacket *>(msg)) {
+    else {
+        Packet *pk = check_and_cast<Packet *>(msg);
+        const auto& pkt = pk->peekHeader<PIMPacket>();
+        if (pkt == nullptr)
+            throw cRuntimeError("PIM-SM: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
         if (!isEnabled) {
             EV_DETAIL << "PIM-SM is disabled, dropping packet.\n";
             delete msg;
             return;
         }
 
-        PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
         switch (pkt->getType()) {
             case Hello:
-                processHelloPacket(check_and_cast<PIMHello *>(pkt));
+                processHelloPacket(pk);
                 break;
 
             case JoinPrune:
-                processJoinPrunePacket(check_and_cast<PIMJoinPrune *>(pkt));
+                processJoinPrunePacket(pk);
                 break;
 
             case Register:
-                processRegisterPacket(check_and_cast<PIMRegister *>(pkt));
+                processRegisterPacket(pk);
                 break;
 
             case RegisterStop:
-                processRegisterStopPacket(check_and_cast<PIMRegisterStop *>(pkt));
+                processRegisterStopPacket(pk);
                 break;
 
             case Assert:
-                processAssertPacket(check_and_cast<PIMAssert *>(pkt));
+                processAssertPacket(pk);
                 break;
 
             case Graft:
                 EV_WARN << "Ignoring PIM-DM Graft packet.\n";
-                delete pkt;
+                delete pk;
                 break;
 
             case GraftAck:
                 EV_WARN << "Ignoring PIM-DM GraftAck packet.\n";
-                delete pkt;
+                delete pk;
                 break;
 
             case StateRefresh:
                 EV_WARN << "Ignoring PIM-DM StateRefresh packet.\n";
-                delete pkt;
+                delete pk;
                 break;
 
             case Bootstrap:
-                delete pkt;
+                delete pk;
                 break;
 
             case CandidateRPAdvertisement:
-                delete pkt;
+                delete pk;
                 break;
 
             default:
-                throw cRuntimeError("PIMSM: received unknown PIM packet: %s (%s)", pkt->getName(), pkt->getClassName());
+                throw cRuntimeError("PIMSM: received unknown PIM packet: %s (%s)", pk->getName(), pk->getClassName());
         }
     }
-    else
-        EV << "PIMSM::handleMessage: Wrong message" << endl;
 }
 
 void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -329,11 +330,12 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
     else if (signalID == NF_IPv4_MDATA_REGISTER) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
-        datagram = check_and_cast<IPv4Header *>(obj);
+        Packet *pk = check_and_cast<Packet *>(obj);
+        const auto& datagram = CHK(pk->peekHeader<IPv4Header>());
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
-            multicastPacketForwarded(datagram);
+            multicastPacketForwarded(pk);
     }
     else if (signalID == NF_PIM_NEIGHBOR_ADDED || signalID == NF_PIM_NEIGHBOR_DELETED || signalID == NF_PIM_NEIGHBOR_CHANGED) {
         PIMNeighbor *neighbor = check_and_cast<PIMNeighbor *>(obj);
@@ -341,13 +343,14 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     }
 }
 
-void PIMSM::processJoinPrunePacket(PIMJoinPrune *pkt)
+void PIMSM::processJoinPrunePacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->peekHeader<PIMJoinPrune>());
     EV_INFO << "Received JoinPrune packet.\n";
 
-    emit(rcvdJoinPrunePkSignal, pkt);
+    emit(rcvdJoinPrunePkSignal, pk);
 
-    InterfaceEntry *inInterface = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *inInterface = ift->getInterfaceById(pk->getMandatoryTag<InterfaceInd>()->getInterfaceId());
 
     int holdTime = pkt->getHoldTime();
     IPv4Address upstreamNeighbor = pkt->getUpstreamNeighborAddress();
@@ -383,7 +386,7 @@ void PIMSM::processJoinPrunePacket(PIMJoinPrune *pkt)
         }
     }
 
-    delete pkt;
+    delete pk;
 }
 
 void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface)
@@ -586,15 +589,16 @@ void PIMSM::processPruneSGrpt(IPv4Address source, IPv4Address group, IPv4Address
  * If PIM Register isn't Null and route doesn't exist, it is created and PIM Register-Stop
  * is sent. If PIM Register is Null, Register-Stop is sent.
  */
-void PIMSM::processRegisterPacket(PIMRegister *pkt)
+void PIMSM::processRegisterPacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->popHeader<PIMRegister>());
     EV_INFO << "Received Register packet.\n";
 
-    emit(rcvdRegisterPkSignal, pkt);
+    emit(rcvdRegisterPkSignal, pk);
 
-    IPv4Address srcAddr = pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    IPv4Address destAddr = pkt->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
-    IPv4Header *encapData = check_and_cast<IPv4Header *>(pkt->decapsulate());
+    IPv4Address srcAddr = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    IPv4Address destAddr = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
+    const auto& encapData = CHK(pk->peekHeader<IPv4Header>());
     IPv4Address source = encapData->getSrcAddress();
     IPv4Address group = encapData->getDestAddress();
     Route *routeG = findRouteG(group);
@@ -623,7 +627,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                 for (auto & elem : routeG->downstreamInterfaces) {
                     DownstreamInterface *downstream = elem;
                     if (downstream->isInInheritedOlist())
-                        forwardMulticastData(encapData->dup(), downstream->getInterfaceId());
+                        forwardMulticastData(pk->dup(), downstream->getInterfaceId());
                 }
 
                 // send Join(S,G) toward source to establish SPT between RP and registering DR
@@ -641,8 +645,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
         }
     }
 
-    delete encapData;
-    delete pkt;
+    delete pk;
 }
 
 /**
@@ -651,11 +654,12 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
  * from Join status revert to Prune status. Also Register Stop Timer is created
  * for periodic sending PIM Register Null messages.
  */
-void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
+void PIMSM::processRegisterStopPacket(Packet *pk)
 {
+    const auto& pkt = CHK(pk->peekHeader<PIMRegisterStop>());
     EV_INFO << "Received RegisterStop packet.\n";
 
-    emit(rcvdRegisterStopPkSignal, pkt);
+    emit(rcvdRegisterStopPkSignal, pk);
 
     // TODO support wildcard source address
     Route *routeSG = findRouteSG(pkt->getSourceAddress(), pkt->getGroupAddress());
@@ -673,19 +677,21 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
             routeSG->startRegisterStopTimer(uniform(0.5 * registerSuppressionTime, 1.5 * registerSuppressionTime) - registerProbeTime);
         }
     }
+    delete pk;
 }
 
-void PIMSM::processAssertPacket(PIMAssert *pkt)
+void PIMSM::processAssertPacket(Packet *pk)
 {
-    int incomingInterfaceId = pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId();
+    const auto& pkt = CHK(pk->peekHeader<PIMAssert>());
+    int incomingInterfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     IPv4Address source = pkt->getSourceAddress();
     IPv4Address group = pkt->getGroupAddress();
-    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pkt->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4());
+    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4());
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
             << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getName() << "'.\n";
 
-    emit(rcvdAssertPkSignal, pkt);
+    emit(rcvdAssertPkSignal, pk);
 
     if (!source.isUnspecified() && !receivedMetric.rptBit) {
         Route *routeSG = findRouteSG(source, group);
@@ -700,7 +706,7 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
 
             if (stateBefore != Interface::NO_ASSERT_INFO || incomingInterface->assertState != Interface::NO_ASSERT_INFO) {
                 // processed by SG
-                delete pkt;
+                delete pk;
                 return;
             }
         }
@@ -716,7 +722,7 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
         processAssertG(incomingInterface, receivedMetric);
     }
 
-    delete pkt;
+    delete pk;
 }
 
 void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric& receivedMetric)
@@ -1276,8 +1282,9 @@ void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
     }
 }
 
-void PIMSM::multicastPacketForwarded(IPv4Header *datagram)
+void PIMSM::multicastPacketForwarded(Packet *pk)
 {
+    const auto& datagram = CHK(pk->peekHeader<IPv4Header>());
     IPv4Address source = datagram->getSrcAddress();
     IPv4Address group = datagram->getDestAddress();
 
@@ -1297,7 +1304,7 @@ void PIMSM::multicastPacketForwarded(IPv4Header *datagram)
 
         InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(routeSG->rpAddr);
         ASSERT(interfaceTowardRP != nullptr);
-        sendPIMRegister(datagram, routeSG->rpAddr, interfaceTowardRP->getInterfaceId());
+        sendPIMRegister(pk, routeSG->rpAddr, interfaceTowardRP->getInterfaceId());
     }
 }
 
@@ -1383,9 +1390,9 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
 {
     EV_INFO << "Sending Join(S=" << (routeType == G ? "*" : source.str()) << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
-    PIMJoinPrune *msg = new PIMJoinPrune();
+    Packet *pk = new Packet("PIMJoin");
+    const auto& msg = std::make_shared<PIMJoinPrune>();
     msg->setType(JoinPrune);
-    msg->setName("PIMJoin");
     msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(joinPruneHoldTime());
 
@@ -1399,26 +1406,29 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
-    msg->setByteLength(PIM_HEADER_LENGTH
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 4
             + ENCODED_GROUP_ADDRESS_LENGTH
             + 4
-            + ENCODED_SOURCE_ADDRESS_LENGTH);
+            + ENCODED_SOURCE_ADDRESS_LENGTH));
 
-    emit(sentJoinPrunePkSignal, msg);
+    msg->markImmutable();
+    pk->pushHeader(msg);
+
+    emit(sentJoinPrunePkSignal, pk);
 
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
-    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
+    sendToIP(pk, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
 }
 
 void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType routeType)
 {
     EV_INFO << "Sending Prune(S=" << (routeType == G ? "*" : source.str()) << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
-    PIMJoinPrune *msg = new PIMJoinPrune();
+    Packet *pk = new Packet("PIMPrune");
+    const auto& msg = std::make_shared<PIMJoinPrune>();
     msg->setType(JoinPrune);
-    msg->setName("PIMPrune");
     msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(joinPruneHoldTime());
 
@@ -1432,17 +1442,20 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
-    msg->setByteLength(PIM_HEADER_LENGTH
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 4
             + ENCODED_GROUP_ADDRESS_LENGTH
             + 4
-            + ENCODED_SOURCE_ADDRESS_LENGTH);
+            + ENCODED_SOURCE_ADDRESS_LENGTH));
 
-    emit(sentJoinPrunePkSignal, msg);
+    msg->markImmutable();
+    pk->pushHeader(msg);
+
+    emit(sentJoinPrunePkSignal, pk);
 
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
-    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
+    sendToIP(pk, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
 }
 
 void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
@@ -1452,47 +1465,53 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
     // only if (S,G exist)
     //if (getRouteFor(multDest,multSource))
     if (findRouteG(multGroup)) {
-        PIMRegister *msg = new PIMRegister();
-        msg->setName("PIMRegister(Null)");
+        Packet *pk = new Packet("PIMRegister(Null)");
+        const auto& msg = std::make_shared<PIMRegister>();
         msg->setType(Register);
         msg->setN(true);
         msg->setB(false);
-
-        msg->setByteLength(PIM_HEADER_LENGTH + 4);
+        msg->setChunkLength(byte(PIM_HEADER_LENGTH + 4));
+        msg->markImmutable();
+        pk->pushHeader(msg);
 
         // set encapsulated packet (IPv4 header only)
-        IPv4Header *datagram = new IPv4Header();
+        const auto& datagram = std::make_shared<IPv4Header>();
         datagram->setDestAddress(multGroup);
         datagram->setSrcAddress(multOrigin);
         datagram->setTransportProtocol(IP_PROT_PIM);
-        datagram->setByteLength(IP_HEADER_BYTES);
-        msg->encapsulate(datagram);
+        datagram->setHeaderLength(IP_HEADER_BYTES);
+        datagram->setTotalLengthField(IP_HEADER_BYTES);
+        datagram->markImmutable();
+        pk->append(datagram);
 
-        emit(sentRegisterPkSignal, msg);
+        emit(sentRegisterPkSignal, pk);
 
         InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(rpAddr);
-        sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, rpAddr, interfaceToRP->getInterfaceId(), MAX_TTL);
+        sendToIP(pk, IPv4Address::UNSPECIFIED_ADDRESS, rpAddr, interfaceToRP->getInterfaceId(), MAX_TTL);
     }
 }
 
-void PIMSM::sendPIMRegister(IPv4Header *datagram, IPv4Address dest, int outInterfaceId)
+void PIMSM::sendPIMRegister(Packet *ipv4Packet, IPv4Address dest, int outInterfaceId)
 {
+    ASSERT(ipv4Packet->peekHeader<IPv4Header>() != nullptr);
+
     EV << "pimSM::sendPIMRegister - encapsulating data packet into Register packet and sending to RP" << endl;
 
-    PIMRegister *msg = new PIMRegister("PIMRegister");
+    Packet *pk = new Packet("PIMRegister");
+    const auto& msg = std::make_shared<PIMRegister>();
     msg->setType(Register);
     msg->setN(false);
     msg->setB(false);
 
-    msg->setByteLength(PIM_HEADER_LENGTH + 4);
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH + 4));
+    msg->markImmutable();
 
-    IPv4Header *datagramCopy = datagram->dup();
-    delete datagramCopy->removeControlInfo();
-    msg->encapsulate(datagramCopy);
+    pk->append(ipv4Packet->peekDataAt(bit(0), ipv4Packet->getDataLength()));
+    pk->pushHeader(msg);
 
-    emit(sentRegisterPkSignal, msg);
+    emit(sentRegisterPkSignal, pk);
 
-    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, dest, outInterfaceId, MAX_TTL);
+    sendToIP(pk, IPv4Address::UNSPECIFIED_ADDRESS, dest, outInterfaceId, MAX_TTL);
 }
 
 void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource)
@@ -1500,45 +1519,50 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
     EV << "pimSM::sendPIMRegisterStop" << endl;
 
     // create PIM Register datagram
-    PIMRegisterStop *msg = new PIMRegisterStop();
+    Packet *pk = new Packet("PIMRegisterStop");
+    const auto& msg = std::make_shared<PIMRegisterStop>();
 
     // set PIM packet
-    msg->setName("PIMRegisterStop");
     msg->setType(RegisterStop);
     msg->setSourceAddress(multSource);
     msg->setGroupAddress(multGroup);
 
-    msg->setByteLength(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH);
+    msg->setChunkLength(byte(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH));
+    msg->markImmutable();
+    pk->pushHeader(msg);
 
-    emit(sentRegisterStopPkSignal, msg);
+    emit(sentRegisterStopPkSignal, pk);
 
     // set IP packet
     InterfaceEntry *interfaceToDR = rt->getInterfaceForDestAddr(dest);
-    sendToIP(msg, source, dest, interfaceToDR->getInterfaceId(), MAX_TTL);
+    sendToIP(pk, source, dest, interfaceToDR->getInterfaceId(), MAX_TTL);
 }
 
 void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit)
 {
     EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
 
-    PIMAssert *pkt = new PIMAssert("PIMAssert");
+    Packet *pk = new Packet("PIMAssert");
+    const auto& pkt = std::make_shared<PIMAssert>();
     pkt->setGroupAddress(group);
     pkt->setSourceAddress(source);
     pkt->setR(rptBit);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
 
-    pkt->setByteLength(PIM_HEADER_LENGTH
+    pkt->setChunkLength(byte(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 8);
+            + 8));
+    pkt->markImmutable();
+    pk->pushHeader(pkt);
 
-    emit(sentAssertPkSignal, pkt);
+    emit(sentAssertPkSignal, pk);
 
-    sendToIP(pkt, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId(), 1);
+    sendToIP(pk, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId(), 1);
 }
 
-void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId, short ttl)
+void PIMSM::sendToIP(Packet *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId, short ttl)
 {
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     packet->ensureTag<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
@@ -1555,14 +1579,14 @@ void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
  * The method create message MultData with multicast source address and multicast group address
  * and send the message from RP to RPT.
  */
-void PIMSM::forwardMulticastData(IPv4Header *datagram, int outInterfaceId)
+void PIMSM::forwardMulticastData(Packet *data, int outInterfaceId)
 {
     EV << "pimSM::forwardMulticastData" << endl;
 
     //
     // Note: we should inject the datagram somehow into the normal IPv4 forwarding path.
     //
-    cPacket *data = datagram->decapsulate();
+    const auto& datagram = CHK(data->popHeader<IPv4Header>());
 
     // set control info
     data->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));
@@ -1570,6 +1594,7 @@ void PIMSM::forwardMulticastData(IPv4Header *datagram, int outInterfaceId)
     // XXX data->ensureTag<L3AddressReq>()->setSource(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
     data->ensureTag<L3AddressReq>()->setDestAddress(datagram->getDestAddress());
     data->ensureTag<HopLimitReq>()->setHopLimit(MAX_TTL - 2);    //one minus for source DR router and one for RP router // XXX specification???
+    data->removePoppedChunks();
     send(data, "ipOut");
 }
 
