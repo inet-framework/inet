@@ -42,6 +42,7 @@ simsignal_t NF_L2_AP_DISASSOCIATED = cComponent::registerSignal("NF_L2_AP_DISASS
 simsignal_t NF_LINK_BREAK = cComponent::registerSignal("NF_LINK_BREAK");
 simsignal_t NF_LINK_PROMISCUOUS = cComponent::registerSignal("NF_LINK_PROMISCUOUS");
 simsignal_t NF_LINK_FULL_PROMISCUOUS = cComponent::registerSignal("NF_LINK_FULL_PROMISCUOUS");
+simsignal_t NF_MODESET_CHANGED = cComponent::registerSignal("NF_MODESET_CHANGED");
 
 simsignal_t NF_INTERFACE_CREATED = cComponent::registerSignal("NF_INTERFACE_CREATED");
 simsignal_t NF_INTERFACE_DELETED = cComponent::registerSignal("NF_INTERFACE_DELETED");

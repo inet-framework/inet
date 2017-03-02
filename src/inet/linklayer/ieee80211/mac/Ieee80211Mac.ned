@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga and Levente M�sz�ros
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,12 +14,18 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
-// Author: Andras Varga
-//
 
 package inet.linklayer.ieee80211.mac;
 
 import inet.linklayer.ieee80211.IIeee80211Mac;
+import inet.linklayer.ieee80211.mac.contract.IRateControl;
+import inet.linklayer.ieee80211.mac.contract.IRateSelection;
+import inet.linklayer.ieee80211.mac.contract.IRx;
+import inet.linklayer.ieee80211.mac.contract.IStatistics;
+import inet.linklayer.ieee80211.mac.contract.ITx;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+
 
 // near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x
 module LayeredProtocolBase
@@ -70,8 +76,8 @@ module MACProtocolBase extends LayeredProtocolBase
 //
 // <b>Limitations</b>
 //
-// The following features not supported: 1) fragmentation, 2) power management,
-// 3) polling (PCF). Physical layer algorithms such as frequency hopping and
+// The following features not supported: 1) power management, 2) polling (PCF).
+// Physical layer algorithms such as frequency hopping and
 // direct sequence spread spectrum are not modelled directly.
 //
 // Fields related to the above unsupported features are omitted from
@@ -86,58 +92,42 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string rateControlModuleType = default("");
-        string upperMacModule = ".upperMac";
-        string rxModule = ".rx";
-        string txModule = ".tx";
-        string firstContentionModule = ".ctn[0]";
-        int numContention = default(4);
-        string collisionControllerModule = ".ctrl";
-        string rateSelectionModule = ".rateSelection";
-        string rateControlModule = ".rateControl";
-        string statisticsModule = ".statistics";
+        string modeSet @enum("a","b","g","n","p") = default("g");
 
-        *.macModule = "^";
-        *.upperMacModule = "^" + upperMacModule;
-        *.rxModule = "^" + rxModule;
-        *.txModule = "^" + txModule;
-        *.firstContentionModule = "^" + firstContentionModule;
-        *.collisionControllerModule = "^" + collisionControllerModule;
-        *.rateSelectionModule = "^" + rateSelectionModule;
-        *.rateControlModule = "^" + rateControlModule;
-        *.statisticsModule = "^" + statisticsModule;
+        bool qosStation = default(false);
 
-        @display("i=block/layer;bgb=721,355");
+        *.rxModule = "^.rx";
+        *.txModule = "^.tx";
+
+        @display("i=block/layer");
+        @nic;
         @class(Ieee80211Mac);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
+        @signal[NF_MODESET_CHANGED](type=inet::physicallayer::Ieee80211ModeSet);
     submodules:
-        rateSelection: <default("BasicRateSelection")> like IRateSelection {
-            @display("p=492,66");
+        dcf: Dcf {
+            parameters:
+                @display("p=100,100");
         }
-        rateControl: <rateControlModuleType> like IRateControl if rateControlModuleType != "" {
-            @display("p=581,66");
-        }
-        statistics: <default("BasicStatistics")> like IStatistics {
-            @display("p=49,66");
-        }
-        upperMac: <default("EdcaUpperMac")> like IUpperMac {
-            @display("p=227,88");
-        }
-        tx: <default("Tx")> like ITx {
-            @display("p=198,260");
-        }
-        ctn[numContention]: <default("Contention")> like IContention {
-            @display("p=295,260,r,60");
+        hcf: Hcf {
+            parameters:
+                @display("p=200,100");
         }
         rx: <default("Rx")> like IRx {
-            @display("p=112,260");
+            parameters:
+                @display("p=100,200");
         }
-        ctrl: <default("CollisionController")> like ICollisionController if numContention > 1 {
-            @display("p=334,180");
+        tx: <default("Tx")> like ITx {
+            parameters:
+                @display("p=200,200");
+        }
+        statistics: <default("BasicStatistics")> like IStatistics {
+            parameters:
+                @display("p=300,100");
         }
 }
 
@@ -148,10 +138,14 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
 module Ieee80211CompatibleMac extends Ieee80211Mac
 {
     parameters:
+        string rateControlType = default("");
         string opMode @enum("a","b","g","n","p") = default("g");
-        double bitrate @unit("bps");
+        double bitrate @unit("bps") = default(-1bps);
+        double dataBitrate @unit("bps") = default(-1bps);
+        double multicastBitrate @unit("bps") = default(-1bps);
         double basicBitrate @unit("bps") = default(-1bps);
         double controlBitrate @unit("bps") = default(-1bps);
+        double initialRateControlRate @unit("bps") = default(-1bps);
         int rtsThresholdBytes @unit("B") = default(2346B);
         int retryLimit = default(-1);
         bool EDCA = default(false);
@@ -170,15 +164,19 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         double slotTime @unit("s") = default(-1s); // slot time, -1 means default (mode dependent)
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
-        int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
 
-        upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
-        numContention = EDCA ? 4 : 1;
+        //upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
 
-        rateSelection.modeSet = opMode; // BasicRateSelection
-        rateSelection.dataBitrate = bitrate; // BasicRateSelection
-        rateSelection.multicastBitrate = basicBitrate;
-        rateSelection.controlBitrate = controlBitrate;
+        modeSet = opMode; // BasicRateSelection
+        *.maxQueueSize = maxQueueSize;
+        *.rateControlType = rateControlType;
+        *.rateSelection.multicastFrameBitrate = multicastBitrate; // BasicRateSelection
+        *.rateSelection.dataFrameBitrate = dataBitrate; // BasicRateSelection
+        *.rateSelection.mgmtFrameBitrate = basicBitrate;
+        *.rateSelection.controlFrameBitrate = controlBitrate;
+        *.rateSelection.responseAckFrameBitrate = controlBitrate;
+        *.rateControl.initialRate = initialRateControlRate;
+        dcf.rtsPolicy.rtsThreshold = rtsThresholdBytes;
         upperMac.rtsThreshold = rtsThresholdBytes; // DcfUpperMac, EdcaUpperMac
         upperMac.shortRetryLimit = retryLimit; // DcfUpperMac, EdcaUpperMac
         upperMac.maxQueueSize = maxQueueSize; // DcfUpperMac, EdcaUpperMac
@@ -194,7 +192,7 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         //TODO upperMac.difsn =  AIFSN;
         upperMac.prioritizeMulticast = prioritizeMulticast; // DcfUpperMac, EdcaUpperMac
         upperMac.slotTime = slotTime; // DcfUpperMac, EdcaUpperMac
-        upperMac.cwMin = cwMinData; // DcfUpperMac
-        upperMac.cwMax = cwMaxData; // DcfUpperMac
+        dcf.channelAccess.cwMin = cwMinData; // DcfUpperMac
+        dcf.channelAccess.cwMax = cwMaxData; // DcfUpperMac
         upperMac.cwMinMulticast = cwMulticast; // DcfUpperMac, EdcaUpperMac
 }

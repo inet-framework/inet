@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2015 Andras Varga
+// Copyright (C) 2016 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
-// Author: Andras Varga
-//
 
 package inet.linklayer.ieee80211.mac;
+
+import inet.linklayer.ieee80211.mac.contract.IRx;
+
 
 //
 // The default implementation of IRx.
@@ -25,8 +26,6 @@ package inet.linklayer.ieee80211.mac;
 simple Rx like IRx
 {
     parameters:
-        string upperMacModule;
-        string firstContentionModule;
-        string statisticsModule;
-        @display("i=block/uparrow");
+        string statisticsModule = default(""); // TODO
+        @display("i=block/rx");
 }
