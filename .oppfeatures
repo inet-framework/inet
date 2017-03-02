@@ -807,16 +807,16 @@
         labels = ""
         nedPackages = "
                        inet.visualizer.base
+                       inet.visualizer.common
                        inet.visualizer.environment
                        inet.visualizer.integrated
                        inet.visualizer.linklayer
                        inet.visualizer.mobility
                        inet.visualizer.networklayer
-                       inet.visualizer.networknode
                        inet.visualizer.physicallayer
                        inet.visualizer.scene
-                       inet.visualizer.statistic
                        inet.visualizer.transportlayer
+                       inet.visualizer.util
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_VISUALIZERS"
