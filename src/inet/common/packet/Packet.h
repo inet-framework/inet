@@ -29,10 +29,8 @@ namespace inet {
  * Internally, packets store their data in different kind of chunks. See the
  * Chunk class and its subclasses for details.
  *
- * Packets are initially mutable, then may become immutable (but never the
- * other way around). All chunks are immutable in an immutable packet.
- * Immutable chunks are automatically shared among immutable packets when
- * duplicating.
+ * All chunks are immutable in a packet. Chunks are automatically shared among
+ * packets when duplicating.
  *
  * Packets are conceptually divided into three parts during processing: headers,
  * data, and trailers. These parts are separated by iterators which are stored
@@ -46,7 +44,7 @@ namespace inet {
  *  - remove from the beginning or end
  *  - query length and peek an arbitrary part
  *  - serialize to and deserialize from a sequence of bytes
- *  - copy to a new mutable packet
+ *  - copy to a new packet
  *  - convert to a human readable string
  */
 // TODO: consider turning some assert into if/throw, consider potential performance penalty, make it optional with compile time macro?
@@ -55,9 +53,10 @@ class INET_API Packet : public cPacket
   friend class PacketDescriptor;
 
   protected:
-    /**
-     * While this chunk is mutable, it allows efficient merging with newly added chunks.
-     */
+  /**
+   * This chunk is always immutable to allow arbitrary peeking. Nevertheless
+   * it's reused if possible to allow efficient merging with newly added chunks.
+   */
     std::shared_ptr<Chunk> contents;
     Chunk::ForwardIterator headerIterator;
     Chunk::BackwardIterator trailerIterator;
