@@ -90,11 +90,12 @@
     </p>
     <p>
         The network contains an <var>IntegratedVisualizer</var>, an <var>IPv4NetworkConfigurator</var> and an <var>Ieee80211ScalarRadioMedium</var> module.
-        The topology consists of 7 <var>AODVRouters</var>, they move randomly between predefined borders.
+        The topology consists of seven <var>AODVRouters</var>, they move randomly between predefined borders.
         The nodes have two UDP applications: an <var>UDPBasicApp</var> and an <var>UDPSink</var>.
         The broadcast messages are sent by the <var>UDPBasicApp</var> and they are received by the <var>UDPSink</var>.
         We set the packets' name to <i>Broadcast</i>.
-        We visualize only these messages.
+        We display only these messages.
+        Here is the configuration of the visualization:
         <div class="snippet">
             *.visualizer.*.physicalLinkVisualizer.displayLinks = true<br>
             *.visualizer.*.physicalLinkVisualizer.packetFilter = "*Broadcast*"<br>
@@ -109,14 +110,13 @@
         <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=512 height=669 src="PhysicalLinkDynamic.mp4">
     </p>
     <p>
-        RESULT<br>
-        A Broadcast csomagok hatasara sok pontozott nyil jelenik meg a node-ok kozott.
-        A nyil afele mutat, aki tudta fogadni a packetet fizikai retegben.
-        Ahogy a node-ok mozognak a linkek eltunnek, ujak alakulnak.
+        Due to the broadcast packets, dotted arrows appear between the nodes.
+        The arrows points to that node, which received a <i>Broadcast</i> packet in the physical layer.
+        As a result of the movement of nodes, some physical links disappear and some new links are established between the nodes.
     </p>
 
 
-    <p><h2>More information</h2></p>
+    <p><h2>More Information</h2></p>
 
     <p>
         This example only demonstrated the key features of phyisical link visualization. For more information, refer to the 
