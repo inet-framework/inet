@@ -2,11 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../../samples.css">
-	<title>Physical link visualizer example</title>
+	<title>Physical Link Visualizer Example</title>
 </head>
 
 <body>
-	<h1><center>Physical Link Visualization example</center></h1>
+	<h1><center>Physical Link Visualization Example</center></h1>
 
 	<p><h2>Goals</h2></p>
     <p> 
@@ -21,7 +21,7 @@
     </p>
 
 
-    <p><h2>About the visualizer</h2></p>
+    <p><h2>About the Visualizer</h2></p>
     <p>
         When a packet is received by a node flawlessly, a physical link is established between the transmitter and the receiver nodes.
         The <code><strong>PhysicalLinkVisualizer</strong></code> keeps track of active physical links in a network.
@@ -37,7 +37,7 @@
     </p>     
 
 
-	<p><h2>Enabling physical links</h2></p>
+	<p><h2>Enabling Visualization of Physical Links</h2></p>
     <p>
         This configuration demonstrates how to enable the visualization of physical links.
     </p>
@@ -66,7 +66,14 @@
         It's represented by an arrow, that starts from the transmitter node and points to the receiver node.
     </p>
 
-	<p><h2>Displaying dynamic physical links</h2></p>
+
+    <p><h2>Filtering Physical Links</h2></p>
+    <p>
+        
+    </p>
+
+
+	<p><h2>Displaying Dynamic Physical Links</h2></p>
     <p>
         The goal of this configuration is displaying dynamically changing active data links in a wireless environment.
         Here is the network for this configuration:
@@ -80,9 +87,9 @@
         We display only the ping echo messages' physical links, so we will see that, which node receives a ping echo message.
         <div class="snippet">
             *.visualizer.*.physicalLinkVisualizer.displayLinks = true<br>
-            *.visualizer.*.physicalLinkVisualizer.packetFilter = "ping* and not *reply"<br>
+            *.visualizer.*.physicalLinkVisualizer.packetFilter = "*Broadcast*"<br>
             *.visualizer.*.physicalLinkVisualizer.fadeOutMode = "simulationTime"<br>
-            *.visualizer.*.physicalLinkVisualizer.fadeOutTime = 1.2s<br>
+            *.visualizer.*.physicalLinkVisualizer.fadeOutTime = 1.3s<br>
         </div>
     </p>
     <p>
