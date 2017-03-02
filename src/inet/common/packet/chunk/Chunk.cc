@@ -15,7 +15,7 @@
 
 #include "inet/common/packet/chunk/SliceChunk.h"
 #include "inet/common/packet/serializer/ChunkSerializer.h"
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {
 
@@ -69,13 +69,13 @@ std::string Chunk::str() const
 void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     Chunk *chunkPointer = chunk.get();
-    auto serializer = SerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
+    auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
     serializer->serialize(stream, chunk, offset, length);
 }
 
 std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
 {
-    auto serializer = SerializerRegistry::globalRegistry.getSerializer(typeInfo);
+    auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
     auto chunk = serializer->deserialize(stream, typeInfo);
     if (stream.isReadBeyondEnd())
         chunk->markIncomplete();

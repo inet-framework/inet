@@ -15,7 +15,7 @@
 
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/serializer/BytesChunkSerializer.h"
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {
 

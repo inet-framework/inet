@@ -13,19 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
 namespace inet {
 
-SerializerRegistry SerializerRegistry::globalRegistry;
+ChunkSerializerRegistry ChunkSerializerRegistry::globalRegistry;
 
-void SerializerRegistry::registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer)
+void ChunkSerializerRegistry::registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer)
 {
     assert(serializer != nullptr);
     serializers[&typeInfo] = serializer;
 }
 
-const ChunkSerializer *SerializerRegistry::getSerializer(const std::type_info& typeInfo) const
+const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_info& typeInfo) const
 {
     auto it = serializers.find(&typeInfo);
     if (it != serializers.end())

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/udp/UdpHeaderSerializer.h"
 #include "inet/transportlayer/udp/UdpHeader.h"
 

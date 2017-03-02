@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ipv4/IGMPHeaderSerializer.h"
 #include "inet/networklayer/ipv4/IGMPMessage.h"
 

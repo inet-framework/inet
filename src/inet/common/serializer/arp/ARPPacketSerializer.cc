@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/common/serializer/arp/ARPPacketSerializer.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"

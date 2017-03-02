@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/SliceChunk.h"
-#include "inet/common/packet/serializer/SerializerRegistry.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/packet/serializer/SliceChunkSerializer.h"
 
 namespace inet {
