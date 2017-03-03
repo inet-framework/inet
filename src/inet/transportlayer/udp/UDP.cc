@@ -310,6 +310,7 @@ void UDP::processPacketFromApp(cPacket *appData)
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
 {
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, udpPacket);
     emit(rcvdPkSignal, udpPacket);
 
     // simulate checksum: discard packet if it has bit error
@@ -791,6 +792,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setTypeOfService(tos);
         udpPacket->setControlInfo(ipControlInfo);
 
+        emit(LayeredProtocolBase::packetSentToLowerSignal, udpPacket);
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }
@@ -807,6 +809,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(ipControlInfo);
 
+        emit(LayeredProtocolBase::packetSentToLowerSignal, udpPacket);
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }
@@ -824,6 +827,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         //ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
 
+        emit(LayeredProtocolBase::packetSentToLowerSignal, udpPacket);
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }
