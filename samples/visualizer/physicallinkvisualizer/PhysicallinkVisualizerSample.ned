@@ -102,25 +102,25 @@ network PhysicalLinkVisualizerDynamic
         radioMedium: Ieee80211ScalarRadioMedium {
             @display("p=100,250");
         }
-        host7: AODVRouter {
+        host7: AdhocHost {
             @display("p=267.548,139.48");
         }
-        host1: AODVRouter {
+        host1: AdhocHost {
             @display("p=509.736,103.976");
         }
-        host2: AODVRouter {
+        host2: AdhocHost {
             @display("p=365.184,213.024");
         }
-        host3: AODVRouter {
+        host3: AdhocHost {
             @display("p=498.324,229.508");
         }
-        host4: AODVRouter {
+        host4: AdhocHost {
             @display("p=280.228,365.184");
         }
-        host5: AODVRouter {
+        host5: AdhocHost {
             @display("p=365.184,517.344");
         }
-        host6: AODVRouter {
+        host6: AdhocHost {
             @display("p=523.684,372.792");
         }
 }
