@@ -179,6 +179,11 @@ visualizing a packet's transmission takes three seconds as per the default anima
 more on this in the next section.
 </p>
 
+<p>TODO: the signal is not growing past the furthest node, it is just present everywhere</p>
+
+<p>TODO: the animation time is fixed 3 seconds, regardless of the bitrate and the size of the packet...
+that is, regardless of the time it takes in reality</p>
+
 <h2>Multiple nodes</h2>
 
 <p>TODO: Multiple nodes, animation speed settings</p>
@@ -271,6 +276,24 @@ that should be about -115 dBW -> the reception power at the farther node is a bi
 </pre>
 
 <p>TODO: the 3rd config</p>
+
+<h2>Interfering signals</h2>
+
+<p>
+This configuration demonstrates the visualization of interfering signals. It uses this network:
+</p>
+
+<img class="screen" src="interferencenetwork.png" width="850px">
+
+<p>
+It contains three <var>AdhocHosts</var> laid out in a chain, just like in the previous configuration. 
+The hosts on the two sides, <var>source1</var> and <var>source2</var>, are configured to ping the host in the middle,
+<var>destination</var>. There is a wall
+positioned between the two hosts on the sides. The obstacle loss model is <var>IdealObstacleLoss</var>, thus the wall
+blocks transmissions completely. Both source hosts can reach the destination, but cannot reach each other, and cannot detect
+whatsoever when the other source is transmitting. The network also contains an <var>IPv4NetworkConfigurator</var>,
+an <var>Ieee80211ScalarRadioMedium</var>, a <var>PhysicalEnvironment</var>, and an <var>IntegratedVisualizer</var> module.
+</p>
 
 <pre>
 The third config shows the interference
