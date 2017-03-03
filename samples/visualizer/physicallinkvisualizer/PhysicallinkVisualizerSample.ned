@@ -58,7 +58,7 @@ network PhysicalLinkVisualizerSimple
 //
 network PhysicalLinkVisualizerFiltering
 {
-    @display("bgb=780,450");
+    @display("bgb=780,330");
     submodules:
         visualizer: IntegratedVisualizer {
             parameters:
@@ -73,16 +73,16 @@ network PhysicalLinkVisualizerFiltering
                 @display("p=100,250");
         }
         accessPoint: AccessPoint {
-            @display("p=500,200");
+            @display("p=471,149");
         }
         source: WirelessHost {
-            @display("p=517,89");
+            @display("p=648,92");
         }
         host1: WirelessHost {
-            @display("p=642,178");
+            @display("p=648,216");
         }
         destination: WirelessHost {
-            @display("p=320,350");
+            @display("p=268,150");
         }
 }
 

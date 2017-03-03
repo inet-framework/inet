@@ -16,7 +16,7 @@
         Without displaying physical links, we need to examine the console to find out whether the physical link is established between the nodes.
     </p>
     <p>    
-        The example consists of 2 simulation models, each demonstrating different features of physical link visualization.
+        The example consists of 3 simulation models, each demonstrating different features of physical link visualization.
     </p>
 
 
@@ -72,7 +72,33 @@
         In addition we show how the <i>packetFilter</i> parameter works.
     </p>
     <p>
-        NETWORK/CONFIG
+        We use the following network for this configuration:
+    </p>
+    <p>
+        <img class="screen" src="PhysicalLinkVisualizerFiltering.png">
+    </p>
+    <p>
+        This is a simple, infrastructure wireless topology, it consists of one <var>accessPoint</var> and three <var>wirelessHosts</var>.
+        In addition there is an <var>IntegratedVisualizer</var>, an <var>IPv4NetworkConfigurator</var> and an <var>Ieee80211ScalarRadioMedium</var> module.<br>
+        The <var>source</var> node pings the <var>destination</var> node.
+        The <var>host1</var> doesn't generate any traffic in addition to connect to the access point.
+        The antennas performance is limited to ensure that the <var>source</var> doesn't reach directly to the <var>destination</var>.
+        The visualization is set to only display the ping packets.
+        We adjust the fading parameters, so the links don't fade out completely before the next ping packets come.
+        Here is the configuration of the visualization:
+        <div class="snippet">
+            *.visualizer.*.physicalLinkVisualizer.displayLinks = true<br>
+            *.visualizer.*.physicalLinkVisualizer.packetFilter = "ping*"<br>
+            *.visualizer.*.physicalLinkVisualizer.fadeOutMode = "simulationTime"<br>
+            *.visualizer.*.physicalLinkVisualizer.fadeOutTime = 1.3s
+        </div>
+    </p>
+    <p>
+        This video illustrates what happens when the simulation is run.
+    </p>
+    <p align="center">        
+        <video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" width=688 height=343 src="DisplayPingPhysicalLinks.mp4">
+        VIDEO
     </p>
     <p>
         RESULT
