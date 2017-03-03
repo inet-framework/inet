@@ -414,7 +414,7 @@
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            dd15-42d5/tplx
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            6529-e2a4/tplx
 
-/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            7934-21db/tplx
+/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            8319-e8bc/tplx
 
 # /examples/wireless/qos/,             -f omnetpp.ini -c MacBase -r 0,                100s,         0000-0000   # MacBase extended
 /examples/wireless/qos/,             -f omnetpp.ini -c Mac -r 0,                    10s,         9425-627c/tplx
