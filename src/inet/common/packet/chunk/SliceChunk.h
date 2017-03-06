@@ -29,7 +29,7 @@ namespace inet {
  */
 class INET_API SliceChunk : public Chunk
 {
-  friend Chunk;
+  friend class Chunk;
 
   protected:
     /**

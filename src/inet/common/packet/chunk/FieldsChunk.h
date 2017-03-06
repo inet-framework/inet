@@ -26,7 +26,7 @@ namespace inet {
  */
 class FieldsChunk : public Chunk
 {
-  friend Chunk;
+  friend class Chunk;
 
   protected:
     /**
