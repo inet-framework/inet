@@ -63,3 +63,7 @@ PhysicalLink
 IPv4
 
 - A broadcast UDP-s csomagok elnyelődnek / nem mennek ki / ForceBroadcast paraméter az IPv4-ben WTF?
+
+TransportRoute
+
+- TCP-vel nem működik, csak UDP-vel
