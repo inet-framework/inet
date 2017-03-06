@@ -45,26 +45,6 @@ Packet::Packet(const Packet& other) :
 {
 }
 
-int Packet::getNumChunks() const
-{
-    if (contents == nullptr)
-        return 0;
-    else if (contents->getChunkType() == Chunk::TYPE_SEQUENCE)
-        return std::static_pointer_cast<SequenceChunk>(contents)->getChunks().size();
-    else
-        return 1;
-}
-
-Chunk *Packet::getChunk(int i) const
-{
-    assert(contents != nullptr);
-    assert(0 <= i && i < getNumChunks());
-    if (contents->getChunkType() == Chunk::TYPE_SEQUENCE)
-        return std::static_pointer_cast<SequenceChunk>(contents)->getChunks()[i].get();
-    else
-        return contents.get();
-}
-
 void Packet::setHeaderPopOffset(bit offset)
 {
     if (contents == nullptr && offset == bit(0))

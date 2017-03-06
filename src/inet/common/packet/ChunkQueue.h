@@ -27,6 +27,8 @@ namespace inet {
  */
 class INET_API ChunkQueue : public cNamedObject
 {
+  friend class ChunkQueueDescriptor;
+
   protected:
     bit pushedByteCount = bit(0);
     bit poppedByteCount = bit(0);
@@ -36,6 +38,9 @@ class INET_API ChunkQueue : public cNamedObject
      */
     std::shared_ptr<Chunk> contents = nullptr;
     Chunk::Iterator iterator;
+
+  protected:
+    Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
     void remove(bit length);
 

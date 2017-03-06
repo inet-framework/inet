@@ -14,7 +14,12 @@
 //
 
 cplusplus {{
+#include "inet/common/packet/chunk/BitsChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/chunk/cPacketChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 }}
 
 namespace inet;
@@ -28,6 +33,36 @@ class Chunk extends cObject
     bool correct @getter("isCorrect");
     bool properlyRepresented @getter("isProperlyRepresented");
     bit chunkLength;
+}
+
+class BitsChunk extends Chunk
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    // TODO: data should be displayed as: 010... (multiple lines)
+}
+
+class BytesChunk extends Chunk
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    // TODO: data should be displayed as: AA 00 FF ... (multiple lines, plus readable text part?)
+}
+
+class SequenceChunk extends Chunk
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
+}
+
+class SliceChunk extends Chunk
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    bit offset;
+    bit length;
+    Chunk* chunk @getter(_getChunk);
 }
 
 class cPacketChunk extends Chunk

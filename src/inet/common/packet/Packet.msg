@@ -14,19 +14,46 @@
 //
 
 cplusplus {{
+#include "inet/common/packet/ChunkBuffer.h"
+#include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 }}
 
 namespace inet;
 
 class Chunk extends cObject;
+class noncobject ChunkBuffer::Region;
+
+class ChunkQueue extends cNamedObject
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    bit queueLength;
+    Chunk* contents @getter(getContents);
+}
+
+class ChunkBuffer::Region
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    bit startOffset;
+    bit endOffset;
+    Chunk* data @getter(getData);
+}
+
+class ChunkBuffer extends cNamedObject
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    ChunkBuffer::Region* regions[] @getter(getRegion) @sizeGetter(getNumRegions);
+}
 
 packet Packet
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit headerPopOffset;
-    bit trailerPopOffset;
+    bit headerPoppedLength;
     bit dataLength;
-    Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
+    bit trailerPoppedLength;
+    Chunk* contents @getter(getContents);
 }

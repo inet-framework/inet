@@ -29,6 +29,7 @@ namespace inet {
 class INET_API SequenceChunk : public Chunk
 {
   friend class Chunk;
+  friend class SequenceChunkDescriptor;
 
   protected:
     /**
@@ -37,6 +38,9 @@ class INET_API SequenceChunk : public Chunk
     std::deque<std::shared_ptr<Chunk>> chunks;
 
   protected:
+    int getNumChunks() const { return chunks.size(); } // only for class descriptor
+    Chunk *getChunk(int i) const { return chunks[i].get(); } // only for class descriptor
+
     int getStartIndex(const Iterator& iterator) const { return iterator.isForward() ? 0 : chunks.size() - 1; }
     int getEndIndex(const Iterator& iterator) const { return iterator.isForward() ? chunks.size() - 1 : 0; }
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }

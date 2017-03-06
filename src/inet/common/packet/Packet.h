@@ -62,8 +62,7 @@ class INET_API Packet : public cPacket
     Chunk::BackwardIterator trailerIterator;
 
   protected:
-    int getNumChunks() const;
-    Chunk *getChunk(int i) const;
+    Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
     void makeContentsMutable() {
         if (contents.use_count() == 1)

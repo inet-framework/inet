@@ -115,6 +115,7 @@ using namespace units::values;
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
+// TODO: peeking with a Type (length == -1) into a SliceChunk should return nullptr without serialization if possible (i.e. slice contains an instance of Type) assuming no following chunks, etc.
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 // TODO: review insert functions for the chunk->insert(chunk) case
 // TODO: consider not allowing appending mutable chunks?

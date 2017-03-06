@@ -26,8 +26,13 @@ namespace inet {
  */
 class INET_API ChunkBuffer : public cNamedObject
 {
+  friend class ChunkBufferDescriptor;
+  friend class ChunkBuffer__RegionDescriptor;
+
   protected:
     class INET_API Region {
+      friend class ChunkBuffer__RegionDescriptor;
+
       public:
         bit offset;
         /**
@@ -35,6 +40,9 @@ class INET_API ChunkBuffer : public cNamedObject
          * it's reused if possible to allow efficient merging with newly added chunks.
          */
         std::shared_ptr<Chunk> data;
+
+      protected:
+        Chunk *getData() const { return data.get(); } // only for class descriptor
 
       public:
         Region(bit offset, const std::shared_ptr<Chunk>& data) : offset(offset), data(data) { }
@@ -54,6 +62,8 @@ class INET_API ChunkBuffer : public cNamedObject
     std::vector<Region> regions;
 
   protected:
+    Region *getRegion(int i) const { return const_cast<Region *>(&regions[i]); } // only for class descriptor
+
     void eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end);
     void sliceRegions(Region& newRegion);
     void mergeRegions(Region& previousRegion, Region& nextRegion);
