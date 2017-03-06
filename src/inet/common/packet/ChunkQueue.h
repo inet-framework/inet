@@ -51,9 +51,9 @@ class INET_API ChunkQueue : public cNamedObject
     /** @name Length querying related functions */
     //@{
     /**
-     * Returns the number of available bytes in the buffer.
+     * Returns the number of available bytes.
      */
-    bit getBufferLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
+    bit getQueueLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
 
     bit getPushedByteCount() const { return pushedByteCount; }
 
@@ -105,9 +105,9 @@ class INET_API ChunkQueue : public cNamedObject
     virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *buffer) { return os << buffer->str(); }
+inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }
 
-inline std::ostream& operator<<(std::ostream& os, const ChunkQueue& buffer) { return os << buffer.str(); }
+inline std::ostream& operator<<(std::ostream& os, const ChunkQueue& queue) { return os << queue.str(); }
 
 } // namespace
 

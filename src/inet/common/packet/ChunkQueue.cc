@@ -45,20 +45,20 @@ void ChunkQueue::remove(bit length)
 
 std::shared_ptr<Chunk> ChunkQueue::peek(bit length) const
 {
-    assert(bit(-1) <= length && length <= getBufferLength());
+    assert(bit(-1) <= length && length <= getQueueLength());
     return contents == nullptr ? nullptr : contents->peek(iterator, length);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::peekAt(bit offset, bit length) const
 {
-    assert(bit(0) <= offset && offset <= getBufferLength());
-    assert(bit(-1) <= length && length <= getBufferLength());
+    assert(bit(0) <= offset && offset <= getQueueLength());
+    assert(bit(-1) <= length && length <= getQueueLength());
     return contents == nullptr ? nullptr : contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::pop(bit length)
 {
-    assert(bit(-1) <= length && length <= getBufferLength());
+    assert(bit(-1) <= length && length <= getQueueLength());
     const auto& chunk = peek(length);
     if (chunk != nullptr)
         remove(chunk->getChunkLength());
@@ -68,7 +68,7 @@ std::shared_ptr<Chunk> ChunkQueue::pop(bit length)
 void ChunkQueue::clear()
 {
     if (contents != nullptr) {
-        poppedByteCount += getBufferLength();
+        poppedByteCount += getQueueLength();
         contents->seekIterator(iterator, bit(0));
         contents = nullptr;
     }
