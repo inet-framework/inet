@@ -16,14 +16,19 @@
 package inet.samples.visualizer.transportroutevisualizer;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.visualizer.integrated.IntegratedVisualizer;
 import inet.visualizer.transportlayer.TransportRouteVisualizer;
 
 
 //
 // TODO documentation
 //
-network TransportRouteSimple
+network TransportRouteSimpleWired
 {
     @display("bgb=500,200");
     submodules:
@@ -41,5 +46,101 @@ network TransportRouteSimple
         }
     connections:
         source.ethg++ <--> Eth100M <--> destination.ethg++;
+}
+
+
+//
+// TODO documentation
+//
+network TransportRouteSimpleWireless
+{
+    @display("bgb=500,260");
+    submodules:
+        source: AdhocHost {
+            @display("p=200,120");
+        }
+        destination: AdhocHost {
+            @display("p=400,120");
+        }
+        routeVisualizer: TransportRouteVisualizer {
+            @display("p=80,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=80,120");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=80,190");
+        }
+}
+
+//
+// TODO documentation
+//
+network TransportRouteExtended
+{
+    @display("bgb=1100,800");
+    submodules:
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=80,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=80,120");
+        }
+        source1: StandardHost {
+            @display("p=308.736,75.576004");
+        }
+        router0: Router {
+            @display("p=633.552,162.408");
+        }
+        router4: Router {
+            @display("p=633.552,403.608");
+        }
+        router3: Router {
+            @display("p=445.41602,520.992");
+        }
+        router1: Router {
+            @display("p=845.808,319.992");
+        }
+        router2: Router {
+            @display("p=411.648,321.6");
+        }
+        destination2: StandardHost {
+            @display("p=283.008,651.24");
+        }
+        source2: StandardHost {
+            @display("p=987.312,75.576004");
+        }
+        destination1: StandardHost {
+            @display("p=898.872,520.992");
+        }
+        etherSwitch0: EtherSwitch {
+            @display("p=308.736,186.528");
+        }
+        etherSwitch1: EtherSwitch {
+            @display("p=845.808,160.8");
+        }
+        etherSwitch2: EtherSwitch {
+            @display("p=295.872,438.984");
+        }
+        etherSwitch3: EtherSwitch {
+            @display("p=709.128,557.976");
+        }
+    connections:
+        router0.pppg++ <--> Eth100M <--> router4.pppg++;
+        source1.ethg++ <--> Eth100M <--> etherSwitch0.ethg++;
+        etherSwitch0.ethg++ <--> Eth100M <--> router0.ethg++;
+        router3.ethg++ <--> Eth100M <--> etherSwitch3.ethg++;
+        etherSwitch3.ethg++ <--> Eth100M <--> destination1.ethg++;
+        router4.pppg++ <--> Eth100M <--> router1.pppg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> router1.ethg++;
+        etherSwitch1.ethg++ <--> Eth100M <--> source2.ethg++;
+        router2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
+        destination2.ethg++ <--> Eth100M <--> etherSwitch2.ethg++;
+        router4.pppg++ <--> Eth100M <--> router2.pppg++;
+        router4.pppg++ <--> Eth100M <--> router3.pppg++;
+        router0.pppg++ <--> Eth100M <--> router2.pppg++;
+        router1.pppg++ <--> Eth100M <--> router0.pppg++;
 }
 
