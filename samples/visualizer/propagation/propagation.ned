@@ -8,6 +8,7 @@ import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedVisualizer;
 
@@ -95,5 +96,29 @@ network PropagationC
         }
         physicalEnvironment: PhysicalEnvironment {
             @display("p=100.399994,387.79498");
+        }
+}
+
+network PropagationD
+{
+    @display("bgb=300000,300000");
+    submodules:
+        wirelessHost: WirelessHost {
+            @display("p=118801.586,166802.22");
+        }
+        accessPoint: AccessPoint {
+            @display("p=118801.39,166802.22");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=234003.11,38400.51");
+        }
+        visualizer: IntegratedVisualizer {
+            @display("p=234603.12,75001");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=229203.05,115801.54");
+        }
+        wirelessHost1: WirelessHost {
+            @display("p=5400.072,6000.08");
         }
 }

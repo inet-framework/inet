@@ -13,14 +13,6 @@
 
 <h2>Goals</h2>
 
-<pre>
-the problem is there are multiple hosts transmitting simulateously in a large network
-this visualization makes it easier to see which nodes are transmitting and which are receiving at a time
-what transmissions are present at various nodes at a time
-misc features are the communication ranges and interference ranges. This helps in the placement of nodes, and to fine tune the transmitter
-power settings. -> this is not about propagation, its about the mediumvisualizer, so its misc
-</pre>
-
 <p>
 In a large network, there might be multiple wireless nodes transmitting simulataneously, causing interference at receiving nodes.
 One has to go through the logs to see which transmissions are received by which nodes.
@@ -41,36 +33,7 @@ and what transmissions are present at various nodes.
 This example contains 3 configurations of increasing complexity, each showing different features of the visualization.
 </p>
 
-<pre>
-config 1 - default settings, all visualizations enabled (except for the communicationheat), simple network
-
-config 2 - more complex network, setting the animation speed parameters, and that the animations are not the same duration
-
-config 3 - interference, an important feature, is that it shows that there are multiple transmissions present at a node
-			at the same time...overlapping transmissions
-</pre>
-
 <h2>About the visualizer</h2>
-
-<p>
-The <var>MediumVisualizer</var> module can visualize various aspects of radio transmissions. It can visualize radio signals as they
-propagate through space as colored disks with a wave pattern, originating at the signal source node. The disk representing the
-signal fades with distance, e.g. as the signal gets weaker further out from the transmitter. By default, different transmissions are colored
-differently. The <var>signalColor</var> parameter specifies a set of colors for the signals. The set of colors is either 'light' or 'dark',
-the latter is the default. Also, a custom set of colors can be specified, e.g. <i>"blue, red, yellow"</i>. The name of the transmitted packet is indicated on the disk. The visualization of propagating signals can be
-enabled with the <var>displaySignals</var> parameter. TODO filters
-</p>
-
-<p>
-The visualizer can indicate that nodes are currently receiving or transmitting a signal, by placing a transmission/reception icon over the node, on the top level
-canvas. The power of the transmitted/received signal is indicated in dBW. The visualization of transmissions and receptions are enabled
-with the visualizer's <var>displayTransmissions</var> and <var>displayReceptions</var> parameter, respectively.
-</p>
-
-<p>
-The communication and interference ranges of nodes can be visualized as blue and grey circles, respectively. These are enabled
-with the <var>displayCommunicationRanges</var> and <var>displayInterferenceRanges</var> parameters.
-</p>
 
 <p>
 The <var>MediumVisualizer</var> module can visualize various aspects of radio communications. It has three main features:
@@ -230,22 +193,6 @@ Alternatively, a fixed duration can be specified for the two phases with the <va
 Additionally, additional time can be specified TODO.
 AnimationSpeedTimeChange TODO
 </p>
-
-<pre>
-That is, there are 2 settings, transmission animation speed, and propagation animation speed.
-How is that defined? How do you get the 500/c value?
-The transmission animation speed should be about 2 degrees of magnitude larger than
-the propagation animation speed
-so that the propagation is visible,
-and the transmission is not too long
-
-If some of them is not defined, then the AnimationTime parameter takes effect
-which is by definition 1 second
-
-An additional animation time can also be defined
-
-One more parameter -> later
-</pre>
 
 <video autoplay loop controls src="propagation7.mp4" onclick="this.paused ? this.play() : this.pause();" width="784" height="470"></video>
 

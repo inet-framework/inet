@@ -27,10 +27,10 @@ This example contains a configuration that demonstrates visualization of IEEE 80
 <h2>About the visualizer</h2>
 
 <p>
-The <var>InfoVisualizer</var> module can visualize information provided by various submodules deep down in the module hierarchy. This information is visualized at the contaning network node, typically at the top level canvas. The following image illustrates this with the example of the UDP submodule:
+The <var>InfoVisualizer</var> module can visualize information provided by various submodules deep down in the module hierarchy. This information is visualized at the submodule of the contaning network node, typically at the top level canvas. The following image illustrates this with the example of the UDP submodule:
 </p>
 
-<img src="example.png">
+<img class="screen" src="example.png">
 
 <p>
 The image on the left shows the state information displayed by the UDP app. To see this, one has to go into the containing node. The image on the right shows the same information
@@ -64,7 +64,7 @@ On the example image above, the display string text is visualized, selected with
 The network for the simulation is the following:
 </p>
 
-<img src="infonetwork.png">
+<img class="screen" src="infonetwork.png">
 
 <p>
 It contains 3 <var>AdhocHosts</var> arranged in a simple chain. It also contains an <var>IPv4NetworkConfigurator</var>,
@@ -102,7 +102,7 @@ Additionally, <var>source</var> is configured to send UDP packets to <var>destin
 When the simulation is run, the channel access state is displayed above the nodes:
 </p>
 
-<img src="accessstate.png">
+<img class="screen" src="accessstate.png">
 
 <p>
 The visualization changes to reflect the changes in the access state. It takes on the following values:
@@ -121,9 +121,9 @@ The visualization changes to reflect the changes in the access state. It takes o
 The following animation illustrates as a packet from <var>source</var> makes its way to <var>destination</var>:
 </p>
 
-<img src="info1.gif">
+<img class="screen" src="info1.gif">
 
-<img src="info2.gif">
+<img class="screen" src="info2.gif">
 
 <p>TODO: what is happening on the animation</p>
 
@@ -161,7 +161,7 @@ For example, the UDP application's state can be displayed in addition to the cha
 This would look like the following:
 </p>
 
-<img src="multiplemodules.png">
+<img class="screen" src="multiplemodules.png">
 
 <p>
 Here, the visualizer displays the UDP application's number of sent and received packets.

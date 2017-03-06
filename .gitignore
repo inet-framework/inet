@@ -69,3 +69,8 @@ backups
 *~
 xxx
 /tmp/
+
+# temp entries
+/tutorials
+/samples/visualizer/*backup
+/samples/visualizer/*/*/unused
