@@ -52,7 +52,7 @@ void AARFRateControl::refreshDisplay() const
 {
     getDisplayString().setTagArg("t", 0, currentMode->getName());
     bps rate = currentMode->getDataMode()->getNetBitrate();
-    emit(ratesignal, rate.get());
+    const_cast<AARFRateControl *>(this)->emit(ratesignal, rate.get());
 }
 
 void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, const IIeee80211Mode* mode, int retryCount, bool isSuccessful, bool isGivenUp)

@@ -114,7 +114,7 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
         if (packets >= packetLimit) {
             bytes += packet->getByteLength();
             double throughput = 8 * bytes / (now - lastSignal).dbl();
-            fire(this, now, throughput DETAILS_ARG_NAME);
+            fire(this, now, throughput, details);
             lastSignal = now;
             bytes = 0;
             packets = 0;

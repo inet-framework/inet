@@ -129,13 +129,13 @@ class INET_API ElapsedTimeFilter : public cResultFilter
     ElapsedTimeFilter();
   protected:
     double getElapsedTime();
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
-    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj DETAILS_ARG) override {fire(this, t, getElapsedTime() DETAILS_ARG_NAME);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {fire(this, t, getElapsedTime(), details);}
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {fire(this, t, getElapsedTime(), details);}
 };
 
 } // namespace filters
