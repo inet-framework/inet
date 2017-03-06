@@ -15,6 +15,7 @@
 
 package inet.samples.visualizer.transportroutevisualizer;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.aodv.AODVRouter;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.AdhocHost;
@@ -142,5 +143,50 @@ network TransportRouteExtended
         router4.pppg++ <--> Eth100M <--> router3.pppg++;
         router0.pppg++ <--> Eth100M <--> router2.pppg++;
         router1.pppg++ <--> Eth100M <--> router0.pppg++;
+}
+
+//
+// TODO documentation
+//
+network ServerClientsNetwork
+{
+    @display("bgb=600,400");
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                @display("p=80,50");
+        }
+        visualizer: IntegratedVisualizer {
+            parameters:
+                @display("p=80,120");
+        }
+        server: StandardHost {
+            @display("p=158,205;i=device/server2");
+        }
+        host1: StandardHost {
+            @display("p=545,35");
+        }
+        host2: StandardHost {
+            @display("p=545,105");
+        }
+        admin: StandardHost {
+            @display("p=545,318");
+        }
+        switch1: EtherSwitch {
+            @display("p=414,61");
+        }
+        switch2: EtherSwitch {
+            @display("p=414,318");
+        }
+        router: Router {
+            @display("p=296,205");
+        }
+    connections:
+        switch1.ethg++ <--> Eth100M <--> host1.ethg++;
+        switch1.ethg++ <--> Eth100M <--> host2.ethg++;
+        switch2.ethg++ <--> Eth100M <--> admin.ethg++;
+        router.ethg++ <--> Eth100M <--> switch1.ethg++;
+        router.ethg++ <--> Eth100M <--> switch2.ethg++;
+        server.ethg++ <--> Eth100M <--> router.ethg++;
 }
 
