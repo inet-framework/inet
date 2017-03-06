@@ -81,8 +81,8 @@
         This is a simple, infrastructure mode wireless topology, it consists of one <var>accessPoint</var> and three <var>wirelessHosts</var>.
         In addition there is an <var>IntegratedVisualizer</var>, an <var>IPv4NetworkConfigurator</var> and an <var>Ieee80211ScalarRadioMedium</var> module.<br>
         The <var>source</var> node pings the <var>destination</var> node.
-        The <var>host1</var> doesn't generate any traffic in addition to connect to the access point.
-        The antennas performance is limited to ensure that the <var>source</var> doesn't reach directly to the <var>destination</var>.
+        The <var>host1</var> doesn't generate any traffic except for connect to the access point.
+        The antennas performance is limited to ensure that the <var>source</var> doesn't reach the <var>destination</var> directly.
         The visualization is set to only display the ping packets.
         We adjust the fading parameters, so the links don't fade out completely before the next ping packets come.
         Here is the configuration of the visualization:
@@ -103,12 +103,13 @@
         
         <br>
         When the <var>accessPoint</var> receives the ping packet from the <var>source</var> on the physical layer, the visualizer displays a dotted arrow between them.
-        Altough the <var>host1</var> is not the destination of the ping message, an arrow still appear between the <var>source</var> and the <var>host1</var>, because the <var>host1</var> receives the ping packet correctly on the first layer.
-        There is no any physical link between the source and the destination. The radio signals are too weak, so destination can't receive the ping message flawlessly on the physical layer.<br>
+        Altough <var>host1</var> is not the destination of the ping message, an arrow still appears between the <var>source</var> and <var>host1</var>, because <var>host1</var> receives the ping packet correctly on the first layer.
+        There is no physical link between the source and the destination.
+        The radio signals are too weak, so destination can't receive the ping message flawlessly on the physical layer.<br>
         The <var>accessPoint</var> is able to create a physical link with any endpoint.
-        When it sends a ping message an arrow is shown towards every endpoints.
+        When it sends a ping message an arrow is shown towards every endpoint.
         The <var>destination</var> sends <i>ping reply</i> messages.
-        It only reaches the <var>accessPoint</var>, so there is only one link which starting point is the <var>destination</var>.
+        It only reaches the <var>accessPoint</var>, so there is only one link whose starting point is the <var>destination</var>.
     </p>
 
 
