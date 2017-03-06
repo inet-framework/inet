@@ -216,7 +216,11 @@ actual, real-time duration. A rule of thumb for setting the animation speed para
 node farthest from the transmitter is two magnitudes smaller than the time it takes to transmit the signal. Thus in this example, it should be about 10<sup>-4</sup>.</li>
 </ul>
 
-<p>TODO: about the additionaltime</p>
+<p>
+By default, the animation switches from propagation phase to transmission phase when the propagating signal reaches the node farthest from
+the signal source. The <var>signalPropagationAdditionalTime</var> parameter can specify how long to continue the propagation animation
+after the edge of the signal left the farthest node.
+</p>
 
 <p>
 The animation speed during the propagation phase and the transmission phase can be specified by the <var>signalPropagationAnimationSpeed</var>
