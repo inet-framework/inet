@@ -91,7 +91,7 @@ bool DSCPMarker::markPacket(cPacket *packet, int dscp)
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet);
+        IPv6Header *ipv6Datagram = dynamic_cast<IPv6Header *>(packet);
         if (ipv6Datagram) {
             ipv6Datagram->setDiffServCodePoint(dscp);
             return true;

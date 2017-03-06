@@ -204,7 +204,7 @@ cPacket *findIPDatagramInPacket(cPacket *packet)
             return packet;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (dynamic_cast<IPv6Datagram *>(packet))
+        if (dynamic_cast<IPv6Header *>(packet))
             return packet;
 #endif // ifdef WITH_IPv6
     }

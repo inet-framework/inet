@@ -17,6 +17,8 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -95,20 +97,25 @@ int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)
     return -1;
 }
 
-int BehaviorAggregateClassifier::getDscpFromPacket(cPacket *packet)
+int BehaviorAggregateClassifier::getDscpFromPacket(cPacket *msg)
 {
-    for ( ; packet; packet = packet->getEncapsulatedPacket()) {
+    auto packet = check_and_cast<Packet *>(msg);
+    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+
+    //TODO processing link-layer headers when exists
+
 #ifdef WITH_IPv4
-        IPv4Header *ipv4Datagram = dynamic_cast<IPv4Header *>(packet);
-        if (ipv4Datagram)
-            return ipv4Datagram->getDiffServCodePoint();
+    if (protocol == &Protocol::ipv4) {
+        const auto& ipv4Header = CHK(packet->peekHeader<IPv4Header>());
+        return ipv4Header->getDiffServCodePoint();
+    }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet);
-        if (ipv6Datagram)
-            return ipv6Datagram->getDiffServCodePoint();
-#endif // ifdef WITH_IPv6
+    if (protocol == &Protocol::ipv6) {
+        const auto& ipv6Header = CHK(packet->peekHeader<IPv6Header>());
+        return ipv6Header->getDiffServCodePoint();
     }
+#endif // ifdef WITH_IPv6
     return -1;
 }
 

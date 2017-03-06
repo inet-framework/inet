@@ -54,9 +54,7 @@ void SingleRateThreeColorMeter::initialize(int stage)
 
 void SingleRateThreeColorMeter::handleMessage(cMessage *msg)
 {
-    cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket *>(msg));
-    if (!packet)
-        throw cRuntimeError("SingleRateThreeColorMeter received a packet that does not encapsulate an IP datagram.");
+    cPacket *packet = check_and_cast<cPacket *>(msg);
 
     numRcvd++;
     int color = meterPacket(packet);

@@ -60,7 +60,7 @@
     <feature enabled="true" id="HttpTools"/>
     <feature enabled="false" id="HttpTools_examples_direct"/>
     <feature enabled="false" id="HttpTools_examples_socket"/>
-    <feature enabled="false" id="DiffServ"/>
+    <feature enabled="true" id="DiffServ"/>
     <feature enabled="false" id="DiffServ_examples"/>
     <feature enabled="true" id="InternetCloud"/>
     <feature enabled="false" id="InternetCloud_examples"/>

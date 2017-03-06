@@ -17,6 +17,8 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -44,7 +46,7 @@ namespace inet {
 using namespace DiffservUtil;
 
 #ifdef WITH_IPv4
-bool MultiFieldClassifier::Filter::matches(IPv4Header *datagram)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv4Header *datagram)
 {
     if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
         return false;
@@ -56,36 +58,34 @@ bool MultiFieldClassifier::Filter::matches(IPv4Header *datagram)
         return false;
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
-        cPacket *packet = datagram->getEncapsulatedPacket();
+
 #ifdef WITH_UDP
-        if (FlatPacket *udpPacket = dynamic_cast<FlatPacket*>(packet)) {
-            if (UdpHeader *udpHeader = dynamic_cast<UdpHeader *>(udpPacket->peekHeader())) {
-                srcPort = udpHeader->getSourcePort();
-                destPort = udpHeader->getDestinationPort();
-            }
+        if (protocol == IP_PROT_UDP) {
+            const auto& udpHeader = packet->peekDataAt<UdpHeader>(datagram->getChunkLength());
+            srcPort = udpHeader->getSourcePort();
+            destPort = udpHeader->getDestinationPort();
         }
-#endif // ifdef WITH_UDP
+#endif
+
 #ifdef WITH_TCP_COMMON
-        tcp::TcpHeader *tcpSegment = dynamic_cast<tcp::TcpHeader *>(packet);
-        if (tcpSegment) {
-            srcPort = tcpSegment->getSrcPort();
-            destPort = tcpSegment->getDestPort();
+        if (protocol == IP_PROT_TCP) {
+            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(datagram->getChunkLength());
+            srcPort = tcpHeader->getSourcePort();
+            destPort = tcpHeader->getDestinationPort();
         }
-#endif // ifdef WITH_TCP_COMMON
+#endif
 
         if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
             return false;
         if (destPortMin >= 0 && (destPort < destPortMin || destPort > destPortMax))
             return false;
     }
-
     return true;
 }
-
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
+bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv6Header *datagram)
 {
     if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !datagram->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
         return false;
@@ -97,21 +97,21 @@ bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
         return false;
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
-        cPacket *packet = datagram->getEncapsulatedPacket();
 #ifdef WITH_UDP
-        UdpHeader *udpPacket = dynamic_cast<UdpHeader *>(packet);
-        if (udpPacket) {
-            srcPort = udpPacket->getSourcePort();
-            destPort = udpPacket->getDestinationPort();
+        if (protocol == IP_PROT_UDP) {
+            const auto& udpHeader = packet->peekDataAt<UdpHeader>(datagram->getChunkLength());
+            srcPort = udpHeader->getSourcePort();
+            destPort = udpHeader->getDestinationPort();
         }
-#endif // ifdef WITH_UDP
+#endif
+
 #ifdef WITH_TCP_COMMON
-        tcp::TcpHeader *tcpSegment = dynamic_cast<tcp::TcpHeader *>(packet);
-        if (tcpSegment) {
-            srcPort = tcpSegment->getSrcPort();
-            destPort = tcpSegment->getDestPort();
+        if (protocol == IP_PROT_TCP) {
+            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(datagram->getChunkLength());
+            srcPort = tcpHeader->getSourcePort();
+            destPort = tcpHeader->getDestinationPort();
         }
-#endif // ifdef WITH_TCP_COMMON
+#endif
 
         if (srcPortMin >= 0 && (srcPort < srcPortMin || srcPort > srcPortMax))
             return false;
@@ -166,29 +166,34 @@ void MultiFieldClassifier::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-int MultiFieldClassifier::classifyPacket(cPacket *packet)
+int MultiFieldClassifier::classifyPacket(cPacket *msg)
 {
-    for ( ; packet; packet = packet->getEncapsulatedPacket()) {
+    auto packet = check_and_cast<Packet *>(msg);
+    int ipProtocol = -1;
+    bit ipHeaderLength = bit(-1);
+    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+
+    //TODO link-layer header???
+
 #ifdef WITH_IPv4
-        ;
-        if (IPv4Header *ipv4Datagram = dynamic_cast<IPv4Header *>(packet)) {
-            for (auto & elem : filters)
-                if (elem.matches(ipv4Datagram))
-                    return elem.gateIndex;
-
-            return -1;
-        }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-        if (IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet)) {
-            for (auto & elem : filters)
-                if (elem.matches(ipv6Datagram))
-                    return elem.gateIndex;
-
-            return -1;
-        }
-#endif // ifdef WITH_IPv6
+    if (protocol == &Protocol::ipv4) {
+        const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+        for (auto & elem : filters)
+            if (elem.matches(packet, ipv4Header.get()))
+                return elem.gateIndex;
+        return -1;
     }
+#endif
+
+#ifdef WITH_IPv6
+    if (protocol == &Protocol::ipv6) {
+        const auto& ipv6Header = packet->peekHeader<IPv6Header>();
+        for (auto & elem : filters)
+            if (elem.matches(packet, ipv6Header.get()))
+                return elem.gateIndex;
+        return -1;
+    }
+#endif
 
     return -1;
 }
