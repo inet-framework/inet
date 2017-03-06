@@ -1,0 +1,3 @@
+[submodule "tutorials"]
+	path = tutorials
+	url = git@github.com:inet-framework/inet-tutorials.git
