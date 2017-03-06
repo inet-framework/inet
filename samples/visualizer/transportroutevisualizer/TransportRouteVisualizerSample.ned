@@ -14,11 +14,32 @@
 // 
 
 package inet.samples.visualizer.transportroutevisualizer;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.visualizer.transportlayer.TransportRouteVisualizer;
+
+
 //
 // TODO documentation
 //
-network Simple
+network TransportRouteSimple
 {
-    @display("bgb=600,400");
+    @display("bgb=500,200");
+    submodules:
+        source: StandardHost {
+            @display("p=200,80");
+        }
+        destination: StandardHost {
+            @display("p=400,80");
+        }
+        routeVisualizer: TransportRouteVisualizer {
+            @display("p=80,50");
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=80,120");
+        }
+    connections:
+        source.ethg++ <--> Eth100M <--> destination.ethg++;
 }
 
