@@ -57,7 +57,7 @@ network DatalinkVisualizerWiredSimple
 //
 network DatalinkVisualizerWirelessSimple
 {
-    @display("bgb=700,350");
+    @display("bgb=700,260");
     submodules:
         linkVisualizer: DataLinkVisualizer {
             parameters:
@@ -65,17 +65,17 @@ network DatalinkVisualizerWirelessSimple
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,120");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,190");
         }
         wirelessSource: AdhocHost {
-            @display("p=300,150");
+            @display("p=300,120");
         }
         wirelessDestination: AdhocHost {
-            @display("p=600,150");
+            @display("p=600,120");
         }
 }
 
