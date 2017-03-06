@@ -175,7 +175,7 @@ has a duration that is a few magnitudes longer than the time it takes for the be
 from the source. Thus a different, faster animation speed is required when the transmission is present at all nodes.
 The animation speed changes smoothly between the two values. By default, the propagation phase animation both at the beginning and at the end
 of the transmission have a duration of one second. The duration of the transmission phase is also one second, thus
-visualizing a packet's transmission takes three seconds as per the default animation speed settings. These settings can be configured with the visualizer's parameters,
+visualizing a packet's transmission takes three seconds as per the default animation settings. These settings can be configured with the visualizer's parameters,
 more on this in the next section.
 </p>
 
@@ -202,6 +202,21 @@ are configured so that hosts can reach only the adjacent hosts. The center host 
 </p>
 
 <p>TODO: the animation speed settings...</p>
+
+<p>
+The animation speed during the propagation pahse and the transmission phase can be specified by the <var>signalPropagationAnimationSpeed</var>
+and <var>signalTransmissionAnimationSpeed</var> parameters (these are not specified by default). If not value is specified for these parameters, the <var>signalPropagationAnimationTime</var> and <var>signalTransmissionAnimationTime</var> parameters take effect, these set a fixed duration for the corresponding phases of the
+transmission animation (by default, both are one second). When the duration is fixed, all transmission animations take the same amount of time, regardless of their
+actual, real-time duration. A rule of thumb for setting the animation speed parameters is illustrated with the following example:
+</p>
+
+<ul>
+<li>Setting the propagation animation speed to 300/c, where c is the speed of light, results in the animation speed value of 10<sup>-6</sup>, and the animation of the propagating signal traveling 300 meters in one second, when the playback speed is set to 1.</li>
+<li>The transmission animation speed should be about 2 magnitudes larger, as the time it takes for the propagating signal to reach the
+node farthest from the transmitter is two magnitudes smaller than the time it takes to transmit the signal. Thus in this example, it should be about 10<sup>-4</sup>.</li>
+</ul>
+
+<p>TODO: about the additionaltime</p>
 
 <p>
 The animation speed during the propagation phase and the transmission phase can be specified by the <var>signalPropagationAnimationSpeed</var>
