@@ -29,7 +29,7 @@ import inet.visualizer.linklayer.DataLinkVisualizer;
 //
 // TODO documentation
 //
-network DatalinkVisualizerWiredSimple
+network DatalinkVisualizerSimpleWired
 {
     @display("bgb=700,250");
     submodules:
@@ -55,7 +55,7 @@ network DatalinkVisualizerWiredSimple
 //
 // TODO documentation
 //
-network DatalinkVisualizerWirelessSimple
+network DatalinkVisualizerSimpleWireless
 {
     @display("bgb=700,260");
     submodules:
@@ -131,7 +131,7 @@ network DatalinkVisualizerComplex
 //
 // TODO documentation
 //
-network DynamicDatalinks
+network DatalinkVisualizerDynamic
 {
     @display("bgb=620,500");
     submodules:
