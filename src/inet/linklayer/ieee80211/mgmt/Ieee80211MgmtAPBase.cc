@@ -99,6 +99,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
                 int etherType = frameWithSNAP->getEtherType();
                 payload->ensureTag<EtherTypeInd>()->setEtherType(etherType);
                 payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
+                payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
             }
             delete frame;
             outFrame = payload;

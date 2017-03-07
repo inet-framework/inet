@@ -229,6 +229,7 @@ Packet *toMutable(Packet *packet)
 {
     auto newPacket = new Packet(packet->getName());
     newPacket->append(packet->peekDataAt(byte(0), packet->getDataLength()));
+    newPacket->transferTagsFrom(packet);
     delete packet;
     return newPacket;
 }
@@ -849,6 +850,7 @@ void IPv4::encapsulate(Packet *transportPacket)
     ipv4Header->setTotalLengthField(byte(ipv4Header->getChunkLength()).get() + transportPacket->getByteLength());
     ipv4Header->markImmutable();
     transportPacket->pushHeader(ipv4Header);
+    transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     // setting IPv4 options is currently not supported
 }
 

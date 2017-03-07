@@ -454,6 +454,7 @@ void CsmaCaMac::decapsulate(Packet *frame)
     frame->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     frame->ensureTag<UserPriorityInd>()->setUserPriority(macHeader->getPriority());
     frame->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+    frame->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
 }
 
 /****************************************************************

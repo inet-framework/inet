@@ -654,7 +654,9 @@ void LMacLayer::decapsulate(Packet *packet)
     const auto& lmacHeader = packet->popHeader<LMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol()));
+    auto protocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 

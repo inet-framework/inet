@@ -731,7 +731,9 @@ void BMacLayer::decapsulate(Packet *packet)
     const auto& bmacHeader = packet->popHeader<BMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol()));
+    auto protocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 

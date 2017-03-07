@@ -949,7 +949,9 @@ void CSMA::decapsulate(Packet *packet)
     const auto& csmaHeader = packet->popHeader<CSMAHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol()));
+    auto protocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
 }
 
 } // namespace inet

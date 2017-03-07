@@ -385,7 +385,10 @@ cPacket *PPP::decapsulate(Packet *packet)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol()));
+
+    auto protocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(protocol);
     return packet;
 }
 

@@ -305,6 +305,7 @@ void IdealMac::decapsulate(Packet *packet)
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<EtherTypeInd>()->setEtherType(idealMacHeader->getNetworkProtocol());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
 }
 
 } // namespace inet

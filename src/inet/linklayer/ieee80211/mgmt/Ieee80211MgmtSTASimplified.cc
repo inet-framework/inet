@@ -105,6 +105,7 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
     if (frameWithSNAP) {
         payload->ensureTag<EtherTypeInd>()->setEtherType(frameWithSNAP->getEtherType());
         payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+        payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
     }
 
     delete frame;
