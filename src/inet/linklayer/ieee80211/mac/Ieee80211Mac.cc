@@ -127,10 +127,13 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 
 void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
-    // KLUDGE: TODO
+    // KLUDGE: to unwrap from a PAcket
     const auto& packetChunk = check_and_cast<Packet *>(msg)->peekDataAt<cPacketChunk>(byte(0));
-    auto frame = check_and_cast<Ieee80211Frame *>(packetChunk->getPacket()->dup());
-    // TODO: auto frame = check_and_cast<Ieee80211Frame *>(msg);
+    auto frame = packetChunk->getPacket()->dup();
+    frame->transferTagsFrom(msg);
+    if (msg->getControlInfo() != nullptr)
+        frame->setControlInfo(msg->removeControlInfo());
+    // KLUDGE: end
     if (rx->lowerFrameReceived(frame)) {
         processLowerFrame(frame);
     }
@@ -222,10 +225,15 @@ void Ieee80211Mac::sendFrame(Ieee80211Frame *frame)
     Enter_Method("sendFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    // KLUDGE: to wrap into a Packet
     Packet *packet = new Packet();
     auto packetChunk = std::make_shared<cPacketChunk>(frame);
     packetChunk->markImmutable();
     packet->append(packetChunk);
+    packet->transferTagsFrom(frame);
+    if (frame->getControlInfo() != nullptr)
+        packet->setControlInfo(frame->removeControlInfo());
+    /// KLUDGE: end
     sendDown(packet);
 }
 
