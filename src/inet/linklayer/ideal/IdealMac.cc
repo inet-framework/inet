@@ -19,16 +19,15 @@
 
 #include <stdio.h>
 #include <string.h>
-
-#include "inet/linklayer/ideal/IdealMac.h"
-
 #include "inet/common/INETUtils.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/ideal/IdealMac.h"
 #include "inet/linklayer/ideal/IdealMacFrame_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -152,17 +151,17 @@ void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long valu
     }
 }
 
-void IdealMac::startTransmitting(cPacket *msg)
+void IdealMac::startTransmitting(Packet *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
     MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
-    IdealMacFrame *frame = encapsulate(msg);
+    encapsulate(check_and_cast<Packet *>(msg));
 
     if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
         if (useAck) {
-            lastSentPk = frame->dup();
+            lastSentPk = msg->dup();
             scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
         }
     }
@@ -170,9 +169,9 @@ void IdealMac::startTransmitting(cPacket *msg)
         frame->setSrcModuleId(-1);
 
     // send
-    EV << "Starting transmission of " << frame << endl;
+    EV << "Starting transmission of " << msg << endl;
     radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(frame);
+    sendDown(msg);
 }
 
 void IdealMac::getNextMsgFromHL()
@@ -195,30 +194,30 @@ void IdealMac::handleUpperPacket(cPacket *msg)
     else {
         // We are idle, so we can start transmitting right away.
         EV << "Received " << msg << " for transmission\n";
-        startTransmitting(msg);
+        startTransmitting(check_and_cast<Packet *>(msg));
     }
 }
 
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
-    IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
-    if (frame->hasBitError()) {
+    auto packet = check_and_cast<Packet *>(msg);
+    auto frame = packet->peekHeader<IdealMacFrame>();
+    if (msg->hasBitError()) {
         EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
         // TODO: add reason? emit(LayeredProtocolBase::packetFromLowerDroppedSignal, frame);
-        delete frame;
         return;
     }
 
-    if (!dropFrameNotForUs(frame)) {
+    if (!dropFrameNotForUs(frame.get())) {
         int senderModuleId = frame->getSrcModuleId();
         IdealMac *senderMac = dynamic_cast<IdealMac *>(getSimulation()->getModule(senderModuleId));
         // TODO: this whole out of bounds ack mechanism is fishy
         if (senderMac && senderMac->useAck)
-            senderMac->acked(frame);
+            senderMac->acked(packet);
         // decapsulate and attach control info
-        cPacket *higherlayerMsg = decapsulate(frame);
-        EV << "Passing up contained packet `" << higherlayerMsg->getName() << "' to higher layer\n";
-        sendUp(higherlayerMsg);
+        decapsulate(packet);
+        EV << "Passing up contained packet `" << packet->getName() << "' to higher layer\n";
+        sendUp(packet);
     }
 }
 
@@ -237,7 +236,7 @@ void IdealMac::handleSelfMessage(cMessage *message)
     }
 }
 
-void IdealMac::acked(IdealMacFrame *frame)
+void IdealMac::acked(Packet *frame)
 {
     Enter_Method_Silent();
     ASSERT(useAck);
@@ -255,18 +254,22 @@ void IdealMac::acked(IdealMacFrame *frame)
         EV_DEBUG << "unaccepted\n";
 }
 
-IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
+void IdealMac::encapsulate(Packet *packet)
 {
-    IdealMacFrame *frame = new IdealMacFrame(msg->getName());
-    frame->setByteLength(headerLength);
-    auto macAddressReq = msg->getMandatoryTag<MacAddressReq>();
-    frame->setSrc(macAddressReq->getSrcAddress());
-    frame->setDest(macAddressReq->getDestAddress());
-    frame->setSrcModuleId(getId());
-    auto ethTypeTag = msg->getTag<EtherTypeReq>();
-    frame->setNetworkProtocol(ethTypeTag ? ethTypeTag->getEtherType() : -1);
-    frame->encapsulate(msg);
-    return frame;
+    auto idealMacHeader = std::make_shared<IdealMacFrame>();
+    idealMacHeader->setChunkLength(headerLength);
+    auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
+    idealMacHeader->setSrc(macAddressReq->getSrcAddress());
+    idealMacHeader->setDest(macAddressReq->getDestAddress());
+    MACAddress dest = macAddressReq->getDestAddress();
+    if (dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified())
+        idealMacHeader->setSrcModuleId(-1);
+    else
+        idealMacHeader->setSrcModuleId(getId());
+    auto ethTypeTag = packet->getTag<EtherTypeReq>();
+    idealMacHeader->setNetworkProtocol(ethTypeTag ? ethTypeTag->getEtherType() : -1);
+    idealMacHeader->markImmutable();
+    packet->pushHeader(idealMacHeader);
 }
 
 bool IdealMac::dropFrameNotForUs(IdealMacFrame *frame)
@@ -293,19 +296,15 @@ bool IdealMac::dropFrameNotForUs(IdealMacFrame *frame)
     return true;
 }
 
-cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
+void IdealMac::decapsulate(Packet *packet)
 {
-    // decapsulate and attach control info
-    cPacket *packet = frame->decapsulate();
+    const auto& idealMacHeader = packet->popHeader<IdealMacFrame>();
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
-    macAddressInd->setSrcAddress(frame->getSrc());
-    macAddressInd->setDestAddress(frame->getDest());
+    macAddressInd->setSrcAddress(idealMacHeader->getSrc());
+    macAddressInd->setDestAddress(idealMacHeader->getDest());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->ensureTag<EtherTypeInd>()->setEtherType(frame->getNetworkProtocol());
-    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frame->getNetworkProtocol()));
-
-    delete frame;
-    return packet;
+    packet->ensureTag<EtherTypeInd>()->setEtherType(idealMacHeader->getNetworkProtocol());
+    packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(idealMacHeader->getNetworkProtocol()));
 }
 
 } // namespace inet

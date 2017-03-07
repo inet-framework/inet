@@ -68,12 +68,12 @@ class INET_API IdealMac : public MACProtocolBase
     virtual InterfaceEntry *createInterfaceEntry() override;
     //@}
 
-    virtual void startTransmitting(cPacket *msg);
+    virtual void startTransmitting(Packet *msg);
     virtual bool dropFrameNotForUs(IdealMacFrame *frame);
-    virtual IdealMacFrame *encapsulate(cPacket *msg);
-    virtual cPacket *decapsulate(IdealMacFrame *frame);
+    virtual void encapsulate(Packet *msg);
+    virtual void decapsulate(Packet *frame);
     virtual void initializeMACAddress();
-    virtual void acked(IdealMacFrame *frame);    // called by other IdealMac module, when receiving a packet with my moduleID
+    virtual void acked(Packet *packet);    // called by other IdealMac module, when receiving a packet with my moduleID
 
     // get MSG from queue
     virtual void getNextMsgFromHL();

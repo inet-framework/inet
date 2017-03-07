@@ -19,19 +19,23 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddress.h"
 }}
 
 namespace inet;
 
 class noncobject MACAddress;
+class FieldsChunk extends cObject;
 
 //
 // Packet for ~IdealMac. Packet size is configurable
 // in the MAC layer. 
 //
-packet IdealMacFrame
+class IdealMacFrame extends FieldsChunk
 {
+    int64_t chunkLength @overridegetter = 16;
     MACAddress src;     // source address
     MACAddress dest;    // destination address
     int srcModuleId;    // technical data, uses instead of sending back an ACK packet
