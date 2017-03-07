@@ -24,6 +24,7 @@
 #define __INET_IGMPV3_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IGMPMessage.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -229,8 +230,8 @@ class INET_API IGMPv3 : public cSimpleModule, protected cListener
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const IPv4AddressVector& sources);
     virtual void sendGroupReport(InterfaceEntry *ie, const std::vector<GroupRecord>& records);
-    virtual void sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address dest);
-    virtual void sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address dest);
+    virtual void sendQueryToIP(Packet *msg, InterfaceEntry *ie, IPv4Address dest);
+    virtual void sendReportToIP(Packet *msg, InterfaceEntry *ie, IPv4Address dest);
 
     virtual void processHostGeneralQueryTimer(cMessage *msg);
     virtual void processHostGroupQueryTimer(cMessage *msg);
@@ -238,9 +239,9 @@ class INET_API IGMPv3 : public cSimpleModule, protected cListener
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);
 
-    virtual void processIgmpMessage(IGMPMessage *msg);
-    virtual void processQuery(IGMPv3Query *msg);
-    virtual void processReport(IGMPv3Report *msg);
+    virtual void processIgmpMessage(Packet *msg);
+    virtual void processQuery(Packet *msg);
+    virtual void processReport(Packet *msg);
 
     virtual void multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, const IPv4MulticastSourceList& sourceList);
 

@@ -26,15 +26,15 @@ namespace inet {
 class INET_API IGMPv3Query : public IGMPv3Query_Base
 {
   public:
-    IGMPv3Query(const char *name = nullptr) : IGMPv3Query_Base(name) {}
+    IGMPv3Query() : IGMPv3Query_Base() {}
     IGMPv3Query(const IGMPv3Query& other) : IGMPv3Query_Base(other) {}
     IGMPv3Query& operator=(const IGMPv3Query& other) { IGMPv3Query_Base::operator=(other); return *this; }
     virtual IGMPv3Query *dup() const override { return new IGMPv3Query(*this); }
 
 //        virtual unsigned char getMaxRespTime() const;
 //        virtual void setMaxRespTime(unsigned char maxRespTime);
-    virtual unsigned char getMaxRespCode() const override { return maxRespTime; }
-    virtual void setMaxRespCode(unsigned char maxRespCode) override { this->maxRespTime = maxRespCode; }
+//    virtual unsigned char getMaxRespCode() const override { return maxRespTime; }
+//    virtual void setMaxRespCode(unsigned char maxRespCode) override { this->maxRespTime = maxRespCode; }
 };
 
 }    // namespace inet

@@ -33,13 +33,13 @@ class INET_API TestIGMP : public IGMPv2, public IScriptable
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void configureInterface(InterfaceEntry *ie) override;
-    virtual void processIgmpMessage(IGMPMessage *msg) override;
+    virtual void processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp) override;
     virtual void processHostGroupTimer(cMessage *msg) override;
     virtual void processQueryTimer(cMessage *msg) override;
     virtual void processLeaveTimer(cMessage *msg) override;
     virtual void processRexmtTimer(cMessage *msg) override;
     virtual void processCommand(const cXMLElement &node) override;
-    virtual void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest) override;
+    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest) override;
   private:
     void dumpMulticastGroups(const char* name, const char *ifname, IPv4AddressVector groups);
     void startEvent(const char *event, int stateMask, InterfaceEntry *ie, const IPv4Address *group = NULL);
@@ -97,23 +97,23 @@ void TestIGMP::configureInterface(InterfaceEntry *ie)
 }
 
 
-void TestIGMP::processIgmpMessage(IGMPMessage *msg)
+void TestIGMP::processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp)
 {
-    InterfaceEntry *ie = ift->getInterfaceById(msg->getMandatoryTag<InterfaceInd>()->getInterfaceId());
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     IPv4Address group = IPv4Address::UNSPECIFIED_ADDRESS;
-    switch (msg->getType())
+    switch (igmp->getType())
     {
         case IGMP_MEMBERSHIP_QUERY:
-            group = check_and_cast<IGMPQuery*>(msg)->getGroupAddress();
+            group = CHK(packet->peekHeader<IGMPQuery>())->getGroupAddress();
             break;
         case IGMPV1_MEMBERSHIP_REPORT:
-            group = check_and_cast<IGMPv1Report*>(msg)->getGroupAddress();
+            group = CHK(packet->peekHeader<IGMPv1Report>())->getGroupAddress();
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
-            group = check_and_cast<IGMPv2Report*>(msg)->getGroupAddress();
+            group = CHK(packet->peekHeader<IGMPv2Report>())->getGroupAddress();
             break;
         case IGMPV2_LEAVE_GROUP:
-            group = check_and_cast<IGMPv2Leave*>(msg)->getGroupAddress();
+            group = CHK(packet->peekHeader<IGMPv2Leave>())->getGroupAddress();
             break;
     }
     int stateMask = 0;
@@ -123,25 +123,25 @@ void TestIGMP::processIgmpMessage(IGMPMessage *msg)
         stateMask |= HOST_GROUP_STATE;
     if (!group.isUnspecified() && rt->isMulticastForwardingEnabled())
         stateMask |= ROUTER_GROUP_STATE;
-    switch (msg->getType())
+    switch (igmp->getType())
     {
         case IGMP_MEMBERSHIP_QUERY:
             startEvent("query received", stateMask, ie, &group);
-            IGMPv2::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(packet, igmp);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
             startEvent("report received", stateMask, ie, &group);
-            IGMPv2::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(packet, igmp);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_LEAVE_GROUP:
             startEvent("leave received", stateMask, ie, &group);
-            IGMPv2::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(packet, igmp);
             endEvent(stateMask, ie, &group);
             break;
         default:
-            IGMPv2::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(packet, igmp);
             break;
     }
 }
@@ -183,11 +183,12 @@ void TestIGMP::processRexmtTimer(cMessage *msg)
     endEvent(ROUTER_GROUP_STATE, ctx->ie, &ctx->routerGroup->groupAddr);
 }
 
-void TestIGMP::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest)
+void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest)
 {
     if (out.is_open())
     {
-        switch (msg->getType())
+        const auto& igmp = CHK(msg->peekHeader<IGMPMessage>());
+        switch (igmp->getType())
         {
             case IGMP_MEMBERSHIP_QUERY:
                 out << "send query"; break;

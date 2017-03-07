@@ -18,7 +18,9 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/transportlayer/common/CRC_m.h"
 #include <vector>
 }}
 
@@ -28,8 +30,10 @@ cplusplus {{
 typedef std::vector<IPv4Address> IPv4AddressVector;
 }}
 
+class FieldsChunk extends cObject;
 class noncobject IPv4Address;
 class noncobject IPv4AddressVector;
+enum CrcMode;
 
 enum IGMPType
 {
@@ -40,41 +44,51 @@ enum IGMPType
     IGMPV3_MEMBERSHIP_REPORT = 0x22;
 }
 
-packet IGMPMessage
+class IGMPMessage extends FieldsChunk
 {
-    int type @enum(IGMPType);
+    bit chunkLength = bit(-1) @overridegetter;
+    short type @enum(IGMPType);         // 1 byte
+    unsigned short code = 0;            // 1 byte
+    uint16_t crc = 0;                   // 2 bytes
+    short crcMode @enum(CrcMode) = -1;  // 0 bytes, inet only
 }
 
-packet IGMPQuery extends IGMPMessage
+class IGMPQuery extends IGMPMessage
 {
+    type = IGMP_MEMBERSHIP_QUERY;
     IPv4Address groupAddress;
 }
 
-packet IGMPv1Query extends IGMPQuery
+class IGMPv1Query extends IGMPQuery
 {
-    type = IGMP_MEMBERSHIP_QUERY;
+    chunkLength = byte(8);
+    code = 0;
 }
 
-packet IGMPv1Report extends IGMPMessage
+class IGMPv1Report extends IGMPMessage
 {
+    chunkLength = byte(8);
     type = IGMPV1_MEMBERSHIP_REPORT;
     IPv4Address groupAddress;
 }
 
-packet IGMPv2Query extends IGMPQuery
+class IGMPv2Query extends IGMPQuery      //FIXME IGMPv1Query and IGMPv2Query differs only value of code field.
 {
-    type = IGMP_MEMBERSHIP_QUERY;
-    unsigned char maxRespTime;
+    chunkLength = byte(8);
+    code = 0xffff;      // invalid value, correct value is maxRespTime in units of 1/10 second
+    simtime_t maxRespTime;      // stored in `code` in units of 1/10 second, 0.1-25.5s
 }
 
-packet IGMPv2Report extends IGMPMessage
+class IGMPv2Report extends IGMPMessage
 {
+    chunkLength = byte(8);
     type = IGMPV2_MEMBERSHIP_REPORT;
     IPv4Address groupAddress;
 }
 
-packet IGMPv2Leave extends IGMPMessage
+class IGMPv2Leave extends IGMPMessage
 {
+    chunkLength = byte(8);
     type = IGMPV2_LEAVE_GROUP;
     IPv4Address groupAddress;
 }
@@ -86,14 +100,17 @@ packet IGMPv2Leave extends IGMPMessage
 // Note: in IGMPv3Query the maxResponseTime field is
 // renamed to maxResponseCode and it is interpreted
 // differently than in IGMPv2.
-packet IGMPv3Query extends IGMPv2Query
+class IGMPv3Query extends IGMPv2Query
 {
     @customize(true);
+    chunkLength = bit(-1);
+    // maxRespTime stored in `code` in units of 1/10 second
+    //     0-127: 0-12.7s
+    //   128-255: 1eeemmmm : (mant | 0x10) << (exp + 3)
     bool suppressRouterProc;
     unsigned char robustnessVariable;
     unsigned char queryIntervalCode;
     IPv4AddressVector sourceList;
-    abstract unsigned char maxRespCode;
 }
 
 enum GroupRecordType
@@ -113,8 +130,10 @@ struct GroupRecord
     IPv4AddressVector sourceList;
 };
 
-packet IGMPv3Report extends IGMPMessage
+class IGMPv3Report extends IGMPMessage
 {
+    chunkLength = bit(-1);
     type = IGMPV3_MEMBERSHIP_REPORT;
     GroupRecord groupRecord[];
 }
+

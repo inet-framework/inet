@@ -43,6 +43,7 @@ Register_Serializer(IGMPMessage, IP_PROT, IP_PROT_IGMP, IGMPSerializer);
 
 void IGMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
 {
+#if 0
     unsigned int startPos = b.getPos();
     const IGMPMessage *pkt = check_and_cast<const IGMPMessage *>(_pkt);
     const void *igmp = b.accessNBytes(0);
@@ -121,17 +122,19 @@ void IGMPSerializer::serialize(const cPacket *_pkt, Buffer &b, Context& context)
             throw cRuntimeError("Can not serialize IGMP packet (%s): type %d not supported.", pkt->getClassName(), pkt->getType());
     }
     b.writeUint16To(2, TCPIPchecksum::checksum(igmp, b.getPos() - startPos));
+#endif
 }
 
 cPacket *IGMPSerializer::deserialize(const Buffer &b, Context& c)
 {
+    cPacket *packet = nullptr;
+#if 0
     unsigned int startPos = b.getPos();
     const void *igmp = b.accessNBytes(0);
     unsigned char type = b.readByte();
     unsigned char code = b.readByte();
     uint16_t chksum = b.readUint16(); (void)chksum;
 
-    cPacket *packet = nullptr;
 
     switch (type) {
         case IGMP_MEMBERSHIP_QUERY:
@@ -229,6 +232,7 @@ cPacket *IGMPSerializer::deserialize(const Buffer &b, Context& c)
     ASSERT(packet);
     if (b.hasError() || TCPIPchecksum::checksum(igmp, packet->getByteLength()) != 0)
         packet->setBitError(true);
+#endif
     return packet;
 }
 

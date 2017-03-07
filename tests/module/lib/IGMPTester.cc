@@ -5,6 +5,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -40,7 +41,7 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
     void processSetFilterCommand(IPv4Address group, McastSourceFilterMode filterMode, const IPv4AddressVector &sources, InterfaceEntry *ie);
     void processDumpCommand(string what, InterfaceEntry *ie);
     void parseIPv4AddressVector(const char *str, IPv4AddressVector &result);
-    void sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest);
+    void sendIGMP(Packet *msg, InterfaceEntry *ie, IPv4Address dest);
 };
 
 Define_Module(IGMPTester);
@@ -66,13 +67,13 @@ static ostream &operator<<(ostream &out, IGMPMessage* msg)
             {
                 IGMPv3Query *v3Query = dynamic_cast<IGMPv3Query*>(msg);
                 out << ", sourceList=" << v3Query->getSourceList()
-                    << ", maxRespCode=" << (int)v3Query->getMaxRespCode()
+                    << ", maxRespTime=" << v3Query->getMaxRespTime()
                     << ", suppressRouterProc=" << (int)v3Query->getSuppressRouterProc()
                     << ", robustnessVariable=" << (int)v3Query->getRobustnessVariable()
                     << ", queryIntervalCode=" << (int)v3Query->getQueryIntervalCode();
             }
             else if (dynamic_cast<IGMPv2Query*>(msg))
-                out << ", maxRespTime=" << (int)dynamic_cast<IGMPv2Query*>(msg)->getMaxRespTime();
+                out << ", maxRespTime=" << dynamic_cast<IGMPv2Query*>(msg)->getMaxRespTime();
             break;
         }
         case IGMPV1_MEMBERSHIP_REPORT:
@@ -140,7 +141,7 @@ void IGMPTester::initialize(int stage)
 
 void IGMPTester::handleMessage(cMessage *msg)
 {
-    IGMPMessage *igmpMsg = check_and_cast<IGMPMessage*>(msg);
+    Packet *igmpMsg = check_and_cast<Packet*>(msg);
     EV << "IGMPTester: Received: " << igmpMsg << ".\n";
     delete msg;
 }
@@ -228,13 +229,16 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         IPv4AddressVector sources;
         parseIPv4AddressVector(sourcesStr, sources);
 
-        IGMPv3Query *msg = new IGMPv3Query("IGMPv3 query");
+        Packet *packet = new Packet("IGMPv3 query");
+        const auto& msg = std::make_shared<IGMPv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(group);
-        msg->setMaxRespCode(maxRespCode);
+        msg->setMaxRespTime(0.1 * maxRespCode);
         msg->setSourceList(sources);
-        msg->setByteLength(12 + (4 * sources.size()));
-        sendIGMP(msg, ie, group.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : group);
+        msg->setChunkLength(byte(12 + (4 * sources.size())));
+        msg->markImmutable();
+        packet->prepend(msg);
+        sendIGMP(packet, ie, group.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : group);
 
     }
     else if (type == "IGMPv2Report")
@@ -248,7 +252,8 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
     else if (type == "IGMPv3Report")
     {
         cXMLElementList records = node.getElementsByTagName("record");
-        IGMPv3Report *msg = new IGMPv3Report("IGMPv3 report");
+        Packet *packet = new Packet("IGMPv3 report");
+        const auto& msg = std::make_shared<IGMPv3Report>();
 
         msg->setGroupRecordArraySize(records.size());
         for (int i = 0; i < (int)records.size(); ++i)
@@ -271,8 +276,10 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
             ASSERT(record.groupAddress.isMulticast());
             ASSERT(record.recordType);
         }
+        msg->markImmutable();
+        packet->prepend(msg);
 
-        sendIGMP(msg, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
+        sendIGMP(packet, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     }
 }
 
@@ -381,7 +388,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
     EV << ".\n";
 }
 
-void IGMPTester::sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest)
+void IGMPTester::sendIGMP(Packet *msg, InterfaceEntry *ie, IPv4Address dest)
 {
     ASSERT(ie->isMulticast());
 

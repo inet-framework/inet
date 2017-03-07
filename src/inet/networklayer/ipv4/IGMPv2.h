@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IGMPMessage_m.h"
@@ -137,9 +138,9 @@ class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListen
     double groupMembershipInterval;    // RFC 2236: Section 8.4
     double otherQuerierPresentInterval;    // RFC 2236: Section 8.5
     double startupQueryInterval;    // RFC 2236: Section 8.6
-    double startupQueryCount;    // RFC 2236: Section 8.7
+    int startupQueryCount;    // RFC 2236: Section 8.7
     double lastMemberQueryInterval;    // RFC 2236: Section 8.8
-    double lastMemberQueryCount;    // RFC 2236: Section 8.9
+    int lastMemberQueryCount;    // RFC 2236: Section 8.9
     double unsolicitedReportInterval;    // RFC 2236: Section 8.10
     //double version1RouterPresentInterval;  // RFC 2236: Section 8.11
 
@@ -196,19 +197,19 @@ class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime);
     virtual void sendReport(InterfaceEntry *ie, HostGroupData *group);
     virtual void sendLeave(InterfaceEntry *ie, HostGroupData *group);
-    virtual void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest);
+    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest);
 
     virtual void processQueryTimer(cMessage *msg);
     virtual void processHostGroupTimer(cMessage *msg);
     virtual void processLeaveTimer(cMessage *msg);
     virtual void processRexmtTimer(cMessage *msg);
 
-    virtual void processIgmpMessage(IGMPMessage *msg);
-    virtual void processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPQuery *msg);
-    virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, int maxRespTime);
+    virtual void processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp);
+    virtual void processQuery(InterfaceEntry *ie, Packet *packet);
+    virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
     //virtual void processV1Report(InterfaceEntry *ie, IGMPMessage *msg);
-    virtual void processV2Report(InterfaceEntry *ie, IGMPv2Report *msg);
-    virtual void processLeave(InterfaceEntry *ie, IGMPv2Leave *msg);
+    virtual void processV2Report(InterfaceEntry *ie, Packet *packet);
+    virtual void processLeave(InterfaceEntry *ie, Packet *packet);
 };
 
 }    // namespace inet
