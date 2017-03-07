@@ -40,7 +40,7 @@ std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) co
     return stream;
 }
 
-const Packet* ReceptionResult::getMacFrame() const
+const Packet* ReceptionResult::getPacket() const
 {
     return macFrame;
 }

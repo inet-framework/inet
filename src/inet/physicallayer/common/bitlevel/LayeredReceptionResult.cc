@@ -53,7 +53,7 @@ std::ostream& LayeredReceptionResult::printToStream(std::ostream& stream, int le
     return stream;
 }
 
-const Packet *LayeredReceptionResult::getMacFrame() const
+const Packet *LayeredReceptionResult::getPacket() const
 {
     return packetModel->getPacket();
 }

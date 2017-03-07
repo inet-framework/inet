@@ -50,7 +50,7 @@ class INET_API LayeredTransmission : public TransmissionBase
     virtual const ITransmissionSampleModel *getSampleModel() const { return sampleModel; }
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return analogModel; }
 
-    virtual const Packet *getMacFrame() const override { return packetModel->getPacket(); }
+    virtual const Packet *getPacket() const override { return packetModel->getPacket(); }
 };
 
 } // namespace physicallayer

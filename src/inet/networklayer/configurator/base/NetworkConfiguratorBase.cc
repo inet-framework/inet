@@ -405,7 +405,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
                 const IReceptionDecision *receptionDecision = new ReceptionDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE, isReceptionPossible, true, true);
                 const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
                 const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
-                Packet *receivedFrame = const_cast<Packet *>(receptionResult->getMacFrame());
+                Packet *receivedFrame = const_cast<Packet *>(receptionResult->getPacket());
                 packetErrorRate = receivedFrame->getMandatoryTag<ErrorRateInd>()->getPacketErrorRate();
                 delete receptionResult;
                 delete receptionDecision;

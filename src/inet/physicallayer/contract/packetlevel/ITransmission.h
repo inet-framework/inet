@@ -58,10 +58,10 @@ class INET_API ITransmission : public IPrintableObject
     virtual const IRadio *getTransmitter() const = 0;
 
     /**
-     * Returns the MAC frame corresponding to this transmission. This function
+     * Returns the packet corresponding to this transmission. This function
      * never returns nullptr.
      */
-    virtual const Packet *getMacFrame() const = 0;
+    virtual const Packet *getPacket() const = 0;
 
     /**
      * Returns the time when the transmitter started this transmission. It is

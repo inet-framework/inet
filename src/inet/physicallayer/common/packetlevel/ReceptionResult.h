@@ -41,7 +41,7 @@ class INET_API ReceptionResult : public IReceptionResult, public cObject
     virtual const IReception *getReception() const override { return reception; }
     virtual const std::vector<const IReceptionDecision *> *getDecisions() const override { return decisions; }
 
-    virtual const Packet *getMacFrame() const override;
+    virtual const Packet *getPacket() const override;
 };
 
 } // namespace physicallayer

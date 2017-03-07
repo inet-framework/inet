@@ -513,7 +513,7 @@ IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, Packe
 IRadioFrame *RadioMedium::createReceiverRadioFrame(const ITransmission *transmission)
 {
     auto radioFrame = new RadioFrame(transmission);
-    auto macFrame = const_cast<Packet *>(transmission->getMacFrame());
+    auto macFrame = const_cast<Packet *>(transmission->getPacket());
     radioFrame->setName(macFrame->getName());
     radioFrame->setDuration(transmission->getDuration());
     radioFrame->encapsulate(macFrame->dup());
@@ -589,7 +589,7 @@ Packet *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame)
         communicationLog.writeReception(radio, radioFrame);
     const IReceptionResult *result = getReceptionResult(radio, listening, transmission);
     communicationCache->removeCachedReceptionResult(radio, transmission);
-    Packet *macFrame = const_cast<Packet *>(result->getMacFrame()->dup());
+    Packet *macFrame = const_cast<Packet *>(result->getPacket()->dup());
     delete result;
     return macFrame;
 }
@@ -608,7 +608,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getReceiverAddress()))
+    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getPacket())->getDestinationAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);
@@ -682,7 +682,7 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
                 if (arrival->getEndTime() >= simTime()) {
                     cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
                     contextSwitcher.methodCallSilent();
-                    const Packet *macFrame = transmission->getMacFrame();
+                    const Packet *macFrame = transmission->getPacket();
                     EV_DEBUG << "Picking up " << macFrame << " originally sent "
                              << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
                              << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()

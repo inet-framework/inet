@@ -78,7 +78,7 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
 
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    auto macFrame = reception->getTransmission()->getMacFrame()->dup();
+    auto macFrame = reception->getTransmission()->getPacket()->dup();
     auto snirInd = macFrame->ensureTag<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
