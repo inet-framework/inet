@@ -315,12 +315,14 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     int destPort = ports->getDestPort();
     int interfaceID = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     int ttl = pk->getMandatoryTag<HopLimitInd>()->getHopLimit();
-    int dscp = pk->getMandatoryTag<DscpInd>()->getDifferentiatedServicesCodePoint();
 
     std::stringstream os;
     os << pk << " (" << pk->getByteLength() << " bytes) ";
     os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
-    os << " TTL=" << ttl << " DSCP=" << dscp << " on ifID=" << interfaceID;
+    os << " TTL=" << ttl;
+    if (auto dscpTag = pk->getTag<DscpInd>())
+        os << " DSCP =" << dscpTag->getDifferentiatedServicesCodePoint();
+    os << " on ifID=" << interfaceID;
     return os.str();
 }
 
