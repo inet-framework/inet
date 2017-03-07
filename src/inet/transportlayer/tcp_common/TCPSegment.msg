@@ -20,7 +20,6 @@
 cplusplus {{
 #include <iostream>
 #include "inet/common/INETDefs.h"
-#include "inet/common/ByteArray.h"
 #include "inet/common/packet/FieldsChunk.h"
 #include "inet/transportlayer/common/CRC_m.h"
 
@@ -49,27 +48,7 @@ cplusplus {{
 
     // maximum allowed sack entry number, if no other options are used
     const unsigned int MAX_SACK_ENTRIES = 4;
-
-    typedef cPacket *cPacketPtr;
-
-    inline std::ostream& operator<<(std::ostream& os, cPacketPtr msg)
-    {
-        return os << "(" << msg->getClassName() << ") " << msg->getName() << ": " << msg->str();
-    }
-
-    inline void doPacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimPack(b);}
-    inline void doUnpacking(cCommBuffer *b, cPacketPtr& msg) {msg->parsimUnpack(b);}
 }}
-
-struct cPacketPtr;
-
-class noncobject ByteArray;
-
-struct TCPPayloadMessage
-{
-    unsigned int endSequenceNo;
-    cPacketPtr msg = nullptr;      // pointer to payload msg
-}
 
 //
 // TCP Option Numbers
@@ -204,7 +183,7 @@ class TCPOptionUnknown extends TCPOption
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-packet TcpHeader extends FieldsChunk
+class TcpHeader extends FieldsChunk
 {
     @customize(true);
     int64_t chunkLength @overridegetter = TCP_HEADER_OCTETS;
