@@ -18,12 +18,11 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different IDataLinkVisualizer
-// submodules from INI files. Such a visualizer displays the active data links
-// in a network.
+// This module interface allows configuring different ~IDataLinkVisualizer
+// submodules from INI files. Such a visualizer displays the active data link
+// layer links in a network.
 //
-// @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, and
-// ~LinkVisualizerBase
+// @see ~DataLinkCanvasVisualizer, ~DataLinkOsgVisualizer, ~DataLinkVisualizer, ~DataLinkVisualizerBase
 //
 moduleinterface IDataLinkVisualizer
 {

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,11 +24,16 @@ namespace inet {
 
 namespace power {
 
+class IEnergySink;
+
 /**
- * This is an interface that should be implemented by energy generators models
- * to integrate with other parts of the power model. Energy generators should
- * connect to an energy sink that will absorb the generated energy. They should
- * also notify the energy sink when the amount of generated power changes.
+ * This class is a base interface that must be implemented by energy generator
+ * models to integrate with other parts of the power model. Energy generators
+ * connect to an energy sink that absorbs the generated energy. Energy
+ * generators are required to notify their energy sink when their energy
+ * generation changes. This interface is extended by various energy generator
+ * interfaces. Actual energy generator implementations should implement one of
+ * the derived interfaces.
  *
  * See the corresponding NED file for more details.
  *
@@ -40,9 +45,10 @@ class INET_API IEnergyGenerator
     virtual ~IEnergyGenerator() {}
 
     /**
-     * Returns the current power generation in the range [0, +infinity).
+     * Returns the energy sink that absorbs energy from this energy generator.
+     * This function never returns nullptr.
      */
-    virtual W getPowerGeneration() const = 0;
+    virtual IEnergySink *getEnergySink() const = 0;
 };
 
 } // namespace power

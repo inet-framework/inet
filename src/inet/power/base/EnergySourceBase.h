@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,64 +24,16 @@ namespace inet {
 
 namespace power {
 
-/**
- * This is an abstract base class that provides a list of energy consumers
- * attached to the energy source.
- *
- * @author Levente Meszaros
- */
 class INET_API EnergySourceBase : public virtual IEnergySource
 {
   protected:
-    struct EnergyConsumerEntry
-    {
-      public:
-        /**
-         * The owner energy consumer.
-         */
-        const IEnergyConsumer *energyConsumer;
-
-        /**
-         * The current power consumption.
-         */
-        W consumedPower;
-
-      public:
-        EnergyConsumerEntry(const IEnergyConsumer *energyConsumer, W consumedPower) :
-            energyConsumer(energyConsumer), consumedPower(consumedPower) {}
-    };
-
-    /**
-     * List of currently known energy consumers.
-     */
-    std::vector<EnergyConsumerEntry> energyConsumers;
-
-    /**
-     * The current total power consumption.
-     */
-    W totalConsumedPower;
-
-  protected:
-    virtual void initialize(int stage);
-
-    W computeTotalConsumedPower();
+    std::vector<const IEnergyConsumer *> energyConsumers;
 
   public:
-    EnergySourceBase();
-
     virtual int getNumEnergyConsumers() const override { return energyConsumers.size(); }
-
-    virtual const IEnergyConsumer *getEnergyConsumer(int energyConsumerId) const override;
-
-    virtual int addEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
-
-    virtual void removeEnergyConsumer(int energyConsumerId) override;
-
-    virtual W getTotalPowerConsumption() const override { return totalConsumedPower; }
-
-    virtual W getPowerConsumption(int energyConsumerId) const override;
-
-    virtual void setPowerConsumption(int energyConsumerId, W consumedPower) override;
+    virtual const IEnergyConsumer *getEnergyConsumer(int index) const override;
+    virtual void addEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
+    virtual void removeEnergyConsumer(const IEnergyConsumer *energyConsumer) override;
 };
 
 } // namespace power

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -41,17 +41,11 @@ Define_Module(MediumOsgVisualizer);
 
 #ifdef WITH_OSG
 
-MediumOsgVisualizer::~MediumOsgVisualizer()
-{
-    cancelAndDelete(signalPropagationUpdateTimer);
-}
-
 void MediumOsgVisualizer::initialize(int stage)
 {
     MediumVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        opacityHalfLife = par("opacityHalfLife");
         const char *signalShapeString = par("signalShape");
         if (!strcmp(signalShapeString, "ring"))
             signalShape = SIGNAL_SHAPE_RING;
@@ -62,40 +56,80 @@ void MediumOsgVisualizer::initialize(int stage)
         else
             throw cRuntimeError("Unknown signalShape parameter value: '%s'", signalShapeString);
         signalPlane = par("signalPlane");
+        signalFadingDistance = par("signalFadingDistance");
+        signalFadingFactor = par("signalFadingFactor");
+        signalWaveLength = par("signalWaveLength");
+        signalWaveAmplitude = par("signalWaveAmplitude");
+        signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
         if (displayTransmissions) {
             const char *transmissionImageString = par("transmissionImage");
             auto path = resolveResourcePath(transmissionImageString);
             transmissionImage = inet::osg::createImage(path.c_str());
+            if (transmissionImage == nullptr)
+                throw cRuntimeError("Transmission image '%s' not found", transmissionImageString);
             auto imageStream = dynamic_cast<osg::ImageStream *>(transmissionImage);
             if (imageStream != nullptr)
                 imageStream->play();
-            if (transmissionImage == nullptr)
-                throw cRuntimeError("Transmission image '%s' not found", transmissionImageString);
         }
         if (displayReceptions) {
             const char *receptionImageString = par("receptionImage");
             auto path = resolveResourcePath(receptionImageString);
             receptionImage = inet::osg::createImage(path.c_str());
+            if (receptionImage == nullptr)
+                throw cRuntimeError("Reception reception '%s' not found", receptionImageString);
             auto imageStream = dynamic_cast<osg::ImageStream *>(receptionImage);
             if (imageStream != nullptr)
                 imageStream->play();
-            if (receptionImage == nullptr)
-                throw cRuntimeError("Reception reception '%s' not found", receptionImageString);
         }
-        signalPropagationUpdateTimer = new cMessage("signalPropagation");
         networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
     }
 }
-
-void MediumOsgVisualizer::handleMessage(cMessage *message)
+void MediumOsgVisualizer::refreshDisplay() const
 {
-    if (message == signalPropagationUpdateTimer)
-        scheduleSignalPropagationUpdateTimer();
-    else
-        throw cRuntimeError("Unknown message");
+    if (displaySignals) {
+        for (auto transmission : transmissions) {
+            auto node = getSignalOsgNode(transmission);
+            if (node != nullptr) {
+                switch (signalShape) {
+                    case SIGNAL_SHAPE_RING: {
+                        refreshRingTransmissionNode(transmission, node);
+                        break;
+                    }
+                    case SIGNAL_SHAPE_SPHERE: {
+                        refreshSphereTransmissionNode(transmission, node);
+                        break;
+                    }
+                    case SIGNAL_SHAPE_BOTH: {
+                        auto group = static_cast<osg::Group *>(node);
+                        refreshRingTransmissionNode(transmission, group->getChild(0));
+                        refreshSphereTransmissionNode(transmission, group->getChild(1));
+                        break;
+                    }
+                    default:
+                        throw cRuntimeError("Unimplemented signal shape");
+                }
+            }
+        }
+    }
 }
 
-osg::Node *MediumOsgVisualizer::getCachedOsgNode(const IRadio *radio) const
+void MediumOsgVisualizer::setAnimationSpeed() const
+{
+    double animationSpeed = DBL_MAX;
+    if (displaySignals) {
+        for (auto transmission : transmissions) {
+            if (isSignalPropagationInProgress(transmission))
+                animationSpeed = std::min(animationSpeed, signalPropagationAnimationSpeed);
+            else if (isSignalTransmissionInProgress(transmission))
+                animationSpeed = std::min(animationSpeed, signalTransmissionAnimationSpeed);
+        }
+    }
+    animationSpeed = animationSpeed == DBL_MAX ? 0 : animationSpeed;
+    // TODO: switch to osg canvas when API is extended
+    visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
+}
+
+osg::Node *MediumOsgVisualizer::getRadioOsgNode(const IRadio *radio) const
 {
     auto it = radioOsgNodes.find(radio);
     if (it == radioOsgNodes.end())
@@ -104,12 +138,12 @@ osg::Node *MediumOsgVisualizer::getCachedOsgNode(const IRadio *radio) const
         return it->second;
 }
 
-void MediumOsgVisualizer::setCachedOsgNode(const IRadio *radio, osg::Node *node)
+void MediumOsgVisualizer::setRadioOsgNode(const IRadio *radio, osg::Node *node)
 {
     radioOsgNodes[radio] = node;
 }
 
-osg::Node *MediumOsgVisualizer::removeCachedOsgNode(const IRadio *radio)
+osg::Node *MediumOsgVisualizer::removeRadioOsgNode(const IRadio *radio)
 {
     auto it = radioOsgNodes.find(radio);
     if (it == radioOsgNodes.end())
@@ -120,42 +154,42 @@ osg::Node *MediumOsgVisualizer::removeCachedOsgNode(const IRadio *radio)
     }
 }
 
-osg::Node *MediumOsgVisualizer::getCachedOsgNode(const ITransmission *transmission) const
+osg::Node *MediumOsgVisualizer::getSignalOsgNode(const ITransmission *transmission) const
 {
-    auto it = transmissionOsgNodes.find(transmission);
-    if (it == transmissionOsgNodes.end())
+    auto it = signalOsgNodes.find(transmission);
+    if (it == signalOsgNodes.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MediumOsgVisualizer::setCachedOsgNode(const ITransmission *transmission, osg::Node *node)
+void MediumOsgVisualizer::setSignalOsgNode(const ITransmission *transmission, osg::Node *node)
 {
-    transmissionOsgNodes[transmission] = node;
+    signalOsgNodes[transmission] = node;
 }
 
-osg::Node *MediumOsgVisualizer::removeCachedOsgNode(const ITransmission *transmission)
+osg::Node *MediumOsgVisualizer::removeSignalOsgNode(const ITransmission *transmission)
 {
-    auto it = transmissionOsgNodes.find(transmission);
-    if (it == transmissionOsgNodes.end())
+    auto it = signalOsgNodes.find(transmission);
+    if (it == signalOsgNodes.end())
         return nullptr;
     else {
-        transmissionOsgNodes.erase(it);
+        signalOsgNodes.erase(it);
         return it->second;
     }
 }
 
-osg::Node *MediumOsgVisualizer::createTransmissionNode(const ITransmission *transmission) const
+osg::Node *MediumOsgVisualizer::createSignalNode(const ITransmission *transmission) const
 {
     switch (signalShape) {
         case SIGNAL_SHAPE_RING:
-            return createRingTransmissionNode(transmission);
+            return createRingSignalNode(transmission);
         case SIGNAL_SHAPE_SPHERE:
-            return createSphereTransmissionNode(transmission);
+            return createSphereSignalNode(transmission);
         case SIGNAL_SHAPE_BOTH: {
             auto group = new osg::Group();
-            group->addChild(createRingTransmissionNode(transmission));
-            group->addChild(createSphereTransmissionNode(transmission));
+            group->addChild(createRingSignalNode(transmission));
+            group->addChild(createSphereSignalNode(transmission));
             return group;
         }
         default:
@@ -163,9 +197,9 @@ osg::Node *MediumOsgVisualizer::createTransmissionNode(const ITransmission *tran
     }
 }
 
-osg::Node *MediumOsgVisualizer::createRingTransmissionNode(const ITransmission *transmission) const
+osg::Node *MediumOsgVisualizer::createRingSignalNode(const ITransmission *transmission) const
 {
-    cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    auto color = signalColorSet.getColor(transmission->getId());
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
     auto stateSet = inet::osg::createStateSet(color, 1.0, false);
@@ -199,46 +233,51 @@ osg::Node *MediumOsgVisualizer::createRingTransmissionNode(const ITransmission *
     positionAttitudeTransform->setNodeMask(0);
     positionAttitudeTransform->addChild(signalAutoTransform);
     positionAttitudeTransform->addChild(labelAutoTransform);
-    if (opacityHalfLife > 0) {
+    if (signalFadingDistance > 0) {
         auto program = new osg::Program();
         auto vertexShader = new osg::Shader(osg::Shader::VERTEX);
         auto fragmentShader = new osg::Shader(osg::Shader::FRAGMENT);
         vertexShader->setShaderSource(R"(
             varying vec4 verpos;
             varying vec4 color;
-            void main(){
+            void main() {
                 gl_Position = ftransform();
                 verpos = gl_Vertex;
                 color = gl_Color;
-                gl_TexCoord[0]=gl_MultiTexCoord0;
+                gl_TexCoord[0] = gl_MultiTexCoord0;
             }
         )");
         fragmentShader->setShaderSource(R"(
             varying vec4 verpos;
             varying vec4 color;
-            uniform float min, max, opacityHalfLife;
-            void main( void )
-            {
-                float alpha = pow(2.0, -length(verpos) / opacityHalfLife);
+            uniform float waveLength, waveAmplitude, waveOffset, waveFadingFactor, fadingFactor, fadingDistance;
+            void main() {
+                float d = length(verpos);
+                float phi = (d - waveOffset) / waveLength * 2.0 * 3.1415926535897932384626433832795;
+                float a = waveAmplitude * waveFadingFactor / 2.0;
+                float alpha = pow(fadingFactor, -d / fadingDistance) * (1.0 - a + cos(phi) * a);
                 gl_FragColor = vec4(color.rgb, alpha);
             }
         )");
         program->addShader(vertexShader);
         program->addShader(fragmentShader);
         stateSet->setAttributeAndModes(program, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-        stateSet->addUniform(new osg::Uniform("min", 0.0f));
-        stateSet->addUniform(new osg::Uniform("max", 200.0f));
-        stateSet->addUniform(new osg::Uniform("opacityHalfLife", (float)opacityHalfLife));
+        stateSet->addUniform(new osg::Uniform("waveLength", (float)signalWaveLength));
+        stateSet->addUniform(new osg::Uniform("waveAmplitude", (float)signalWaveAmplitude));
+        stateSet->addUniform(new osg::Uniform("waveOffset", 0.0f));
+        stateSet->addUniform(new osg::Uniform("waveFadingFactor", 1.0f));
+        stateSet->addUniform(new osg::Uniform("fadingFactor", (float)signalFadingFactor));
+        stateSet->addUniform(new osg::Uniform("fadingDistance", (float)signalFadingDistance));
     }
     return positionAttitudeTransform;
 }
 
-osg::Node *MediumOsgVisualizer::createSphereTransmissionNode(const ITransmission *transmission) const
+osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *transmission) const
 {
     auto transmissionStart = transmission->getStartPosition();
     auto startSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
     auto endSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
-    cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());;
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
     auto startStateSet = inet::osg::createStateSet(color, 1.0, false);
@@ -257,6 +296,57 @@ osg::Node *MediumOsgVisualizer::createSphereTransmissionNode(const ITransmission
     group->addChild(startGeode);
     group->addChild(endGeode);
     return group;
+}
+
+void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *transmission, osg::Node *node) const
+{
+    auto propagation = radioMedium->getPropagation();
+    auto transmissionStart = transmission->getStartPosition();
+    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
+    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
+    auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(node);
+    auto annulusAutoTransform = static_cast<osg::AutoTransform *>(positionAttitudeTransform->getChild(0));
+    auto annulus = static_cast<osg::Geometry *>(static_cast<osg::Geode *>(annulusAutoTransform->getChild(0))->getDrawable(0));
+    auto labelAutoTransform = static_cast<osg::AutoTransform *>(positionAttitudeTransform->getChild(1));
+    auto vertices = inet::osg::createAnnulusVertices(Coord::ZERO, startRadius, endRadius, 100);
+    annulus->setVertexArray(vertices);
+    node->setNodeMask(startRadius > 0 ? 1 : 0);
+    double phi = transmission->getId();
+    labelAutoTransform->setPosition(osg::Vec3d(endRadius * sin(phi), endRadius * cos(phi), 0.0));
+    auto stateSet = annulus->getOrCreateStateSet();
+    stateSet->getUniform("waveOffset")->set((float)startRadius);
+    // TODO: add parameter to control
+    double waveFadingFactor = std::min(1.0, signalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor);
+    stateSet->getUniform("waveFadingFactor")->set((float)waveFadingFactor);
+}
+
+void MediumOsgVisualizer::refreshSphereTransmissionNode(const ITransmission *transmission, osg::Node *node) const
+{
+    auto propagation = radioMedium->getPropagation();
+    auto transmissionStart = transmission->getStartPosition();
+    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
+    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
+    auto group = static_cast<osg::Group *>(node);
+    auto startGeode = static_cast<osg::Geode *>(group->getChild(0));
+    startGeode->setNodeMask(startRadius != 0);
+    auto endGeode = static_cast<osg::Geode *>(group->getChild(1));
+    endGeode->setNodeMask(endRadius != 0);
+    auto startSphere = startGeode->getDrawable(0);
+    auto endSphere = endGeode->getDrawable(0);
+    auto startShape = static_cast<osg::Sphere *>(startSphere->getShape());
+    auto endShape = static_cast<osg::Sphere *>(endSphere->getShape());
+    startShape->setRadius(startRadius);
+    endShape->setRadius(endRadius);
+    startSphere->dirtyDisplayList();
+    startSphere->dirtyBound();
+    endSphere->dirtyDisplayList();
+    endSphere->dirtyBound();
+    double startAlpha = std::min(1.0, pow(signalFadingFactor, -startRadius / signalFadingDistance));
+    auto startMaterial = static_cast<osg::Material *>(startSphere->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+    startMaterial->setAlpha(osg::Material::FRONT_AND_BACK, std::max(0.1, startAlpha));
+    double endAlpha = std::min(1.0, pow(signalFadingFactor, -endRadius / signalFadingDistance));
+    auto endMaterial = static_cast<osg::Material *>(endSphere->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+    endMaterial->setAlpha(osg::Material::FRONT_AND_BACK, std::max(0.1, endAlpha));
 }
 
 void MediumOsgVisualizer::radioAdded(const IRadio *radio)
@@ -298,7 +388,7 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
         if (displayInterferenceRanges) {
             auto maxInterferenceRange = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(radio);
             auto circle = inet::osg::createCircleGeometry(Coord::ZERO, maxInterferenceRange.get(), 100);
-            auto stateSet = inet::osg::createStateSet(cFigure::GREY, 1);
+            auto stateSet = inet::osg::createLineStateSet(interferenceRangeLineColor, interferenceRangeLineStyle, interferenceRangeLineWidth);
             circle->setStateSet(stateSet);
             auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::NO_ROTATION, false);
 //            auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::ROTATE_TO_SCREEN, false);
@@ -307,24 +397,24 @@ void MediumOsgVisualizer::radioAdded(const IRadio *radio)
         if (displayCommunicationRanges) {
             auto maxCommunicationRange = radioMedium->getMediumLimitCache()->getMaxCommunicationRange(radio);
             auto circle = inet::osg::createCircleGeometry(Coord::ZERO, maxCommunicationRange.get(), 100);
-            auto stateSet = inet::osg::createStateSet(cFigure::BLUE, 1);
+            auto stateSet = inet::osg::createLineStateSet(communicationRangeLineColor, communicationRangeLineStyle, communicationRangeLineWidth);
             circle->setStateSet(stateSet);
             auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::NO_ROTATION, false);
 //            auto autoTransform = inet::osg::createAutoTransform(circle, osg::AutoTransform::ROTATE_TO_SCREEN, false);
             networkNodeVisualization->addChild(autoTransform);
         }
-        setCachedOsgNode(radio, group);
+        setRadioOsgNode(radio, group);
     }
 }
 
 void MediumOsgVisualizer::radioRemoved(const IRadio *radio)
 {
     Enter_Method_Silent();
-    auto node = removeCachedOsgNode(radio);
+    auto node = removeRadioOsgNode(radio);
     if (node != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
-        auto networkVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
-        networkVisualization->removeAnnotation(node);
+        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        networkNodeVisualization->removeAnnotation(node);
     }
 }
 
@@ -333,12 +423,11 @@ void MediumOsgVisualizer::transmissionAdded(const ITransmission *transmission)
     Enter_Method_Silent();
     if (displaySignals) {
         transmissions.push_back(transmission);
-        auto node = createTransmissionNode(transmission);
+        auto node = createSignalNode(transmission);
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(node);
-        setCachedOsgNode(transmission, node);
-        if (signalPropagationUpdateInterval > 0)
-            scheduleSignalPropagationUpdateTimer();
+        setSignalOsgNode(transmission, node);
+        setAnimationSpeed();
     }
 }
 
@@ -347,17 +436,20 @@ void MediumOsgVisualizer::transmissionRemoved(const ITransmission *transmission)
     Enter_Method_Silent();
     if (displaySignals) {
         transmissions.erase(std::remove(transmissions.begin(), transmissions.end(), transmission));
-        auto node = removeCachedOsgNode(transmission);
+        auto node = removeSignalOsgNode(transmission);
         if (node != nullptr)
             node->getParent(0)->removeChild(node);
+        setAnimationSpeed();
     }
 }
 
 void MediumOsgVisualizer::transmissionStarted(const ITransmission *transmission)
 {
     Enter_Method_Silent();
+    if (displaySignals)
+        setAnimationSpeed();
     if (displayTransmissions) {
-        auto group = static_cast<osg::Group *>(getCachedOsgNode(transmission->getTransmitter()));
+        auto group = static_cast<osg::Group *>(getRadioOsgNode(transmission->getTransmitter()));
         auto node = static_cast<osg::Node *>(group->getChild(0));
         node->setNodeMask(1);
     }
@@ -366,8 +458,11 @@ void MediumOsgVisualizer::transmissionStarted(const ITransmission *transmission)
 void MediumOsgVisualizer::transmissionEnded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
+    if (displaySignals)
+        setAnimationSpeed();
     if (displayTransmissions) {
-        auto group = static_cast<osg::Group *>(getCachedOsgNode(transmission->getTransmitter()));
+        auto transmitter = transmission->getTransmitter();
+        auto group = static_cast<osg::Group *>(getRadioOsgNode(transmitter));
         auto node = static_cast<osg::Node *>(group->getChild(0));
         node->setNodeMask(0);
     }
@@ -376,129 +471,25 @@ void MediumOsgVisualizer::transmissionEnded(const ITransmission *transmission)
 void MediumOsgVisualizer::receptionStarted(const IReception *reception)
 {
     Enter_Method_Silent();
+    if (displaySignals)
+        setAnimationSpeed();
     if (displayReceptions) {
-        auto group = static_cast<osg::Group *>(getCachedOsgNode(reception->getReceiver()));
+        auto group = static_cast<osg::Group *>(getRadioOsgNode(reception->getReceiver()));
         auto node = static_cast<osg::Node *>(group->getChild(1));
         node->setNodeMask(1);
-    }
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    const ITransmission *transmission = reception->getTransmission();
-    if (displayRadioFrames) {
-        Coord transmissionPosition = transmission->getStartPosition();
-        Coord receptionPosition = reception->getStartPosition();
-        Coord centerPosition = (transmissionPosition + receptionPosition) / 2;
-        osg::Geometry *linesGeom = new osg::Geometry();
-        osg::Vec3Array *vertexData = new osg::Vec3Array();
-        vertexData->push_back(osg::Vec3(transmissionPosition.x, transmissionPosition.y, transmissionPosition.z));
-        vertexData->push_back(osg::Vec3(receptionPosition.x, receptionPosition.y, receptionPosition.z));
-        osg::DrawArrays *drawArrayLines = new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP);
-        drawArrayLines->setFirst(0);
-        drawArrayLines->setCount(vertexData->size());
-        linesGeom->setVertexArray(vertexData);
-        linesGeom->addPrimitiveSet(drawArrayLines);
-        osg::Geode *geode = new osg::Geode();
-        geode->addDrawable(linesGeom);
-        scene->addChild(geode);
     }
 }
 
 void MediumOsgVisualizer::receptionEnded(const IReception *reception)
 {
     Enter_Method_Silent();
+    if (displaySignals)
+        setAnimationSpeed();
     if (displayReceptions) {
-        auto group = static_cast<osg::Group *>(getCachedOsgNode(reception->getReceiver()));
+        auto receiver = reception->getReceiver();
+        auto group = static_cast<osg::Group *>(getRadioOsgNode(receiver));
         auto node = static_cast<osg::Node *>(group->getChild(1));
         node->setNodeMask(0);
-    }
-}
-
-void MediumOsgVisualizer::refreshDisplay() const
-{
-    if (displaySignals) {
-        for (auto transmission : transmissions) {
-            auto node = getCachedOsgNode(transmission);
-            if (node != nullptr) {
-                switch (signalShape) {
-                    case SIGNAL_SHAPE_RING: {
-                        refreshRingTransmissionNode(transmission, node);
-                        break;
-                    }
-                    case SIGNAL_SHAPE_SPHERE: {
-                        refreshSphereTransmissionNode(transmission, node);
-                        break;
-                    }
-                    case SIGNAL_SHAPE_BOTH: {
-                        auto group = static_cast<osg::Group *>(node);
-                        refreshRingTransmissionNode(transmission, group->getChild(0));
-                        refreshSphereTransmissionNode(transmission, group->getChild(1));
-                        break;
-                    }
-                    default:
-                        throw cRuntimeError("Unimplemented signal shape");
-                }
-            }
-        }
-    }
-}
-
-void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *transmission, osg::Node *node) const
-{
-    auto propagation = radioMedium->getPropagation();
-    auto transmissionStart = transmission->getStartPosition();
-    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
-    auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(node);
-    auto annulusAutoTransform = static_cast<osg::AutoTransform *>(positionAttitudeTransform->getChild(0));
-    auto annulus = static_cast<osg::Geometry *>(static_cast<osg::Geode *>(annulusAutoTransform->getChild(0))->getDrawable(0));
-    auto labelAutoTransform = static_cast<osg::AutoTransform *>(positionAttitudeTransform->getChild(1));
-    auto vertices = inet::osg::createAnnulusVertices(Coord::ZERO, startRadius, endRadius, 100);
-    annulus->setVertexArray(vertices);
-    node->setNodeMask(startRadius > 0 ? 1 : 0);
-    double phi = transmission->getId();
-    labelAutoTransform->setPosition(osg::Vec3d(endRadius * sin(phi), endRadius * cos(phi), 0.0));
-}
-
-void MediumOsgVisualizer::refreshSphereTransmissionNode(const ITransmission *transmission, osg::Node *node) const
-{
-    auto propagation = radioMedium->getPropagation();
-    auto transmissionStart = transmission->getStartPosition();
-    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
-    auto group = static_cast<osg::Group *>(node);
-    auto startGeode = static_cast<osg::Geode *>(group->getChild(0));
-    startGeode->setNodeMask(startRadius != 0);
-    auto endGeode = static_cast<osg::Geode *>(group->getChild(1));
-    endGeode->setNodeMask(endRadius != 0);
-    auto startSphere = startGeode->getDrawable(0);
-    auto endSphere = endGeode->getDrawable(0);
-    auto startShape = static_cast<osg::Sphere *>(startSphere->getShape());
-    auto endShape = static_cast<osg::Sphere *>(endSphere->getShape());
-    startShape->setRadius(startRadius);
-    endShape->setRadius(endRadius);
-    startSphere->dirtyDisplayList();
-    startSphere->dirtyBound();
-    endSphere->dirtyDisplayList();
-    endSphere->dirtyBound();
-    double startAlpha = std::min(1.0, pow(2.0, -startRadius / opacityHalfLife));
-    auto startMaterial = static_cast<osg::Material *>(startSphere->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-    startMaterial->setAlpha(osg::Material::FRONT_AND_BACK, std::max(0.1, startAlpha));
-    double endAlpha = std::min(1.0, pow(2.0, -endRadius / opacityHalfLife));
-    auto endMaterial = static_cast<osg::Material *>(endSphere->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
-    endMaterial->setAlpha(osg::Material::FRONT_AND_BACK, std::max(0.1, endAlpha));
-}
-
-void MediumOsgVisualizer::scheduleSignalPropagationUpdateTimer()
-{
-    if (signalPropagationUpdateTimer->isScheduled())
-        cancelEvent(signalPropagationUpdateTimer);
-    simtime_t earliestUpdateTime = SimTime::getMaxTime();
-    for (auto transmission : transmissions) {
-        simtime_t nextSignalPropagationUpdateTime = getNextSignalPropagationUpdateTime(transmission);
-        if (nextSignalPropagationUpdateTime < earliestUpdateTime)
-            earliestUpdateTime = nextSignalPropagationUpdateTime;
-    }
-    if (earliestUpdateTime != SimTime::getMaxTime()) {
-        scheduleAt(earliestUpdateTime, signalPropagationUpdateTimer);
     }
 }
 

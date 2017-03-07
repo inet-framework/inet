@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,15 +22,13 @@ import inet.visualizer.contract.IMobilityVisualizer;
 
 //
 // This module visualizes multiple mobilities on a 3D osg scene. It moves the
-// visual represnetation according to their mobility model and it can also
-// display recent movement as a polyline.
+// visual represnetation according to their mobility model. It also displays
+// recent movement as a polyline, current velocity vector and current orientation.
 //
-// @see ~MobilityCanvasVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase,
-// and ~IMobilityVisualizer
+// @see ~MobilityCanvasVisualizer, ~MobilityVisualizer, ~MobilityVisualizerBase, ~IMobilityVisualizer
 //
 simple MobilityOsgVisualizer extends MobilityVisualizerBase like IMobilityVisualizer
 {
     parameters:
         @class(MobilityOsgVisualizer);
-        string networkNodeVisualizerModule = default("^.networkNodeVisualizer");
 }

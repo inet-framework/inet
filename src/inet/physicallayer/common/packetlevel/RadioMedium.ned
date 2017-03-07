@@ -61,6 +61,15 @@ module RadioMedium like IRadioMedium
         @class(RadioMedium);
         @display("i=misc/sun_s");
 
+        @signal[radioAdded];
+        @signal[radioRemoved];
+        @signal[transmissionAdded];
+        @signal[transmissionRemoved];
+        @signal[transmissionStarted];
+        @signal[transmissionEnded];
+        @signal[receptionStarted];
+        @signal[receptionEnded];
+
     submodules:
         propagation: <propagationType> like IPropagation {
             parameters:

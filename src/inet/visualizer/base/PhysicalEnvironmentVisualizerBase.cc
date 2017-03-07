@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,6 +28,7 @@ void PhysicalEnvironmentVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         physicalEnvironment = dynamic_cast<IPhysicalEnvironment *>(getModuleByPath(par("physicalEnvironmentModule")));
+        displayObjects = par("displayObjects");
     }
 }
 

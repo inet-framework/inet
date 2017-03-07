@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,22 +22,26 @@
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
-#include "inet/visualizer/networknode/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
 
 namespace visualizer {
 
-class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListener
+class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 {
 #ifdef WITH_OSG
 
   protected:
     /** @name Parameters */
     //@{
-    double opacityHalfLife = NaN;
     SignalShape signalShape = SIGNAL_SHAPE_RING;
     const char *signalPlane = nullptr;
+    double signalFadingDistance = NaN;
+    double signalFadingFactor = NaN;
+    double signalWaveLength = NaN;
+    double signalWaveAmplitude = NaN;
+    double signalWaveFadingAnimationSpeedFactor = NaN;
     osg::Image *transmissionImage = nullptr;
     osg::Image *receptionImage = nullptr;
     //@}
@@ -54,42 +58,30 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListen
      */
     std::map<const IRadio *, osg::Node *> radioOsgNodes;
     /**
-     * The list of ongoing transmission osg nodes.
+     * The propagating signal osg nodes.
      */
-    std::map<const ITransmission *, osg::Node *> transmissionOsgNodes;
-    //@}
-
-    /** @name Timer */
-    //@{
-    /**
-     * The message that is used to update the scene when ongoing communications exist.
-     */
-    cMessage *signalPropagationUpdateTimer = nullptr;
+    std::map<const ITransmission *, osg::Node *> signalOsgNodes;
     //@}
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
+
+    virtual void setAnimationSpeed() const;
+
+    virtual osg::Node *getRadioOsgNode(const IRadio *radio) const;
+    virtual void setRadioOsgNode(const IRadio *radio, osg::Node *node);
+    virtual osg::Node *removeRadioOsgNode(const IRadio *radio);
+
+    virtual osg::Node *getSignalOsgNode(const ITransmission *transmission) const;
+    virtual void setSignalOsgNode(const ITransmission *transmission, osg::Node *node);
+    virtual osg::Node *removeSignalOsgNode(const ITransmission *transmission);
+
+    virtual osg::Node *createSignalNode(const ITransmission *transmission) const;
+    virtual osg::Node *createSphereSignalNode(const ITransmission *transmission) const;
+    virtual osg::Node *createRingSignalNode(const ITransmission *transmission) const;
     virtual void refreshSphereTransmissionNode(const ITransmission *transmission, osg::Node *node) const;
     virtual void refreshRingTransmissionNode(const ITransmission *transmission, osg::Node *node) const;
-
-    virtual osg::Node *getCachedOsgNode(const IRadio *radio) const;
-    virtual void setCachedOsgNode(const IRadio *radio, osg::Node *node);
-    virtual osg::Node *removeCachedOsgNode(const IRadio *radio);
-
-    virtual osg::Node *getCachedOsgNode(const ITransmission *transmission) const;
-    virtual void setCachedOsgNode(const ITransmission *transmission, osg::Node *node);
-    virtual osg::Node *removeCachedOsgNode(const ITransmission *transmission);
-
-    virtual osg::Node *createTransmissionNode(const ITransmission *transmission) const;
-    virtual osg::Node *createSphereTransmissionNode(const ITransmission *transmission) const;
-    virtual osg::Node *createRingTransmissionNode(const ITransmission *transmission) const;
-
-    virtual void scheduleSignalPropagationUpdateTimer();
-
-  public:
-    virtual ~MediumOsgVisualizer();
 
     virtual void radioAdded(const IRadio *radio) override;
     virtual void radioRemoved(const IRadio *radio) override;
@@ -104,7 +96,9 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase, public cListen
 
 #else // ifdef WITH_OSG
 
-  public:
+  protected:
+    virtual void initialize(int stage) override {}
+
     virtual void radioAdded(const IRadio *radio) override {}
     virtual void radioRemoved(const IRadio *radio) override {}
 

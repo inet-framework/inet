@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,6 +27,15 @@ Define_Module(PhysicalLinkCanvasVisualizer);
 bool PhysicalLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 {
     return dynamic_cast<inet::physicallayer::IRadio *>(module) != nullptr;
+}
+
+const LinkVisualizerBase::LinkVisualization *PhysicalLinkCanvasVisualizer::createLinkVisualization(cModule *source, cModule *destination) const
+{
+    auto linkVisualization = static_cast<const LinkCanvasVisualization *>(LinkCanvasVisualizerBase::createLinkVisualization(source, destination));
+    linkVisualization->figure->setTags("physical_link");
+    linkVisualization->figure->setTooltip("This arrow represents a physical link between two network nodes");
+    linkVisualization->shiftPriority = 1;
+    return linkVisualization;
 }
 
 } // namespace visualizer

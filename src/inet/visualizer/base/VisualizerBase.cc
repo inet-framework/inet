@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,8 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/geometry/object/LineSegment.h"
+#include "inet/common/geometry/shape/Cuboid.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
@@ -29,24 +32,56 @@ void VisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         const char *path = par("visualizerTargetModule");
-        visualizerTargetModule = *path == '\0' ? getSystemModule() : getModuleByPath(path);
+        visualizerTargetModule = getModuleByPath(path);
         if (visualizerTargetModule == nullptr)
             throw cRuntimeError("Module not found on path '%s' defined by par 'visualizerTargetModule'", path);
     }
 }
 
-Coord VisualizerBase::getPosition(cModule *node) const
+Coord VisualizerBase::getPosition(const cModule *networkNode) const
 {
-    auto mobility = node->getSubmodule("mobility");
+    auto mobility = networkNode->getSubmodule("mobility");
     if (mobility == nullptr) {
-        double x, y;
-        cDisplayString displayString = node->getDisplayString();
-        x = atof(displayString.getTagArg("p", 0));
-        y = atof(displayString.getTagArg("p", 1));
-        return Coord(x, y, 0);
+        auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
+        auto center = bounds.getCenter();
+        return Coord(center.x, center.y, 0);
     }
     else
         return check_and_cast<IMobility *>(mobility)->getCurrentPosition();
+}
+
+Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const
+{
+    if (!strcmp(contactMode, "circular")) {
+        auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
+        auto size = bounds.getSize();
+        auto radius = std::sqrt(size.x * size.x + size.y * size.y) / 2;
+        auto position = getPosition(networkNode);
+        auto direction = fromPosition - position;
+        direction.normalize();
+        direction *= radius + contactSpacing;
+        return position + direction;
+    }
+    else if (!strcmp(contactMode, "rectangular")) {
+        auto position = getPosition(networkNode);
+        auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
+        auto size = bounds.getSize();
+        Cuboid networkNodeShape(Coord(size.x + 2 * contactSpacing, size.y + 2 * contactSpacing, 1));
+        Coord intersection1, intersection2, normal1, normal2;
+        networkNodeShape.computeIntersection(LineSegment(Coord::ZERO, fromPosition - position), intersection1, intersection2, normal1, normal2);
+        return position + intersection2;
+    }
+    else
+        throw cRuntimeError("Unknown contact mode: %s", contactMode);
+}
+
+InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule *module) const
+{
+    L3AddressResolver addressResolver;
+    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
+    if (interfaceTable == nullptr)
+        return nullptr;
+    return interfaceTable->getInterfaceByInterfaceModule(module);
 }
 
 } // namespace visualizer

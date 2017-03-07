@@ -62,8 +62,6 @@ void Radio::initialize(int stage)
         radioIn->setDeliverOnReceptionStart(true);
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");
-        displayCommunicationRange = par("displayCommunicationRange");
-        displayInterferenceRange = par("displayInterferenceRange");
         WATCH(radioMode);
         WATCH(receptionState);
         WATCH(transmissionState);
@@ -364,7 +362,7 @@ void Radio::startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part)
     EV_INFO << "Transmission started: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireTransmissionStarted(transmission);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void Radio::continueTransmission()
@@ -390,7 +388,7 @@ void Radio::endTransmission()
     EV_INFO << "Transmission ended: " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireTransmissionEnded(transmission);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void Radio::abortTransmission()
@@ -432,7 +430,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     scheduleAt(arrival->getEndTime(part), timer);
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireReceptionStarted(reception);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::receptionStartedSignal, check_and_cast<const cObject *>(reception));
 }
 
 void Radio::continueReception(cMessage *timer)
@@ -483,7 +481,7 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    check_and_cast<RadioMedium *>(medium)->fireReceptionEnded(reception);
+    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::receptionEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }
 
@@ -599,37 +597,6 @@ void Radio::updateTransceiverPart()
         EV_INFO << "Changing radio transmitted signal part from " << IRadioSignal::getSignalPartName(transmittedSignalPart) << " to " << IRadioSignal::getSignalPartName(newTransmittedPart) << "." << endl;
         transmittedSignalPart = newTransmittedPart;
         emit(transmittedSignalPartChangedSignal, transmittedSignalPart);
-    }
-}
-
-void Radio::refreshDisplay() const
-{
-    // draw the interference area and sensitivity area
-    // according pathloss propagation only
-    // we use the radio channel method to calculate interference distance
-    // it should be the methods provided by propagation models, but to
-    // avoid a big modification, we reuse those methods.
-    if (displayInterferenceRange || displayCommunicationRange) {
-        cModule *host = findContainingNode(this);
-        cDisplayString& displayString = host->getDisplayString();
-        if (displayInterferenceRange) {
-            m maxInterferenceRage = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxInterferenceRange(this);
-            char tag[32];
-            sprintf(tag, "r%i1", getId());
-            displayString.removeTag(tag);
-            displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, maxInterferenceRage.get());
-            displayString.setTagArg(tag, 2, "gray");
-        }
-        if (displayCommunicationRange) {
-            m maxCommunicationRange = check_and_cast<const RadioMedium *>(medium)->getMediumLimitCache()->getMaxCommunicationRange(this);
-            char tag[32];
-            sprintf(tag, "r%i2", getId());
-            displayString.removeTag(tag);
-            displayString.insertTag(tag);
-            displayString.setTagArg(tag, 0, maxCommunicationRange.get());
-            displayString.setTagArg(tag, 2, "blue");
-        }
     }
 }
 

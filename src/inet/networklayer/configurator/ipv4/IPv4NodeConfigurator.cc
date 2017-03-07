@@ -63,7 +63,11 @@ void IPv4NodeConfigurator::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
-            configureNode();
+            configureInterface();
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
+            configureRoutingTable();
     }
 }
 
@@ -73,8 +77,10 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER)
             prepareNode();
-        else if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
-            configureNode();
+        else if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
+            configureInterface();
+            configureRoutingTable();
+        }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {    /*nothing to do*/
         ;
@@ -115,11 +121,16 @@ void IPv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
     }
 }
 
-void IPv4NodeConfigurator::configureNode()
+void IPv4NodeConfigurator::configureInterface()
 {
     ASSERT(networkConfigurator);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
+}
+
+void IPv4NodeConfigurator::configureRoutingTable()
+{
+    ASSERT(networkConfigurator);
     if (par("configureRoutingTable").boolValue())
         networkConfigurator->configureRoutingTable(routingTable);
 }

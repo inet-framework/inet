@@ -1,0 +1,168 @@
+//
+// Copyright (C) 2005 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+package inet.examples.wireless.aggregationtest;
+
+import inet.applications.ethernet.EtherAppCli;
+import inet.common.queue.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.static.StationaryMobility;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+
+module WirelessAPWithSink
+{
+    parameters:
+        @networkNode();
+        @labels(node);
+        @display("i=device/accesspoint");
+        *.interfaceTableModule = default("");
+    gates:
+        input radioIn @directIn;
+    submodules:
+        sink: Sink {
+            parameters:
+                @display("p=169,124");
+        }
+        wlan: Ieee80211Nic {
+            parameters:
+                @display("p=89,225;q=queue");
+                mgmtType = default("Ieee80211MgmtAPSimplified");
+                mgmt.encapDecap = "false";
+        }
+        mobility: StationaryMobility {
+            parameters:
+                @display("p=71,121");
+        }
+    connections allowunconnected:
+        radioIn --> { @display("m=s"); } --> wlan.radioIn;
+        wlan.upperLayerOut --> sink.in++;
+}
+
+module SinkClient
+{
+    parameters:
+        @display("i=device/wifilaptop");
+        @networkNode();
+        *.interfaceTableModule = "";
+    gates:
+        input radioIn @directIn;
+
+    submodules:
+        sink: Sink {
+            parameters:
+                @display("p=65,34");
+        }
+        wlan: Ieee80211Nic {
+            parameters:
+                @display("p=112,134;q=queue");
+                mgmtType = default("Ieee80211MgmtSTASimplified");
+        }
+        mobility: StationaryMobility {
+            parameters:
+                @display("p=50,141");
+        }
+    connections allowunconnected:
+        wlan.radioIn <-- radioIn;
+        wlan.upperLayerOut --> sink.in++;
+}
+
+module ThroughputClient
+{
+    parameters:
+        @display("i=device/wifilaptop");
+        @networkNode();
+        *.interfaceTableModule = "";
+    gates:
+        input radioIn @directIn;
+    submodules:
+        cli: EtherAppCli {
+            parameters:
+                registerSAP = false;
+                @display("b=40,24;p=180,60,col");
+        }
+        wlan: Ieee80211Nic {
+            parameters:
+                @display("p=112,134;q=queue");
+                mgmtType = default("Ieee80211MgmtSTASimplified");
+        }
+        mobility: StationaryMobility {
+            parameters:
+                @display("p=50,141");
+        }
+    connections allowunconnected:
+        wlan.radioIn <-- radioIn;
+        cli.out --> wlan.upperLayerIn;
+}
+
+network AggregationTest
+{
+    parameters:
+        int numCli;
+        @display("b=297,203");
+    submodules:
+        cliHost[numCli]: ThroughputClient {
+            parameters:
+                @display("r=,,#707070");
+        }
+        ap: WirelessAPWithSink {
+            parameters:
+                @display("p=200,200;r=,,#707070");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=61,46");
+        }
+}
+
+network AggregationTest2
+{
+    @display("bgb=503,221");
+    submodules:
+        sender1: WirelessHost {
+            @display("p=62,35");
+        }
+        sender2: WirelessHost {
+            @display("p=62,117");
+        }
+        sink1: WirelessHost {
+            @display("p=335,130");
+        }
+        sink2: WirelessHost {
+            @display("p=335,35");
+        }
+        accessPoint: AccessPoint {
+            @display("p=205,69");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                assignDisjunctSubnetAddresses = false;
+                @display("p=455,178");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            @display("p=62,165");
+        }
+    connections:
+}
+

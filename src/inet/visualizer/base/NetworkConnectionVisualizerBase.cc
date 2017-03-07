@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,22 +27,32 @@ void NetworkConnectionVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        networkNodePathMatcher.setPattern(par("networkNodePathFilter"), true, true, true);
+        nodeFilter.setPattern(par("nodeFilter"));
         lineColor = cFigure::Color(par("lineColor"));
+        lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         lineWidth = par("lineWidth");
     }
     else if (stage == INITSTAGE_LAST) {
         for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
             auto networkNode = *it;
-            if (isNetworkNode(networkNode) && networkNodePathMatcher.matches(networkNode->getFullPath().c_str())) {
+            if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
                 for (cModule::GateIterator gt(networkNode); !gt.end(); gt++) {
                     auto gate = *gt;
                     auto startNetworkNode = getContainingNode(gate->getPathStartGate()->getOwnerModule());
                     auto endNetworkNode = getContainingNode(gate->getPathEndGate()->getOwnerModule());
-                    createConnection(startNetworkNode, endNetworkNode);
+                    createNetworkConnectionVisualization(startNetworkNode, endNetworkNode);
                 }
             }
         }
+    }
+}
+
+void NetworkConnectionVisualizerBase::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "nodeFilter"))
+            nodeFilter.setPattern(par("nodeFilter"));
+        // TODO:
     }
 }
 

@@ -238,7 +238,7 @@ void RadioMedium::removeNonInterferingTransmissions()
         const IRadioFrame *radioFrame = communicationCache->getCachedFrame(transmission);
         communicationCache->removeCachedFrame(transmission);
         communicationCache->removeTransmission(transmission);
-        fireTransmissionRemoved(transmission);
+        emit(transmissionRemovedSignal, check_and_cast<const cObject *>(transmission));
         delete radioFrame;
         delete transmission;
     }
@@ -443,7 +443,7 @@ void RadioMedium::addRadio(const IRadio *radio)
         radioModule->subscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
         getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
-    fireRadioAdded(radio);
+    emit(radioAddedSignal, radioModule);
 }
 
 void RadioMedium::removeRadio(const IRadio *radio)
@@ -466,7 +466,7 @@ void RadioMedium::removeRadio(const IRadio *radio)
         radioModule->unsubscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
         getContainingNode(radioModule)->unsubscribe(NF_INTERFACE_CONFIG_CHANGED, this);
-    fireRadioRemoved(radio);
+    emit(radioRemovedSignal, radioModule);
 }
 
 void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmission *transmission)
@@ -474,7 +474,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
     transmissionCount++;
     transmissions.push_back(transmission);
     communicationCache->addTransmission(transmission);
-    simtime_t maxArrivalEndTime = simTime();
+    simtime_t maxArrivalEndTime = transmission->getEndTime();
     for (const auto receiverRadio : radios) {
         if (receiverRadio != nullptr && receiverRadio != transmitterRadio) {
             const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
@@ -493,7 +493,7 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         Enter_Method_Silent();
         scheduleAt(communicationCache->getCachedInterferenceEndTime(transmissions[0]), removeNonInterferingTransmissionsTimer);
     }
-    fireTransmissionAdded(transmission);
+    emit(transmissionAddedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 IRadioFrame *RadioMedium::createTransmitterRadioFrame(const IRadio *radio, cPacket *macFrame)
@@ -610,7 +610,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getDestinationAddress()))
+    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getReceiverAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);
@@ -701,54 +701,6 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
             }
         }
     }
-}
-
-void RadioMedium::fireRadioAdded(const IRadio *radio) const
-{
-    for (auto listener : listeners)
-        listener->radioAdded(radio);
-}
-
-void RadioMedium::fireRadioRemoved(const IRadio *radio) const
-{
-    for (auto listener : listeners)
-        listener->radioRemoved(radio);
-}
-
-void RadioMedium::fireTransmissionAdded(const ITransmission *transmission) const
-{
-    for (auto listener : listeners)
-        listener->transmissionAdded(transmission);
-}
-
-void RadioMedium::fireTransmissionRemoved(const ITransmission *transmission) const
-{
-    for (auto listener : listeners)
-        listener->transmissionRemoved(transmission);
-}
-
-void RadioMedium::fireTransmissionStarted(const ITransmission *transmission) const
-{
-    for (auto listener : listeners)
-        listener->transmissionStarted(transmission);
-}
-
-void RadioMedium::fireTransmissionEnded(const ITransmission *transmission) const
-{
-    for (auto listener : listeners)
-        listener->transmissionEnded(transmission);
-}
-
-void RadioMedium::fireReceptionStarted(const IReception *reception) const
-{
-    for (auto listener : listeners)
-        listener->receptionStarted(reception);
-}
-
-void RadioMedium::fireReceptionEnded(const IReception *reception) const
-{
-    for (auto listener : listeners)
-        listener->receptionEnded(reception);
 }
 
 } // namespace physicallayer

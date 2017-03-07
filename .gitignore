@@ -52,6 +52,7 @@ out/
 *.pdb
 *.idb
 *.manifest
+.qtenv.ini
 .qtenvrc
 .tkenvrc
 .tkenvlog

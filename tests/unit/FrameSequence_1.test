@@ -1,0 +1,497 @@
+%description:
+Test 802.11 frame sequences
+
+%includes:
+#include <stdio.h>
+#include "inet/linklayer/ieee80211/mac/FrameSequence.h"
+#include "inet/linklayer/ieee80211/mac/FrameSequenceContext.h"
+
+%inifile: omnetpp.ini
+
+#debug-on-errors = true
+#debugger-attach-on-error = true
+
+%global:
+
+using namespace inet::ieee80211;
+
+class DataFs : public IFrameSequence 
+{
+    protected:
+        int firstStep = -1;
+        int step = -1;
+
+    public:
+        virtual void startSequence(FrameSequenceContext *context, int firstStep) override {
+            this->firstStep = firstStep;
+            step = 0;
+        }
+
+        virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override {
+            switch (context->role) {
+                case FrameSequenceContext::Role::ORIGINATOR: {
+                    switch (step) {
+                        case 0: {
+                            Ieee80211Frame *frame = new Ieee80211Frame("DATA");
+                            frame->setType(ST_DATA);
+                            return new TransmitStep(frame, 0);
+                        }
+                        case 1:
+                            return nullptr;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                case FrameSequenceContext::Role::RECIPIENT: {
+                    switch (step) {
+                        case 0:
+                            return new ReceiveStep();
+                        case 1:
+                            return nullptr;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                default:
+                    throw cRuntimeError("Unknown frame sequence role");
+            }
+        }
+
+        virtual StepCompletion completeStep(FrameSequenceContext *context) override {
+            switch (context->role) {
+                case FrameSequenceContext::Role::ORIGINATOR: {
+                    switch (step) {
+                        case 0:
+                            step++;
+                            return StepCompletion::ACCEPT;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                case FrameSequenceContext::Role::RECIPIENT: {
+                    switch (step) {
+                        case 0: {
+                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                            step++;
+                            return receiveStep->getReceivedFrame()->getType() == ST_DATA ? StepCompletion::ACCEPT : StepCompletion::REJECT;
+                        }
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                default:
+                    throw cRuntimeError("Unknown frame sequence role");
+            }
+        }
+};
+
+class INET_API AckFs : public IFrameSequence {
+    protected:
+        int firstStep = -1;
+        int step = -1;
+
+    public:
+        virtual void startSequence(FrameSequenceContext *context, int firstStep) override {
+            this->firstStep = firstStep;
+            step = 0;
+        }
+
+        virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override {
+            switch (context->role) {
+                case FrameSequenceContext::Role::ORIGINATOR: {
+                    switch (step) {
+                        case 0:
+                            return new ReceiveStep();
+                        case 1:
+                            return nullptr;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                case FrameSequenceContext::Role::RECIPIENT: {
+                    switch (step) {
+                        case 0: {
+                            Ieee80211Frame *frame = new Ieee80211Frame("ACK");
+                            frame->setType(ST_ACK);
+                            return new TransmitStep(frame, 0);
+                        }
+                        case 1:
+                            return nullptr;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                default:
+                    throw cRuntimeError("Unknown frame sequence role");
+            }
+        }
+
+        virtual StepCompletion completeStep(FrameSequenceContext *context) override {
+            switch (context->role) {
+                case FrameSequenceContext::Role::ORIGINATOR: {
+                    switch (step) {
+                        case 0: {
+                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                            step++;
+                            return receiveStep->getReceivedFrame()->getType() == ST_ACK ? StepCompletion::ACCEPT : StepCompletion::REJECT;
+                        }
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                case FrameSequenceContext::Role::RECIPIENT: {
+                    switch (step) {
+                        case 0:
+                            step++;
+                            return StepCompletion::ACCEPT;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                default:
+                    throw cRuntimeError("Unknown frame sequence role");
+            }
+        }
+};
+
+class RtsCtsFs : public IFrameSequence {
+    protected:
+        int firstStep = -1;
+        int step = -1;
+
+    public:
+        RtsCtsFs() { }
+
+        virtual void startSequence(FrameSequenceContext *context, int firstStep) override {
+            step = 0;
+            this->firstStep = firstStep;
+        }
+
+        IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override {
+            switch (context->role) {
+                case FrameSequenceContext::Role::ORIGINATOR: {
+                    switch (step) {
+                        case 0: {
+                            Ieee80211Frame *frame = new Ieee80211Frame("RTS");
+                            frame->setType(ST_RTS);
+                            return new TransmitStep(frame, 0);
+                        }
+                        case 1:
+                            return new ReceiveStep();
+                        case 2:
+                            return nullptr;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                case FrameSequenceContext::Role::RECIPIENT: {
+                    switch (step) {
+                        case 0:
+                            return new ReceiveStep();
+                        case 1: {
+                            Ieee80211Frame *frame = new Ieee80211Frame("CTS");
+                            frame->setType(ST_CTS);
+                            return new TransmitStep(frame, 0);
+                        }
+                        case 2:
+                            return nullptr;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                default:
+                    throw cRuntimeError("Unknown frame sequence role");
+            }
+        }
+        
+        IFrameSequence::StepCompletion completeStep(FrameSequenceContext *context) override {
+            switch (context->role) {
+                case FrameSequenceContext::Role::ORIGINATOR: {
+                    switch (step) {
+                        case 0:
+                            step++;
+                            return StepCompletion::ACCEPT;
+                        case 1: {
+                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                            step++;
+                            return receiveStep->getReceivedFrame()->getType() == ST_CTS ? StepCompletion::ACCEPT : StepCompletion::REJECT;
+                        }
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                case FrameSequenceContext::Role::RECIPIENT: {
+                    switch (step) {
+                        case 0: {
+                            IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
+                            step++;
+                            return receiveStep->getReceivedFrame()->getType() == ST_RTS ? StepCompletion::ACCEPT : StepCompletion::REJECT;
+                        }
+                        case 1:
+                            step++;
+                            return StepCompletion::ACCEPT;
+                        default:
+                            throw cRuntimeError("Unknown step");
+                    }
+                }
+                default:
+                    throw cRuntimeError("Unknown frame sequence role");
+            }
+        }
+};
+
+static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequence *recipientFrameSequence)
+{
+    // prepare originator
+    bool isOriginatorRunning = true;
+    IFrameSequenceStep *originatorStep = nullptr;
+    Ieee80211Frame *originatorFrame = nullptr;
+    FrameSequenceContext *originatorContext = new FrameSequenceContext(FrameSequenceContext::Role::ORIGINATOR, nullptr, nullptr, nullptr, nullptr);
+    originatorFrameSequence->startSequence(originatorContext, 0);
+
+    // prepare recipient
+    bool isRecipientRunning = true;
+    IFrameSequenceStep *recipientStep = nullptr;
+    Ieee80211Frame *recipientFrame = nullptr;
+    FrameSequenceContext *recipientContext = new FrameSequenceContext(FrameSequenceContext::Role::RECIPIENT, nullptr, nullptr, nullptr, nullptr);
+    recipientFrameSequence->startSequence(recipientContext, 0);
+    
+    // run frame sequence
+    while (isOriginatorRunning || isRecipientRunning) {
+        if (isOriginatorRunning) {
+            // advance originator
+            originatorStep = originatorFrameSequence->prepareStep(originatorContext);
+            if (originatorStep == nullptr) {
+                EV_INFO << "originator complete\n";
+                isOriginatorRunning = false;
+            }
+            else
+                originatorContext->addStep(originatorStep);
+        }
+        
+        if (isRecipientRunning) {
+            // advance recipient
+            recipientStep = recipientFrameSequence->prepareStep(recipientContext);
+            if (recipientStep == nullptr) {
+                EV_INFO << "recipient complete\n";
+                isRecipientRunning = false;
+            }
+            else
+                recipientContext->addStep(recipientStep);
+        }
+
+        // handle originator transmit        
+        if (isOriginatorRunning) {
+            if (originatorStep->getType() == IFrameSequenceStep::Type::TRANSMIT) {
+                ITransmitStep *transmitStep = check_and_cast<ITransmitStep *>(originatorStep);
+                originatorFrame = transmitStep->getFrameToTransmit();
+                EV_INFO << "originator transmit: " << originatorFrame->getName() << "\n";
+            }
+        }
+        
+        // handle recipient transmit
+        if (isRecipientRunning) {
+            if (recipientStep->getType() == IFrameSequenceStep::Type::TRANSMIT) {
+                ITransmitStep *transmitStep = check_and_cast<ITransmitStep *>(recipientStep);
+                recipientFrame = transmitStep->getFrameToTransmit();
+                EV_INFO << "recipient transmit: " << recipientFrame->getName() << "\n";
+            }
+        }
+
+        // handle originator receive
+        if (isOriginatorRunning) {
+            if (originatorStep->getType() == IFrameSequenceStep::Type::RECEIVE) {
+                IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(originatorStep);
+                ASSERT(recipientFrame);
+                receiveStep->setFrameToReceive(recipientFrame);
+                EV_INFO << "originator receive: " << recipientFrame->getName() << "\n";
+            }
+        }
+
+        // handle recipient receive
+        if (isRecipientRunning) {
+            if (recipientStep->getType() == IFrameSequenceStep::Type::RECEIVE) {
+                IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(recipientStep);
+                ASSERT(originatorFrame);
+                receiveStep->setFrameToReceive(originatorFrame);
+                EV_INFO << "recipient receive: " << originatorFrame->getName() << "\n";
+            }
+        }
+
+        // complete originator
+        if (isOriginatorRunning) {
+            IFrameSequence::StepCompletion originatorStepCompletion = originatorFrameSequence->completeStep(originatorContext);
+            if (originatorStepCompletion == IFrameSequence::StepCompletion::SKIP) {
+                EV_INFO << "originator complete\n";
+                isOriginatorRunning = false;
+            }
+            else if (originatorStepCompletion == IFrameSequence::StepCompletion::REJECT) {
+                EV_INFO << "originator abort\n";
+                isOriginatorRunning = false;
+            }
+        }
+
+        // complete recipient
+        if (isRecipientRunning) {
+            IFrameSequence::StepCompletion recipientStepCompletion = recipientFrameSequence->completeStep(recipientContext);
+            if (recipientStepCompletion == IFrameSequence::StepCompletion::SKIP) {
+                EV_INFO << "recipient complete\n";
+                isRecipientRunning = false;
+            }
+            else if (recipientStepCompletion == IFrameSequence::StepCompletion::REJECT) {
+                EV_INFO << "recipient abort\n";
+                isRecipientRunning = false;
+            }
+        }
+        
+        delete originatorFrame;
+        delete recipientFrame;
+        originatorFrame = nullptr;
+        recipientFrame = nullptr;
+    }
+    delete originatorContext;
+    delete recipientContext;
+    delete originatorFrameSequence;
+    delete recipientFrameSequence;
+}
+
+OptionalFs::Apply applyOptional(OptionalFs *frameSequence, FrameSequenceContext *context) {
+    return OptionalFs::Apply::APPLY;
+}
+
+OptionalFs::Apply skipOptional(OptionalFs *frameSequence, FrameSequenceContext *context) {
+    return OptionalFs::Apply::SKIP;
+}
+
+RepeatingFs::Apply skipRepeated(RepeatingFs *frameSequence, FrameSequenceContext *context) {
+    return RepeatingFs::Apply::SKIP;
+}
+
+RepeatingFs::Apply applyRepeatedOneTime(RepeatingFs *frameSequence, FrameSequenceContext *context) {
+    return frameSequence->getCount() <= 1 ? RepeatingFs::Apply::APPLY : RepeatingFs::Apply::SKIP;
+}
+
+RepeatingFs::Apply applyRepeatedTwoTimes(RepeatingFs *frameSequence, FrameSequenceContext *context) {
+    return frameSequence->getCount() <= 2 ? RepeatingFs::Apply::APPLY : RepeatingFs::Apply::SKIP;
+}
+
+int selectFirstAlternative(AlternativesFs *frameSequence, FrameSequenceContext *context) {
+    return 0;
+}
+
+int selectSecondAlternative(AlternativesFs *frameSequences, FrameSequenceContext *context) {
+    return 1;
+}
+
+int selectSubsequentAlternativeCounter = 0;
+int selectSubsequentAlternative(AlternativesFs *frameSequences, FrameSequenceContext *context) {
+    if (context->role == FrameSequenceContext::Role::ORIGINATOR)
+        return selectSubsequentAlternativeCounter++ / 2;
+    else {
+        selectSubsequentAlternativeCounter++;
+        if (selectSubsequentAlternativeCounter < 2)
+            return -1;
+        else
+            return selectSubsequentAlternativeCounter / 2;
+    }
+}
+
+%activity:
+EV_INFO << "\nTesting DATA frame sequence\n";
+runFrameSequence(new DataFs(), new DataFs());
+
+EV_INFO << "\nTesting sequential frame sequence\n";
+runFrameSequence(new SequentialFs({new DataFs(), new DataFs()}), new SequentialFs({new DataFs(), new DataFs()}));
+
+EV_INFO << "\nTesting applied optional frame sequence\n";
+runFrameSequence(new OptionalFs(new DataFs(), applyOptional), new OptionalFs(new DataFs(), applyOptional));
+
+EV_INFO << "\nTesting skipped optional frame sequence\n";
+runFrameSequence(new OptionalFs(new DataFs(), skipOptional), new OptionalFs(new DataFs(), skipOptional));
+
+EV_INFO << "\nTesting skipped repeated frame sequence\n";
+runFrameSequence(new RepeatingFs(new DataFs(), skipRepeated), new RepeatingFs(new DataFs(), skipRepeated));
+
+EV_INFO << "\nTesting one time applied repeated frame sequence\n";
+runFrameSequence(new RepeatingFs(new DataFs(), applyRepeatedOneTime), new RepeatingFs(new DataFs(), applyRepeatedOneTime));
+
+EV_INFO << "\nTesting alternative frame sequence\n";
+runFrameSequence(new AlternativesFs({new DataFs()}, selectFirstAlternative), new AlternativesFs({new DataFs()}, selectFirstAlternative));
+
+EV_INFO << "\nTesting DATA ACK frame sequence\n";
+runFrameSequence(new SequentialFs({new DataFs(), new AckFs()}), new SequentialFs({new DataFs(), new AckFs()}));
+
+EV_INFO << "\nTesting skipped [RTS CTS] DATA ACK frame sequence\n";
+runFrameSequence(new SequentialFs({new OptionalFs(new RtsCtsFs(), skipOptional), new DataFs(), new AckFs()}), new SequentialFs({new OptionalFs(new RtsCtsFs(), skipOptional), new DataFs(), new AckFs()}));
+
+EV_INFO << "\nTesting applied [RTS CTS] DATA ACK frame sequence\n";
+runFrameSequence(new SequentialFs({new OptionalFs(new RtsCtsFs(), applyOptional), new DataFs(), new AckFs()}), new SequentialFs({new OptionalFs(new RtsCtsFs(), applyOptional), new DataFs(), new AckFs()}));
+
+%contains: stdout
+Testing DATA frame sequence
+originator transmit: DATA
+recipient receive: DATA
+originator complete
+recipient complete
+
+Testing sequential frame sequence
+originator transmit: DATA
+recipient receive: DATA
+originator transmit: DATA
+recipient receive: DATA
+originator complete
+recipient complete
+
+Testing applied optional frame sequence
+originator transmit: DATA
+recipient receive: DATA
+originator complete
+recipient complete
+
+Testing skipped optional frame sequence
+originator complete
+recipient complete
+
+Testing skipped repeated frame sequence
+originator complete
+recipient complete
+
+Testing one time applied repeated frame sequence
+originator transmit: DATA
+recipient receive: DATA
+originator complete
+recipient complete
+
+Testing alternative frame sequence
+originator transmit: DATA
+recipient receive: DATA
+originator complete
+recipient complete
+
+Testing DATA ACK frame sequence
+originator transmit: DATA
+recipient receive: DATA
+recipient transmit: ACK
+originator receive: ACK
+originator complete
+recipient complete
+
+Testing skipped [RTS CTS] DATA ACK frame sequence
+originator transmit: DATA
+recipient receive: DATA
+recipient transmit: ACK
+originator receive: ACK
+originator complete
+recipient complete
+
+Testing applied [RTS CTS] DATA ACK frame sequence
+originator transmit: RTS
+recipient receive: RTS
+recipient transmit: CTS
+originator receive: CTS
+originator transmit: DATA
+recipient receive: DATA
+recipient transmit: ACK
+originator receive: ACK
+originator complete
+recipient complete

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -36,7 +36,7 @@ Define_Module(MobilityOsgVisualizer);
 
 #ifdef WITH_OSG
 
-MobilityOsgVisualizer::CacheEntry::CacheEntry(NetworkNodeOsgVisualization *networkNode, osg::Geode *trail) :
+MobilityOsgVisualizer::MobilityOsgVisualization::MobilityOsgVisualization(NetworkNodeOsgVisualization *networkNode, osg::Geode *trail) :
     networkNode(networkNode),
     trail(trail)
 {
@@ -50,40 +50,46 @@ void MobilityOsgVisualizer::initialize(int stage)
         networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
 }
 
-MobilityOsgVisualizer::CacheEntry *MobilityOsgVisualizer::getCacheEntry(const IMobility *mobility) const
+void MobilityOsgVisualizer::refreshDisplay() const
 {
-    auto it = cacheEntries.find(mobility);
-    if (it == cacheEntries.end())
+    MobilityVisualizerBase::refreshDisplay();
+    // TODO: switch to osg canvas when API is extended
+    visualizerTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
+}
+
+MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::getMobilityVisualization(const IMobility *mobility) const
+{
+    auto it = mobilityVisualizations.find(mobility);
+    if (it == mobilityVisualizations.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MobilityOsgVisualizer::setCacheEntry(const IMobility *mobility, CacheEntry *entry)
+void MobilityOsgVisualizer::setMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *entry)
 {
-    cacheEntries[mobility] = entry;
+    mobilityVisualizations[mobility] = entry;
 }
 
-void MobilityOsgVisualizer::removeCacheEntry(const IMobility *mobility)
+void MobilityOsgVisualizer::removeMobilityVisualization(const IMobility *mobility)
 {
-    cacheEntries.erase(mobility);
+    mobilityVisualizations.erase(mobility);
 }
 
-MobilityOsgVisualizer::CacheEntry* MobilityOsgVisualizer::ensureCacheEntry(const IMobility *mobility)
+MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMobilityVisualization(const IMobility *mobility)
 {
-    auto cacheEntry = getCacheEntry(mobility);
-    if (cacheEntry == nullptr) {
+    auto mobilityVisualization = getMobilityVisualization(mobility);
+    if (mobilityVisualization == nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
         auto trail = new osg::Geode();
-        cFigure::Color color = cFigure::GOOD_DARK_COLORS[module->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-        trail->setStateSet(inet::osg::createStateSet(color, 1.0));
+        trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
         auto networkNode = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
         scene->addChild(trail);
-        cacheEntry = new CacheEntry(networkNode, trail);
-        setCacheEntry(mobility, cacheEntry);
+        mobilityVisualization = new MobilityOsgVisualization(networkNode, trail);
+        setMobilityVisualization(mobility, mobilityVisualization);
     }
-    return cacheEntry;
+    return mobilityVisualization;
 }
 
 void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& position)
@@ -114,20 +120,21 @@ void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& 
 void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (!hasGUI()) return;
     if (signal == IMobility::mobilityStateChangedSignal) {
         auto mobility = dynamic_cast<IMobility *>(object);
         auto position = mobility->getCurrentPosition();
         auto orientation = mobility->getCurrentAngularPosition();
-        auto cacheEntry = ensureCacheEntry(mobility);
-        auto networkNode = cacheEntry->networkNode;
+        auto mobilityVisualization = ensureMobilityVisualization(mobility);
+        auto networkNode = mobilityVisualization->networkNode;
         networkNode->setPosition(osg::Vec3d(position.x, position.y, position.z));
         networkNode->setAttitude(osg::Quat(orientation.alpha, osg::Vec3d(0.0, 0.0, 1.0)) *
                                  osg::Quat(orientation.beta, osg::Vec3d(0.0, 1.0, 0.0)) *
                                  osg::Quat(orientation.gamma, osg::Vec3d(1.0, 0.0, 0.0)));
-        if (displayMovementTrail)
-            extendMovementTrail(cacheEntry->trail, position);
+        if (displayMovementTrails)
+            extendMovementTrail(mobilityVisualization->trail, position);
     }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 #endif // ifdef WITH_OSG

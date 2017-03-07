@@ -1,0 +1,16 @@
+This example demonstrates how to display active network layer routes in a
+network. An active route is created when a packet gets delivered by the network
+from one node to another. Active routes become inactive over time unless they
+are reinforced by new packets.
+
+There are two networks in this example, a static wired network, and a dynamic
+wireless mobile network. The networks contain a source node, a destination node,
+and a number of intermediate nodes. In both of them the source node continuously
+pings the destination node. In the wired network, nodes are stationary and links
+don't break, so the established route is static. In the wireless network, all
+nodes move around randomly, so links might break, and thus every now and then a
+new route has to be found.
+
+When you run the example, the route visualizer eventually displays the discovered
+route as a polyline along the nodes. In the wireless example, every now and then
+the current route disappears, but a new route appears again once it is found.

@@ -1,0 +1,40 @@
+// Notes on Lifetime
+// =================
+//
+//
+// The expiration of the A-MSDU lifetime timer occurs only when the lifetime timer of all of the constituent
+// MSDUs of the A-MSDU have expired. -- 9.11 A-MSDU operation
+//
+// If there is no response (i.e., neither a Basic BlockAck nor an ACK frame) to the Basic BlockAckReq frame, the
+// originator may retransmit the Basic BlockAckReq frame within the current TXOP (if time permits) or within a
+// subsequent TXOP. MSDUs that are sent using the Block Ack mechanism are not subject to retry limits but
+// only to MSDU lifetime. The originator need not set the retry bit to 1 for any possible retransmissions of the
+// MPDUs. -- p. 908
+//
+// The source STA shall maintain a transmit MSDU timer for each MSDU being transmitted. The attribute
+// dot11MaxTransmitMSDULifetime specifies the maximum amount of time allowed to transmit an MSDU. The
+// timer starts on the initial attempt to transmit the first fragment of the MSDU. If the timer exceeds
+// dot11MaxTransmitMSDULifetime, then all remaining fragments are discarded by the source STA and no
+// attempt is made to complete transmission of the MSDU. -- 9.5 Fragmentation
+
+// QoS STAs shall maintain a transmit MSDU timer for each MSDU passed to the MAC.
+// dot11EDCATableMSDULifetime specifies the maximum amount of time allowed to transmit an MSDU for a
+// given AC. The transmit MSDU timer shall be started when the MSDU is passed to the MAC. If the value of
+// this timer exceeds the appropriate entry in dot11EDCATableMSDULifetime, then the MSDU, or any
+// remaining, undelivered fragments of that MSDU, shall be discarded by the source STA without any further
+// attempt to complete delivery of that MSDU.
+//
+// When A-MSDU aggregation is used, the HT STA maintains a single timer for the whole A-MSDU. The timer
+// is restarted each time an MSDU is added to the A-MSDU. The result of this procedure is that no MSDU in the
+// A-MSDU is discarded before a period of dot11EDCATableMSDULifetime has elapsed. -- 9.19.2.6 Retransmit procedures
+
+
+// The destination STA shall maintain a Receive Timer for each MSDU or MMPDU being received, for a
+// minimum of three MSDUs or MMPDUs. The STA may implement additional timers to be able to receive
+// additional concurrent MSDUs or MMPDUs. The receiving STA shall discard all fragments that are part of an
+// MSDU or MMPDU for which a timer is not maintained. There is also dot11MaxReceiveLifetime, that
+// specifies the maximum amount of time allowed to receive an MSDU. The receive MSDU or MMPDU timer
+// starts on the reception of the first fragment of the MSDU or MMPDU. If the receive MSDU timer exceeds
+// dot11MaxReceiveLifetime, then all received fragments of this MSDU or MMPDU are discarded by the
+// destination STA. If additional fragments of an individually addressed MSDU or MMPDU are received after its
+// dot11MaxReceiveLifetime is exceeded, those fragments shall be acknowledged and discarded. -- 9.6 Defragmentation

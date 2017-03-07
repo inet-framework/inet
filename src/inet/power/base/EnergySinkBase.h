@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,64 +24,16 @@ namespace inet {
 
 namespace power {
 
-/**
- * This is an abstract base class that provides a list of energy generators
- * attached to the energy sink.
- *
- * @author Levente Meszaros
- */
 class INET_API EnergySinkBase : public virtual IEnergySink
 {
   protected:
-    struct EnergyGeneratorEntry
-    {
-      public:
-        /**
-         * The owner energy generator.
-         */
-        const IEnergyGenerator *energyGenerator;
-
-        /**
-         * The current power generation.
-         */
-        W generatedPower;
-
-      public:
-        EnergyGeneratorEntry(const IEnergyGenerator *energyGenerator, W generatedPower) :
-            energyGenerator(energyGenerator), generatedPower(generatedPower) {}
-    };
-
-    /**
-     * List of currently known energy generators.
-     */
-    std::vector<EnergyGeneratorEntry> energyGenerators;
-
-    /**
-     * The current total power generation.
-     */
-    W totalGeneratedPower;
-
-  protected:
-    virtual void initialize(int stage);
-
-    W computeTotalGeneratedPower();
+    std::vector<const IEnergyGenerator *> energyGenerators;
 
   public:
-    EnergySinkBase();
-
     virtual int getNumEnergyGenerators() const override { return energyGenerators.size(); }
-
-    virtual const IEnergyGenerator *getEnergyGenerator(int energyGeneratorId) const override;
-
-    virtual int addEnergyGenerator(const IEnergyGenerator *energyGenerator) override;
-
-    virtual void removeEnergyGenerator(int energyGeneratorId) override;
-
-    virtual W getTotalPowerGeneration() const override { return totalGeneratedPower; }
-
-    virtual W getPowerGeneration(int energyGeneratorId) const override;
-
-    virtual void setPowerGeneration(int energyGeneratorId, W generatedPower) override;
+    virtual const IEnergyGenerator *getEnergyGenerator(int index) const override;
+    virtual void addEnergyGenerator(const IEnergyGenerator *energyGenerator) override;
+    virtual void removeEnergyGenerator(const IEnergyGenerator *energyGenerator) override;
 };
 
 } // namespace power

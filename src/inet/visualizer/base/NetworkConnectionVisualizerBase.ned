@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,14 +21,18 @@ package inet.visualizer.base;
 // This is a base module for connection visualizer simple modules. The actual
 // visualization of network connections is done in derived modules.
 //
-// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionOsgVisualizer,
-// ~INetworkConnectionVisualizer, and ~NetworkConnectionVisualizerBase
+// @see ~NetworkConnectionCanvasVisualizer, ~NetworkConnectionOsgVisualizer, ~INetworkConnectionVisualizer, ~VisualizerBase
 //
 simple NetworkConnectionVisualizerBase extends VisualizerBase
 {
     parameters:
-        string networkNodePathFilter = default("**"); // determines which network connections are displayed, all connections by default
+        bool displayNetworkConnections = default(true);
+
+        string nodeFilter = default("*"); // determines which network connections are displayed, all connections by default
+
         string lineColor = default("black"); // connection line color
+        string lineStyle = default("solid"); // connection line style (solid, dashed, dotted)
         double lineWidth = default(1); // connection line width
+
         @class(NetworkConnectionVisualizerBase);
 }

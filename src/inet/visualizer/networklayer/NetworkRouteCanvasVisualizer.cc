@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -58,6 +58,15 @@ bool NetworkRouteCanvasVisualizer::isPathElement(cModule *module) const
 #endif
 
     return false;
+}
+
+const PathCanvasVisualizerBase::PathVisualization *NetworkRouteCanvasVisualizer::createPathVisualization(const std::vector<int>& path) const
+{
+    auto pathVisualization = static_cast<const PathCanvasVisualization *>(PathCanvasVisualizerBase::createPathVisualization(path));
+    pathVisualization->figure->setTags("network_route");
+    pathVisualization->figure->setTooltip("This polyline arrow represents a recently active network route between two network nodes");
+    pathVisualization->shiftPriority = 3;
+    return pathVisualization;
 }
 
 } // namespace visualizer

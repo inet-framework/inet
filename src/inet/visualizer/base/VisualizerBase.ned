@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,7 +24,7 @@ package inet.visualizer.base;
 simple VisualizerBase
 {
     parameters:
+        string visualizerTargetModule = default("<root>"); // module path relative to the visualizer where the visualization should appear in the user interface, root module by default
         @class(VisualizerBase);
         @display("i=block/app_s");
-        string visualizerTargetModule = default(""); // module path relative to the visualizer where the visualization should appear in the user interface, root module by default
 }

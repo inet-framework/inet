@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -19,6 +19,7 @@
 #define __INET_VISUALIZERBASE_H
 
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
@@ -33,7 +34,9 @@ class INET_API VisualizerBase : public cSimpleModule
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual Coord getPosition(cModule *node) const;
+    virtual Coord getPosition(const cModule *networkNode) const;
+    virtual Coord getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const;
+    virtual InterfaceEntry *getInterfaceEntry(cModule *networkNode, cModule *module) const;
 };
 
 } // namespace visualizer

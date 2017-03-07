@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,10 +24,15 @@ namespace inet {
 
 namespace visualizer {
 
-LinkVisualizerBase::Link::Link(int sourceModuleId, int destinationModuleId) :
-    sourceModuleId(sourceModuleId),
-    destinationModuleId(destinationModuleId)
+LinkVisualizerBase::LinkVisualization::LinkVisualization(int sourceModuleId, int destinationModuleId) :
+    LineManager::ModuleLine(sourceModuleId, destinationModuleId)
 {
+}
+
+LinkVisualizerBase::~LinkVisualizerBase()
+{
+    if (displayLinks)
+        unsubscribe();
 }
 
 void LinkVisualizerBase::initialize(int stage)
@@ -35,50 +40,110 @@ void LinkVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        subscriptionModule = *par("subscriptionModule").stringValue() == '\0' ? getSystemModule() : getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        subscriptionModule->subscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
-        subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
-        subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
-        packetNameMatcher.setPattern(par("packetNameFilter"), false, true, true);
+        displayLinks = par("displayLinks");
+        nodeFilter.setPattern(par("nodeFilter"));
+        interfaceFilter.setPattern(par("interfaceFilter"));
+        packetFilter.setPattern(par("packetFilter"));
         lineColor = cFigure::Color(par("lineColor"));
-        lineWidth = par("lineWidth");
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
-        opacityHalfLife = par("opacityHalfLife");
+        lineWidth = par("lineWidth");
+        lineShift = par("lineShift");
+        lineShiftMode = par("lineShiftMode");
+        lineContactSpacing = par("lineContactSpacing");
+        lineContactMode = par("lineContactMode");
+        fadeOutMode = par("fadeOutMode");
+        fadeOutTime = par("fadeOutTime");
+        fadeOutAnimationSpeed = par("fadeOutAnimationSpeed");
+        lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
+        if (displayLinks)
+            subscribe();
+    }
+}
+
+void LinkVisualizerBase::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "nodeFilter"))
+            nodeFilter.setPattern(par("nodeFilter"));
+        else if (!strcmp(name, "interfaceFilter"))
+            interfaceFilter.setPattern(par("interfaceFilter"));
+        else if (!strcmp(name, "packetFilter"))
+            packetFilter.setPattern(par("packetFilter"));
+        removeAllLinkVisualizations();
     }
 }
 
 void LinkVisualizerBase::refreshDisplay() const
 {
-    auto now = simTime();
-    std::vector<const Link *> removedLinks;
-    for (auto it : links) {
-        auto link = it.second;
-        auto alpha = std::min(1.0, std::pow(2.0, -(now - link->lastUsage).dbl() / opacityHalfLife));
-        if (alpha < 0.01)
-            removedLinks.push_back(link);
-        else
-            setAlpha(link, alpha);
+    if (displayLinks) {
+        AnimationPosition currentAnimationPosition;
+        std::vector<const LinkVisualization *> removedLinkVisualizations;
+        for (auto it : linkVisualizations) {
+            auto linkVisualization = it.second;
+            double delta;
+            if (!strcmp(fadeOutMode, "simulationTime"))
+                delta = (currentAnimationPosition.getSimulationTime() - linkVisualization->lastUsageAnimationPosition.getSimulationTime()).dbl();
+            else if (!strcmp(fadeOutMode, "animationTime"))
+                delta = currentAnimationPosition.getAnimationTime() - linkVisualization->lastUsageAnimationPosition.getAnimationTime();
+            else if (!strcmp(fadeOutMode, "realTime"))
+                delta = currentAnimationPosition.getRealTime() - linkVisualization->lastUsageAnimationPosition.getRealTime();
+            else
+                throw cRuntimeError("Unknown fadeOutMode: %s", fadeOutMode);
+            if (delta > fadeOutTime)
+                removedLinkVisualizations.push_back(linkVisualization);
+            else
+                setAlpha(linkVisualization, 1 - delta / fadeOutTime);
+        }
+        for (auto linkVisualization : removedLinkVisualizations) {
+            const_cast<LinkVisualizerBase *>(this)->removeLinkVisualization(linkVisualization);
+            delete linkVisualization;
+        }
     }
-    for (auto link : removedLinks) {
-        const_cast<LinkVisualizerBase *>(this)->removeLink(link);
-        delete link;
+}
+
+void LinkVisualizerBase::subscribe()
+{
+    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
+    subscriptionModule->subscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
+    subscriptionModule->subscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
+}
+
+void LinkVisualizerBase::unsubscribe()
+{
+    // NOTE: lookup the module again because it may have been deleted first
+    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
+    if (subscriptionModule != nullptr) {
+        subscriptionModule->unsubscribe(LayeredProtocolBase::packetSentToUpperSignal, this);
+        subscriptionModule->unsubscribe(LayeredProtocolBase::packetReceivedFromUpperSignal, this);
     }
 }
 
-const LinkVisualizerBase::Link *LinkVisualizerBase::getLink(std::pair<int, int> link)
+const LinkVisualizerBase::LinkVisualization *LinkVisualizerBase::getLinkVisualization(std::pair<int, int> linkVisualization)
 {
-    auto it = links.find(link);
-    return it == links.end() ? nullptr : it->second;
+    auto it = linkVisualizations.find(linkVisualization);
+    return it == linkVisualizations.end() ? nullptr : it->second;
 }
 
-void LinkVisualizerBase::addLink(std::pair<int, int> sourceAndDestination, const Link *link)
+void LinkVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization)
 {
-    links[sourceAndDestination] = link;
+    linkVisualizations[sourceAndDestination] = linkVisualization;
 }
 
-void LinkVisualizerBase::removeLink(const Link *link)
+void LinkVisualizerBase::removeLinkVisualization(const LinkVisualization *linkVisualization)
 {
-    links.erase(links.find(std::pair<int, int>(link->sourceModuleId, link->destinationModuleId)));
+    linkVisualizations.erase(linkVisualizations.find(std::pair<int, int>(linkVisualization->sourceModuleId, linkVisualization->destinationModuleId)));
+}
+
+void LinkVisualizerBase::removeAllLinkVisualizations()
+{
+    lastModules.clear();
+    std::vector<const LinkVisualization *> removedLinkVisualizations;
+    for (auto it : linkVisualizations)
+        removedLinkVisualizations.push_back(it.second);
+    for (auto it : removedLinkVisualizations) {
+        removeLinkVisualization(it);
+        delete it;
+    }
 }
 
 cModule *LinkVisualizerBase::getLastModule(int treeId)
@@ -100,52 +165,53 @@ void LinkVisualizerBase::removeLastModule(int treeId)
     lastModules.erase(lastModules.find(treeId));
 }
 
-void LinkVisualizerBase::updateLink(cModule *source, cModule *destination)
+void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *destination)
 {
     auto key = std::pair<int, int>(source->getId(), destination->getId());
-    auto link = getLink(key);
-    if (link == nullptr) {
-        link = createLink(source, destination);
-        addLink(key, link);
+    auto linkVisualization = getLinkVisualization(key);
+    if (linkVisualization == nullptr) {
+        linkVisualization = createLinkVisualization(source, destination);
+        addLinkVisualization(key, linkVisualization);
     }
-    else
-        link->lastUsage = simTime();
+    else {
+        linkVisualization->lastUsageAnimationPosition = AnimationPosition();
+    }
 }
 
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
-        auto position = mobility->getCurrentPosition();
-        auto module = check_and_cast<cModule *>(source);
-        auto node = getContainingNode(module);
-        setPosition(node, position);
-    }
-    else if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
+    Enter_Method_Silent();
+    if (signal == LayeredProtocolBase::packetReceivedFromUpperSignal) {
         if (isLinkEnd(static_cast<cModule *>(source))) {
+            auto module = check_and_cast<cModule *>(source);
+            auto networkNode = getContainingNode(module);
+            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (packetNameMatcher.matches(packet->getFullName())) {
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
-                auto module = check_and_cast<cModule *>(source);
                 setLastModule(treeId, module);
             }
         }
     }
     else if (signal == LayeredProtocolBase::packetSentToUpperSignal) {
         if (isLinkEnd(static_cast<cModule *>(source))) {
+            auto module = check_and_cast<cModule *>(source);
+            auto networkNode = getContainingNode(module);
+            auto interfaceEntry = getInterfaceEntry(networkNode, module);
             auto packet = check_and_cast<cPacket *>(object);
-            if (packetNameMatcher.matches(packet->getFullName())) {
+            if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
                 auto treeId = packet->getTreeId();
-                auto module = check_and_cast<cModule *>(source);
                 auto lastModule = getLastModule(treeId);
                 if (lastModule != nullptr) {
-                    updateLink(getContainingNode(lastModule), getContainingNode(module));
+                    updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module));
                     // TODO: breaks due to multiple recipient?
                     // removeLastModule(treeId);
                 }
             }
         }
     }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace visualizer

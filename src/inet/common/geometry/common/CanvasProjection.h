@@ -26,17 +26,21 @@ class INET_API CanvasProjection
 {
   protected:
     Rotation rotation;
+    cFigure::Point scale;
     cFigure::Point translation;
 
     static CanvasProjection defaultCanvasProjection;
     static std::map<const cCanvas *, const CanvasProjection *> canvasProjections;
 
   public:
-    CanvasProjection() {}
+    CanvasProjection() : scale(cFigure::Point(1, 1)) {}
     CanvasProjection(Rotation rotation, cFigure::Point translation);
 
     const Rotation& getRotation() const { return rotation; }
     void setRotation(const Rotation& rotation) { this->rotation = rotation; }
+
+    const cFigure::Point& getScale() const { return scale; }
+    void setScale(const cFigure::Point& scale) { this->scale = scale; }
 
     const cFigure::Point& getTranslation() const { return translation; }
     void setTranslation(const cFigure::Point& translation) { this->translation = translation; }

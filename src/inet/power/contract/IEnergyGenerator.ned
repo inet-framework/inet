@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,11 +23,11 @@ package inet.power.contract;
 // panel's position on the globe, its orientation towards the sun and the actual
 // weather conditions.
 //
+// @see ~IEnergyConsumer, ~IEnergySource, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement
 // @author Levente Meszaros
 //
 moduleinterface IEnergyGenerator
 {
     parameters:
         @display("i=block/plug");
-        @signal[powerGenerationChanged](type=double);
 }

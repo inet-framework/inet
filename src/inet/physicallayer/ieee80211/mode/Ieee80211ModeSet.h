@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ModeSet : public IPrintableObject
+class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 {
   protected:
     class INET_API Entry
@@ -55,7 +55,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
-    const char *getName() const { return name.c_str(); }
+    const char *getName() const override { return name.c_str(); }
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
@@ -73,6 +73,12 @@ class INET_API Ieee80211ModeSet : public IPrintableObject
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);
+
+    simtime_t getSifsTime() const { return entries[0].mode->getSifsTime(); }
+    simtime_t getSlotTime() const { return entries[0].mode->getSlotTime(); }
+    simtime_t getPhyRxStartDelay() const { return entries[0].mode->getPhyRxStartDelay(); }
+    int getCwMin() const { return entries[0].mode->getLegacyCwMin(); }
+    int getCwMax() const { return entries[0].mode->getLegacyCwMax(); }
 };
 
 } // namespace physicallayer

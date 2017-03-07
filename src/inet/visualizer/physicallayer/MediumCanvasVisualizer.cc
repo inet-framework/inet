@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,7 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/figures/LabeledIconFigure.h"
+#include "inet/common/figures/SignalFigure.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"
 
 namespace inet {
@@ -24,16 +28,12 @@ namespace visualizer {
 
 Define_Module(MediumCanvasVisualizer);
 
-MediumCanvasVisualizer::~MediumCanvasVisualizer()
-{
-    cancelAndDelete(signalPropagationUpdateTimer);
-}
-
 void MediumCanvasVisualizer::initialize(int stage)
 {
     MediumVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
+        zIndex = par("zIndex");
         const char *signalShapeString = par("signalShape");
         if (!strcmp(signalShapeString, "ring"))
             signalShape = SIGNAL_SHAPE_RING;
@@ -41,22 +41,30 @@ void MediumCanvasVisualizer::initialize(int stage)
             signalShape = SIGNAL_SHAPE_SPHERE;
         else
             throw cRuntimeError("Unknown signalShape parameter value: '%s'", signalShapeString);
+        signalOpacity = par("signalOpacity");
+        signalRingCount = par("signalRingCount");
+        signalRingSize = par("signalRingSize");
+        signalFadingDistance = par("signalFadingDistance");
+        signalFadingFactor = par("signalFadingFactor");
+        signalWaveCount = par("signalWaveCount");
+        signalWaveLength = par("signalWaveLength");
+        signalWaveWidth = par("signalWaveWidth");
+        signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
         if (displaySignals) {
-            communicationLayer = new cGroupFigure("communication");
-            communicationLayer->insertBelow(canvas->getSubmodulesLayer());
-        }
-        if (displayRadioFrames) {
-            radioFrameLayer = new cGroupFigure("radioFrameLayer");
-            radioFrameLayer->insertAbove(canvas->getSubmodulesLayer());
+            signalLayer = new cGroupFigure("communication");
+            signalLayer->setZIndex(zIndex);
+            signalLayer->insertBelow(canvas->getSubmodulesLayer());
         }
         displayCommunicationHeat = par("displayCommunicationHeat");
         if (displayCommunicationHeat) {
             communicationHeat = new HeatMapFigure(communicationHeatMapSize, "communication heat");
+            communicationHeat->setZIndex(zIndex);
             communicationHeat->setTags("successful_reception heat");
             canvas->addFigure(communicationHeat, 0);
         }
-        signalPropagationUpdateTimer = new cMessage("signalPropagation");
+        animationSpeedInterpolator.setCurrentAnimationSpeed(0);
+        animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, 0, 0);
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
     }
     else if (stage == INITSTAGE_LAST) {
@@ -82,220 +90,395 @@ void MediumCanvasVisualizer::initialize(int stage)
     }
 }
 
-void MediumCanvasVisualizer::handleMessage(cMessage *message)
+void MediumCanvasVisualizer::refreshDisplay() const
 {
-    if (message == signalPropagationUpdateTimer)
-        scheduleSignalPropagationUpdateTimer();
-    else
-        throw cRuntimeError("Unknown message");
+    if (displaySignals) {
+        for (auto transmission : transmissions)
+            if (matchesTransmission(transmission))
+                refreshSignalFigure(transmission);
+        const_cast<MediumCanvasVisualizer *>(this)->setAnimationSpeed();
+    }
+    if (displayCommunicationHeat)
+        communicationHeat->coolDown();
 }
 
-cFigure *MediumCanvasVisualizer::getCachedFigure(const ITransmission *transmission) const
+void MediumCanvasVisualizer::setAnimationSpeed()
 {
-    auto it = transmissionFigures.find(transmission);
-    if (it == transmissionFigures.end())
+    SignalInProgress newSignalInProgress = SIP_NONE;
+    double newSignalTransmissionAnimationSpeed = DBL_MAX;
+    for (auto transmission : transmissions) {
+        if (matchesTransmission(transmission)) {
+            if (isSignalPropagationInProgress(transmission))
+                newSignalInProgress = SIP_PROPAGATION;
+            if (isSignalTransmissionInProgress(transmission)) {
+                if (newSignalInProgress == SIP_NONE)
+                    newSignalInProgress = SIP_TRANSMISSION;
+                // TODO: overwrite only...
+                if (std::isnan(signalTransmissionAnimationSpeed))
+                    newSignalTransmissionAnimationSpeed = std::min(newSignalTransmissionAnimationSpeed, transmission->getDuration().dbl() / signalTransmissionAnimationTime);
+            }
+        }
+    }
+    if (newSignalTransmissionAnimationSpeed != DBL_MAX)
+        defaultSignalTransmissionAnimationSpeed = newSignalTransmissionAnimationSpeed;
+    double currentSignalPropagationAnimationSpeed = std::isnan(signalPropagationAnimationSpeed) ? defaultSignalPropagationAnimationSpeed : signalPropagationAnimationSpeed;
+    double currentSignalTransmissionAnimationSpeed = std::isnan(signalTransmissionAnimationSpeed) ? defaultSignalTransmissionAnimationSpeed : signalTransmissionAnimationSpeed;
+    AnimationPosition currentPosition;
+    if (lastSignalInProgress == SIP_NONE) {
+        if (newSignalInProgress == SIP_NONE) {
+            if (animationSpeedInterpolator.getCurrentAnimationSpeed() == animationSpeedInterpolator.getTargetAnimationSpeed())
+                animationSpeedInterpolator.setAnimationSpeed(0);
+        }
+        else if (newSignalInProgress == SIP_PROPAGATION)
+            animationSpeedInterpolator.setAnimationSpeed(currentSignalPropagationAnimationSpeed);
+        else if (newSignalInProgress == SIP_TRANSMISSION)
+            animationSpeedInterpolator.setAnimationSpeed(currentSignalTransmissionAnimationSpeed);
+    }
+    else if (lastSignalInProgress == SIP_PROPAGATION) {
+        if (newSignalInProgress == SIP_NONE) {
+            animationSpeedInterpolator.setCurrentAnimationSpeed(currentSignalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
+        }
+        else if (newSignalInProgress == SIP_PROPAGATION)
+            ; // void
+        else if (newSignalInProgress == SIP_TRANSMISSION) {
+            animationSpeedInterpolator.setCurrentAnimationSpeed(currentSignalPropagationAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
+        }
+    }
+    else if (lastSignalInProgress == SIP_TRANSMISSION) {
+        if (newSignalInProgress == SIP_NONE)
+            animationSpeedInterpolator.setAnimationSpeed(0);
+        else if (newSignalInProgress == SIP_PROPAGATION)
+            animationSpeedInterpolator.setAnimationSpeed(currentSignalPropagationAnimationSpeed);
+        else if (newSignalInProgress == SIP_TRANSMISSION)
+            ; // void
+    }
+    lastSignalInProgress = newSignalInProgress;
+    double animationSpeed = animationSpeedInterpolator.getCurrentAnimationSpeed();
+    ASSERT(!std::isnan(animationSpeed));
+    visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
+}
+
+cFigure *MediumCanvasVisualizer::getRadioFigure(const IRadio *radio) const
+{
+    auto it = radioFigures.find(radio);
+    if (it == radioFigures.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MediumCanvasVisualizer::setCachedFigure(const ITransmission *transmission, cFigure *figure)
+void MediumCanvasVisualizer::setRadioFigure(const IRadio *radio, cFigure *figure)
 {
-    transmissionFigures[transmission] = figure;
+    radioFigures[radio] = figure;
 }
 
-void MediumCanvasVisualizer::removeCachedFigure(const ITransmission *transmission)
+cFigure *MediumCanvasVisualizer::removeRadioFigure(const IRadio *radio)
 {
-    transmissionFigures.erase(transmission);
+    auto it = radioFigures.find(radio);
+    if (it == radioFigures.end())
+        return nullptr;
+    else {
+        radioFigures.erase(it);
+        return it->second;
+    }
+}
+
+cFigure *MediumCanvasVisualizer::getSignalFigure(const ITransmission *transmission) const
+{
+    auto it = signalFigures.find(transmission);
+    if (it == signalFigures.end())
+        return nullptr;
+    else
+        return it->second;
+}
+
+void MediumCanvasVisualizer::setSignalFigure(const ITransmission *transmission, cFigure *figure)
+{
+    signalFigures[transmission] = figure;
+}
+
+cFigure *MediumCanvasVisualizer::removeSignalFigure(const ITransmission *transmission)
+{
+    auto it = signalFigures.find(transmission);
+    if (it == signalFigures.end())
+        return nullptr;
+    else {
+        signalFigures.erase(it);
+        return it->second;
+    }
+}
+
+cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* transmission) const
+{
+    cFigure::Point position = canvasProjection->computeCanvasPoint( transmission->getStartPosition());
+    cGroupFigure* groupFigure = new cGroupFigure("signal");
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());
+    SignalFigure* signalFigure = new SignalFigure("bubble");
+    signalFigure->setTags("propagating_signal");
+    signalFigure->setTooltip("These rings represents a signal propagating through the medium");
+    signalFigure->setAssociatedObject(const_cast<cObject *>(check_and_cast<const cObject *>(transmission)));
+    signalFigure->setRingCount(signalRingCount);
+    signalFigure->setRingSize(signalRingSize);
+    signalFigure->setFadingDistance(signalFadingDistance);
+    signalFigure->setFadingFactor(signalFadingFactor);
+    signalFigure->setWaveCount(signalWaveCount);
+    signalFigure->setWaveLength(signalWaveLength);
+    signalFigure->setWaveWidth(signalWaveWidth);
+    signalFigure->setOpacity(signalOpacity);
+    signalFigure->setColor(color);
+    signalFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
+    signalFigure->refresh();
+    groupFigure->addFigure(signalFigure);
+    cLabelFigure* nameFigure = new cLabelFigure("packet name");
+    nameFigure->setPosition(position);
+    nameFigure->setTags("propagating_signal packet_name label");
+    nameFigure->setText(transmission->getMacFrame()->getName());
+    nameFigure->setColor(color);
+    groupFigure->addFigure(nameFigure);
+    return groupFigure;
+}
+
+void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmission) const
+{
+    const IPropagation *propagation = radioMedium->getPropagation();
+    cFigure *groupFigure = getSignalFigure(transmission);
+    double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
+    double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
+    if (groupFigure) {
+        SignalFigure *signalFigure = static_cast<SignalFigure *>(groupFigure->getFigure(0));
+        cLabelFigure *labelFigure = static_cast<cLabelFigure *>(groupFigure->getFigure(1));
+        double phi = transmission->getId();
+        labelFigure->setTransform(cFigure::Transform().translate(endRadius * sin(phi), endRadius * cos(phi)));
+        const Coord transmissionStart = transmission->getStartPosition();
+        // KLUDGE: to workaround overflow bugs in drawing
+        double offset = std::fmod(startRadius, signalFigure->getWaveLength());
+        if (startRadius > 10000)
+            startRadius = 10000;
+        if (endRadius > 10000)
+            endRadius = 10000;
+        switch (signalShape) {
+            case SIGNAL_SHAPE_RING: {
+                // determine the rotated 2D canvas points by computing the 2D affine transformation from the 3D transformation of the environment
+                cFigure::Point o = canvasProjection->computeCanvasPoint(transmissionStart);
+                cFigure::Point x = canvasProjection->computeCanvasPoint(transmissionStart + Coord(1, 0, 0));
+                cFigure::Point y = canvasProjection->computeCanvasPoint(transmissionStart + Coord(0, 1, 0));
+                double t1 = o.x;
+                double t2 = o.y;
+                double a = x.x - t1;
+                double b = x.y - t2;
+                double c = y.x - t1;
+                double d = y.y - t2;
+                signalFigure->setTransform(cFigure::Transform(a, b, c, d, t1, t2));
+                signalFigure->setBounds(cFigure::Rectangle(-startRadius, -startRadius, startRadius * 2, startRadius * 2));
+                signalFigure->setInnerRx(endRadius);
+                signalFigure->setInnerRy(endRadius);
+                signalFigure->setWaveOffset(offset);
+                double currentSignalPropagationAnimationSpeed = std::isnan(signalPropagationAnimationSpeed) ? defaultSignalPropagationAnimationSpeed : signalPropagationAnimationSpeed;
+                signalFigure->setWaveOpacityFactor(std::min(1.0, currentSignalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor));
+                signalFigure->refresh();
+                break;
+            }
+            case SIGNAL_SHAPE_SPHERE: {
+                // a sphere looks like a circle from any view angle
+                cFigure::Point center = canvasProjection->computeCanvasPoint(transmissionStart);
+                signalFigure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
+                signalFigure->setInnerRx(endRadius);
+                signalFigure->setInnerRy(endRadius);
+                break;
+            }
+            default:
+                throw cRuntimeError("Unimplemented signal shape");
+        }
+    }
 }
 
 void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
 {
     Enter_Method_Silent();
     auto module = check_and_cast<const cModule *>(radio);
-    if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
-        auto module = check_and_cast<const cModule *>(radio);
-        auto node = getContainingNode(module);
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
-        auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
-        m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
-        interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRange.get(), -maxInterferenceRange.get(), 2 * maxInterferenceRange.get(), 2 * maxInterferenceRange.get()));
-        interferenceRangeFigure->setLineColor(interferenceRangeColor);
-        networkNodeVisualization->addFigure(interferenceRangeFigure);
-    }
-    if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
-        auto module = check_and_cast<const cModule *>(radio);
-        auto node = getContainingNode(module);
-        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(node);
-        auto communicationRangeFigure = new cOvalFigure("communicationRange");
-        m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
-        communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
-        communicationRangeFigure->setLineColor(communicationRangeColor);
-        networkNodeVisualization->addFigure(communicationRangeFigure);
+    auto networkNode = getContainingNode(module);
+    if (networkNodeFilter.matches(networkNode)) {
+        if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
+            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
+            m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
+            interferenceRangeFigure->setTags("interference_range");
+            interferenceRangeFigure->setTooltip("This circle represents the interference range of a wireless interface");
+            interferenceRangeFigure->setBounds(cFigure::Rectangle(-maxInterferenceRange.get(), -maxInterferenceRange.get(), 2 * maxInterferenceRange.get(), 2 * maxInterferenceRange.get()));
+            interferenceRangeFigure->setLineColor(interferenceRangeLineColor);
+            interferenceRangeFigure->setLineStyle(interferenceRangeLineStyle);
+            interferenceRangeFigure->setLineWidth(interferenceRangeLineWidth);
+            networkNodeVisualization->addFigure(interferenceRangeFigure);
+        }
+        if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
+            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto communicationRangeFigure = new cOvalFigure("communicationRange");
+            m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
+            communicationRangeFigure->setTags("communication_range");
+            communicationRangeFigure->setTooltip("This circle represents the communication range of a wireless interface");
+            communicationRangeFigure->setBounds(cFigure::Rectangle(-maxCommunicationRange.get(), -maxCommunicationRange.get(), 2 * maxCommunicationRange.get(), 2 * maxCommunicationRange.get()));
+            communicationRangeFigure->setLineColor(communicationRangeLineColor);
+            communicationRangeFigure->setLineStyle(communicationRangeLineStyle);
+            communicationRangeFigure->setLineWidth(communicationRangeLineWidth);
+            networkNodeVisualization->addFigure(communicationRangeFigure);
+        }
+        if (displayTransmissions || displayReceptions) {
+            auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(networkNode);
+            auto group = new cGroupFigure("activity");
+            cFigure::Rectangle bounds;
+            if (displayTransmissions) {
+                std::string imageName = par("transmissionImage");
+                auto transmissionFigure = new LabeledIconFigure("transmission");
+                transmissionFigure->setTags("transmission");
+                transmissionFigure->setTooltip("This icon represents an ongoing transmission in a wireless interface");
+                transmissionFigure->setVisible(false);
+                auto iconFigure = transmissionFigure->getIconFigure();
+                iconFigure->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
+                iconFigure->setAnchor(cFigure::ANCHOR_NW);
+                auto labelFigure = transmissionFigure->getLabelFigure();
+                labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
+                group->addFigure(transmissionFigure);
+                bounds = transmissionFigure->getBounds();
+            }
+            if (displayReceptions) {
+                std::string imageName = par("receptionImage");
+                auto receptionFigure = new LabeledIconFigure("reception");
+                receptionFigure->setTags("reception");
+                receptionFigure->setTooltip("This icon represents an ongoing reception in a wireless interface");
+                receptionFigure->setVisible(false);
+                auto iconFigure = receptionFigure->getIconFigure();
+                iconFigure->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
+                iconFigure->setAnchor(cFigure::ANCHOR_NW);
+                auto labelFigure = receptionFigure->getLabelFigure();
+                labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
+                group->addFigure(receptionFigure);
+                bounds = receptionFigure->getBounds();
+            }
+            networkNodeVisualization->addAnnotation(group, bounds.getSize());
+            setRadioFigure(radio, group);
+        }
     }
 }
 
 void MediumCanvasVisualizer::radioRemoved(const IRadio *radio)
 {
     Enter_Method_Silent();
+    auto figure = removeRadioFigure(radio);
+    if (figure != nullptr) {
+        auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
+        auto networkNodeVisualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
+        networkNodeVisualization->removeAnnotation(figure);
+    }
 }
 
 void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
-    if (displaySignals) {
+    if (displaySignals && matchesTransmission(transmission)) {
         transmissions.push_back(transmission);
-        cFigure::Point position = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
-        cGroupFigure *groupFigure = new cGroupFigure("signal");
-        cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-        cRingFigure *communicationFigure = new cRingFigure("bubble");
-        communicationFigure->setTags("ongoing_transmission");
-        communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
-        communicationFigure->setFillColor(color);
-        communicationFigure->setLineWidth(1);
-        communicationFigure->setLineColor(cFigure::BLACK);
-        groupFigure->addFigure(communicationFigure);
-        communicationFigure->setFilled(true);
-        communicationFigure->setFillOpacity(0.5);
-        communicationFigure->setLineOpacity(0.5);
-        communicationFigure->setZoomLineWidth(false);
-        cLabelFigure *nameFigure = new cLabelFigure("name");
-        nameFigure->setPosition(position);
-        nameFigure->setTags("ongoing_transmission packet_name label");
-        nameFigure->setText(transmission->getMacFrame()->getName());
-        nameFigure->setColor(color);
-        groupFigure->addFigure(nameFigure);
-        communicationLayer->addFigure(groupFigure);
-        setCachedFigure(transmission, groupFigure);
-        if (signalPropagationUpdateInterval > 0)
-            scheduleSignalPropagationUpdateTimer();
+        cGroupFigure *signalFigure = createSignalFigure(transmission);
+        signalLayer->addFigure(signalFigure);
+        setSignalFigure(transmission, signalFigure);
+        setAnimationSpeed();
     }
 }
 
 void MediumCanvasVisualizer::transmissionRemoved(const ITransmission *transmission)
 {
     Enter_Method_Silent();
-    if (displaySignals) {
+    if (displaySignals && matchesTransmission(transmission)) {
         transmissions.erase(std::remove(transmissions.begin(), transmissions.end(), transmission));
-        cFigure *figure = getCachedFigure(transmission);
-        removeCachedFigure(transmission);
-        if (figure != nullptr)
-            delete communicationLayer->removeFigure(figure);
+        cFigure *signalFigure = getSignalFigure(transmission);
+        removeSignalFigure(transmission);
+        if (signalFigure != nullptr)
+            delete signalLayer->removeFigure(signalFigure);
+        setAnimationSpeed();
     }
 }
 
 void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmission)
 {
     Enter_Method_Silent();
+    if (matchesTransmission(transmission)) {
+        if (displaySignals)
+            setAnimationSpeed();
+        if (displayTransmissions) {
+            auto transmitter = transmission->getTransmitter();
+            auto figure = getRadioFigure(transmitter);
+            figure->getFigure(0)->setVisible(true);
+            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(0))->getLabelFigure();
+            if (auto scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission)) {
+                char tmp[32];
+                sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarTransmission->getPower()).get()));
+                labelFigure->setText(tmp);
+            }
+            else
+                labelFigure->setText("");
+        }
+    }
 }
 
 void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
+    if (matchesTransmission(transmission)) {
+        if (displaySignals)
+            setAnimationSpeed();
+        if (displayTransmissions) {
+            auto transmitter = transmission->getTransmitter();
+            auto figure = getRadioFigure(transmitter);
+            figure->getFigure(0)->setVisible(false);
+        }
+    }
 }
 
 void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
 {
     Enter_Method_Silent();
-    const ITransmission *transmission = reception->getTransmission();
-    if (displayRadioFrames) {
-        cLineFigure *communicationFigure = new cLineFigure("signal");
-        communicationFigure->setTags("radio_frame recent_history");
-        cFigure::Point start = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
-        cFigure::Point end = canvasProjection->computeCanvasPoint(reception->getStartPosition());
-        communicationFigure->setStart(start);
-        communicationFigure->setEnd(end);
-        communicationFigure->setLineColor(radioFrameLineColor);
-        communicationFigure->setEndArrowhead(cFigure::ARROW_BARBED);
-        communicationFigure->setLineWidth(1);
-        communicationFigure->setZoomLineWidth(false);
-        radioFrameLayer->addFigure(communicationFigure);
-    }
-    if (displayCommunicationHeat) {
-        const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
-        Coord min = mediumLimitCache->getMinConstraintArea();
-        Coord max = mediumLimitCache->getMaxConstraintArea();
-        Coord delta = max - min;
-        int x1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().x - min.x) / delta.x));
-        int y1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().y - min.x) / delta.y));
-        int x2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().x - min.x) / delta.x));
-        int y2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().y - min.y) / delta.y));
-        communicationHeat->heatLine(x1, y1, x2, y2);
+    if (matchesTransmission(reception->getTransmission())) {
+        if (displaySignals)
+            setAnimationSpeed();
+        if (displayReceptions) {
+            auto receiver = reception->getReceiver();
+            auto figure = getRadioFigure(receiver);
+            figure->getFigure(1)->setVisible(true);
+            auto labelFigure = check_and_cast<LabeledIconFigure *>(figure->getFigure(1))->getLabelFigure();
+            if (auto scalarReception = dynamic_cast<const ScalarReception *>(reception)) {
+                char tmp[32];
+                sprintf(tmp, "%.4g dBW", inet::math::fraction2dB(W(scalarReception->getPower()).get()));
+                labelFigure->setText(tmp);
+            }
+            else
+                labelFigure->setText("");
+        }
+        if (displayCommunicationHeat) {
+            const ITransmission *transmission = reception->getTransmission();
+            const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
+            Coord min = mediumLimitCache->getMinConstraintArea();
+            Coord max = mediumLimitCache->getMaxConstraintArea();
+            Coord delta = max - min;
+            int x1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().x - min.x) / delta.x));
+            int y1 = std::round((communicationHeatMapSize - 1) * ((transmission->getStartPosition().y - min.x) / delta.y));
+            int x2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().x - min.x) / delta.x));
+            int y2 = std::round((communicationHeatMapSize - 1) * ((reception->getStartPosition().y - min.y) / delta.y));
+            communicationHeat->heatLine(x1, y1, x2, y2);
+        }
     }
 }
 
 void MediumCanvasVisualizer::receptionEnded(const IReception *reception)
 {
     Enter_Method_Silent();
-}
-
-void MediumCanvasVisualizer::refreshDisplay() const
-{
-    if (displaySignals) {
-        const IPropagation *propagation = radioMedium->getPropagation();
-        if (communicationHeat != nullptr)
-            communicationHeat->coolDown();
-        for (const auto transmission : transmissions) {
-            cFigure *groupFigure = getCachedFigure(transmission);
-            double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
-            double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
-            if (groupFigure) {
-                cRingFigure *communicationFigure = static_cast<cRingFigure *>(groupFigure->getFigure(0));
-                cLabelFigure *labelFigure = static_cast<cLabelFigure *>(groupFigure->getFigure(1));
-                double phi = transmission->getId();
-                labelFigure->setTransform(cFigure::Transform().translate(endRadius * sin(phi), endRadius * cos(phi)));
-                const Coord transmissionStart = transmission->getStartPosition();
-                // KLUDGE: to workaround overflow bugs in drawing
-                if (startRadius > 10000)
-                    startRadius = 10000;
-                if (endRadius > 10000)
-                    endRadius = 10000;
-                switch (signalShape) {
-                    case SIGNAL_SHAPE_RING: {
-                        // determine the rotated 2D canvas points by computing the 2D affine trasnformation from the 3D transformation of the environment
-                        cFigure::Point o = canvasProjection->computeCanvasPoint(transmissionStart);
-                        cFigure::Point x = canvasProjection->computeCanvasPoint(transmissionStart + Coord(1, 0, 0));
-                        cFigure::Point y = canvasProjection->computeCanvasPoint(transmissionStart + Coord(0, 1, 0));
-                        double t1 = o.x;
-                        double t2 = o.y;
-                        double a = x.x - t1;
-                        double b = x.y - t2;
-                        double c = y.x - t1;
-                        double d = y.y - t2;
-                        communicationFigure->setTransform(cFigure::Transform(a, b, c, d, t1, t2));
-                        communicationFigure->setBounds(cFigure::Rectangle(-startRadius, -startRadius, startRadius * 2, startRadius * 2));
-                        communicationFigure->setInnerRx(endRadius);
-                        communicationFigure->setInnerRy(endRadius);
-                        break;
-                    }
-                    case SIGNAL_SHAPE_SPHERE: {
-                        // a sphere looks like a circle from any view angle
-                        cFigure::Point center = canvasProjection->computeCanvasPoint(transmissionStart);
-                        communicationFigure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
-                        communicationFigure->setInnerRx(endRadius);
-                        communicationFigure->setInnerRy(endRadius);
-                        break;
-                    }
-                    default:
-                        throw cRuntimeError("Unimplemented signal shape");
-                }
-            }
+    if (matchesTransmission(reception->getTransmission())) {
+        if (displaySignals)
+            setAnimationSpeed();
+        if (displayReceptions) {
+            auto receiver = reception->getReceiver();
+            auto figure = getRadioFigure(receiver);
+            figure->getFigure(1)->setVisible(false);
         }
-    }
-}
-
-void MediumCanvasVisualizer::scheduleSignalPropagationUpdateTimer()
-{
-    if (signalPropagationUpdateTimer->isScheduled())
-        cancelEvent(signalPropagationUpdateTimer);
-    simtime_t earliestUpdateTime = SimTime::getMaxTime();
-    for (auto transmission : transmissions) {
-        simtime_t nextSignalPropagationUpdateTime = getNextSignalPropagationUpdateTime(transmission);
-        if (nextSignalPropagationUpdateTime < earliestUpdateTime)
-            earliestUpdateTime = nextSignalPropagationUpdateTime;
-    }
-    if (earliestUpdateTime != SimTime::getMaxTime()) {
-        scheduleAt(earliestUpdateTime, signalPropagationUpdateTimer);
     }
 }
 

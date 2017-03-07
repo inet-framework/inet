@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,8 +18,9 @@
 #ifndef __INET_STATISTICVISUALIZERBASE_H
 #define __INET_STATISTICVISUALIZERBASE_H
 
-#include "inet/common/PatternMatcher.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -41,51 +42,74 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         double getLastValue() const { return lastValue; }
     };
 
-    class CacheEntry {
+    class StatisticVisualization {
       public:
         LastValueRecorder *recorder = nullptr;
+        const int moduleId = -1;
+        const simsignal_t signal = -1;
         const char *unit = nullptr;
+        mutable double printValue = NaN;
+        mutable const char *printUnit = nullptr;
 
       public:
-        CacheEntry(const char *unit);
+        StatisticVisualization(int moduleId, simsignal_t signal, const char *unit);
+    };
+
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const StatisticVisualizerBase *visualizer = nullptr;
+        const StatisticVisualization *visualization = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(const StatisticVisualizerBase *visualizer, const StatisticVisualization *visualization) : visualizer(visualizer), visualization(visualization) { }
+
+        virtual const char *resolveDirective(char directive) override;
     };
 
   protected:
     /** @name Parameters */
     //@{
-    cModule *subscriptionModule = nullptr;
-    PatternMatcher sourcePathMatcher;
+    bool displayStatistics = false;
+    ModuleFilter sourceFilter;
     const char *signalName = nullptr;
     const char *statisticName = nullptr;
-    const char *unit = nullptr;
-    const char *prefix = nullptr;
-    cFigure::Color color;
+    StringFormat format;
+    std::vector<std::string> units;
     double minValue = NaN;
     double maxValue = NaN;
+    cFigure::Font font;
+    cFigure::Color textColor;
+    cFigure::Color backgroundColor;
+    double opacity = NaN;
     //@}
 
-    /**
-     * Maps module and signal pair to statistic.
-     */
-    std::map<std::pair<int, int>, CacheEntry *> cacheEntries;
+    std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
+
+    virtual void subscribe();
+    virtual void unsubscribe();
 
     virtual cResultFilter *findResultFilter(cComponent *source, simsignal_t signal);
     virtual cResultFilter *findResultFilter(cResultFilter *parentResultFilter, cResultListener *resultListener);
-    virtual std::string getText(CacheEntry *cacheEntry);
+    virtual std::string getText(const StatisticVisualization *statisticVisualization);
     virtual const char *getUnit(cComponent *source);
 
-    virtual CacheEntry *createCacheEntry(cComponent *source, simsignal_t signal) = 0;
-    virtual CacheEntry *getCacheEntry(std::pair<int, int> moduleAndSignal);
-    virtual void addCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry);
-    virtual void removeCacheEntry(std::pair<int, int> moduleAndSignal, CacheEntry *cacheEntry);
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) = 0;
+    virtual const StatisticVisualization *getStatisticVisualization(cComponent *source, simsignal_t signal);
+    virtual void addStatisticVisualization(const StatisticVisualization *statisticVisualization);
+    virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization);
+    virtual void removeAllStatisticVisualizations();
 
-    virtual void refreshStatistic(CacheEntry *cacheEntry) = 0;
+    virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization);
     virtual void processSignal(cComponent *source, simsignal_t signal, double value);
 
   public:
+    virtual ~StatisticVisualizerBase();
+
     virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { processSignal(source, signal, NaN); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details) override { processSignal(source, signal, l); }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details) override { processSignal(source, signal, l); }

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -19,7 +19,6 @@
 #define __INET_SCENEVISUALIZERBASE_H
 
 #include "inet/common/geometry/object/Box.h"
-#include "inet/common/PatternMatcher.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 
 namespace inet {
@@ -29,17 +28,6 @@ namespace visualizer {
 class INET_API SceneVisualizerBase : public VisualizerBase
 {
   protected:
-    simtime_t refreshDisplayInterval = 0;
-    cMessage *refreshDisplayTimer = nullptr;
-
-  protected:
-    virtual ~SceneVisualizerBase();
-
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual void scheduleRefreshDisplay();
-
     virtual Box getPlaygroundBounds();
 };
 
