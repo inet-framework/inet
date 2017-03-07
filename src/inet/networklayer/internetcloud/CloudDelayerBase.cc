@@ -57,7 +57,7 @@ void CloudDelayerBase::finish()
 void CloudDelayerBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        INetworkHeader *context = (INetworkHeader *)msg->getContextPointer();
+        Packet *context = (Packet *)msg->getContextPointer();
         delete msg;
         networkProtocol->reinjectQueuedDatagram(context);
     }
@@ -69,31 +69,30 @@ void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int
     outDelay = SIMTIME_ZERO;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     Enter_Method_Silent();
 
     int srcID = inputInterfaceEntry ? inputInterfaceEntry->getInterfaceId() : -1;
     int destID = outputInterfaceEntry->getInterfaceId();
 
-    cMessage *msg = check_and_cast<cMessage *>(datagram);
     simtime_t propDelay;
     bool isDrop;
-    calculateDropAndDelay(msg, srcID, destID, isDrop, propDelay);
+    calculateDropAndDelay(datagram, srcID, destID, isDrop, propDelay);
     if (isDrop) {
         //TODO emit?
-        EV_INFO << "Message " << msg->str() << " dropped in cloud.\n";
+        EV_INFO << "Message " << datagram->STR_COMPAT() << " dropped in cloud.\n";
         return INetfilter::IHook::DROP;
     }
 
     if (propDelay > SIMTIME_ZERO) {
         //TODO emit?
-        EV_INFO << "Message " << msg->str() << " delayed with " << propDelay * 1000.0 << "ms in cloud.\n";
+        EV_INFO << "Message " << datagram->STR_COMPAT() << " delayed with " << propDelay * 1000.0 << "ms in cloud.\n";
         cMessage *selfmsg = new cMessage("Delay");
         selfmsg->setContextPointer(datagram);
         scheduleAt(simTime() + propDelay, selfmsg);
@@ -102,17 +101,17 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkHeader *
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inputInterfaceEntry)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
