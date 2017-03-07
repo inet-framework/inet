@@ -17,25 +17,27 @@
 
 cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/contract/IMACFrame.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/FieldsChunk.h"
 }}
-
-class noncobject MACAddress;
 
 namespace inet;
 
-packet CsmaCaMacFrame
+class noncobject MACAddress;
+class FieldsChunk extends cObject;
+
+class CsmaCaMacFrame extends FieldsChunk
 {
-    @implements(IMACFrame);
+    bit chunkLength @overridegetter;
     MACAddress transmitterAddress;
     MACAddress receiverAddress;
 }
 
-packet CsmaCaMacAckFrame extends CsmaCaMacFrame
+class CsmaCaMacAckFrame extends CsmaCaMacFrame
 {
 }
 
-packet CsmaCaMacDataFrame extends CsmaCaMacFrame
+class CsmaCaMacDataFrame extends CsmaCaMacFrame
 {
     int priority;  // 802.1d UP (User Priority) 
 }

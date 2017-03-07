@@ -19,10 +19,11 @@
 #define __INET_CSMAMAC_H
 
 #include "inet/common/FSMA.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/base/MACProtocolBase.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/csmaca/CsmaCaMacFrame_m.h"
+#include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
@@ -150,8 +151,8 @@ class INET_API CsmaCaMac : public MACProtocolBase
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
-    virtual CsmaCaMacDataFrame *encapsulate(cPacket *msg);
-    virtual cPacket *decapsulate(CsmaCaMacDataFrame *frame);
+    virtual void encapsulate(Packet *packet);
+    virtual void decapsulate(Packet *packet);
     //@}
 
     /**
@@ -159,12 +160,12 @@ class INET_API CsmaCaMac : public MACProtocolBase
      * @brief These functions have the side effect of starting the corresponding timers.
      */
     //@{
-    virtual void scheduleSifsTimer(CsmaCaMacFrame *frame);
+    virtual void scheduleSifsTimer(Packet *frame);
 
     virtual void scheduleDifsTimer();
     virtual void cancelDifsTimer();
 
-    virtual void scheduleAckTimeout(CsmaCaMacDataFrame *frame);
+    virtual void scheduleAckTimeout(Packet *frame);
     virtual void cancelAckTimer();
 
     virtual void invalidateBackoffPeriod();
@@ -179,7 +180,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
      * @name Frame transmission functions
      */
     //@{
-    virtual void sendDataFrame(CsmaCaMacDataFrame *frameToSend);
+    virtual void sendDataFrame(Packet *frameToSend);
     virtual void sendAckFrame();
     //@}
 
@@ -190,7 +191,7 @@ class INET_API CsmaCaMac : public MACProtocolBase
     virtual void finishCurrentTransmission();
     virtual void giveUpCurrentTransmission();
     virtual void retryCurrentTransmission();
-    virtual CsmaCaMacDataFrame *getCurrentTransmission();
+    virtual Packet *getCurrentTransmission();
     virtual void popTransmissionQueue();
     virtual void resetStateVariables();
 
