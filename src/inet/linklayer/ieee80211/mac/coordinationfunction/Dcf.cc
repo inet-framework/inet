@@ -32,7 +32,7 @@ void Dcf::initialize(int stage)
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER_2) {
         startRxTimer = new cMessage("startRxTimeout");
-        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this));
+        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         dataAndMgmtRateControl = dynamic_cast<IRateControl *>(getSubmodule(("rateControl")));
         tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
