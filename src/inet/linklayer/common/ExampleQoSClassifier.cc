@@ -72,18 +72,21 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
         return UP_BE;
 
 #ifdef WITH_UDP
-    UDPHeader *udp = dynamic_cast<UDPHeader *>(ipData->getEncapsulatedPacket());
-    if (udp) {
-        if (udp->getDestinationPort() == 21 || udp->getSourcePort() == 21)
-            return UP_BK;
-        if (udp->getDestinationPort() == 80 || udp->getSourcePort() == 80)
-            return UP_BE;
-        if (udp->getDestinationPort() == 4000 || udp->getSourcePort() == 4000)
-            return UP_VI;
-        if (udp->getDestinationPort() == 5000 || udp->getSourcePort() == 5000)
-            return UP_VO;
-        if (udp->getDestinationPort() == 6000 || udp->getSourcePort() == 6000) // not classified
-            return -1;
+    if (FlatPacket *udpPacket = dynamic_cast<FlatPacket*>(ipData->getEncapsulatedPacket())) {
+        if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(udpPacket->peekHeader())) {
+            unsigned int srcPort = udpHeader->getSourcePort();
+            unsigned int destPort = udpHeader->getDestinationPort();
+            if (destPort == 21 || srcPort == 21)
+                return UP_BK;
+            if (destPort == 80 || srcPort == 80)
+                return UP_BE;
+            if (destPort == 4000 || srcPort == 4000)
+                return UP_VI;
+            if (destPort == 5000 || srcPort == 5000)
+                return UP_VO;
+            if (destPort == 6000 || srcPort == 6000) // not classified
+                return -1;
+        }
     }
 #endif
 

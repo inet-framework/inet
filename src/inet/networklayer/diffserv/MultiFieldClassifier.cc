@@ -58,10 +58,11 @@ bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
         int srcPort = -1, destPort = -1;
         cPacket *packet = datagram->getEncapsulatedPacket();
 #ifdef WITH_UDP
-        UDPHeader *udpPacket = dynamic_cast<UDPHeader *>(packet);
-        if (udpPacket) {
-            srcPort = udpPacket->getSourcePort();
-            destPort = udpPacket->getDestinationPort();
+        if (FlatPacket *udpPacket = dynamic_cast<FlatPacket*>(packet)) {
+            if (UDPHeader *udpHeader = dynamic_cast<UDPHeader *>(udpPacket->peekHeader())) {
+                srcPort = udpHeader->getSourcePort();
+                destPort = udpHeader->getDestinationPort();
+            }
         }
 #endif // ifdef WITH_UDP
 #ifdef WITH_TCP_COMMON
