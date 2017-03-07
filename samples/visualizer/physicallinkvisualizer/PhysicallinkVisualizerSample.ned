@@ -28,7 +28,7 @@ import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
 //
 // TODO documentation
 //
-network PhysicalLinkVisualizerSimple
+network PhysicalLinkSimple
 {
     @display("bgb=600,300");
     submodules:
@@ -56,7 +56,7 @@ network PhysicalLinkVisualizerSimple
 //
 // TODO documentation
 //
-network PhysicalLinkVisualizerFiltering
+network PhysicalLinkFiltering
 {
     @display("bgb=780,330");
     submodules:
@@ -89,7 +89,7 @@ network PhysicalLinkVisualizerFiltering
 //
 // TODO documentation
 //
-network PhysicalLinkVisualizerDynamic
+network PhysicalLinkDynamic
 {
     @display("bgb=660,630");
     submodules:
