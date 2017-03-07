@@ -52,11 +52,11 @@ PacketDropVisualizer:
 
 - nincs subscribe-olva a dropPkFromHLIfaceDownSignal-ra és a dropPkIfaceDownSignal-ra ? A hibaüzenet "Interface is not connected -- dropping packet"
 
-IPv4NetworkConfigurator
+IPv4NetworkConfigurator:
 
 - a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
 
-PhysicalLink
+PhysicalLink:
 
 - Hibásan vett csomagokra ne húzzon be nyilat / vagy máshogyan
 
@@ -64,6 +64,6 @@ IPv4
 
 - A broadcast UDP-s csomagok elnyelődnek / nem mennek ki / ForceBroadcast paraméter az IPv4-ben WTF?
 
-TransportRoute
+TransportRoute:
 
 - TCP-vel nem működik, csak UDP-vel
