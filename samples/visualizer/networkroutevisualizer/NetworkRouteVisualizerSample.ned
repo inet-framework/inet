@@ -129,7 +129,7 @@ network NetworkRouteExtended
 //
 // TODO documentation
 //
-network DynamicNetworkRoutes
+network NetworkRouteDynamic
 {
     @display("bgb=660,630");
     submodules:
