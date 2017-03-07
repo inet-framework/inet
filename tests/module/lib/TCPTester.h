@@ -21,8 +21,9 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
+#include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/common/packet/PacketDump.h"
 
@@ -42,7 +43,7 @@ class INET_API TCPTesterBase : public cSimpleModule
     PacketDump tcpdump;
 
   protected:
-    void dump(TCPSegment *seg, bool fromA, const char *comment=NULL);
+    void dump(const std::shared_ptr<inet::tcp::TcpHeader>& seg, bool fromA, const char *comment=NULL);
 
   public:
     TCPTesterBase();
@@ -74,8 +75,8 @@ class INET_API TCPScriptableTester : public TCPTesterBase
 
   protected:
     void parseScript(const char *script);
-    void dispatchSegment(TCPSegment *seg);
-    void processIncomingSegment(TCPSegment *seg, bool fromA);
+    void dispatchSegment(Packet *pk);
+    void processIncomingSegment(Packet *pk, bool fromA);
 
   public:
     TCPScriptableTester() {}
@@ -97,8 +98,8 @@ class INET_API TCPRandomTester : public TCPTesterBase
     cPar *delay;
 
   protected:
-    void dispatchSegment(TCPSegment *seg);
-    void processIncomingSegment(TCPSegment *seg, bool fromA);
+    void dispatchSegment(Packet *pk);
+    void processIncomingSegment(Packet *pk, bool fromA);
 
   public:
     TCPRandomTester() {}
