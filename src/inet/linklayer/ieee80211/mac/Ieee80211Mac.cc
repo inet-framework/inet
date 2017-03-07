@@ -127,12 +127,13 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 
 void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
-    // KLUDGE: to unwrap from a PAcket
+    // KLUDGE: to unwrap from a Packet
     const auto& packetChunk = check_and_cast<Packet *>(msg)->peekDataAt<cPacketChunk>(byte(0));
     auto frame = packetChunk->getPacket()->dup();
     frame->transferTagsFrom(msg);
     if (msg->getControlInfo() != nullptr)
         frame->setControlInfo(msg->removeControlInfo());
+    frame->setBitError(msg->hasBitError());
     // KLUDGE: end
     if (rx->lowerFrameReceived(frame)) {
         processLowerFrame(frame);
