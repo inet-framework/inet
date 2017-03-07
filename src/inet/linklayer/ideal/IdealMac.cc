@@ -165,8 +165,6 @@ void IdealMac::startTransmitting(Packet *msg)
             scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
         }
     }
-    else
-        frame->setSrcModuleId(-1);
 
     // send
     EV << "Starting transmission of " << msg << endl;

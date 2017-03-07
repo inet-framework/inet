@@ -475,6 +475,7 @@ void Radio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, radioFrame->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, radioFrame);
+        decapsulate(macFrame);
         emit(LayeredProtocolBase::packetSentToUpperSignal, macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;

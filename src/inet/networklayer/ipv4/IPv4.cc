@@ -196,7 +196,7 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
 {
     ASSERT(packet);
     ASSERT(fromIE);
-    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, datagram);
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, packet);
 
     //
     // "Prerouting"

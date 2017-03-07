@@ -95,7 +95,7 @@ void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const std::shared_ptr<
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
         packet->ensureTag<InterfaceReq>()->setInterfaceId(outputInterfaceId);
-        emit(LayeredProtocolBase::packetSentToLowerSignal, frame);
+        emit(LayeredProtocolBase::packetSentToLowerSignal, packet);
         send(packet, "ifOut");
     }
     else {
