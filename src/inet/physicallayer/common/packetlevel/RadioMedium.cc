@@ -18,7 +18,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
-#include "inet/common/packet/FieldsChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"

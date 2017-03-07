@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/Serializer.h"
 #include "inet/common/packet/SerializerRegistry.h"
 

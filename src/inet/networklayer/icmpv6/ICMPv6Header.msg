@@ -19,7 +19,7 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/FieldsChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #define ICMPv6_HEADER_BYTES  8
 }}
 

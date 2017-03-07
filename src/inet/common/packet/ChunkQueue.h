@@ -16,7 +16,7 @@
 #ifndef __INET_CHUNKQUEUE_H_
 #define __INET_CHUNKQUEUE_H_
 
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 

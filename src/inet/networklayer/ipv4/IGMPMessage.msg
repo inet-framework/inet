@@ -18,7 +18,7 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/FieldsChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/transportlayer/common/CRC_m.h"
 #include <vector>

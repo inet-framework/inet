@@ -19,7 +19,7 @@
 
 #include "inet/applications/udpapp/UDPVideoStreamCli.h"
 
-#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 

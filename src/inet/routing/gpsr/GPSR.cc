@@ -25,7 +25,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 

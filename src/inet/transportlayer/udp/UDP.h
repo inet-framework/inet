@@ -23,7 +23,7 @@
 #include <list>
 
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/packet/BytesChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"

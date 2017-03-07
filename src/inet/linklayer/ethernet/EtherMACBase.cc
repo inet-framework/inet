@@ -21,7 +21,7 @@
 #include "inet/linklayer/ethernet/EtherMACBase.h"
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/BytesChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"

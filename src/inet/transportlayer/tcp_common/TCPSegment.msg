@@ -20,7 +20,7 @@
 cplusplus {{
 #include <iostream>
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/FieldsChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/transportlayer/common/CRC_m.h"
 
 namespace inet {

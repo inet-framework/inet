@@ -13,26 +13,27 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BITCOUNTCHUNK_H_
-#define __INET_BITCOUNTCHUNK_H_
+#ifndef __INET_BITSCHUNK_H_
+#define __INET_BITSCHUNK_H_
 
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 
 /**
- * This class represents data using a bit length field only. This can be useful
- * when the actual data is irrelevant and memory efficiency is high priority.
+ * This class represents data using a sequence of bits. This can be useful
+ * when the actual data is important because. For example, when an external
+ * program sends or receives the data, or in hardware in the loop simulations.
  */
-class INET_API BitCountChunk : public Chunk
+class INET_API BitsChunk : public Chunk
 {
   friend Chunk;
 
   protected:
     /**
-     * The chunk length in bits, or -1 if not yet specified.
+     * The data bits as is.
      */
-    bit length;
+    std::vector<bool> bits;
 
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
@@ -40,24 +41,27 @@ class INET_API BitCountChunk : public Chunk
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    BitCountChunk();
-    BitCountChunk(const BitCountChunk& other);
-    BitCountChunk(bit length);
+    BitsChunk();
+    BitsChunk(const BitsChunk& other);
+    BitsChunk(const std::vector<bool>& bits);
 
-    virtual BitCountChunk *dup() const override { return new BitCountChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BitCountChunk>(*this); }
+    virtual BitsChunk *dup() const override { return new BitsChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BitsChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
     //@{
-    bit getLength() const { return length; }
-    void setLength(bit length);
+    const std::vector<bool>& getBits() const { return bits; }
+    void setBits(const std::vector<bool>& bits);
+
+    bool getBit(int index) const { return bits[index]; }
+    void setBit(int index, bool bit);
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_BITCOUNT; }
-    virtual bit getChunkLength() const override { return length; }
+    virtual Type getChunkType() const override { return TYPE_BITS; }
+    virtual bit getChunkLength() const override { return bit(bits.size()); }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
@@ -79,5 +83,5 @@ class INET_API BitCountChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_BITCOUNTCHUNK_H_
+#endif // #ifndef __INET_BITSCHUNK_H_
 

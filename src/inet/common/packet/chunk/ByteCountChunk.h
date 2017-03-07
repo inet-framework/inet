@@ -13,70 +13,50 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SLICECHUNK_H_
-#define __INET_SLICECHUNK_H_
+#ifndef __INET_BYTECOUNTCHUNK_H_
+#define __INET_BYTECOUNTCHUNK_H_
 
-#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 
 /**
- * This class represents data using a slice of another chunk. The slice is
- * designated with the sliced chunk, an offset, and a length field, both
- * measured in bytes. It's used by the Chunk API implementation internally to
- * efficiently represent slices of other chunks. User code should not directly
- * instantiate this class.
+ * This class represents data using a byte length field only. This can be useful
+ * when the actual data is irrelevant and memory efficiency is high priority.
  */
-class INET_API SliceChunk : public Chunk
+class INET_API ByteCountChunk : public Chunk
 {
   friend Chunk;
 
   protected:
     /**
-     * The chunk of which this chunk is a slice, or nullptr if not yet specified.
+     * The chunk length in bytes, or -1 if not yet specified.
      */
-    std::shared_ptr<Chunk> chunk;
-    /**
-     * The offset measured in bytes, or -1 if not yet specified.
-     */
-    bit offset;
-    /**
-     * The length measured in bytes, or -1 if not yet specified.
-     */
-    bit length;
+    byte length;
 
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
-    virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, bit length = bit(-1)) const override;
-
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    SliceChunk();
-    SliceChunk(const SliceChunk& other);
-    SliceChunk(const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
+    ByteCountChunk();
+    ByteCountChunk(const ByteCountChunk& other);
+    ByteCountChunk(byte length);
 
-    virtual SliceChunk *dup() const override { return new SliceChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SliceChunk>(*this); }
+    virtual ByteCountChunk *dup() const override { return new ByteCountChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<ByteCountChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
     //@{
-
-    const std::shared_ptr<Chunk>& getChunk() const { return chunk; }
-    void setChunk(const std::shared_ptr<Chunk>& chunk) { this->chunk = chunk; }
-
-    bit getOffset() const { return offset; }
-    void setOffset(bit offset);
-
-    bit getLength() const { return length; }
-    void setLength(bit length);
+    byte getLength() const { return length; }
+    void setLength(byte length);
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_SLICE; }
+    virtual Type getChunkType() const override { return TYPE_BYTECOUNT; }
     virtual bit getChunkLength() const override { return length; }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
@@ -85,8 +65,8 @@ class INET_API SliceChunk : public Chunk
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) override { return false; }
-    virtual bool canRemoveFromEnd(bit length) override { return false; }
+    virtual bool canRemoveFromBeginning(bit length) override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromEnd(bit length) override { return bit(length).get() % 8 == 0; }
 
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;
@@ -99,5 +79,5 @@ class INET_API SliceChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_SLICECHUNK_H_
+#endif // #ifndef __INET_BYTECOUNTCHUNK_H_
 

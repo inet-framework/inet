@@ -24,7 +24,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/BytesChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/queue/IPassiveQueue.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"

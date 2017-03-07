@@ -17,7 +17,7 @@
 
 
 cplusplus {{
-#include "inet/common/packet/FieldsChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for enums
 #include "inet/linklayer/common/MACAddress.h"

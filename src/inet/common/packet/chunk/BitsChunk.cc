@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/BitsChunk.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
 
 namespace inet {
 

@@ -22,7 +22,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 

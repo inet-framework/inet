@@ -25,7 +25,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/ReorderBuffer.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"

@@ -20,7 +20,7 @@
 
 #include <set>
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"

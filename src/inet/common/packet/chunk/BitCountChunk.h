@@ -13,27 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BYTESCHUNK_H_
-#define __INET_BYTESCHUNK_H_
+#ifndef __INET_BITCOUNTCHUNK_H_
+#define __INET_BITCOUNTCHUNK_H_
 
-#include "Chunk.h"
+#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 
 /**
- * This class represents data using a sequence of bytes. This can be useful
- * when the actual data is important because. For example, when an external
- * program sends or receives the data, or in hardware in the loop simulations.
+ * This class represents data using a bit length field only. This can be useful
+ * when the actual data is irrelevant and memory efficiency is high priority.
  */
-class INET_API BytesChunk : public Chunk
+class INET_API BitCountChunk : public Chunk
 {
   friend Chunk;
 
   protected:
     /**
-     * The data bytes as is.
+     * The chunk length in bits, or -1 if not yet specified.
      */
-    std::vector<uint8_t> bytes;
+    bit length;
 
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
@@ -41,27 +40,24 @@ class INET_API BytesChunk : public Chunk
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    BytesChunk();
-    BytesChunk(const BytesChunk& other);
-    BytesChunk(const std::vector<uint8_t>& bytes);
+    BitCountChunk();
+    BitCountChunk(const BitCountChunk& other);
+    BitCountChunk(bit length);
 
-    virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
+    virtual BitCountChunk *dup() const override { return new BitCountChunk(*this); }
+    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BitCountChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
     //@{
-    const std::vector<uint8_t>& getBytes() const { return bytes; }
-    void setBytes(const std::vector<uint8_t>& bytes);
-
-    uint8_t getByte(int index) const { return bytes[index]; }
-    void setByte(int index, uint8_t byte);
+    bit getLength() const { return length; }
+    void setLength(bit length);
     //@}
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_BYTES; }
-    virtual bit getChunkLength() const override { return byte(bytes.size()); }
+    virtual Type getChunkType() const override { return TYPE_BITCOUNT; }
+    virtual bit getChunkLength() const override { return length; }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
@@ -69,8 +65,8 @@ class INET_API BytesChunk : public Chunk
     virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
 
-    virtual bool canRemoveFromBeginning(bit length) override { return bit(length).get() % 8 == 0; }
-    virtual bool canRemoveFromEnd(bit length) override { return bit(length).get() % 8 == 0; }
+    virtual bool canRemoveFromBeginning(bit length) override { return true; }
+    virtual bool canRemoveFromEnd(bit length) override { return true; }
 
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;
@@ -83,5 +79,5 @@ class INET_API BytesChunk : public Chunk
 
 } // namespace
 
-#endif // #ifndef __INET_BYTESCHUNK_H_
+#endif // #ifndef __INET_BITCOUNTCHUNK_H_
 

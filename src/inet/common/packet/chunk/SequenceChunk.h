@@ -17,7 +17,7 @@
 #define __INET_SEQUENCECHUNK_H_
 
 #include <deque>
-#include "inet/common/packet/SliceChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 

@@ -19,7 +19,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/packet/ByteCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/common/MACAddress.h"

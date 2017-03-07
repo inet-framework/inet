@@ -16,14 +16,14 @@
 #ifndef __INET_SERIALIZER_H_
 #define __INET_SERIALIZER_H_
 
-#include "inet/common/packet/BitCountChunk.h"
-#include "inet/common/packet/BitsChunk.h"
-#include "inet/common/packet/ByteCountChunk.h"
 #include "inet/common/packet/ByteInputStream.h"
 #include "inet/common/packet/ByteOutputStream.h"
-#include "inet/common/packet/BytesChunk.h"
-#include "inet/common/packet/SequenceChunk.h"
-#include "inet/common/packet/SliceChunk.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 

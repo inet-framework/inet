@@ -15,9 +15,9 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 }}
 
 namespace inet;

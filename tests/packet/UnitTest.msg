@@ -14,8 +14,8 @@
 //
 
 cplusplus {{
-#include "inet/common/packet/FieldsChunk.h"
-#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 }}
 
 namespace inet;

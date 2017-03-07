@@ -20,7 +20,7 @@ class noncobject L3Address;
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/FieldsChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 }}
 

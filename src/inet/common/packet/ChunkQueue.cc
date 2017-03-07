@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/ChunkQueue.h"
-#include "inet/common/packet/SequenceChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 
 namespace inet {
 

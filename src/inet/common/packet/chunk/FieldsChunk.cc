@@ -13,33 +13,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 
 namespace inet {
 
-cPacketChunk::cPacketChunk(cPacket *packet) :
+FieldsChunk::FieldsChunk() :
     Chunk(),
-    packet(packet)
+    serializedBytes(nullptr)
 {
-    take(packet);
 }
 
-cPacketChunk::cPacketChunk(const cPacketChunk& other) :
+FieldsChunk::FieldsChunk(const FieldsChunk& other) :
     Chunk(other),
-    packet(other.packet->dup())
+    serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
 {
-    take(packet);
 }
 
-cPacketChunk::~cPacketChunk()
+FieldsChunk::~FieldsChunk()
 {
-    dropAndDelete(packet);
+    delete serializedBytes;
 }
 
-std::string cPacketChunk::str() const {
-    std::ostringstream os;
-    os << "cPacketChunk, packet = {" << ( packet != nullptr ? packet->str() : std::string("<null>")) << "}";
-    return os.str();
+void FieldsChunk::handleChange()
+{
+    Chunk::handleChange();
+    delete serializedBytes;
+    serializedBytes = nullptr;
 }
 
 } // namespace
