@@ -16,17 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "ExampleQoSClassifier.h"
 #include "UserPriority.h"
-
-#ifdef WITH_IPv4
-#undef WITH_IPv4  //FIXME //KLUDGE
-#endif
-
-#ifdef WITH_UDP
-#undef WITH_UDP  //FIXME //KLUDGE
-#endif
 
 #ifdef WITH_IPv4
 #  include "inet/networklayer/ipv4/IPv4Header.h"
@@ -60,12 +54,18 @@ void ExampleQoSClassifier::handleMessage(cMessage *msg)
 
 int ExampleQoSClassifier::getUserPriority(cMessage *msg)
 {
-    cPacket *ipData = nullptr;
+    auto packet = check_and_cast<Packet *>(msg);
+    int ipProtocol = -1;
+    bit ipHeaderLength = bit(-1);
 
 #ifdef WITH_IPv4
-    ipData = dynamic_cast<IPv4Header *>(msg);
-    if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
-        return UP_BE; // ICMP class
+    if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
+        const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+        if (ipv4Header->getTransportProtocol() == IP_PROT_ICMP)
+            return UP_BE; // ICMP class
+        ipProtocol = ipv4Header->getTransportProtocol();
+        ipHeaderLength = ipv4Header->getChunkLength();
+    }
 #endif
 
 #ifdef WITH_IPv6
@@ -76,38 +76,39 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
     }
 #endif
 
-    if (!ipData)
+    if (ipProtocol == -1)
         return UP_BE;
 
 #ifdef WITH_UDP
-    if (FlatPacket *udpPacket = dynamic_cast<FlatPacket*>(ipData->getEncapsulatedPacket())) {
-        if (UdpHeader *udpHeader = dynamic_cast<UdpHeader *>(udpPacket->peekHeader())) {
-            unsigned int srcPort = udpHeader->getSourcePort();
-            unsigned int destPort = udpHeader->getDestinationPort();
-            if (destPort == 21 || srcPort == 21)
-                return UP_BK;
-            if (destPort == 80 || srcPort == 80)
-                return UP_BE;
-            if (destPort == 4000 || srcPort == 4000)
-                return UP_VI;
-            if (destPort == 5000 || srcPort == 5000)
-                return UP_VO;
-            if (destPort == 6000 || srcPort == 6000) // not classified
-                return -1;
-        }
+    if (ipProtocol == IP_PROT_UDP) {
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipHeaderLength);
+        unsigned int srcPort = udpHeader->getSourcePort();
+        unsigned int destPort = udpHeader->getDestinationPort();
+        if (destPort == 21 || srcPort == 21)
+            return UP_BK;
+        if (destPort == 80 || srcPort == 80)
+            return UP_BE;
+        if (destPort == 4000 || srcPort == 4000)
+            return UP_VI;
+        if (destPort == 5000 || srcPort == 5000)
+            return UP_VO;
+        if (destPort == 6000 || srcPort == 6000) // not classified
+            return -1;
     }
 #endif
 
 #ifdef WITH_TCP_COMMON
-    tcp::TcpHeader *tcp = dynamic_cast<tcp::TcpHeader *>(ipData->getEncapsulatedPacket());
-    if (tcp) {
-        if (tcp->getDestPort() == 21 || tcp->getSrcPort() == 21)
+    if (ipProtocol == IP_PROT_TCP) {
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipHeaderLength);
+        unsigned int srcPort = tcpHeader->getSourcePort();
+        unsigned int destPort = tcpHeader->getDestinationPort();
+        if (destPort == 21 || srcPort == 21)
             return UP_BK;
-        if (tcp->getDestPort() == 80 || tcp->getSrcPort() == 80)
+        if (destPort == 80 || srcPort == 80)
             return UP_BE;
-        if (tcp->getDestPort() == 4000 || tcp->getSrcPort() == 4000)
+        if (destPort == 4000 || srcPort == 4000)
             return UP_VI;
-        if (tcp->getDestPort() == 5000 || tcp->getSrcPort() == 5000)
+        if (destPort == 5000 || srcPort == 5000)
             return UP_VO;
         if (tcp->getDestinationPort() == 6000 || tcp->getSourcePort() == 6000) // not classified
             return -1;
