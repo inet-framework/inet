@@ -204,7 +204,7 @@ void BMacLayer::sendPreamble()
     auto preamble = std::make_shared<BMacHeader>();
     preamble->setSrcAddr(address);
     preamble->setDestAddr(MACAddress::BROADCAST_ADDRESS);
-    preamble->setChunkLength(headerLength / 8);
+    preamble->setChunkLength(bit(headerLength));
     preamble->markImmutable();
 
     //attach signal and send down
@@ -224,7 +224,7 @@ void BMacLayer::sendMacAck()
     auto ack = std::make_shared<BMacHeader>();
     ack->setSrcAddr(address);
     ack->setDestAddr(lastDataPktSrcAddr);
-    ack->setChunkLength(headerLength / 8);
+    ack->setChunkLength(bit(headerLength));
 
     //attach signal and send down
     auto packet = new Packet();
@@ -738,7 +738,7 @@ void BMacLayer::decapsulate(Packet *packet)
 void BMacLayer::encapsulate(Packet *packet)
 {
     auto pkt = std::make_shared<BMacHeader>();
-    pkt->setChunkLength(headerLength / 8);
+    pkt->setChunkLength(bit(headerLength));
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer

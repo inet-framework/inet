@@ -257,7 +257,7 @@ void IdealMac::acked(Packet *frame)
 void IdealMac::encapsulate(Packet *packet)
 {
     auto idealMacHeader = std::make_shared<IdealMacHeader>();
-    idealMacHeader->setChunkLength(headerLength);
+    idealMacHeader->setChunkLength(byte(headerLength));
     auto macAddressReq = packet->getMandatoryTag<MacAddressReq>();
     idealMacHeader->setSrc(macAddressReq->getSrcAddress());
     idealMacHeader->setDest(macAddressReq->getDestAddress());

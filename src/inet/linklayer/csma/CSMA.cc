@@ -211,7 +211,7 @@ void CSMA::handleUpperPacket(cPacket *msg)
     //MacPkt*macPkt = encapsMsg(msg);
     auto macPkt = std::make_shared<CSMAHeader>();
     assert(headerLength % 8 == 0);
-    macPkt->setChunkLength(headerLength / 8);
+    macPkt->setChunkLength(bit(headerLength));
     MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
     EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() << ", CInfo removed, mac addr=" << dest << endl;
     macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
@@ -877,7 +877,7 @@ void CSMA::handleLowerPacket(cPacket *msg)
                 auto csmaHeader = std::make_shared<CSMAHeader>();
                 csmaHeader->setSrcAddr(address);
                 csmaHeader->setDestAddr(src);
-                csmaHeader->setChunkLength(ackLength / 8);
+                csmaHeader->setChunkLength(bit(ackLength));
                 csmaHeader->markImmutable();
                 ackMessage = new Packet("CSMA-Ack");
                 ackMessage->pushHeader(csmaHeader);

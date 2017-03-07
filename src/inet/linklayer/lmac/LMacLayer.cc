@@ -475,7 +475,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 
                 control->setSrcAddr(address);
                 control->setMySlot(mySlot);
-                control->setChunkLength((headerLength + numSlots) / 8);
+                control->setChunkLength(bit(headerLength + numSlots));
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
@@ -498,7 +498,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet();
-                data->append(macQueue.front()->peekAt(headerLength / 8));
+                data->append(macQueue.front()->peekAt(bit(headerLength)));
                 data->setKind(LMAC_DATA);
                 const auto& lmacHeader = std::static_pointer_cast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);
@@ -651,7 +651,7 @@ void LMacLayer::findNewSlot()
 
 void LMacLayer::decapsulate(Packet *packet)
 {
-    const auto& msg = packet->peekHeader<LMacHeader>();
+    const auto& msg = packet->popHeader<LMacHeader>();
     packet->ensureTag<MacAddressInd>()->setSrcAddress(msg->getSrcAddr());
     packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(msg->getNetworkProtocol()));
@@ -666,7 +666,7 @@ void LMacLayer::decapsulate(Packet *packet)
 void LMacLayer::encapsulate(Packet *netwPkt)
 {
     auto pkt = std::make_shared<LMacHeader>();
-    pkt->setChunkLength(headerLength / 8);
+    pkt->setChunkLength(bit(headerLength));
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer

@@ -127,7 +127,10 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 
 void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
-    auto frame = check_and_cast<Ieee80211Frame *>(msg);
+    // KLUDGE: TODO
+    const auto& packetChunk = check_and_cast<Packet *>(msg)->peekDataAt<cPacketChunk>(byte(0));
+    auto frame = check_and_cast<Ieee80211Frame *>(packetChunk->getPacket()->dup());
+    // TODO: auto frame = check_and_cast<Ieee80211Frame *>(msg);
     if (rx->lowerFrameReceived(frame)) {
         processLowerFrame(frame);
     }
