@@ -11,11 +11,24 @@
 
     <p><h2>Goals</h2></p>
     <p>
+        Key words: 
     </p>
 
 
     <p><h2>About the Visualizer</h2></p>
     <p>
+        The <var>TransportRouteVisualizer</var> keeps track of active routes in the transport layer.
+        A route between two node is considered active if a packet is sent recently between their transport layers.
+        Active routes are not displayed by default, we can enable their vsisualization by switching the <i>displayRoutes</i> parameter to true.
+	</p>   
+    <p> 
+        The links are represented visually by solid arrows.
+        The arrow's starting point is the source node and its endpoint is the destination node.
+    </p>
+    <p>    
+        The visualizer has filtering parameters, like <i>nodeFilter</i> and <i>packetFilter</i>.
+        Using these we can specify which routes are shown. By default all nodes and all packets are considered for displaying transport routes.
+        It is possible to use logical expressions in the values of the filter parameters, e.g <i>nodeFilter = "host1 or host2"</i> shows the routes between the nodes that called <var>host1</var> and <var>host2</var>.
     </p>
 
 
