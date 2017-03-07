@@ -20,6 +20,7 @@
 #include <assert.h>
 #include "inet/transportlayer/tcp/TCP.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TCPConnectionDescriptor_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp/TCPSendQueue.h"

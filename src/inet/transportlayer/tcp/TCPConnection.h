@@ -319,13 +319,20 @@ class INET_API TCPConnection : public cObject
   public:
     // connection identification by apps: socketId
     int socketId = -1;    // identifies connection within the app
+    int getSocketId() const { return socketId; }
+
     int listeningSocketId = -1;    // identifies listening connection within the app
+    int getListeningSocketId() const { return listeningSocketId; }
 
     // socket pair
     L3Address localAddr;
+    L3Address getLocalAddr() const { return localAddr; }
     L3Address remoteAddr;
+    L3Address getRemoteAddr() const { return remoteAddr; }
     int localPort = -1;
+    int getLocalPort() const { return localPort; }
     int remotePort = -1;
+    int getRemotePort() const { return remotePort; }
 
   protected:
     TCP *tcpMain = nullptr;    // TCP module
@@ -335,18 +342,23 @@ class INET_API TCPConnection : public cObject
 
     // variables associated with TCP state
     TCPStateVariables *state = nullptr;
+    TCPStateVariables *getState() const { return state; }
 
     // TCP queues
     TCPSendQueue *sendQueue = nullptr;
+    TCPSendQueue *getSendQueue() const { return sendQueue; }
     TCPReceiveQueue *receiveQueue = nullptr;
+    TCPReceiveQueue *getReceiveQueue() const { return receiveQueue; }
     TCPDataTransferMode transferMode = TCP_TRANSFER_UNDEFINED;    // TCP transfer mode: bytecount, object, bytestream
 
   public:
     TCPSACKRexmitQueue *rexmitQueue = nullptr;
+    TCPSACKRexmitQueue *getRexmitQueue() const { return rexmitQueue; }
 
   protected:
     // TCP behavior in data transfer state
     TCPAlgorithm *tcpAlgorithm = nullptr;
+    TCPAlgorithm *getTcpAlgorithm() const { return tcpAlgorithm; }
 
     // timers
     cMessage *the2MSLTimer = nullptr;
