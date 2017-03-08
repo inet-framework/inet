@@ -48,9 +48,10 @@ module Ieee80211Nic like IWirelessNic
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
         **.opMode = opMode;
         **.bitrate = bitrate;
-        @display("i=block/ifcard");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
+        @nic;
+        @display("i=block/ifcard");
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers
