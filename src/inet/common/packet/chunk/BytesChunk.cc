@@ -59,6 +59,16 @@ void BytesChunk::setByte(int index, uint8_t byte)
     bytes[index] = byte;
 }
 
+size_t BytesChunk::getBytes(uint8_t *buffer, size_t bufLen) const
+{
+    size_t numBytes = bytes.size();
+    if (bufLen < numBytes)
+        throw cRuntimeError("getBytes(): buffer is too short");
+    for (size_t i = 0; i < numBytes; i++)
+        buffer[i] = bytes[i];
+    return numBytes;
+}
+
 bool BytesChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == TYPE_BYTES;

@@ -44,6 +44,7 @@ class INET_API BytesChunk : public Chunk
     BytesChunk();
     BytesChunk(const BytesChunk& other);
     BytesChunk(const std::vector<uint8_t>& bytes);
+    BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) { }
 
     virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
     virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
@@ -56,6 +57,10 @@ class INET_API BytesChunk : public Chunk
 
     uint8_t getByte(int index) const { return bytes[index]; }
     void setByte(int index, uint8_t byte);
+
+    size_t getBytes(uint8_t *buffer, size_t bufLen) const;
+    void setBytes(const uint8_t *buffer, size_t bufLen) { bytes.assign(buffer, buffer + bufLen); }
+
     //@}
 
     /** @name Overridden chunk functions */
