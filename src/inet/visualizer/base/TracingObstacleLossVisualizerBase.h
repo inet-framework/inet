@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,29 +20,61 @@
 
 #include "inet/physicallayer/contract/packetlevel/ITracingObstacleLoss.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/AnimationPosition.h"
 
 namespace inet {
 
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
+using namespace inet::physicallayer;
 
 class INET_API TracingObstacleLossVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
+    class INET_API ObstacleLossVisualization {
+      public:
+        mutable AnimationPosition obstacleLossAnimationPosition;
+
+      public:
+        ObstacleLossVisualization() { }
+        virtual ~ObstacleLossVisualization() { }
+    };
+
+  protected:
     /** @name Parameters */
     //@{
-    cModule *subscriptionModule = nullptr;
-    bool displayIntersectionTrail = false;
-    bool displayFaceNormalVectorTrail = false;
+    bool displayIntersections = false;
+    cFigure::Color intersectionLineColor;
+    cFigure::LineStyle intersectionLineStyle;
+    double intersectionLineWidth = NaN;
+    bool displayFaceNormalVectors = false;
+    cFigure::Color faceNormalLineColor;
+    cFigure::LineStyle faceNormalLineStyle;
+    double faceNormalLineWidth = NaN;
+    const char *fadeOutMode = nullptr;
+    double fadeOutTime = NaN;
+    double fadeOutAnimationSpeed = NaN;
     //@}
+
+    std::vector<const ObstacleLossVisualization *> obstacleLossVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
 
-    virtual void obstaclePenetrated(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) = 0;
+    virtual void subscribe();
+    virtual void unsubscribe();
+
+    // TODO: use ITransmission for identification?
+    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const = 0;
+    virtual void addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
+    virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization);
+    virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const = 0;
 
   public:
+    virtual ~TracingObstacleLossVisualizerBase();
+
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -27,8 +27,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 // opposite of the coordinate system origin with respect to the sphere, and it
 // faces towards the center of the sphere.
 //
-// @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase,
-// and ~ISceneVisualizer
+// @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
 //
 simple SceneOsgVisualizer extends SceneOsgVisualizerBase like ISceneVisualizer
 {

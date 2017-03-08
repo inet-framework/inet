@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,6 +28,7 @@ namespace visualizer {
 class INET_API SceneCanvasVisualizer : public SceneVisualizerBase
 {
   protected:
+    double zIndex = NaN;
     CanvasProjection canvasProjection;
     cGroupFigure *axisLayer = nullptr;
 
@@ -37,7 +38,7 @@ class INET_API SceneCanvasVisualizer : public SceneVisualizerBase
     virtual void handleParameterChange(const char *name) override;
 
     virtual EulerAngles computeViewAngle(const char *viewAngle);
-    virtual cFigure::Point computeViewTranslation(const char *viewTranslation);
+    virtual cFigure::Point parse2D(const char *text);
     virtual void displayDescription(const char *descriptionFigurePath);
 
 };

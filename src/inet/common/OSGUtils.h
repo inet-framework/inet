@@ -67,6 +67,7 @@ Image* createImage(const char *fileName);
 Texture2D *createTexture(const char *name, bool repeat);
 
 StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullBackFace = true);
+StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width);
 
 #endif // ifdef WITH_OSG
 

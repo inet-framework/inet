@@ -21,6 +21,7 @@ import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.node.inet.INetworkNode;
 import inet.power.contract.IEnergyGenerator;
+import inet.power.contract.IEnergyManagement;
 import inet.power.contract.IEnergyStorage;
 
 //
@@ -40,6 +41,7 @@ module NodeBase like INetworkNode
         string osgModelColor = default(""); // tint color, no colorization by default
         string mobilityType = default("");
         string energyStorageType = default("");
+        string energyManagementType = default("");
         string energyGeneratorType = default("");
         *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
         *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
@@ -54,9 +56,13 @@ module NodeBase like INetworkNode
             parameters:
                 @display("p=100,300;is=s");
         }
+        energyManagement: <energyManagementType> like IEnergyManagement if energyManagementType != "" {
+            parameters:
+                @display("p=100,400;i=block/plug;is=s");
+        }
         energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
             parameters:
-                @display("p=100,400;is=s");
+                @display("p=100,500;is=s");
         }
         // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints 
         mobility: <mobilityType> like IMobility if mobilityType != "" {

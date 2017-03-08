@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,52 +20,6 @@
 namespace inet {
 
 namespace power {
-
-void EnergyStorageBase::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL) {
-        EnergySourceBase::initialize(stage);
-        EnergySinkBase::initialize(stage);
-    }
-}
-
-int EnergyStorageBase::addEnergyConsumer(const IEnergyConsumer *energyConsumer)
-{
-    EnergySourceBase::addEnergyConsumer(energyConsumer);
-    emit(powerConsumptionChangedSignal, totalConsumedPower.get());
-    return energyConsumers.size() - 1;
-}
-
-void EnergyStorageBase::removeEnergyConsumer(int energyConsumerId)
-{
-    EnergySourceBase::removeEnergyConsumer(energyConsumerId);
-    emit(powerConsumptionChangedSignal, totalConsumedPower.get());
-}
-
-void EnergyStorageBase::setPowerConsumption(int energyConsumerId, W consumedPower)
-{
-    EnergySourceBase::setPowerConsumption(energyConsumerId, consumedPower);
-    emit(powerConsumptionChangedSignal, totalConsumedPower.get());
-}
-
-int EnergyStorageBase::addEnergyGenerator(const IEnergyGenerator *energyGenerator)
-{
-    EnergySinkBase::addEnergyGenerator(energyGenerator);
-    emit(powerGenerationChangedSignal, totalGeneratedPower.get());
-    return energyGenerators.size() - 1;
-}
-
-void EnergyStorageBase::removeEnergyGenerator(int energyGeneratorId)
-{
-    EnergySinkBase::removeEnergyGenerator(energyGeneratorId);
-    emit(powerGenerationChangedSignal, totalGeneratedPower.get());
-}
-
-void EnergyStorageBase::setPowerGeneration(int energyGeneratorId, W generatedPower)
-{
-    EnergySinkBase::setPowerGeneration(energyGeneratorId, generatedPower);
-    emit(powerGenerationChangedSignal, totalGeneratedPower.get());
-}
 
 } // namespace power
 

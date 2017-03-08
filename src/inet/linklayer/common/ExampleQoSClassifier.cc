@@ -82,6 +82,8 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
             return UP_VI;
         if (udp->getDestinationPort() == 5000 || udp->getSourcePort() == 5000)
             return UP_VO;
+        if (udp->getDestinationPort() == 6000 || udp->getSourcePort() == 6000) // not classified
+            return -1;
     }
 #endif
 
@@ -96,6 +98,8 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
             return UP_VI;
         if (tcp->getDestPort() == 5000 || tcp->getSrcPort() == 5000)
             return UP_VO;
+        if (tcp->getDestinationPort() == 6000 || tcp->getSourcePort() == 6000) // not classified
+            return -1;
     }
 #endif
 

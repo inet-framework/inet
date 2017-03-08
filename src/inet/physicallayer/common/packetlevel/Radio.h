@@ -106,14 +106,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      * are simulated separately or not.
      */
     bool separateReceptionParts = false;
-    /**
-     * Displays a circle around the host submodule representing the communication range.
-     */
-    bool displayCommunicationRange = false;
-    /**
-     * Displays a circle around the host submodule representing the interference range.
-     */
-    bool displayInterferenceRange = false;
     //@}
 
     /** Gates */
@@ -221,7 +213,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual void updateTransceiverState();
     virtual void updateTransceiverPart();
-    virtual void refreshDisplay() const override;
 
   public:
     Radio() { }

@@ -46,11 +46,11 @@ module LinkLayerNodeBase extends NodeBase
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=100,500;is=s");
+                @display("p=100,600;is=s");
         }
         pcapRecorder: PcapRecorder if hasPcapRecorder {
             parameters:
-                @display("p=100,600;is=s");
+                @display("p=100,700;is=s");
         }
         lo[numLoInterfaces]: LoopbackInterface {
             parameters:

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -19,7 +19,7 @@
 #include "inet/common/OSGScene.h"
 #include "inet/common/OSGUtils.h"
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
-#include "inet/visualizer/networknode/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
 #ifdef WITH_OSG
 #include <osg/PolygonOffset>

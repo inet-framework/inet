@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -22,8 +22,7 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 //
 // This module integrates canvas and osg physical environment visualizers into a single module.
 //
-// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer,
-// ~PhysicalEnvironmentVisualizerBase, and ~IPhysicalEnvironmentVisualizer
+// @see ~PhysicalEnvironmentCanvasVisualizer, ~PhysicalEnvironmentOsgVisualizer, ~PhysicalEnvironmentVisualizerBase, ~IPhysicalEnvironmentVisualizer
 //
 module PhysicalEnvironmentVisualizer like IPhysicalEnvironmentVisualizer
 {

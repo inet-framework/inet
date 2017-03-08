@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,15 +25,13 @@ package inet.visualizer.base;
 // to periodically update the user interface independently of the underlying
 // simulation. The actual visualization of the scene is done in derived modules.
 //
-// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~ISceneVisualizer, and
-// ~SceneVisualizerBase
+// @see ~SceneCanvasVisualizer, ~SceneOsgVisualizer, ~ISceneVisualizer, ~VisualizerBase
 //
 simple SceneVisualizerBase extends VisualizerBase
 {
     parameters:
-        string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment module, refers to a top level submodule by default
-        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path of the network node visualizer, refers to a sibling submodule by default
+        string physicalEnvironmentModule = default("physicalEnvironment"); // the physical environment module, refers to a top level submodule by default
+        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer, refers to a sibling submodule by default
         double axisLength @unit(m) = default(0m/0); // length of x, y, and z axes, no axis by default
-        double refreshDisplayInterval @unit(s) = default(0s); // time interval for periodic display refresh, no refresh by default
         @class(SceneVisualizerBase);
 }

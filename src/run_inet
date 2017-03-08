@@ -21,7 +21,7 @@ if [ "$1" = "--gdb" ] ; then
    shift
 fi
 
-OPP_OPTIONS="-n $DIR/../tutorials:$DIR/../examples:$DIR $@"
+OPP_OPTIONS="-n $DIR/../tutorials:$DIR/../examples:$DIR --image-path=$DIR/../images $@"
 
 if [ -f $DIR/INET ]; then
   $TOOL $DIR/INET $OPP_OPTIONS

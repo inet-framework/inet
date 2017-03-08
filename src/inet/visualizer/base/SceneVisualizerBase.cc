@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -25,37 +25,6 @@ namespace inet {
 namespace visualizer {
 
 using namespace inet::physicalenvironment;
-
-SceneVisualizerBase::~SceneVisualizerBase()
-{
-    cancelAndDelete(refreshDisplayTimer);
-}
-
-void SceneVisualizerBase::initialize(int stage)
-{
-    VisualizerBase::initialize(stage);
-    if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL) {
-        refreshDisplayInterval = par("refreshDisplayInterval");
-        if (refreshDisplayInterval != 0) {
-            refreshDisplayTimer = new cMessage("refreshDisplay");
-            scheduleRefreshDisplay();
-        }
-    }
-}
-
-void SceneVisualizerBase::handleMessage(cMessage *message)
-{
-    if (message == refreshDisplayTimer)
-        scheduleRefreshDisplay();
-    else
-        throw cRuntimeError("Unknown message");
-}
-
-void SceneVisualizerBase::scheduleRefreshDisplay()
-{
-    scheduleAt(simTime() + refreshDisplayInterval, refreshDisplayTimer);
-}
 
 Box SceneVisualizerBase::getPlaygroundBounds()
 {

@@ -22,6 +22,8 @@
 #include <osg/Depth>
 #include <osg/Light>
 #include <osg/LightSource>
+#include <osg/LineWidth>
+#include <osg/LineStipple>
 #include <osgDB/ReadFile>
 #endif // ifdef WITH_OSG
 
@@ -276,6 +278,39 @@ StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullB
         auto cullFace = new CullFace();
         cullFace->setMode(CullFace::BACK);
         stateSet->setAttributeAndModes(cullFace, StateAttribute::ON);
+    }
+    return stateSet;
+}
+
+StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width)
+{
+    auto stateSet = new StateSet();
+    auto material = new Material();
+    Vec4 colorVec((double)color.red / 255.0, (double)color.green / 255.0, (double)color.blue / 255.0, 1.0);
+    material->setAmbient(Material::FRONT_AND_BACK, colorVec);
+    material->setDiffuse(Material::FRONT_AND_BACK, colorVec);
+    stateSet->setAttribute(material);
+    stateSet->setMode(GL_BLEND, StateAttribute::ON);
+    stateSet->setMode(GL_DEPTH_TEST, StateAttribute::ON);
+    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    if (width != 1.0) {
+        auto lineWidth = new osg::LineWidth();
+        lineWidth->setWidth(width);
+        stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
+    }
+    if (style != cFigure::LINE_SOLID) {
+        auto lineStipple = new osg::LineStipple();
+        switch (style) {
+            case cFigure::LINE_DOTTED:
+                lineStipple->setPattern(0xAAAA);
+                break;
+            case cFigure::LINE_DASHED:
+                lineStipple->setPattern(0xF0F0);
+                break;
+            default:
+                throw cRuntimeError("Unknown line style");
+        }
+        stateSet->setAttributeAndModes(lineStipple, osg::StateAttribute::ON);
     }
     return stateSet;
 }

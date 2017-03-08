@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -21,15 +21,15 @@ package inet.power.contract;
 // The energy storage models describe devices that absorb energy produced by
 // generators, and provide energy for consumers. For example, an electrochemical
 // battery in a mobile phone provides energy for its display, its CPU, and its
-// wireless communication devices. It can also absorb energy produced by a solar
-// panel installed on its display, or by a portable charger plugged into the
-// wall socket. Other energy storage models such as a simple capacitor also exist.
+// wireless communication device. It can also absorb energy produced by a solar
+// panel installed on its display, or by a portable charger plugged into a wall
+// socket.
 //
+// @see ~IEnergyConsumer, ~IEnergySource, ~IEnergyGenerator, ~IEnergySink, ~IEnergyManagement
 // @author Levente Meszaros
 //
 moduleinterface IEnergyStorage extends IEnergySource, IEnergySink
 {
     parameters:
         @display("i=block/plug");
-        @signal[residualCapacityChanged](type=double);
 }

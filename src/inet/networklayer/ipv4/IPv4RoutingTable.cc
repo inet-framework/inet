@@ -350,8 +350,9 @@ bool IPv4RoutingTable::isLocalAddress(const IPv4Address& dest) const
     if (localAddresses.empty()) {
         // collect interface addresses if not yet done
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            IPv4Address interfaceAddr = ift->getInterface(i)->ipv4Data()->getIPAddress();
-            localAddresses.insert(interfaceAddr);
+            auto ipv4Data = ift->getInterface(i)->ipv4Data();
+            if (ipv4Data != nullptr)
+                localAddresses.insert(ipv4Data->getIPAddress());
         }
     }
 

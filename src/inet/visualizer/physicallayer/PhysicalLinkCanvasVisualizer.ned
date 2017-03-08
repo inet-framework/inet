@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,25 +17,23 @@
 
 package inet.visualizer.physicallayer;
 
-import inet.visualizer.base.LinkVisualizerBase;
+import inet.visualizer.base.PhysicalLinkVisualizerBase;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;
 
 //
-// This module visualizes network links on a 2D canvas. It displays an
+// This module visualizes physical layer links on a 2D canvas. It displays an
 // arrow for each active link in the network. See the documentation of the base
 // module for what constitutes an active link. The arrow points from the source
 // towards the destination. If a link is used in both directions then there are
-// arrowheads on both ends of the arrow. Each arrow fades out over time until
-// the link becomes inactive unless it is reinforced by another packet. The
-// arrow automatically follows the movement of mobile nodes.
+// separate arrows for them. Each arrow fades out over time as the link becomes
+// inactive unless it is reinforced by another packet. The arrow automatically
+// follows the movement of mobile nodes.
 //
-// @see ~LinkOsgVisualizer, ~LinkVisualizer,
-// ~LinkVisualizerBase, and ~ILinkVisualizer
+// @see ~PhysicalLinkOsgVisualizer, ~PhysicalLinkVisualizer, ~PhysicalLinkVisualizerBase, ~IPhysicalLinkVisualizer
 //
-simple PhysicalLinkCanvasVisualizer extends LinkVisualizerBase like IPhysicalLinkVisualizer
+simple PhysicalLinkCanvasVisualizer extends PhysicalLinkVisualizerBase like IPhysicalLinkVisualizer
 {
     parameters:
-        lineColor = default("olive");
-        lineStyle = default("dotted");
+        double zIndex = default(1); // determines the drawing order of figures relative to other visualizers
         @class(PhysicalLinkCanvasVisualizer);
 }

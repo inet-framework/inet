@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -26,8 +26,8 @@ namespace visualizer {
 
 class INET_API DataLinkOsgVisualizer : public LinkOsgVisualizerBase
 {
-    protected:
-        virtual bool isLinkEnd(cModule *module) const override;
+  protected:
+    virtual bool isLinkEnd(cModule *module) const override;
 };
 
 } // namespace visualizer

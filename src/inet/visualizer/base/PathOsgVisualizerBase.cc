@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -32,34 +32,25 @@ namespace visualizer {
 
 #ifdef WITH_OSG
 
-PathOsgVisualizerBase::OsgPath::OsgPath(const std::vector<int>& path, osg::Node *node) :
-    Path(path),
+PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const std::vector<int>& path, osg::Node *node) :
+    PathVisualization(path),
     node(node)
 {
 }
 
-PathOsgVisualizerBase::OsgPath::~OsgPath()
+PathOsgVisualizerBase::PathOsgVisualization::~PathOsgVisualization()
 {
     // TODO: delete node;
 }
 
-void PathOsgVisualizerBase::addPath(std::pair<int, int> sourceAndDestination, const Path *path)
+void PathOsgVisualizerBase::refreshDisplay() const
 {
-    PathVisualizerBase::addPath(sourceAndDestination, path);
-    auto osgPath = static_cast<const OsgPath *>(path);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
-    scene->addChild(osgPath->node);
+    PathVisualizerBase::refreshDisplay();
+    // TODO: switch to osg canvas when API is extended
+    visualizerTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-void PathOsgVisualizerBase::removePath(std::pair<int, int> sourceAndDestination, const Path *path)
-{
-    PathVisualizerBase::removePath(sourceAndDestination, path);
-    auto osgPath = static_cast<const OsgPath *>(path);
-    auto node = osgPath->node;
-    node->getParent(0)->removeChild(node);
-}
-
-const PathVisualizerBase::Path *PathOsgVisualizerBase::createPath(const std::vector<int>& path) const
+const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVisualization(const std::vector<int>& path) const
 {
     std::vector<Coord> points;
     for (auto id : path) {
@@ -67,45 +58,33 @@ const PathVisualizerBase::Path *PathOsgVisualizerBase::createPath(const std::vec
         points.push_back(getPosition(node));
     }
     auto node = inet::osg::createPolyline(points, cFigure::ARROW_NONE, cFigure::ARROW_BARBED);
-    auto color = cFigure::GOOD_DARK_COLORS[paths.size() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-    auto stateSet = inet::osg::createStateSet(color, 1, false);
-    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-    auto lineWidth = new osg::LineWidth();
-    lineWidth->setWidth(this->lineWidth);
-    stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
-    node->setStateSet(stateSet);
-    return new OsgPath(path, node);
+    node->setStateSet(inet::osg::createLineStateSet(lineColorSet.getColor(pathVisualizations.size()), lineStyle, lineWidth));
+    return new PathOsgVisualization(path, node);
 }
 
-void PathOsgVisualizerBase::setAlpha(const Path *path, double alpha) const
+void PathOsgVisualizerBase::addPathVisualization(const PathVisualization *pathVisualization)
 {
-    auto osgPath = static_cast<const OsgPath *>(path);
-    auto node = osgPath->node;
+    PathVisualizerBase::addPathVisualization(pathVisualization);
+    auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    scene->addChild(pathOsgVisualization->node);
+}
+
+void PathOsgVisualizerBase::removePathVisualization(const PathVisualization *pathVisualization)
+{
+    PathVisualizerBase::removePathVisualization(pathVisualization);
+    auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
+    auto node = pathOsgVisualization->node;
+    node->getParent(0)->removeChild(node);
+}
+
+void PathOsgVisualizerBase::setAlpha(const PathVisualization *pathVisualization, double alpha) const
+{
+    auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
+    auto node = pathOsgVisualization->node;
     auto stateSet = node->getOrCreateStateSet();
     auto material = static_cast<osg::Material *>(stateSet->getAttribute(osg::StateAttribute::MATERIAL));
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
-}
-
-void PathOsgVisualizerBase::setPosition(cModule *node, const Coord& position) const
-{
-    for (auto it : paths) {
-        auto path = static_cast<const OsgPath *>(it.second);
-        auto group = static_cast<osg::Group *>(path->node);
-        auto geode = static_cast<osg::Geode *>(group->getChild(0));
-        auto geometry = static_cast<osg::Geometry *>(geode->getDrawable(0));
-        auto vertices = static_cast<osg::Vec3Array *>(geometry->getVertexArray());
-        auto autoTransform = dynamic_cast<osg::AutoTransform *>(group->getChild(1));
-        for (int i = 0; i < path->moduleIds.size(); i++) {
-            if (node->getId() == path->moduleIds[i]) {
-                osg::Vec3d p(position.x, position.y, position.z + path->offset);
-                vertices->at(i) = p;
-                if (autoTransform != nullptr && i == path->moduleIds.size() - 1)
-                    autoTransform->setPosition(p);
-            }
-        }
-        geometry->dirtyBound();
-        geometry->dirtyDisplayList();
-    }
 }
 
 #endif // ifdef WITH_OSG

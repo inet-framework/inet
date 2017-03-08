@@ -97,6 +97,6 @@ module Router extends ApplicationLayerNodeBase
         pim.networkLayerOut --> tn.upperLayerIn++ if hasPIM;
         pim.networkLayerIn <-- tn.upperLayerOut++ if hasPIM;
 
-        dhcp.udpOut --> at.upperLayerIn++ if hasDHCP;
-        dhcp.udpIn <-- at.upperLayerOut++ if hasDHCP;
+        dhcp.socketOut --> at.upperLayerIn++ if hasDHCP;
+        dhcp.socketIn <-- at.upperLayerOut++ if hasDHCP;
 }

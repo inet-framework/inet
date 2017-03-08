@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,6 +20,8 @@
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/ModuleFilter.h"
+#include "inet/visualizer/util/ColorSet.h"
 
 namespace inet {
 
@@ -28,15 +30,46 @@ namespace visualizer {
 class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
+    class INET_API MobilityVisualization {
+      public:
+        IMobility *mobility = nullptr;
+
+      public:
+        MobilityVisualization(IMobility *mobility);
+    };
+  protected:
     /** @name Parameters */
     //@{
-    cModule *subscriptionModule = nullptr;
-    bool displayMovementTrail = false;
+    bool displayMovements = false;
+    double animationSpeed = NaN;
+    ModuleFilter moduleFilter;
+    // orientation
+    bool displayOrientations = false;
+    double orientationArcSize = NaN;
+    cFigure::Color orientationLineColor;
+    cFigure::LineStyle orientationLineStyle;
+    double orientationLineWidth = NaN;
+    // velocity
+    bool displayVelocities = false;
+    double velocityArrowScale = NaN;
+    cFigure::Color velocityLineColor;
+    cFigure::LineStyle velocityLineStyle;
+    double velocityLineWidth = NaN;
+    // movement trail
+    bool displayMovementTrails = false;
+    bool autoMovementTrailLineColor = false;
+    ColorSet movementTrailLineColorSet;
+    cFigure::LineStyle movementTrailLineStyle;
+    double movementTrailLineWidth = NaN;
     int trailLength = -1;
     //@}
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
+
+    virtual void subscribe();
+    virtual void unsubscribe();
 
   public:
     virtual ~MobilityVisualizerBase();

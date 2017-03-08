@@ -38,9 +38,10 @@ class INET_API ITracingObstacleLoss : public IObstacleLoss
         const Coord intersection2;
         const Coord normal1;
         const Coord normal2;
+        const double loss;
 
       public:
-        ObstaclePenetratedEvent(const IPhysicalObject *object, Coord intersection1, Coord intersection2, Coord normal1, Coord normal2);
+        ObstaclePenetratedEvent(const IPhysicalObject *object, Coord intersection1, Coord intersection2, Coord normal1, Coord normal2, double loss);
     };
 
   public:

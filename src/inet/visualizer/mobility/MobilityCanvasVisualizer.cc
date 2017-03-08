@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -24,17 +24,20 @@ namespace visualizer {
 
 Define_Module(MobilityCanvasVisualizer);
 
-MobilityCanvasVisualizer::CacheEntry::CacheEntry(NetworkNodeCanvasVisualization *visualization, cModule *visualRepresentation, TrailFigure *trailFigure) :
-    visualization(visualization),
+MobilityCanvasVisualizer::MobilityCanvasVisualization::MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility) :
+    MobilityVisualization(mobility),
+    networkNodeVisualization(networkNodeVisualization),
     visualRepresentation(visualRepresentation),
+    orientationFigure(orientationFigure),
+    veloctiyFigure(veloctiyFigure),
     trailFigure(trailFigure)
 {
 }
 
 MobilityCanvasVisualizer::~MobilityCanvasVisualizer()
 {
-    for (auto cacheEntry : cacheEntries)
-        delete cacheEntry.second;
+    for (auto mobilityVisualization : mobilityVisualizations)
+        delete mobilityVisualization.second;
 }
 
 void MobilityCanvasVisualizer::initialize(int stage)
@@ -42,9 +45,38 @@ void MobilityCanvasVisualizer::initialize(int stage)
     MobilityVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
+        zIndex = par("zIndex");
         canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
     }
+}
+
+void MobilityCanvasVisualizer::refreshDisplay() const
+{
+    MobilityVisualizerBase::refreshDisplay();
+    for (auto it : mobilityVisualizations) {
+        auto mobilityVisualization = it.second;
+        auto mobility = mobilityVisualization->mobility;
+        auto position = canvasProjection->computeCanvasPoint(mobility->getCurrentPosition());
+        auto orientation = mobility->getCurrentAngularPosition();
+        auto velocity = canvasProjection->computeCanvasPoint(mobility->getCurrentSpeed());
+        mobilityVisualization->networkNodeVisualization->setTransform(cFigure::Transform().translate(position.x, position.y));
+        if (mobilityVisualization->visualRepresentation != nullptr)
+            setPosition(mobilityVisualization->visualRepresentation, position);
+        if (displayOrientations) {
+            // TODO: this doesn't correctly take canvas projetion into account
+            double angle = orientation.alpha;
+            mobilityVisualization->orientationFigure->setStartAngle(angle - M_PI * orientationArcSize);
+            mobilityVisualization->orientationFigure->setEndAngle(angle + M_PI * orientationArcSize);
+        }
+        if (displayVelocities) {
+            mobilityVisualization->veloctiyFigure->setEnd(velocity * velocityArrowScale);
+            mobilityVisualization->veloctiyFigure->setVisible(velocity.getLength() != 0);
+        }
+        if (displayMovementTrails)
+            extendMovementTrail(mobility, mobilityVisualization->trailFigure, position);
+    }
+    visualizerTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
 }
 
 cModule *MobilityCanvasVisualizer::findVisualRepresentation(cModule *module) const
@@ -54,43 +86,74 @@ cModule *MobilityCanvasVisualizer::findVisualRepresentation(cModule *module) con
     return module;
 }
 
-MobilityCanvasVisualizer::CacheEntry *MobilityCanvasVisualizer::getCacheEntry(const IMobility *mobility) const
+MobilityCanvasVisualizer::MobilityCanvasVisualization *MobilityCanvasVisualizer::getMobilityVisualization(const IMobility *mobility) const
 {
-    auto it = cacheEntries.find(mobility);
-    if (it == cacheEntries.end())
+    auto it = mobilityVisualizations.find(mobility);
+    if (it == mobilityVisualizations.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MobilityCanvasVisualizer::setCacheEntry(const IMobility *mobility, CacheEntry *entry)
+void MobilityCanvasVisualizer::setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry)
 {
-    cacheEntries[mobility] = entry;
+    mobilityVisualizations[mobility] = entry;
 }
 
-void MobilityCanvasVisualizer::removeCacheEntry(const IMobility *mobility)
+void MobilityCanvasVisualizer::removeMobilityVisualization(const IMobility *mobility)
 {
-    cacheEntries.erase(mobility);
+    mobilityVisualizations.erase(mobility);
 }
 
-MobilityCanvasVisualizer::CacheEntry* MobilityCanvasVisualizer::ensureCacheEntry(const IMobility *mobility)
+MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer::ensureMobilityVisualization(IMobility *mobility)
 {
-    auto cacheEntry = getCacheEntry(mobility);
-    if (cacheEntry == nullptr) {
+    auto mobilityVisualization = getMobilityVisualization(mobility);
+    if (mobilityVisualization == nullptr) {
         auto canvas = visualizerTargetModule->getCanvas();
         auto module = const_cast<cModule *>(dynamic_cast<const cModule *>(mobility));
         auto visualRepresentation = findVisualRepresentation(module);
-        auto trailFigure = displayMovementTrail ? new TrailFigure(trailLength, true, "movement trail") : nullptr;
         auto visualization = networkNodeVisualizer->getNeworkNodeVisualization(getContainingNode(module));
-        if (trailFigure != nullptr)
+        cArcFigure *orientationFigure = nullptr;
+        if (displayOrientations) {
+            auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);
+            int radius = rectangle.getSize().getLength() * 1.25 / 2;
+            orientationFigure = new cArcFigure("orientation");
+            orientationFigure->setTags("orientation");
+            orientationFigure->setTooltip("This arc represents the current orientation of the mobility model");
+            orientationFigure->setZIndex(zIndex);
+            orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
+            orientationFigure->setLineColor(orientationLineColor);
+            orientationFigure->setLineStyle(orientationLineStyle);
+            orientationFigure->setLineWidth(orientationLineWidth);
+            visualization->addFigure(orientationFigure);
+        }
+        cLineFigure *velocityFigure = nullptr;
+        if (displayVelocities) {
+            velocityFigure = new cLineFigure("velocity");
+            velocityFigure->setTags("velocity");
+            velocityFigure->setTooltip("This arrow represents the current velocity of the mobility model");
+            velocityFigure->setZIndex(zIndex);
+            velocityFigure->setVisible(false);
+            velocityFigure->setEndArrowhead(cFigure::ARROW_SIMPLE);
+            velocityFigure->setLineColor(velocityLineColor);
+            velocityFigure->setLineStyle(velocityLineStyle);
+            velocityFigure->setLineWidth(velocityLineWidth);
+            visualization->addFigure(velocityFigure);
+        }
+        TrailFigure *trailFigure = nullptr;
+        if (displayMovementTrails) {
+            trailFigure = new TrailFigure(trailLength, true, "movement trail");
+            trailFigure->setTags("movement_trail recent_history");
+            trailFigure->setZIndex(zIndex);
             canvas->addFigure(trailFigure);
-        cacheEntry = new CacheEntry(visualization, visualRepresentation, trailFigure);
-        setCacheEntry(mobility, cacheEntry);
+        }
+        mobilityVisualization = new MobilityCanvasVisualization(visualization, visualRepresentation, orientationFigure, velocityFigure, trailFigure, mobility);
+        setMobilityVisualization(mobility, mobilityVisualization);
     }
-    return cacheEntry;
+    return mobilityVisualization;
 }
 
-void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position)
+void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position) const
 {
     cFigure::Point startPosition;
     cFigure::Point endPosition = position;
@@ -104,12 +167,13 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
     if (trailFigure->getNumFigures() == 0 || dx * dx + dy * dy > 1) {
         cLineFigure *movementLine = new cLineFigure("movementTrail");
         movementLine->setTags("movement_trail recent_history");
+        movementLine->setTooltip("This line represents the recent movement trail of the mobility model");
         movementLine->setStart(startPosition);
         movementLine->setEnd(endPosition);
-        movementLine->setLineWidth(1);
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
-        cFigure::Color color = cFigure::GOOD_DARK_COLORS[module->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
-        movementLine->setLineColor(color);
+        movementLine->setLineColor(movementTrailLineColorSet.getColor(module->getId()));
+        movementLine->setLineStyle(movementTrailLineStyle);
+        movementLine->setLineWidth(movementTrailLineWidth);
         movementLine->setZoomLineWidth(false);
         trailFigure->addFigure(movementLine);
     }
@@ -118,17 +182,10 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
 void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (!hasGUI()) return;
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = dynamic_cast<IMobility *>(object);
-        auto position = canvasProjection->computeCanvasPoint(mobility->getCurrentPosition());
-        auto entry = ensureCacheEntry(mobility);
-        entry->visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
-        if (entry->visualRepresentation != nullptr)
-            setPosition(entry->visualRepresentation, position);
-        if (displayMovementTrail)
-            extendMovementTrail(mobility, entry->trailFigure, position);
-    }
+    if (signal == IMobility::mobilityStateChangedSignal)
+        ensureMobilityVisualization(dynamic_cast<IMobility *>(object));
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 void MobilityCanvasVisualizer::setPosition(cModule* visualRepresentation, cFigure::Point position)

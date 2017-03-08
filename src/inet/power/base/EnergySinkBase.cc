@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,59 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 #include "inet/power/base/EnergySinkBase.h"
 
 namespace inet {
 
 namespace power {
 
-EnergySinkBase::EnergySinkBase() :
-    totalGeneratedPower(W(0))
+const IEnergyGenerator *EnergySinkBase::getEnergyGenerator(int index) const
 {
+    return energyGenerators[index];
 }
 
-void EnergySinkBase::initialize(int stage)
+void EnergySinkBase::addEnergyGenerator(const IEnergyGenerator *energyGenerator)
 {
-    if (stage == INITSTAGE_LOCAL)
-        WATCH(totalGeneratedPower);
+    energyGenerators.push_back(energyGenerator);
 }
 
-W EnergySinkBase::computeTotalGeneratedPower()
+void EnergySinkBase::removeEnergyGenerator(const IEnergyGenerator *energyGenerator)
 {
-    W totalGeneratedPower = W(0);
-    for (auto& elem : energyGenerators)
-        totalGeneratedPower += (elem).generatedPower;
-    return totalGeneratedPower;
-}
-
-const IEnergyGenerator *EnergySinkBase::getEnergyGenerator(int energyGeneratorId) const
-{
-    return energyGenerators[energyGeneratorId].energyGenerator;
-}
-
-int EnergySinkBase::addEnergyGenerator(const IEnergyGenerator *energyGenerator)
-{
-    energyGenerators.push_back(EnergyGeneratorEntry(energyGenerator, energyGenerator->getPowerGeneration()));
-    totalGeneratedPower = computeTotalGeneratedPower();
-    return energyGenerators.size() - 1;
-}
-
-void EnergySinkBase::removeEnergyGenerator(int energyGeneratorId)
-{
-    energyGenerators[energyGeneratorId].generatedPower = W(0);
-    energyGenerators[energyGeneratorId].energyGenerator = nullptr;
-    totalGeneratedPower = computeTotalGeneratedPower();
-}
-
-W EnergySinkBase::getPowerGeneration(int energyGeneratorId) const
-{
-    return energyGenerators[energyGeneratorId].generatedPower;
-}
-
-void EnergySinkBase::setPowerGeneration(int energyGeneratorId, W generatedPower)
-{
-    energyGenerators[energyGeneratorId].generatedPower = generatedPower;
-    totalGeneratedPower = computeTotalGeneratedPower();
+    auto it = std::find(energyGenerators.begin(), energyGenerators.end(), energyGenerator);
+    if (it == energyGenerators.end())
+        throw cRuntimeError("Energy generator not found");
+    else
+        energyGenerators.erase(it);
 }
 
 } // namespace power

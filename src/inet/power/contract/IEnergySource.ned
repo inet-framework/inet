@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,11 +20,11 @@ package inet.power.contract;
 //
 // The energy source models provide energy for multiple energy consumers.
 //
+// @see ~IEnergyConsumer, ~IEnergyGenerator, ~IEnergySink, ~IEnergyStorage, ~IEnergyManagement
 // @author Levente Meszaros
 //
 moduleinterface IEnergySource
 {
     parameters:
         @display("i=block/plug");
-        @signal[powerConsumptionChanged](type=double);
 }

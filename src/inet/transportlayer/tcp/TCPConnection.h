@@ -314,7 +314,7 @@ class INET_API TCPStateVariables : public cObject
  * When the CLOSED state is reached, TCP will delete the TCPConnection object.
  *
  */
-class INET_API TCPConnection
+class INET_API TCPConnection : public cObject
 {
   public:
     // connection identification by apps: socketId
@@ -594,6 +594,12 @@ class INET_API TCPConnection
      * Destructor.
      */
     virtual ~TCPConnection();
+
+    int getLocalPort() const { return localPort; }
+    L3Address getLocalAddress() const { return localAddr; }
+
+    int getRemotePort() const { return remotePort; }
+    L3Address getRemoteAddress() const { return remoteAddr; }
 
     /**
      * This method gets invoked from TCP when a segment arrives which

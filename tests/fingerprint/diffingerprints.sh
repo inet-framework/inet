@@ -7,6 +7,7 @@
 # Configure the simulation by adding the following lines to the ini file:
 #
 # record-eventlog = true
+# cmdenv-log-format = "%f %g [%l] "
 # fingerprint = 0000-0000
 
 grep "E #" $1 | awk '{print $13}' | uniq > $1.tmp

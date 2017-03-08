@@ -132,10 +132,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * removed from the beginning. This list doesn't contain nullptr values.
      */
     std::vector<const ITransmission *> transmissions;
-    /**
-     * TODO
-     */
-    std::vector<IMediumListener *> listeners;
     //@}
 
     /** @name Cache */
@@ -316,28 +312,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IListeningDecision *computeListeningDecision(const IRadio *receiver, const IListening *listening, const std::vector<const ITransmission *> *transmissions) const;
     //@}
 
-    /** @name Notification */
-    //@{
-    virtual void fireRadioAdded(const IRadio *radio) const;
-    virtual void fireRadioRemoved(const IRadio *radio) const;
-
-    virtual void fireTransmissionAdded(const ITransmission *transmission) const;
-    virtual void fireTransmissionRemoved(const ITransmission *transmission) const;
-
-    virtual void fireTransmissionStarted(const ITransmission *transmission) const;
-    virtual void fireTransmissionEnded(const ITransmission *transmission) const;
-    virtual void fireReceptionStarted(const IReception *reception) const;
-    virtual void fireReceptionEnded(const IReception *reception) const;
-    //@}
-
   public:
     RadioMedium();
     virtual ~RadioMedium();
 
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
-
-    virtual void addListener(IMediumListener *listener) override { listeners.push_back(listener); }
-    virtual void removeListener(IMediumListener *listener) override { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
 
     virtual const IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }

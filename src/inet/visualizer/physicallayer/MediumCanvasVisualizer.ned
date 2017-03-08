@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -28,16 +28,25 @@ import inet.visualizer.contract.IMediumVisualizer;
 // radio signals as a 2D ring or a 3D sphere as they propagate through the
 // medium.
 //
-// @see ~MediumCanvasVisualizer, ~MediumVisualizer, ~MediumVisualizerBase,
-// and ~IMediumVisualizer
+// @see ~MediumCanvasVisualizer, ~MediumVisualizer, ~MediumVisualizerBase, ~IMediumVisualizer
 //
 simple MediumCanvasVisualizer extends MediumVisualizerBase like IMediumVisualizer
 {
     parameters:
-        @class(MediumCanvasVisualizer);
-        string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path of the network node visualizer module
+        double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
 
         string signalShape @enum("ring", "sphere") = default("ring"); // shape for displaying signals
+        double signalOpacity = default(0.5); // signal opacity, value must be in the range [0, 1]
+        int signalRingCount = default(20); // number of stationary rings around the transmitter, value must be in the range [0, +inf)
+        double signalRingSize = default(50); // width of stationary rings, value must be in the range (0, +inf)
+        double signalFadingDistance = default(50); // distance parameter for exponential opacity decreasing, value must be in the range (0, +inf)
+        double signalFadingFactor = default(1.2); // factor parameter for exponential opacity decreasing, value must be in the range (1, +inf)
+        int signalWaveCount = default(20); // number of moving circles representing waves around the transmitter, value must be in the range [0, +inf)
+        double signalWaveLength = default(50); // distance between moving circles representing waves, value must be in the range (0, +inf)
+        double signalWaveWidth = default(10); // width of moving circles representing waves, value must be in the range (0, +inf)
+        double signalWaveFadingAnimationSpeedFactor = default(1); // value must be in the range [0, 1]
 
         bool displayCommunicationHeat = default(false); // when enabled the radio medium displays recent successful receptions as a heat map overlay
+
+        @class(MediumCanvasVisualizer);
 }

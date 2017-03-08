@@ -94,7 +94,10 @@ class TCPReceiveQueue;
 class INET_API TCP : public cSimpleModule, public ILifecycle
 {
   public:
-    struct AppConnKey    // XXX this class is redundant since socketId is already globally unique
+    static simsignal_t tcpConnectionAddedSignal;
+    static simsignal_t tcpConnectionRemovedSignal;
+
+    struct AppConnKey    // XXX this class is redundant since connId is already globally unique
     {
         int socketId;
 

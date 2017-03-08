@@ -1,0 +1,109 @@
+%description: https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions (Example L.2)
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+
+network RetransmissionTest
+{
+    parameters:
+        @display("b=297,203");
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            @display("p=61,164");
+        }
+        receiver: WirelessHost {
+            parameters:
+                @display("r=,,#707070");
+        }
+        sender: WirelessHost {
+            parameters:
+                @display("r=,,#707070");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=61,46");
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+
+network = RetransmissionTest
+record-eventlog = true
+ned-path = .;../../../../src;../../lib
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 400m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+
+**.mobility.initFromDisplayString = false
+**.sender.mobility.initialX = 100m
+**.sender.mobility.initialY = 100m
+**.receiver.mobility.initialX = 300m
+**.receiver.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+
+# Radio settings
+**.radio.transmitter.power = 2000mW
+**.radio.receiver.sensitivity = -85dBm
+**.radio.receiver.snirThreshold = 4dB
+
+# ARP
+**.arpType = "GlobalARP"
+
+# Sender
+**.sender.numUdpApps = 1
+**.sender.udpApp[0].typename = "MpduGen"
+**.sender.udpApp[0].destAddress = "receiver"
+**.sender.udpApp[0].destPort = 21
+**.sender.udpApp[0].longPacketSize = 1700B
+**.sender.udpApp[0].shortPacketSize = 500B
+**.sender.udpApp[0].startTime = 0.05s
+
+# Receiver
+**.receiver.numUdpApps = 1
+**.receiver.udpApp[0].typename = "UDPSink"
+**.receiver.udpApp[0].localPort = 21
+**.wlan[*].mac.rtsThresholdBytes = 1500B
+**.wlan[*].mac.cwMinData = 15
+**.wlan[*].mac.cwMaxData = 1023
+**.sender.wlan[*].macType = "Ieee80211CompatibleMac"
+**.receiver.wlan[*].macType = "Ieee80211TesterMac"
+**.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
+
+**.sender.udpApp[0].packets = "LL"
+**.receiver.wlan[*].mac.actions = "ABAAAA"
+
+%contains-regex: stdout
+.*
+For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
+.*
+For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
+.*
+For the current frame exchange, we have CW = 31 SRC = 0 LRC = 1 SSRC = 0 and SLRC = 1
+.*
+For the current frame exchange, we have CW = 31 SRC = 0 LRC = 1 SSRC = 0 and SLRC = 1
+.*
+For the current frame exchange, we have CW = 15 SRC = 0 LRC = 1 SSRC = 0 and SLRC = 0
+.*
+For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
+.*
+For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
+.*
+For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 0
+.*
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,83 @@
+%description:
+
+Test for IEEE 802.11 power model with two adhoc nodes. One node is pinging the
+other. The source node is initially down, the destination node is initially up.
+The battery of the source node is initially depleted and it's being charged. The
+source node starts when the battery reaches the configured capacity. The battery
+of the destination node is initially full and gets depleted during the run. The
+destination node shuts down when the battery reaches the configured capacity.
+The end result is that the number of successful ping messages is less than if
+there were no batteries involved at all.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.common.lifecycle.LifecycleController;
+
+network Test
+{
+    submodules:
+        lifecycleController: LifecycleController;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: IPv4NetworkConfigurator;
+        hostSource: AdhocHost;
+        hostDestination: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 100s
+cmdenv-express-mode = false
+
+# status
+**.hasStatus = true
+
+# power
+**.energyStorageType = "SimpleCcBattery"
+**.energyConsumerType = "StateBasedCcEnergyConsumer"
+**.energyStorage.nominalCapacity = 1C
+**.energyStorage.nominalVoltage = 1.5V
+**.energyStorage.cutoffVoltage = 1.0V
+**.energyStorage.internalResistance = 0.2Ohm
+*.hostSource.energyStorage.initialCapacity = 1C
+*.hostDestination.energyStorage.initialCapacity = 0.1C
+
+# mobility
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 50m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.hostSource.mobility.initialX = 20m
+*.hostDestination.mobility.initialX = 80m
+
+# ping app
+*.host*.numPingApps = 1
+*.hostSource.pingApp[0].destAddr = "hostDestination"
+*.hostSource.pingApp[0].printPing = true
+
+%contains: stdout
+--------------------------------------------------------
+	Test.hostSource.pingApp[0]
+--------------------------------------------------------
+sent: 100   received: 49   loss rate (%): 51
+round-trip min/avg/max (ms): 0.4564/0.729102/1.5588
+stddev (ms): 0.218581   variance:4.77778e-08
+--------------------------------------------------------
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

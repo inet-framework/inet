@@ -29,10 +29,10 @@ class INET_API IMACFrame
 {
   public:
     virtual ~IMACFrame() {}
-    virtual MACAddress getSourceAddress() const = 0;
-    virtual void setSourceAddress(const MACAddress& address) = 0;
-    virtual MACAddress getDestinationAddress() const = 0;
-    virtual void setDestinationAddress(const MACAddress& address) = 0;
+    virtual const MACAddress &getTransmitterAddress() const = 0;
+    virtual void setTransmitterAddress(const MACAddress& address) = 0;
+    virtual const MACAddress &getReceiverAddress() const = 0;
+    virtual void setReceiverAddress(const MACAddress& address) = 0;
 };
 
 } // namespace inet
