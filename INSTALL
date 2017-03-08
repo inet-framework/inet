@@ -66,17 +66,12 @@ Note to GIT users:
 
 If you want to check out INET directly from the repository, we recommend using the
 
-    $ git clone git@github.com:inet-framework/inet.git
+    $ git clone --recursive git@github.com:inet-framework/inet.git
 
-command. The INET repository contains some additional git 'submodules' that contain
-tutorials and showcases. To save space, these folders are not cloned by default.
-Running the Makefile will automatically populate those directories.
-
-You can initializa/deinitialize those submodules later manually, too:
+command, because the INET repository contains git submodules. If you forget to specify
+--recursive, you can initialize those submodules with:
 
     $ git submodule update --init
-or
-    $ git submodule deinit .
 
 To make the installation simple, the GIT repo contains all IDE configuration files.
 If you make local changes in the IDE you may need to disable the change tracking on
