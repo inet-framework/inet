@@ -37,8 +37,8 @@ network Indicator
     @figure[lineargauge](type=linearGauge; pos=340,90; size=300,50);
     @statistic[lineargauge](source=signalSourceOutput; record=figure; targetFigure=lineargauge);
 
-    @figure[progress](type=progressMeter; pos=220,230; size=300,20);
-    @statistic[progress](source=100 * sum(packetBytes(server.udp.sentPk)) / 1038000; record=figure; targetFigure=progress);
+    @figure[progress](type=progressMeter; pos=220,230; size=300,20; text="%.4g%%");
+    @statistic[progress](source=100 * sum(packetBytes(client.udpApp[0].rcvdPk)) / 1048576; record=figure; targetFigure=progress);
 
     @figure[counter](type=counter; pos=550,227);
     @statistic[counter](source=count(server.udp.sentPk); record=figure; targetFigure=counter);
