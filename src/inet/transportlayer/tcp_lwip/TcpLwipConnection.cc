@@ -20,7 +20,7 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/serializer/headers/defs.h"    // for endian macros
+//#include "inet/common/serializer/headers/defs.h"    // for endian macros
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/tcp_lwip/TCP_lwIP.h"

@@ -57,7 +57,7 @@ unsigned int TcpLwipSendQueue::getBytesForTcpLayer(void *bufferP, unsigned int b
 {
     ASSERT(bufferP);
 
-    unsigned int length = byte(dataBuffer.getBufferLength()).get();
+    unsigned int length = byte(dataBuffer.getQueueLength()).get();
     if (bufferLengthP < length)
         length = bufferLengthP;
     const auto& bytesChunk = dataBuffer.peek<BytesChunk>(byte(length));
@@ -72,7 +72,7 @@ void TcpLwipSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 
 unsigned long TcpLwipSendQueue::getBytesAvailable() const
 {
-    return byte(dataBuffer.getBufferLength()).get();
+    return byte(dataBuffer.getQueueLength()).get();
 }
 
 Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
@@ -135,7 +135,7 @@ void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLeng
 
 unsigned long TcpLwipReceiveQueue::getExtractableBytesUpTo() const
 {
-    return byte(dataBuffer.getBufferLength()).get();
+    return byte(dataBuffer.getQueueLength()).get();
 }
 
 Packet *TcpLwipReceiveQueue::extractBytesUpTo()
@@ -143,7 +143,7 @@ Packet *TcpLwipReceiveQueue::extractBytesUpTo()
     ASSERT(connM);
 
     Packet *dataMsg = nullptr;
-    bit queueLength = dataBuffer.getBufferLength();
+    bit queueLength = dataBuffer.getQueueLength();
 
     if (queueLength > bit(0)) {
         dataMsg = new Packet("DATA");
@@ -157,12 +157,12 @@ Packet *TcpLwipReceiveQueue::extractBytesUpTo()
 
 uint32 TcpLwipReceiveQueue::getAmountOfBufferedBytes() const
 {
-    return byte(dataBuffer.getBufferLength()).get();
+    return byte(dataBuffer.getQueueLength()).get();
 }
 
 uint32 TcpLwipReceiveQueue::getQueueLength() const
 {
-    return byte(dataBuffer.getBufferLength()).get();
+    return byte(dataBuffer.getQueueLength()).get();
 }
 
 void TcpLwipReceiveQueue::getQueueStatus() const
