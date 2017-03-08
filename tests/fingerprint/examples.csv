@@ -32,7 +32,7 @@
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           fd0f-6c4c/tplx
 /examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            c0dd-f835/tplx
-/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            00bb-3a7f/tplx
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            8d4b-2fc6/tplx
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            baea-6c2a/tplx
 
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             6f98-b9d9/tplx
@@ -61,7 +61,7 @@
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           8e25-3130/tplx
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            ebc8-853c/tplx
 
-/examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            5b8f-14e1/tplx
+/examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            d560-d3af/tplx
 
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,     33b7-ed9b/tplx
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,      b012-af31/tplx
@@ -99,7 +99,7 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             f433-5d56/tplx
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             85ac-df6f/tplx
 
-/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            5b36-f82f/tplx
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            cfb9-799c/tplx
 /examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             7349-3e4f/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             9d93-9160/tplx
 /examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             8535-4fac/tplx
@@ -305,9 +305,9 @@
 /examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         8196-6306/tplx
 /examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         73cb-7f2f/tplx
 
-/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,          1b3b-abbd/tplx
-/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,          1b3b-abbd/tplx
-/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,          1b3b-abbd/tplx
+/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,          43dd-c45d/tplx
+/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,          43dd-c45d/tplx
+/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,          43dd-c45d/tplx
 
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,             18ad-3cda/tplx
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,             00c1-0e10/tplx
