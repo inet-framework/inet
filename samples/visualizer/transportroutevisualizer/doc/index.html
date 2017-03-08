@@ -11,14 +11,19 @@
 
     <p><h2>Goals</h2></p>
     <p>
-        Key words: lot of simulteanous communication in transport layer
+        The transport layer offers peer-to-peer and end-to-end connection between two processes on remote hosts.
+        This layer is the first one which breaks the information data in to smaller units called segments.
+        By visualizing transport routes, we can see the segments' path between the transport layers of the corresponding devices.
+    </p>
+    <p>    
+        The example consists of four simulation models, each demonstrating different features of transport route visualization.
     </p>
 
 
     <p><h2>About the Visualizer</h2></p>
     <p>
         The <var>TransportRouteVisualizer</var> keeps track of active routes in the transport layer.
-        A route between two node is considered active if a packet is sent recently between their transport layers.
+        A route between two node is considered active if a transport layer segment is completely sent recently between their transport layers.
         Active routes are not displayed by default, we can enable their vsisualization by switching the <i>displayRoutes</i> parameter to true.
 	</p>   
     <p> 
@@ -32,23 +37,35 @@
     </p>
 
 
-    <p><h2>Enabling Transport Route Visualization in a Wired Network</h2></p>
+    <p><h2>Enabling Visualization of Transport Routes</h2></p>
     <p>
+        In this configuration we show how to enable the visualization with its default settings.
+        We visualize transport routes both in a wired and in a wireless network.
     </p>
-
-
-    <p><h2>Enabling Transport Route Visualization in a Wireless Network</h2></p>
     <p>
+        The wired and the wireless network are very similar:
+    </p>
+    <p>
+        <img class="screen" src="TransportRouteSimpleWired.png">
+    </p>
+    <p>
+        <img class="screen" src="TransportRouteSimpleWireless.png">
+    </p>
+    <p>
+        Both networks contain two endpoints, a <var>TransportRouteVisualizer</var> and an <var>IPv4NetworkConfigurator</var> module.
+        The wireless network includes an <var>Ieee80211ScalarRadioMedium</var> too.
     </p>
 
 
     <p><h2>Transport Route Visualization in an Extended Network</h2></p>
     <p>
+        <img class="screen" src="TransportRouteExtended.png">
     </p>
 
 
     <p><h2>Displaying Transport Routes of Different Protocols</h2></p>
     <p>
+        <img class="screen" src="ServerClientsNetwork.png">
     </p>
 
 
