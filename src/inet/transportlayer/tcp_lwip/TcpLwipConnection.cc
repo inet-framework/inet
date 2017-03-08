@@ -28,7 +28,6 @@
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/common/serializer/tcp/TCPSerializer.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {
@@ -285,7 +284,7 @@ void TcpLwipConnection::accept()
     do_SEND();
 }
 
-void TcpLwipConnection::send(cPacket *msgP)
+void TcpLwipConnection::send(Packet *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
 }

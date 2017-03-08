@@ -39,7 +39,6 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
-#include "inet/common/serializer/tcp/TCPSerializer.h"
 #include "inet/common/serializer/tcp/headers/tcphdr.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -49,9 +48,7 @@
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
-#include "inet/transportlayer/tcp_lwip/queues/TcpLwipByteStreamQueues.h"
-#include "inet/transportlayer/tcp_lwip/queues/TcpLwipMsgBasedQueues.h"
-#include "inet/transportlayer/tcp_lwip/queues/TcpLwipVirtualDataQueues.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
 namespace inet {
 
@@ -139,12 +136,12 @@ TCP_lwIP::~TCP_lwIP()
         delete pLwipTcpLayerM;
 }
 
-void TCP_lwIP::handleIpInputMessage(FlatPacket *packet)
+void TCP_lwIP::handleIpInputMessage(Packet *packet)
 {
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    TcpHeader *tcpsegP = check_and_cast<TcpHeader *>(packet->peekHeader());
+    const auto& tcpsegP = CHK(packet->peekHeader<TcpHeader>());
     srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getMandatoryTag<InterfaceInd>())->getInterfaceId();
@@ -167,12 +164,8 @@ void TCP_lwIP::handleIpInputMessage(FlatPacket *packet)
 
     size_t totalTcpLen = maxBufferSize - ipHdrLen;
 
-    Buffer b(tcph, totalTcpLen);
-    Context c;
-    //    c.l3AddressesPtr = ?;
-    //    c.l3AddressesLength = ?;
-    TCPSerializer().serializePacket(packet, b, c);
-    totalTcpLen = b.getPos();
+    const auto& bytes = packet->peekDataAt<BytesChunk>(bit(0), bit(packet->getBitLength()));
+    totalTcpLen = bytes->getBytes((uint8_t *)data + ipHdrLen, totalTcpLen);
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
     ih->_chksum = 0;
@@ -201,7 +194,7 @@ void TCP_lwIP::handleIpInputMessage(FlatPacket *packet)
     }
 
     ASSERT(pCurTcpSegM == nullptr);
-    pCurTcpSegM = tcpsegP;
+    pCurTcpSegM = packet;
     // receive msg from network
     pLwipTcpLayerM->if_receive_packet(interfaceId, data, totalIpLen);
     // lwip call back the notifyAboutIncomingSegmentProcessing() for store incoming messages
@@ -221,7 +214,8 @@ void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(pCurTcpSegM, seqNo, dataptr, len);
     }
     else {
-        if (pCurTcpSegM->getPayloadLength())
+        const auto& tcpHdr = CHK(pCurTcpSegM->peekHeader<TcpHeader>());
+        if (pCurTcpSegM->getByteLength() > tcpHdr->getHeaderLength())
             throw cRuntimeError("conn is null, and received packet has data");
 
         EV_WARN << "notifyAboutIncomingSegmentProcessing: conn is null\n";
@@ -421,24 +415,19 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
         }
     }
     else if (msgP->arrivedOn("ipIn")) {
-        if (false
-#ifdef WITH_IPv4
-            || dynamic_cast<ICMPMessage *>(msgP)
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-            || dynamic_cast<ICMPv6Message *>(msgP)
-#endif // ifdef WITH_IPv6
-            )
-        {
+        // must be a Packet
+        Packet *pk = check_and_cast<Packet *>(msgP);
+        auto protocol = msgP->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::tcp) {
+            EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
+            handleIpInputMessage(pk);
+        }
+        else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
             EV_WARN << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
             delete msgP;
         }
-        else {
-            // must be a FlatPacket
-            FlatPacket *fp = check_and_cast<FlatPacket *>(msgP);
-            EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
-            handleIpInputMessage(fp);
-        }
+        else
+            throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
     }
     else {    // must be from app
         EV_TRACE << this << ": handle msg: " << msgP->getName() << "\n";
@@ -567,23 +556,26 @@ void TCP_lwIP::printConnBrief(TcpLwipConnection& connP)
     EV_TRACE << this << ": connId=" << connP.connIdM;
 }
 
-void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
-        L3Address const& destP, void *dataP, int lenP)
+void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Address const& destP, void *dataP, int lenP)
 {
     TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
 
-    TcpHeader *tcpseg;
+    Packet *packet = nullptr;
 
     if (conn) {
-        tcpseg = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
+        packet = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
     }
     else {
-        tcpseg = TCPSerializer().deserialize((const unsigned char *)dataP, lenP, true);
-        ASSERT(tcpseg->getPayloadLength() == 0);
+        packet = new Packet(nullptr, std::make_shared<BytesChunk>((const uint8_t*)dataP, lenP));
+        const auto& tcpHdr = CHK(packet->popHeader<TcpHeader>());
+        packet->removePoppedHeaders();
+        int64_t numBytes = packet->getByteLength();
+        ASSERT(numBytes == 0);
+        packet->pushHeader(tcpHdr);
     }
 
-    ASSERT(tcpseg);
-    FlatPacket *packet = tcpseg->getOwnerPacket();
+    const auto& tcpHdr = CHK(packet->peekHeader<TcpHeader>());
+    ASSERT(tcpHdr);
     ASSERT(packet);
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
@@ -598,24 +590,24 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
     addresses->setSrcAddress(srcP);
     addresses->setDestAddress(destP);
     if (conn) {
-        conn->notifyAboutSending(*tcpseg);
+        conn->notifyAboutSending(*tcpHdr);
     }
 
     EV_INFO << this << ": Send segment: conn ID=" << conn->connIdM << " from " << srcP
-            << " to " << destP << " SEQ=" << tcpseg->getSequenceNo();
-    if (tcpseg->getSynBit())
+            << " to " << destP << " SEQ=" << tcpHdr->getSequenceNo();
+    if (tcpHdr->getSynBit())
         EV_INFO << " SYN";
-    if (tcpseg->getAckBit())
-        EV_INFO << " ACK=" << tcpseg->getAckNo();
-    if (tcpseg->getFinBit())
+    if (tcpHdr->getAckBit())
+        EV_INFO << " ACK=" << tcpHdr->getAckNo();
+    if (tcpHdr->getFinBit())
         EV_INFO << " FIN";
-    if (tcpseg->getRstBit())
+    if (tcpHdr->getRstBit())
         EV_INFO << " RST";
-    if (tcpseg->getPshBit())
+    if (tcpHdr->getPshBit())
         EV_INFO << " PSH";
-    if (tcpseg->getUrgBit())
+    if (tcpHdr->getUrgBit())
         EV_INFO << " URG";
-    EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
+    EV_INFO << " len=" << packet->getByteLength() - tcpHdr->getHeaderLength() << "\n";
 
     send(packet, "ipOut");
 }
@@ -641,7 +633,7 @@ void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
             break;
 
         case TCP_C_SEND:
-            process_SEND(connP, check_and_cast<cPacket *>(msgP));
+            process_SEND(connP, check_and_cast<Packet *>(msgP));
             break;
 
         case TCP_C_CLOSE:
@@ -716,7 +708,7 @@ void TCP_lwIP::process_ACCEPT(TcpLwipConnection& connP, TCPAcceptCommand *tcpCom
     delete msg;
 }
 
-void TCP_lwIP::process_SEND(TcpLwipConnection& connP, cPacket *msgP)
+void TCP_lwIP::process_SEND(TcpLwipConnection& connP, Packet *msgP)
 {
     EV_INFO << this << ": processing SEND command, len=" << msgP->getByteLength() << endl;
 
@@ -758,36 +750,12 @@ void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
 
 TcpLwipSendQueue *TCP_lwIP::createSendQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP) {
-        case TCP_TRANSFER_BYTECOUNT:
-            return new TcpLwipVirtualDataSendQueue();
-
-        case TCP_TRANSFER_OBJECT:
-            return new TcpLwipMsgBasedSendQueue();
-
-        case TCP_TRANSFER_BYTESTREAM:
-            return new TcpLwipByteStreamSendQueue();
-
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
-    }
+    return new TcpLwipSendQueue();
 }
 
 TcpLwipReceiveQueue *TCP_lwIP::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP) {
-        case TCP_TRANSFER_BYTECOUNT:
-            return new TcpLwipVirtualDataReceiveQueue();
-
-        case TCP_TRANSFER_OBJECT:
-            return new TcpLwipMsgBasedReceiveQueue();
-
-        case TCP_TRANSFER_BYTESTREAM:
-            return new TcpLwipByteStreamReceiveQueue();
-
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
-    }
+    return new TcpLwipReceiveQueue();
 }
 
 bool TCP_lwIP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

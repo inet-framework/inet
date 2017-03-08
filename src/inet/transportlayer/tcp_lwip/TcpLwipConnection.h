@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
@@ -87,8 +88,7 @@ class INET_API TcpLwipConnection
 
     void listen(L3Address& localAddr, unsigned short localPort);
 
-    void connect(L3Address& localAddr, unsigned short localPort, L3Address& remoteAddr,
-            unsigned short remotePort);
+    void connect(L3Address& localAddr, unsigned short localPort, L3Address& remoteAddr, unsigned short remotePort);
 
     void close();
 
@@ -96,7 +96,7 @@ class INET_API TcpLwipConnection
 
     void accept();
 
-    void send(cPacket *msgP);
+    void send(Packet *msgP);
 
     void fillStatusInfo(TCPStatusInfo& statusInfo);
 

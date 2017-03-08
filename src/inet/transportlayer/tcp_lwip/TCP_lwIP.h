@@ -25,7 +25,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/packet/FlatPacket.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "lwip/lwip_tcp.h"
@@ -107,7 +107,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     void printConnBrief(TcpLwipConnection& connP);
 
     void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(FlatPacket *packet);
+    void handleIpInputMessage(Packet *packet);
 
     // to be refined...
 
@@ -118,7 +118,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     void process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP, cMessage *msgP);
     void process_OPEN_PASSIVE(TcpLwipConnection& connP, TCPOpenCommand *tcpCommandP, cMessage *msgP);
     void process_ACCEPT(TcpLwipConnection& connP, TCPAcceptCommand *tcpCommand, cMessage *msg);
-    void process_SEND(TcpLwipConnection& connP, cPacket *msgP);
+    void process_SEND(TcpLwipConnection& connP, Packet *msgP);
     void process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_ABORT(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
@@ -160,7 +160,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
   protected:
     LwipTcpLayer *pLwipTcpLayerM;
     bool isAliveM;
-    TcpHeader *pCurTcpSegM;
+    Packet *pCurTcpSegM;
 };
 
 } // namespace tcp
