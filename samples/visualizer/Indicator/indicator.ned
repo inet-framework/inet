@@ -32,15 +32,15 @@ network Indicator
     @statistic[label](source=signalSourceOutput; record=figure; targetFigure=label);
 
     @figure[gauge](type=gauge; pos=150,50; size=150,150);
-    @statistic[gauge](source=signalSourceOutput; record=figure; targetFigure=gauge);
+    @statistic[gauge](source=throughput(client.udpApp[0].rcvdPk); record=figure; targetFigure=gauge);
 
     @figure[lineargauge](type=linearGauge; pos=340,90; size=300,50);
     @statistic[lineargauge](source=signalSourceOutput; record=figure; targetFigure=lineargauge);
 
-    @figure[progress](type=progressMeter; pos=220,230; size=300,20; text="%.4g%%");
+    @figure[progress](type=progressMeter; pos=220,230; size=300,20; text="%.4g%%"; label="Download progress");
     @statistic[progress](source=100 * sum(packetBytes(client.udpApp[0].rcvdPk)) / 1048576; record=figure; targetFigure=progress);
 
-    @figure[counter](type=counter; pos=550,227);
+    @figure[counter](type=counter; pos=550,227; label="Packets received");
     @statistic[counter](source=count(server.udp.sentPk); record=figure; targetFigure=counter);
 
     @figure[thermometer](type=thermometer; pos=700,50; size=50,300);
