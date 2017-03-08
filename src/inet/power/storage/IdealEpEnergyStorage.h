@@ -47,6 +47,7 @@ class INET_API IdealEpEnergyStorage : public EpEnergyStorageBase
   public:
     virtual J getNominalEnergyCapacity() const override { return J(INFINITY); }
     virtual J getResidualEnergyCapacity() const override { return J(INFINITY); }
+    virtual J getEnergyBalance() { return energyBalance; }
 };
 
 } // namespace power
