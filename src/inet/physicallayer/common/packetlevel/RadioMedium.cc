@@ -19,6 +19,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
@@ -616,7 +617,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getPacket())->getDestinationAddress()))
+    else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->getMandatoryTag<MacAddressReq>()->getDestAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);

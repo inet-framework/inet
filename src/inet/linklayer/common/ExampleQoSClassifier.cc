@@ -112,7 +112,7 @@ int ExampleQoSClassifier::getUserPriority(cMessage *msg)
             return UP_VI;
         if (destPort == 5000 || srcPort == 5000)
             return UP_VO;
-        if (tcp->getDestinationPort() == 6000 || tcp->getSourcePort() == 6000) // not classified
+        if (destPort == 6000 || srcPort == 6000) // not classified
             return -1;
     }
 #endif

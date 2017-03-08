@@ -234,7 +234,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     cLabelFigure* nameFigure = new cLabelFigure("packet name");
     nameFigure->setPosition(position);
     nameFigure->setTags("propagating_signal packet_name label");
-    nameFigure->setText(transmission->getMacFrame()->getName());
+    nameFigure->setText(transmission->getPacket()->getName());
     nameFigure->setColor(color);
     groupFigure->addFigure(nameFigure);
     return groupFigure;

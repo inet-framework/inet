@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/cPacketChunk.h"
+#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
@@ -129,7 +129,7 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
     // KLUDGE: to unwrap from a Packet
     const auto& packetChunk = check_and_cast<Packet *>(msg)->peekDataAt<cPacketChunk>(byte(0));
-    auto frame = packetChunk->getPacket()->dup();
+    auto frame = check_and_cast<Ieee80211Frame *>(packetChunk->getPacket()->dup());
     frame->transferTagsFrom(msg);
     if (msg->getControlInfo() != nullptr)
         frame->setControlInfo(msg->removeControlInfo());

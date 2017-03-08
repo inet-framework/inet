@@ -330,9 +330,7 @@ class INET_API TCPConnection : public cObject
     L3Address remoteAddr;
     const L3Address& getRemoteAddr() const { return remoteAddr; }
     int localPort = -1;
-    int getLocalPort() const { return localPort; }
     int remotePort = -1;
-    int getRemotePort() const { return remotePort; }
 
   protected:
     TCP *tcpMain = nullptr;    // TCP module

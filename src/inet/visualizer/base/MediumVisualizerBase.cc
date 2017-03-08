@@ -155,7 +155,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
     auto networkNode = getContainingNode(radio);
     auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
     auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(radio->getParentModule());
-    auto packet = transmission->getPhyFrame() != nullptr ? transmission->getPhyFrame() : transmission->getMacFrame();
+    auto packet = transmission->getPacket();
     return networkNodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet);
 }
 

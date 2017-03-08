@@ -24,11 +24,14 @@
 // Get endianness macros defined
 //
 #if defined(_WIN32)    /*MSVC and MinGW*/
+# include <ws2tcpip.h>
+# include <winsock2.h>
 # define LITTLE_ENDIAN    1
 # define BIG_ENDIAN       2
 # define BYTE_ORDER       LITTLE_ENDIAN   /* XXX at least on x86 */
 #elif defined(linux) || defined(__linux)
 # include <endian.h>
+# include <netinet/in.h>
 # define LITTLE_ENDIAN    __LITTLE_ENDIAN
 # define BIG_ENDIAN       __BIG_ENDIAN
 # define BYTE_ORDER       __BYTE_ORDER
