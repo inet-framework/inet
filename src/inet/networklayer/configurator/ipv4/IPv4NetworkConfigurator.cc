@@ -1290,35 +1290,33 @@ void IPv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
         topology.calculateWeightedSingleShortestPathsTo(sourceNode);
         // check if adding the default routes would be ok (this is an optimization)
-        if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo) {
-            if (sourceNode->interfaceInfos[0]->addDefaultRoute) {
-                InterfaceInfo *sourceInterfaceInfo = static_cast<InterfaceInfo *>(sourceNode->interfaceInfos[0]);
-                InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
-                InterfaceInfo *gatewayInterfaceInfo = static_cast<InterfaceInfo *>(sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo);
-                //InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
+        if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo && sourceNode->interfaceInfos[0]->addDefaultRoute) {
+            InterfaceInfo *sourceInterfaceInfo = static_cast<InterfaceInfo *>(sourceNode->interfaceInfos[0]);
+            InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
+            InterfaceInfo *gatewayInterfaceInfo = static_cast<InterfaceInfo *>(sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo);
+            //InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
 
-                // add a network route for the local network using ARP
-                IPv4Route *route = new IPv4Route();
-                route->setDestination(sourceInterfaceInfo->getAddress().doAnd(sourceInterfaceInfo->getNetmask()));
-                route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
-                route->setNetmask(sourceInterfaceInfo->getNetmask());
-                route->setInterface(sourceInterfaceEntry);
-                route->setSourceType(IPv4Route::MANUAL);
-                sourceNode->staticRoutes.push_back(route);
+            // add a network route for the local network using ARP
+            IPv4Route *route = new IPv4Route();
+            route->setDestination(sourceInterfaceInfo->getAddress().doAnd(sourceInterfaceInfo->getNetmask()));
+            route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
+            route->setNetmask(sourceInterfaceInfo->getNetmask());
+            route->setInterface(sourceInterfaceEntry);
+            route->setSourceType(IPv4Route::MANUAL);
+            sourceNode->staticRoutes.push_back(route);
 
-                // add a default route towards the only one gateway
-                route = new IPv4Route();
-                IPv4Address gateway = gatewayInterfaceInfo->getAddress();
-                route->setDestination(IPv4Address::UNSPECIFIED_ADDRESS);
-                route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
-                route->setGateway(gateway);
-                route->setInterface(sourceInterfaceEntry);
-                route->setSourceType(IPv4Route::MANUAL);
-                sourceNode->staticRoutes.push_back(route);
+            // add a default route towards the only one gateway
+            route = new IPv4Route();
+            IPv4Address gateway = gatewayInterfaceInfo->getAddress();
+            route->setDestination(IPv4Address::UNSPECIFIED_ADDRESS);
+            route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
+            route->setGateway(gateway);
+            route->setInterface(sourceInterfaceEntry);
+            route->setSourceType(IPv4Route::MANUAL);
+            sourceNode->staticRoutes.push_back(route);
 
-                // skip building and optimizing the whole routing table
-                EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
-            }
+            // skip building and optimizing the whole routing table
+            EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
         }
         else {
             // add a route to all destinations in the network

@@ -55,7 +55,7 @@ void TransportConnectionVisualizerBase::removeConnectionVisualization(const Tran
     connectionVisualizations.erase(std::remove(connectionVisualizations.begin(), connectionVisualizations.end(), connection), connectionVisualizations.end());
 }
 
-void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == inet::tcp::TCP::tcpConnectionAddedSignal) {
         auto tcpConnection = check_and_cast<inet::tcp::TCPConnection *>(object);

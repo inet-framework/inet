@@ -49,7 +49,7 @@ void RoutingTableVisualizerBase::initialize(int stage)
     }
 }
 
-void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void RoutingTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
 //    if (signal == IMobility::mobilityStateChangedSignal) {
 //        auto mobility = dynamic_cast<IMobility *>(object);

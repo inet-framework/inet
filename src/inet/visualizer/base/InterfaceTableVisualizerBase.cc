@@ -91,7 +91,7 @@ std::string InterfaceTableVisualizerBase::getVisualizationText(const InterfaceEn
         throw cRuntimeError("Unknown content parameter");
 }
 
-void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == NF_INTERFACE_CREATED) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));

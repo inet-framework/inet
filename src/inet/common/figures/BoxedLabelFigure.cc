@@ -66,7 +66,7 @@ const char *BoxedLabelFigure::getText() const
 
 void BoxedLabelFigure::setText(const char *text)
 {
-    int width, height, ascent;
+    double width, height, ascent;
     getSimulation()->getEnvir()->getTextExtent(labelFigure->getFont(), text, width, height, ascent);
     rectangleFigure->setBounds(cFigure::Rectangle(0, 0, width + spacing * 2, height + spacing * 2));
     labelFigure->setText(text);

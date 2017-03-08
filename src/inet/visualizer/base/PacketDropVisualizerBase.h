@@ -60,7 +60,7 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
 
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 
     virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const = 0;
     virtual const PacketDropVisualization *createPacketDropVisualization(cModule *module, cPacket *packet) const = 0;

@@ -78,7 +78,7 @@ void LinkBreakVisualizerBase::refreshDisplay() const
     }
 }
 
-void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
 //    if (signal == IMobility::mobilityStateChangedSignal) {
 //        auto mobility = dynamic_cast<IMobility *>(object);

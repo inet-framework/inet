@@ -91,7 +91,7 @@ void PacketDropVisualizerBase::refreshDisplay() const
     }
 }
 
-void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object DETAILS_ARG)
+void PacketDropVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == LayeredProtocolBase::packetFromLowerDroppedSignal || signal == LayeredProtocolBase::packetFromUpperDroppedSignal) {
         if (packetNameMatcher.matches(object->getFullName()))
