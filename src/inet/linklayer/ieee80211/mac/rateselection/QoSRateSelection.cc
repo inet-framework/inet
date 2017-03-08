@@ -18,6 +18,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
 #include "QoSRateSelection.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -48,12 +49,12 @@ void QoSRateSelection::initialize(int stage)
 
 const IIeee80211Mode* QoSRateSelection::getMode(Ieee80211Frame* frame)
 {
-    auto txReq = dynamic_cast<Ieee80211TransmissionRequest*>(frame->getControlInfo());
-    if (txReq)
-        return txReq->getMode();
-    auto rxInd = dynamic_cast<Ieee80211ReceptionIndication*>(frame->getControlInfo());
-    if (rxInd)
-        return rxInd->getMode();
+    auto modeReqTag = frame->getTag<Ieee80211ModeReq>();
+    if (modeReqTag)
+        return modeReqTag->getMode();
+    auto modeIndTag = frame->getTag<Ieee80211ModeInd>();
+    if (modeIndTag)
+        return modeIndTag->getMode();
     throw cRuntimeError("Missing mode");
 }
 

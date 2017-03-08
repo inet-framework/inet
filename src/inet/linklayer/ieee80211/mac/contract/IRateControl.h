@@ -38,7 +38,7 @@ class INET_API IRateControl
         virtual ~IRateControl() {}
 
         virtual const IIeee80211Mode *getRate() = 0;
-        virtual void frameTransmitted(const Ieee80211Frame *frame, const IIeee80211Mode *mode, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
+        virtual void frameTransmitted(const Ieee80211Frame *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
         virtual void frameReceived(const Ieee80211Frame *frame) = 0;
 };
 

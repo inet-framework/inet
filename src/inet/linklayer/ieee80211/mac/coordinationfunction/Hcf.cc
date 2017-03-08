@@ -23,6 +23,7 @@
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -629,10 +630,7 @@ void Hcf::processMgmtFrame(Ieee80211ManagementFrame* mgmtFrame)
 void Hcf::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode) const
  {
     ASSERT(mode != nullptr);
-    delete frame->removeControlInfo();
-    Ieee80211TransmissionRequest *ctrl = new Ieee80211TransmissionRequest();
-    ctrl->setMode(mode);
-    frame->setControlInfo(ctrl);
+    frame->ensureTag<Ieee80211ModeReq>()->setMode(mode);
 }
 
 

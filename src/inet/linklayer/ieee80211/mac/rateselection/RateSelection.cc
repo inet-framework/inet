@@ -21,6 +21,7 @@
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -52,12 +53,12 @@ void RateSelection::initialize(int stage)
 
 const IIeee80211Mode* RateSelection::getMode(Ieee80211Frame* frame)
 {
-    auto txReq = dynamic_cast<Ieee80211TransmissionRequest*>(frame->getControlInfo());
-    if (txReq)
-        return txReq->getMode();
-    auto rxInd = dynamic_cast<Ieee80211ReceptionIndication*>(frame->getControlInfo());
-    if (rxInd)
-        return rxInd->getMode();
+    auto modeReqTag = frame->getTag<Ieee80211ModeReq>();
+    if (modeReqTag)
+        return modeReqTag->getMode();
+    auto modeIndTag = frame->getTag<Ieee80211ModeInd>();
+    if (modeIndTag)
+        return modeIndTag->getMode();
     throw cRuntimeError("Missing mode");
 }
 
@@ -154,10 +155,7 @@ void RateSelection::frameTransmitted(Ieee80211Frame* frame)
 void RateSelection::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode)
 {
     ASSERT(mode != nullptr);
-    delete frame->removeControlInfo();
-    Ieee80211TransmissionRequest *ctrl = new Ieee80211TransmissionRequest();
-    ctrl->setMode(mode);
-    frame->setControlInfo(ctrl);
+    frame->ensureTag<Ieee80211ModeReq>()->setMode(mode);
 }
 
 
