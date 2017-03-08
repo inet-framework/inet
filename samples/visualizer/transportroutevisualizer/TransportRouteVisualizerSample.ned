@@ -161,25 +161,25 @@ network ServerClientsNetwork
                 @display("p=80,120");
         }
         server: StandardHost {
-            @display("p=158,205;i=device/server2");
+            @display("p=158,228;i=device/server2");
         }
         host1: StandardHost {
-            @display("p=545,35");
+            @display("p=545,58");
         }
         host2: StandardHost {
-            @display("p=545,105");
+            @display("p=545,128");
         }
         admin: StandardHost {
-            @display("p=545,318");
+            @display("p=545,341");
         }
         switch1: EtherSwitch {
-            @display("p=414,61");
+            @display("p=414,84");
         }
         switch2: EtherSwitch {
-            @display("p=414,318");
+            @display("p=414,341");
         }
         router: Router {
-            @display("p=296,205");
+            @display("p=296,228");
         }
     connections:
         switch1.ethg++ <--> Eth100M <--> host1.ethg++;
