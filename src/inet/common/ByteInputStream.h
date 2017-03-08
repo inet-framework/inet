@@ -49,6 +49,12 @@ class INET_API ByteInputStream {
     {
     }
 
+    ByteInputStream(const uint8_t* buffer, size_t bufLength, int64_t position = 0) :
+        bytes(buffer, buffer + bufLength),
+        position(position)
+    {
+    }
+
     bool isReadBeyondEnd() const { return isReadBeyondEnd_; }
 
     uint8_t operator[](int64_t i) { return bytes[i]; }
