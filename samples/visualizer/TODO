@@ -43,10 +43,13 @@ SceneVisualizer
 - viewScale parameter
 
 DatalinkVisualizer & PhysicallinkVisualizer:
-
 - Csak akkor legyen nyíl 2 node között, ha a csomag közvetlenül megy át közöttük és nincs más node ahol megjelenik
 
 NetworkRouteVisualizer:
+- samples/visualizer/networkroutevisualizer-ben
+    Config StaticNetworkRoutes-ban
+        CreateArrowheadGeometry, inet/common/OSGUtils.cc line 106
+        at t=1.001055s event #512
 
 PacketDropVisualizer:
 
@@ -57,13 +60,11 @@ IPv4NetworkConfigurator:
 - a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
 
 PhysicalLink:
-
 - Hibásan vett csomagokra ne húzzon be nyilat / vagy máshogyan
 
 IPv4
-
 - A broadcast UDP-s csomagok elnyelődnek / nem mennek ki / ForceBroadcast paraméter az IPv4-ben WTF?
 
 TransportRoute:
-
 - TCP-vel nem működik, csak UDP-vel
+- A nyilak nem követik végig az útvonalat, csak a forrást és a célt köti össze a nyíl
