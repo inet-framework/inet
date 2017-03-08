@@ -72,4 +72,6 @@
     <feature enabled="true" id="LMAC"/>
     <feature enabled="true" id="CSMA"/>
     <feature enabled="true" id="CsmaCaMac"/>
+    <feature enabled="true" id="wirelesstutorial"/>
+    <feature enabled="true" id="visualizationtutorial"/>
 </featurestates>
