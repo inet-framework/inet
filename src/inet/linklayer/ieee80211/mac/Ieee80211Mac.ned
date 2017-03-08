@@ -100,7 +100,6 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         *.txModule = "^.tx";
 
         @display("i=block/layer");
-        @nic;
         @class(Ieee80211Mac);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

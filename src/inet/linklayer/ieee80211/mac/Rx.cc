@@ -47,7 +47,7 @@ void Rx::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // statistics = check_and_cast<IStatistics *>(getModuleByPath(par("statisticsModule")));
-        address = check_and_cast<Ieee80211Mac*>(getContainingNicModule(this))->getAddress();
+        address = check_and_cast<Ieee80211Mac*>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();
     }
 }

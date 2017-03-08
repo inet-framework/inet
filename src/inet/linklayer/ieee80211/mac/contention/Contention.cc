@@ -38,7 +38,7 @@ void Contention::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         backoffOptimization = par("backoffOptimization");
         lastIdleStartTime = simTime() - SimTime::getMaxTime() / 2;
-        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this));
+        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startTxEvent = new cMessage("startTx");
         startTxEvent->setSchedulingPriority(1000); // low priority, i.e. processed later than most events for the same time
         // FIXME: kludge

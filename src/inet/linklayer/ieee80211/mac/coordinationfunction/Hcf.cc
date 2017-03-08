@@ -33,7 +33,7 @@ void Hcf::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this));
+        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startRxTimer = new cMessage("startRxTimeout");
         inactivityTimer = new cMessage("blockAckInactivityTimer");
         numEdcafs = par("numEdcafs");

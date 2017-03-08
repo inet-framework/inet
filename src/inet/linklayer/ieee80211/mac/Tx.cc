@@ -38,7 +38,7 @@ Tx::~Tx()
 void Tx::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this));
+        mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(getModuleByPath(par("rxModule")));
         // statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
