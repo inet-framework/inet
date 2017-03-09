@@ -20,6 +20,24 @@ to extruded buildings.
         <profile>spherical-mercator</profile>
     </image>
 
+<external>
+    <annotations>
+        <model name="car">
+                <url>car.osgb.20.scale</url>
+                <position lat="42.3562004" long="-71.0677178"/>
+        </model>
+
+        <label text="Boston downtown">
+                <position lat="42.35798" long="-71.06902" alt="10" mode="relative"/>
+                <style type="text/css">
+                    text-align:     center_center;
+                    text-size:      20;
+                    text-declutter: true;
+                    text-fill: #ff0000;
+                </style>
+        </label>
+    </annotations>
+
 <!--
     <model name="buildings" driver="feature_geom">
         <features name="buildings" driver="ogr">
@@ -66,7 +84,7 @@ to extruded buildings.
     </model>
 -->
 
-    <external>
+ <!--   <external>  -->
         <viewpoints>
             <viewpoint name="Home" heading="-25" height="50" lat="42.355" long="-71.068" pitch="-90" range="480"/>
             <viewpoint name="Bird's eye" heading="24" height="50" lat="42.355" long="-71.068" pitch="-20" range="1000"/>

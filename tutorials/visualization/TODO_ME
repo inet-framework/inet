@@ -1,0 +1,214 @@
+All steps:
+	- milyen képeket lehetne a html oldalra rakni. Miről kéne csinálni, hova kéne elhelyezni a szövegben, stb...
+	- minden resultsba kell valami kép/gif/mindkettő
+	- nézzen ki jól
+		
+	- choose appropriate network name
+		SOLVED: remove "Network" from network name
+	- change positions from meter to longitude, latitude
+		SOLVED
+
+	- waypoint files changed: point 1 --> last point
+		
+	Q:
+	- 7: 2d-ben jol elfer a ieee80211Visualizer es a interfaceTableVisualizer, de 3d-ben egymason vannak
+	- 13: routingTable
+	- 18: amikor 2 célhoz megy videoStreamPk, akkor az egyiknél nem (sem?) marad piros
+	- 18: 3d-ben lehet valtoztatni a packetdropVisualizer.iconTintColor-t, 3d-ben nem valtozik
+	- 20: linkBreakVisualizer 3dben
+
+
+Step 1:
+	- change words: "ha a camera mode-ot váltom, akkor változik hogy az egér melyik gombjára mit reagál a simulation"
+		SOLVED: change camera mode, that means you can change the mouse buttons' and mouse wheel's camera action
+
+
+Step 3:
+	- if Visualization02 became active change Visualization01 to Visualization02
+		SOLVED
+
+
+Step 4:
+	- search any 3d model on google or anywhere
+		SOLVED: found boxman.osgb in "inet/examples/visualization/networknode/" folder
+	- external 3D animated osg model, I take it from "inet/examples/visualization/networknode/" folder
+
+
+Step 5:
+	- don't display orientation
+		SOLVED: deleted this line: *.visualizer.*.mobilityVisualizer.displayOrientation = true
+	- if Visualization04 became active change Visualization04 to Visualization04
+		SOLVED: Visualization04 is working now
+	- optimize pedestrians common movement parameters/
+		SOLVED: -30,30 --> -10,10		0.1s --> 0.5s		5mps --> 1.3mps
+
+
+Step 6:
+	- Q: Results: can we change the background and the font color at the interface table visualizer?
+		SOLVED: yes, we can, InfoVisualizerBase
+
+
+Step 7:
+	- Q: csak meg kell jeleníteni a jeleket? Vagy infoval az állapotukat?
+		SOLVED: csak azt kell, hogy a pedestrian melyik ap-hez csatlakozott. Talán az ap ssid-jét is ki lehet
+	- Q: InfoVisualizerBase Question: module-nak tetszőleges valtozójat ki lehet iratni? (CObjectet pl)
+		SOLVED: ieee80211Visualizer
+
+
+Step 8:
+	- Q: message length mekkora legyen?
+		SOLVED: change to 400
+	- will be real voip stream
+		SOLVED: SimpleVoIPSender --> SimpleVoIPReceiver
+
+
+Step 10:
+	- physicalLinkVisualizer: There are more unused parameters...
+		SOLVED: We don't need
+	- Q: What is physical link exactly?
+		SOLVED: amikor bármilyen, akár neki, akár nem neki küldött jel vétele befejeződik a fizikai rétegben
+	- nyilak egyezzenek
+		SOLVED
+	- halványodás időtartamának növelése
+		SOLVED
+
+
+Step 11:
+	- Q: What is data link exactly?
+		SOLVED: amikor a mac veszi a keretet
+	- nyilak egyezzenek
+		SOLVED
+	- halványodás időtartamának növelése
+		SOLVED
+
+
+Step 12:
+	- nem jó a statisztika a simplevoip* miatt
+		SOLVED: change signal to VoIPPacketLossRate and statistic to packetLossRate
+	- vagy másik statisztika kell, vagy ki kell engedni a range-ből a pedestrian1-et
+		SOLVED: playout delay statistic
+
+
+Step 13:
+	- routingTableVisualizer most a routokat mutatja a videoStreamServer felé. Túl egyszerű a hálózat?
+	
+
+
+Step 15:
+	- If we'll have routeVisualizer, then activate the commented lines
+		SOLVED
+	- check and cast error
+		SOLVED
+	- when?
+		SOLVED: amikor a videoPedestrian hálózati rétege megkapja a csomagot. A kezdo ponttol a végpontig jut. Kozben nem rajzolja ki a lepeseket
+
+
+Step 16:
+	- make an obstacle
+		SOLVED: drawed, but it seems only walls
+	- it seems only walls and is not acting like an obstacle
+		SOLVED: points were in wrong sequence
+
+
+Step 17:
+	- all accessPoints and routers Z position is negative!!! It counts at displayObstacleLoss
+		SOLVED
+
+
+Step 18:
+	- network: VisualizationF
+		SOLVED
+	- handover problem
+		SOLVED
+		- fadeout
+		
+		
+Step 19:
+	- signal propagation off?
+		SOLVED
+	- cars don't know the route to videoStreamServer
+		SOLVED
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+- Step01
+PIPA	- Kell egy uj network
+PIPA	- init megváltoztatni
+PIPA	- A többi networkot hátrébb kell tolni
+PIPA	- iniben a networkok nevét eltolni
+
+- Step02
+PIPA	- új pikcsör a resultsba axis nélkül
+
+- Step03
+PIPA	- Kell egy uj network
+QL	- init megváltoztatni: SceneOsgEarthVisualizer-t használunk, ehhez muszáj coordinateSystemModule
+PIPA	- A többi networkot hátrébb kell tolni
+PIPA	- iniben a networkok nevét eltolni
+
+- Step05
+	- img range-ek nélkül
+
+- Step07
+PIPA	- gif movement trail nélkül hogy confusing legyen
+PIPA	- velocityArrowScale-t belőni
+PIPA	- velocity nyíl miatt újra kell 2d gif result
+	- orientation-t megmutatni
+
+- Step08
+PIPA	- velocity nyíl miatt újra kell 2d gif result
+
+- Step09
+PIPA	- velocity nyíl miatt újra kell 2d gif result VAGY le is lehetne venni akár
+
+- Step11
+	- átírni a goalt
+	
+- Step12
+	- Resultsba leírni, hogy akkor is van physical link, ha nem neki szól az üzenet
+
+- Step15
+	- Túl egyszerű a network, hogy ez látványos legyen?
+	
+- Step17 ini
+PIPA	- configurationD --> configurationF
+
+- Step18
+PIPA	- logikailag nem összevonható a Step17-tel? Nem
+
+- Step20 ini
+PIPA	- configurationF --> configurationH
+	
+- Step21 ini
+	- connectionre valami szinonimát találni, esetleg átfogalmazni
+	
+- Step22
+	
+
+- Goals
+PIPA	- Step1
+PIPA	- Step2
+PIPA	- Step3
+QL	- Step4: kell ez egyáltalán?
+	- Step5
+	- Step6
+	- Step7
+	- Step8
+	- Step9
+	- Step10
+	- Step11
+	- Step12
+	- Step13
+	- Step14
+	- Step15
+	- Step16
+	- Step17
+	- Step18
+	- Step19
+	- Step20
+	- Step21
+	- Step22
+	- Step23
+	- Step24
+	- StepConclusion
+
+- All steps
+	- címeket beírni
