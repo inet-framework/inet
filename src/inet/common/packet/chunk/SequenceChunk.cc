@@ -260,17 +260,17 @@ void SequenceChunk::removeFromBeginning(bit length)
     auto it = chunks.begin();
     while (it != chunks.end()) {
         auto chunk = *it;
-        bit chunkLength = bit(chunk->getChunkLength());
+        bit chunkLength = chunk->getChunkLength();
         if (chunkLength <= length) {
             it++;
             length -= chunkLength;
+            if (length == bit(0))
+                break;
         }
         else {
-            *it = std::make_shared<SliceChunk>(chunk, length, chunkLength - length);
-            length = bit(0);
-        }
-        if (length == bit(0))
+            *it = chunk->peek(length, chunkLength - length);
             break;
+        }
     }
     chunks.erase(chunks.begin(), it);
 }
@@ -282,17 +282,17 @@ void SequenceChunk::removeFromEnd(bit length)
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {
         auto chunk = *it;
-        bit chunkLength = bit(chunk->getChunkLength());
+        bit chunkLength = chunk->getChunkLength();
         if (chunkLength <= length) {
             it++;
             length -= chunkLength;
+            if (length == bit(0))
+                break;
         }
         else {
-            *it = std::make_shared<SliceChunk>(chunk, bit(0), chunkLength - length);
-            length = bit(0);
-        }
-        if (length == bit(0))
+            *it = chunk->peek(bit(0), chunkLength - length);
             break;
+        }
     }
     chunks.erase(it.base(), chunks.end());
 }
