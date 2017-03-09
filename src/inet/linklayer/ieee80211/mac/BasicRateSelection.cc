@@ -22,6 +22,11 @@
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
+#include <stdlib.h>
+#include <string.h>
+
+#include "inet/linklayer/ieee80211/mac/MacUtils.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -69,14 +74,28 @@ const IIeee80211Mode *BasicRateSelection::getModeForMulticastDataOrMgmtFrame(Iee
     return multicastFrameMode;
 }
 
-const IIeee80211Mode *BasicRateSelection::getModeForControlFrame(Ieee80211Frame *controlFrame)
+const IIeee80211Mode *BasicRateSelection::getModeForControlFrame(Ieee80211DataOrMgmtFrame *dataFrame, Ieee80211Frame *controlFrame)
 {
-    return controlFrameMode;
+//    if (dynamic_cast<Ieee80211ACKFrame *>(controlFrame) && dataFrame != nullptr) {
+//        auto controlInfo = check_and_cast<Ieee80211ReceptionIndication *>(dataFrame->getControlInfo());
+//        auto dataMode = controlInfo->getMode();
+//        auto ackMode = modeSet->getIsMandatory(dataMode) ? dataMode : modeSet->getSlowerMandatoryMode(dataMode);
+//        return ackMode != nullptr ? ackMode : controlFrameMode;
+//    }
+//    else
+        return controlFrameMode;
 }
 
-const IIeee80211Mode *BasicRateSelection::getResponseControlFrameMode()
+const IIeee80211Mode *BasicRateSelection::getResponseControlFrameMode(Ieee80211Frame *frame)
 {
-    return controlFrameMode;
+//    if (frame != nullptr) {
+//        auto controlInfo = check_and_cast<Ieee80211TransmissionRequest *>(frame->getControlInfo());
+//        auto frameMode = controlInfo->getMode();
+//        auto responseMode = modeSet->getIsMandatory(frameMode) ? frameMode : modeSet->getSlowerMandatoryMode(controlInfo->getMode());
+//        return responseMode != nullptr ? responseMode : controlFrameMode;
+//    }
+//    else
+        return controlFrameMode;
 }
 
 } // namespace ieee80211

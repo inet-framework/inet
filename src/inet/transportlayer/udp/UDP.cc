@@ -46,6 +46,7 @@
 
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/LayeredProtocolBase.h"
 
 namespace inet {
 
@@ -287,6 +288,7 @@ void UDP::processCommandFromApp(cMessage *msg)
 
 void UDP::processPacketFromApp(cPacket *appData)
 {
+    emit(LayeredProtocolBase::packetReceivedFromUpperSignal, appData);
     UDPSendCommand *ctrl = check_and_cast<UDPSendCommand *>(appData->removeControlInfo());
 
     SockDesc *sd = getOrCreateSocket(ctrl->getSockId(), appData->getArrivalGate()->getIndex());
@@ -308,6 +310,7 @@ void UDP::processPacketFromApp(cPacket *appData)
 
 void UDP::processUDPPacket(UDPPacket *udpPacket)
 {
+    emit(LayeredProtocolBase::packetReceivedFromLowerSignal, udpPacket);
     emit(rcvdPkSignal, udpPacket);
 
     // simulate checksum: discard packet if it has bit error
@@ -741,6 +744,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const L3Address& srcAddr, ushor
     payload->setKind(UDP_I_DATA);
 
     emit(passedUpPkSignal, payload);
+    emit(LayeredProtocolBase::packetSentToUpperSignal, payload);
     send(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }
@@ -788,6 +792,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setTypeOfService(tos);
         udpPacket->setControlInfo(ipControlInfo);
 
+        emit(LayeredProtocolBase::packetSentToLowerSignal, udpPacket);
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }
@@ -804,6 +809,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(ipControlInfo);
 
+        emit(LayeredProtocolBase::packetSentToLowerSignal, udpPacket);
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }
@@ -821,6 +827,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
         //ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
 
+        emit(LayeredProtocolBase::packetSentToLowerSignal, udpPacket);
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }

@@ -47,6 +47,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     bps transmissionBitrate = transmissionMode->getDataMode()->getNetBitrate();
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
+    std::cout << "XXX: " << macFrame->getBitLength() << "bits, " << transmissionMode->getPreambleMode()->getDuration() << ", " << transmissionMode->getHeaderMode()->getDuration() << ", " << transmissionMode->getDataMode()->getDuration(macFrame->getBitLength()) << endl;
     const simtime_t duration = transmissionMode->getDuration(macFrame->getBitLength());
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();

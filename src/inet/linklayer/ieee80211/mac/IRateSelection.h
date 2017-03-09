@@ -44,8 +44,9 @@ class INET_API IRateSelection
         virtual const IIeee80211Mode *getSlowestMandatoryMode() = 0;  // for EIFS computation, etc.
         virtual const IIeee80211Mode *getModeForUnicastDataOrMgmtFrame(Ieee80211DataOrMgmtFrame *frame) = 0;
         virtual const IIeee80211Mode *getModeForMulticastDataOrMgmtFrame(Ieee80211DataOrMgmtFrame *frame) = 0;
-        virtual const IIeee80211Mode *getModeForControlFrame(Ieee80211Frame *controlFrame) = 0;
-        virtual const IIeee80211Mode *getResponseControlFrameMode() = 0;  // for RTS Duration field computation (needs CTS+Data+ACK durations)
+//        virtual const IIeee80211Mode *getModeForControlFrame(Ieee80211Frame *controlFrame) = 0;
+        virtual const IIeee80211Mode *getModeForControlFrame(Ieee80211DataOrMgmtFrame *dataFrame, Ieee80211Frame *controlFrame) = 0;
+        virtual const IIeee80211Mode *getResponseControlFrameMode(Ieee80211Frame *frame) = 0;  // for RTS Duration field computation (needs CTS+Data+ACK durations)
         virtual ~IRateSelection() {}
 };
 

@@ -81,7 +81,7 @@ void MediumVisualizerBase::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_LAST) {
-        if (std::isnan(signalPropagationAnimationSpeed)) {
+        if (std::isnan(signalPropagationAnimationSpeed) && radioMedium != nullptr) {
             double maxPropagationDuration = radioMedium->getMediumLimitCache()->getMaxConstraintArea().distance(radioMedium->getMediumLimitCache()->getMinConstraintArea()) / mps(radioMedium->getPropagation()->getPropagationSpeed()).get();
             defaultSignalPropagationAnimationSpeed = maxPropagationDuration / signalPropagationAnimationTime;
         }
