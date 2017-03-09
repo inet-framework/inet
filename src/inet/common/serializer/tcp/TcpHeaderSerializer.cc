@@ -37,8 +37,8 @@ void TcpHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_
     struct tcphdr tcp;
 
     // fill TCP header structure
-    if (tcpHeader->getCrcMode() != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize TCP header without a properly computed CRC");
+//    if (tcpHeader->getCrcMode() != CRC_COMPUTED)      //FIXME KLUDGE
+//        throw cRuntimeError("Cannot serialize TCP header without a properly computed CRC");
     tcp.th_sum = htons(tcpHeader->getCrc());
     tcp.th_sport = htons(tcpHeader->getSrcPort());
     tcp.th_dport = htons(tcpHeader->getDestPort());
