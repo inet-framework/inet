@@ -43,8 +43,8 @@ class INET_API BasicRateSelection : public cSimpleModule, public IRateSelection
         virtual const IIeee80211Mode *getSlowestMandatoryMode() override;
         virtual const IIeee80211Mode *getModeForUnicastDataOrMgmtFrame(Ieee80211DataOrMgmtFrame *frame) override;
         virtual const IIeee80211Mode *getModeForMulticastDataOrMgmtFrame(Ieee80211DataOrMgmtFrame *frame) override;
-        virtual const IIeee80211Mode *getModeForControlFrame(Ieee80211Frame *controlFrame) override;
-        virtual const IIeee80211Mode* getResponseControlFrameMode() override;
+        virtual const IIeee80211Mode *getModeForControlFrame(Ieee80211DataOrMgmtFrame *dataFrame, Ieee80211Frame *controlFrame) override;
+        virtual const IIeee80211Mode* getResponseControlFrameMode(Ieee80211Frame *frame) override;
 };
 
 } // namespace ieee80211
