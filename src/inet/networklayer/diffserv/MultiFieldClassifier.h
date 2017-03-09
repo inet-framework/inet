@@ -77,7 +77,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual int classifyPacket(cPacket *packet);
+    virtual int classifyPacket(Packet *packet);
 };
 
 } // namespace inet

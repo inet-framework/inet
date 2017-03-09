@@ -20,6 +20,7 @@
 #define __INET_BEHAVIORAGGREGATECLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -44,9 +45,9 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual int classifyPacket(cPacket *packet);
+    virtual int classifyPacket(Packet *packet);
 
-    int getDscpFromPacket(cPacket *packet);
+    int getDscpFromPacket(Packet *packet);
 };
 
 } // namespace inet

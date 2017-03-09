@@ -18,7 +18,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -67,7 +66,7 @@ void BehaviorAggregateClassifier::initialize()
 
 void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
 {
-    cPacket *packet = check_and_cast<cPacket *>(msg);
+    Packet *packet = check_and_cast<Packet *>(msg);
     numRcvd++;
     int clazz = classifyPacket(packet);
     emit(pkClassSignal, clazz);
@@ -86,7 +85,7 @@ void BehaviorAggregateClassifier::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)
+int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
 {
     int dscp = getDscpFromPacket(packet);
     if (dscp >= 0) {
@@ -97,9 +96,8 @@ int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)
     return -1;
 }
 
-int BehaviorAggregateClassifier::getDscpFromPacket(cPacket *msg)
+int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
 
     //TODO processing link-layer headers when exists

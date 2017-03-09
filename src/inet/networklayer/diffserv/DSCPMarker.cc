@@ -18,6 +18,8 @@
 
 #include "inet/networklayer/diffserv/DSCPMarker.h"
 
+#include "inet/common/ProtocolTag_m.h"
+
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #endif // ifdef WITH_IPv4
@@ -54,19 +56,15 @@ void DSCPMarker::initialize()
 
 void DSCPMarker::handleMessage(cMessage *msg)
 {
-    cPacket *packet = dynamic_cast<cPacket *>(msg);
-    if (packet) {
-        numRcvd++;
-        int dscp = dscps.at(msg->getArrivalGate()->getIndex());
-        if (markPacket(packet, dscp)) {
-            emit(markPkSignal, packet);
-            numMarked++;
-        }
-
-        send(packet, "out");
+    Packet *packet = check_and_cast<Packet *>(msg);
+    numRcvd++;
+    int dscp = dscps.at(msg->getArrivalGate()->getIndex());
+    if (markPacket(packet, dscp)) {
+        emit(markPkSignal, packet);
+        numMarked++;
     }
-    else
-        throw cRuntimeError("DSCPMarker expects cPackets");
+
+    send(packet, "out");
 }
 void DSCPMarker::refreshDisplay() const
 {
@@ -78,26 +76,34 @@ void DSCPMarker::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool DSCPMarker::markPacket(cPacket *packet, int dscp)
+bool DSCPMarker::markPacket(Packet *packet, int dscp)
 {
     EV_DETAIL << "Marking packet with dscp=" << dscpToString(dscp) << "\n";
 
-    for ( ; packet; packet = packet->getEncapsulatedPacket()) {
+    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+
+    //TODO processing link-layer headers when exists
+
 #ifdef WITH_IPv4
-        IPv4Header *ipv4Datagram = dynamic_cast<IPv4Header *>(packet);
-        if (ipv4Datagram) {
-            ipv4Datagram->setDiffServCodePoint(dscp);
-            return true;
-        }
+    if (protocol == &Protocol::ipv4) {
+        auto ipv4Header = std::dynamic_pointer_cast<IPv4Header>(packet->popHeader<IPv4Header>()->dupShared());
+        packet->removePoppedHeaders();
+        ipv4Header->setDiffServCodePoint(dscp);
+        ipv4Header->markImmutable();
+        packet->pushHeader(ipv4Header);
+        return true;
+    }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        IPv6Header *ipv6Datagram = dynamic_cast<IPv6Header *>(packet);
-        if (ipv6Datagram) {
-            ipv6Datagram->setDiffServCodePoint(dscp);
-            return true;
-        }
-#endif // ifdef WITH_IPv6
+    if (protocol == &Protocol::ipv6) {
+        auto ipv6Header = std::dynamic_pointer_cast<IPv6Header>(packet->popHeader<IPv6Header>()->dupShared());
+        packet->removePoppedHeaders();
+        ipv6Header->setDiffServCodePoint(dscp);
+        ipv6Header->markImmutable();
+        packet->pushHeader(ipv6Header);
+        return true;
     }
+#endif // ifdef WITH_IPv6
 
     return false;
 }

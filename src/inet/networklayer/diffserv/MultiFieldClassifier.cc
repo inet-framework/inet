@@ -52,7 +52,8 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv4Header *datagram)
         return false;
     if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !datagram->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
         return false;
-    if (protocol >= 0 && datagram->getTransportProtocol() != protocol)
+    int dgramProtocol = datagram->getTransportProtocol();
+    if (protocol >= 0 && dgramProtocol != protocol)
         return false;
     if (tosMask != 0 && (tos & tosMask) != (datagram->getTypeOfService() & tosMask))
         return false;
@@ -60,7 +61,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv4Header *datagram)
         int srcPort = -1, destPort = -1;
 
 #ifdef WITH_UDP
-        if (protocol == IP_PROT_UDP) {
+        if (dgramProtocol == IP_PROT_UDP) {
             const auto& udpHeader = packet->peekDataAt<UdpHeader>(datagram->getChunkLength());
             srcPort = udpHeader->getSourcePort();
             destPort = udpHeader->getDestinationPort();
@@ -68,7 +69,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv4Header *datagram)
 #endif
 
 #ifdef WITH_TCP_COMMON
-        if (protocol == IP_PROT_TCP) {
+        if (dgramProtocol == IP_PROT_TCP) {
             const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(datagram->getChunkLength());
             srcPort = tcpHeader->getSourcePort();
             destPort = tcpHeader->getDestinationPort();
@@ -91,14 +92,15 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv6Header *datagram)
         return false;
     if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !datagram->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
         return false;
-    if (protocol >= 0 && datagram->getTransportProtocol() != protocol)
+    int dgramProtocol = datagram->getTransportProtocol();
+    if (protocol >= 0 && dgramProtocol != protocol)
         return false;
     if (tosMask != 0 && (tos & tosMask) != (datagram->getTrafficClass() & tosMask))
         return false;
     if (srcPortMin >= 0 || destPortMin >= 0) {
         int srcPort = -1, destPort = -1;
 #ifdef WITH_UDP
-        if (protocol == IP_PROT_UDP) {
+        if (dgramProtocol == IP_PROT_UDP) {
             const auto& udpHeader = packet->peekDataAt<UdpHeader>(datagram->getChunkLength());
             srcPort = udpHeader->getSourcePort();
             destPort = udpHeader->getDestinationPort();
@@ -106,7 +108,7 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, IPv6Header *datagram)
 #endif
 
 #ifdef WITH_TCP_COMMON
-        if (protocol == IP_PROT_TCP) {
+        if (dgramProtocol == IP_PROT_TCP) {
             const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(datagram->getChunkLength());
             srcPort = tcpHeader->getSourcePort();
             destPort = tcpHeader->getDestinationPort();
@@ -146,7 +148,7 @@ void MultiFieldClassifier::initialize(int stage)
 
 void MultiFieldClassifier::handleMessage(cMessage *msg)
 {
-    cPacket *packet = check_and_cast<cPacket *>(msg);
+    Packet *packet = check_and_cast<Packet *>(msg);
 
     numRcvd++;
     int gateIndex = classifyPacket(packet);
@@ -166,14 +168,9 @@ void MultiFieldClassifier::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-int MultiFieldClassifier::classifyPacket(cPacket *msg)
+int MultiFieldClassifier::classifyPacket(Packet *packet)
 {
-    auto packet = check_and_cast<Packet *>(msg);
-    int ipProtocol = -1;
-    bit ipHeaderLength = bit(-1);
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
-
-    //TODO link-layer header???
 
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {

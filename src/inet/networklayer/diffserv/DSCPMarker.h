@@ -19,6 +19,7 @@
 #define __INET_DSCPMARKER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -43,7 +44,7 @@ class INET_API DSCPMarker : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual bool markPacket(cPacket *msg, int dscp);
+    virtual bool markPacket(Packet *msg, int dscp);
 };
 
 } // namespace inet
