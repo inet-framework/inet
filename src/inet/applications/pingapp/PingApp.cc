@@ -175,7 +175,7 @@ void PingApp::handleMessage(cMessage *msg)
                 case L3Address::IPv4: icmp = IP_PROT_ICMP; l3ProtocolId = Protocol::ipv4.getId(); break;
                 case L3Address::IPv6: icmp = IP_PROT_IPv6_ICMP; l3ProtocolId = Protocol::ipv6.getId(); break;
                 case L3Address::MODULEID:
-                case L3Address::MODULEPATH: icmp = IP_PROT_ICMP; l3ProtocolId = Protocol::gnp.getId(); break;    //FIXME icmp value ????
+                case L3Address::MODULEPATH: icmp = IP_PROT_ECHO; l3ProtocolId = Protocol::gnp.getId(); break;
                     //TODO
                 default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
             }
