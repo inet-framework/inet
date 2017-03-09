@@ -127,7 +127,7 @@ Packet *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
     ethframe->setDest(frame->getAddress3());
     ethframe->setSrc(frame->getTransmitterAddress());
     ethframe->setEtherType(frame->getEtherType());
-    ethframe->setChunkLength(byte(ETHER_MAC_FRAME_BYTES));
+    ethframe->setChunkLength(byte(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
 
     // encapsulate the payload in there
     Packet *pk = check_and_cast<Packet*>(frame->decapsulate());
