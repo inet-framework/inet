@@ -46,7 +46,7 @@ submodule-init:
 	fi
 
 # generate an include file that contains all the WITH_FEATURE macros according to the current enablement of features
-$(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures submodule-init
+$(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
 	@./inet_featuretool defines >$(FEATURES_H)
 
 
