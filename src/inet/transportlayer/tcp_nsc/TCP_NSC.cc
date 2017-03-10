@@ -31,6 +31,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 
@@ -39,16 +40,12 @@
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/common/serializer/tcp/TCPSerializer.h"
 
 #include <assert.h>
 #include <dlfcn.h>
 #include <netinet/in.h>
 
-#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_VirtualDataQueues.h"
-#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_ByteStreamQueues.h"
-
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/transportlayer/tcp_nsc/queues/TCP_NSC_Queues.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/INETUtils.h"
@@ -326,14 +323,14 @@ void TCP_NSC::changeAddresses(TCP_NSC_Connection& connP,
     }
 }
 
-void TCP_NSC::handleIpInputMessage(TcpHeader *tcpsegP)
+void TCP_NSC::handleIpInputMessage(Packet *packet)
 {
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
 
-    FlatPacket *packet = tcpsegP->getMandatoryOwnerPacket();
     inetSockPair.remoteM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     inetSockPair.localM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
+    const auto& tcpsegP = CHK(packet->peekHeader<TcpHeader>());
     //int interfaceId = controlInfo->getInterfaceId();
 
     if (packet->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
@@ -408,17 +405,11 @@ void TCP_NSC::handleIpInputMessage(TcpHeader *tcpsegP)
         conn = findConnByInetSockPair(inetSockPairAny);
     }
 
-    { // local scope for 'b' and 'c'
-        Buffer b(tcph, totalTcpLen);
-        Context c;
-        c.l3AddressesPtr = &ih->saddr;
-        c.l3AddressesLength = 8;
-        TCPSerializer().serializePacket(packet, b, c);
-        totalTcpLen = b.getPos();
-    }
+    const auto& bytes = packet->peekDataBytes();
+    totalTcpLen = bytes->getBytes((uint8_t *)tcph, totalTcpLen);
 
     if (conn) {
-        conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(tcpsegP);
+        conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(packet);
     }
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
@@ -465,12 +456,10 @@ void TCP_NSC::handleIpInputMessage(TcpHeader *tcpsegP)
                 changeAddresses(*conn, inetSockPair, nscSockPair);
 
                 // following code to be kept consistent with initConnection()
-                const char *sendQueueClass = c.sendQueueM->getClassName();
-                conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(inet::utils::createOne(sendQueueClass));
+                conn->sendQueueM = new TCP_NSC_SendQueue();
                 conn->sendQueueM->setConnection(conn);
 
-                const char *receiveQueueClass = c.receiveQueueM->getClassName();
-                conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
+                conn->receiveQueueM = new TCP_NSC_ReceiveQueue();
                 conn->receiveQueueM->setConnection(conn);
                 EV_DETAIL << this << ": NSC: got accept!\n";
 
@@ -592,32 +581,12 @@ void TCP_NSC::sendErrorNotificationToApp(TCP_NSC_Connection& c, int err)
 
 TCP_NSC_SendQueue *TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP) {
-        case TCP_TRANSFER_BYTECOUNT:
-            return new TCP_NSC_VirtualDataSendQueue();
-
-        case TCP_TRANSFER_BYTESTREAM:
-            return new TCP_NSC_ByteStreamSendQueue();
-
-        case TCP_TRANSFER_OBJECT:    //return new TCP_NSC_MsgBasedSendQueue();
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
-    }
+    return new TCP_NSC_SendQueue();
 }
 
 TCP_NSC_ReceiveQueue *TCP_NSC::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP) {
-        case TCP_TRANSFER_BYTECOUNT:
-            return new TCP_NSC_VirtualDataReceiveQueue();
-
-        case TCP_TRANSFER_BYTESTREAM:
-            return new TCP_NSC_ByteStreamReceiveQueue();
-
-        case TCP_TRANSFER_OBJECT:    //return new TCP_NSC_MsgBasedReceiveQueue();
-        default:
-            throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
-    }
+    return new TCP_NSC_ReceiveQueue();
 }
 
 void TCP_NSC::handleAppMessage(cMessage *msgP)
@@ -674,25 +643,18 @@ void TCP_NSC::handleMessage(cMessage *msgP)
         }
     }
     else if (msgP->arrivedOn("ipIn")) {
-        if (false
-#ifdef WITH_IPv4
-            || dynamic_cast<ICMPMessage *>(msgP)
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-            || dynamic_cast<ICMPv6Message *>(msgP)
-#endif // ifdef WITH_IPv6
-            )
-        {
+        Packet *pk = check_and_cast<Packet *>(msgP);
+        auto protocol = msgP->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+        if (protocol == &Protocol::tcp) {
+            EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
+            handleIpInputMessage(pk);
+        }
+        else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
             EV_WARN << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
             delete msgP;
         }
-        else {
-            EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
-            // must be a TCPSegment
-            FlatPacket *fp = check_and_cast<FlatPacket *>(msgP);
-            TcpHeader *tcpseg = check_and_cast<TcpHeader *>(fp->peekHeader());
-            handleIpInputMessage(tcpseg);
-        }
+        else
+            throw cRuntimeError("Unknown protocol: %s(%d)", protocol->getName(), protocol->getId());
     }
     else {    // must be from app
         EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
@@ -875,21 +837,30 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         conn = findConnByNscSockPair(nscSockPair);
     }
 
-    TcpHeader *tcpseg;
+    Packet *fp = nullptr;
 
     if (conn) {
-        tcpseg = conn->sendQueueM->createSegmentWithBytes(tcph, totalLen - ipHdrLen);
+        fp = conn->sendQueueM->createSegmentWithBytes(tcph, totalLen - ipHdrLen);
         src = conn->inetSockPairM.localM.ipAddrM;
         dest = conn->inetSockPairM.remoteM.ipAddrM;
     }
     else {
-        tcpseg = TCPSerializer().deserialize((const unsigned char *)tcph, totalLen - ipHdrLen, true);
+        const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
+        bytes->markImmutable();
+        fp = new Packet(nullptr, bytes);
+        const auto& tcpHdr = CHK(fp->popHeader<TcpHeader>());
+        fp->removePoppedHeaders();
+        int64_t numBytes = fp->getByteLength();
+        ASSERT(numBytes == 0);
+        fp->pushHeader(tcpHdr);
+
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 
-    ASSERT(tcpseg);
-    FlatPacket *fp = tcpseg->getMandatoryOwnerPacket();
+    const auto& tcpHdr = CHK(fp->peekHeader<TcpHeader>());
+    ASSERT(tcpHdr);
 
+    bit payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
              << " to " << dest << "\n";
 
@@ -902,32 +873,32 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     addresses->setDestAddress(dest);
 
     if (conn) {
-        conn->receiveQueueM->notifyAboutSending(tcpseg);
+        conn->receiveQueueM->notifyAboutSending(fp);
     }
 
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && tcpseg->getPayloadLength() != 0)
-        sndNxtVector->record(tcpseg->getSequenceNo());
+    if (sndNxtVector && payloadLength != bit(0))
+        sndNxtVector->record(tcpHdr->getSequenceNo());
 
     if (sndAckVector)
-        sndAckVector->record(tcpseg->getAckNo());
+        sndAckVector->record(tcpHdr->getAckNo());
 
     int connId = conn ? conn->connIdM : -1;
     EV_INFO << this << ": Send segment: conn ID=" << connId << " from " << src
-            << " to " << dest << " SEQ=" << tcpseg->getSequenceNo();
-    if (tcpseg->getSynBit())
+            << " to " << dest << " SEQ=" << tcpHdr->getSequenceNo();
+    if (tcpHdr->getSynBit())
         EV_INFO << " SYN";
-    if (tcpseg->getAckBit())
-        EV_INFO << " ACK=" << tcpseg->getAckNo();
-    if (tcpseg->getFinBit())
+    if (tcpHdr->getAckBit())
+        EV_INFO << " ACK=" << tcpHdr->getAckNo();
+    if (tcpHdr->getFinBit())
         EV_INFO << " FIN";
-    if (tcpseg->getRstBit())
+    if (tcpHdr->getRstBit())
         EV_INFO << " RST";
-    if (tcpseg->getPshBit())
+    if (tcpHdr->getPshBit())
         EV_INFO << " PSH";
-    if (tcpseg->getUrgBit())
+    if (tcpHdr->getUrgBit())
         EV_INFO << " URG";
-    EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
+    EV_INFO << " len=" << payloadLength << "\n";
 
     send(fp, "ipOut");
 }
@@ -953,7 +924,7 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
             break;
 
         case TCP_C_SEND:
-            process_SEND(connP, check_and_cast<cPacket *>(msgP));
+            process_SEND(connP, check_and_cast<Packet *>(msgP));
             break;
 
         case TCP_C_CLOSE:
@@ -1095,7 +1066,7 @@ void TCP_NSC::process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCom
     sendErrorNotificationToApp(connP, err);
 }
 
-void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, cPacket *msgP)
+void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, Packet *msgP)
 {
     connP.send(msgP);
 

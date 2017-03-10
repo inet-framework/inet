@@ -93,7 +93,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     void loadStack(const char *stacknameP, int bufferSizeP);
 
     void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(TcpHeader *tcpsegP);
+    void handleIpInputMessage(Packet *packet);
 
     void sendDataToApp(TCP_NSC_Connection& c);
     void sendErrorNotificationToApp(TCP_NSC_Connection& c, int err);
@@ -111,7 +111,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     void process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_ACCEPT(TCP_NSC_Connection& connP, TCPAcceptCommand *tcpCommandP, cMessage *msgP);
-    void process_SEND(TCP_NSC_Connection& connP, cPacket *msgP);
+    void process_SEND(TCP_NSC_Connection& connP, Packet *msgP);
     void process_CLOSE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_ABORT(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
     void process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP);

@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 
 // forward declarations:
@@ -90,7 +91,7 @@ class INET_API TCP_NSC_Connection
     void connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);
     void close();
     void abort();
-    void send(cPacket *msgP);
+    void send(Packet *msgP);
     void do_SEND();
 
   public:

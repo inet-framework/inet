@@ -28,7 +28,6 @@
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/common/serializer/tcp/TCPSerializer.h"
 
 #include <assert.h>
 #include <dlfcn.h>
@@ -145,7 +144,7 @@ void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, Sock
     nscSockPairP.remoteM.portM = PORT_UNDEF;
 }
 
-void TCP_NSC_Connection::send(cPacket *msgP)
+void TCP_NSC_Connection::send(Packet *msgP)
 {
     ASSERT(sendQueueM);
     sendQueueM->enqueueAppData(msgP);
