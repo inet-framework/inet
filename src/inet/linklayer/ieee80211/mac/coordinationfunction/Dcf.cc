@@ -245,9 +245,6 @@ void Dcf::originatorProcessReceivedFrame(Ieee80211Frame* frame, Ieee80211Frame* 
 {
     if (frame->getType() == ST_ACK) {
         auto lastTransmittedDataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(lastTransmittedFrame);
-        recoveryProcedure->ackFrameReceived(lastTransmittedDataOrMgmtFrame, stationRetryCounters);
-        ackHandler->processReceivedAck(check_and_cast<Ieee80211ACKFrame *>(frame), lastTransmittedDataOrMgmtFrame);
-        inProgressFrames->dropFrame(lastTransmittedDataOrMgmtFrame);
         if (dataAndMgmtRateControl) {
             int retryCount;
             if (lastTransmittedFrame->getRetry())
@@ -256,6 +253,9 @@ void Dcf::originatorProcessReceivedFrame(Ieee80211Frame* frame, Ieee80211Frame* 
                 retryCount = 0;
             dataAndMgmtRateControl->frameTransmitted(frame, retryCount, true, false);
         }
+        recoveryProcedure->ackFrameReceived(lastTransmittedDataOrMgmtFrame, stationRetryCounters);
+        ackHandler->processReceivedAck(check_and_cast<Ieee80211ACKFrame *>(frame), lastTransmittedDataOrMgmtFrame);
+        inProgressFrames->dropFrame(lastTransmittedDataOrMgmtFrame);
     }
     else if (frame->getType() == ST_RTS)
         ; // void
@@ -271,13 +271,13 @@ void Dcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
     ASSERT(failedFrame->getType() != ST_DATA_WITH_QOS);
     ASSERT(ackHandler->getAckStatus(failedFrame) == AckHandler::Status::WAITING_FOR_ACK);
     EV_INFO << "Data/Mgmt frame transmission failed\n";
-    ackHandler->processFailedFrame(failedFrame);
     recoveryProcedure->dataOrMgmtFrameTransmissionFailed(failedFrame, stationRetryCounters);
     bool retryLimitReached = recoveryProcedure->isRetryLimitReached(failedFrame);
     if (dataAndMgmtRateControl) {
         int retryCount = recoveryProcedure->getRetryCount(failedFrame);
         dataAndMgmtRateControl->frameTransmitted(failedFrame, retryCount, false, retryLimitReached);
     }
+    ackHandler->processFailedFrame(failedFrame);
     if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(failedFrame);
         inProgressFrames->dropFrame(failedFrame);
