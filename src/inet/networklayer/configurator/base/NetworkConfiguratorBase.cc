@@ -395,6 +395,10 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             transmittedFrame->append(byteCountChunk);
             // KLUDGE: call transmitter->createPhyHeader();
             auto phyHeader = std::make_shared<IdealPhyHeader>();
+
+            //FIXME phyHeader->setChunkLength(???);     // length is 0 currently
+            phyHeader->setChunkLength(byte(1));
+
             phyHeader->markImmutable();
             transmittedFrame->pushHeader(phyHeader);
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
