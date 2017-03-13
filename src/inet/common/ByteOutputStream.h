@@ -71,7 +71,7 @@ class INET_API ByteOutputStream {
 
     void writeBytes(const std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
         if (length == -1)
-            length = bytes.size();
+            length = bytes.size() - offset;
         this->bytes.insert(this->bytes.end(), bytes.begin() + offset, bytes.begin() + offset + length);
     }
 
