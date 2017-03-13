@@ -32,7 +32,7 @@ void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::share
         fieldsChunk->setSerializedBytes(stream.copyBytes(streamPosition, byte(serializedLength).get()));
     }
     else {
-        ByteOutputStream chunkStream;
+        ByteOutputStream chunkStream((fieldsChunk->getChunkLength().get() + 7) >> 3);
         serialize(chunkStream, fieldsChunk);
         stream.writeBytes(chunkStream.getBytes(), byte(offset).get(), length == bit(-1) ? -1 : byte(length).get());
         ChunkSerializer::totalSerializedBitCount += byte(chunkStream.getSize());

@@ -32,6 +32,7 @@ class INET_API ByteOutputStream {
     std::vector<uint8_t> bytes;
 
   public:
+    ByteOutputStream(size_t initCapacity = 64) { bytes.reserve(initCapacity); }
     int64_t getSize() const { return bytes.size(); }
     int64_t getPosition() const { return bytes.size(); }
 
@@ -71,8 +72,7 @@ class INET_API ByteOutputStream {
     void writeBytes(const std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
         if (length == -1)
             length = bytes.size();
-        for (int64_t i = 0; i < length; i++)
-            this->bytes.push_back(bytes[offset + i]);
+        this->bytes.insert(this->bytes.end(), bytes.begin() + offset, bytes.begin() + offset + length);
     }
 
     void writeUint8(uint8_t byte) {
