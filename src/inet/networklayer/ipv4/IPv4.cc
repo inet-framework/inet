@@ -300,10 +300,9 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
                 // KLUDGE: TODO: factor out
-                auto packetCopy = toMutable(packet);
-                const auto& ipv4Header = packetCopy->peekHeader<IPv4Header>();
-                packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
-                ipv4Header->markMutableIfExclusivelyOwned();
+                Packet* packetCopy = packet->dup();
+                const auto& ipv4Header = std::static_pointer_cast<IPv4Header>(packetCopy->popHeader<IPv4Header>()->dupShared());
+                packetCopy->removePoppedChunks();
                 ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
                 ipv4Header->markImmutable();
                 packetCopy->pushHeader(ipv4Header);
