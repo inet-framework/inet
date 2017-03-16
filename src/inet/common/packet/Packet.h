@@ -96,6 +96,11 @@ class INET_API Packet : public cPacket
     virtual void setBitLength(int64_t value) override { throw cRuntimeError("Invalid operation"); }
     //@}
 
+    /** @name Other overridden cPacket functions */
+    //@{
+    virtual bool hasBitError() const override { return contents->isIncorrect(); }
+    //@}
+
     /** @name Unsupported cPacket functions */
     //@{
     virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
