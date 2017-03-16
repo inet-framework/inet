@@ -192,7 +192,9 @@ void Packet::removeFromBeginning(bit length)
         assert(bit(0) <= length && length <= getPacketLength());
         assert(contents != nullptr);
         assert(headerIterator.getPosition() == bit(0));
-        if (contents->canRemoveFromBeginning(length)) {
+        if (contents->getChunkLength() == length)
+            contents = nullptr;
+        else if (contents->canRemoveFromBeginning(length)) {
             makeContentsMutable();
             contents->removeFromBeginning(length);
         }
@@ -211,7 +213,9 @@ void Packet::removeFromEnd(bit length)
         assert(bit(0) <= length && length <= getPacketLength());
         assert(contents != nullptr);
         assert(trailerIterator.getPosition() == bit(0));
-        if (contents->canRemoveFromEnd(length)) {
+        if (contents->getChunkLength() == length)
+            contents = nullptr;
+        else if (contents->canRemoveFromEnd(length)) {
             makeContentsMutable();
             contents->removeFromEnd(length);
         }
