@@ -97,10 +97,8 @@ void TCP::initialize(int stage)
         useDataNotification = par("useDataNotification");
 
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declaredCorrect"))
+        if (!strcmp(crcModeString, "declared"))
             crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "declaredIncorrect"))
-            crcMode = CRC_DECLARED_INCORRECT;
         else if (!strcmp(crcModeString, "computed"))
             crcMode = CRC_COMPUTED;
         else
