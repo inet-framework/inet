@@ -31,10 +31,11 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
 
 void AdaptiveProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
 {
-    ProbabilisticBroadcastHeader *m = check_and_cast<ProbabilisticBroadcastHeader *>(msg);
+    auto packet = check_and_cast<Packet *>(msg);
+    const auto& macHeader = packet->peekHeader<ProbabilisticBroadcastHeader>();
     // Update neighbors table before calling the method of the super class
     // because it may delete the message.
-    updateNeighMap(m);
+    updateNeighMap(macHeader.get());
     ProbabilisticBroadcast::handleLowerPacket(msg);
 }
 
