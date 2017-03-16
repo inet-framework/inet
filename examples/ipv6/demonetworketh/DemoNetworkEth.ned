@@ -19,7 +19,7 @@
 
 package inet.examples.ipv6.demonetworketh;
 
-import inet.common.packet.TCPDump;
+import inet.common.packet.recorder.TCPDump;
 import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
