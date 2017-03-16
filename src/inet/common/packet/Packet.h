@@ -101,6 +101,8 @@ class INET_API Packet : public cPacket
     virtual void encapsulate(cPacket *packet) override { throw cRuntimeError("Invalid operation"); }
 
     virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
+
+    virtual cPacket *getEncapsulatedPacket() const override { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Header querying related functions */
