@@ -48,15 +48,14 @@ void APSKRadio::encapsulate(Packet *packet) const
     const APSKModulationBase *modulation = nullptr;
     const ConvolutionalCode *forwardErrorCorrection = nullptr;
     auto phyHeader = std::make_shared<APSKPhyHeader>();
+
     // KLUDGE:
-    auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter);
-    if (flatTransmitter != nullptr) {
+    if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         phyHeader->setChunkLength(flatTransmitter->getHeaderLength());
         modulation = check_and_cast<const APSKModulationBase *>(flatTransmitter->getModulation());
     }
     // KLUDGE:
-    auto layeredTransmitter = dynamic_cast<const APSKLayeredTransmitter *>(transmitter);
-    if (layeredTransmitter != nullptr) {
+    else if (auto layeredTransmitter = dynamic_cast<const APSKLayeredTransmitter *>(transmitter)) {
         phyHeader->setChunkLength(byte(APSK_PHY_HEADER_BYTE_LENGTH));
         auto encoder = layeredTransmitter->getEncoder();
         if (encoder != nullptr) {
@@ -65,6 +64,14 @@ void APSKRadio::encapsulate(Packet *packet) const
         }
         modulation = check_and_cast<const APSKModulationBase *>(layeredTransmitter->getModulator()->getModulation());
     }
+    // KLUDGE:
+    else {
+        phyHeader->setChunkLength(byte(1));
+        ASSERT(modulation != nullptr);  //FIXME when uses OFDM, ofdm modulator can not cast to apsk modulator, see /examples/wireless/layered80211/ -f omnetpp.ini -c LayeredCompliant80211Ping
+    }
+
+    ASSERT(modulation != nullptr);
+
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
     auto paddingBitLength = bit(computePaddingLength(bit(packet->getPacketLength()).get(), nullptr, modulation));
