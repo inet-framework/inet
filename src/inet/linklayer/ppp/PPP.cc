@@ -374,6 +374,7 @@ Packet *PPP::encapsulate(cPacket *msg)
     auto pppTrailer = std::make_shared<PppTrailer>();
     pppTrailer->markImmutable();
     packet->pushTrailer(pppTrailer);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
     return packet;
 }
 
