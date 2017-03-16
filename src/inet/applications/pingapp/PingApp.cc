@@ -227,15 +227,14 @@ void PingApp::handleMessage(cMessage *msg)
 #endif
 #ifdef WITH_IPv6
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
-            ICMPv6Header *icmpMessage = dynamic_cast<ICMPv6Header *>(msg);
-            if (icmpMessage->getType() == ICMPv6_ECHO_REPLY) {
-                check_and_cast<ICMPv6EchoReplyMsg *>(msg);
+            const auto& icmpHeader = packet->popHeader<ICMPv6Header>();
+            if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
                 processPingResponse(packet);
             }
             else {
                 // process other icmpv6 messages, process icmpv6 errors
             }
-            delete icmpMessage;
+            delete packet;
         }
         else
 #endif
