@@ -25,6 +25,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo.h"
@@ -49,6 +50,17 @@ const bool DEFAULT_MULTICAST_LOOP = true;
 class INET_API UDP : public cSimpleModule, public ILifecycle
 {
   public:
+    class CrcInsertion : public NetfilterBase::HookBase {
+      public:
+        UDP *udp = nullptr;
+
+      public:
+        virtual Result datagramPreRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+        virtual Result datagramForwardHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+        virtual Result datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override;
+        virtual Result datagramLocalInHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry) override { return ACCEPT; }
+        virtual Result datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) override { return ACCEPT; }
+    };
 
     enum PortRange {
         EPHEMERAL_PORTRANGE_START = 1024,
@@ -100,6 +112,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
   protected:
     CrcMode crcMode = (CrcMode)-1;
+    CrcInsertion crcInsertion;
 
     // sockets
     SocketsByIdMap socketsByIdMap;
@@ -182,6 +195,11 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
+    // crc
+    virtual bool verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet);
+    virtual void insertCrc(const L3Address srcAddress, const L3Address destAddress, const std::shared_ptr<UdpHeader> udpHeader, Packet *packet);
+    virtual uint16_t computeCrc(const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
+
   public:
     UDP();
     virtual ~UDP();
@@ -191,8 +209,6 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
 };
-
-uint16_t computeUdpCrc(const TransportPseudoHeader& pseudoHeader, const BytesChunk& udpPacket);
 
 } // namespace inet
 

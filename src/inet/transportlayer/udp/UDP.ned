@@ -47,6 +47,22 @@ import inet.transportlayer.contract.IUDP;
 // The ~UDP model relies on sending and receiving ~IPv4ControlInfo/~IPv6ControlInfo
 // objects attached to ~UdpHeader objects as control info.
 //
+// CRC operation modes for outgoing UDP packets (crcMode parameter in UDP module):
+//  - "disabled" means the outgoing packet will have its CRC set to 0 (serializable)
+//  - "declared" means the outgoing packet will have the correct CRC declared
+//     without actually computing it, the value is set to 0xC00D (not serializable)
+//  - "computed" means the outgoing packet will have the correctly computed CRC
+//     as defined by the RFC (serializable)
+// CRC operation modes for incoming UDP packets (crcMode field in UDPHeader chunk):
+//  - CRC_DISABLED means the incoming packet must have its CRC set to 0 (serializable)
+//  - CRC_DECLARED_CORRECT means the incoming packet is assumed to have a
+//    correct CRC without the actual value (not serializable)
+//  - CRC_DECLARED_INCORRECT means the incoming packet is assumed to have an
+//    incorrect CRC without the actual value (not serializable)
+//  - CRC_COMPUTED means the incoming packet has a potentially incorrect CRC
+//    that is to be verified as defined by the RFC (serializable)
+// The incoming packet also fails the CRC verification if any relevant chunk is marked incorrect.
+//
 // @see ~UdpHeader, ~UDPControlInfo, ~UDPCommandCode
 //
 simple UDP like IUDP
@@ -55,7 +71,7 @@ simple UDP like IUDP
         string interfaceTableModule;   // The path to the InterfaceTable module
         string icmpModule = default("^.ipv4.icmp");
         string icmpv6Module = default("^.ipv6.icmpv6");
-        string crcMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
+        string crcMode @enum("disabled", "declared", "computed") = default("declared");
         @display("i=block/transport");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

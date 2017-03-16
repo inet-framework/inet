@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,20 +14,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// @author: Zoltan Bojthe
-//
-
-
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
 
 namespace inet;
 
 enum CrcMode
 {
-    CRC_DECLARED_CORRECT = 0;
-    CRC_DECLARED_INCORRECT  = 1;
-    CRC_COMPUTED = 2;
+    CRC_DISABLED = 0; // CRC is not set, serializable
+    CRC_DECLARED_CORRECT = 1; // CRC is correctly set without the actual value, not serializable
+    CRC_DECLARED_INCORRECT = 2; // the CRC is incorrectly set without the actual value, not serializable
+    CRC_COMPUTED = 3; // CRC is set to a value that is potentially incorrect, serializable
 }
 
