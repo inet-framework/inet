@@ -30,5 +30,5 @@ class FieldsChunk extends cObject;
 class ApplicationPacket extends FieldsChunk
 {
     bit chunkLength @overridegetter;
-    long sequenceNumber;
+    uint32_t sequenceNumber;
 }
