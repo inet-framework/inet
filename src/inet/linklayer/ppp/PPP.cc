@@ -222,7 +222,7 @@ void PPP::startTransmitting(cPacket *msg)
     emit(packetSentToLowerSignal, pppFrame);
     pppFrame->clearTags();
     if (sendRawBytes) {
-        auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekDataAt<BytesChunk>(bit(0), pppFrame->getPacketLength()));
+        auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekBytes());
         send(rawFrame, physOutGate);
         delete pppFrame;
     }

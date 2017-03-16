@@ -163,7 +163,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFie
     // The SIGNAL field is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1), Tail (6),
     // fields, so the SIGNAL field is 24 bits (OFDM_SYMBOL_SIZE / 2) long.
     BitVector *signalField = new BitVector();
-    const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekAt<BytesChunk>(bit(0), completePacketModel->getPacket()->getPacketLength())->getBytes());
+    const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekBytes()->getBytes());
     for (unsigned int i = 0; i < NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i++)
         signalField->appendBit(serializedPacket->getBit(i));
     return new TransmissionPacketModel(nullptr, bps(NaN));
@@ -172,7 +172,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createSignalFie
 const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
 {
     BitVector *dataField = new BitVector();
-    const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekAt<BytesChunk>(bit(0), completePacketModel->getPacket()->getPacketLength())->getBytes());
+    const BitVector *serializedPacket = new BitVector(completePacketModel->getPacket()->peekBytes()->getBytes());
     for (unsigned int i = NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2; i < serializedPacket->getSize(); i++)
         dataField->appendBit(serializedPacket->getBit(i));
     return new TransmissionPacketModel(nullptr, bps(NaN));

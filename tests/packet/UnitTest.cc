@@ -235,7 +235,7 @@ static void testImproperlyRepresented()
     ipHeader1->markImmutable();
     packet1.append(ipHeader1);
     assert(ipHeader1->isProperlyRepresented());
-    auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peekAt<BytesChunk>(bit(0), packet1.getPacketLength())->dupShared());
+    auto bytesChunk1 = std::static_pointer_cast<BytesChunk>(packet1.peekBytes()->dupShared());
     bytesChunk1->setByte(0, 42);
     bytesChunk1->markImmutable();
     Packet packet2(nullptr, bytesChunk1);
@@ -331,7 +331,7 @@ static void testEncapsulation()
     const auto& ethernetTrailer1 = packet2.popTrailer<EthernetTrailer>();
     const auto& byteCountChunk1 = packet2.peekDataAt(byte(0), byte(10));
     const auto& bytesChunk1 = packet2.peekDataAt(byte(10), byte(10));
-    const auto& dataChunk1 = packet2.peekDataAt<BytesChunk>(bit(0), packet2.getDataLength());
+    const auto& dataChunk1 = packet2.peekDataBytes();
     assert(ethernetHeader1 != nullptr);
     assert(ethernetTrailer1 != nullptr);
     assert(byteCountChunk1 != nullptr);
@@ -424,7 +424,7 @@ static void testPolymorphism()
     assert(tlvHeaderInt1->getInt16Value() == 42);
 
     // 2. packet provides deserialized headers in a polymorphic way after serialization
-    Packet packet2(nullptr, packet1.peekAt<BytesChunk>(bit(0), packet1.getPacketLength()));
+    Packet packet2(nullptr, packet1.peekBytes());
     const auto& tlvHeader5 = packet2.popHeader<TlvHeader>();
     assert(tlvHeader5 != nullptr);
     assert(tlvHeader5->getChunkLength() == byte(3));
@@ -591,7 +591,7 @@ static void testDuality()
     assert(bytesChunk1->getChunkLength() == byte(10));
 
     // 2. packet provides header in both fields and bytes representation after serialization
-    Packet packet2(nullptr, packet1.peekAt<BytesChunk>(bit(0), packet1.getPacketLength()));
+    Packet packet2(nullptr, packet1.peekBytes());
     const auto& applicationHeader2 = packet2.peekHeader<ApplicationHeader>();
     const auto& bytesChunk2 = packet2.peekHeader<BytesChunk>(byte(10));
     assert(applicationHeader2 != nullptr);
@@ -638,7 +638,7 @@ static void testMerging()
     packet4.append(makeImmutableBytesChunk(makeVector(5)));
     packet4.append(makeImmutableBytesChunk(makeVector(5)));
     const auto& chunk5 = packet4.peekAt(bit(0), packet4.getPacketLength());
-    const auto& chunk6 = packet4.peekAt<BytesChunk>(bit(0), packet4.getPacketLength());
+    const auto& chunk6 = packet4.peekBytes();
     assert(chunk5 != nullptr);
     assert(chunk5->getChunkLength() == byte(10));
     assert(std::dynamic_pointer_cast<BytesChunk>(chunk5) != nullptr);
@@ -759,7 +759,7 @@ static void testNesting()
     assert(compoundHeader2 != nullptr);
 
     // 2. packet provides compound header after serialization
-    Packet packet2(nullptr, packet1.peekAt<BytesChunk>(bit(0), packet1.getPacketLength()));
+    Packet packet2(nullptr, packet1.peekBytes());
     const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
     assert(compoundHeader3 != nullptr);
     auto it = Chunk::ForwardIterator(bit(0), 0);

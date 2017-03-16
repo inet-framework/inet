@@ -68,7 +68,7 @@ std::ostream& APSKEncoder::printToStream(std::ostream& stream, int level) const
 const ITransmissionBitModel *APSKEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
-    const auto& bytesChunk = packet->peekAt<BytesChunk>(bit(0), packet->getPacketLength());
+    const auto& bytesChunk = packet->peekBytes();
     auto bitLength = bytesChunk->getChunkLength();
     BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
     const IScrambling *scrambling = nullptr;

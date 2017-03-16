@@ -395,7 +395,7 @@ EtherPhyFrame *EtherMACBase::encapsulate(Packet* frame)
 {
     EtherPhyFrame *phyFrame = new EtherPhyFrame(frame->getName());
     if (sendRawBytes) {
-        auto rawFrame = new Packet(frame->getName(), frame->peekDataAt<BytesChunk>(bit(0), frame->getPacketLength()));
+        auto rawFrame = new Packet(frame->getName(), frame->peekBytes());
         phyFrame->encapsulate(rawFrame);
         delete frame;
     }

@@ -114,7 +114,7 @@ void PcapDump::writeFrame(simtime_t stime, const Packet *ipPacket)
     ph.ts_sec = (int32)stime.inUnit(SIMTIME_S);
     ph.ts_usec = (uint32)(stime.inUnit(SIMTIME_US) - (uint32)1000000 * stime.inUnit(SIMTIME_S));
 
-    auto data = ipPacket->peekDataAt<BytesChunk>(bit(0), ipPacket->getPacketLength());
+    auto data = ipPacket->peekBytes();
     auto bytes = data->getBytes();
     for (int i = 0; i < bytes.size(); i++)
         buf[i] = bytes[i];
