@@ -22,14 +22,6 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/recorder/PcapRecorder.h"
 
-#ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Header.h"
-#endif // ifdef WITH_IPv4
-
-#ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Header.h"
-#endif // ifdef WITH_IPv6
-
 namespace inet {
 
 //----
@@ -132,31 +124,14 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 {
     EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
-    packetDumper.dumpPacket(l2r, msg);
+    // TODO: revive packetDumper.dumpPacket(l2r, msg);
 
-#if defined(WITH_IPv4) || defined(WITH_IPv6)
     if (!pcapDumper.isOpen())
         return;
 
-    bool hasBitError = false;
     auto packet = dynamic_cast<Packet *>(msg);
 
-#ifdef WITH_IPv6
-    IPv6Header *ip6Packet = nullptr;
-#endif // ifdef WITH_IPv6
-    while (msg) {
-        if (msg->hasBitError())
-            hasBitError = true;
-#ifdef WITH_IPv6
-        if (nullptr != (ip6Packet = dynamic_cast<IPv6Header *>(msg))) {
-            break;
-        }
-#endif // ifdef WITH_IPv6
-
-        msg = msg->getEncapsulatedPacket();
-    }
-#endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
-    if (packet && (dumpBadFrames || !hasBitError)) {
+    if (packet && (dumpBadFrames || !packet->hasBitError())) {
         auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
         for (auto dumpProtocol : dumpProtocols) {
             if (protocol == dumpProtocol) {
@@ -165,12 +140,6 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
             }
         }
     }
-#ifdef WITH_IPv6
-    if (ip6Packet && (dumpBadFrames || !hasBitError)) {
-        const simtime_t stime = simTime();
-        pcapDumper.writeIPv6Frame(stime, ip6Packet);
-    }
-#endif // ifdef WITH_IPv6
 }
 
 void PcapRecorder::finish()
