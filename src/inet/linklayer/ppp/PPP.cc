@@ -370,10 +370,10 @@ Packet *PPP::encapsulate(cPacket *msg)
     auto pppHeader = std::make_shared<PppHeader>();
     pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
     pppHeader->markImmutable();
-    packet->prepend(pppHeader);
+    packet->pushHeader(pppHeader);
     auto pppTrailer = std::make_shared<PppTrailer>();
     pppTrailer->markImmutable();
-    packet->append(pppTrailer);
+    packet->pushTrailer(pppTrailer);
     return packet;
 }
 
