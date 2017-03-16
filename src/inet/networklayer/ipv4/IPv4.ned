@@ -88,7 +88,7 @@ simple IPv4
         string routingTableModule;
         string arpModule;
         string icmpModule;
-        string crcMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
+        string crcMode @enum("declared", "computed") = default("declared");
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
