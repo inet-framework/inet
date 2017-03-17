@@ -72,8 +72,7 @@ void IPv4HeaderSerializer::serialize(ByteOutputStream& stream, const std::shared
             stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, headerLength - writtenLength);
     }
 
-    for (int i = 0; i < IP_HEADER_BYTES; i++)
-        stream.writeByte(((uint8_t *)&iphdr)[i]);
+    stream.writeBytes((uint8_t *)&iphdr, IP_HEADER_BYTES);
 }
 
 void IPv4HeaderSerializer::serializeOption(ByteOutputStream& stream, const TLVOptionBase *option) const
@@ -153,8 +152,7 @@ std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(ByteInputStream& stream
 {
     auto position = stream.getPosition();
     uint8_t buffer[IP_HEADER_BYTES];
-    for (int i = 0; i < IP_HEADER_BYTES; i++)
-        buffer[i] = stream.readByte();
+    stream.readBytes(buffer, IP_HEADER_BYTES);
     auto ipv4Header = std::make_shared<IPv4Header>();
     unsigned int bufsize = stream.getRemainingSize();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);

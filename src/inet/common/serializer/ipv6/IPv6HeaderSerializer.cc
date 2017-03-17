@@ -68,8 +68,7 @@ void IPv6HeaderSerializer::serialize(ByteOutputStream& stream, const std::shared
 
     ip6h.ip6_plen = htons(dgram->getPayloadLength());
 
-    for (int i = 0; i < IPv6_HEADER_BYTES; i++)
-        stream.writeByte(((uint8_t *)&ip6h)[i]);
+    stream.writeBytes((uint8_t *)&ip6h, IPv6_HEADER_BYTES);
 
     //FIXME serialize extension headers
     for (i = 0; i < dgram->getExtensionHeaderArraySize(); i++) {
@@ -127,8 +126,7 @@ void IPv6HeaderSerializer::serialize(ByteOutputStream& stream, const std::shared
 std::shared_ptr<Chunk> IPv6HeaderSerializer::deserialize(ByteInputStream& stream) const
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
-    for (int i = 0; i < IPv6_HEADER_BYTES; i++)
-        buffer[i] = stream.readByte();
+    stream.readBytes(buffer, IPv6_HEADER_BYTES);
     auto dest = std::make_shared<IPv6Header>();
     const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
     uint32_t flowinfo = ntohl(ip6h.ip6_flow);

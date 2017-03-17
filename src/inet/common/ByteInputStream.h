@@ -99,6 +99,11 @@ class INET_API ByteInputStream {
         return success;
     }
 
+    void readBytes(uint8_t *buffer, int64_t length) {
+        for (int i = 0; i < length; i++)
+            buffer[i] = readByte();
+    }
+
     void readBytes(std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
         if (length == -1)
             length = bytes.size();

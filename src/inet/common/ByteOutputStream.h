@@ -75,6 +75,10 @@ class INET_API ByteOutputStream {
         this->bytes.insert(this->bytes.end(), bytes.begin() + offset, bytes.begin() + offset + length);
     }
 
+    void writeBytes(uint8_t *buffer, int64_t length) {
+        bytes.insert(bytes.end(), buffer, buffer + length);
+    }
+
     void writeUint8(uint8_t byte) {
         writeByte(byte);
     }
