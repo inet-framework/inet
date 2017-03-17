@@ -288,14 +288,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     template <typename T>
     std::shared_ptr<T> doPeek(const Iterator& iterator, bit length = bit(-1)) const {
         assertImmutable();
-        // TODO: what if it's a backward iterator??? wtf?
+        assert(iterator.isForward());
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
         chunk->markImmutable();
-        // TODO: do we need this? std::static_pointer_cast<T>(chunk);
-        if ((chunk->isComplete() && length == bit(-1)) || length == chunk->getChunkLength())
-            return std::dynamic_pointer_cast<T>(chunk);
-        else
-            return nullptr;
+        return std::static_pointer_cast<T>(chunk);
     }
 
   public:
@@ -443,8 +439,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     bool has(const Iterator& iterator, bit length = bit(-1)) const {
         if (length != bit(-1) && getChunkLength() < iterator.getPosition() + length)
             return false;
-        else
-            return peek<T>(iterator, length, PF_ALLOW_NULLPTR) != nullptr;
+        else {
+            const auto& chunk = peek<T>(iterator, length, PF_ALLOW_NULLPTR + PF_ALLOW_INCOMPLETE);
+            return chunk != nullptr && chunk->isComplete();
+        }
     }
 
     /**
