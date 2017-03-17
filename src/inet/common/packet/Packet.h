@@ -99,8 +99,10 @@ class INET_API Packet : public cPacket
 
     /** @name Other overridden cPacket functions */
     //@{
-    virtual bool hasBitError() const override { return contents->isIncorrect(); }
+    virtual bool hasBitError() const override { return cPacket::hasBitError() || contents->isIncorrect(); }
     //@}
+
+    //TODO virtual void setBitError(bool e) override;
 
     /** @name Unsupported cPacket functions */
     //@{
