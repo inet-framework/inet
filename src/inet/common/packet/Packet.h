@@ -130,9 +130,9 @@ class INET_API Packet : public cPacket
      */
     bit getHeaderPoppedLength() const { return headerIterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peekHeader(bit length = bit(-1)) const;
+    std::shared_ptr<Chunk> peekHeader(bit length = bit(-1), int flags = 0) const;
 
-    std::shared_ptr<Chunk> popHeader(bit length = bit(-1));
+    std::shared_ptr<Chunk> popHeader(bit length = bit(-1), int flags = 0);
 
     void pushHeader(const std::shared_ptr<Chunk>& chunk);
 
@@ -143,15 +143,15 @@ class INET_API Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekHeader(bit length = bit(-1)) const {
+    std::shared_ptr<T> peekHeader(bit length = bit(-1), int flags = 0) const {
         assert(bit(-1) <= length && length <= getDataLength());
-        return contents == nullptr ? nullptr : contents->peek<T>(headerIterator, length);
+        return contents == nullptr ? nullptr : contents->peek<T>(headerIterator, length, flags);
     }
 
     template <typename T>
-    std::shared_ptr<T> popHeader(bit length = bit(-1)) {
+    std::shared_ptr<T> popHeader(bit length = bit(-1), int flags = 0) {
         assert(bit(-1) <= length && length <= getDataLength());
-        const auto& chunk = peekHeader<T>(length);
+        const auto& chunk = peekHeader<T>(length, flags);
         if (chunk != nullptr)
             contents->moveIterator(headerIterator, chunk->getChunkLength());
         return chunk;
@@ -177,9 +177,9 @@ class INET_API Packet : public cPacket
      */
     bit getTrailerPoppedLength() const { return trailerIterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peekTrailer(bit length = bit(-1)) const;
+    std::shared_ptr<Chunk> peekTrailer(bit length = bit(-1), int flags = 0) const;
 
-    std::shared_ptr<Chunk> popTrailer(bit length = bit(-1));
+    std::shared_ptr<Chunk> popTrailer(bit length = bit(-1), int flags = 0);
 
     void pushTrailer(const std::shared_ptr<Chunk>& chunk);
 
@@ -190,15 +190,15 @@ class INET_API Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekTrailer(bit length = bit(-1)) const {
+    std::shared_ptr<T> peekTrailer(bit length = bit(-1), int flags = 0) const {
         assert(bit(-1) <= length && length <= getDataLength());
-        return contents == nullptr ? nullptr : contents->peek<T>(trailerIterator, length);
+        return contents == nullptr ? nullptr : contents->peek<T>(trailerIterator, length, flags);
     }
 
     template <typename T>
-    std::shared_ptr<T> popTrailer(bit length = bit(-1)) {
+    std::shared_ptr<T> popTrailer(bit length = bit(-1), int flags = 0) {
         assert(bit(-1) <= length && length <= getDataLength());
-        const auto& chunk = peekTrailer<T>(length);
+        const auto& chunk = peekTrailer<T>(length, flags);
         if (chunk != nullptr)
             contents->moveIterator(trailerIterator, chunk->getChunkLength());
         return chunk;
@@ -213,7 +213,7 @@ class INET_API Packet : public cPacket
      */
     bit getDataLength() const { return getPacketLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
-    std::shared_ptr<Chunk> peekDataAt(bit offset, bit length = bit(-1)) const;
+    std::shared_ptr<Chunk> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const;
 
     template <typename T>
     bool hasDataAt(bit offset, bit length = bit(-1)) const {
@@ -221,8 +221,8 @@ class INET_API Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekDataAt(bit offset, bit length = bit(-1)) const {
-        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
+    std::shared_ptr<T> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const {
+        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
     }
 
     std::shared_ptr<BitsChunk> peekDataBits() const {
@@ -236,7 +236,7 @@ class INET_API Packet : public cPacket
 
     /** @name Querying related functions */
     //@{
-    std::shared_ptr<Chunk> peekAt(bit offset, bit length = bit(-1)) const;
+    std::shared_ptr<Chunk> peekAt(bit offset, bit length = bit(-1), int flags = 0) const;
 
     template <typename T>
     bool hasAt(bit offset, bit length = bit(-1)) const {
@@ -246,10 +246,10 @@ class INET_API Packet : public cPacket
     }
 
     template <typename T>
-    std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1)) const {
+    std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         assert(bit(0) <= offset && offset <= getPacketLength());
         assert(bit(-1) <= length && length <= getPacketLength());
-        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length);
+        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
     }
 
     std::shared_ptr<BitsChunk> peekBits() const {

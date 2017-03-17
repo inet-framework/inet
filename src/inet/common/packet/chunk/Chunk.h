@@ -182,6 +182,16 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         CT_FIELDS
     };
 
+    /**
+     * This enum specifies bitmasks for the flags argument of various peek functions.
+     */
+    enum PeekFlag {
+        PF_ALLOW_NULLPTR                = (1 << 0),
+        PF_ALLOW_INCOMPLETE             = (1 << 1),
+        PF_ALLOW_INCORRECT              = (1 << 2),
+        PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 3),
+    };
+
     class INET_API Iterator
     {
       protected:
@@ -259,11 +269,29 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
     template <typename T>
+    std::shared_ptr<T> checkPeekResult(const std::shared_ptr<T>& chunk, int flags) const {
+        if (chunk == nullptr) {
+            if (!(flags & PF_ALLOW_NULLPTR))
+                throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
+        }
+        else {
+            if (chunk->isIncomplete() && !(flags & PF_ALLOW_INCOMPLETE))
+                throw cRuntimeError("Returning an incomplete chunk is not allowed according to the flags: %x", flags);
+            if (chunk->isIncorrect() && !(flags & PF_ALLOW_INCORRECT))
+                throw cRuntimeError("Returning an incorrect chunk is not allowed according to the flags: %x", flags);
+            if (chunk->isImproperlyRepresented() && !(flags & PF_ALLOW_IMPROPERLY_REPRESENTED))
+                throw cRuntimeError("Returning an improperly represented chunk is not allowed according to the flags: %x", flags);
+        }
+        return chunk;
+    }
+
+    template <typename T>
     std::shared_ptr<T> doPeek(const Iterator& iterator, bit length = bit(-1)) const {
         assertImmutable();
         // TODO: what if it's a backward iterator??? wtf?
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
         chunk->markImmutable();
+        // TODO: do we need this? std::static_pointer_cast<T>(chunk);
         if ((chunk->isComplete() && length == bit(-1)) || length == chunk->getChunkLength())
             return std::dynamic_pointer_cast<T>(chunk);
         else
@@ -401,18 +429,22 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
+        return checkPeekResult<Chunk>(peekUnchecked(iterator, length), flags);
+    }
+
+    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
      * requested representation.
      */
     template <typename T>
-    bool has(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
+    bool has(const Iterator& iterator, bit length = bit(-1)) const {
         if (length != bit(-1) && getChunkLength() < iterator.getPosition() + length)
             return false;
         else
-            return peek<T>(iterator, length) != nullptr;
+            return peek<T>(iterator, length, PF_ALLOW_NULLPTR) != nullptr;
     }
 
     /**
@@ -424,6 +456,11 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
+        return checkPeekResult<T>(peekUnchecked<T>(iterator, length), flags);
+    }
+
+    template <typename T>
+    std::shared_ptr<T> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const {
         bit chunkLength = getChunkLength();
         assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
         if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))

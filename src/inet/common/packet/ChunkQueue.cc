@@ -39,7 +39,7 @@ void ChunkQueue::remove(bit length)
     auto position = iterator.getPosition();
     if (position > contents->getChunkLength() / 2) {
         contents->seekIterator(iterator, bit(0));
-        contents = contents->peek(position, contents->getChunkLength() - position);
+        contents = contents->peek(position, contents->getChunkLength() - position, Chunk::PF_ALLOW_NULLPTR);
     }
 }
 
