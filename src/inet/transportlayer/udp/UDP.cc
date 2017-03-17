@@ -413,9 +413,7 @@ void UDP::processUDPPacket(Packet *udpPacket)
     emit(rcvdPkSignal, udpPacket);
 
     bit udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
-    const auto& udpHeader = udpPacket->popHeader<UdpHeader>();
-    if (udpHeader == nullptr)
-        throw cRuntimeError("not an udp header");
+    const auto& udpHeader = udpPacket->popHeader<UdpHeader>(bit(-1), Chunk::PF_ALLOW_INCORRECT);
 
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
@@ -485,13 +483,12 @@ void UDP::processICMPv4Error(Packet *packet)
     code = icmpHeader->getCode();
     const auto& ipv4Header = packet->popHeader<IPv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
-        if (const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8))) {
-            localAddr = ipv4Header->getSrcAddress();
-            remoteAddr = ipv4Header->getDestAddress();
-            localPort = udpHeader->getSourcePort();
-            remotePort = udpHeader->getDestinationPort();
-            udpHeaderAvailable = true;
-        }
+        const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8), Chunk::PF_ALLOW_INCOMPLETE);
+        localAddr = ipv4Header->getSrcAddress();
+        remoteAddr = ipv4Header->getDestAddress();
+        localPort = udpHeader->getSourcePort();
+        remotePort = udpHeader->getDestinationPort();
+        udpHeaderAvailable = true;
     }
     EV_WARN << "ICMP error received: type=" << type << " code=" << code
             << " about packet " << localAddr << ":" << localPort << " > "
@@ -535,13 +532,12 @@ void UDP::processICMPv6Error(Packet *packet)
     const auto& ipv6Header = packet->popHeader<IPv6Header>();
     IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (!fh || fh->getFragmentOffset() == 0) {
-        if (const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8))) {
-            localAddr = ipv6Header->getSrcAddress();
-            remoteAddr = ipv6Header->getDestAddress();
-            localPort = udpHeader->getSourcePort();
-            remotePort = udpHeader->getDestinationPort();
-            udpHeaderAvailable = true;
-        }
+        const auto& udpHeader = packet->peekHeader<UdpHeader>(byte(8), Chunk::PF_ALLOW_INCOMPLETE);
+        localAddr = ipv6Header->getSrcAddress();
+        remoteAddr = ipv6Header->getDestAddress();
+        localPort = udpHeader->getSourcePort();
+        remotePort = udpHeader->getDestinationPort();
+        udpHeaderAvailable = true;
     }
 
     EV_WARN << "ICMPv6 error received: type=" << type << " code=" << code
@@ -1321,7 +1317,7 @@ bool UDP::verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
         case CRC_DECLARED_CORRECT: {
             // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
             auto totalLength = udpHeader->getTotalLengthField();
-            auto udpDataBytes = packet->peekDataAt(byte(0), byte(totalLength) - udpHeader->getChunkLength());
+            auto udpDataBytes = packet->peekDataAt(byte(0), byte(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
             return udpHeader->isCorrect() && udpDataBytes->isCorrect();
         }
         case CRC_DECLARED_INCORRECT:
@@ -1338,7 +1334,7 @@ bool UDP::verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
                 auto destAddress = l3AddressInd->getDestAddress();
                 auto udpHeaderBytes = udpHeader->Chunk::peek<BytesChunk>(byte(0), udpHeader->getChunkLength())->getBytes();
                 auto totalLength = udpHeader->getTotalLengthField();
-                auto udpData = packet->peekDataAt<BytesChunk>(byte(0), byte(totalLength) - udpHeader->getChunkLength());
+                auto udpData = packet->peekDataAt<BytesChunk>(byte(0), byte(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
                 auto udpDataBytes = udpData->getBytes();
                 auto computedCrc = computeCrc(srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
