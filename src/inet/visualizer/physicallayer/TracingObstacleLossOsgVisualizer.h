@@ -56,7 +56,7 @@ class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisu
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const IPhysicalObject *object, const Coord& intersection1, const Coord& intersection2, const Coord& normal1, const Coord& normal2) const override { return nullptr; }
+    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override { return nullptr; }
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override { }
 
 #endif // ifdef WITH_OSG
