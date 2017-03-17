@@ -172,6 +172,8 @@ std::shared_ptr<Chunk> SequenceChunk::peekSequenceChunk2(const Iterator& iterato
 
 void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
+    if (chunk->getChunkLength() == bit(0))
+        throw cRuntimeError("zero length chunk is invalid");
     // TODO: KLUDGE: temporarily commented out to pass CSMA fingerprint tests, should be uncommented: assert(chunk->getChunkLength() > bit(0));
     if (chunks.empty())
         chunks.push_front(chunk);
@@ -193,6 +195,8 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
+    if (sliceChunk->getChunkLength() == bit(0))
+        throw cRuntimeError("zero length chunk is invalid");
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         bit offset = sequenceChunk->getChunkLength();
@@ -234,6 +238,8 @@ void SequenceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
+    if (chunk->getChunkLength() == bit(0))
+        throw cRuntimeError("zero length chunk is invalid");
     // TODO: KLUDGE: temporarily commented out to pass Flood fingerprint tests, should be uncommented: assert(chunk->getChunkLength() > bit(0));
     if (chunks.empty())
         chunks.push_back(chunk);
@@ -255,6 +261,8 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
+    if (sliceChunk->getChunkLength() == bit(0))
+        throw cRuntimeError("zero length chunk is invalid");
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         bit offset = bit(0);
