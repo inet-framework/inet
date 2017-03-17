@@ -401,14 +401,14 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1)) const;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
      * requested representation.
      */
     template <typename T>
-    bool has(const Iterator& iterator, bit length = bit(-1)) const {
+    bool has(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
         if (length != bit(-1) && getChunkLength() < iterator.getPosition() + length)
             return false;
         else
@@ -423,7 +423,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
     template <typename T>
-    std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1)) const {
+    std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
         bit chunkLength = getChunkLength();
         assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
         if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))

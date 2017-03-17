@@ -91,7 +91,7 @@ void BitCountChunk::removeFromEnd(bit length)
     this->length -= length;
 }
 
-std::shared_ptr<Chunk> BitCountChunk::peek(const Iterator& iterator, bit length) const
+std::shared_ptr<Chunk> BitCountChunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
     bit chunkLength = getChunkLength();

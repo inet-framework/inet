@@ -297,7 +297,7 @@ void SequenceChunk::removeFromEnd(bit length)
     chunks.erase(it.base(), chunks.end());
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, bit length) const
+std::shared_ptr<Chunk> SequenceChunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);

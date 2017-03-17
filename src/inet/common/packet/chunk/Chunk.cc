@@ -47,7 +47,7 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
     return deserialize(inputStream, typeInfo);
 }
 
-std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length) const
+std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);

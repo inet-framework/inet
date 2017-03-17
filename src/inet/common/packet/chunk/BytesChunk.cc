@@ -109,7 +109,7 @@ void BytesChunk::removeFromEnd(bit length)
     bytes.erase(bytes.end() - byte(length).get(), bytes.end());
 }
 
-std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, bit length) const
+std::shared_ptr<Chunk> BytesChunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
     bit chunkLength = getChunkLength();

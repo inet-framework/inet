@@ -71,7 +71,7 @@ class INET_API BitCountChunk : public Chunk
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;
 
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1)) const override;
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const override;
 
     virtual std::string str() const override;
     //@}
