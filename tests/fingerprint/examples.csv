@@ -1,15 +1,11 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            e055-93d1/tplx
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            d54f-b9fc/tplx
-# /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,           0000-0000    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           7a5d-b0c9/tplx
-# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
-# /examples/adhoc/qos/,                -f omnetpp.ini -c MacBase -r 0,                100s,            0000-0000   # MacBase extended
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             356f-ab42/tplx
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             356f-ab42/tplx
-# /examples/adhoc/qos/,                -f omnetpp.ini -c Edca -r 0,                   100s,            0000-0000   # Edca extended
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             2201-f267/tplx
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             2201-f267/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             654d-49d4/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             33be-145a/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             d5a0-0823/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             8010-438d/tplx
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          8f17-9b2f/tplx
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          f8ac-4b51/tplx
