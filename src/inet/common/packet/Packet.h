@@ -16,6 +16,7 @@
 #ifndef __INET_PACKET_H_
 #define __INET_PACKET_H_
 
+#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/chunk/Chunk.h"
 
@@ -224,6 +225,10 @@ class INET_API Packet : public cPacket
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
     }
 
+    std::shared_ptr<BitsChunk> peekDataBits() const {
+        return peekDataAt<BitsChunk>(bit(0), getDataLength());
+    }
+
     std::shared_ptr<BytesChunk> peekDataBytes() const {
         return peekDataAt<BytesChunk>(bit(0), getDataLength());
     }
@@ -245,6 +250,10 @@ class INET_API Packet : public cPacket
         assert(bit(0) <= offset && offset <= getPacketLength());
         assert(bit(-1) <= length && length <= getPacketLength());
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length);
+    }
+
+    std::shared_ptr<BitsChunk> peekBits() const {
+        return peekAt<BitsChunk>(bit(0), getPacketLength());
     }
 
     std::shared_ptr<BytesChunk> peekBytes() const {
