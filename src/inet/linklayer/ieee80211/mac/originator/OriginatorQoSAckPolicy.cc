@@ -27,6 +27,7 @@ void OriginatorQoSAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        rateSelection = check_and_cast<IQoSRateSelection*>(getModuleByPath(par("rateSelectionModule")));
         maxBlockAckPolicyFrameLength = par("maxBlockAckPolicyFrameLength");
         blockAckReqTreshold = par("blockAckReqTreshold");
         blockAckTimeout = par("blockAckTimeout");
@@ -139,12 +140,12 @@ bool OriginatorQoSAckPolicy::checkAgreementPolicy(Ieee80211DataFrame* frame, Ori
 //
 simtime_t OriginatorQoSAckPolicy::getAckTimeout(Ieee80211DataOrMgmtFrame* dataOrMgmtFrame) const
 {
-    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + modeSet->getPhyRxStartDelay() : ackTimeout;
+    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(dataOrMgmtFrame)->getPhyRxStartDelay() : ackTimeout;
 }
 
 simtime_t OriginatorQoSAckPolicy::getBlockAckTimeout(Ieee80211BlockAckReq* blockAckReq) const
 {
-    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + modeSet->getPhyRxStartDelay() : blockAckTimeout;
+    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(blockAckReq)->getPhyRxStartDelay() : blockAckTimeout;
 }
 
 } /* namespace ieee80211 */

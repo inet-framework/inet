@@ -20,6 +20,8 @@ package inet.linklayer.ieee80211.mac.originator;
 simple OriginatorQoSAckPolicy 
 {
     parameters:
+        string rateSelectionModule;
+
         int blockAckReqTreshold = default(5);
         int maxBlockAckPolicyFrameLength @unit("B") = default(1000B);
         double blockAckTimeout @unit("s") = default(-1s);

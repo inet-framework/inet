@@ -26,6 +26,7 @@ void RtsPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
         rtsThreshold = par("rtsThreshold");
         ctsTimeout = par("ctsTimeout");
     }
@@ -59,7 +60,7 @@ bool RtsPolicy::isRtsNeeded(Ieee80211Frame* protectedFrame) const
 //
 simtime_t RtsPolicy::getCtsTimeout(Ieee80211RTSFrame *rtsFrame) const
 {
-    return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + modeSet->getPhyRxStartDelay() : ctsTimeout;
+    return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseCtsFrameMode(rtsFrame)->getPhyRxStartDelay() : ctsTimeout;
 }
 
 } /* namespace ieee80211 */

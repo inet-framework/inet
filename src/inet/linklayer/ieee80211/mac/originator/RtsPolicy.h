@@ -20,6 +20,7 @@
 
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -29,6 +30,7 @@ class INET_API RtsPolicy : public ModeSetListener, public IRtsPolicy
     protected:
         int rtsThreshold = -1;
         simtime_t ctsTimeout = -1;
+        IRateSelection *rateSelection = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

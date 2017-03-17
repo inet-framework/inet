@@ -20,6 +20,7 @@
 
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -27,6 +28,7 @@ namespace ieee80211 {
 class INET_API OriginatorAckPolicy : public ModeSetListener, public IOriginatorAckPolicy
 {
     protected:
+        IRateSelection *rateSelection = nullptr;
         simtime_t ackTimeout = -1;
 
     protected:
@@ -34,8 +36,8 @@ class INET_API OriginatorAckPolicy : public ModeSetListener, public IOriginatorA
         virtual void initialize(int stage) override;
 
     public:
-        virtual bool isAckNeeded(Ieee80211Frame *frame) const override;
-        virtual simtime_t getAckTimeout(Ieee80211Frame *frame) const override;
+        virtual bool isAckNeeded(Ieee80211DataOrMgmtFrame *frame) const override;
+        virtual simtime_t getAckTimeout(Ieee80211DataOrMgmtFrame *frame) const override;
 };
 
 } /* namespace ieee80211 */
