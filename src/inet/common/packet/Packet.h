@@ -110,7 +110,7 @@ class INET_API Packet : public cPacket
 
     virtual cPacket *decapsulate() override { throw cRuntimeError("Invalid operation"); }
 
-    virtual cPacket *getEncapsulatedPacket() const override { throw cRuntimeError("Invalid operation"); }
+    virtual cPacket *getEncapsulatedPacket() const override { return nullptr; }         // do not generate throw, called by qtenv/tkenv
     //@}
 
     /** @name Header querying related functions */
