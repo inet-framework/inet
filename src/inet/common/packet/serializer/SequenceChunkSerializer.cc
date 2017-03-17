@@ -25,7 +25,7 @@ void SequenceChunkSerializer::serialize(ByteOutputStream& stream, const std::sha
 {
     bit currentOffset = bit(0);
     bit serializeBegin = offset;
-    bit serializeEnd = offset + length == bit(-1) ? chunk->getChunkLength() : length;
+    bit serializeEnd = offset + (length == bit(-1) ? chunk->getChunkLength() : length);
     const auto& sequenceChunk = std::static_pointer_cast<const SequenceChunk>(chunk);
     for (auto& chunk : sequenceChunk->getChunks()) {
         bit chunkLength = chunk->getChunkLength();
