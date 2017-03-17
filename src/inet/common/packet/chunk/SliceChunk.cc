@@ -135,7 +135,7 @@ void SliceChunk::removeFromEnd(bit length)
     this->length -= length;
 }
 
-std::shared_ptr<Chunk> SliceChunk::peek(const Iterator& iterator, bit length, int flags) const
+std::shared_ptr<Chunk> SliceChunk::peekUnchecked(const Iterator& iterator, bit length) const
 {
     assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= this->length);
     if (length == bit(0) || (iterator.getPosition() == this->length && length == bit(-1)))
