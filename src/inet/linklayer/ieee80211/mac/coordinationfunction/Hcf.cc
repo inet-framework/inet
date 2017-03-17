@@ -226,6 +226,12 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
     }
 }
 
+/*
+ * TODO:  If a PHY-RXSTART.indication primitive does not occur during the ACKTimeout interval,
+ * the STA concludes that the transmission of the MPDU has failed, and this STA shall invoke its
+ * backoff procedure **upon expiration of the ACKTimeout interval**.
+ */
+
 void Hcf::frameSequenceFinished()
 {
     auto edcaf = edca->getChannelOwner();
