@@ -164,7 +164,7 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
 
     size_t totalTcpLen = maxBufferSize - ipHdrLen;
 
-    const auto& bytes = packet->peekBytes();
+    const auto& bytes = packet->peekDataBytes();
     totalTcpLen = bytes->getBytes((uint8_t *)data + ipHdrLen, totalTcpLen);
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
@@ -566,7 +566,9 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Ad
         packet = conn->sendQueueM->createSegmentWithBytes(dataP, lenP);
     }
     else {
-        packet = new Packet(nullptr, std::make_shared<BytesChunk>((const uint8_t*)dataP, lenP));
+        const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)dataP, lenP);
+        bytes->markImmutable();
+        packet = new Packet(nullptr, bytes);
         const auto& tcpHdr = CHK(packet->popHeader<TcpHeader>());
         packet->removePoppedHeaders();
         int64_t numBytes = packet->getByteLength();

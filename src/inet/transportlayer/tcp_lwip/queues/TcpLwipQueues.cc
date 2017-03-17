@@ -60,9 +60,11 @@ unsigned int TcpLwipSendQueue::getBytesForTcpLayer(void *bufferP, unsigned int b
     unsigned int length = byte(dataBuffer.getQueueLength()).get();
     if (bufferLengthP < length)
         length = bufferLengthP;
-    const auto& bytesChunk = dataBuffer.peek<BytesChunk>(byte(length));
+    if (length == 0)
+        return 0;
 
-    return bytesChunk->getBytes((uint8_t*)bufferP, bufferLengthP);
+    const auto& bytesChunk = dataBuffer.peek<BytesChunk>(byte(length));
+    return bytesChunk->getBytes((uint8_t*)bufferP, length);
 }
 
 void TcpLwipSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
@@ -79,7 +81,9 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
 {
     ASSERT(tcpDataP);
 
-    auto packet = new Packet(nullptr, std::make_shared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP));
+    const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
+    bytes->markImmutable();
+    auto packet = new Packet(nullptr, bytes);
     const auto& tcpHdr = CHK(packet->popHeader<TcpHeader>());
     packet->removePoppedHeaders();
     int64_t numBytes = packet->getByteLength();
@@ -117,9 +121,10 @@ TcpLwipReceiveQueue::~TcpLwipReceiveQueue()
 void TcpLwipReceiveQueue::setConnection(TcpLwipConnection *connP)
 {
     ASSERT(connP);
+    ASSERT(connM == nullptr);
 
     dataBuffer.clear();
-    TcpLwipReceiveQueue::setConnection(connP);
+    connM = connP;
 }
 
 void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, uint32 seqno, const void *bufferP, size_t bufferLengthP)
@@ -130,7 +135,9 @@ void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, u
 
 void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP)
 {
-    dataBuffer.push(std::make_shared<BytesChunk>((uint8_t *)dataP, dataLengthP));
+    const auto& bytes = std::make_shared<BytesChunk>((uint8_t *)dataP, dataLengthP);        //FIXME KLUDGE
+    bytes->markImmutable();
+    dataBuffer.push(bytes);
 }
 
 unsigned long TcpLwipReceiveQueue::getExtractableBytesUpTo() const

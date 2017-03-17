@@ -22,7 +22,6 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/ReorderBuffer.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 
 namespace inet {
