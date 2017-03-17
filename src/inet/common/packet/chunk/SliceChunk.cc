@@ -83,7 +83,7 @@ void SliceChunk::setLength(bit length)
 
 bool SliceChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    if (chunk->getChunkType() == TYPE_SLICE) {
+    if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
         return this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length;
     }
@@ -93,7 +93,7 @@ bool SliceChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 bool SliceChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    if (chunk->getChunkType() == TYPE_SLICE) {
+    if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
         return this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset;
     }
@@ -103,7 +103,7 @@ bool SliceChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_SLICE);
+    assert(chunk->getChunkType() == CT_SLICE);
     handleChange();
     const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
     assert(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
@@ -113,7 +113,7 @@ void SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_SLICE);
+    assert(chunk->getChunkType() == CT_SLICE);
     handleChange();
     const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
     assert(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);

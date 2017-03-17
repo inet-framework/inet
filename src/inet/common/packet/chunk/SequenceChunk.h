@@ -109,7 +109,7 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Querying data related functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_SEQUENCE; }
+    virtual ChunkType getChunkType() const override { return CT_SEQUENCE; }
     virtual bit getChunkLength() const override;
 
     virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;

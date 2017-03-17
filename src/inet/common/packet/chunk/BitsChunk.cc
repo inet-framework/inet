@@ -61,17 +61,17 @@ void BitsChunk::setBit(int index, bool bit)
 
 bool BitsChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    return chunk->getChunkType() == TYPE_BITS;
+    return chunk->getChunkType() == CT_BITS;
 }
 
 bool BitsChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    return chunk->getChunkType() == TYPE_BITS;
+    return chunk->getChunkType() == CT_BITS;
 }
 
 void BitsChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_BITS);
+    assert(chunk->getChunkType() == CT_BITS);
     handleChange();
     const auto& bitsChunk = std::static_pointer_cast<BitsChunk>(chunk);
     bits.insert(bits.begin(), bitsChunk->bits.begin(), bitsChunk->bits.end());
@@ -79,7 +79,7 @@ void BitsChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void BitsChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_BITS);
+    assert(chunk->getChunkType() == CT_BITS);
     handleChange();
     const auto& bitsChunk = std::static_pointer_cast<BitsChunk>(chunk);
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());

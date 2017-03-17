@@ -66,17 +66,17 @@ size_t BytesChunk::getBytes(uint8_t *buffer, size_t bufLen) const
 
 bool BytesChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    return chunk->getChunkType() == TYPE_BYTES;
+    return chunk->getChunkType() == CT_BYTES;
 }
 
 bool BytesChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    return chunk->getChunkType() == TYPE_BYTES;
+    return chunk->getChunkType() == CT_BYTES;
 }
 
 void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_BYTES);
+    assert(chunk->getChunkType() == CT_BYTES);
     handleChange();
     const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
     bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
@@ -84,7 +84,7 @@ void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_BYTES);
+    assert(chunk->getChunkType() == CT_BYTES);
     handleChange();
     const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());

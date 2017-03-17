@@ -153,7 +153,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
-    if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
+    if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         bit offset = sequenceChunk->getChunkLength();
         bit sliceChunkBegin = sliceChunk->getOffset();
@@ -184,9 +184,9 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SequenceChunk>& ch
 void SequenceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
     handleChange();
-    if (chunk->getChunkType() == TYPE_SLICE)
+    if (chunk->getChunkType() == CT_SLICE)
         doInsertToBeginning(std::static_pointer_cast<SliceChunk>(chunk));
-    else if (chunk->getChunkType() == TYPE_SEQUENCE)
+    else if (chunk->getChunkType() == CT_SEQUENCE)
         doInsertToBeginning(std::static_pointer_cast<SequenceChunk>(chunk));
     else
         doInsertToBeginning(chunk);
@@ -215,7 +215,7 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
 {
-    if (sliceChunk->getChunk()->getChunkType() == TYPE_SEQUENCE) {
+    if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
         bit offset = bit(0);
         bit sliceChunkBegin = sliceChunk->getOffset();
@@ -245,9 +245,9 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk)
 void SequenceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
     handleChange();
-    if (chunk->getChunkType() == TYPE_SLICE)
+    if (chunk->getChunkType() == CT_SLICE)
         doInsertToEnd(std::static_pointer_cast<SliceChunk>(chunk));
-    else if (chunk->getChunkType() == TYPE_SEQUENCE)
+    else if (chunk->getChunkType() == CT_SEQUENCE)
         doInsertToEnd(std::static_pointer_cast<SequenceChunk>(chunk));
     else
         doInsertToEnd(chunk);

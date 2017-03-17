@@ -78,7 +78,7 @@ class INET_API SliceChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_SLICE; }
+    virtual ChunkType getChunkType() const override { return CT_SLICE; }
     virtual bit getChunkLength() const override { return length; }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;

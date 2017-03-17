@@ -50,7 +50,7 @@ class INET_API cPacketChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_CPACKET; }
+    virtual ChunkType getChunkType() const override { return CT_CPACKET; }
     virtual bit getChunkLength() const override { return bit(packet->getBitLength()); }
 
     virtual std::string str() const override;

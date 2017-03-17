@@ -62,7 +62,7 @@ class FieldsChunk : public Chunk
 
     /** @name Overridden chunk functions */
     //@{
-    virtual Type getChunkType() const override { return TYPE_FIELDS; }
+    virtual ChunkType getChunkType() const override { return CT_FIELDS; }
     //@}
 };
 

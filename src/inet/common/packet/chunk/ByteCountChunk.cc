@@ -53,17 +53,17 @@ void ByteCountChunk::setLength(byte length)
 
 bool ByteCountChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    return chunk->getChunkType() == TYPE_BYTECOUNT;
+    return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
 bool ByteCountChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    return chunk->getChunkType() == TYPE_BYTECOUNT;
+    return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
 void ByteCountChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_BYTECOUNT);
+    assert(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
     const auto& byteCountChunk = std::static_pointer_cast<ByteCountChunk>(chunk);
     length += byteCountChunk->length;
@@ -71,7 +71,7 @@ void ByteCountChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == TYPE_BYTECOUNT);
+    assert(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
     const auto& byteCountChunk = std::static_pointer_cast<ByteCountChunk>(chunk);
     length += byteCountChunk->length;
