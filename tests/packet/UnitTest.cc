@@ -32,6 +32,8 @@ Register_Serializer(TlvHeaderBool, TlvHeaderBoolSerializer);
 Register_Serializer(TlvHeaderInt, TlvHeaderIntSerializer);
 Define_Module(UnitTest);
 
+#define ASSERT_ERROR(code) try { code; assert(false); } catch (cRuntimeError& e) { assert(true); }
+
 static std::vector<uint8_t> makeVector(int length)
 {
     std::vector<uint8_t> bytes;
@@ -184,8 +186,7 @@ static void testIncomplete()
     Packet fragment1;
     fragment1.append(packet1.peekAt(byte(0), byte(5)));
     assert(!fragment1.hasHeader<ApplicationHeader>());
-    const auto& applicationHeader2 = fragment1.peekHeader<ApplicationHeader>(bit(-1), Chunk::PF_ALLOW_NULLPTR);
-    assert(applicationHeader2 == nullptr);
+    ASSERT_ERROR(fragment1.peekHeader<ApplicationHeader>());
 
     // 2. packet provides incomplete variable length header if requested
     Packet packet2;
