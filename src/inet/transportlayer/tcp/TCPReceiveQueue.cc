@@ -109,11 +109,11 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
         kludgeQueue.push(chunk);
 
     auto data = kludgeQueue.peek();
-    if (data == nullptr || data->getChunkType() == Chunk::TYPE_SLICE)
+    if (data == nullptr || data->getChunkType() == Chunk::CT_SLICE)
         return nullptr;
     chunk = kludgeQueue.pop();
     ASSERT(chunk->getChunkLength() == data->getChunkLength());
-    ASSERT(data->getChunkType() != Chunk::TYPE_SLICE);
+    ASSERT(data->getChunkType() != Chunk::CT_SLICE);
     // TODO: KLUDGE1: end
 #endif
 
@@ -122,12 +122,12 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
         // TODO: KLUDGE: to match fingerprints with packet containing objects
         kludgeQueue.push(chunk);
         auto data = kludgeQueue.peekAt(0, kludgeQueue.getBufferLength());
-        if (data->getChunkType() == Chunk::TYPE_SLICE)
+        if (data->getChunkType() == Chunk::CT_SLICE)
             return nullptr;
-        else if (data->getChunkType() == Chunk::TYPE_SEQUENCE) {
+        else if (data->getChunkType() == Chunk::CT_SEQUENCE) {
             auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(data);
             for (auto chunk : sequenceChunk->getChunks())
-                if (chunk->getChunkType() == Chunk::TYPE_SLICE)
+                if (chunk->getChunkType() == Chunk::CT_SLICE)
                     return nullptr;
         }
         else
