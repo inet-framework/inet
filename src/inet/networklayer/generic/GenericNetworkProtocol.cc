@@ -401,7 +401,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
 {
     GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo *>(transportPacket->removeControlInfo());
     GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
-//    datagram->setByteLength(HEADER_BYTES); //TODO parameter
+    datagram->setByteLength(par("headerLength")); //TODO parameter
     datagram->encapsulate(transportPacket);
 
     // set source and destination address
