@@ -434,6 +434,8 @@ void LDP::sendHelloTo(IPv4Address dest)
     hello->setHoldTime(SIMTIME_DBL(holdTime));
     //hello->setRbit(...);
     //hello->setTbit(...);
+    hello->markImmutable();
+    pk->append(hello);
     pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
     if (dest.isMulticast()) {
