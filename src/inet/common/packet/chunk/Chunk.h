@@ -158,13 +158,13 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 {
   protected:
     /**
-     * This enum specifies bitmasks for the flags field.
+     * This enum specifies bitmasks for the flags field of Chunk.
      */
-    enum Flag {
-        FLAG_IMMUTABLE  = 1,
-        FLAG_INCOMPLETE = 2,
-        FLAG_INCORRECT  = 4,
-        FLAG_IMPROPERLY_REPRESENTED = 8,
+    enum ChunkFlag {
+        CF_IMMUTABLE              = (1 << 0),
+        CF_INCOMPLETE             = (1 << 1),
+        CF_INCORRECT              = (1 << 2),
+        CF_IMPROPERLY_REPRESENTED = (1 << 3),
     };
 
   public:
@@ -285,46 +285,46 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /** @name Mutability related functions */
     //@{
     // NOTE: there is no markMutable() intentionally
-    bool isMutable() const { return !(flags & FLAG_IMMUTABLE); }
-    bool isImmutable() const { return flags & FLAG_IMMUTABLE; }
+    bool isMutable() const { return !(flags & CF_IMMUTABLE); }
+    bool isImmutable() const { return flags & CF_IMMUTABLE; }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
     void markMutableIfExclusivelyOwned() {
         // NOTE: one for external reference and one for local variable
         assert(shared_from_this().use_count() == 2);
-        flags &= ~FLAG_IMMUTABLE;
+        flags &= ~CF_IMMUTABLE;
     }
-    virtual void markImmutable() { flags |= FLAG_IMMUTABLE; }
+    virtual void markImmutable() { flags |= CF_IMMUTABLE; }
     //@}
 
     /** @name Completeness related functions */
     //@{
     // NOTE: there is no markComplete() intentionally
-    bool isComplete() const { return !(flags & FLAG_INCOMPLETE); }
-    bool isIncomplete() const { return flags & FLAG_INCOMPLETE; }
+    bool isComplete() const { return !(flags & CF_INCOMPLETE); }
+    bool isIncomplete() const { return flags & CF_INCOMPLETE; }
     void assertComplete() const { assert(isComplete()); }
     void assertIncomplete() const { assert(isIncomplete()); }
-    virtual void markIncomplete() { flags |= FLAG_INCOMPLETE; }
+    virtual void markIncomplete() { flags |= CF_INCOMPLETE; }
     //@}
 
     /** @name Correctness related functions */
     //@{
     // NOTE: there is no markCorrect() intentionally
-    bool isCorrect() const { return !(flags & FLAG_INCORRECT); }
-    bool isIncorrect() const { return flags & FLAG_INCORRECT; }
+    bool isCorrect() const { return !(flags & CF_INCORRECT); }
+    bool isIncorrect() const { return flags & CF_INCORRECT; }
     void assertCorrect() const { assert(isCorrect()); }
     void assertIncorrect() const { assert(isIncorrect()); }
-    virtual void markIncorrect() { flags |= FLAG_INCORRECT; }
+    virtual void markIncorrect() { flags |= CF_INCORRECT; }
     //@}
 
     /** @name Proper representation related functions */
     //@{
     // NOTE: there is no markProperlyRepresented() intentionally
-    bool isProperlyRepresented() const { return !(flags & FLAG_IMPROPERLY_REPRESENTED); }
-    bool isImproperlyRepresented() const { return flags & FLAG_IMPROPERLY_REPRESENTED; }
+    bool isProperlyRepresented() const { return !(flags & CF_IMPROPERLY_REPRESENTED); }
+    bool isImproperlyRepresented() const { return flags & CF_IMPROPERLY_REPRESENTED; }
     void assertProperlyRepresented() const { assert(isProperlyRepresented()); }
     void assertImproperlyRepresented() const { assert(isImproperlyRepresented()); }
-    virtual void markImproperlyRepresented() { flags |= FLAG_IMPROPERLY_REPRESENTED; }
+    virtual void markImproperlyRepresented() { flags |= CF_IMPROPERLY_REPRESENTED; }
     //@}
 
     /** @name Iteration related functions */

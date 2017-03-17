@@ -28,7 +28,7 @@ Chunk::Chunk() :
 }
 
 Chunk::Chunk(const Chunk& other) :
-    flags(other.flags & ~FLAG_IMMUTABLE)
+    flags(other.flags & ~CF_IMMUTABLE)
 {
 }
 
