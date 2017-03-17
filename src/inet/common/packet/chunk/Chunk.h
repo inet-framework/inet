@@ -387,7 +387,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Returns the type of this chunk as an enum member. This can be used to
      * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.
      */
-    virtual Type getChunkType() const = 0;
+    virtual ChunkType getChunkType() const = 0;
 
     /**
      * Returns the length of data measured in bytes represented by this chunk.
@@ -433,12 +433,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
                 return tChunk;
         }
         switch (getChunkType()) {
-            case TYPE_SLICE: {
+            case CT_SLICE: {
                 if (auto tChunk = std::dynamic_pointer_cast<T>(peekSliceChunk(iterator, length)))
                     return tChunk;
                 break;
             }
-            case TYPE_SEQUENCE:
+            case CT_SEQUENCE:
                 if (auto tChunk = std::dynamic_pointer_cast<T>(peekSequenceChunk1(iterator, length)))
                     return tChunk;
                 if (auto tChunk = std::dynamic_pointer_cast<T>(peekSequenceChunk2(iterator, length)))
