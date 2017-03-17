@@ -412,9 +412,9 @@
 
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            8319-e8bc/tplx
 
-# /examples/wireless/qos/,             -f omnetpp.ini -c MacBase -r 0,                100s,         0000-0000   # MacBase extended
-/examples/wireless/qos/,             -f omnetpp.ini -c Mac -r 0,                    10s,         9425-627c/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacEdca -r 0,                10s,         c089-bc13/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         0000-0000
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         9425-627c/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         c089-bc13/tplx
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            a797-ed58/tplx
 
