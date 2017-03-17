@@ -184,7 +184,7 @@ static void testIncomplete()
     Packet fragment1;
     fragment1.append(packet1.peekAt(byte(0), byte(5)));
     assert(!fragment1.hasHeader<ApplicationHeader>());
-    const auto& applicationHeader2 = fragment1.peekHeader<ApplicationHeader>();
+    const auto& applicationHeader2 = fragment1.peekHeader<ApplicationHeader>(bit(-1), Chunk::PF_ALLOW_NULLPTR);
     assert(applicationHeader2 == nullptr);
 
     // 2. packet provides incomplete variable length header if requested
@@ -197,7 +197,7 @@ static void testIncomplete()
     tcpHeader1->setDestPort(1000);
     tcpHeader1->markImmutable();
     packet2.append(tcpHeader1);
-    const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(byte(4));
+    const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(byte(4), Chunk::PF_ALLOW_INCOMPLETE);
     assert(tcpHeader2->isIncomplete());
     assert(tcpHeader2->getChunkLength() == byte(4));
     assert(tcpHeader2->getCrcMode() == CRC_COMPUTED);
@@ -239,7 +239,7 @@ static void testImproperlyRepresented()
     bytesChunk1->setByte(0, 42);
     bytesChunk1->markImmutable();
     Packet packet2(nullptr, bytesChunk1);
-    const auto& ipHeader2 = packet2.peekHeader<IpHeader>();
+    const auto& ipHeader2 = packet2.peekHeader<IpHeader>(bit(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     assert(ipHeader2->isImproperlyRepresented());
 }
 
@@ -492,7 +492,7 @@ static void testIteration()
         assert(chunk1 != nullptr);
         assert(chunk1->getChunkLength() == byte(10));
         index1++;
-        chunk1 = packet1.popHeader();
+        chunk1 = packet1.popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR);
     }
     assert(index1 == 3);
 
@@ -514,7 +514,7 @@ static void testIteration()
         index2++;
         if (chunk2 != nullptr)
             sequenceChunk1->moveIterator(iterator2, chunk2->getChunkLength());
-        chunk2 = sequenceChunk1->peek(iterator2);
+        chunk2 = sequenceChunk1->peek(iterator2, bit(-1), Chunk::PF_ALLOW_NULLPTR);
     }
     assert(index2 == 3);
 
@@ -536,7 +536,7 @@ static void testIteration()
         index3++;
         if (chunk3 != nullptr)
             sequenceChunk1->moveIterator(iterator3, chunk3->getChunkLength());
-        chunk3 = sequenceChunk1->peek(iterator3);
+        chunk3 = sequenceChunk1->peek(iterator3, bit(-1), Chunk::PF_ALLOW_NULLPTR);
     }
     assert(index2 == 3);
 }
@@ -559,7 +559,7 @@ static void testCorruption()
         bit length = chunk->getChunkLength();
         if (random[index++] >= std::pow(1 - ber, length.get()))
             chunk->markIncorrect();
-        chunk = packet1.popHeader();
+        chunk = packet1.popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR);
     }
     assert(chunk1->isCorrect());
     assert(chunk2->isIncorrect());
