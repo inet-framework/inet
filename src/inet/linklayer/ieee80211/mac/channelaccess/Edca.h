@@ -32,7 +32,6 @@ class INET_API Edca : public cSimpleModule
     protected:
         int numEdcafs = -1;
         Edcaf **edcafs = nullptr;
-        IEdcaCollisionController *collisionController = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
