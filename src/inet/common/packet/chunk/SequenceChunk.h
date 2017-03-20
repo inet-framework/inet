@@ -46,6 +46,8 @@ class INET_API SequenceChunk : public Chunk
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
+    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;
+
     virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, bit length) const override;
     virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, bit length) const override;
 
@@ -59,7 +61,6 @@ class INET_API SequenceChunk : public Chunk
 
     std::deque<std::shared_ptr<Chunk>> dupChunks() const;
 
-  protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
   public:
@@ -122,8 +123,6 @@ class INET_API SequenceChunk : public Chunk
     //@{
     virtual ChunkType getChunkType() const override { return CT_SEQUENCE; }
     virtual bit getChunkLength() const override;
-
-    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;
     //@}
 
     virtual std::string str() const override;

@@ -37,6 +37,8 @@ class INET_API BitCountChunk : public Chunk
   protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
+    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;
+
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
@@ -70,8 +72,6 @@ class INET_API BitCountChunk : public Chunk
 
     virtual void removeFromBeginning(bit length) override;
     virtual void removeFromEnd(bit length) override;
-
-    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;
 
     virtual std::string str() const override;
     //@}
