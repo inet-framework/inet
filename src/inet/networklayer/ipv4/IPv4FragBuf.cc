@@ -67,15 +67,15 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
     // add fragment into reassembly buffer
     int bytes = ipv4Header->getTotalLengthField() - ipv4Header->getHeaderLength();
     buf->buf.replace(byte(ipv4Header->getFragmentOffset()), packet->peekDataAt(byte(ipv4Header->getHeaderLength()), byte(bytes)));
+    if (!ipv4Header->getMoreFragments()) {
+        buf->buf.setExpectedLength(byte(ipv4Header->getFragmentOffset() + bytes));
+    }
     if (ipv4Header->getFragmentOffset() == 0 || buf->packet == nullptr) {
         delete buf->packet;
         buf->packet = packet;
     }
     else {
         delete packet;
-    }
-    if (!ipv4Header->getMoreFragments()) {
-        buf->buf.setExpectedLength(byte(ipv4Header->getFragmentOffset() + bytes));
     }
 
     // do we have the complete datagram?
