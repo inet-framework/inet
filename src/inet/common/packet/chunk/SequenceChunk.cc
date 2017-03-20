@@ -56,11 +56,51 @@ void SequenceChunk::setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks)
     this->chunks = chunks;
 }
 
+bool SequenceChunk::isMutable() const
+{
+    if (Chunk::isMutable())
+        return true;
+    for (const auto& chunk : chunks)
+        if (chunk->isMutable())
+            return true;
+    return false;
+}
+
 void SequenceChunk::markImmutable()
 {
     Chunk::markImmutable();
     for (auto& chunk : chunks)
         chunk->markImmutable();
+}
+
+bool SequenceChunk::isIncomplete() const
+{
+    if (Chunk::isIncomplete())
+        return true;
+    for (const auto& chunk : chunks)
+        if (chunk->isIncomplete())
+            return true;
+    return false;
+}
+
+bool SequenceChunk::isIncorrect() const
+{
+    if (Chunk::isIncorrect())
+        return true;
+    for (const auto& chunk : chunks)
+        if (chunk->isIncorrect())
+            return true;
+    return false;
+}
+
+bool SequenceChunk::isImproperlyRepresented() const
+{
+    if (Chunk::isImproperlyRepresented())
+        return true;
+    for (const auto& chunk : chunks)
+        if (chunk->isImproperlyRepresented())
+            return true;
+    return false;
 }
 
 bit SequenceChunk::getChunkLength() const

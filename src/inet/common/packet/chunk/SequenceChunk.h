@@ -78,9 +78,20 @@ class INET_API SequenceChunk : public Chunk
     void setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks);
     //@}
 
-    /** @name Mutability related functions */
+    /** @name Overridden flag functions */
     //@{
+    virtual bool isMutable() const override;
+    virtual bool isImmutable() const override { return !isMutable(); }
     virtual void markImmutable() override;
+
+    virtual bool isComplete() const override { return !isIncomplete(); }
+    virtual bool isIncomplete() const override;
+
+    virtual bool isCorrect() const override { return !isIncorrect(); }
+    virtual bool isIncorrect() const override;
+
+    virtual bool isProperlyRepresented() const override { return !isImproperlyRepresented(); }
+    virtual bool isImproperlyRepresented() const override;
     //@}
 
     /** @name Iteration related functions */

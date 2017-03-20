@@ -76,6 +76,21 @@ class INET_API SliceChunk : public Chunk
     void setLength(bit length);
     //@}
 
+    /** @name Overridden flag functions */
+    //@{
+    virtual bool isMutable() const override { return Chunk::isMutable() || chunk->isMutable(); }
+    virtual bool isImmutable() const override { return Chunk::isImmutable() && chunk->isImmutable(); }
+
+    virtual bool isComplete() const override { return Chunk::isComplete() && chunk->isComplete(); }
+    virtual bool isIncomplete() const override { return Chunk::isIncomplete() || chunk->isIncomplete(); }
+
+    virtual bool isCorrect() const override { return Chunk::isCorrect() && chunk->isCorrect(); }
+    virtual bool isIncorrect() const override { return Chunk::isIncorrect() || chunk->isIncorrect(); }
+
+    virtual bool isProperlyRepresented() const override { return Chunk::isProperlyRepresented() && chunk->isProperlyRepresented(); }
+    virtual bool isImproperlyRepresented() const override { return Chunk::isImproperlyRepresented() || chunk->isImproperlyRepresented(); }
+    //@}
+
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_SLICE; }
