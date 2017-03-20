@@ -246,7 +246,7 @@ void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *
     macHeader->markImmutable();
     msgDesc->pkt->pushHeader(macHeader);
     // insert message ID in ID list.
-    knownMsgIds.insert(msgDesc->pkt->getId());
+    knownMsgIds.insert(macHeader->getId());
     // insert key value pair <broadcast time, pointer to message> in message queue.
     auto pos = msgQueue.insert(make_pair(bcastTime, msgDesc));
     // if the message has been inserted in the front of the list, it means that it
