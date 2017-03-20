@@ -25,19 +25,26 @@ Register_Serializer(ApplicationPacket, ApplicationPacketSerializer);
 
 void ApplicationPacketSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
+    int64_t startPos = stream.getPosition();
     const auto& applicationPacket = std::static_pointer_cast<const ApplicationPacket>(chunk);
     stream.writeUint32(byte(applicationPacket->getChunkLength()).get());
     stream.writeUint32(applicationPacket->getSequenceNumber());
-    stream.writeByteRepeatedly('?', byte(applicationPacket->getChunkLength() - byte(8)).get());
+    int64_t remainders = byte(applicationPacket->getChunkLength()).get() - (stream.getPosition() - startPos);
+    if (remainders < 0)
+        throw cRuntimeError("ApplicationPacket length = %d smaller than required %d bytes", (int)byte(applicationPacket->getChunkLength()).get(), (int)(stream.getPosition() - startPos));
+    stream.writeByteRepeatedly('?', remainders);
 }
 
 std::shared_ptr<Chunk> ApplicationPacketSerializer::deserialize(ByteInputStream& stream) const
 {
+    int64_t startPos = stream.getPosition();
     auto applicationPacket = std::make_shared<ApplicationPacket>();
     byte chunkLength = byte(stream.readUint32());
     applicationPacket->setChunkLength(chunkLength);
     applicationPacket->setSequenceNumber(stream.readUint32());
-    stream.readByteRepeatedly('?', byte(chunkLength - byte(8)).get());
+    int64_t remainders = byte(applicationPacket->getChunkLength()).get() - (stream.getPosition() - startPos);
+    ASSERT(remainders >= 0);
+    stream.readByteRepeatedly('?', remainders);
     return applicationPacket;
 }
 
