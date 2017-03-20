@@ -342,7 +342,7 @@
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            625d-8799/tplx
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            3382-de20/tplx
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            56de-a10a/tplx
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            38cb-01ec/tplx
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            38cb-01ac/tplx
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            397e-d777/tplx
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0000-0000    # unstable fingerprint
