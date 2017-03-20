@@ -287,7 +287,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     template <typename T>
     std::shared_ptr<T> doPeek(const Iterator& iterator, bit length = bit(-1)) const {
-        assertImmutable();
+        assert(isImmutable());
         assert(iterator.isForward());
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
         chunk->markImmutable();
@@ -311,14 +311,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     // NOTE: there is no markMutable() intentionally
     virtual bool isMutable() const { return !(flags & CF_IMMUTABLE); }
     virtual bool isImmutable() const { return flags & CF_IMMUTABLE; }
-    void assertMutable() const { assert(isMutable()); }
-    void assertImmutable() const { assert(isImmutable()); }
+    virtual void markImmutable() { flags |= CF_IMMUTABLE; }
     void markMutableIfExclusivelyOwned() {
         // NOTE: one for external reference and one for local variable
         assert(shared_from_this().use_count() == 2);
         flags &= ~CF_IMMUTABLE;
     }
-    virtual void markImmutable() { flags |= CF_IMMUTABLE; }
     //@}
 
     /** @name Completeness related functions */
@@ -326,8 +324,6 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     // NOTE: there is no markComplete() intentionally
     virtual bool isComplete() const { return !(flags & CF_INCOMPLETE); }
     virtual bool isIncomplete() const { return flags & CF_INCOMPLETE; }
-    void assertComplete() const { assert(isComplete()); }
-    void assertIncomplete() const { assert(isIncomplete()); }
     virtual void markIncomplete() { flags |= CF_INCOMPLETE; }
     //@}
 
@@ -336,8 +332,6 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     // NOTE: there is no markCorrect() intentionally
     virtual bool isCorrect() const { return !(flags & CF_INCORRECT); }
     virtual bool isIncorrect() const { return flags & CF_INCORRECT; }
-    void assertCorrect() const { assert(isCorrect()); }
-    void assertIncorrect() const { assert(isIncorrect()); }
     virtual void markIncorrect() { flags |= CF_INCORRECT; }
     //@}
 
@@ -346,8 +340,6 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     // NOTE: there is no markProperlyRepresented() intentionally
     virtual bool isProperlyRepresented() const { return !(flags & CF_IMPROPERLY_REPRESENTED); }
     virtual bool isImproperlyRepresented() const { return flags & CF_IMPROPERLY_REPRESENTED; }
-    void assertProperlyRepresented() const { assert(isProperlyRepresented()); }
-    void assertImproperlyRepresented() const { assert(isImproperlyRepresented()); }
     virtual void markImproperlyRepresented() { flags |= CF_IMPROPERLY_REPRESENTED; }
     //@}
 
@@ -372,12 +364,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assertMutable(); assert(false); }
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assert(isMutable()); assert(false); }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assertMutable(); assert(false); }
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assert(isMutable()); assert(false); }
     //@}
 
     /** @name Removing data related functions */
@@ -396,13 +388,13 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Removes the requested number of bytes from the beginning of this chunk
      * and returns true if the removal was successful.
      */
-    virtual void removeFromBeginning(bit length) { assertMutable(); assert(false); }
+    virtual void removeFromBeginning(bit length) { assert(isMutable()); assert(false); }
 
     /**
      * Removes the requested number of bytes from the end of this chunk and
      * returns true if the removal was successful.
      */
-    virtual void removeFromEnd(bit length) { assertMutable(); assert(false); }
+    virtual void removeFromEnd(bit length) { assert(isMutable()); assert(false); }
     //@}
 
     /** @name Chunk querying related functions */

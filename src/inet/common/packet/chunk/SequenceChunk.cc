@@ -52,7 +52,7 @@ std::deque<std::shared_ptr<Chunk>> SequenceChunk::dupChunks() const
 
 void SequenceChunk::setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks)
 {
-    assertMutable();
+    assert(isMutable());
     this->chunks = chunks;
 }
 

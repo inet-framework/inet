@@ -46,7 +46,7 @@ std::shared_ptr<Chunk> ByteCountChunk::createChunk(const std::type_info& typeInf
 
 void ByteCountChunk::setLength(byte length)
 {
-    assertMutable();
+    assert(isMutable());
     assert(length >= byte(0));
     this->length = length;
 }

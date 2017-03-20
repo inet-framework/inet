@@ -34,7 +34,7 @@ Chunk::Chunk(const Chunk& other) :
 
 void Chunk::handleChange()
 {
-    assertMutable();
+    assert(isMutable());
 }
 
 std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)

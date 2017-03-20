@@ -69,14 +69,14 @@ std::shared_ptr<Chunk> SliceChunk::peekSliceChunk(const Iterator& iterator, bit 
 
 void SliceChunk::setOffset(bit offset)
 {
-    assertMutable();
+    assert(isMutable());
     assert(bit(0) <= offset && offset <= chunk->getChunkLength());
     this->offset = offset;
 }
 
 void SliceChunk::setLength(bit length)
 {
-    assertMutable();
+    assert(isMutable());
     assert(bit(0) <= length && length <= chunk->getChunkLength());
     this->length = length;
 }

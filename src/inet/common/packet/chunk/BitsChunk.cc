@@ -49,13 +49,13 @@ std::shared_ptr<Chunk> BitsChunk::createChunk(const std::type_info& typeInfo, co
 
 void BitsChunk::setBits(const std::vector<bool>& bits)
 {
-    assertMutable();
+    assert(isMutable());
     this->bits = bits;
 }
 
 void BitsChunk::setBit(int index, bool bit)
 {
-    assertMutable();
+    assert(isMutable());
     bits[index] = bit;
 }
 

@@ -46,7 +46,7 @@ std::shared_ptr<Chunk> BitCountChunk::createChunk(const std::type_info& typeInfo
 
 void BitCountChunk::setLength(bit length)
 {
-    assertMutable();
+    assert(isMutable());
     assert(length >= bit(0));
     this->length = length;
 }

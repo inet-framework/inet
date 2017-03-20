@@ -44,13 +44,13 @@ std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, c
 
 void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
 {
-    assertMutable();
+    assert(isMutable());
     this->bytes = bytes;
 }
 
 void BytesChunk::setByte(int index, uint8_t byte)
 {
-    assertMutable();
+    assert(isMutable());
     bytes[index] = byte;
 }
 
