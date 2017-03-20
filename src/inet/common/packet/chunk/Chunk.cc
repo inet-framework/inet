@@ -56,7 +56,7 @@ std::shared_ptr<Chunk> Chunk::peekUnchecked(const Iterator& iterator, bit length
     else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
         return const_cast<Chunk *>(this)->shared_from_this();
     else
-        return doPeek<SliceChunk>(iterator, length);
+        return peekWithConversion<SliceChunk>(iterator, length);
 }
 
 std::string Chunk::str() const

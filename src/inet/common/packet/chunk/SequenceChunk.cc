@@ -351,7 +351,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(const Iterator& iterator, bi
             return chunk;
         if (auto chunk = peekSequenceChunk2(iterator, length))
             return chunk;
-        return doPeek<SequenceChunk>(iterator, length);
+        return peekWithConversion<SequenceChunk>(iterator, length);
     }
 }
 

@@ -312,11 +312,11 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
             default:
                 break;
         }
-        return doPeek<T>(iterator, length);
+        return peekWithConversion<T>(iterator, length);
     }
 
     template <typename T>
-    std::shared_ptr<T> doPeek(const Iterator& iterator, bit length = bit(-1)) const {
+    std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length = bit(-1)) const {
         assert(isImmutable());
         assert(iterator.isForward());
         const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
