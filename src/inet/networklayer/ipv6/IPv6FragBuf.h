@@ -21,7 +21,8 @@
 #include <map>
 #include <vector>
 #include "inet/common/INETDefs.h"
-#include "inet/common/OldReassemblyBuffer.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/ReassemblyBuffer.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
@@ -56,8 +57,8 @@ class INET_API IPv6FragBuf
     //
     struct DatagramBuffer
     {
-        OldReassemblyBuffer buf;    // reassembly buffer
-        IPv6Header *datagram = nullptr;    // the actual datagram
+        ReassemblyBuffer buf;    // reassembly buffer
+        Packet *packet = nullptr;    // the actual datagram
         simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
@@ -92,7 +93,7 @@ class INET_API IPv6FragBuf
      * If this fragment completes a datagram, the full reassembled
      * datagram is returned, otherwise nullptr.
      */
-    IPv6Header *addFragment(IPv6Header *datagram, IPv6FragmentHeader *fh, simtime_t now);
+    Packet *addFragment(Packet *packet, IPv6Header *dg, IPv6FragmentHeader *fh, simtime_t now);
 
     /**
      * Throws out all fragments which are incomplete and their

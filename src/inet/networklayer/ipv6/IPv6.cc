@@ -608,8 +608,8 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 {
     auto ipv6HeaderPosition = packet->getHeaderPopOffset();
     const auto& datagram = packet->peekHeader<IPv6Header>();
+
     // Defragmentation. skip defragmentation if datagram is not fragmented
-#if 0 // KLUDGE: TODO
     IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader *>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (fh) {
         EV_DETAIL << "Datagram fragment: offset=" << fh->getFragmentOffset()
@@ -621,14 +621,13 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
             fragbuf.purgeStaleFragments(simTime() - FRAGMENT_TIMEOUT);
         }
 
-        datagram = fragbuf.addFragment(datagram, fh, simTime());
-        if (!datagram) {
+        packet = fragbuf.addFragment(packet, datagram.get(), fh, simTime());
+        if (!packet) {
             EV_DETAIL << "No complete datagram yet.\n";
             return;
         }
         EV_DETAIL << "This fragment completes the datagram.\n";
     }
-#endif
 
 #ifdef WITH_xMIPv6
     // #### 29.08.07 - CB
@@ -786,7 +785,7 @@ void IPv6::encapsulate(Packet *transportPacket)
 
 void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
 {
-    const auto& datagram = packet->peekHeader<IPv6Header>();
+    auto datagram = packet->peekHeader<IPv6Header>();
     // hop counter check
     if (datagram->getHopLimit() <= 0) {
         // drop datagram, destruction responsibility in ICMP
@@ -810,6 +809,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         ipv6HeaderCopy->setSrcAddress(srcAddr);
         ipv6HeaderCopy->markImmutable();
         packet->pushHeader(ipv6HeaderCopy);
+        datagram = ipv6HeaderCopy;
 
     #ifdef WITH_xMIPv6
         // if the datagram has a tentative address as source we have to reschedule it
@@ -838,12 +838,10 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
         return;
     }
 
-    // KLUDGE: TODO
-    ASSERT(false);
-#if 0
     // create and send fragments
+    datagram = packet->popHeader<IPv6Header>();
     int headerLength = datagram->calculateUnfragmentableHeaderByteLength();
-    int payloadLength = byte(packet->getPacketLength() - byte(headerLength)).get();
+    int payloadLength = packet->getByteLength();
     int fragmentLength = ((mtu - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
     ASSERT(fragmentLength > 0);
 
@@ -852,29 +850,31 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
     std::string fragMsgName = datagram->getName();
     fragMsgName += "-frag";
 
+    //FIXME is need to remove unfragmentable header extensions? see calculateUnfragmentableHeaderByteLength()
+
     unsigned int identification = curFragmentId++;
-    cPacket *encapsulatedPacket = datagram->decapsulate();
     for (int offset = 0; offset < payloadLength; offset += fragmentLength) {
         bool lastFragment = (offset + fragmentLength >= payloadLength);
         int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
 
-        IPv6FragmentHeader *fh = new IPv6FragmentHeader();
+        Packet *fragPk = new Packet(fragMsgName.c_str());
+        const auto& fragHdr = std::static_pointer_cast<IPv6Header>(datagram->dupShared());
+        auto *fh = new IPv6FragmentHeader();
         fh->setIdentification(identification);
         fh->setFragmentOffset(offset);
         fh->setMoreFragments(!lastFragment);
+        fragHdr->addExtensionHeader(fh);
+        fragHdr->setChunkLength(byte(headerLength + fh->getByteLength()));      //FIXME KLUDGE
+        fragHdr->markImmutable();
+        fragPk->pushHeader(fragHdr);
+        fragPk->append(packet->peekDataAt(byte(offset), byte(thisFragmentLength)));
 
-        IPv6Header *fragment = datagram->dup();
-        if (offset == 0)
-            fragment->encapsulate(encapsulatedPacket);
-        fragment->setName(fragMsgName.c_str());
-        fragment->addExtensionHeader(fh);
-        fragment->setByteLength(headerLength + fh->getByteLength() + thisFragmentLength);
+        ASSERT(fragPk->getByteLength() == headerLength + fh->getByteLength() + thisFragmentLength);
 
-        sendDatagramToOutput(fragment, ie, nextHopAddr);
+        sendDatagramToOutput(fragPk, ie, nextHopAddr);
     }
 
     delete packet;
-#endif
 }
 
 void IPv6::sendDatagramToOutput(Packet *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr)
