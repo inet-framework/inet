@@ -31,6 +31,7 @@ class INET_API HcfFs : public AlternativesFs {
         virtual int selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
         virtual bool isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context);
         virtual bool hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *context);
+        virtual bool hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context);
 };
 
 } // namespace ieee80211

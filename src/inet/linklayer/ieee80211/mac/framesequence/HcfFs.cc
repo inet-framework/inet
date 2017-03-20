@@ -35,7 +35,7 @@ HcfFs::HcfFs() :
     //   Data + self + null + CF-Poll + QoS;
     AlternativesFs({new SequentialFs({new OptionalFs(new SelfCtsFs(), OPTIONALFS_PREDICATE(isSelfCtsNeeded)),
                                       new RepeatingFs(new AlternativesFs({new DataFs(), new ManagementFs()}, ALTERNATIVESFS_SELECTOR(selectDataOrManagementSequence)),
-                                                      REPEATINGFS_PREDICATE(hasMoreTxOps))}),
+                                                      REPEATINGFS_PREDICATE(hasMoreTxOpsAndMulticast))}),
                     new SequentialFs({new OptionalFs(new SelfCtsFs(), OPTIONALFS_PREDICATE(isSelfCtsNeeded)),
                                       new RepeatingFs(new TxOpFs(), REPEATINGFS_PREDICATE(hasMoreTxOps))})},
                    ALTERNATIVESFS_SELECTOR(selectHcfSequence))
@@ -72,6 +72,11 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
         return frameSequence->getCount() == 0 || (!nextFrameToTransmit->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
     }
     return false;
+}
+
+bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context)
+{
+    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->getReceiverAddress().isMulticast();
 }
 
 } // namespace ieee80211
