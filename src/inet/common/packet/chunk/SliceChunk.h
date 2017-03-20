@@ -23,7 +23,7 @@ namespace inet {
 /**
  * This class represents data using a slice of another chunk. The slice is
  * designated with the sliced chunk, an offset, and a length field, both
- * measured in bytes. It's used by the Chunk API implementation internally to
+ * measured in bits. It's used by the Chunk API implementation internally to
  * efficiently represent slices of other chunks. User code should not directly
  * instantiate this class.
  */
@@ -38,11 +38,11 @@ class INET_API SliceChunk : public Chunk
      */
     std::shared_ptr<Chunk> chunk;
     /**
-     * The offset measured in bytes, or -1 if not yet specified.
+     * The offset measured in bits, or -1 if not yet specified.
      */
     bit offset;
     /**
-     * The length measured in bytes, or -1 if not yet specified.
+     * The length measured in bits, or -1 if not yet specified.
      */
     bit length;
 

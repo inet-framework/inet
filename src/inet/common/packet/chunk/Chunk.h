@@ -262,9 +262,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Creates a new chunk of the given type that represents the designated part
      * of the provided chunk. The designated part starts at the provided offset
-     * and has the provided length, both measured in bytes. This function isn't
-     * a constructor to allow creating instances of message compiler generated
-     * field based chunk classes.
+     * and has the provided length. This function isn't a constructor to allow
+     * creating instances of message compiler generated field based chunk classes.
      */
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
@@ -415,14 +414,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual bool canRemoveFromEnd(bit length) { return false; }
 
     /**
-     * Removes the requested number of bytes from the beginning of this chunk
-     * and returns true if the removal was successful.
+     * Removes the requested part from the beginning of this chunk and returns.
      */
     virtual void removeFromBeginning(bit length) { assert(isMutable()); assert(false); }
 
     /**
-     * Removes the requested number of bytes from the end of this chunk and
-     * returns true if the removal was successful.
+     * Removes the requested part from the end of this chunk.
      */
     virtual void removeFromEnd(bit length) { assert(isMutable()); assert(false); }
     //@}
@@ -436,7 +433,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual ChunkType getChunkType() const = 0;
 
     /**
-     * Returns the length of data measured in bytes represented by this chunk.
+     * Returns the length of data represented by this chunk.
      */
     virtual bit getChunkLength() const = 0;
 
