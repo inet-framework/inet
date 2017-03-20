@@ -309,8 +309,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /** @name Mutability related functions */
     //@{
     // NOTE: there is no markMutable() intentionally
-    bool isMutable() const { return !(flags & CF_IMMUTABLE); }
-    bool isImmutable() const { return flags & CF_IMMUTABLE; }
+    virtual bool isMutable() const { return !(flags & CF_IMMUTABLE); }
+    virtual bool isImmutable() const { return flags & CF_IMMUTABLE; }
     void assertMutable() const { assert(isMutable()); }
     void assertImmutable() const { assert(isImmutable()); }
     void markMutableIfExclusivelyOwned() {
@@ -324,8 +324,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /** @name Completeness related functions */
     //@{
     // NOTE: there is no markComplete() intentionally
-    bool isComplete() const { return !(flags & CF_INCOMPLETE); }
-    bool isIncomplete() const { return flags & CF_INCOMPLETE; }
+    virtual bool isComplete() const { return !(flags & CF_INCOMPLETE); }
+    virtual bool isIncomplete() const { return flags & CF_INCOMPLETE; }
     void assertComplete() const { assert(isComplete()); }
     void assertIncomplete() const { assert(isIncomplete()); }
     virtual void markIncomplete() { flags |= CF_INCOMPLETE; }
@@ -334,8 +334,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /** @name Correctness related functions */
     //@{
     // NOTE: there is no markCorrect() intentionally
-    bool isCorrect() const { return !(flags & CF_INCORRECT); }
-    bool isIncorrect() const { return flags & CF_INCORRECT; }
+    virtual bool isCorrect() const { return !(flags & CF_INCORRECT); }
+    virtual bool isIncorrect() const { return flags & CF_INCORRECT; }
     void assertCorrect() const { assert(isCorrect()); }
     void assertIncorrect() const { assert(isIncorrect()); }
     virtual void markIncorrect() { flags |= CF_INCORRECT; }
@@ -344,8 +344,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /** @name Proper representation related functions */
     //@{
     // NOTE: there is no markProperlyRepresented() intentionally
-    bool isProperlyRepresented() const { return !(flags & CF_IMPROPERLY_REPRESENTED); }
-    bool isImproperlyRepresented() const { return flags & CF_IMPROPERLY_REPRESENTED; }
+    virtual bool isProperlyRepresented() const { return !(flags & CF_IMPROPERLY_REPRESENTED); }
+    virtual bool isImproperlyRepresented() const { return flags & CF_IMPROPERLY_REPRESENTED; }
     void assertProperlyRepresented() const { assert(isProperlyRepresented()); }
     void assertImproperlyRepresented() const { assert(isImproperlyRepresented()); }
     virtual void markImproperlyRepresented() { flags |= CF_IMPROPERLY_REPRESENTED; }
