@@ -28,13 +28,14 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 #ifdef WITH_RADIO
+#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
+#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/common/packetlevel/Interference.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/idealradio/IdealPhyHeader_m.h"
 #endif
 
@@ -393,14 +394,8 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             auto byteCountChunk = std::make_shared<ByteCountChunk>(byte(transmitterInterfaceInfo->interfaceEntry->getMTU()));
             byteCountChunk->markImmutable();
             transmittedFrame->append(byteCountChunk);
-            // KLUDGE: call transmitter->createPhyHeader();
-            auto phyHeader = std::make_shared<IdealPhyHeader>();
-
-            //FIXME phyHeader->setChunkLength(???);     // length is 0 currently
-            phyHeader->setChunkLength(byte(1));
-
-            phyHeader->markImmutable();
-            transmittedFrame->pushHeader(phyHeader);
+            // TODO: KLUDGE: review
+            check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());

@@ -203,9 +203,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void abortReception(cMessage *timer);
     virtual void captureReception(cMessage *timer);
 
-    virtual void encapsulate(Packet *packet) const { }
-    virtual void decapsulate(Packet *packet) const { }
-
     virtual void sendUp(Packet *macFrame);
     virtual cMessage *createReceptionTimer(RadioFrame *radioFrame) const;
     virtual bool isReceptionTimer(const cMessage *message) const;
@@ -243,6 +240,10 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override;
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override;
+
+    // TODO: cleanup
+    virtual void encapsulate(Packet *packet) const { }
+    virtual void decapsulate(Packet *packet) const { }
 };
 
 } // namespace physicallayer
