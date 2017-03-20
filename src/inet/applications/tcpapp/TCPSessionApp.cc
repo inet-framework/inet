@@ -17,6 +17,7 @@
 
 #include "inet/applications/tcpapp/TCPSessionApp.h"
 
+#include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -156,9 +157,8 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
             break;
         }
         case TCP_TRANSFER_OBJECT: {
-            cPacket *msg = new cPacket("data1");
-            msg->setByteLength(sendBytes);
-            const auto& payload = std::make_shared<cPacketChunk>(msg);
+            const auto& payload = std::make_shared<ApplicationPacket>();
+            payload->setChunkLength(byte(sendBytes));
             payload->markImmutable();
             packet->append(payload);
             break;
