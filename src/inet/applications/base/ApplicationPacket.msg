@@ -27,6 +27,7 @@ class FieldsChunk extends cObject;
 //
 // Generic application packet
 //
+// TODO: rename to ApplicationHeader and remove ByteCountChunk from ApplicationHeaderSerializer
 class ApplicationPacket extends FieldsChunk
 {
     bit chunkLength @overridegetter;
