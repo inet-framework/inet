@@ -70,13 +70,20 @@ void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& ch
 {
     Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
+    auto startPosition = byte(stream.getPosition());
     serializer->serialize(stream, chunk, offset, length);
+    auto endPosition = byte(stream.getPosition());
+    auto expectedChunkLength = length == bit(-1) ? chunk->getChunkLength() - offset : length;
+    assert(expectedChunkLength == endPosition - startPosition);
 }
 
 std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
 {
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
+    auto startPosition = byte(stream.getPosition());
     auto chunk = serializer->deserialize(stream, typeInfo);
+    auto endPosition = byte(stream.getPosition());
+    assert(chunk->getChunkLength() == endPosition - startPosition);
     if (stream.isReadBeyondEnd())
         chunk->markIncomplete();
     return chunk;
