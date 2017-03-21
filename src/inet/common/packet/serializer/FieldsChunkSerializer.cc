@@ -42,11 +42,12 @@ void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::share
 
 std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto streamPosition = stream.getPosition();
+    auto startPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));
-    auto length = byte(stream.getPosition() - streamPosition);
-    ChunkSerializer::totalDeserializedBitCount += length;
-    fieldsChunk->setSerializedBytes(stream.copyBytes(streamPosition, byte(length).get()));
+    auto chunkLength = byte(stream.getPosition() - startPosition);
+    ChunkSerializer::totalDeserializedBitCount += chunkLength;
+    fieldsChunk->setChunkLength(chunkLength);
+    fieldsChunk->setSerializedBytes(stream.copyBytes(byte(startPosition).get(), byte(chunkLength).get()));
     return fieldsChunk;
 }
 
