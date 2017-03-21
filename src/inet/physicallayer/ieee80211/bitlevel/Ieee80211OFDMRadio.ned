@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2014 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,30 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
-}}
+package inet.physicallayer.ieee80211.bitlevel;
 
-namespace inet;
+import inet.physicallayer.base.packetlevel.FlatRadioBase;
 
-class FieldsChunk extends cObject;
-
-namespace inet::physicallayer;
-
-enum Ieee80211PLCPType
+module Ieee80211OFDMRadio extends FlatRadioBase
 {
-    OFDM = 0;
-    DSSS = 1;
-    Infrared = 2;
-    FHSS = 3;
-    HRDSSS = 4;
-    ERP = 5;
-    HT = 6;
-}
-
-class Ieee80211PLCPFrame extends FieldsChunk
-{
-    short type @enum(Ieee80211PLCPType);
+    parameters:
+        antennaType = default("IsotropicAntenna");
+        @class(Ieee80211OFDMRadio);
 }

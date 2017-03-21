@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2014 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,30 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
-#include "inet/transportlayer/common/CRC_m.h"
-}}
+#ifndef __INET_IEEE80211OFDMRADIO_H
+#define __INET_IEEE80211OFDMRADIO_H
 
-namespace inet;
+#include "inet/physicallayer/base/packetlevel/FlatRadioBase.h"
 
-class FieldsChunk extends cObject;
+namespace inet {
 
-namespace inet::physicallayer;
+namespace physicallayer {
 
-enum Ieee80211PLCPType
+class INET_API Ieee80211OFDMRadio : public FlatRadioBase
 {
-    OFDM = 0;
-    DSSS = 1;
-    Infrared = 2;
-    FHSS = 3;
-    HRDSSS = 4;
-    ERP = 5;
-    HT = 6;
-}
+  protected:
+    virtual void encapsulate(Packet *packet) const override;
+    virtual void decapsulate(Packet *packet) const override;
 
-class Ieee80211PLCPFrame extends FieldsChunk
-{
-    short type @enum(Ieee80211PLCPType);
-}
+  public:
+    Ieee80211OFDMRadio();
+};
+
+} // namespace physicallayer
+
+} // namespace inet
+
+#endif // ifndef __INET_IEEE80211OFDMRADIO_H
+

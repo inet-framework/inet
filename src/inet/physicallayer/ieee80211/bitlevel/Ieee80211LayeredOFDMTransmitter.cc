@@ -106,18 +106,9 @@ BitVector *Ieee80211LayeredOFDMTransmitter::serialize(const cPacket *packet) con
     return serializedPacket;
 }
 
-const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createPacketModel(const cPacket *macFrame) const
+const ITransmissionPacketModel *Ieee80211LayeredOFDMTransmitter::createPacketModel(const Packet *packet) const
 {
-    // The PLCP header is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1),
-    // Tail (6) and SERVICE (16) fields.
-    int plcpHeaderLength = 4 + 1 + 12 + 1 + 6 + 16;
-    Ieee80211OFDMPLCPFrame *phyFrame = new Ieee80211OFDMPLCPFrame();
-    phyFrame->setName(macFrame->getName());
-    phyFrame->setRate(mode->getSignalMode()->getRate());
-    phyFrame->setLength(macFrame->getByteLength());
-    phyFrame->encapsulate(const_cast<cPacket *>(macFrame));
-    phyFrame->setBitLength(phyFrame->getLength() * 8 + plcpHeaderLength);
-    return new TransmissionPacketModel(check_and_cast<Packet *>(phyFrame), mode->getDataMode()->getNetBitrate());
+    return new TransmissionPacketModel(packet, mode->getDataMode()->getNetBitrate());
 }
 
 const ITransmissionAnalogModel *Ieee80211LayeredOFDMTransmitter::createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const

@@ -65,7 +65,7 @@ class INET_API Ieee80211LayeredOFDMTransmitter : public TransmitterBase
     /* Packet domain */
     const ITransmissionPacketModel *createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const;
     const ITransmissionPacketModel *createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const;
-    virtual const ITransmissionPacketModel *createPacketModel(const cPacket *macFrame) const;
+    virtual const ITransmissionPacketModel *createPacketModel(const Packet *packet) const;
 
     /* Symbol and bit domain */
     const ITransmissionSymbolModel *createSymbolModel(const ITransmissionSymbolModel *signalFieldSymbolModel, const ITransmissionSymbolModel *dataFieldSymbolModel) const;
