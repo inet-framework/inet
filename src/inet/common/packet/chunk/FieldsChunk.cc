@@ -19,12 +19,14 @@ namespace inet {
 
 FieldsChunk::FieldsChunk() :
     Chunk(),
+    chunkLength(bit(-1)),
     serializedBytes(nullptr)
 {
 }
 
 FieldsChunk::FieldsChunk(const FieldsChunk& other) :
     Chunk(other),
+    chunkLength(other.chunkLength),
     serializedBytes(other.serializedBytes != nullptr ? new std::vector<uint8_t>(*other.serializedBytes) : nullptr)
 {
 }

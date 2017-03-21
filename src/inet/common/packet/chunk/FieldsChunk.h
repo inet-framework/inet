@@ -29,6 +29,7 @@ class FieldsChunk : public Chunk
   friend class Chunk;
 
   protected:
+    bit chunkLength;
     /**
     * The serialized representation of this chunk or nullptr if not available.
     * When a chunk is serialized, the result is stored here for fast subsequent
@@ -63,6 +64,9 @@ class FieldsChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_FIELDS; }
+
+    virtual bit getChunkLength() const override { return chunkLength; }
+    virtual void setChunkLength(bit chunkLength) { assert(isMutable()); handleChange(); this->chunkLength = chunkLength; }
     //@}
 };
 
