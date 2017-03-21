@@ -49,7 +49,6 @@ namespace inet {
  *  - copy to a new packet
  *  - convert to a human readable string
  */
-// TODO: consider turning some assert into if/throw, consider potential performance penalty, make it optional with compile time macro?
 class INET_API Packet : public cPacket
 {
   friend class PacketDescriptor;
@@ -101,8 +100,6 @@ class INET_API Packet : public cPacket
     //@{
     virtual bool hasBitError() const override { return cPacket::hasBitError() || contents->isIncorrect(); }
     //@}
-
-    //TODO virtual void setBitError(bool e) override;
 
     /** @name Unsupported cPacket functions */
     //@{

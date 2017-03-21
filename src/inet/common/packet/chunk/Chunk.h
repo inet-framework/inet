@@ -115,15 +115,12 @@ using namespace units::values;
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
  */
-// TODO: peeking with a Type (length == -1) into a SliceChunk should return nullptr without serialization if possible (i.e. slice contains an instance of Type) assuming no following chunks, etc.
+// TODO: consider turning some assert into if/throw, consider potential performance penalty, make it optional with compile time macro?
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 // TODO: review insert functions for the chunk->insert(chunk) case
-// TODO: consider not allowing appending mutable chunks?
 // TODO: consider adding a simplify function as peek(0, getChunkLength())?
 // TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
-// TODO: when peeking an incomplete fixed size header, what does getChunkLength() return for such a header?
 // TODO: peek is misleading with BytesChunk and default length, consider introducing an enum to replace -1 length values
-// TODO: chunks may be incorrect/incomplete/improper, this is inconvenient for each protocol to check all chunks in the data part of the packet
 // TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
 //       message compiler could support @optional fields, inspectors could hide them, etc.
 // TODO: how do we represent the random subfield sequences (options) right after mandatory header part?, possible alternatives:
