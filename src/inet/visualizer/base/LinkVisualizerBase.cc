@@ -17,6 +17,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
@@ -186,10 +187,9 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
             auto interfaceEntry = getInterfaceEntry(networkNode, module);
-            auto packet = check_and_cast<cPacket *>(object);
+            auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
-                auto treeId = packet->getTreeId();
-                setLastModule(treeId, module);
+                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { setLastModule(id, module); });
             }
         }
     }
@@ -198,15 +198,16 @@ void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
             auto interfaceEntry = getInterfaceEntry(networkNode, module);
-            auto packet = check_and_cast<cPacket *>(object);
+            auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && interfaceFilter.matches(interfaceEntry) && packetFilter.matches(packet)) {
-                auto treeId = packet->getTreeId();
-                auto lastModule = getLastModule(treeId);
-                if (lastModule != nullptr) {
-                    updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module));
-                    // TODO: breaks due to multiple recipient?
-                    // removeLastModule(treeId);
-                }
+                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) {
+                    auto lastModule = getLastModule(id);
+                    if (lastModule != nullptr) {
+                        updateLinkVisualization(getContainingNode(lastModule), getContainingNode(module));
+                        // TODO: breaks due to multiple recipient?
+                        // removeLastModule(treeId);
+                    }
+                });
             }
         }
     }

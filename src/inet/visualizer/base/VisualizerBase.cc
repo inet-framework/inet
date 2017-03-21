@@ -18,6 +18,9 @@
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/shape/Cuboid.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/VisualizerBase.h"
@@ -82,6 +85,18 @@ InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule 
     if (interfaceTable == nullptr)
         return nullptr;
     return interfaceTable->getInterfaceByInterfaceModule(module);
+}
+
+void VisualizerBase::mapChunkIds(const std::shared_ptr<Chunk>& chunk, const std::function<void(int)>& thunk) const
+{
+    if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
+        for (const auto& elementChunk : std::static_pointer_cast<SequenceChunk>(chunk)->getChunks())
+            mapChunkIds(elementChunk, thunk);
+    }
+    else if (chunk->getChunkType() == Chunk::CT_SLICE)
+        thunk(std::static_pointer_cast<SliceChunk>(chunk)->getChunk()->getChunkId());
+    else
+        thunk(chunk->getChunkId());
 }
 
 } // namespace visualizer

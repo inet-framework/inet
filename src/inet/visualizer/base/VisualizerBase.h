@@ -19,6 +19,7 @@
 #define __INET_VISUALIZERBASE_H
 
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/packet/chunk/Chunk.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -37,6 +38,7 @@ class INET_API VisualizerBase : public cSimpleModule
     virtual Coord getPosition(const cModule *networkNode) const;
     virtual Coord getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const;
     virtual InterfaceEntry *getInterfaceEntry(cModule *networkNode, cModule *module) const;
+    virtual void mapChunkIds(const std::shared_ptr<Chunk>& chunk, const std::function<void(int)>& thunk) const;
 };
 
 } // namespace visualizer

@@ -17,6 +17,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
@@ -198,31 +199,28 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
-            auto packet = check_and_cast<cPacket *>(object);
+            auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto treeId = packet->getTreeId();
-                auto module = check_and_cast<cModule *>(source);
-                addToIncompletePath(treeId, getContainingNode(module));
+                auto module = getContainingNode(check_and_cast<cModule *>(source));
+                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { addToIncompletePath(id, module); });
             }
         }
     }
     else if (signal == LayeredProtocolBase::packetReceivedFromLowerSignal) {
         if (isPathEnd(static_cast<cModule *>(source))) {
-            auto packet = check_and_cast<cPacket *>(object);
+            auto packet = check_and_cast<Packet *>(object);
             if (packetFilter.matches(packet)) {
-                auto treeId = packet->getEncapsulatedPacket()->getTreeId();
-                auto module = check_and_cast<cModule *>(source);
-                addToIncompletePath(treeId, getContainingNode(module));
+                auto module = getContainingNode(check_and_cast<cModule *>(source));
+                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { addToIncompletePath(id, module); });
             }
         }
         else if (isPathElement(static_cast<cModule *>(source))) {
-            auto packet = check_and_cast<cPacket *>(object);
+            auto packet = check_and_cast<Packet *>(object);
             if (packetFilter.matches(packet)) {
                 auto encapsulatedPacket = packet->getEncapsulatedPacket()->getEncapsulatedPacket();
                 if (encapsulatedPacket != nullptr) {
-                    auto treeId = encapsulatedPacket->getTreeId();
-                    auto module = check_and_cast<cModule *>(source);
-                    addToIncompletePath(treeId, getContainingNode(module));
+                    auto module = getContainingNode(check_and_cast<cModule *>(source));
+                    mapChunkIds(packet->peekAt(bit(0)), [&] (int id) { addToIncompletePath(id, module); });
                 }
             }
         }
@@ -231,12 +229,12 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
         if (isPathEnd(static_cast<cModule *>(source))) {
             auto module = check_and_cast<cModule *>(source);
             auto networkNode = getContainingNode(module);
-            auto packet = check_and_cast<cPacket *>(object);
+            auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                auto treeId = packet->getTreeId();
-                auto path = getIncompletePath(treeId);
-                updatePath(*path);
-                removeIncompletePath(treeId);
+                mapChunkIds(packet->peekAt(bit(0)), [&] (int id) {
+                    updatePath(*getIncompletePath(id));
+                    removeIncompletePath(id);
+                });
             }
         }
     }
