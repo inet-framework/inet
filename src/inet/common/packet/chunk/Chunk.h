@@ -244,7 +244,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     static bool enableImplicitChunkSerialization;
 
+    static int nextId;
+
   protected:
+    int id;
     /**
      * The boolean flags merged into a single integer.
      */
@@ -426,6 +429,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     /** @name Chunk querying related functions */
     //@{
+    virtual int getChunkId() const { return id; }
+
     /**
      * Returns the type of this chunk as an enum member. This can be used to
      * avoid expensive std::dynamic_cast and std::dynamic_pointer_cast operators.

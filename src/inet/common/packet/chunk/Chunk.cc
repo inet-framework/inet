@@ -21,13 +21,16 @@ namespace inet {
 
 // TODO: disable it by default
 bool Chunk::enableImplicitChunkSerialization = true;
+int Chunk::nextId = 0;
 
 Chunk::Chunk() :
+    id(nextId++),
     flags(0)
 {
 }
 
 Chunk::Chunk(const Chunk& other) :
+    id(nextId++),
     flags(other.flags & ~CF_IMMUTABLE)
 {
 }
