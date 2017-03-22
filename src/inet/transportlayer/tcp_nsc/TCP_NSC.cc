@@ -330,39 +330,44 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
 
     inetSockPair.remoteM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     inetSockPair.localM.ipAddrM = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
-    const auto& tcpsegP = CHK(packet->peekHeader<TcpHeader>());
     //int interfaceId = controlInfo->getInterfaceId();
 
     if (packet->getMandatoryTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
-        {
-            // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
-            //       with IP header size difference
-            unsigned short numOptions = tcpsegP->getHeaderOptionArraySize();
-            for (unsigned short i = 0; i < numOptions; i++) {
-                TCPOption* option = tcpsegP->getHeaderOption(i);
-                if (option->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
-                    TCPOptionMaxSegmentSize *mssOption = dynamic_cast<TCPOptionMaxSegmentSize *>(option);
-                    if (mssOption) {
-                        unsigned int value = mssOption->getMaxSegmentSize();
-                        value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
-                        mssOption->setMaxSegmentSize(value);
-                    }
-                }
+        const auto& tcpHdr = packet->peekHeader<TcpHeader>();
+        // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
+        //       with IP header size difference
+        unsigned short numOptions = tcpHdr->getHeaderOptionArraySize();
+        for (unsigned short i = 0; i < numOptions; i++) {
+            if (tcpHdr->getHeaderOption(i)->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
+                auto newTcpHdr = std::static_pointer_cast<TcpHeader>(tcpHdr->dupShared());
+                TCPOption* option = newTcpHdr->getHeaderOption(i);
+                TCPOptionMaxSegmentSize *mssOption = check_and_cast<TCPOptionMaxSegmentSize *>(option);
+                unsigned int value = mssOption->getMaxSegmentSize();
+                value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
+                mssOption->setMaxSegmentSize(value);
+                newTcpHdr->handleChange();      //FIXME KLUDGE: why not called handleChange() automatically?
+                packet->popHeader<TcpHeader>();
+                packet->removePoppedChunks();
+                newTcpHdr->markImmutable();
+                packet->pushHeader(newTcpHdr);
+                break;
             }
         }
     }
 
+    const auto& tcpHdr = packet->peekHeader<TcpHeader>();
+
     // statistics:
     if (rcvSeqVector)
-        rcvSeqVector->record(tcpsegP->getSequenceNo());
+        rcvSeqVector->record(tcpHdr->getSequenceNo());
 
     if (rcvAckVector)
-        rcvAckVector->record(tcpsegP->getAckNo());
+        rcvAckVector->record(tcpHdr->getAckNo());
 
-    inetSockPair.remoteM.portM = tcpsegP->getSrcPort();
-    inetSockPair.localM.portM = tcpsegP->getDestPort();
-    nscSockPair.remoteM.portM = tcpsegP->getSrcPort();
-    nscSockPair.localM.portM = tcpsegP->getDestPort();
+    inetSockPair.remoteM.portM = tcpHdr->getSrcPort();
+    inetSockPair.localM.portM = tcpHdr->getDestPort();
+    nscSockPair.remoteM.portM = tcpHdr->getSrcPort();
+    nscSockPair.localM.portM = tcpHdr->getDestPort();
     inetSockPairAny.localM = inetSockPair.localM;
 
     // process segment
@@ -383,7 +388,7 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
     ih->version = 4;
     ih->ihl = ipHdrLen / 4;
     ih->tos = 0;
-    ih->id = htons(tcpsegP->getSequenceNo());
+    ih->id = htons(tcpHdr->getSequenceNo());
     ih->frag_off = htons(0x4000);    // don't fragment, offset = 0;
     ih->ttl = 64;
     ih->protocol = 6;    // TCP
