@@ -200,7 +200,7 @@ void Ieee8021dRelay::learn(MACAddress srcAddr, int arrivalInterfaceId)
 
 void Ieee8021dRelay::dispatchBPDU(Packet *packet)
 {
-    const auto& bpdu = CHK(packet->peekHeader<BPDU>());
+    const auto& bpdu = packet->peekHeader<BPDU>();
     unsigned int portNum = packet->getMandatoryTag<InterfaceReq>()->getInterfaceId();
     MACAddress address = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
 
@@ -228,7 +228,7 @@ void Ieee8021dRelay::deliverBPDU(Packet *packet)
 {
     const auto& eth = EtherEncap::decapsulate(packet);
 
-    const auto& bpdu = CHK(packet->peekHeader<BPDU>());
+    const auto& bpdu = packet->peekHeader<BPDU>();
 
     auto macAddressTag = packet->ensureTag<MacAddressInd>();
     macAddressTag->setSrcAddress(eth->getSrc());

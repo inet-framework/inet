@@ -542,7 +542,7 @@ void RIPRouting::handleMessage(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         Packet *pk = check_and_cast<Packet *>(msg);
-        unsigned char command = CHK(pk->peekHeader<RIPPacket>())->getCommand();
+        unsigned char command = pk->peekHeader<RIPPacket>()->getCommand();
         if (command == RIP_REQUEST)
             processRequest(pk);
         else if (command == RIP_RESPONSE)
@@ -598,7 +598,7 @@ void RIPRouting::processUpdate(bool triggered)
  */
 void RIPRouting::processRequest(Packet *packet)
 {
-    const auto& ripPacket = std::dynamic_pointer_cast<RIPPacket>(CHK(packet->peekHeader<RIPPacket>())->dupShared());
+    const auto& ripPacket = std::dynamic_pointer_cast<RIPPacket>(packet->peekHeader<RIPPacket>()->dupShared());
 
     int numEntries = ripPacket->getEntryArraySize();
     if (numEntries == 0) {
@@ -780,7 +780,7 @@ void RIPRouting::processResponse(Packet *packet)
         return;
     }
 
-    const auto& ripPacket = CHK(packet->peekHeader<RIPPacket>());
+    const auto& ripPacket = packet->peekHeader<RIPPacket>();
 
     EV_INFO << "response received from " << srcAddr << "\n";
     int numEntries = ripPacket->getEntryArraySize();

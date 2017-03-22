@@ -185,7 +185,7 @@ void MessageHandler::handleTimer(cMessage *timer)
 
 void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unused2)
 {
-    const auto& packet = CHK(pk->peekHeader<OSPFPacket>());
+    const auto& packet = pk->peekHeader<OSPFPacket>();
     EV_INFO << "Received packet: (" << packet.get()->getClassName() << ")" << pk->getName() << "\n";
     if (packet->getRouterID() == IPv4Address(router->getRouterID())) {
         EV_INFO << "This packet is from ourselves, discarding.\n";
@@ -315,13 +315,13 @@ void MessageHandler::sendPacket(Packet *packet, IPv4Address destination, int out
     packet->ensureTag<InterfaceReq>()->setInterfaceId(outputIfIndex);
     packet->ensureTag<L3AddressReq>()->setDestAddress(destination);
     packet->ensureTag<HopLimitReq>()->setHopLimit(ttl);
-    const auto& ospfPacket = CHK(packet->peekHeader<OSPFPacket>());
+    const auto& ospfPacket = packet->peekHeader<OSPFPacket>();
 
     switch (ospfPacket->getType()) {
         case HELLO_PACKET: {
             packet->setName("OSPF_HelloPacket");
 
-            const auto& helloPacket = CHK(packet->peekHeader<OSPFHelloPacket>());
+            const auto& helloPacket = packet->peekHeader<OSPFHelloPacket>();
             printHelloPacket(helloPacket.get(), destination, outputIfIndex);
         }
         break;
@@ -329,7 +329,7 @@ void MessageHandler::sendPacket(Packet *packet, IPv4Address destination, int out
         case DATABASE_DESCRIPTION_PACKET: {
             packet->setName("OSPF_DDPacket");
 
-            const auto& ddPacket = CHK(packet->peekHeader<OSPFDatabaseDescriptionPacket>());
+            const auto& ddPacket = packet->peekHeader<OSPFDatabaseDescriptionPacket>();
             printDatabaseDescriptionPacket(ddPacket.get(), destination, outputIfIndex);
         }
         break;
@@ -337,7 +337,7 @@ void MessageHandler::sendPacket(Packet *packet, IPv4Address destination, int out
         case LINKSTATE_REQUEST_PACKET: {
             packet->setName("OSPF_LSReqPacket");
 
-            const auto& requestPacket = CHK(packet->peekHeader<OSPFLinkStateRequestPacket>());
+            const auto& requestPacket = packet->peekHeader<OSPFLinkStateRequestPacket>();
             printLinkStateRequestPacket(requestPacket.get(), destination, outputIfIndex);
         }
         break;
@@ -345,7 +345,7 @@ void MessageHandler::sendPacket(Packet *packet, IPv4Address destination, int out
         case LINKSTATE_UPDATE_PACKET: {
             packet->setName("OSPF_LSUpdPacket");
 
-            const auto& updatePacket = CHK(packet->peekHeader<OSPFLinkStateUpdatePacket>());
+            const auto& updatePacket = packet->peekHeader<OSPFLinkStateUpdatePacket>();
             printLinkStateUpdatePacket(updatePacket.get(), destination, outputIfIndex);
         }
         break;
@@ -353,7 +353,7 @@ void MessageHandler::sendPacket(Packet *packet, IPv4Address destination, int out
         case LINKSTATE_ACKNOWLEDGEMENT_PACKET: {
             packet->setName("OSPF_LSAckPacket");
 
-            const auto& ackPacket = CHK(packet->peekHeader<OSPFLinkStateAcknowledgementPacket>());
+            const auto& ackPacket = packet->peekHeader<OSPFLinkStateAcknowledgementPacket>();
             printLinkStateAcknowledgementPacket(ackPacket.get(), destination, outputIfIndex);
         }
         break;

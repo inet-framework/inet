@@ -80,11 +80,11 @@ void MPLS::processPacketFromL3(Packet *msg)
         return;
     }
 
-    const auto& ipHeader = CHK(msg->peekHeader<IPv4Header>());
+    const auto& ipHeader = msg->peekHeader<IPv4Header>();
 
     // XXX temporary solution, until TCPSocket and IPv4 are extended to support nam tracing
     if (ipHeader->getTransportProtocol() == IP_PROT_TCP) {
-        const auto& seg = CHK(msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength()));
+        const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {
             ASSERT(!msg->hasPar("color"));
             msg->addPar("color") = LDP_TRAFFIC;
@@ -102,7 +102,7 @@ void MPLS::processPacketFromL3(Packet *msg)
 
 bool MPLS::tryLabelAndForwardIPv4Datagram(Packet *packet)
 {
-    const auto& ipv4Header = CHK(packet->peekHeader<IPv4Header>());
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
     LabelOpVector outLabel;
     std::string outInterface;   //FIXME set based on interfaceID
     int color;
@@ -215,7 +215,7 @@ void MPLS::processMPLSPacketFromL2(Packet *packet)
     int incomingInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(incomingInterfaceId);
     std::string incomingInterfaceName = ie->getName();
-    const auto& mplsHeader = std::dynamic_pointer_cast<MplsHeader>(CHK(packet->popHeader<MplsHeader>())->dupShared());
+    const auto& mplsHeader = std::dynamic_pointer_cast<MplsHeader>(packet->popHeader<MplsHeader>()->dupShared());
     ASSERT(mplsHeader->hasLabel());
     MplsLabel oldLabel = mplsHeader->getTopLabel();
 

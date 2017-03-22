@@ -215,7 +215,7 @@ void BGPRouting::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != (SessionID)-1) {
         //TODO: should queuing incoming payloads, and peek from the queue
-        const auto& ptrHdr = CHK(msg->peekHeader<BGPHeader>());
+        const auto& ptrHdr = msg->peekHeader<BGPHeader>();
         switch (ptrHdr->getType()) {
             case BGP_OPEN:
                 //BGPOpenMessage* ptrMsg = check_and_cast<BGPOpenMessage*>(msg);

@@ -489,7 +489,7 @@ void IGMPv2::handleMessage(cMessage *msg)
         send(msg, "ipOut");
     else {
         Packet *packet = check_and_cast<Packet *>(msg);
-        const auto& igmp = CHK(packet->peekHeader<IGMPMessage>());
+        const auto& igmp = packet->peekHeader<IGMPMessage>();
         processIgmpMessage(packet, igmp);
     }
 }

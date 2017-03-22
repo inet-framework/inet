@@ -33,7 +33,7 @@ void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Interface *i
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
-        const auto& lsAckPacket = CHK(packet->peekHeader<OSPFLinkStateAcknowledgementPacket>());
+        const auto& lsAckPacket = packet->peekHeader<OSPFLinkStateAcknowledgementPacket>();
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 

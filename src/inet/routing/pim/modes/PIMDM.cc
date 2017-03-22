@@ -214,7 +214,7 @@ void PIMDM::handleMessageWhenUp(cMessage *msg)
 
 void PIMDM::processJoinPrunePacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMJoinPrune>());
+    const auto& pkt = pk->peekHeader<PIMJoinPrune>();
     EV_INFO << "Received JoinPrune packet.\n";
 
     emit(rcvdJoinPrunePkSignal, pk);
@@ -385,7 +385,7 @@ void PIMDM::processJoin(Route *route, int intId, int numRpfNeighbors, IPv4Addres
 
 void PIMDM::processGraftPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMGraft>());
+    const auto& pkt = pk->peekHeader<PIMGraft>();
     EV_INFO << "Received Graft packet.\n";
 
     emit(rcvdGraftPkSignal, pk);
@@ -539,7 +539,7 @@ void PIMDM::processOlistNonEmptyEvent(Route *route)
 
 void PIMDM::processGraftAckPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMGraft>());
+    const auto& pkt = pk->peekHeader<PIMGraft>();
     EV_INFO << "Received GraftAck packet.\n";
 
     emit(rcvdGraftAckPkSignal, pk);
@@ -587,7 +587,7 @@ void PIMDM::processGraftAckPacket(Packet *pk)
  */
 void PIMDM::processStateRefreshPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMStateRefresh>());
+    const auto& pkt = pk->peekHeader<PIMStateRefresh>();
     EV << "pimDM::processStateRefreshPacket" << endl;
 
     emit(rcvdStateRefreshPkSignal, pk);
@@ -687,7 +687,7 @@ void PIMDM::processStateRefreshPacket(Packet *pk)
 
 void PIMDM::processAssertPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMAssert>());
+    const auto& pkt = pk->peekHeader<PIMAssert>();
     int incomingInterfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     IPv4Address srcAddrFromTag = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address source = pkt->getSourceAddress();

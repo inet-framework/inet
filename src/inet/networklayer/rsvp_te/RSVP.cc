@@ -1487,7 +1487,7 @@ void RSVP::processPathTearMsg(Packet *pk)
 void RSVP::processPathMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_MESSAGE" << endl;
-    auto msg = std::dynamic_pointer_cast<RSVPPathMsg>(CHK(pk->peekHeader<RSVPPathMsg>())->dupShared());
+    auto msg = std::dynamic_pointer_cast<RSVPPathMsg>(pk->peekHeader<RSVPPathMsg>()->dupShared());
     print(msg.get());
 
     // process ERO *************************************************************

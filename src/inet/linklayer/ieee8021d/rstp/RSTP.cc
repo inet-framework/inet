@@ -274,7 +274,7 @@ void RSTP::handleBackup(const std::shared_ptr<BPDU>& frame, unsigned int arrival
 
 void RSTP::handleIncomingFrame(Packet *packet)
 {
-    const std::shared_ptr<BPDU>& frame = CHK(packet->peekHeader<BPDU>());
+    const std::shared_ptr<BPDU>& frame = packet->peekHeader<BPDU>();
     // incoming BPDU handling
     // checking message age
     int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();

@@ -141,7 +141,7 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    const auto& tcpsegP = CHK(packet->peekHeader<TcpHeader>());
+    const auto& tcpsegP = packet->peekHeader<TcpHeader>();
     srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getMandatoryTag<InterfaceInd>())->getInterfaceId();
@@ -214,7 +214,7 @@ void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(pCurTcpSegM, seqNo, dataptr, len);
     }
     else {
-        const auto& tcpHdr = CHK(pCurTcpSegM->peekHeader<TcpHeader>());
+        const auto& tcpHdr = pCurTcpSegM->peekHeader<TcpHeader>();
         if (pCurTcpSegM->getByteLength() > tcpHdr->getHeaderLength())
             throw cRuntimeError("conn is null, and received packet has data");
 
@@ -569,14 +569,14 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Ad
         const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)dataP, lenP);
         bytes->markImmutable();
         packet = new Packet(nullptr, bytes);
-        const auto& tcpHdr = CHK(packet->popHeader<TcpHeader>());
+        const auto& tcpHdr = packet->popHeader<TcpHeader>();
         packet->removePoppedHeaders();
         int64_t numBytes = packet->getByteLength();
         ASSERT(numBytes == 0);
         packet->pushHeader(tcpHdr);
     }
 
-    const auto& tcpHdr = CHK(packet->peekHeader<TcpHeader>());
+    const auto& tcpHdr = packet->peekHeader<TcpHeader>();
     ASSERT(tcpHdr);
     ASSERT(packet);
 

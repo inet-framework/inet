@@ -80,7 +80,7 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
     }
 
     Packet *pk = check_and_cast<Packet *>(msg);
-    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
+    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
     bool ok = true;
     if (curConn.offline)
         createConnection(pk);
@@ -145,7 +145,7 @@ void VoIPStreamReceiver::createConnection(Packet *pk)
 {
     ASSERT(curConn.offline);
 
-    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
+    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
     auto ports = pk->getMandatoryTag<L4PortInd>();
 
@@ -186,7 +186,7 @@ void VoIPStreamReceiver::checkSourceAndParameters(Packet *pk)
 {
     ASSERT(!curConn.offline);
 
-    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
+    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
     auto l3Addresses = pk->getMandatoryTag<L3AddressInd>();
     auto ports = pk->getMandatoryTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
@@ -221,7 +221,7 @@ void VoIPStreamReceiver::closeConnection()
 
 void VoIPStreamReceiver::decodePacket(Packet *pk)
 {
-    const auto& vp = CHK(pk->peekHeader<VoIPStreamPacket>());
+    const auto& vp = pk->peekHeader<VoIPStreamPacket>();
     switch (vp->getType()) {
         case VOICE:
             emit(packetHasVoiceSignal, 1);

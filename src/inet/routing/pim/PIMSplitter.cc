@@ -80,7 +80,7 @@ void PIMSplitter::handleMessage(cMessage *msg)
 
 void PIMSplitter::processPIMPacket(Packet *pkt)
 {
-    const auto& pimPkt = CHK(pkt->peekHeader<PIMPacket>());
+    const auto& pimPkt = pkt->peekHeader<PIMPacket>();
     InterfaceEntry *ie = ift->getInterfaceById(pkt->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     ASSERT(ie);
 

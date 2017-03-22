@@ -48,7 +48,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
 {
     router->getMessageHandler()->printEvent("Link State update packet received", intf, neighbor);
 
-    const auto& lsUpdatePacket = CHK(packet->peekHeader<OSPFLinkStateUpdatePacket>());
+    const auto& lsUpdatePacket = packet->peekHeader<OSPFLinkStateUpdatePacket>();
     bool shouldRebuildRoutingTable = false;
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {

@@ -34,7 +34,7 @@ HelloHandler::HelloHandler(Router *containingRouter) :
 
 void HelloHandler::processPacket(Packet *packet, Interface *intf, Neighbor *unused)
 {
-    const auto& helloPacket = CHK(packet->peekHeader<OSPFHelloPacket>());
+    const auto& helloPacket = packet->peekHeader<OSPFHelloPacket>();
     bool shouldRebuildRoutingTable = false;
 
     /* The values of the Network Mask, HelloInterval,

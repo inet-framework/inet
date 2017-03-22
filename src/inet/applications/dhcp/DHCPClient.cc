@@ -396,7 +396,7 @@ void DHCPClient::handleDHCPMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
-    const auto& msg = CHK(packet->peekHeader<DHCPMessage>());
+    const auto& msg = packet->peekHeader<DHCPMessage>();
     if (msg->getOp() != BOOTREPLY) {
         EV_WARN << "Client received a non-BOOTREPLY message, dropping." << endl;
         return;

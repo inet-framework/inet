@@ -149,7 +149,7 @@ Packet *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
 {
 #ifdef WITH_ETHERNET
-    auto ethframe = CHK(EtherEncap::decapsulate(packet));       // do not use const auto& : removePoppedChunks() delete it from packet
+    auto ethframe = EtherEncap::decapsulate(packet);       // do not use const auto& : removePoppedChunks() delete it from packet
     // create new frame
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(ethframe->getName());
     frame->setFromDS(true);

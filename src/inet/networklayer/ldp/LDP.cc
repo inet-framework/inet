@@ -518,7 +518,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
 void LDP::processLDPHello(Packet *msg)
 {
-    const auto& ldpHello = CHK(msg->peekHeader<LDPHello>());
+    const auto& ldpHello = msg->peekHeader<LDPHello>();
     //IPv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     IPv4Address peerAddr = ldpHello->getSenderAddress();
     int interfaceId = msg->getMandatoryTag<InterfaceInd>()->getInterfaceId();
@@ -1207,13 +1207,13 @@ bool LDP::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
 
     // LDP traffic (both discovery...
     if (protocol == IP_PROT_UDP) {
-        const auto& udpHeader = CHK(packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength()));
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength());
         if (udpHeader->getDestinationPort() == LDP_PORT)
             return false;
     }
     else if (protocol == IP_PROT_TCP) {
     // ...and session)
-        const auto& tcpHeader = CHK(packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength()));
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
         if (tcpHeader->getDestPort() == LDP_PORT || tcpHeader->getSrcPort() == LDP_PORT)
             return false;
     }

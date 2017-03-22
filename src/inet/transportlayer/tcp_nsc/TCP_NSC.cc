@@ -853,7 +853,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         const auto& bytes = std::make_shared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
         bytes->markImmutable();
         fp = new Packet(nullptr, bytes);
-        const auto& tcpHdr = CHK(fp->popHeader<TcpHeader>());
+        const auto& tcpHdr = fp->popHeader<TcpHeader>();
         fp->removePoppedHeaders();
         int64_t numBytes = fp->getByteLength();
         ASSERT(numBytes == 0);
@@ -862,7 +862,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 
-    const auto& tcpHdr = CHK(fp->peekHeader<TcpHeader>());
+    const auto& tcpHdr = fp->peekHeader<TcpHeader>();
     ASSERT(tcpHdr);
 
     bit payloadLength = fp->getDataLength() - tcpHdr->getChunkLength();

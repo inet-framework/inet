@@ -331,7 +331,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     else if (signalID == NF_IPv4_MDATA_REGISTER) {
         EV << "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
         Packet *pk = check_and_cast<Packet *>(obj);
-        const auto& datagram = CHK(pk->peekHeader<IPv4Header>());
+        const auto& datagram = pk->peekHeader<IPv4Header>();
         PIMInterface *incomingInterface = getIncomingInterface(check_and_cast<InterfaceEntry *>(details));
         route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
@@ -345,7 +345,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 
 void PIMSM::processJoinPrunePacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMJoinPrune>());
+    const auto& pkt = pk->peekHeader<PIMJoinPrune>();
     EV_INFO << "Received JoinPrune packet.\n";
 
     emit(rcvdJoinPrunePkSignal, pk);
@@ -591,14 +591,14 @@ void PIMSM::processPruneSGrpt(IPv4Address source, IPv4Address group, IPv4Address
  */
 void PIMSM::processRegisterPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->popHeader<PIMRegister>());
+    const auto& pkt = pk->popHeader<PIMRegister>();
     EV_INFO << "Received Register packet.\n";
 
     emit(rcvdRegisterPkSignal, pk);
 
     IPv4Address srcAddr = pk->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv4();
     IPv4Address destAddr = pk->getMandatoryTag<L3AddressInd>()->getDestAddress().toIPv4();
-    const auto& encapData = CHK(pk->peekHeader<IPv4Header>());
+    const auto& encapData = pk->peekHeader<IPv4Header>();
     IPv4Address source = encapData->getSrcAddress();
     IPv4Address group = encapData->getDestAddress();
     Route *routeG = findRouteG(group);
@@ -656,7 +656,7 @@ void PIMSM::processRegisterPacket(Packet *pk)
  */
 void PIMSM::processRegisterStopPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMRegisterStop>());
+    const auto& pkt = pk->peekHeader<PIMRegisterStop>();
     EV_INFO << "Received RegisterStop packet.\n";
 
     emit(rcvdRegisterStopPkSignal, pk);
@@ -682,7 +682,7 @@ void PIMSM::processRegisterStopPacket(Packet *pk)
 
 void PIMSM::processAssertPacket(Packet *pk)
 {
-    const auto& pkt = CHK(pk->peekHeader<PIMAssert>());
+    const auto& pkt = pk->peekHeader<PIMAssert>();
     int incomingInterfaceId = pk->getMandatoryTag<InterfaceInd>()->getInterfaceId();
     IPv4Address source = pkt->getSourceAddress();
     IPv4Address group = pkt->getGroupAddress();
@@ -1284,7 +1284,7 @@ void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
 
 void PIMSM::multicastPacketForwarded(Packet *pk)
 {
-    const auto& datagram = CHK(pk->peekHeader<IPv4Header>());
+    const auto& datagram = pk->peekHeader<IPv4Header>();
     IPv4Address source = datagram->getSrcAddress();
     IPv4Address group = datagram->getDestAddress();
 
@@ -1586,7 +1586,7 @@ void PIMSM::forwardMulticastData(Packet *data, int outInterfaceId)
     //
     // Note: we should inject the datagram somehow into the normal IPv4 forwarding path.
     //
-    const auto& datagram = CHK(data->popHeader<IPv4Header>());
+    const auto& datagram = data->popHeader<IPv4Header>();
 
     // set control info
     data->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(datagram->getTransportProtocol()));

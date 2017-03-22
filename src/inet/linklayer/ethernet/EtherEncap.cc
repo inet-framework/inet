@@ -159,8 +159,8 @@ std::shared_ptr<EtherFrame> EtherEncap::decapsulate(Packet *packet)
 {
     EV_STATICCONTEXT;
 
-    auto ethHeader = CHK(packet->peekHeader<EtherFrame>());
-    const auto& ethTrailer = CHK(packet->peekTrailer<EthernetFcs>());
+    auto ethHeader = packet->peekHeader<EtherFrame>();
+    const auto& ethTrailer = packet->peekTrailer<EthernetFcs>();
 
     switch(ethTrailer->getFcsMode()) {
         case FCS_DECLARED_CORRECT:

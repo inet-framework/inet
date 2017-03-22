@@ -69,7 +69,7 @@ void STP::handleMessage(cMessage *msg)
 
     if (!msg->isSelfMessage()) {
         Packet *packet = check_and_cast<Packet*>(msg);
-        const auto& bpdu = CHK(packet->peekHeader<BPDU>());
+        const auto& bpdu = packet->peekHeader<BPDU>();
 
         if (bpdu->getBpduType() == CONFIG_BDPU)
             handleBPDU(packet, bpdu);

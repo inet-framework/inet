@@ -156,7 +156,7 @@ void DHCPServer::processDHCPMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
-    const auto& dhcpMsg = CHK(packet->peekHeader<DHCPMessage>());
+    const auto& dhcpMsg = packet->peekHeader<DHCPMessage>();
 
     // check that the packet arrived on the interface we are supposed to serve
     int inputInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
