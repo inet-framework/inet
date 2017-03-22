@@ -316,8 +316,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     template <typename T>
     std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length = bit(-1)) const {
         assert(isImmutable());
-        assert(iterator.isForward());
-        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), iterator.getPosition(), length);
+        assert(iterator.isForward() || length != bit(-1));
+        auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
+        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length);
         chunk->markImmutable();
         return std::static_pointer_cast<T>(chunk);
     }
