@@ -27,6 +27,7 @@ namespace inet {
 class FieldsChunk : public Chunk
 {
   friend class Chunk;
+  friend class FieldsChunkSerializer;
 
   protected:
     bit chunkLength;
@@ -40,9 +41,12 @@ class FieldsChunk : public Chunk
     const std::vector<uint8_t> *serializedBytes;
 
   protected:
-    virtual void handleChange() override;
+    /** @name Field accessor functions */
+    //@{
+    const std::vector<uint8_t> *getSerializedBytes() const { return serializedBytes; }
+    void setSerializedBytes(const std::vector<uint8_t> *bytes) { this->serializedBytes = bytes; }
+    //@}
 
-  protected:
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) {
         return Chunk::createChunk(typeInfo, chunk, offset, length);
     }
@@ -55,11 +59,7 @@ class FieldsChunk : public Chunk
     virtual ~FieldsChunk();
     //@}
 
-    /** @name Field accessor functions */
-    //@{
-    const std::vector<uint8_t> *getSerializedBytes() const { return serializedBytes; }
-    void setSerializedBytes(const std::vector<uint8_t> *bytes) { this->serializedBytes = bytes; }
-    //@}
+    virtual void handleChange() override;
 
     /** @name Overridden chunk functions */
     //@{
