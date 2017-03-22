@@ -279,6 +279,15 @@ static void testHeader()
     assert(std::dynamic_pointer_cast<BytesChunk>(chunk5) != nullptr);
     const auto& bytesChunk1 = std::static_pointer_cast<BytesChunk>(chunk5);
     assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
+
+    // 4. packet provides header from bytes
+    Packet packet3;
+    auto bytesChunk2 = std::make_shared<BytesChunk>();
+    bytesChunk2->setBytes({2, 4, 0, 42});
+    bytesChunk2->markImmutable();
+    packet3.pushHeader(bytesChunk2);
+    auto tlvHeader1 = packet3.peekHeader<TlvHeaderInt>();
+    assert(tlvHeader1->getInt16Value() == 42);
 }
 
 static void testTrailer()
@@ -316,6 +325,16 @@ static void testTrailer()
     assert(std::dynamic_pointer_cast<BytesChunk>(chunk5) != nullptr);
     const auto& bytesChunk1 = std::static_pointer_cast<BytesChunk>(chunk5);
     assert(std::equal(bytesChunk1->getBytes().begin(), bytesChunk1->getBytes().end(), makeVector(10).begin()));
+
+    // 4. packet provides trailer from bytes but only when length is provided
+    Packet packet3;
+    auto bytesChunk2 = std::make_shared<BytesChunk>();
+    bytesChunk2->setBytes({2, 4, 0, 42});
+    bytesChunk2->markImmutable();
+    packet3.pushTrailer(bytesChunk2);
+    ASSERT_ERROR(packet3.peekTrailer<TlvHeaderInt>(byte()));
+    auto tlvTrailer1 = packet3.peekTrailer<TlvHeaderInt>(byte(4));
+    assert(tlvTrailer1->getInt16Value() == 42);
 }
 
 static void testEncapsulation()
