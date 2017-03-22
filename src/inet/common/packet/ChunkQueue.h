@@ -67,9 +67,9 @@ class INET_API ChunkQueue : public cNamedObject
 
     /** @name Querying data related functions */
     //@{
-    std::shared_ptr<Chunk> peek(bit length = bit(-1)) const;
+    std::shared_ptr<Chunk> peek(bit length = bit(-1), int flags = 0) const;
 
-    std::shared_ptr<Chunk> peekAt(bit offset, bit length) const;
+    std::shared_ptr<Chunk> peekAt(bit offset, bit length, int flags = 0) const;
 
     template <typename T>
     bool has(bit length = bit(-1)) const {
@@ -77,23 +77,23 @@ class INET_API ChunkQueue : public cNamedObject
     }
 
     template <typename T>
-    std::shared_ptr<T> peek(bit length = bit(-1)) const {
-        return contents == nullptr ? nullptr : contents->peek<T>(iterator, length);
+    std::shared_ptr<T> peek(bit length = bit(-1), int flags = 0) const {
+        return contents == nullptr ? nullptr : contents->peek<T>(iterator, length, flags);
     }
 
     template <typename T>
-    std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1)) const {
-        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length);
+    std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
+        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
     }
     //@}
 
     /** @name Removing data related functions */
     //@{
-    std::shared_ptr<Chunk> pop(bit length = bit(-1));
+    std::shared_ptr<Chunk> pop(bit length = bit(-1), int flags = 0);
 
     template <typename T>
-    std::shared_ptr<T> pop(bit length = bit(-1)) {
-        const auto& chunk = peek<T>(length);
+    std::shared_ptr<T> pop(bit length = bit(-1), int flags = 0) {
+        const auto& chunk = peek<T>(length, flags);
         if (chunk != nullptr)
             remove(chunk->getChunkLength());
         return chunk;
