@@ -149,7 +149,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
         if (contents->canInsertAtBeginning(chunk)) {
             makeContentsMutable();
             contents->insertAtBeginning(chunk);
-            contents = contents->peek(bit(0), contents->getChunkLength());
+            contents = contents->simplify();
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();
@@ -172,7 +172,7 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
         if (contents->canInsertAtEnd(chunk)) {
             makeContentsMutable();
             contents->insertAtEnd(chunk);
-            contents = contents->peek(bit(0), contents->getChunkLength());
+            contents = contents->simplify();
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();

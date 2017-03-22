@@ -88,7 +88,7 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
             else
                 contents = contents->dupShared();
             contents->insertAtEnd(chunk);
-            contents = contents->peek(bit(0), contents->getChunkLength());
+            contents = contents->simplify();
         }
         else {
             auto sequenceChunk = std::make_shared<SequenceChunk>();

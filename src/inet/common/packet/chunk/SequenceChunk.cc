@@ -186,7 +186,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
                 firstChunk = firstChunk->dupShared();
             firstChunk->insertAtBeginning(chunk);
             firstChunk->markImmutable();
-            chunks.front() = firstChunk->peek(bit(0), firstChunk->getChunkLength());
+            chunks.front() = firstChunk->simplify();
         }
     }
 }
@@ -248,7 +248,7 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
                 lastChunk = lastChunk->dupShared();
             lastChunk->insertAtEnd(chunk);
             lastChunk->markImmutable();
-            chunks.back() = lastChunk->peek(bit(0), lastChunk->getChunkLength());
+            chunks.back() = lastChunk->simplify();
         }
     }
 }

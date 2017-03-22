@@ -96,7 +96,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
             else
                 previousRegion.data = previousRegion.data->dupShared();
             previousRegion.data->insertAtEnd(nextRegion.data);
-            previousRegion.data = previousRegion.data->peek(bit(0), previousRegion.data->getChunkLength());
+            previousRegion.data = previousRegion.data->simplify();
             previousRegion.data->markImmutable();
             nextRegion.data = nullptr;
         }
@@ -107,7 +107,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
             else
                 nextRegion.data = nextRegion.data->dupShared();
             nextRegion.data->insertAtBeginning(previousRegion.data);
-            nextRegion.data = nextRegion.data->peek(bit(0), nextRegion.data->getChunkLength());
+            nextRegion.data = nextRegion.data->simplify();
             nextRegion.data->markImmutable();
             nextRegion.offset = previousRegion.offset;
             previousRegion.data = nullptr;
