@@ -39,7 +39,7 @@ namespace tcp {
 
 class TcpHeader;
 
-#define TCPRECEIVEQUEUE_KLUDGE 0
+#define TCPRECEIVEQUEUE_KLUDGE 1
 
 
 /**
