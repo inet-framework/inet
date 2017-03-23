@@ -347,6 +347,7 @@
         labels = "protocols"
         nedPackages = "
                        inet.linklayer.ppp
+                       inet.common.serializer.ppp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_PPP"
