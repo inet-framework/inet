@@ -47,9 +47,6 @@ class INET_API TCPIPchecksum
     }
 
     static uint16_t _checksum(const void *addr, unsigned int count);
-
-    static uint16_t checksum(unsigned int protocolId, const void *packet, unsigned int packetLength,
-            const void *addr, unsigned int addrLength);
 };
 
 } // namespace serializer

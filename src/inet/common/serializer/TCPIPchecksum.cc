@@ -43,19 +43,6 @@ uint16_t TCPIPchecksum::_checksum(const void *_addr, unsigned int count)
     return (uint16_t)sum;
 }
 
-uint16_t TCPIPchecksum::checksum(unsigned int protocolId, const void *packet, unsigned int packetLength,
-        const void *addr, unsigned int addrLength)
-{
-    uint32_t sum = TCPIPchecksum::_checksum(packet, packetLength)
-            + TCPIPchecksum::_checksum(addr, addrLength) + packetLength + protocolId;
-
-    while (sum >> 16)
-        sum = (sum & 0xFFFF) + (sum >> 16);
-
-    return (uint16_t) ~sum;
-}
-
-
 } // namespace serializer
 } // namespace inet
 
