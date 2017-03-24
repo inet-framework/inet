@@ -18,6 +18,7 @@
 #ifndef __INET_HTTPSERVER_H
 #define __INET_HTTPSERVER_H
 
+#include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
 #include "inet/applications/httptools/server/HttpServerBase.h"
@@ -39,6 +40,12 @@ namespace httptools {
 class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInterface
 {
   protected:
+    struct SockData
+    {
+        TCPSocket *socket = nullptr;    // A reference to the socket object.
+        ChunkQueue queue;       // incoming queue for slices
+    };
+
     TCPSocket listensocket;
     TCPSocketMap sockCollection;
     unsigned long numBroken = 0;
@@ -55,6 +62,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     virtual void socketPeerClosed(int connId, void *yourPtr) override;
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
+    virtual void socketDeleted(int connId, void *yourPtr) override;
 };
 
 } // namespace httptools

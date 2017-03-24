@@ -39,7 +39,6 @@ void HttpServer::initialize(int stage)
 
         int port = par("port");
 
-        TCPSocket listensocket;
         listensocket.setOutputGate(gate("socketOut"));
         listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
         listensocket.bind(port);
@@ -76,8 +75,12 @@ void HttpServer::handleMessage(cMessage *msg)
             socket = new TCPSocket(msg);
             socket->setOutputGate(gate("socketOut"));
             socket->setDataTransferMode(TCP_TRANSFER_OBJECT);
-            socket->setCallbackObject(this, socket);
             sockCollection.addSocket(socket);
+
+            // Initialize the associated data structure
+            SockData *sockdata = new SockData;
+            sockdata->socket = socket;
+            socket->setCallbackObject(this, sockdata);
         }
         EV_DEBUG << "Process the message " << msg->getName() << endl;
         socket->processMessage(msg);
@@ -96,15 +99,21 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool 
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket *)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
+    TCPSocket *socket = sockdata->socket;
 
     // Should be a HttpReplyMessage
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
-    cMessage *reply = handleReceivedMessage(msg);
-    if (reply != nullptr) {
-        socket->send(reply);    // Send to socket if the reply is non-zero.
+    sockdata->queue.push(msg->peekDataAt(byte(0), msg->getDataLength()));
+
+    while (sockdata->queue.has<HttpRequestMessage>()) {
+        auto packet = new Packet(msg->getName(), sockdata->queue.pop<HttpRequestMessage>());
+        packet->setSentFrom(msg->getSenderModule(), msg->getSenderGate()->getId(), msg->getSendingTime());
+        cMessage *reply = handleReceivedMessage(packet);
+        if (reply != nullptr)
+            socket->send(reply);    // Send to socket if the reply is non-zero.
     }
     delete msg;    // Delete the received message here. Must not be deleted in the handler!
 }
@@ -115,7 +124,8 @@ void HttpServer::socketPeerClosed(int connId, void *yourPtr)
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket *)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
+    TCPSocket *socket = sockdata->socket;
 
     // close the connection (if not already closed)
     if (socket->getState() == TCPSocket::PEER_CLOSED) {
@@ -133,7 +143,8 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
         return;
     }
     // Cleanup
-    TCPSocket *socket = (TCPSocket *)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
+    TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
 }
@@ -149,7 +160,8 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket *)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
+    TCPSocket *socket = sockdata->socket;
 
     if (code == TCP_I_CONNECTION_RESET)
         EV_WARN << "Connection reset!\n";
@@ -159,6 +171,12 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
     // Cleanup
     sockCollection.removeSocket(socket);
     delete socket;
+}
+
+void HttpServer::socketDeleted(int connId, void *yourPtr)
+{
+    SockData *sockdata = (SockData *)yourPtr;
+    delete sockdata;
 }
 
 } // namespace httptools

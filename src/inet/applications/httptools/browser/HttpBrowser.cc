@@ -192,15 +192,11 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool
     SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
 
-    auto chunk = msg->peekDataAt(byte(0));
-    sockdata->queue.push(chunk);
-    msg->removeFromBeginning(msg->getPacketLength());   // remove all content
+    sockdata->queue.push(msg->peekDataAt(byte(0), msg->getDataLength()));
 
-    while(const auto& appmsg = sockdata->queue.pop<HttpReplyMessage>()) {
-        Packet *pk = msg->dup();
-        pk->append(appmsg);
-        handleDataMessage(pk);
-    }
+    while (sockdata->queue.has<HttpReplyMessage>())
+        handleDataMessage(new Packet(msg->getName(), sockdata->queue.pop<HttpReplyMessage>()));
+
     delete msg;
 
     if (--sockdata->pending == 0) {
@@ -277,6 +273,7 @@ void HttpBrowser::socketDeleted(int connId, void *yourPtr)
     }
 
     SockData *sockdata = (SockData *)yourPtr;
+    // TODO: socket is already deleted, no?
     TCPSocket *socket = sockdata->socket;
     ASSERT(connId == socket->getConnectionId());
     HttpRequestQueue& queue = sockdata->messageQueue;
