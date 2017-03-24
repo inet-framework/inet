@@ -125,6 +125,9 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     // utility: processing requested ARP resolution timed out
     void arpResolutionTimedOut(IARP::Notification *entry);
 
+    // utility: verifying CRC
+    bool verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header, Packet *packet);
+
     /**
      * Encapsulate packet coming from higher layers into IPv4Header, using
      * the given control info. Override if you subclassed controlInfo and/or

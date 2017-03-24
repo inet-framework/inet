@@ -29,6 +29,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/networklayer/arp/ipv4/ARPPacket_m.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
@@ -187,10 +188,37 @@ void IPv4::endService(cPacket *packet)
     else {    // from network
         EV_INFO << "Received " << packet << " from network.\n";
         const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
-        if (auto pk = dynamic_cast<Packet *>(packet))
-            handleIncomingDatagram(pk, fromIE);
-        else
-            throw cRuntimeError(packet, "Unexpected packet type: %s", packet->getClassName());
+        handleIncomingDatagram(check_and_cast<Packet*>(packet), fromIE);
+    }
+}
+
+bool IPv4::verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header, Packet *packet)
+{
+    switch (ipv4Header->getCrcMode()) {
+        case CRC_DECLARED_CORRECT: {
+            // if the CRC mode is declared to be correct, then the check passes if and only if the chunk is correct
+            return ipv4Header->isCorrect();
+        }
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then the check fails
+            return false;
+        case CRC_COMPUTED: {
+            if (ipv4Header->isCorrect()) {
+                // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
+                auto ipv4HeaderBytes = ipv4Header->Chunk::peek<BytesChunk>(byte(0), ipv4Header->getChunkLength())->getBytes();
+                auto bufferLength = ipv4HeaderBytes.size();
+                auto buffer = new uint8_t[bufferLength];
+                // 1. fill in the data
+                std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
+                // 2. compute the CRC
+                auto computedCrc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+                return computedCrc == 0xFFFF;
+            }
+            else
+                return false;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
     }
 }
 
@@ -677,6 +705,26 @@ void IPv4::fragmentPostRouting(Packet *packet, const InterfaceEntry *destIe, IPv
 
 void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
+    if (crcMode == CRC_COMPUTED) {
+        const auto& ipv4HeaderOld = packet->popHeader<IPv4Header>();
+        // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
+        auto ipv4Header = std::static_pointer_cast<IPv4Header>(ipv4HeaderOld->dupShared());
+        packet->removePoppedHeaders();
+        ipv4Header->setCrc(0);
+        ByteOutputStream ipv4HeaderStream;
+        Chunk::serialize(ipv4HeaderStream, ipv4Header);
+        auto ipv4HeaderBytes = ipv4HeaderStream.getBytes();
+        auto bufferLength = ipv4HeaderBytes.size();
+        auto buffer = new uint8_t[bufferLength];
+        // 1. fill in the data
+        std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
+        // 2. compute the CRC
+        uint16_t crc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
+        ipv4Header->setCrc(crc);
+        ipv4Header->markImmutable();
+        packet->pushHeader(ipv4Header);
+    }
+
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
 
     // hop counter check
@@ -823,11 +871,24 @@ void IPv4::encapsulate(Packet *transportPacket)
     ipv4Header->setTimeToLive(ttl);
     ipv4Header->setTotalLengthField(byte(ipv4Header->getChunkLength()).get() + transportPacket->getByteLength());
     ipv4Header->setCrcMode(crcMode);
-    uint16_t crc = 0;
-    if (crcMode == CRC_COMPUTED) {
-        // TODO:
+    ipv4Header->setCrc(0);
+    switch (crcMode) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+            ipv4Header->setCrc(0xC00D);
+            break;
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+            ipv4Header->setCrc(0xBAAD);
+            break;
+        case CRC_COMPUTED: {
+            ipv4Header->setCrc(0);
+            // crc will be calculated in fragmentAndSend()
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
     }
-    ipv4Header->setCrc(crc);
     ipv4Header->markImmutable();
     transportPacket->pushHeader(ipv4Header);
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
