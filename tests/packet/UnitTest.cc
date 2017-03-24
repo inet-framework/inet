@@ -203,7 +203,6 @@ static void testIncomplete()
     assert(tcpHeader2->getChunkLength() == byte(4));
     assert(tcpHeader2->getCrcMode() == CRC_COMPUTED);
     assert(tcpHeader2->getSrcPort() == 1000);
-    assert(tcpHeader2->getDestPort() != 1000);
 }
 
 static void testCorrect()
