@@ -23,6 +23,7 @@
 #include <list>
 
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -196,9 +197,9 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     // crc
-    virtual bool verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet);
-    virtual void insertCrc(const L3Address srcAddress, const L3Address destAddress, const std::shared_ptr<UdpHeader> udpHeader, Packet *packet);
-    virtual uint16_t computeCrc(const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
+    virtual bool verifyCrc(const Protocol *networkProtocol, const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet);
+    virtual void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet);
+    virtual uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
 
   public:
     UDP();

@@ -374,18 +374,6 @@ void UDP::processPacketFromApp(Packet *packet)
     if (packet->getTag<DscpReq>() == nullptr)
         packet->ensureTag<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
 
-    auto udpHeader = std::make_shared<UdpHeader>();
-    // set source and destination port
-    udpHeader->setSourcePort(srcPort);
-    udpHeader->setDestinationPort(destPort);
-    udpHeader->setTotalLengthField(byte(udpHeader->getChunkLength() + packet->getPacketLength()).get());
-    if (crcMode != CRC_COMPUTED) // CRC_COMPUTED is done in an INetfilter hook
-        insertCrc(L3Address(), L3Address(), udpHeader, packet);
-    udpHeader->markImmutable();
-    packet->pushHeader(udpHeader);
-    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
-    packet->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
-
     const Protocol *l3Protocol = nullptr;
     if (destAddr.getType() == L3Address::IPv4) {
         // send to IPv4
@@ -399,6 +387,19 @@ void UDP::processPacketFromApp(Packet *packet)
         // send to generic
         l3Protocol = &Protocol::gnp;
     }
+
+    auto udpHeader = std::make_shared<UdpHeader>();
+    // set source and destination port
+    udpHeader->setSourcePort(srcPort);
+    udpHeader->setDestinationPort(destPort);
+    udpHeader->setTotalLengthField(byte(udpHeader->getChunkLength() + packet->getPacketLength()).get());
+    if (crcMode != CRC_COMPUTED) // CRC_COMPUTED is done in an INetfilter hook
+        insertCrc(l3Protocol, L3Address(), L3Address(), udpHeader, packet);
+    udpHeader->markImmutable();
+    packet->pushHeader(udpHeader);
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::udp);
+    packet->ensureTag<TransportProtocolTag>()->setProtocol(&Protocol::udp);
+
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
@@ -425,8 +426,9 @@ void UDP::processUDPPacket(Packet *udpPacket)
     auto destAddr = l3AddressInd->getDestAddress();
     auto totalLength = byte(udpHeader->getTotalLengthField());
     auto hasIncorrectLength = totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
+    auto networkProtocol = udpPacket->getMandatoryTag<NetworkProtocolInd>()->getProtocol();
 
-    if (hasIncorrectLength || !verifyCrc(udpHeader, udpPacket)) {
+    if (hasIncorrectLength || !verifyCrc(networkProtocol, udpHeader, udpPacket)) {
         EV_WARN << "Packet has bit error, discarding\n";
         emit(droppedPkBadChecksumSignal, udpPacket);
         numDroppedBadChecksum++;
@@ -1237,45 +1239,24 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
 
 INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *packet, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress)
 {
-    if (false) ;
-#ifdef WITH_IPv4
-    else if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
-        auto ipv4Header = packet->peekHeader<IPv4Header>();
-        if (ipv4Header->getTransportProtocol() == IP_PROT_UDP) {
-            packet->removeFromBeginning(ipv4Header->getChunkLength());
-            auto udpHeader = std::static_pointer_cast<UdpHeader>(packet->peekHeader<UdpHeader>()->dupShared());
-            packet->removeFromBeginning(udpHeader->getChunkLength());
-            // TODO: src address is not filled in yet, should be: ipv4Header->getSrcAddress();
-            auto srcAddress = outputInterfaceEntry->ipv4Data()->getIPAddress();
-            auto destAddress = ipv4Header->getDestAddress();
-            udp->insertCrc(srcAddress, destAddress, udpHeader, packet);
-            udpHeader->markImmutable();
-            packet->pushHeader(udpHeader);
-            packet->pushHeader(ipv4Header);
-        }
+    auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    const auto& networkHeader = peekNetworkHeader(packet);
+    if (networkHeader->getTransportProtocol() == IP_PROT_UDP) {
+        packet->removeFromBeginning(networkHeader->getNetworkHeaderLength());
+        auto udpHeader = std::static_pointer_cast<UdpHeader>(packet->peekHeader<UdpHeader>()->dupShared());
+        packet->removeFromBeginning(udpHeader->getChunkLength());
+        // TODO: src address is not filled in yet, should be: ipv4Header->getSrcAddress();
+        const L3Address& srcAddress = networkHeader->getSourceAddress();
+        const L3Address& destAddress = networkHeader->getDestinationAddress();
+        udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        udpHeader->markImmutable();
+        packet->pushHeader(udpHeader);
+        packet->pushHeader(CHK(std::dynamic_pointer_cast<Chunk>(networkHeader)));
     }
-#endif
-#ifdef WITH_IPv6
-    else if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
-        auto ipv6Header = packet->peekHeader<IPv6Header>();
-        if (ipv6Header->getTransportProtocol() == IP_PROT_UDP) {
-            packet->removeFromBeginning(ipv6Header->getChunkLength());
-            auto udpHeader = std::static_pointer_cast<UdpHeader>(packet->peekHeader<UdpHeader>()->dupShared());
-            packet->removeFromBeginning(udpHeader->getChunkLength());
-            // TODO: src address is not filled in yet, should be: ipv6Header->getSrcAddress();
-            auto srcAddress = outputInterfaceEntry->ipv6Data()->getLinkLocalAddress();
-            auto destAddress = ipv6Header->getDestAddress();
-            udp->insertCrc(srcAddress, destAddress, udpHeader, packet);
-            udpHeader->markImmutable();
-            packet->pushHeader(udpHeader);
-            packet->pushHeader(ipv6Header);
-        }
-    }
-#endif
     return ACCEPT;
 }
 
-void UDP::insertCrc(const L3Address srcAddress, const L3Address destAddress, const std::shared_ptr<UdpHeader> udpHeader, Packet *packet)
+void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
 {
     udpHeader->setCrcMode(crcMode);
     switch (crcMode) {
@@ -1299,7 +1280,7 @@ void UDP::insertCrc(const L3Address srcAddress, const L3Address destAddress, con
             Chunk::serialize(udpHeaderStream, udpHeader);
             auto udpHeaderBytes = udpHeaderStream.getBytes();
             auto udpDataBytes = packet->peekDataBytes()->getBytes();
-            auto crc = computeCrc(srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
+            auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
             udpHeader->setCrc(crc);
             break;
         }
@@ -1308,7 +1289,7 @@ void UDP::insertCrc(const L3Address srcAddress, const L3Address destAddress, con
     }
 }
 
-bool UDP::verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
+bool UDP::verifyCrc(const Protocol *networkProtocol, const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
 {
     switch (udpHeader->getCrcMode()) {
         case CRC_DISABLED:
@@ -1336,7 +1317,7 @@ bool UDP::verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
                 auto totalLength = udpHeader->getTotalLengthField();
                 auto udpData = packet->peekDataAt<BytesChunk>(byte(0), byte(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
                 auto udpDataBytes = udpData->getBytes();
-                auto computedCrc = computeCrc(srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
+                auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
             }
         }
@@ -1345,13 +1326,21 @@ bool UDP::verifyCrc(const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
     }
 }
 
-uint16_t UDP::computeCrc(const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes)
+uint16_t UDP::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes)
 {
     auto pseudoHeader = std::make_shared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);
     pseudoHeader->setDestAddress(destAddress);
+    pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
     pseudoHeader->setProtocolId(IP_PROT_UDP);
     pseudoHeader->setPacketLength(udpHeaderBytes.size() + udpDataBytes.size());
+    // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, other: ???
+    if (networkProtocol == &Protocol::ipv4)
+        pseudoHeader->setChunkLength(byte(12));
+    else if (networkProtocol == &Protocol::ipv6)
+        pseudoHeader->setChunkLength(byte(40));
+    else
+        throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
     pseudoHeader->markImmutable();
     auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(byte(0), pseudoHeader->getChunkLength())->getBytes();
     // Excerpt from RFC 768:

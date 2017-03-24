@@ -99,10 +99,22 @@ void TCP::initialize(int stage)
         const char *crcModeString = par("crcMode");
         if (!strcmp(crcModeString, "declared"))
             crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
+        else if (!strcmp(crcModeString, "computed")) {
             crcMode = CRC_COMPUTED;
+#ifdef WITH_IPv4
+            auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
+            if (ipv4 != nullptr)
+                ipv4->registerHook(0, &crcInsertion);
+#endif
+#ifdef WITH_IPv6
+            auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ip"));
+            if (ipv6 != nullptr)
+                ipv6->registerHook(0, &crcInsertion);
+#endif
+        }
         else
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
+        crcInsertion.setCrcMode(crcMode);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *host = findContainingNode(this);

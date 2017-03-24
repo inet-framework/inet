@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeaderSerializer.h"
@@ -25,23 +26,35 @@ Register_Serializer(TransportPseudoHeader, TransportPseudoHeaderSerializer);
 
 void TransportPseudoHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
+    //FIXME: ipv6, generic ????
     const auto& transportPseudoHeader = std::static_pointer_cast<const TransportPseudoHeader>(chunk);
-    stream.writeIPv4Address(transportPseudoHeader->getSrcAddress().toIPv4());
-    stream.writeIPv4Address(transportPseudoHeader->getDestAddress().toIPv4());
-    stream.writeByte(0);
-    stream.writeByte(transportPseudoHeader->getProtocolId());
-    stream.writeUint16(transportPseudoHeader->getPacketLength());
+    auto nwProtId = transportPseudoHeader->getNetworkProtocolId();
+    if (nwProtId == Protocol::ipv4.getId()) {
+        ASSERT(transportPseudoHeader->getChunkLength() == byte(12));
+        stream.writeIPv4Address(transportPseudoHeader->getSrcAddress().toIPv4());
+        stream.writeIPv4Address(transportPseudoHeader->getDestAddress().toIPv4());
+        stream.writeByte(0);
+        stream.writeByte(transportPseudoHeader->getProtocolId());
+        stream.writeUint16(transportPseudoHeader->getPacketLength());
+    }
+    else
+    if (nwProtId == Protocol::ipv6.getId()) {
+        ASSERT(transportPseudoHeader->getChunkLength() == byte(40));
+        stream.writeIPv6Address(transportPseudoHeader->getSrcAddress().toIPv6());
+        stream.writeIPv6Address(transportPseudoHeader->getDestAddress().toIPv6());
+        stream.writeUint32(transportPseudoHeader->getPacketLength());
+        stream.writeByte(0);
+        stream.writeByte(0);
+        stream.writeByte(0);
+        stream.writeByte(transportPseudoHeader->getProtocolId());
+    }
+    else
+        throw cRuntimeError("Unknown network protocol: %d", nwProtId);
 }
 
 std::shared_ptr<Chunk> TransportPseudoHeaderSerializer::deserialize(ByteInputStream& stream) const
 {
-    auto transportPseudoHeader = std::make_shared<TransportPseudoHeader>();
-    transportPseudoHeader->setSrcAddress(stream.readIPv4Address());
-    transportPseudoHeader->setDestAddress(stream.readIPv4Address());
-    stream.readByte();
-    transportPseudoHeader->setProtocolId(stream.readByte());
-    transportPseudoHeader->setPacketLength(stream.readUint16());
-    return transportPseudoHeader;
+    throw cRuntimeError("TransportPseudoHeader is not a valid deserializable data");
 }
 
 } // namespace serializer
