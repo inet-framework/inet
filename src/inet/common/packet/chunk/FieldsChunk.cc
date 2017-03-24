@@ -14,6 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 
@@ -41,6 +42,35 @@ void FieldsChunk::handleChange()
     Chunk::handleChange();
     delete serializedBytes;
     serializedBytes = nullptr;
+}
+
+std::shared_ptr<Chunk> FieldsChunk::peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const
+{
+    bit chunkLength = getChunkLength();
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    // 1. peeking an empty part returns nullptr
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+        if (predicate == nullptr || predicate(nullptr))
+            return nullptr;
+    }
+    // 2. peeking the whole part returns this chunk
+    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+        auto result = const_cast<FieldsChunk *>(this)->shared_from_this();
+        if (predicate == nullptr || predicate(result))
+            return result;
+    }
+    // 3. peeking a part from the beginning without conversion returns an incomplete copy of this chunk
+    if (predicate != nullptr && predicate(const_cast<FieldsChunk *>(this)->shared_from_this()) && iterator.getPosition() == bit(0) && flags & PF_ALLOW_INCOMPLETE) {
+        auto copy = std::static_pointer_cast<FieldsChunk>(dupShared());
+        copy->setChunkLength(length);
+        copy->markIncomplete();
+        return copy;
+    }
+    // 4. peeking without conversion returns a SliceChunk
+    if (converter == nullptr)
+        return peekWithConversion<SliceChunk>(iterator, length);
+    // 5. peeking with conversion
+    return converter(const_cast<FieldsChunk *>(this)->shared_from_this(), iterator, length);
 }
 
 } // namespace

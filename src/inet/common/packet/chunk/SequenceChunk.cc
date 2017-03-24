@@ -34,6 +34,55 @@ SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
 {
 }
 
+std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const
+{
+    bit chunkLength = getChunkLength();
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    // 1. peeking an empty part returns nullptr
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+        if (predicate == nullptr || predicate(nullptr))
+            return nullptr;
+    }
+    // 2. peeking the whole part returns this chunk only if length is also specified
+    if (iterator.getPosition() == bit(0) && length == chunkLength) {
+        auto result = const_cast<SequenceChunk *>(this)->shared_from_this();
+        if (predicate == nullptr || predicate(result))
+            return result;
+    }
+    // 3. peeking a part represented by an element chunk with its index returns that element chunk
+    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
+        const auto& chunk = getElementChunk(iterator);
+        if (length == bit(-1) || chunk->getChunkLength() == length) {
+            if (predicate == nullptr || predicate(chunk))
+                return chunk;
+        }
+    }
+    // 4. peeking a part represented by an element chunk returns that element chunk
+    bit position = bit(0);
+    int startIndex = getStartIndex(iterator);
+    int endIndex = getEndIndex(iterator);
+    int increment = getIndexIncrement(iterator);
+    for (int i = startIndex; i != endIndex + increment; i += increment) {
+        auto& chunk = chunks[i];
+        bit chunkLength = chunk->getChunkLength();
+        // 4.1 peeking the whole part of an element chunk returns that element chunk
+        if (iterator.getPosition() == position && (length == bit(-1) || length == chunk->getChunkLength())) {
+            if (predicate == nullptr || predicate(chunk))
+                return chunk;
+        }
+        // 4.2 peeking a part of an element chunk returns the part of that element chunk
+        if (position <= iterator.getPosition() && iterator.getPosition() < position + chunkLength &&
+            (length == bit(-1) || iterator.getPosition() + length <= position + chunkLength))
+            return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() - position, -1), length, flags);
+        position += chunkLength;
+    }
+    // 5. peeking without conversion returns a SequenceChunk
+    if (converter == nullptr)
+        return peekWithConversion<SequenceChunk>(iterator, length);
+    // 6. peeking with conversion
+    return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length);
+}
+
 std::shared_ptr<Chunk> SequenceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     assert(chunk->isImmutable());
@@ -139,35 +188,6 @@ void SequenceChunk::moveIterator(Iterator& iterator, bit length) const
         iterator.setIndex(iterator.getIndex() + 1);
     else
         iterator.setIndex(-1);
-}
-
-std::shared_ptr<Chunk> SequenceChunk::peekSequenceChunk1(const Iterator& iterator, bit length) const
-{
-    if (iterator.getIndex() != -1 && iterator.getIndex() != chunks.size()) {
-        const auto& chunk = getElementChunk(iterator);
-        if (length == bit(-1) || chunk->getChunkLength() == length)
-            return chunk;
-    }
-    return nullptr;
-}
-
-std::shared_ptr<Chunk> SequenceChunk::peekSequenceChunk2(const Iterator& iterator, bit length) const
-{
-    bit position = bit(0);
-    int startIndex = getStartIndex(iterator);
-    int endIndex = getEndIndex(iterator);
-    int increment = getIndexIncrement(iterator);
-    for (int i = startIndex; i != endIndex + increment; i += increment) {
-        auto& chunk = chunks[i];
-        bit chunkLength = chunk->getChunkLength();
-        if (iterator.getPosition() == position && (length == bit(-1) || length == chunk->getChunkLength()))
-            return chunk;
-        else if (position <= iterator.getPosition() && iterator.getPosition() < position + chunkLength &&
-                 (length == bit(-1) || iterator.getPosition() + length <= position + chunkLength))
-            return chunk->peek(ForwardIterator(iterator.getPosition() - position, -1), length);
-        position += chunkLength;
-    }
-    return nullptr;
 }
 
 void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
@@ -335,24 +355,6 @@ void SequenceChunk::removeFromEnd(bit length)
         }
     }
     chunks.erase(it.base(), chunks.end());
-}
-
-std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(const Iterator& iterator, bit length) const
-{
-    bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
-        return nullptr;
-    // NOTE: if length is -1 we return the child chunk instead of this
-    else if (iterator.getPosition() == bit(0) && length == chunkLength)
-        return const_cast<SequenceChunk *>(this)->shared_from_this();
-    else {
-        if (auto chunk = peekSequenceChunk1(iterator, length))
-            return chunk;
-        if (auto chunk = peekSequenceChunk2(iterator, length))
-            return chunk;
-        return peekWithConversion<SequenceChunk>(iterator, length);
-    }
 }
 
 std::string SequenceChunk::str() const

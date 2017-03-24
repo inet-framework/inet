@@ -49,9 +49,7 @@ class INET_API SliceChunk : public Chunk
   protected:
     Chunk *_getChunk() const { return chunk.get(); } // only for class descriptor
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;
-
-    virtual std::shared_ptr<Chunk> peekSliceChunk(const Iterator& iterator, bit length = bit(-1)) const override;
+    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const override;
 
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 

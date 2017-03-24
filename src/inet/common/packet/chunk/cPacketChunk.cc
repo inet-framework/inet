@@ -14,6 +14,7 @@
 //
 
 #include "inet/common/packet/chunk/cPacketChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 
 namespace inet {
 
@@ -34,6 +35,28 @@ cPacketChunk::cPacketChunk(const cPacketChunk& other) :
 cPacketChunk::~cPacketChunk()
 {
     dropAndDelete(packet);
+}
+
+std::shared_ptr<Chunk> cPacketChunk::peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const
+{
+    bit chunkLength = getChunkLength();
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    // 1. peeking an empty part returns nullptr
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+        if (predicate == nullptr || predicate(nullptr))
+            return nullptr;
+    }
+    // 2. peeking the whole part returns this chunk
+    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+        auto result = const_cast<cPacketChunk *>(this)->shared_from_this();
+        if (predicate == nullptr || predicate(result))
+            return result;
+    }
+    // 3. peeking without conversion returns a SliceChunk
+    if (converter == nullptr)
+        return peekWithConversion<SliceChunk>(iterator, length);
+    // 4. peeking with conversion
+    return converter(const_cast<cPacketChunk *>(this)->shared_from_this(), iterator, length);
 }
 
 std::string cPacketChunk::str() const {

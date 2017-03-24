@@ -51,6 +51,8 @@ class FieldsChunk : public Chunk
         return Chunk::createChunk(typeInfo, chunk, offset, length);
     }
 
+    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const override;
+
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{

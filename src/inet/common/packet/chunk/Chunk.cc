@@ -50,16 +50,10 @@ std::shared_ptr<Chunk> Chunk::createChunk(const std::type_info& typeInfo, const 
     return deserialize(inputStream, typeInfo);
 }
 
-std::shared_ptr<Chunk> Chunk::peekUnchecked(const Iterator& iterator, bit length) const
+std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
 {
-    bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
-        return nullptr;
-    else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
-        return const_cast<Chunk *>(this)->shared_from_this();
-    else
-        return peekWithConversion<SliceChunk>(iterator, length);
+    const auto& chunk = peekUnchecked(nullptr, nullptr, iterator, length, flags);
+    return checkPeekResult<Chunk>(chunk, flags);
 }
 
 std::string Chunk::str() const

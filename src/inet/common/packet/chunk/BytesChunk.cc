@@ -34,6 +34,31 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
+std::shared_ptr<Chunk> BytesChunk::peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const
+{
+    bit chunkLength = getChunkLength();
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    // 1. peeking an empty part returns nullptr
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+        if (predicate == nullptr || predicate(nullptr))
+            return nullptr;
+    }
+    // 2. peeking the whole part returns this chunk
+    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+        auto result = const_cast<BytesChunk *>(this)->shared_from_this();
+        if (predicate == nullptr || predicate(result))
+            return result;
+    }
+    // 3. peeking without conversion returns a BytesChunk
+    if (converter == nullptr) {
+        auto chunk = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + byte(iterator.getPosition()).get(), length == bit(-1) ? bytes.end() : bytes.begin() + byte(iterator.getPosition() + length).get()));
+        chunk->markImmutable();
+        return chunk;
+    }
+    // 4. peeking with conversion
+    return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length);
+}
+
 std::shared_ptr<Chunk> BytesChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     ByteOutputStream outputStream((chunk->getChunkLength().get() + 7) >> 3);
@@ -102,21 +127,6 @@ void BytesChunk::removeFromEnd(bit length)
     assert(bit(0) <= length && length <= getChunkLength());
     handleChange();
     bytes.erase(bytes.end() - byte(length).get(), bytes.end());
-}
-
-std::shared_ptr<Chunk> BytesChunk::peekUnchecked(const Iterator& iterator, bit length) const
-{
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= getChunkLength());
-    bit chunkLength = getChunkLength();
-    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
-        return nullptr;
-    else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength))
-        return const_cast<BytesChunk *>(this)->shared_from_this();
-    else {
-        auto result = std::make_shared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + byte(iterator.getPosition()).get(), length == bit(-1) ? bytes.end() : bytes.begin() + byte(iterator.getPosition() + length).get()));
-        result->markImmutable();
-        return result;
-    }
 }
 
 std::string BytesChunk::str() const

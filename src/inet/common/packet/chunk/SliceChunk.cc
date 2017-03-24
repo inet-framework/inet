@@ -45,6 +45,31 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, bit offset, bit leng
     assert(bit(0) <= this->length && this->offset + this->length <= chunkLength);
 }
 
+std::shared_ptr<Chunk> SliceChunk::peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const
+{
+    bit chunkLength = getChunkLength();
+    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    // 1. peeking an empty part returns nullptr
+    if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
+        if (predicate == nullptr || predicate(nullptr))
+            return nullptr;
+    }
+    // 2. peeking the whole part
+    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
+        // 2.1 peeking the whole part returns the sliced chunk
+        if (offset == bit(0) && chunkLength == chunk->getChunkLength()) {
+            if (predicate == nullptr || predicate(chunk))
+                return chunk;
+        }
+        // 2.2 peeking the whole part returns this chunk
+        auto result = const_cast<SliceChunk *>(this)->shared_from_this();
+        if (predicate == nullptr || predicate(result))
+            return result;
+    }
+    // 3. peeking anything else returns what peeking the sliced chunk returns
+    return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == bit(-1) ? chunkLength : length, flags);
+}
+
 std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     assert(chunk->isImmutable());
@@ -53,18 +78,6 @@ std::shared_ptr<Chunk> SliceChunk::createChunk(const std::type_info& typeInfo, c
     assert(bit(0) <= offset && offset <= chunkLength);
     assert(bit(0) <= sliceLength && sliceLength <= chunkLength);
     return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
-}
-
-std::shared_ptr<Chunk> SliceChunk::peekSliceChunk(const Iterator& iterator, bit length) const
-{
-    if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == this->length)) {
-        if (offset == bit(0) && this->length == chunk->getChunkLength())
-            return chunk;
-        else
-            return const_cast<SliceChunk *>(this)->shared_from_this();
-    }
-    else
-        return chunk->peek(ForwardIterator(iterator.getPosition() + offset, -1), length);
 }
 
 void SliceChunk::setOffset(bit offset)
@@ -133,15 +146,6 @@ void SliceChunk::removeFromEnd(bit length)
     assert(bit(0) <= length && length <= this->length);
     handleChange();
     this->length -= length;
-}
-
-std::shared_ptr<Chunk> SliceChunk::peekUnchecked(const Iterator& iterator, bit length) const
-{
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= this->length);
-    if (length == bit(0) || (iterator.getPosition() == this->length && length == bit(-1)))
-        return nullptr;
-    else
-        return peekSliceChunk(iterator, length);
 }
 
 std::string SliceChunk::str() const

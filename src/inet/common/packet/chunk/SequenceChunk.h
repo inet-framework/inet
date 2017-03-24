@@ -46,11 +46,6 @@ class INET_API SequenceChunk : public Chunk
     int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
     const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const override;
-
-    virtual std::shared_ptr<Chunk> peekSequenceChunk1(const Iterator& iterator, bit length) const override;
-    virtual std::shared_ptr<Chunk> peekSequenceChunk2(const Iterator& iterator, bit length) const override;
-
     void doInsertToBeginning(const std::shared_ptr<Chunk>& chunk);
     void doInsertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
     void doInsertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
@@ -60,6 +55,8 @@ class INET_API SequenceChunk : public Chunk
     void doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
 
     std::deque<std::shared_ptr<Chunk>> dupChunks() const;
+
+    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const override;
 
     static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 

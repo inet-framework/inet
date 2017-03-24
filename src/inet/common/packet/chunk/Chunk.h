@@ -152,6 +152,9 @@ using namespace units::values;
 // - TcpOption2
 class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
+  friend class SliceChunk;
+  friend class SequenceChunk;
+
   protected:
     /**
      * This enum specifies bitmasks for the flags field of Chunk.
@@ -283,35 +286,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         return chunk;
     }
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const;
-
-    template <typename T>
-    std::shared_ptr<T> peekUnchecked(const Iterator& iterator, bit length = bit(-1)) const {
-        bit chunkLength = getChunkLength();
-        assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
-        if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1)))
-            return nullptr;
-        else if (iterator.getPosition() == bit(0) && (length == bit(-1) || length == chunkLength)) {
-            if (auto tChunk = std::dynamic_pointer_cast<T>(const_cast<Chunk *>(this)->shared_from_this()))
-                return tChunk;
-        }
-        switch (getChunkType()) {
-            case CT_SLICE: {
-                if (auto tChunk = std::dynamic_pointer_cast<T>(peekSliceChunk(iterator, length)))
-                    return tChunk;
-                break;
-            }
-            case CT_SEQUENCE:
-                if (auto tChunk = std::dynamic_pointer_cast<T>(peekSequenceChunk1(iterator, length)))
-                    return tChunk;
-                if (auto tChunk = std::dynamic_pointer_cast<T>(peekSequenceChunk2(iterator, length)))
-                    return tChunk;
-                break;
-            default:
-                break;
-        }
-        return peekWithConversion<T>(iterator, length);
-    }
+    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const = 0;
 
     template <typename T>
     std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length = bit(-1)) const {
@@ -454,9 +429,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
-        return checkPeekResult<Chunk>(peekUnchecked(iterator, length), flags);
-    }
+    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
@@ -481,7 +454,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
-        return checkPeekResult<T>(peekUnchecked<T>(iterator, length), flags);
+        const auto& predicate = [] (const std::shared_ptr<Chunk>& chunk) -> bool { return chunk == nullptr || std::dynamic_pointer_cast<T>(chunk); };
+        const auto& converter = [] (const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length) -> std::shared_ptr<Chunk> { return chunk->peekWithConversion<T>(iterator, length); };
+        const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
+        return checkPeekResult<T>(std::static_pointer_cast<T>(chunk), flags);
     }
 
     /**
