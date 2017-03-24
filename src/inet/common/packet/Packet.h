@@ -224,6 +224,10 @@ class INET_API Packet : public cPacket
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
     }
 
+    std::shared_ptr<Chunk> peekData() const {
+        return peekDataAt(bit(0), getDataLength());
+    }
+
     std::shared_ptr<BitsChunk> peekDataBits() const {
         return peekDataAt<BitsChunk>(bit(0), getDataLength());
     }
@@ -249,6 +253,10 @@ class INET_API Packet : public cPacket
         assert(bit(0) <= offset && offset <= getPacketLength());
         assert(bit(-1) <= length && length <= getPacketLength());
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
+    }
+
+    std::shared_ptr<Chunk> peek() const {
+        return peekAt(bit(0), getPacketLength());
     }
 
     std::shared_ptr<BitsChunk> peekBits() const {
