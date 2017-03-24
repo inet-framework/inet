@@ -83,7 +83,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(std::function<bool(const std
     return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length);
 }
 
-std::shared_ptr<Chunk> SequenceChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     assert(chunk->isImmutable());
     auto sequenceChunk = std::make_shared<SequenceChunk>();

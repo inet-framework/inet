@@ -61,7 +61,7 @@ std::shared_ptr<Chunk> BitCountChunk::peekUnchecked(std::function<bool(const std
     return converter(const_cast<BitCountChunk *>(this)->shared_from_this(), iterator, length);
 }
 
-std::shared_ptr<Chunk> BitCountChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> BitCountChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;

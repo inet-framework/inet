@@ -59,7 +59,7 @@ std::shared_ptr<Chunk> BitsChunk::peekUnchecked(std::function<bool(const std::sh
     return converter(const_cast<BitsChunk *>(this)->shared_from_this(), iterator, length);
 }
 
-std::shared_ptr<Chunk> BitsChunk::createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
 {
     ByteOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);

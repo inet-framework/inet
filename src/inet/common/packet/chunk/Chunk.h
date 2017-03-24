@@ -267,7 +267,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * and has the provided length. This function isn't a constructor to allow
      * creating instances of message compiler generated field based chunk classes.
      */
-    static std::shared_ptr<Chunk> createChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
+    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
+
+    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const = 0;
 
     template <typename T>
     std::shared_ptr<T> checkPeekResult(const std::shared_ptr<T>& chunk, int flags) const {
@@ -286,14 +288,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         return chunk;
     }
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const = 0;
-
     template <typename T>
     std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length = bit(-1)) const {
         assert(isImmutable());
         assert(iterator.isForward() || length != bit(-1));
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
-        const auto& chunk = T::createChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length);
+        const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length);
         chunk->markImmutable();
         return std::static_pointer_cast<T>(chunk);
     }
