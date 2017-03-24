@@ -19,14 +19,19 @@
 #ifndef __INET_INETWORKHEADER_H
 #define __INET_INETWORKHEADER_H
 
+#include "inet/common/Units.h"
 #include "inet/networklayer/common/L3Address.h"
 
+
 namespace inet {
+
+using units::values::bit;
 
 class INET_API INetworkHeader
 {
   public:
     virtual ~INetworkHeader() {}
+    virtual bit getNetworkHeaderLength() const = 0;
     virtual L3Address getSourceAddress() const = 0;
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;

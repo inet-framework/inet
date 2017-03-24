@@ -37,6 +37,7 @@ class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base, public
     GenericDatagramHeader& operator=(const GenericDatagramHeader& other) { GenericDatagramHeader_Base::operator=(other); return *this; }
     virtual GenericDatagramHeader *dup() const override { return new GenericDatagramHeader(*this); }
 
+    virtual bit getNetworkHeaderLength() const override { return getChunkLength(); }
     virtual L3Address getSourceAddress() const override { return GenericDatagramHeader_Base::_getSrcAddr(); }
     virtual void setSourceAddress(const L3Address& addr) override { GenericDatagramHeader_Base::setSourceAddress(addr); }
     virtual L3Address getDestinationAddress() const override { return GenericDatagramHeader_Base::_getDestAddr(); }

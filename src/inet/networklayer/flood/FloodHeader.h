@@ -37,6 +37,7 @@ class INET_API FloodHeader : public FloodHeader_Base, public INetworkHeader
 
     virtual FloodHeader *dup() const override { return new FloodHeader(*this); }
 
+    virtual bit getNetworkHeaderLength() const override { return getChunkLength(); }
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
