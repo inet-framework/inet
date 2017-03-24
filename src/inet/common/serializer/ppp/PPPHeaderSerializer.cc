@@ -47,14 +47,14 @@ void PppTrailerSerializer::serialize(ByteOutputStream& stream, const std::shared
 {
     const auto& pppTrailer = std::static_pointer_cast<const PppTrailer>(chunk);
     stream.writeUint16(pppTrailer->getFcs());
-    stream.writeUint8(pppTrailer->getFlag());
+//    stream.writeUint8(pppTrailer->getFlag()); //FIXME KLUDGE length is currently 2 bytes instead of 3 bytes
 }
 
 std::shared_ptr<Chunk> PppTrailerSerializer::deserialize(ByteInputStream& stream) const
 {
     auto pppTrailer = std::make_shared<PppTrailer>();
     pppTrailer->setFcs(stream.readUint16());
-    pppTrailer->setFlag(stream.readUint8());
+//    pppTrailer->setFlag(stream.readUint8()); //FIXME KLUDGE length is currently 2 bytes instead of 3 bytes
     return pppTrailer;
 }
 
