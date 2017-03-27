@@ -246,11 +246,14 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     static int nextId;
 
   protected:
+    /**
+     * The id is automatically assigned sequentially during construction.
+     */
     int id;
     /**
-     * The boolean flags merged into a single integer.
+     * The boolean chunk flags are merged into a single integer.
      */
-    uint16_t flags;
+    int flags;
 
   protected:
     virtual void handleChange() override;
@@ -266,7 +269,18 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     typedef bool (*PeekPredicate)(const std::shared_ptr<Chunk>&);
     typedef std::shared_ptr<Chunk> (*PeekConverter)(const std::shared_ptr<Chunk>& chunk, const Chunk::Iterator& iterator, bit length);
+
     virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
+
+    template <typename T>
+    std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length = bit(-1)) const {
+        assert(isImmutable());
+        assert(iterator.isForward() || length != bit(-1));
+        auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
+        const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length);
+        chunk->markImmutable();
+        return std::static_pointer_cast<T>(chunk);
+    }
 
     template <typename T>
     std::shared_ptr<T> checkPeekResult(const std::shared_ptr<T>& chunk, int flags) const {
@@ -283,16 +297,6 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
                 throw cRuntimeError("Returning an improperly represented chunk is not allowed according to the flags: %x", flags);
         }
         return chunk;
-    }
-
-    template <typename T>
-    std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length = bit(-1)) const {
-        assert(isImmutable());
-        assert(iterator.isForward() || length != bit(-1));
-        auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
-        const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length);
-        chunk->markImmutable();
-        return std::static_pointer_cast<T>(chunk);
     }
 
   public:
@@ -398,6 +402,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     /** @name Chunk querying related functions */
     //@{
+    /**
+     * Returns the sequentially assigned id.
+     */
     virtual int getChunkId() const { return id; }
 
     /**
