@@ -269,7 +269,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      */
     static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length);
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const = 0;
+    typedef bool (*PeekPredicate)(const std::shared_ptr<Chunk>&);
+    typedef std::shared_ptr<Chunk> (*PeekConverter)(const std::shared_ptr<Chunk>& chunk, const Chunk::Iterator& iterator, bit length);
+    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
 
     template <typename T>
     std::shared_ptr<T> checkPeekResult(const std::shared_ptr<T>& chunk, int flags) const {

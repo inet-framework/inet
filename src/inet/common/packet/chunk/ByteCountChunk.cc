@@ -36,7 +36,7 @@ ByteCountChunk::ByteCountChunk(byte length) :
     assert(length >= byte(0));
 }
 
-std::shared_ptr<Chunk> ByteCountChunk::peekUnchecked(std::function<bool(const std::shared_ptr<Chunk>&)> predicate, std::function<const std::shared_ptr<Chunk>(const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length)> converter, const Iterator& iterator, bit length, int flags) const
+std::shared_ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
