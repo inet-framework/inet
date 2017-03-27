@@ -30,6 +30,7 @@ simsignal_t NF_PP_TX_END = cComponent::registerSignal("NF_PP_TX_END");
 simsignal_t NF_PP_RX_END = cComponent::registerSignal("NF_PP_RX_END");
 simsignal_t NF_TX_ACKED = cComponent::registerSignal("NF_TX_ACKED");
 simsignal_t NF_L2_Q_DROP = cComponent::registerSignal("NF_L2_Q_DROP");
+simsignal_t NF_PACKET_DROP = cComponent::registerSignal("NF_PACKET_DROP");
 simsignal_t NF_MAC_BECAME_IDLE = cComponent::registerSignal("NF_MAC_BECAME_IDLE");
 simsignal_t NF_L2_BEACON_LOST = cComponent::registerSignal("NF_L2_BEACON_LOST");
 simsignal_t NF_L2_ASSOCIATED = cComponent::registerSignal("NF_L2_ASSOCIATED");
