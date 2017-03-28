@@ -232,15 +232,15 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
         preroutingFinish(packet, fromIE, destIE, nextHop.toIPv4());
 }
 
-namespace {
-Packet *toMutable(Packet *packet)
+Packet *IPv4::createForwardedPacket(Packet *packet) const
 {
-    auto newPacket = new Packet(packet->getName());
-    newPacket->append(packet->peekDataAt(byte(0), packet->getDataLength()));
-    newPacket->transferTagsFrom(packet);
-    delete packet;
-    return newPacket;
-}
+    auto forwardedPacket = packet->dup();
+    forwardedPacket->removePoppedChunks();
+    const auto& ipv4Header = forwardedPacket->removeHeader<IPv4Header>();
+    ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
+    ipv4Header->markImmutable();
+    forwardedPacket->pushHeader(ipv4Header);
+    return forwardedPacket;
 }
 
 void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
@@ -276,17 +276,9 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             EV_WARN << "Skip forwarding of multicast datagram (TTL reached 0)\n";
             delete packet;
         }
-        else {
-            // KLUDGE: TODO: factor out
-            auto packetCopy = toMutable(packet);
-            auto ipv4Header = std::dynamic_pointer_cast<IPv4Header>(packetCopy->peekHeader<IPv4Header>()->dupShared());
-            packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
-            ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
-            ipv4Header->markImmutable();
-            packetCopy->pushHeader(ipv4Header);
+        else
             // needed a mutable copy for forwarding
-            forwardMulticastPacket(packetCopy, fromIE);
-        }
+            forwardMulticastPacket(createForwardedPacket(packet), fromIE);
     }
     else {
         const InterfaceEntry *broadcastIE = nullptr;
@@ -298,17 +290,8 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         }
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
-            if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
-                // KLUDGE: TODO: factor out
-                Packet* packetCopy = packet->dup();
-                const auto& ipv4Header = std::static_pointer_cast<IPv4Header>(packetCopy->popHeader<IPv4Header>()->dupShared());
-                packetCopy->removePoppedChunks();
-                ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
-                ipv4Header->markImmutable();
-                packetCopy->pushHeader(ipv4Header);
-                // needed a mutable copy for forwarding
-                fragmentPostRouting(packetCopy, broadcastIE, IPv4Address::ALLONES_ADDRESS);
-            }
+            if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled())
+                fragmentPostRouting(createForwardedPacket(packet), broadcastIE, IPv4Address::ALLONES_ADDRESS);
 
             EV_INFO << "Broadcast received\n";
             reassembleAndDeliver(packet, fromIE);
@@ -318,19 +301,8 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             numDropped++;
             delete packet;
         }
-        else {
-            // KLUDGE: TODO: factor out
-            auto packetCopy = toMutable(packet);
-            auto ipv4Header = packetCopy->peekHeader<IPv4Header>();
-            packetCopy->removeFromBeginning(ipv4Header->getChunkLength());
-            ipv4Header = std::static_pointer_cast<IPv4Header>(ipv4Header->dupShared());
-            // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
-            ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
-            ipv4Header->markImmutable();
-            packetCopy->pushHeader(ipv4Header);
-            // needed a mutable copy for forwarding
-            routeUnicastPacket(packetCopy, fromIE, destIE, nextHopAddr);
-        }
+        else
+            routeUnicastPacket(createForwardedPacket(packet), fromIE, destIE, nextHopAddr);
     }
 }
 
@@ -701,9 +673,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
     // fill in source address
     if (ipv4Header->getSrcAddress().isUnspecified()) {
         // KLUDGE: TODO: factor out
-        packet->removeFromBeginning(ipv4Header->getChunkLength());
-        auto ipv4HeaderCopy = std::static_pointer_cast<IPv4Header>(ipv4Header->dupShared());
-        // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
+        auto ipv4HeaderCopy = packet->removeHeader<IPv4Header>();
         ipv4HeaderCopy->setSrcAddress(destIe->ipv4Data()->getIPAddress());
         ipv4HeaderCopy->markImmutable();
         packet->pushHeader(ipv4HeaderCopy);
