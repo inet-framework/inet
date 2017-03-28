@@ -23,10 +23,9 @@ namespace inet {
 /**
  * This class provides functionality for reassembling out of order data chunks
  * for protocols supporting fragmentation. The reassembling algorithm requires
- * the expected length of the non-fragmented data chunk measured in bytes. It
- * assumes that the non-fragmented data chunk starts at 0 offset. If all data
- * becomes available up to the expected length, then the defragmentation is
- * considered complete.
+ * the expected length of the non-fragmented data chunk. It assumes that the
+ * non-fragmented data chunk starts at 0 offset. If all data becomes available
+ * up to the expected length, then the defragmentation is considered complete.
  */
 class INET_API ReassemblyBuffer : public ChunkBuffer
 {
@@ -40,7 +39,14 @@ class INET_API ReassemblyBuffer : public ChunkBuffer
     ReassemblyBuffer(bit expectedLength = bit(-1)) : expectedLength(expectedLength) { }
     ReassemblyBuffer(const ReassemblyBuffer& other) : ChunkBuffer(other), expectedLength(other.expectedLength) { }
 
+    /**
+     * Returns the expected data length.
+     */
     bit getExpectedLength() const { return expectedLength; }
+
+    /**
+     * Changes the expected data length.
+     */
     void setExpectedLength(bit expectedLength) { this->expectedLength = expectedLength; }
 
     /**

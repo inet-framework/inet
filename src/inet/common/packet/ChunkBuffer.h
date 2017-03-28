@@ -23,6 +23,18 @@ namespace inet {
 /**
  * This class provides basic functionality for merging large data chunks from
  * out of order smaller data chunks.
+ *
+ * Internally, buffers stores the data in different kind of chunks. See the
+ * Chunk class and its subclasses for details. All chunks are immutable in a
+ * buffer. Chunks are automatically merged as they are replaced in the buffer,
+ * and they are also shared among buffers when duplicating.
+ *
+ * In general, this class supports the following operations:
+ *  - push at the tail and pop at the head
+ *  - query the length
+ *  - serialize to and deserialize from a sequence of bits or bytes
+ *  - copy to a new queue
+ *  - convert to a human readable string
  */
 class INET_API ChunkBuffer : public cNamedObject
 {
@@ -79,11 +91,34 @@ class INET_API ChunkBuffer : public cNamedObject
 
     /** @name Content querying functions */
     //@{
+    /**
+     * Returns true if the buffer is completely empty.
+     */
     bool isEmpty() const { return regions.empty(); }
+
+    /**
+     * Returns the number non-overlapping, non-connecting but continuous regions
+     */
     int getNumRegions() const { return regions.size(); }
+
+    /**
+     * Returns the length of the given region.
+     */
     bit getRegionLength(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data->getChunkLength(); }
+
+    /**
+     * Returns the start offset of the given region.
+     */
     bit getRegionStartOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].offset; }
+
+    /**
+     * Returns the end offset of the given region.
+     */
     bit getRegionEndOffset(int index) const { assert(0 <= index && index < regions.size()); return regions[index].getEndOffset(); }
+
+    /**
+     * Returns the data of the given region in its current representation.
+     */
     const std::shared_ptr<Chunk>& getRegionData(int index) const { assert(0 <= index && index < regions.size()); return regions[index].data; }
     //@}
 
@@ -105,6 +140,9 @@ class INET_API ChunkBuffer : public cNamedObject
      */
     void clear() { regions.clear(); }
 
+    /**
+     * Returns a human readable string representation.
+     */
     virtual std::string str() const override;
 };
 

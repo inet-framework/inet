@@ -25,6 +25,18 @@ namespace inet {
  * This class represents a first in, first out queue of chunks. It is mainly
  * useful for application and protocol buffers where the incoming chunks are
  * guaranteed to be in order.
+ *
+ * Internally, queues stores the data in different kind of chunks. See the
+ * Chunk class and its subclasses for details. All chunks are immutable in a
+ * queue. Chunks are automatically merged as they are pushed into the queue,
+ * and they are also shared among queues when duplicating.
+ *
+ * In general, this class supports the following operations:
+ *  - push at the tail and pop at the head
+ *  - query the length
+ *  - serialize to and deserialize from a sequence of bits or bytes
+ *  - copy to a new queue
+ *  - convert to a human readable string
  */
 class INET_API ChunkQueue : public cNamedObject
 {
@@ -57,31 +69,62 @@ class INET_API ChunkQueue : public cNamedObject
     /** @name Length querying related functions */
     //@{
     /**
-     * Returns the number of available bytes.
+     * Returns the length of data currently available in the queue.
      */
     bit getQueueLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
 
+    /**
+     * Returns the total length of data pushed into the queue.
+     */
     bit getPushedLength() const { return pushedLength; }
 
+    /**
+     * Returns the total length of data popped from the queue.
+     */
     bit getPoppedLength() const { return poppedLength; }
     //@}
 
     /** @name Querying data related functions */
     //@{
+    /**
+     * Returns the designated data from the head of the queue as an immutable
+     * chunk in its current representation. If the length is unspecified, then
+     * the length of the result is chosen according to the internal representation.
+     */
     std::shared_ptr<Chunk> peek(bit length = bit(-1), int flags = 0) const;
 
+    /**
+     * Returns the designated data at the given offset as an immutable chunk in
+     * its current representation. If the length is unspecified, then the length
+     * of the result is chosen according to the internal representation.
+     */
     std::shared_ptr<Chunk> peekAt(bit offset, bit length, int flags = 0) const;
 
+    /**
+     * Returns true if the designated data is available at the head of the queue
+     * in the requested representation. If the length is unspecified, then the
+     * length of the result is chosen according to the internal representation.
+     */
     template <typename T>
     bool has(bit length = bit(-1)) const {
         return contents == nullptr ? false : contents->has<T>(iterator, length);
     }
 
+    /**
+     * Returns the designated data from the head of the queue as an immutable
+     * chunk in the requested representation. If the length is unspecified, then
+     * the length of the result is chosen according to the internal representation.
+     */
     template <typename T>
     std::shared_ptr<T> peek(bit length = bit(-1), int flags = 0) const {
         return contents == nullptr ? nullptr : contents->peek<T>(iterator, length, flags);
     }
 
+    /**
+     * Returns the designated data at the given offset as an immutable chunk in
+     * the requested representation. If the length is unspecified, then the
+     * length of the result is chosen according to the internal representation.
+     */
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
@@ -114,8 +157,19 @@ class INET_API ChunkQueue : public cNamedObject
 
     /** @name Removing data related functions */
     //@{
+    /**
+     * Pops the designated data and returns it as an immutable chunk in its
+     * current representation. If the length is unspecified, then the length of
+     * the result is chosen according to the internal representation.
+     */
     std::shared_ptr<Chunk> pop(bit length = bit(-1), int flags = 0);
 
+    /**
+     * Pops the designated data from the head of the queue and returns it as
+     * an immutable chunk in the requested representation. If the length is
+     * unspecified, then the length of the result is chosen according to the
+     * internal representation.
+     */
     template <typename T>
     std::shared_ptr<T> pop(bit length = bit(-1), int flags = 0) {
         const auto& chunk = peek<T>(length, flags);
@@ -124,14 +178,23 @@ class INET_API ChunkQueue : public cNamedObject
         return chunk;
     }
 
+    /**
+     * Erases all data from the queue.
+     */
     void clear();
     //@}
 
     /** @name Filling with data related functions */
     //@{
+    /**
+     * Inserts the provided chunk at the tail of the queue.
+     */
     void push(const std::shared_ptr<Chunk>& chunk);
     //@}
 
+    /**
+     * Returns a human readable string representation.
+     */
     virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
 };
 

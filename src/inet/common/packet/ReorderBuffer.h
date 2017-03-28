@@ -23,9 +23,8 @@ namespace inet {
 /**
  * This class provides functionality for reordering out of order data chunks
  * for reliable connection oriented protocols. The reordering algorithm takes
- * the expected offset of the next data chunk measured in bytes. It provides
- * reordered data as a continuous data chunk at the expected offset as soon
- * as it becomes available.
+ * the expected offset of the next data chunk. It provides reordered data as a
+ * continuous data chunk at the expected offset as soon as it becomes available.
  */
 class INET_API ReorderBuffer : public ChunkBuffer
 {
@@ -39,7 +38,14 @@ class INET_API ReorderBuffer : public ChunkBuffer
     ReorderBuffer(bit expectedOffset = bit(-1)) : expectedOffset(expectedOffset) { }
     ReorderBuffer(const ReorderBuffer& other) : ChunkBuffer(other), expectedOffset(other.expectedOffset) { }
 
+    /**
+     * Returns the offset of the next expected data chunk.
+     */
     bit getExpectedOffset() const { return expectedOffset; }
+
+    /**
+     * Changes the offset of the next expected data chunk.
+     */
     void setExpectedOffset(bit expectedOffset) { this->expectedOffset = expectedOffset; }
 
     /**
