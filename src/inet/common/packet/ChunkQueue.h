@@ -30,8 +30,8 @@ class INET_API ChunkQueue : public cNamedObject
   friend class ChunkQueueDescriptor;
 
   protected:
-    bit pushedByteCount = bit(0);
-    bit poppedByteCount = bit(0);
+    bit pushedLength = bit(0);
+    bit poppedLength = bit(0);
     /**
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
@@ -60,9 +60,9 @@ class INET_API ChunkQueue : public cNamedObject
      */
     bit getQueueLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
 
-    bit getPushedByteCount() const { return pushedByteCount; }
+    bit getPushedLength() const { return pushedLength; }
 
-    bit getPoppedByteCount() const { return poppedByteCount; }
+    bit getPoppedLength() const { return poppedLength; }
     //@}
 
     /** @name Querying data related functions */

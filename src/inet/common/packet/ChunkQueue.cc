@@ -34,7 +34,7 @@ ChunkQueue::ChunkQueue(const ChunkQueue& other) :
 
 void ChunkQueue::remove(bit length)
 {
-    poppedByteCount += length;
+    poppedLength += length;
     contents->moveIterator(iterator, length);
     auto position = iterator.getPosition();
     if (position > contents->getChunkLength() / 2) {
@@ -68,7 +68,7 @@ std::shared_ptr<Chunk> ChunkQueue::pop(bit length, int flags)
 void ChunkQueue::clear()
 {
     if (contents != nullptr) {
-        poppedByteCount += getQueueLength();
+        poppedLength += getQueueLength();
         contents->seekIterator(iterator, bit(0));
         contents = nullptr;
     }
@@ -78,7 +78,7 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
     assert(chunk->isImmutable());
-    pushedByteCount += chunk->getChunkLength();
+    pushedLength += chunk->getChunkLength();
     if (contents == nullptr)
         contents = chunk;
     else {

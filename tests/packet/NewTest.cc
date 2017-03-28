@@ -294,15 +294,15 @@ void NewReceiver::receiveApplication(Packet *packet)
     EV_DEBUG << "Collecting application data: " << chunk << std::endl;
     applicationData.push(chunk);
     EV_DEBUG << "Buffering application data: " << applicationData << std::endl;
-    if (applicationData.getPoppedByteCount() == byte(0) && applicationData.has<BytesChunk>(byte(10))) {
+    if (applicationData.getPoppedLength() == byte(0) && applicationData.has<BytesChunk>(byte(10))) {
         const auto& chunk = applicationData.pop<BytesChunk>(byte(10));
         EV_DEBUG << "Receiving application data: " << chunk << std::endl;
     }
-    if (applicationData.getPoppedByteCount() == byte(10) && applicationData.has<ApplicationHeader>()) {
+    if (applicationData.getPoppedLength() == byte(10) && applicationData.has<ApplicationHeader>()) {
         const auto& chunk = applicationData.pop<ApplicationHeader>();
         EV_DEBUG << "Receiving application data: " << chunk << std::endl;
     }
-    if (applicationData.getPoppedByteCount() == byte(20) && applicationData.has<ByteCountChunk>(byte(10))) {
+    if (applicationData.getPoppedLength() == byte(20) && applicationData.has<ByteCountChunk>(byte(10))) {
         const auto& chunk = applicationData.pop<ByteCountChunk>(byte(10));
         EV_DEBUG << "Receiving application data: " << chunk << std::endl;
     }
