@@ -16,7 +16,8 @@
 #ifndef __INET_CHUNKQUEUE_H_
 #define __INET_CHUNKQUEUE_H_
 
-#include "inet/common/packet/chunk/Chunk.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 
 namespace inet {
 
@@ -84,6 +85,30 @@ class INET_API ChunkQueue : public cNamedObject
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
+    }
+
+    /**
+     * Returns all data in the queue in the current representation. The length
+     * of the returned chunk is the same as the value returned by getQueueLength().
+     */
+    std::shared_ptr<Chunk> peek() const {
+        return peekAt(bit(0), getQueueLength());
+    }
+
+    /**
+     * Returns all data in the queue in the as a sequence of bits. The length
+     * of the returned chunk is the same as the value returned by getQueueLength().
+     */
+    std::shared_ptr<BitsChunk> peekBits() const {
+        return peekAt<BitsChunk>(bit(0), getQueueLength());
+    }
+
+    /**
+     * Returns all data in the queue in the as a sequence of bytes. The length
+     * of the returned chunk is the same as the value returned by getQueueLength().
+     */
+    std::shared_ptr<BytesChunk> peekBytes() const {
+        return peekAt<BytesChunk>(bit(0), getQueueLength());
     }
     //@}
 

@@ -18,7 +18,6 @@
 
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
 
