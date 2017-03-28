@@ -287,6 +287,18 @@ static void testHeader()
     packet3.pushHeader(bytesChunk2);
     auto tlvHeader1 = packet3.peekHeader<TlvHeaderInt>();
     assert(tlvHeader1->getInt16Value() == 42);
+
+    // 5. packet provides mutable headers without duplication if possible
+    Packet packet4;
+    packet4.pushHeader(makeImmutableBytesChunk(makeVector(10)));
+    const auto& chunk6 = packet4.peekHeader<BytesChunk>().get();
+    const auto& chunk7 = packet4.removeHeader<BytesChunk>(byte(10));
+    assert(chunk7.get() == chunk6);
+    assert(chunk7->isMutable());
+    assert(chunk7->getChunkLength() == byte(10));
+    assert(packet4.getPacketLength() == byte(0));
+    const auto& bytesChunk3 = std::static_pointer_cast<BytesChunk>(chunk7);
+    assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
 
 static void testTrailer()
@@ -334,6 +346,18 @@ static void testTrailer()
     ASSERT_ERROR(packet3.peekTrailer<TlvHeaderInt>(byte()));
     auto tlvTrailer1 = packet3.peekTrailer<TlvHeaderInt>(byte(4));
     assert(tlvTrailer1->getInt16Value() == 42);
+
+    // 5. packet provides mutable trailers without duplication if possible
+    Packet packet4;
+    packet4.pushTrailer(makeImmutableBytesChunk(makeVector(10)));
+    const auto& chunk6 = packet4.peekTrailer<BytesChunk>().get();
+    const auto& chunk7 = packet4.removeTrailer<BytesChunk>(byte(10));
+    assert(chunk7.get() == chunk6);
+    assert(chunk7->isMutable());
+    assert(chunk7->getChunkLength() == byte(10));
+    assert(packet4.getPacketLength() == byte(0));
+    const auto& bytesChunk3 = std::static_pointer_cast<BytesChunk>(chunk7);
+    assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
 
 static void testEncapsulation()
