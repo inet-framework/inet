@@ -72,6 +72,14 @@ std::shared_ptr<Chunk> Packet::popHeader(bit length, int flags)
     return chunk;
 }
 
+std::shared_ptr<Chunk> Packet::removeHeader(bit length, int flags)
+{
+    assert(bit(-1) <= length && length <= getDataLength());
+    const auto& chunk = popHeader(length, flags);
+    removePoppedHeaders();
+    return makeExclusivelyOwnedMutableChunk(chunk);
+}
+
 void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
@@ -104,6 +112,14 @@ std::shared_ptr<Chunk> Packet::popTrailer(bit length, int flags)
     if (chunk != nullptr)
         contents->moveIterator(trailerIterator, -chunk->getChunkLength());
     return chunk;
+}
+
+std::shared_ptr<Chunk> Packet::removeTrailer(bit length, int flags)
+{
+    assert(bit(-1) <= length && length <= getDataLength());
+    const auto& chunk = popTrailer(length, flags);
+    removePoppedTrailers();
+    return makeExclusivelyOwnedMutableChunk(chunk);
 }
 
 void Packet::pushTrailer(const std::shared_ptr<Chunk>& chunk)
@@ -147,7 +163,7 @@ void Packet::prepend(const std::shared_ptr<Chunk>& chunk)
         contents = chunk;
     else {
         if (contents->canInsertAtBeginning(chunk)) {
-            makeContentsMutable();
+            contents = makeExclusivelyOwnedMutableChunk(contents);
             contents->insertAtBeginning(chunk);
             contents = contents->simplify();
         }
@@ -170,7 +186,7 @@ void Packet::append(const std::shared_ptr<Chunk>& chunk)
         contents = chunk;
     else {
         if (contents->canInsertAtEnd(chunk)) {
-            makeContentsMutable();
+            contents = makeExclusivelyOwnedMutableChunk(contents);
             contents->insertAtEnd(chunk);
             contents = contents->simplify();
         }
@@ -195,7 +211,7 @@ void Packet::removeFromBeginning(bit length)
         if (contents->getChunkLength() == length)
             contents = nullptr;
         else if (contents->canRemoveFromBeginning(length)) {
-            makeContentsMutable();
+            contents = makeExclusivelyOwnedMutableChunk(contents);
             contents->removeFromBeginning(length);
         }
         else
@@ -216,7 +232,7 @@ void Packet::removeFromEnd(bit length)
         if (contents->getChunkLength() == length)
             contents = nullptr;
         else if (contents->canRemoveFromEnd(length)) {
-            makeContentsMutable();
+            contents = makeExclusivelyOwnedMutableChunk(contents);
             contents->removeFromEnd(length);
         }
         else

@@ -65,11 +65,14 @@ class INET_API Packet : public cPacket
   protected:
     Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
-    void makeContentsMutable() {
-        if (contents.use_count() == 1)
-            contents->markMutableIfExclusivelyOwned();
+    template <typename T>
+    std::shared_ptr<T> makeExclusivelyOwnedMutableChunk(const std::shared_ptr<T>& chunk) const {
+        if (chunk.use_count() == 1) {
+            chunk->markMutableIfExclusivelyOwned();
+            return chunk;
+        }
         else
-            contents = contents->dupShared();
+            return std::static_pointer_cast<T>(chunk->dupShared());
     }
 
   public:
@@ -133,6 +136,8 @@ class INET_API Packet : public cPacket
 
     std::shared_ptr<Chunk> popHeader(bit length = bit(-1), int flags = 0);
 
+    std::shared_ptr<Chunk> removeHeader(bit length = bit(-1), int flags = 0);
+
     void pushHeader(const std::shared_ptr<Chunk>& chunk);
 
     template <typename T>
@@ -154,6 +159,13 @@ class INET_API Packet : public cPacket
         if (chunk != nullptr)
             contents->moveIterator(headerIterator, chunk->getChunkLength());
         return chunk;
+    }
+
+    template <typename T>
+    std::shared_ptr<T> removeHeader(bit length = bit(-1), int flags = 0) {
+        const auto& chunk = popHeader<T>(length, flags);
+        removePoppedHeaders();
+        return makeExclusivelyOwnedMutableChunk(chunk);
     }
     //@}
 
@@ -180,6 +192,8 @@ class INET_API Packet : public cPacket
 
     std::shared_ptr<Chunk> popTrailer(bit length = bit(-1), int flags = 0);
 
+    std::shared_ptr<Chunk> removeTrailer(bit length = bit(-1), int flags = 0);
+
     void pushTrailer(const std::shared_ptr<Chunk>& chunk);
 
     template <typename T>
@@ -201,6 +215,13 @@ class INET_API Packet : public cPacket
         if (chunk != nullptr)
             contents->moveIterator(trailerIterator, chunk->getChunkLength());
         return chunk;
+    }
+
+    template <typename T>
+    std::shared_ptr<T> removeTrailer(bit length = bit(-1), int flags = 0) {
+        const auto& chunk = popTrailer<T>(length, flags);
+        removePoppedTrailers();
+        return makeExclusivelyOwnedMutableChunk(chunk);
     }
     //@}
 
