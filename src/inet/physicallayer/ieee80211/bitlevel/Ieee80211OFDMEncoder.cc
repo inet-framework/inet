@@ -46,7 +46,7 @@ std::ostream& Ieee80211OFDMEncoder::printToStream(std::ostream& stream, int leve
 const ITransmissionBitModel *Ieee80211OFDMEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
-    const auto& bytesChunk = packet->peekBytes();
+    const auto& bytesChunk = packet->peekAllBytes();
     BitVector *encodedBits = new BitVector(bytesChunk->getBytes());
     const IScrambling *scrambling = nullptr;
     if (scrambler) {

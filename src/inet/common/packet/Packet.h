@@ -407,7 +407,7 @@ class INET_API Packet : public cPacket
      * current representation. The length of the returned chunk is the same as
      * the value returned by getPacketLength().
      */
-    std::shared_ptr<Chunk> peek() const {
+    std::shared_ptr<Chunk> peekAll() const {
         return peekAt(bit(0), getPacketLength());
     }
 
@@ -416,7 +416,7 @@ class INET_API Packet : public cPacket
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getPacketLength().
      */
-    std::shared_ptr<BitsChunk> peekBits() const {
+    std::shared_ptr<BitsChunk> peekAllBits() const {
         return peekAt<BitsChunk>(bit(0), getPacketLength());
     }
 
@@ -425,7 +425,7 @@ class INET_API Packet : public cPacket
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getPacketLength().
      */
-    std::shared_ptr<BytesChunk> peekBytes() const {
+    std::shared_ptr<BytesChunk> peekAllBytes() const {
         return peekAt<BytesChunk>(bit(0), getPacketLength());
     }
     //@}

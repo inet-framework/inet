@@ -291,7 +291,7 @@ const IReceptionBitModel *Ieee80211LayeredOFDMReceiver::createDataFieldBitModel(
         const ConvolutionalCode *convolutionalCode = nullptr;
         const APSKModulationBase *modulation = nullptr;
         double codeRate = NaN;
-        unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(signalFieldPacketModel->getPacket()->peekBytes()->getBytes())) * 8;
+        unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(signalFieldPacketModel->getPacket()->peekAllBytes()->getBytes())) * 8;
         unsigned int dataFieldLengthInBits = psduLengthInBits + PPDU_SERVICE_FIELD_BITS_LENGTH + PPDU_TAIL_BITS_LENGTH;
         if (isCompliant) {
             const Ieee80211OFDMDataMode *dataMode = mode->getDataMode();
@@ -337,9 +337,9 @@ const IReceptionSymbolModel *Ieee80211LayeredOFDMReceiver::createCompleteSymbolM
 
 const IReceptionPacketModel *Ieee80211LayeredOFDMReceiver::createCompletePacketModel(const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    const BitVector *headerBits = new BitVector(signalFieldPacketModel->getPacket()->peekBytes()->getBytes());
+    const BitVector *headerBits = new BitVector(signalFieldPacketModel->getPacket()->peekAllBytes()->getBytes());
     BitVector *mergedBits = new BitVector(*headerBits);
-    const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekBytes()->getBytes());
+    const BitVector *dataBits = new BitVector(dataFieldPacketModel->getPacket()->peekAllBytes()->getBytes());
     for (unsigned int i = 0; i < dataBits->getSize(); i++)
         mergedBits->appendBit(dataBits->getBit(i));
     throw cRuntimeError("Obsoleted"); // KLUDGE:
@@ -378,7 +378,7 @@ const IReceptionResult *Ieee80211LayeredOFDMReceiver::computeReceptionResult(con
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
-        uint8_t rate = getRate(new BitVector(signalFieldPacketModel->getPacket()->peekBytes()->getBytes()));
+        uint8_t rate = getRate(new BitVector(signalFieldPacketModel->getPacket()->peekAllBytes()->getBytes()));
         // TODO: handle erroneous rate field
         mode = &Ieee80211OFDMCompliantModes::getCompliantMode(rate, channelSpacing);
     }

@@ -186,7 +186,7 @@ const std::vector<Packet *> NewMedium::receivePackets()
 
 Packet *NewMedium::serializePacket(Packet *packet)
 {
-    const auto& bytesChunk = packet->peekBytes();
+    const auto& bytesChunk = packet->peekAllBytes();
     auto serializedPacket = new Packet();
     serializedPacket->append(bytesChunk);
     return serializedPacket;
