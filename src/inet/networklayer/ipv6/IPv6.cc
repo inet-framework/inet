@@ -329,7 +329,7 @@ void IPv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, IPv6Ad
 
 void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, IPv6Address requestedNextHopAddress, bool fromHL)
 {
-    const auto& datagram = packet->peekHeader<IPv6Header>();
+    auto datagram = packet->peekHeader<IPv6Header>();
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
 
@@ -378,6 +378,7 @@ void IPv6::routePacket(Packet *packet, const InterfaceEntry *destIE, const Inter
         ipv6Header->setHopLimit(ipv6Header->getHopLimit() - 1);
         ipv6Header->markImmutable();
         packet->pushHeader(ipv6Header);
+        datagram = ipv6Header;
     }
 
     // routing
