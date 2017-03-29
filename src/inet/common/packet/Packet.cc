@@ -75,6 +75,7 @@ std::shared_ptr<Chunk> Packet::popHeader(bit length, int flags)
 std::shared_ptr<Chunk> Packet::removeHeader(bit length, int flags)
 {
     assert(bit(-1) <= length && length <= getDataLength());
+    assert(headerIterator.getPosition() == bit(0));
     const auto& chunk = popHeader(length, flags);
     removePoppedHeaders();
     return makeExclusivelyOwnedMutableChunk(chunk);
@@ -125,6 +126,7 @@ std::shared_ptr<Chunk> Packet::popTrailer(bit length, int flags)
 std::shared_ptr<Chunk> Packet::removeTrailer(bit length, int flags)
 {
     assert(bit(-1) <= length && length <= getDataLength());
+    assert(headerIterator.getPosition() == bit(0));
     const auto& chunk = popTrailer(length, flags);
     removePoppedTrailers();
     return makeExclusivelyOwnedMutableChunk(chunk);

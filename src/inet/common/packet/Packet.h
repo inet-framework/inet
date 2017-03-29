@@ -151,21 +151,22 @@ class INET_API Packet : public cPacket
     /**
      * Removes the designated header and returns it as a mutable chunk in its
      * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation.
+     * the result is chosen according to the internal representation. The popped
+     * header length must be zero before calling this function.
      */
     std::shared_ptr<Chunk> removeHeader(bit length = bit(-1), int flags = 0);
 
     /**
      * Pushes the provided header at the beginning of the packet. The header
-     * must be immutable and the header pop offset must point to the beginning
-     * of the packet before calling this function.
+     * must be immutable and the popped header length must be zero before
+     * calling this function.
      */
     void pushHeader(const std::shared_ptr<Chunk>& chunk);
 
     /**
      * Pushes the provided header at the beginning of the packet. The pushed
-     * header is automatically marked immutable. The header pop offset must
-     * point to the beginning of the packet before calling this function.
+     * header is automatically marked immutable. The popped header length must
+     * be zero before calling this function.
      */
     void insertHeader(const std::shared_ptr<Chunk>& chunk);
 
@@ -208,10 +209,13 @@ class INET_API Packet : public cPacket
     /**
      * Removes the designated header and returns it as a mutable chunk in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation.
+     * of the result is chosen according to the internal representation. The
+     * popped header length must be zero before calling this function.
      */
     template <typename T>
     std::shared_ptr<T> removeHeader(bit length = bit(-1), int flags = 0) {
+        assert(bit(-1) <= length && length <= getDataLength());
+        assert(headerIterator.getPosition() == bit(0));
         const auto& chunk = popHeader<T>(length, flags);
         removePoppedHeaders();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -254,21 +258,22 @@ class INET_API Packet : public cPacket
     /**
      * Removes the designated trailer and returns it as a mutable chunk in its
      * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation.
+     * the result is chosen according to the internal representation. The popped
+     * trailer length must be zero before calling this function.
      */
     std::shared_ptr<Chunk> removeTrailer(bit length = bit(-1), int flags = 0);
 
     /**
      * Pushes the provided trailer at the end of the packet. The trailer must be
-     * immutable and the trailer pop offset must point to the end of the packet
-     * before calling this function.
+     * immutable and the popped trailer length must be zero before calling this
+     * function.
      */
     void pushTrailer(const std::shared_ptr<Chunk>& chunk);
 
     /**
      * Pushes the provided trailer at the end of the packet. The pushed trailer
-     * is automatically marked immutable. The trailer pop offset must point to
-     * the end of the packet before calling this function.
+     * is automatically marked immutable. The popped trailer length must be zero
+     * before calling this function.
      */
     void insertTrailer(const std::shared_ptr<Chunk>& chunk);
 
@@ -311,10 +316,13 @@ class INET_API Packet : public cPacket
     /**
      * Removes the designated trailer and returns it as a mutable chunk in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation.
+     * of the result is chosen according to the internal representation. The
+     * popped trailer length must be zero before calling this function.
      */
     template <typename T>
     std::shared_ptr<T> removeTrailer(bit length = bit(-1), int flags = 0) {
+        assert(bit(-1) <= length && length <= getDataLength());
+        assert(headerIterator.getPosition() == bit(0));
         const auto& chunk = popTrailer<T>(length, flags);
         removePoppedTrailers();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -450,14 +458,14 @@ class INET_API Packet : public cPacket
     /** @name Filling with data related functions */
     //@{
     /**
-     * Inserts the provided chunk at the beginning of the packet. The header
-     * pop offset must be zero before calling this function.
+     * Inserts the provided chunk at the beginning of the packet. The popped
+     * header length must be zero before calling this function.
      */
     void prepend(const std::shared_ptr<Chunk>& chunk);
 
     /**
-     * Inserts the provided chunk at the end of the packet. The trailer pop
-     * offset must be zero before calling this function.
+     * Inserts the provided chunk at the end of the packet. The popped trailer
+     * length must be zero before calling this function.
      */
     void append(const std::shared_ptr<Chunk>& chunk);
     //@}
@@ -465,25 +473,25 @@ class INET_API Packet : public cPacket
     /** @name Removing data related functions */
     //@{
     /**
-     * Removes the requested amount from the beginning of the packet. The header
-     * pop offset must be zero before calling this function.
+     * Removes the requested amount from the beginning of the packet. The popped
+     * header length must be zero before calling this function.
      */
     void removeFromBeginning(bit length);
 
     /**
-     * Removes the requested amount from the end of the packet. The trailer pop
-     * offset must be zero before calling this function.
+     * Removes the requested amount from the end of the packet. The popped trailer
+     * length must be zero before calling this function.
      */
     void removeFromEnd(bit length);
 
     /**
-     * Removes all popped headers, and sets the header pop offset to zero.
+     * Removes all popped headers, and sets the header pop length to zero.
      * The popped trailers and the data part of the packet isn't affected.
      */
     void removePoppedHeaders();
 
     /**
-     * Removes all popped trailers, and sets the trailer pop offset to zero.
+     * Removes all popped trailers, and sets the trailer pop length to zero.
      * The popped headers and the data part of the packet isn't affected.
      */
     void removePoppedTrailers();
