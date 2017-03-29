@@ -284,7 +284,7 @@ void PPP::handleMessage(cMessage *msg)
             // pass up payload
             auto packet = check_and_cast<Packet *>(msg);
             const auto& pppHeader = packet->peekHeader<PppHeader>();
-            const auto& pppTrailer = packet->peekTrailer<PppTrailer>();
+            const auto& pppTrailer = packet->peekTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
             if (pppHeader == nullptr || pppTrailer == nullptr)
                 throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
             emit(rxPkOkSignal, packet);
@@ -381,7 +381,7 @@ Packet *PPP::encapsulate(cPacket *msg)
 cPacket *PPP::decapsulate(Packet *packet)
 {
     const auto& pppHeader = packet->popHeader<PppHeader>();
-    const auto& pppTrailer = packet->popTrailer<PppTrailer>();
+    const auto& pppTrailer = packet->popTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC

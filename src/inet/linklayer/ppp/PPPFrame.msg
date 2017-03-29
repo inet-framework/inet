@@ -31,7 +31,8 @@ cplusplus {{
 namespace inet;
 
 cplusplus {{
-const int PPP_OVERHEAD_BYTES = 7;
+const byte PPP_HEADER_LENGTH = byte(5);
+const byte PPP_TRAILER_LENGTH = byte(2);
 }}
 
 class FieldsChunk extends cObject;
@@ -46,7 +47,7 @@ class FieldsChunk extends cObject;
 // CRC is modelled only via cMessage's bit error attribute.
 class PppHeader extends FieldsChunk
 {
-    chunkLength = byte(5);
+    chunkLength = PPP_HEADER_LENGTH;
     short flag = 0x7e;      //1 byte
     short address = 0xff;   //1 byte
     short control = 0x03;   //1 byte
@@ -55,7 +56,7 @@ class PppHeader extends FieldsChunk
 
 class PppTrailer extends FieldsChunk
 {
-    chunkLength = byte(2); //FIXME correct value is 3, but old inet was used 2 bytes
+    chunkLength = PPP_TRAILER_LENGTH; //FIXME correct value is 3, but old inet was used 2 bytes
     short fcs = 0;      // frame check sequence, 2 byte
     short flag = 0x7e;  // 1 byte, omitted for successive PPP packets
 }
