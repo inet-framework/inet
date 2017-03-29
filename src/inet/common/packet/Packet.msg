@@ -52,6 +52,7 @@ packet Packet
 {
     @existingClass(true);
     @descriptor(readonly);
+    bit totalLength;
     bit headerPoppedLength;
     bit dataLength;
     bit trailerPoppedLength;
