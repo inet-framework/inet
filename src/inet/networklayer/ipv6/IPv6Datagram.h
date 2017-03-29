@@ -41,7 +41,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkHeader
     int getExtensionHeaderOrder(IPv6ExtensionHeader *eh);
 
   public:
-    IPv6Datagram(const char *name = nullptr, int kind = 0) : IPv6Datagram_Base(name, kind) {}
+    IPv6Datagram() : IPv6Datagram_Base() {}
     IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other) { copy(other); }
     IPv6Datagram& operator=(const IPv6Datagram& other);
     ~IPv6Datagram();

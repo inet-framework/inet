@@ -19,6 +19,7 @@
 
 cplusplus {{
 #include <iostream>
+#include "inet/common/packet/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
@@ -37,8 +38,8 @@ const int IPv6_HEADER_BYTES = 40;
 enum IPProtocolId;
 
 class noncobject IPv6Address;
-
 class noncobject IPv6ExtensionHeaderPtr;
+class FieldsChunk extends cObject;
 
 //
 // IPv6 datagram. RFC 2460 Section 3.
@@ -48,9 +49,10 @@ class noncobject IPv6ExtensionHeaderPtr;
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
-packet IPv6Datagram
+class IPv6Datagram extends FieldsChunk
 {
     @customize(true);
+    bit chunkLength @overridegetter;
     IPv6Address srcAddress;
     IPv6Address destAddress;
     unsigned char trafficClass;

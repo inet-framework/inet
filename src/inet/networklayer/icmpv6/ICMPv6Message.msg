@@ -19,10 +19,13 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/FieldsChunk.h"
 #define ICMPv6_HEADER_BYTES  8
 }}
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg
@@ -101,9 +104,9 @@ enum ICMPv6_PARAMETER_PROB
 //       as defined in RFC2463
 //    2. Any ICMP type with MSB set, i.e. >=128 is an Informational ICMP message
 //
-packet ICMPv6Message
+class ICMPv6Message extends FieldsChunk
 {
-    byteLength = 8;
+    bit chunkLength @overridegetter = byte(8);
     int type @enum(ICMPv6Type);
         //int code; //TODO: this should be specific to different ICMP types.
 }
@@ -112,23 +115,23 @@ packet ICMPv6Message
 // Notes:
 //   1. As defined in RFC2463: Section 3
 //
-packet ICMPv6DestUnreachableMsg extends ICMPv6Message
+class ICMPv6DestUnreachableMsg extends ICMPv6Message
 {
     int code @enum(ICMPv6DEST_UN);
 }
 
-packet ICMPv6PacketTooBigMsg extends ICMPv6Message
+class ICMPv6PacketTooBigMsg extends ICMPv6Message
 {
     int code; //Set to 0 by sender and ignored by receiver.
     int MTU; //MTU of next-hop link
 }
 
-packet ICMPv6TimeExceededMsg extends ICMPv6Message
+class ICMPv6TimeExceededMsg extends ICMPv6Message
 {
     int code @enum(ICMPv6_TIME_EX);
 }
 
-packet ICMPv6ParamProblemMsg extends ICMPv6Message
+class ICMPv6ParamProblemMsg extends ICMPv6Message
 {
     int code @enum(ICMPv6_PARAMETER_PROB);
 }
@@ -137,7 +140,7 @@ packet ICMPv6ParamProblemMsg extends ICMPv6Message
 // ICMPv6 Echo Request packet (RFC2463: Section 4).
 // Data is attached through encapsulation (see ICMPv6.cc)
 //
-packet ICMPv6EchoRequestMsg extends ICMPv6Message
+class ICMPv6EchoRequestMsg extends ICMPv6Message
 {
     int code; //set to 0.
     int identifier; // identifier to aid in matching Echo replies. May be Zero
@@ -148,7 +151,7 @@ packet ICMPv6EchoRequestMsg extends ICMPv6Message
 //
 // ICMPv6 Echo Reply packet. Data is attached through encapsulation (see ICMPv6.cc)
 //
-packet ICMPv6EchoReplyMsg extends ICMPv6Message
+class ICMPv6EchoReplyMsg extends ICMPv6Message
 {
     int code; //set to 0.
     int identifier; // identifier to aid in matching Echo replies. May be Zero
