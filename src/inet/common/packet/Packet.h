@@ -156,10 +156,18 @@ class INET_API Packet : public cPacket
     std::shared_ptr<Chunk> removeHeader(bit length = bit(-1), int flags = 0);
 
     /**
-     * Pushes the provided header at the end of the packet. The header pop
-     * offset must be zero before calling this function.
+     * Pushes the provided header at the beginning of the packet. The header
+     * must be immutable and the header pop offset must point to the beginning
+     * of the packet before calling this function.
      */
     void pushHeader(const std::shared_ptr<Chunk>& chunk);
+
+    /**
+     * Pushes the provided header at the beginning of the packet. The pushed
+     * header is automatically marked immutable. The header pop offset must
+     * point to the beginning of the packet before calling this function.
+     */
+    void insertHeader(const std::shared_ptr<Chunk>& chunk);
 
     /**
      * Returns true if the designated header is available in the requested
@@ -251,10 +259,18 @@ class INET_API Packet : public cPacket
     std::shared_ptr<Chunk> removeTrailer(bit length = bit(-1), int flags = 0);
 
     /**
-     * Pushes the provided trailer at the end of the packet. The trailer pop
-     * offset must be zero before calling this function.
+     * Pushes the provided trailer at the end of the packet. The trailer must be
+     * immutable and the trailer pop offset must point to the end of the packet
+     * before calling this function.
      */
     void pushTrailer(const std::shared_ptr<Chunk>& chunk);
+
+    /**
+     * Pushes the provided trailer at the end of the packet. The pushed trailer
+     * is automatically marked immutable. The trailer pop offset must point to
+     * the end of the packet before calling this function.
+     */
+    void insertTrailer(const std::shared_ptr<Chunk>& chunk);
 
     /**
      * Returns true if the designated trailer is available in the requested
@@ -344,7 +360,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns the data part (excluding popped headers and trailers) in the
      * current representation. The length of the returned chunk is the same as
-     * the value returned by getPacketLength().
+     * the value returned by getDataLength().
      */
     std::shared_ptr<Chunk> peekData() const {
         return peekDataAt(bit(0), getDataLength());

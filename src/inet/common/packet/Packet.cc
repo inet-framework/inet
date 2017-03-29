@@ -87,6 +87,14 @@ void Packet::pushHeader(const std::shared_ptr<Chunk>& chunk)
     prepend(chunk);
 }
 
+void Packet::insertHeader(const std::shared_ptr<Chunk>& chunk)
+{
+    assert(chunk != nullptr);
+    assert(headerIterator.getPosition() == bit(0));
+    chunk->markImmutable();
+    prepend(chunk);
+}
+
 void Packet::setTrailerPopOffset(bit offset)
 {
     if (contents == nullptr && offset == bit(0))
@@ -126,6 +134,14 @@ void Packet::pushTrailer(const std::shared_ptr<Chunk>& chunk)
 {
     assert(chunk != nullptr);
     assert(trailerIterator.getPosition() == bit(0));
+    append(chunk);
+}
+
+void Packet::insertTrailer(const std::shared_ptr<Chunk>& chunk)
+{
+    assert(chunk != nullptr);
+    assert(trailerIterator.getPosition() == bit(0));
+    chunk->markImmutable();
     append(chunk);
 }
 
