@@ -20,19 +20,11 @@ namespace inet {
 
 class CompoundHeader : public CompoundHeader_Base
 {
-  friend Chunk;
-
-  protected:
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags) {
-        return Chunk::convertChunk(typeInfo, chunk, offset, length, flags);
-    }
-
   public:
     CompoundHeader() : CompoundHeader_Base() { }
     CompoundHeader(const CompoundHeader& other) : CompoundHeader_Base(other) { }
     CompoundHeader& operator=(const CompoundHeader& other) {if (this==&other) return *this; CompoundHeader_Base::operator=(other); return *this;}
     virtual CompoundHeader *dup() const {return new CompoundHeader(*this);}
-
 };
 
 class CompoundHeaderSerializer : public SequenceChunkSerializer

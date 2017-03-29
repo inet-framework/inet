@@ -798,7 +798,7 @@ static void testNesting()
     compoundHeader1->insertAtEnd(ipHeader1);
     compoundHeader1->markImmutable();
     packet1.append(compoundHeader1);
-    const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>();
+    const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>(compoundHeader1->getChunkLength());
     assert(compoundHeader2 != nullptr);
 
     // 2. packet provides compound header after serialization
