@@ -273,7 +273,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
 
     template <typename T>
-    std::shared_ptr<T> peekWithConversion(const Iterator& iterator, bit length, int flags) const {
+    std::shared_ptr<T> peekConverted(const Iterator& iterator, bit length, int flags) const {
         assert(isImmutable());
         assert(iterator.isForward() || length != bit(-1));
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
@@ -459,7 +459,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     template <typename T>
     std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
         const auto& predicate = [] (const std::shared_ptr<Chunk>& chunk) -> bool { return chunk == nullptr || std::dynamic_pointer_cast<T>(chunk); };
-        const auto& converter = [] (const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length, int flags) -> std::shared_ptr<Chunk> { return chunk->peekWithConversion<T>(iterator, length, flags); };
+        const auto& converter = [] (const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length, int flags) -> std::shared_ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
         return checkPeekResult<T>(std::static_pointer_cast<T>(chunk), flags);
     }
