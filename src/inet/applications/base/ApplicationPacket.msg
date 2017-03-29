@@ -30,6 +30,5 @@ class FieldsChunk extends cObject;
 // TODO: rename to ApplicationHeader and remove ByteCountChunk from ApplicationHeaderSerializer
 class ApplicationPacket extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
     uint32_t sequenceNumber;
 }

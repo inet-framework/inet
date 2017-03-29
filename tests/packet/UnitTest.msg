@@ -31,7 +31,6 @@ class CompoundHeader extends SequenceChunk
 class TlvHeader extends FieldsChunk
 {
     int8_t type = -1;
-    bit chunkLength = bit(-1) @overridegetter;
 }
 
 class TlvHeaderBool extends TlvHeader

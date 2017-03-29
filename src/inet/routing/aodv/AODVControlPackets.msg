@@ -48,7 +48,6 @@ enum AODVControlPacketType
 //
 class AODVControlPacket extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
     unsigned int packetType;
 }
 

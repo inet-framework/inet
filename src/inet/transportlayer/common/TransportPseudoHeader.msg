@@ -31,7 +31,7 @@ class noncobject L3Address;
 //
 class TransportPseudoHeader extends FieldsChunk
 {
-    bit chunkLength @overridegetter = byte(12);
+    chunkLength = byte(12);
     L3Address srcAddress;
     L3Address destAddress;
     int protocolId = -1;    // TCP: 6, UDP: 17

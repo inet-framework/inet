@@ -56,7 +56,7 @@ class FieldsChunk extends cObject;
 //
 class RSVPMessage extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
+    chunkLength = byte(0);
     int rsvpKind;
 }
 

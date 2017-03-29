@@ -47,7 +47,7 @@ enum GenericTLVOptionTypes
 class GenericDatagramHeader extends FieldsChunk
 {
     @customize(true);
-    bit chunkLength @overridegetter = byte(0); // TODO: byte(10); breaks fingerprints //FIXME //KLUDGE set to -1, and should reading from ned parameter
+    chunkLength = byte(0); // TODO: byte(10); breaks fingerprints //FIXME //KLUDGE set to -1, and should reading from ned parameter
     L3Address sourceAddress @getter(_getSrcAddr);
     L3Address destinationAddress @getter(_getDestAddr);
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;

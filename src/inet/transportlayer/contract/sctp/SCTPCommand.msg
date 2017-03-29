@@ -222,7 +222,6 @@ message SCTPSendQueueAbated extends SCTPCommand
 
 class SCTPSimpleMessage extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
     uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
     char data[];
     simtime_t creationTime = 0;

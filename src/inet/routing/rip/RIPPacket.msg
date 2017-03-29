@@ -72,7 +72,6 @@ struct RIPEntry
 //
 class RIPPacket extends FieldsChunk
 {
-    bit chunkLength @overridegetter = bit(-1);
     unsigned char command @enum(RIPCommand);
     // version is fixed: 2
     RIPEntry entry[];

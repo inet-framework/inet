@@ -74,7 +74,6 @@ message RREQHolddownTimer extends RREQTimer {
 //
 
 class DYMOPacket extends FieldsChunk {
-    bit chunkLength @overridegetter;
     int hopLimit;
 }
 

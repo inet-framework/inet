@@ -28,7 +28,6 @@ class FieldsChunk extends cObject;
 
 class NetworkHeaderBase extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
     L3Address srcAddr;
     L3Address destAddr;
 }

@@ -65,7 +65,7 @@ struct FEC_TLV
 //
 class LDPPacket extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
+    chunkLength = byte(0);
     int type;
     IPv4Address senderAddress;
     IPv4Address receiverAddress;

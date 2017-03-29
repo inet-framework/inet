@@ -25,5 +25,4 @@ class FieldsChunk extends cObject;
 
 class Ieee80211PhyHeader extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
 }

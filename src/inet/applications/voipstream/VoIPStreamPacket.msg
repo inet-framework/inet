@@ -46,7 +46,7 @@ class noncobject ByteArray;
 //
 class VoIPStreamPacket extends FieldsChunk
 {
-    bit chunkLength @overridegetter = bit(0);
+    chunkLength = bit(0);
 
     int type @enum(VoIPStreamPacketType);
 

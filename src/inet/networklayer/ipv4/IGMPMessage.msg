@@ -46,7 +46,6 @@ enum IGMPType
 
 class IGMPMessage extends FieldsChunk
 {
-    bit chunkLength = bit(-1) @overridegetter;
     short type @enum(IGMPType);         // 1 byte
     uint16_t crc = 0;                   // 2 bytes
     short crcMode @enum(CrcMode) = -1;  // 0 bytes, inet only

@@ -25,5 +25,4 @@ class FieldsChunk extends cObject;
 
 class IdealPhyHeader extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
 }

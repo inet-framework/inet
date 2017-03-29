@@ -52,7 +52,7 @@ class FieldsChunk extends cObject;
 class IPv6Header extends FieldsChunk
 {
     @customize(true);
-    bit chunkLength @overridegetter;
+    chunkLength = byte(0);
     IPv6Address srcAddress;
     IPv6Address destAddress;
     int payloadLength = -1; // includes extension headers and payload

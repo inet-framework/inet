@@ -27,7 +27,6 @@ class FieldsChunk extends cObject;
 
 class CsmaCaMacHeader extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
     MACAddress transmitterAddress;
     MACAddress receiverAddress;
     int networkProtocol = -1;

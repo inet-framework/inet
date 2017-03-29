@@ -71,7 +71,7 @@ enum BGPType
 //
 class BGPHeader extends FieldsChunk
 {
-    bit chunkLength @overridegetter = byte(BGP_HEADER_OCTETS);
+    chunkLength = byte(BGP_HEADER_OCTETS);
     char type @enum(BGPType);
 }
 

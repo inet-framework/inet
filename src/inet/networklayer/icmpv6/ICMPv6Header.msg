@@ -106,10 +106,11 @@ enum ICMPv6_PARAMETER_PROB
 //
 class ICMPv6Header extends FieldsChunk
 {
-    bit chunkLength @overridegetter = byte(ICMPv6_HEADER_BYTES);
-    int type @enum(ICMPv6Type);
-        //int code; //TODO: this should be specific to different ICMP types.
-    int chksum = 0;
+    chunkLength = byte(ICMPv6_HEADER_BYTES);
+    int type @enum(ICMPv6Type);     // 1 byte
+    //int code; // 1 byte //TODO: this should be specific to different ICMP types.
+    int chksum = 0;     // 2 bytes
+    // 4 bytes 'type' specific values
 }
 
 //

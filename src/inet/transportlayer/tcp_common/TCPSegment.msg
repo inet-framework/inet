@@ -186,7 +186,7 @@ class TCPOptionUnknown extends TCPOption
 class TcpHeader extends FieldsChunk
 {
     @customize(true);
-    bit chunkLength @overridegetter = byte(TCP_HEADER_OCTETS);
+    chunkLength = byte(TCP_HEADER_OCTETS);
 
     // Source Port
     unsigned short srcPort;

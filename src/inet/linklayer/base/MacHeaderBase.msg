@@ -28,7 +28,6 @@ class FieldsChunk extends cObject;
 
 class MacHeaderBase extends FieldsChunk
 {
-    bit chunkLength @overridegetter;
     MACAddress srcAddr;
     MACAddress destAddr;
     int networkProtocol = -1;
