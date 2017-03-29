@@ -69,17 +69,17 @@ class INET_API ChunkQueue : public cNamedObject
     /** @name Length querying related functions */
     //@{
     /**
-     * Returns the length of data currently available in the queue.
+     * Returns the total length of data currently available in the queue.
      */
-    bit getQueueLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
+    bit getLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
 
     /**
-     * Returns the total length of data pushed into the queue.
+     * Returns the total length of data pushed into the queue so far.
      */
     bit getPushedLength() const { return pushedLength; }
 
     /**
-     * Returns the total length of data popped from the queue.
+     * Returns the total length of data popped from the queue so far.
      */
     bit getPoppedLength() const { return poppedLength; }
     //@}
@@ -132,26 +132,26 @@ class INET_API ChunkQueue : public cNamedObject
 
     /**
      * Returns all data in the queue in the current representation. The length
-     * of the returned chunk is the same as the value returned by getQueueLength().
+     * of the returned chunk is the same as the value returned by getLength().
      */
     std::shared_ptr<Chunk> peekAll(int flags = 0) const {
-        return peekAt(bit(0), getQueueLength(), flags);
+        return peekAt(bit(0), getLength(), flags);
     }
 
     /**
      * Returns all data in the queue in the as a sequence of bits. The length
-     * of the returned chunk is the same as the value returned by getQueueLength().
+     * of the returned chunk is the same as the value returned by getLength().
      */
     std::shared_ptr<BitsChunk> peekAllBits(int flags = 0) const {
-        return peekAt<BitsChunk>(bit(0), getQueueLength(), flags);
+        return peekAt<BitsChunk>(bit(0), getLength(), flags);
     }
 
     /**
      * Returns all data in the queue in the as a sequence of bytes. The length
-     * of the returned chunk is the same as the value returned by getQueueLength().
+     * of the returned chunk is the same as the value returned by getLength().
      */
     std::shared_ptr<BytesChunk> peekAllBytes(int flags = 0) const {
-        return peekAt<BytesChunk>(bit(0), getQueueLength(), flags);
+        return peekAt<BytesChunk>(bit(0), getLength(), flags);
     }
     //@}
 

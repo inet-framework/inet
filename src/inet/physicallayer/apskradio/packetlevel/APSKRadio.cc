@@ -74,7 +74,7 @@ void APSKRadio::encapsulate(Packet *packet) const
 
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
-    auto paddingBitLength = bit(computePaddingLength(bit(packet->getPacketLength()).get(), nullptr, modulation));
+    auto paddingBitLength = bit(computePaddingLength(bit(packet->getTotalLength()).get(), nullptr, modulation));
     if (paddingBitLength != bit(0)) {
         auto paddingTrailer = std::make_shared<ByteCountChunk>(paddingBitLength);
         paddingTrailer->markImmutable();

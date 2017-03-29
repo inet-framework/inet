@@ -392,7 +392,7 @@ void UDP::processPacketFromApp(Packet *packet)
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
-    udpHeader->setTotalLengthField(byte(udpHeader->getChunkLength() + packet->getPacketLength()).get());
+    udpHeader->setTotalLengthField(byte(udpHeader->getChunkLength() + packet->getTotalLength()).get());
     if (crcMode != CRC_COMPUTED) // CRC_COMPUTED is done in an INetfilter hook
         insertCrc(l3Protocol, L3Address(), L3Address(), udpHeader, packet);
     udpHeader->markImmutable();

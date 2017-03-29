@@ -90,7 +90,7 @@ class INET_API Packet : public cPacket
      * Returns the total packet length ignoring header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    bit getPacketLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength(); }
+    bit getTotalLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength(); }
 
     /**
      * Returns the length in bits between the header and trailer iterators.
@@ -119,13 +119,13 @@ class INET_API Packet : public cPacket
     //@{
     /**
      * Returns the header pop offset measured from the beginning of the packet.
-     * The returned value is in the range [0, getPacketLength()].
+     * The returned value is in the range [0, getTotalLength()].
      */
     bit getHeaderPopOffset() const { return headerIterator.getPosition(); }
 
     /**
      * Changes the header pop offset measured from the beginning of the packet.
-     * The value must be in the range [0, getPacketLength()].
+     * The value must be in the range [0, getTotalLength()].
      */
     void setHeaderPopOffset(bit offset);
 
@@ -222,13 +222,13 @@ class INET_API Packet : public cPacket
     //@{
     /**
      * Returns the trailer pop offset measured from the beginning of the packet.
-     * The returned value is in the range [0, getPacketLength()].
+     * The returned value is in the range [0, getTotalLength()].
      */
-    bit getTrailerPopOffset() const { return getPacketLength() - trailerIterator.getPosition(); }
+    bit getTrailerPopOffset() const { return getTotalLength() - trailerIterator.getPosition(); }
 
     /**
      * Changes the trailer pop offset measured from the beginning of the packet.
-     * The value must be in the range [0, getPacketLength()].
+     * The value must be in the range [0, getTotalLength()].
      */
     void setTrailerPopOffset(bit offset);
 
@@ -326,9 +326,9 @@ class INET_API Packet : public cPacket
     /**
      * Returns the current length of the data part of the packet. This is the
      * same as the difference between the header and trailer pop offsets.
-     * The returned value is in the range [0, getPacketLength()].
+     * The returned value is in the range [0, getTotalLength()].
      */
-    bit getDataLength() const { return getPacketLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
+    bit getDataLength() const { return getTotalLength() - headerIterator.getPosition() - trailerIterator.getPosition(); }
 
     /**
      * Returns the designated data part as an immutable chunk in its current
@@ -401,8 +401,8 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasAt(bit offset, bit length = bit(-1)) const {
-        assert(bit(0) <= offset && offset <= getPacketLength());
-        assert(bit(-1) <= length && length <= getPacketLength());
+        assert(bit(0) <= offset && offset <= getTotalLength());
+        assert(bit(-1) <= length && length <= getTotalLength());
         return peekAt<T>(offset, length) != nullptr;
     }
 
@@ -413,36 +413,37 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        assert(bit(0) <= offset && offset <= getPacketLength());
-        assert(bit(-1) <= length && length <= getPacketLength());
+        assert(bit(0) <= offset && offset <= getTotalLength());
+        assert(bit(-1) <= length && length <= getTotalLength());
         return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
     }
+
 
     /**
      * Returns the whole packet (including popped headers and trailers) in the
      * current representation. The length of the returned chunk is the same as
-     * the value returned by getPacketLength().
+     * the value returned by getTotalLength().
      */
     std::shared_ptr<Chunk> peekAll(int flags = 0) const {
-        return peekAt(bit(0), getPacketLength(), flags);
+        return peekAt(bit(0), getTotalLength(), flags);
     }
 
     /**
      * Returns the whole packet (including popped headers and trailers) as a
      * sequence of bits. The length of the returned chunk is the same as the
-     * value returned by getPacketLength().
+     * value returned by getTotalLength().
      */
     std::shared_ptr<BitsChunk> peekAllBits(int flags = 0) const {
-        return peekAt<BitsChunk>(bit(0), getPacketLength(), flags);
+        return peekAt<BitsChunk>(bit(0), getTotalLength(), flags);
     }
 
     /**
      * Returns the whole packet (including popped headers and trailers) as a
      * sequence of bytes. The length of the returned chunk is the same as the
-     * value returned by getPacketLength().
+     * value returned by getTotalLength().
      */
     std::shared_ptr<BytesChunk> peekAllBytes(int flags = 0) const {
-        return peekAt<BytesChunk>(bit(0), getPacketLength(), flags);
+        return peekAt<BytesChunk>(bit(0), getTotalLength(), flags);
     }
     //@}
 

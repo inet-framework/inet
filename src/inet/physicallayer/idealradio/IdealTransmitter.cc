@@ -66,7 +66,7 @@ std::ostream& IdealTransmitter::printToStream(std::ostream& stream, int level) c
 const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<IdealPhyHeader>();
-    auto dataLength = packet->getPacketLength() - phyHeader->getChunkLength();
+    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     auto signalBitrateReq = const_cast<Packet *>(packet)->getTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
     auto headerDuration = bit(headerLength).get() / bps(transmissionBitrate).get();

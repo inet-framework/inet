@@ -51,7 +51,7 @@ void Packet::setHeaderPopOffset(bit offset)
         return;
     else {
         assert(contents != nullptr);
-        assert(bit(0) <= offset && offset <= getPacketLength() - trailerIterator.getPosition());
+        assert(bit(0) <= offset && offset <= getTotalLength() - trailerIterator.getPosition());
         contents->seekIterator(headerIterator, offset);
         assert(getDataLength() > bit(0));
     }
@@ -102,7 +102,7 @@ void Packet::setTrailerPopOffset(bit offset)
     else {
         assert(contents != nullptr);
         assert(headerIterator.getPosition() <= offset);
-        contents->seekIterator(trailerIterator, getPacketLength() - offset);
+        contents->seekIterator(trailerIterator, getTotalLength() - offset);
         assert(getDataLength() > bit(0));
     }
 }
@@ -160,12 +160,12 @@ std::shared_ptr<Chunk> Packet::peekDataAt(bit offset, bit length, int flags) con
 
 std::shared_ptr<Chunk> Packet::peekAt(bit offset, bit length, int flags) const
 {
-    assert(bit(0) <= offset && offset <= getPacketLength());
-    assert(bit(-1) <= length && length <= getPacketLength());
+    assert(bit(0) <= offset && offset <= getTotalLength());
+    assert(bit(-1) <= length && length <= getTotalLength());
     if (contents == nullptr)
         return nullptr;
     else {
-        bit peekLength = length == bit(-1) ? getPacketLength() - offset : length;
+        bit peekLength = length == bit(-1) ? getTotalLength() - offset : length;
         return contents->peek(Chunk::Iterator(true, offset, -1), peekLength, flags);
     }
 }
@@ -221,7 +221,7 @@ void Packet::removeFromBeginning(bit length)
     if (contents == nullptr && length == bit(0))
         return;
     else {
-        assert(bit(0) <= length && length <= getPacketLength());
+        assert(bit(0) <= length && length <= getTotalLength());
         assert(contents != nullptr);
         assert(headerIterator.getPosition() == bit(0));
         if (contents->getChunkLength() == length)
@@ -242,7 +242,7 @@ void Packet::removeFromEnd(bit length)
     if (contents == nullptr && length == bit(0))
         return;
     else {
-        assert(bit(0) <= length && length <= getPacketLength());
+        assert(bit(0) <= length && length <= getTotalLength());
         assert(contents != nullptr);
         assert(trailerIterator.getPosition() == bit(0));
         if (contents->getChunkLength() == length)
@@ -268,7 +268,7 @@ void Packet::removePoppedHeaders()
 void Packet::removePoppedTrailers()
 {
     bit poppedLength = getTrailerPoppedLength();
-    setTrailerPopOffset(getPacketLength());
+    setTrailerPopOffset(getTotalLength());
     removeFromEnd(poppedLength);
 }
 

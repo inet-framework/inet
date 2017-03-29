@@ -206,7 +206,7 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
     // error when decapsulating the origDatagram on the receiver side.
     // A workaround is to avoid decapsulation, or to manually set the
     // errorMessage length to be larger than the encapsulated message.
-    bit copyLength =  byte(IPv6_MIN_MTU) - errorMsg->getPacketLength();
+    bit copyLength =  byte(IPv6_MIN_MTU) - errorMsg->getTotalLength();
     errorMsg->append(origDatagram->peekDataAt(bit(0), std::min(copyLength, origDatagram->getDataLength())));
 
     // debugging information

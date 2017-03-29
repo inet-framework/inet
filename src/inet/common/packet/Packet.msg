@@ -28,7 +28,7 @@ class ChunkQueue extends cNamedObject
 {
     @existingClass(true);
     @descriptor(readonly);
-    bit queueLength;
+    bit length;
     Chunk* contents @getter(getContents);
 }
 

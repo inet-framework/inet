@@ -37,7 +37,7 @@ void Ieee80211OFDMRadio::encapsulate(Packet *packet) const
     auto phyHeader = std::make_shared<Ieee80211OFDMPLCPFrame>();
     phyHeader->setChunkLength(bit(plcpHeaderLength));
 // TODO: phyHeader->setRate(mode->getSignalMode()->getRate());
-    phyHeader->setLength(byte(packet->getPacketLength()).get());
+    phyHeader->setLength(byte(packet->getTotalLength()).get());
     phyHeader->markImmutable();
     packet->pushHeader(phyHeader);
 }

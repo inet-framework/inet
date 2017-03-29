@@ -42,7 +42,7 @@ std::ostream& Ieee80211ScalarTransmitter::printToStream(std::ostream& stream, in
 const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<Ieee80211PhyHeader>();
-    auto dataLength = packet->getPacketLength() - phyHeader->getChunkLength();
+    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
     W transmissionPower = computeTransmissionPower(packet);

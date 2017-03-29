@@ -121,7 +121,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
 #if TCPRECEIVEQUEUE_KLUDGE == 2
         // TODO: KLUDGE: to match fingerprints with packet containing objects
         kludgeQueue.push(chunk);
-        auto data = kludgeQueue.peekAt(bit(0), kludgeQueue.getQueueLength());
+        auto data = kludgeQueue.peekAt(bit(0), kludgeQueue.getLength());
         if (data->getChunkType() == Chunk::CT_SLICE)
             return nullptr;
         else if (data->getChunkType() == Chunk::CT_SEQUENCE) {

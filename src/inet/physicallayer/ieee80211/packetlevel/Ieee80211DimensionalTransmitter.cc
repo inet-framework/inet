@@ -51,7 +51,7 @@ std::ostream& Ieee80211DimensionalTransmitter::printToStream(std::ostream& strea
 const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
     auto phyHeader = packet->peekHeader<Ieee80211PhyHeader>();
-    auto dataLength = packet->getPacketLength() - phyHeader->getChunkLength();
+    auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
     W transmissionPower = computeTransmissionPower(packet);

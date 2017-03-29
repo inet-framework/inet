@@ -826,7 +826,7 @@ void IPv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MACAd
     int mtu = ie->getMTU();
 
     // check if datagram does not require fragmentation
-    if (packet->getPacketLength() <= byte(mtu)) {
+    if (packet->getTotalLength() <= byte(mtu)) {
         sendDatagramToOutput(packet, ie, nextHopAddr);
         return;
     }

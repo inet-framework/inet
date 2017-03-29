@@ -56,7 +56,7 @@ int TCP_NSC_SendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) con
 {
     ASSERT(bufferP);
 
-    unsigned int length = byte(dataBuffer.getQueueLength()).get();
+    unsigned int length = byte(dataBuffer.getLength()).get();
     if (bufferLengthP < length)
         length = bufferLengthP;
     if (length == 0)
@@ -73,7 +73,7 @@ void TCP_NSC_SendQueue::dequeueTcpLayerMsg(int msgLengthP)
 
 ulong TCP_NSC_SendQueue::getBytesAvailable() const
 {
-    return byte(dataBuffer.getQueueLength()).get();
+    return byte(dataBuffer.getLength()).get();
 }
 
 Packet *TCP_NSC_SendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
@@ -144,7 +144,7 @@ cPacket *TCP_NSC_ReceiveQueue::extractBytesUpTo()
     ASSERT(connM);
 
     Packet *dataMsg = nullptr;
-    bit queueLength = dataBuffer.getQueueLength();
+    bit queueLength = dataBuffer.getLength();
 
     if (queueLength > bit(0)) {
         dataMsg = new Packet("DATA");
@@ -158,12 +158,12 @@ cPacket *TCP_NSC_ReceiveQueue::extractBytesUpTo()
 
 uint32 TCP_NSC_ReceiveQueue::getAmountOfBufferedBytes() const
 {
-    return byte(dataBuffer.getQueueLength()).get();
+    return byte(dataBuffer.getLength()).get();
 }
 
 uint32 TCP_NSC_ReceiveQueue::getQueueLength() const
 {
-    return byte(dataBuffer.getQueueLength()).get();
+    return byte(dataBuffer.getLength()).get();
 }
 
 void TCP_NSC_ReceiveQueue::getQueueStatus() const
