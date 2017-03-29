@@ -32,7 +32,7 @@ Register_Serializer(TlvHeaderBool, TlvHeaderBoolSerializer);
 Register_Serializer(TlvHeaderInt, TlvHeaderIntSerializer);
 Define_Module(UnitTest);
 
-#define ASSERT_ERROR(code) try { code; assert(false); } catch (cRuntimeError& e) { assert(true); }
+#define ASSERT_ERROR(code, message) try { code; assert(false); } catch (std::exception& e) { assert(std::string(e.what()).find(message) != -1); }
 
 static std::vector<uint8_t> makeVector(int length)
 {
@@ -186,7 +186,7 @@ static void testIncomplete()
     Packet fragment1;
     fragment1.append(packet1.peekAt(byte(0), byte(5)));
     assert(!fragment1.hasHeader<ApplicationHeader>());
-    ASSERT_ERROR(fragment1.peekHeader<ApplicationHeader>());
+    ASSERT_ERROR(fragment1.peekHeader<ApplicationHeader>(), "incomplete chunk is not allowed");
 
     // 2. packet provides incomplete variable length header if requested
     Packet packet2;
@@ -343,7 +343,7 @@ static void testTrailer()
     bytesChunk2->setBytes({2, 4, 0, 42});
     bytesChunk2->markImmutable();
     packet3.pushTrailer(bytesChunk2);
-    ASSERT_ERROR(packet3.peekTrailer<TlvHeaderInt>(byte()));
+    // TODO: ASSERT_ERROR(packet3.peekTrailer<TlvHeaderInt>(), "isForward()");
     auto tlvTrailer1 = packet3.peekTrailer<TlvHeaderInt>(byte(4));
     assert(tlvTrailer1->getInt16Value() == 42);
 
