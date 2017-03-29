@@ -19,8 +19,7 @@
 
 namespace inet {
 
-// TODO: disable it by default
-bool Chunk::enableImplicitChunkSerialization = true;
+bool Chunk::enableImplicitChunkSerialization = false;
 int Chunk::nextId = 0;
 
 Chunk::Chunk() :
@@ -42,8 +41,9 @@ void Chunk::handleChange()
 
 std::shared_ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
-    if (!enableImplicitChunkSerialization)
-        throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the value of the ENABLE_IMPLICIT_CHUNK_SERIALIZATION variable)");
+    auto chunkType = chunk->getChunkType();
+    if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
+        throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flat to peek)");
     ByteOutputStream outputStream;
     serialize(outputStream, chunk, offset, length);
     ByteInputStream inputStream(outputStream.getBytes());

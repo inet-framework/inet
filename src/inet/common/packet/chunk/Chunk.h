@@ -189,6 +189,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         PF_ALLOW_INCOMPLETE             = (1 << 1),
         PF_ALLOW_INCORRECT              = (1 << 2),
         PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 3),
+        PF_ALLOW_SERIALIZATION          = (1 << 4),
     };
 
     class INET_API Iterator
