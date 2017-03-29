@@ -147,35 +147,35 @@ void Flood::handleUpperPacket(cPacket *m)
 void Flood::handleLowerPacket(cPacket *m)
 {
     auto packet = check_and_cast<Packet *>(m);
-    auto flooadHeader = packet->peekHeader<FloodHeader>();
+    auto floodHeader = packet->peekHeader<FloodHeader>();
 
     //msg not broadcasted yet
-    if (notBroadcasted(flooadHeader.get())) {
+    if (notBroadcasted(floodHeader.get())) {
         //msg is for me
-        if (interfaceTable->isLocalAddress(flooadHeader->getDestinationAddress())) {
+        if (interfaceTable->isLocalAddress(floodHeader->getDestinationAddress())) {
             EV << " data msg for me! send to Upper" << endl;
-            nbHops = nbHops + (defaultTtl + 1 - flooadHeader->getTtl());
+            nbHops = nbHops + (defaultTtl + 1 - floodHeader->getTtl());
             decapsulate(packet);
             sendUp(packet);
             nbDataPacketsReceived++;
         }
         //broadcast message
-        else if (flooadHeader->getDestinationAddress().isBroadcast()) {
+        else if (floodHeader->getDestinationAddress().isBroadcast()) {
             //check ttl and rebroadcast
-            if (flooadHeader->getTtl() > 1) {
-                EV << " data msg BROADCAST! ttl = " << flooadHeader->getTtl()
+            if (floodHeader->getTtl() > 1) {
+                EV << " data msg BROADCAST! ttl = " << floodHeader->getTtl()
                    << " > 1 -> rebroadcast msg & send to upper\n";
-                flooadHeader->setTtl(flooadHeader->getTtl() - 1);
+                floodHeader->setTtl(floodHeader->getTtl() - 1);
                 auto dMsg = packet->dup();
                 setDownControlInfo(dMsg, MACAddress::BROADCAST_ADDRESS);
                 sendDown(dMsg);
                 nbDataPacketsForwarded++;
             }
             else
-                EV << " max hops reached (ttl = " << flooadHeader->getTtl() << ") -> only send to upper\n";
+                EV << " max hops reached (ttl = " << floodHeader->getTtl() << ") -> only send to upper\n";
 
             // message has to be forwarded to upper layer
-            nbHops = nbHops + (defaultTtl + 1 - flooadHeader->getTtl());
+            nbHops = nbHops + (defaultTtl + 1 - floodHeader->getTtl());
             decapsulate(packet);
             sendUp(packet);
             nbDataPacketsReceived++;
@@ -183,14 +183,14 @@ void Flood::handleLowerPacket(cPacket *m)
         //not for me -> rebroadcast
         else {
             //check ttl and rebroadcast
-            if (flooadHeader->getTtl() > 1) {
-                EV << " data msg not for me! ttl = " << flooadHeader->getTtl()
+            if (floodHeader->getTtl() > 1) {
+                EV << " data msg not for me! ttl = " << floodHeader->getTtl()
                    << " > 1 -> forward\n";
                 decapsulate(packet);
                 auto packetCopy = new Packet();
                 packetCopy->append(packet->peekDataAt(bit(0), packet->getDataLength()));
-                auto floodHeaderCopy = std::static_pointer_cast<FloodHeader>(flooadHeader->dupShared());
-                floodHeaderCopy->setTtl(flooadHeader->getTtl() - 1);
+                auto floodHeaderCopy = std::static_pointer_cast<FloodHeader>(floodHeader->dupShared());
+                floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
                 floodHeaderCopy->markImmutable();
                 packetCopy->pushHeader(floodHeaderCopy);
                 // needs to set the next hop address again to broadcast
@@ -203,7 +203,7 @@ void Flood::handleLowerPacket(cPacket *m)
             }
             else {
                 //max hops reached -> delete
-                EV << " max hops reached (ttl = " << flooadHeader->getTtl() << ") -> delete msg\n";
+                EV << " max hops reached (ttl = " << floodHeader->getTtl() << ") -> delete msg\n";
                 delete packet;
             }
         }
