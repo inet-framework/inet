@@ -18,9 +18,9 @@
 #ifndef __INET_INETFILTER_H
 #define __INET_INETFILTER_H
 
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
 
 namespace inet {
 
@@ -60,34 +60,34 @@ class INET_API INetfilter
          * a datagram that was received from the lower layer. The nextHopAddress
          * is ignored when the outputInterfaceEntry is nullptr.
          */
-        virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramPreRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
 
         /**
          * This is the second hook called by the network protocol before it sends
          * a datagram to the lower layer. This is done after the datagramPreRoutingHook
          * or the datagramLocalInHook is called and the datagram is routed.
          */
-        virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramForwardHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
 
         /**
          * This is the last hook called by the network protocol before it sends
          * a datagram to the lower layer.
          */
-        virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramPostRoutingHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
 
         /**
          * This is the last hook called by the network protocol before it sends
          * a datagram to the upper layer. This is done after the datagramPreRoutingHook
          * is called and the datagram is routed.
          */
-        virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry) = 0;
+        virtual Result datagramLocalInHook(Packet *datagram, const InterfaceEntry *inputInterfaceEntry) = 0;
 
         /**
          * This is the first hook called by the network protocol before it routes
          * a datagram that was received from the upper layer. The nextHopAddress
          * is ignored when the outputInterfaceEntry is a nullptr. After this is done
          */
-        virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
+        virtual Result datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) = 0;
     };
 
     virtual ~INetfilter() {}
@@ -108,14 +108,14 @@ class INET_API INetfilter
      * needed. This function may be used by a reactive routing protocol when it
      * cancels the route discovery process.
      */
-    virtual void dropQueuedDatagram(const INetworkDatagram *daragram) = 0;
+    virtual void dropQueuedDatagram(const Packet *daragram) = 0;
 
     /**
      * Requests the network layer to restart the processing of the datagram. This
      * function may be used by a reactive routing protocol when it completes the
      * route discovery process.
      */
-    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) = 0;
+    virtual void reinjectQueuedDatagram(const Packet *datagram) = 0;
 };
 
 class INET_API NetfilterBase : public INetfilter {

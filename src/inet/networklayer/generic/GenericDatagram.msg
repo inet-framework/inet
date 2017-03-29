@@ -17,12 +17,15 @@
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
+#include "inet/common/packet/Chunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
 namespace inet;
 
+class Chunk extends cObject;
 class noncobject L3Address;
 class noncobject TLVOptions;
 
@@ -43,9 +46,10 @@ enum GenericTLVOptionTypes
 //
 // Represents a generic network datagram with generic network addresses. 
 //
-packet GenericDatagram
+class GenericDatagramHeader extends Chunk
 {
     @customize(true);
+    int64_t byteLength = 0;
     L3Address sourceAddress @getter(_getSrcAddr);
     L3Address destinationAddress @getter(_getDestAddr);
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
