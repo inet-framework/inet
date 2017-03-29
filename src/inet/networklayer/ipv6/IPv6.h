@@ -165,6 +165,7 @@ class INET_API IPv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * through the specified interface.
      */
     virtual void fragmentAndSend(Packet *packet, const InterfaceEntry *destIE, const MACAddress& nextHopAddr, bool fromHL);
+
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
