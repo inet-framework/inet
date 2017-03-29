@@ -54,7 +54,7 @@ ThermometerFigure::ThermometerFigure(const char *name) : cGroupFigure(name)
 ThermometerFigure::~ThermometerFigure()
 {
     // delete figures which is not in canvas
-    for (int i = numTicks; i < tickFigures.size(); ++i) {
+    for (size_t i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }

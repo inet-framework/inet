@@ -64,10 +64,10 @@ GaugeFigure::GaugeFigure(const char *name) : cGroupFigure(name)
 GaugeFigure::~GaugeFigure()
 {
     // delete figures which is not in canvas
-    for (int i = curvesOnCanvas; i < curveFigures.size(); ++i)
+    for (size_t i = curvesOnCanvas; i < curveFigures.size(); ++i)
         delete curveFigures[i];
 
-    for (int i = numTicks; i < tickFigures.size(); ++i) {
+    for (size_t i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }

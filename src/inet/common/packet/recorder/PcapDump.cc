@@ -116,7 +116,7 @@ void PcapDump::writeFrame(simtime_t stime, const Packet *ipPacket)
 
     auto data = ipPacket->peekAllBytes();
     auto bytes = data->getBytes();
-    for (int i = 0; i < bytes.size(); i++)
+    for (size_t i = 0; i < bytes.size(); i++)
         buf[i] = bytes[i];
 
     ph.orig_len = byte(data->getChunkLength()).get();
