@@ -412,7 +412,7 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, const InterfaceEntry *& destIE)
 {
     GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
-//    datagram->setByteLength(HEADER_BYTES); //TODO parameter
+    datagram->setByteLength(par("headerLength");
     auto l3AddressReq = transportPacket->removeMandatoryTag<L3AddressReq>();
     L3Address src = l3AddressReq->getSrcAddress();
     L3Address dest = l3AddressReq->getDestAddress();

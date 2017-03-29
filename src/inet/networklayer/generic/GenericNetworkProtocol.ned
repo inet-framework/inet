@@ -31,6 +31,7 @@ simple GenericNetworkProtocol
         string arpModule;
         double procDelay @unit("s") = default(0s);
         int hopLimit = default(32);
+        int headerLength @unit("B") = default(10B);
         @display("i=block/routing");
     gates:
         input transportIn @labels(TCPSegment,UDPPacket);

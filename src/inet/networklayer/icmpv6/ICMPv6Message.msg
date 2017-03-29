@@ -103,6 +103,7 @@ enum ICMPv6_PARAMETER_PROB
 //
 packet ICMPv6Message
 {
+    byteLength = 8;
     int type @enum(ICMPv6Type);
         //int code; //TODO: this should be specific to different ICMP types.
 }

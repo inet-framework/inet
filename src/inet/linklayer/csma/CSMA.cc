@@ -50,6 +50,8 @@ void CSMA::initialize(int stage)
         useMACAcks = par("useMACAcks").boolValue();
         queueLength = par("queueLength");
         sifs = par("sifs");
+//        TODO: KLUDGE: it was missing, changes fingerprints, delayed until flatpacket tests pass:
+        headerLength = par("headerLength");
         transmissionAttemptInterruptedByRx = false;
         nbTxFrames = 0;
         nbRxFrames = 0;
