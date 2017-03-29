@@ -663,22 +663,21 @@ void IPv4::decapsulate(Packet *packet)
 void IPv4::fragmentPostRouting(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
     L3Address nextHop(nextHopAddr);
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
+    // fill in source address
+    if (ipv4Header->getSrcAddress().isUnspecified()) {
+        auto ipv4HeaderCopy = packet->removeHeader<IPv4Header>();
+        ipv4HeaderCopy->setSrcAddress(destIe->ipv4Data()->getIPAddress());
+        ipv4HeaderCopy->markImmutable();
+        packet->pushHeader(ipv4HeaderCopy);
+    }
     if (datagramPostRoutingHook(packet, getSourceInterfaceFrom(packet), destIe, nextHop) == INetfilter::IHook::ACCEPT)
         fragmentAndSend(packet, destIe, nextHop.toIPv4());
 }
 
 void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
-    auto ipv4Header = packet->peekHeader<IPv4Header>();
-    // fill in source address
-    if (ipv4Header->getSrcAddress().isUnspecified()) {
-        // KLUDGE: TODO: factor out
-        auto ipv4HeaderCopy = packet->removeHeader<IPv4Header>();
-        ipv4HeaderCopy->setSrcAddress(destIe->ipv4Data()->getIPAddress());
-        ipv4HeaderCopy->markImmutable();
-        packet->pushHeader(ipv4HeaderCopy);
-        ipv4Header = ipv4HeaderCopy;
-    }
+    const auto& ipv4Header = packet->peekHeader<IPv4Header>();
 
     // hop counter check
     if (ipv4Header->getTimeToLive() <= 0) {
@@ -755,7 +754,6 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
 
         fraghdr->markImmutable();
         fragment->prepend(fraghdr);
-        int bl = fragment->getByteLength();
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
         sendDatagramToOutput(fragment, destIe, nextHopAddr);
         offset += thisFragmentLength;
