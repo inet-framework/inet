@@ -54,9 +54,9 @@ std::shared_ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, Peek
     }
     // 3. peeking without conversion returns a SliceChunk
     if (converter == nullptr)
-        return peekWithConversion<SliceChunk>(iterator, length);
+        return peekWithConversion<SliceChunk>(iterator, length, flags);
     // 4. peeking with conversion
-    return converter(const_cast<cPacketChunk *>(this)->shared_from_this(), iterator, length);
+    return converter(const_cast<cPacketChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
 std::string cPacketChunk::str() const {

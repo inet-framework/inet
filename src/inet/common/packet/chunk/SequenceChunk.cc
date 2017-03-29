@@ -78,12 +78,12 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, Pee
     }
     // 5. peeking without conversion returns a SequenceChunk
     if (converter == nullptr)
-        return peekWithConversion<SequenceChunk>(iterator, length);
+        return peekWithConversion<SequenceChunk>(iterator, length, flags);
     // 6. peeking with conversion
-    return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length);
+    return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     assert(chunk->isImmutable());
     auto sequenceChunk = std::make_shared<SequenceChunk>();

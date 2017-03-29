@@ -58,10 +58,10 @@ std::shared_ptr<Chunk> BitCountChunk::peekUnchecked(PeekPredicate predicate, Pee
         return result;
     }
     // 4. peeking with conversion
-    return converter(const_cast<BitCountChunk *>(this)->shared_from_this(), iterator, length);
+    return converter(const_cast<BitCountChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> BitCountChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> BitCountChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;

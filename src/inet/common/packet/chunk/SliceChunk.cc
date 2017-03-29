@@ -70,7 +70,7 @@ std::shared_ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekCo
     return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == bit(-1) ? chunkLength : length, flags);
 }
 
-std::shared_ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     assert(chunk->isImmutable());
     bit chunkLength = chunk->getChunkLength();

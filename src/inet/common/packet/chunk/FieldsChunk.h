@@ -47,11 +47,11 @@ class FieldsChunk : public Chunk
     void setSerializedBytes(const std::vector<uint8_t> *bytes) { this->serializedBytes = bytes; }
     //@}
 
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) {
-        return Chunk::convertChunk(typeInfo, chunk, offset, length);
-    }
-
     virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+
+    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags) {
+        return Chunk::convertChunk(typeInfo, chunk, offset, length, flags);
+    }
 
   public:
     /** @name Constructors, destructors and duplication related functions */

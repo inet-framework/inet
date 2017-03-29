@@ -56,10 +56,10 @@ std::shared_ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekCo
         return chunk;
     }
     // 4. peeking with conversion
-    return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length);
+    return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+std::shared_ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     ByteOutputStream outputStream((chunk->getChunkLength().get() + 7) >> 3);
     Chunk::serialize(outputStream, chunk, offset, length);

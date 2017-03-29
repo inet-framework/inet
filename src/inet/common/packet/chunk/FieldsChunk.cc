@@ -68,9 +68,9 @@ std::shared_ptr<Chunk> FieldsChunk::peekUnchecked(PeekPredicate predicate, PeekC
     }
     // 4. peeking without conversion returns a SliceChunk
     if (converter == nullptr)
-        return peekWithConversion<SliceChunk>(iterator, length);
+        return peekWithConversion<SliceChunk>(iterator, length, flags);
     // 5. peeking with conversion
-    return converter(const_cast<FieldsChunk *>(this)->shared_from_this(), iterator, length);
+    return converter(const_cast<FieldsChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
 } // namespace
