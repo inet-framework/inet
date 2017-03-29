@@ -362,8 +362,8 @@ class INET_API Packet : public cPacket
      * current representation. The length of the returned chunk is the same as
      * the value returned by getDataLength().
      */
-    std::shared_ptr<Chunk> peekData() const {
-        return peekDataAt(bit(0), getDataLength());
+    std::shared_ptr<Chunk> peekData(int flags = 0) const {
+        return peekDataAt(bit(0), getDataLength(), flags);
     }
 
     /**
@@ -371,8 +371,8 @@ class INET_API Packet : public cPacket
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getDataLength().
      */
-    std::shared_ptr<BitsChunk> peekDataBits() const {
-        return peekDataAt<BitsChunk>(bit(0), getDataLength());
+    std::shared_ptr<BitsChunk> peekDataBits(int flags = 0) const {
+        return peekDataAt<BitsChunk>(bit(0), getDataLength(), flags);
     }
 
     /**
@@ -380,8 +380,8 @@ class INET_API Packet : public cPacket
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getDataLength().
      */
-    std::shared_ptr<BytesChunk> peekDataBytes() const {
-        return peekDataAt<BytesChunk>(bit(0), getDataLength());
+    std::shared_ptr<BytesChunk> peekDataBytes(int flags = 0) const {
+        return peekDataAt<BytesChunk>(bit(0), getDataLength(), flags);
     }
     //@}
 
@@ -423,8 +423,8 @@ class INET_API Packet : public cPacket
      * current representation. The length of the returned chunk is the same as
      * the value returned by getPacketLength().
      */
-    std::shared_ptr<Chunk> peekAll() const {
-        return peekAt(bit(0), getPacketLength());
+    std::shared_ptr<Chunk> peekAll(int flags = 0) const {
+        return peekAt(bit(0), getPacketLength(), flags);
     }
 
     /**
@@ -432,8 +432,8 @@ class INET_API Packet : public cPacket
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getPacketLength().
      */
-    std::shared_ptr<BitsChunk> peekAllBits() const {
-        return peekAt<BitsChunk>(bit(0), getPacketLength());
+    std::shared_ptr<BitsChunk> peekAllBits(int flags = 0) const {
+        return peekAt<BitsChunk>(bit(0), getPacketLength(), flags);
     }
 
     /**
@@ -441,8 +441,8 @@ class INET_API Packet : public cPacket
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getPacketLength().
      */
-    std::shared_ptr<BytesChunk> peekAllBytes() const {
-        return peekAt<BytesChunk>(bit(0), getPacketLength());
+    std::shared_ptr<BytesChunk> peekAllBytes(int flags = 0) const {
+        return peekAt<BytesChunk>(bit(0), getPacketLength(), flags);
     }
     //@}
 

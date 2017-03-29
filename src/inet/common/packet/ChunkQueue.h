@@ -134,24 +134,24 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the current representation. The length
      * of the returned chunk is the same as the value returned by getQueueLength().
      */
-    std::shared_ptr<Chunk> peekAll() const {
-        return peekAt(bit(0), getQueueLength());
+    std::shared_ptr<Chunk> peekAll(int flags = 0) const {
+        return peekAt(bit(0), getQueueLength(), flags);
     }
 
     /**
      * Returns all data in the queue in the as a sequence of bits. The length
      * of the returned chunk is the same as the value returned by getQueueLength().
      */
-    std::shared_ptr<BitsChunk> peekAllBits() const {
-        return peekAt<BitsChunk>(bit(0), getQueueLength());
+    std::shared_ptr<BitsChunk> peekAllBits(int flags = 0) const {
+        return peekAt<BitsChunk>(bit(0), getQueueLength(), flags);
     }
 
     /**
      * Returns all data in the queue in the as a sequence of bytes. The length
      * of the returned chunk is the same as the value returned by getQueueLength().
      */
-    std::shared_ptr<BytesChunk> peekAllBytes() const {
-        return peekAt<BytesChunk>(bit(0), getQueueLength());
+    std::shared_ptr<BytesChunk> peekAllBytes(int flags = 0) const {
+        return peekAt<BytesChunk>(bit(0), getQueueLength(), flags);
     }
     //@}
 
