@@ -32,9 +32,7 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     const auto& networkHeader = peekNetworkHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_TCP) {
         packet->removeFromBeginning(networkHeader->getNetworkHeaderLength());
-        auto tcpHeader = std::static_pointer_cast<TcpHeader>(packet->peekHeader<TcpHeader>()->dupShared());
-        packet->removeFromBeginning(tcpHeader->getChunkLength());
-        // TODO: src address is not filled in yet, should be: ipv4Header->getSrcAddress();
+        auto tcpHeader = packet->removeHeader<TcpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
