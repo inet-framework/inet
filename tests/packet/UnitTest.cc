@@ -522,6 +522,21 @@ static void testSerialization()
     assert(totalSerializedBitCount + size == ChunkSerializer::totalSerializedBitCount);
 }
 
+static void testConversion()
+{
+    // 1. implicit non-conversion via serialization is an error by default (would unnecessary slow down simulation)
+    Packet packet1;
+    auto applicationHeader1 = makeImmutableApplicationHeader(42);
+    packet1.append(applicationHeader1->Chunk::peek<BytesChunk>(byte(0), byte(5)));
+    packet1.append(applicationHeader1->Chunk::peek(byte(5), byte(5)));
+    ASSERT_ERROR(packet1.peekHeader<ApplicationHeader>(byte(10)), "serialization is disabled");
+
+    // 2. implicit conversion via serialization is an error by default (would result in hard to debug errors)
+    Packet packet2;
+    packet2.append(makeImmutableIpHeader());
+    ASSERT_ERROR(packet2.peekHeader<ApplicationHeader>(), "serialization is disabled");
+}
+
 static void testIteration()
 {
     // 1. packet provides appended chunks
@@ -1123,6 +1138,7 @@ void UnitTest::initialize()
     testFragmentation();
     testPolymorphism();
     testSerialization();
+    testConversion();
     testIteration();
     testCorruption();
     testDuplication();
