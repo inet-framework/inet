@@ -63,7 +63,7 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, Pee
     int endIndex = getEndIndex(iterator);
     int increment = getIndexIncrement(iterator);
     for (int i = startIndex; i != endIndex + increment; i += increment) {
-        auto& chunk = chunks[i];
+        const auto& chunk = chunks[i];
         bit chunkLength = chunk->getChunkLength();
         // 4.1 peeking the whole part of an element chunk returns that element chunk
         if (iterator.getPosition() == position && (length == bit(-1) || length == chunk->getChunkLength())) {
@@ -94,7 +94,7 @@ std::shared_ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInf
 std::deque<std::shared_ptr<Chunk>> SequenceChunk::dupChunks() const
 {
     std::deque<std::shared_ptr<Chunk>> copies;
-    for (auto& chunk : chunks)
+    for (const auto& chunk : chunks)
         copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
     return copies;
 }
@@ -118,7 +118,7 @@ bool SequenceChunk::isMutable() const
 void SequenceChunk::markImmutable()
 {
     Chunk::markImmutable();
-    for (auto& chunk : chunks)
+    for (const auto& chunk : chunks)
         chunk->markImmutable();
 }
 
@@ -155,7 +155,7 @@ bool SequenceChunk::isImproperlyRepresented() const
 bit SequenceChunk::getChunkLength() const
 {
     bit length = bit(0);
-    for (auto& chunk : chunks)
+    for (const auto& chunk : chunks)
         length += chunk->getChunkLength();
     return length;
 }
@@ -219,7 +219,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& slice
         bit sliceChunkBegin = sliceChunk->getOffset();
         bit sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
         for (auto it = sequenceChunk->chunks.rbegin(); it != sequenceChunk->chunks.rend(); it++) {
-            auto& elementChunk = *it;
+            const auto& elementChunk = *it;
             offset -= elementChunk->getChunkLength();
             bit chunkBegin = offset;
             bit chunkEnd = offset + elementChunk->getChunkLength();
@@ -280,7 +280,7 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
         bit offset = bit(0);
         bit sliceChunkBegin = sliceChunk->getOffset();
         bit sliceChunkEnd = sliceChunk->getOffset() + sliceChunk->getChunkLength();
-        for (auto& elementChunk : sequenceChunk->chunks) {
+        for (const auto& elementChunk : sequenceChunk->chunks) {
             bit chunkBegin = offset;
             bit chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
@@ -298,8 +298,8 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
 
 void SequenceChunk::doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk)
 {
-    for (auto& chunk : chunk->chunks)
-        doInsertToEnd(chunk);
+    for (const auto& elementChunk : chunk->chunks)
+        doInsertToEnd(elementChunk);
 }
 
 void SequenceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
@@ -362,7 +362,7 @@ std::string SequenceChunk::str() const
     std::ostringstream os;
     os << "[";
     bool first = true;
-    for (auto& chunk : chunks) {
+    for (const auto& chunk : chunks) {
         if (!first)
             os << " | ";
         else
