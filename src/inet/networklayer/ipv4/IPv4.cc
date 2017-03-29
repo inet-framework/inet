@@ -703,10 +703,8 @@ void IPv4::fragmentPostRouting(Packet *packet, const InterfaceEntry *destIe, IPv
 void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Address nextHopAddr)
 {
     if (crcMode == CRC_COMPUTED) {
-        const auto& ipv4HeaderOld = packet->popHeader<IPv4Header>();
-        // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
-        auto ipv4Header = std::static_pointer_cast<IPv4Header>(ipv4HeaderOld->dupShared());
         packet->removePoppedHeaders();
+        const auto& ipv4Header = packet->removeHeader<IPv4Header>();
         ipv4Header->setCrc(0);
         ByteOutputStream ipv4HeaderStream;
         Chunk::serialize(ipv4HeaderStream, ipv4Header);
