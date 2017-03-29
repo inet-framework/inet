@@ -227,8 +227,8 @@ void NewSender::sendTcp(Packet *packet)
     if (tcpSegment == nullptr)
         tcpSegment = new Packet();
     byte tcpSegmentSizeLimit = byte(15);
-    if (tcpSegment->getPacketLength() + packet->getPacketLength() >= tcpSegmentSizeLimit) {
-        bit length = tcpSegmentSizeLimit - tcpSegment->getPacketLength();
+    if (tcpSegment->getTotalLength() + packet->getTotalLength() >= tcpSegmentSizeLimit) {
+        bit length = tcpSegmentSizeLimit - tcpSegment->getTotalLength();
         tcpSegment->append(packet->peekAt(bit(0), length));
         auto tcpHeader = createTcpHeader();
         auto crcMode = medium.getSerialize() ? CRC_COMPUTED : CRC_DECLARED_CORRECT;
@@ -239,7 +239,7 @@ void NewSender::sendTcp(Packet *packet)
                 break;
             case CRC_COMPUTED: {
                 tcpHeader->setCrc(0);
-                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpHeader, tcpSegment->peekAt<BytesChunk>(bit(0), tcpSegment->getPacketLength())));
+                tcpHeader->setCrc(computeTcpCrc(BytesChunk(), tcpHeader, tcpSegment->peekAt<BytesChunk>(bit(0), tcpSegment->getTotalLength())));
                 break;
             }
             default:
@@ -248,7 +248,7 @@ void NewSender::sendTcp(Packet *packet)
         tcpHeader->markImmutable();
         tcpSegment->prepend(tcpHeader);
         sendIp(tcpSegment);
-        bit remainingLength = packet->getPacketLength() - length;
+        bit remainingLength = packet->getTotalLength() - length;
         if (remainingLength == bit(0))
             tcpSegment = nullptr;
         else {
@@ -326,7 +326,7 @@ void NewReceiver::receiveTcp(Packet *packet)
         case CRC_DECLARED_CORRECT:
             break;
         case CRC_COMPUTED: {
-            bit length = packet->getPacketLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
+            bit length = packet->getTotalLength() - tcpHeaderPopOffset - packet->getTrailerPopOffset();
             if (crc != computeTcpCrc(BytesChunk(), tcpHeader, packet->peekAt<BytesChunk>(tcpHeaderPopOffset, length))) {
                 delete packet;
                 return;

@@ -296,7 +296,7 @@ static void testHeader()
     assert(chunk7.get() == chunk6);
     assert(chunk7->isMutable());
     assert(chunk7->getChunkLength() == byte(10));
-    assert(packet4.getPacketLength() == byte(0));
+    assert(packet4.getTotalLength() == byte(0));
     const auto& bytesChunk3 = std::static_pointer_cast<BytesChunk>(chunk7);
     assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
@@ -355,7 +355,7 @@ static void testTrailer()
     assert(chunk7.get() == chunk6);
     assert(chunk7->isMutable());
     assert(chunk7->getChunkLength() == byte(10));
-    assert(packet4.getPacketLength() == byte(0));
+    assert(packet4.getTotalLength() == byte(0));
     const auto& bytesChunk3 = std::static_pointer_cast<BytesChunk>(chunk7);
     assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
@@ -396,8 +396,8 @@ static void testAggregation()
     Packet packet3;
     packet3.append(makeImmutableIpHeader());
     // aggregate other packets
-    packet3.append(packet1.peekAt(bit(0), packet2.getPacketLength()));
-    packet3.append(packet2.peekAt(bit(0), packet2.getPacketLength()));
+    packet3.append(packet1.peekAt(bit(0), packet2.getTotalLength()));
+    packet3.append(packet2.peekAt(bit(0), packet2.getTotalLength()));
     const auto& ipHeader1 = packet3.popHeader<IpHeader>();
     const auto& chunk1 = packet3.peekDataAt(byte(0), byte(10));
     const auto& chunk2 = packet3.peekDataAt(byte(10), byte(10));
@@ -426,7 +426,7 @@ static void testFragmentation()
     const auto& fragment1 = packet2.peekDataAt(bit(0), packet2.getDataLength());
     const auto& chunk1 = fragment1->peek(byte(0), byte(3));
     const auto& chunk2 = fragment1->peek(byte(3), byte(7));
-    assert(packet2.getPacketLength() == byte(30));
+    assert(packet2.getTotalLength() == byte(30));
     assert(ipHeader1 != nullptr);
     assert(std::dynamic_pointer_cast<IpHeader>(ipHeader1) != nullptr);
     assert(fragment1 != nullptr);
@@ -616,7 +616,7 @@ static void testDuplication()
     std::shared_ptr<ByteCountChunk> byteCountChunk1 = makeImmutableByteCountChunk(byte(10));
     packet1.append(byteCountChunk1);
     auto packet2 = packet1.dup();
-    assert(packet2->getPacketLength() == byte(10));
+    assert(packet2->getTotalLength() == byte(10));
     assert(byteCountChunk1.use_count() == 3); // 1 here + 2 in the packets
     delete packet2;
 }
@@ -667,8 +667,8 @@ static void testMerging()
     Packet packet3;
     packet3.append(makeImmutableByteCountChunk(byte(5)));
     packet3.append(makeImmutableByteCountChunk(byte(5)));
-    const auto& chunk3 = packet3.peekAt(bit(0), packet3.getPacketLength());
-    const auto& chunk4 = packet3.peekAt<ByteCountChunk>(bit(0), packet3.getPacketLength());
+    const auto& chunk3 = packet3.peekAt(bit(0), packet3.getTotalLength());
+    const auto& chunk4 = packet3.peekAt<ByteCountChunk>(bit(0), packet3.getTotalLength());
     assert(chunk3 != nullptr);
     assert(chunk3->getChunkLength() == byte(10));
     assert(std::dynamic_pointer_cast<ByteCountChunk>(chunk3) != nullptr);
@@ -680,7 +680,7 @@ static void testMerging()
     Packet packet4;
     packet4.append(makeImmutableBytesChunk(makeVector(5)));
     packet4.append(makeImmutableBytesChunk(makeVector(5)));
-    const auto& chunk5 = packet4.peekAt(bit(0), packet4.getPacketLength());
+    const auto& chunk5 = packet4.peekAt(bit(0), packet4.getTotalLength());
     const auto& chunk6 = packet4.peekAllBytes();
     assert(chunk5 != nullptr);
     assert(chunk5->getChunkLength() == byte(10));

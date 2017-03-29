@@ -23,8 +23,8 @@ class CompoundHeader : public CompoundHeader_Base
   friend Chunk;
 
   protected:
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) {
-        return Chunk::convertChunk(typeInfo, chunk, offset, length);
+    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags) {
+        return Chunk::convertChunk(typeInfo, chunk, offset, length, flags);
     }
 
   public:
