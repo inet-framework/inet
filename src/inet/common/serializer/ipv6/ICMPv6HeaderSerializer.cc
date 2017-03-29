@@ -29,6 +29,13 @@ namespace inet {
 namespace serializer {
 
 Register_Serializer(ICMPv6Header, ICMPv6HeaderSerializer);
+Register_Serializer(ICMPv6EchoRequestMsg, ICMPv6HeaderSerializer);
+Register_Serializer(ICMPv6EchoReplyMsg, ICMPv6HeaderSerializer);
+Register_Serializer(ICMPv6DestUnreachableMsg, ICMPv6HeaderSerializer);
+Register_Serializer(ICMPv6PacketTooBigMsg, ICMPv6HeaderSerializer);
+Register_Serializer(ICMPv6ParamProblemMsg, ICMPv6HeaderSerializer);
+Register_Serializer(ICMPv6TimeExceededMsg, ICMPv6HeaderSerializer);
+Register_Serializer(IPv6NeighbourSolicitation, ICMPv6HeaderSerializer);
 
 void ICMPv6HeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
@@ -95,6 +102,7 @@ std::shared_ptr<Chunk> ICMPv6HeaderSerializer::deserialize(ByteInputStream& stre
     std::shared_ptr<ICMPv6Header> _pkt = nullptr;
     uint8_t type = stream.readByte();     // type
     uint8_t subcode = stream.readByte();  // subcode
+    uint16_t chksum = stream.readUint16();
 
     switch (type) {
         case ICMPv6_ECHO_REQUEST: {
@@ -110,6 +118,24 @@ std::shared_ptr<Chunk> ICMPv6HeaderSerializer::deserialize(ByteInputStream& stre
             pkt->setType(type);
             pkt->setCode(subcode);
             pkt->setChunkLength(byte(4));
+            break;
+        }
+
+        case ICMPv6_DESTINATION_UNREACHABLE: {
+            auto pkt = std::make_shared<ICMPv6DestUnreachableMsg>(); _pkt = pkt;
+            pkt->setType(type);
+            pkt->setCode(subcode);
+            pkt->setChunkLength(byte(8));
+            stream.readUint32();        // unused
+            break;
+        }
+
+        case ICMPv6_TIME_EXCEEDED: {
+            auto pkt = std::make_shared<ICMPv6TimeExceededMsg>(); _pkt = pkt;
+            pkt->setType(type);
+            pkt->setCode(subcode);
+            pkt->setChunkLength(byte(8));
+            stream.readUint32();        // unused
             break;
         }
 

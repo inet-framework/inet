@@ -69,16 +69,17 @@ void ICMPv6::handleMessage(cMessage *msg)
 
 void ICMPv6::processICMPv6Message(Packet *packet)
 {
-    auto icmpv6msg = packet->popHeader<ICMPv6Header>();
+    auto icmpv6msg = packet->peekHeader<ICMPv6Header>();
     int type = icmpv6msg->getType();
     if (type < 128) {
         // ICMP errors are delivered to the appropriate higher layer protocols
         EV_INFO << "ICMPv6 packet: passing it to higher layer\n";
-        auto bogusIpv6Header = packet->peekHeader<IPv6Header>();
+        const auto& bogusIpv6Header = packet->peekDataAt<IPv6Header>(icmpv6msg->getChunkLength());
         int transportProtocol = bogusIpv6Header->getTransportProtocol();
         if (transportProtocol == IP_PROT_IPv6_ICMP) {
             // ICMP error answer to an ICMP packet:
             errorOut(icmpv6msg);
+            delete packet;
         }
         else {
             packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
@@ -86,32 +87,36 @@ void ICMPv6::processICMPv6Message(Packet *packet)
         }
     }
     else {
-    if (std::dynamic_pointer_cast<ICMPv6DestUnreachableMsg>(icmpv6msg)) {
-        EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
-        errorOut(icmpv6msg);
-    }
-    else if (std::dynamic_pointer_cast<ICMPv6PacketTooBigMsg>(icmpv6msg)) {
-        EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
-        errorOut(icmpv6msg);
-    }
-    else if (std::dynamic_pointer_cast<ICMPv6TimeExceededMsg>(icmpv6msg)) {
-        EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
-        errorOut(icmpv6msg);
-    }
-    else if (std::dynamic_pointer_cast<ICMPv6ParamProblemMsg>(icmpv6msg)) {
-        EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
-        errorOut(icmpv6msg);
-    }
-    else if (auto echoRequest = std::dynamic_pointer_cast<ICMPv6EchoRequestMsg>(icmpv6msg)) {
-        EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
-        processEchoRequest(packet, echoRequest);
-    }
-    else if (auto echoReply = std::dynamic_pointer_cast<ICMPv6EchoReplyMsg>(icmpv6msg)) {
-        EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
-        processEchoReply(packet, echoReply);
-    }
-    else
-        throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(),icmpv6msg->getName());
+        auto icmpv6msg = packet->popHeader<ICMPv6Header>();
+        if (std::dynamic_pointer_cast<ICMPv6DestUnreachableMsg>(icmpv6msg)) {
+            EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
+            errorOut(icmpv6msg);
+            delete packet;
+        }
+        else if (std::dynamic_pointer_cast<ICMPv6PacketTooBigMsg>(icmpv6msg)) {
+            EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
+            errorOut(icmpv6msg);
+            delete packet;
+        }
+        else if (std::dynamic_pointer_cast<ICMPv6TimeExceededMsg>(icmpv6msg)) {
+            EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
+            errorOut(icmpv6msg);
+            delete packet;
+        }
+        else if (std::dynamic_pointer_cast<ICMPv6ParamProblemMsg>(icmpv6msg)) {
+            EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
+            errorOut(icmpv6msg);
+        }
+        else if (auto echoRequest = std::dynamic_pointer_cast<ICMPv6EchoRequestMsg>(icmpv6msg)) {
+            EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
+            processEchoRequest(packet, echoRequest);
+        }
+        else if (auto echoReply = std::dynamic_pointer_cast<ICMPv6EchoReplyMsg>(icmpv6msg)) {
+            EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
+            processEchoReply(packet, echoReply);
+        }
+        else
+            throw cRuntimeError("Unknown message type received: (%s)%s.\n", icmpv6msg->getClassName(),icmpv6msg->getName());
     }
 }
 
@@ -314,6 +319,14 @@ bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDon
 {
     //pingMap.clear();
     throw cRuntimeError("Lifecycle operation support not implemented");
+}
+
+void ICMPv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("transportIn", gate->getBaseName())) {
+        transportProtocols.insert(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol));
+    }
 }
 
 } // namespace inet

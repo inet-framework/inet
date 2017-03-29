@@ -198,24 +198,19 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
 
 void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, ICMPv6Header *msg)
 {
-    if (dynamic_cast<IPv6RouterSolicitation *>(msg)) {
-        IPv6RouterSolicitation *rs = (IPv6RouterSolicitation *)msg;
+    if (IPv6RouterSolicitation *rs = dynamic_cast<IPv6RouterSolicitation *>(msg)) {
         processRSPacket(packet, rs);
     }
-    else if (dynamic_cast<IPv6RouterAdvertisement *>(msg)) {
-        IPv6RouterAdvertisement *ra = (IPv6RouterAdvertisement *)msg;
+    else if (IPv6RouterAdvertisement *ra = dynamic_cast<IPv6RouterAdvertisement *>(msg)) {
         processRAPacket(packet, ra);
     }
-    else if (dynamic_cast<IPv6NeighbourSolicitation *>(msg)) {
-        IPv6NeighbourSolicitation *ns = (IPv6NeighbourSolicitation *)msg;
+    else if (IPv6NeighbourSolicitation *ns = dynamic_cast<IPv6NeighbourSolicitation *>(msg)) {
         processNSPacket(packet, ns);
     }
-    else if (dynamic_cast<IPv6NeighbourAdvertisement *>(msg)) {
-        IPv6NeighbourAdvertisement *na = (IPv6NeighbourAdvertisement *)msg;
+    else if (IPv6NeighbourAdvertisement *na = dynamic_cast<IPv6NeighbourAdvertisement *>(msg)) {
         processNAPacket(packet, na);
     }
-    else if (dynamic_cast<IPv6Redirect *>(msg)) {
-        IPv6Redirect *redirect = (IPv6Redirect *)msg;
+    else if (IPv6Redirect *redirect = dynamic_cast<IPv6Redirect *>(msg)) {
         processRedirectPacket(redirect);
     }
     else {
@@ -1082,6 +1077,7 @@ void IPv6NeighbourDiscovery::processRDTimeout(cMessage *msg)
 void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitation *rs)
 {
     if (validateRSPacket(packet, rs) == false) {
+        delete packet;
         return;
     }
 
@@ -1095,6 +1091,7 @@ void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitat
         EV_INFO << "This is an advertising interface, processing RS\n";
 
         if (validateRSPacket(packet, rs) == false) {
+            delete packet;
             return;
         }
 
@@ -1152,6 +1149,7 @@ void IPv6NeighbourDiscovery::processRSPacket(Packet *packet, IPv6RouterSolicitat
     else {
         EV_INFO << "This interface is a host, discarding RA message\n";
     }
+    delete packet;
 }
 
 bool IPv6NeighbourDiscovery::validateRSPacket(Packet *packet, IPv6RouterSolicitation *rs)
@@ -1299,10 +1297,12 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {
         EV_INFO << "Interface is an advertising interface, dropping RA message.\n";
+        delete packet;
         return;
     }
     else {
         if (validateRAPacket(packet, ra) == false) {
+            delete packet;
             return;
         }
 
@@ -1311,6 +1311,7 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
             // in case we are currently performing DAD we ignore this RA
             // TODO improve this procedure in order to allow reinitiating DAD
             // (which means cancel current DAD, start new DAD)
+            delete packet;
             return;
         }
 #endif /* WITH_xMIPv6 */
@@ -1347,6 +1348,7 @@ void IPv6NeighbourDiscovery::processRAPacket(Packet *packet, IPv6RouterAdvertise
 #endif /* WITH_xMIPv6 */
         }
     }
+    delete packet;
 }
 
 void IPv6NeighbourDiscovery::processRAForRouterUpdates(Packet *packet, IPv6RouterAdvertisement *ra)
@@ -1846,6 +1848,7 @@ void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, IPv6NeighbourSolici
         || ie->ipv6Data()->hasAddress(nsTargetAddr) == false)
     {
         bubble("NS validation failed\n");
+        delete packet;
         return;
     }
 
@@ -1862,6 +1865,7 @@ void IPv6NeighbourDiscovery::processNSPacket(Packet *packet, IPv6NeighbourSolici
         EV_INFO << "Process NS for Non-Tentative target address.\n";
         processNSForNonTentativeAddress(packet, ns, ie);
     }
+    delete packet;
 }
 
 bool IPv6NeighbourDiscovery::validateNSPacket(Packet *packet, IPv6NeighbourSolicitation *ns)
@@ -2159,6 +2163,7 @@ void IPv6NeighbourDiscovery::sendUnsolicitedNA(InterfaceEntry *ie)
 void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na)
 {
     if (validateNAPacket(packet, na) == false) {
+        delete packet;
         return;
     }
 
@@ -2177,6 +2182,7 @@ void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvert
     if (neighbourEntry == nullptr) {
         EV_INFO << "NA received. Target Address not found in Neighbour Cache\n";
         EV_INFO << "Dropping NA packet.\n";
+        delete packet;
         return;
     }
 
@@ -2187,6 +2193,7 @@ void IPv6NeighbourDiscovery::processNAPacket(Packet *packet, IPv6NeighbourAdvert
         processNAForIncompleteNCEState(na, neighbourEntry);
     else
         processNAForOtherNCEStates(na, neighbourEntry);
+    delete packet;
 }
 
 bool IPv6NeighbourDiscovery::validateNAPacket(Packet *packet, IPv6NeighbourAdvertisement *na)

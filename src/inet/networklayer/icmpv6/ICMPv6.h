@@ -19,6 +19,8 @@
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
+#include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
@@ -33,7 +35,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
+class INET_API ICMPv6 : public cSimpleModule, public ILifecycle, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -94,9 +96,12 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
 
     virtual void errorOut(const std::shared_ptr<ICMPv6Header>& header);
 
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate) override;
+
   protected:
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
+    std::set<int> transportProtocols;    // where to send up packets
 };
 
 } // namespace inet

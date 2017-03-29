@@ -106,7 +106,7 @@ enum ICMPv6_PARAMETER_PROB
 //
 class ICMPv6Header extends FieldsChunk
 {
-    bit chunkLength @overridegetter = byte(8);
+    bit chunkLength @overridegetter = byte(ICMPv6_HEADER_BYTES);
     int type @enum(ICMPv6Type);
         //int code; //TODO: this should be specific to different ICMP types.
     int chksum = 0;
@@ -119,6 +119,7 @@ class ICMPv6Header extends FieldsChunk
 class ICMPv6DestUnreachableMsg extends ICMPv6Header
 {
     int code @enum(ICMPv6DEST_UN);
+    // unused 4 bytes
 }
 
 class ICMPv6PacketTooBigMsg extends ICMPv6Header
@@ -158,3 +159,4 @@ class ICMPv6EchoReplyMsg extends ICMPv6Header
     int identifier; // identifier to aid in matching Echo replies. May be Zero
     int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
 }
+
