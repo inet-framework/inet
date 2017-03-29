@@ -1243,9 +1243,7 @@ INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *pac
     const auto& networkHeader = peekNetworkHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_UDP) {
         packet->removeFromBeginning(networkHeader->getNetworkHeaderLength());
-        auto udpHeader = std::static_pointer_cast<UdpHeader>(packet->peekHeader<UdpHeader>()->dupShared());
-        packet->removeFromBeginning(udpHeader->getChunkLength());
-        // TODO: src address is not filled in yet, should be: ipv4Header->getSrcAddress();
+        auto udpHeader = packet->removeHeader<UdpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
