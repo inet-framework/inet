@@ -260,15 +260,13 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
         preroutingFinish(packet, fromIE, destIE, nextHop.toIPv4());
 }
 
-Packet *IPv4::createForwardedPacket(Packet *packet) const
+Packet *IPv4::prepareForForwarding(Packet *packet) const
 {
-    auto forwardedPacket = packet->dup();
-    forwardedPacket->removePoppedChunks();
-    const auto& ipv4Header = forwardedPacket->removeHeader<IPv4Header>();
+    packet->removePoppedChunks();
+    const auto& ipv4Header = packet->removeHeader<IPv4Header>();
     ipv4Header->setTimeToLive(ipv4Header->getTimeToLive() - 1);
-    ipv4Header->markImmutable();
-    forwardedPacket->pushHeader(ipv4Header);
-    return forwardedPacket;
+    packet->insertHeader(ipv4Header);
+    return packet;
 }
 
 void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
@@ -305,8 +303,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             delete packet;
         }
         else
-            // needed a mutable copy for forwarding
-            forwardMulticastPacket(createForwardedPacket(packet), fromIE);
+            forwardMulticastPacket(prepareForForwarding(packet), fromIE);
     }
     else {
         const InterfaceEntry *broadcastIE = nullptr;
@@ -319,7 +316,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled())
-                fragmentPostRouting(createForwardedPacket(packet), broadcastIE, IPv4Address::ALLONES_ADDRESS);
+                fragmentPostRouting(prepareForForwarding(packet->dup()), broadcastIE, IPv4Address::ALLONES_ADDRESS);
 
             EV_INFO << "Broadcast received\n";
             reassembleAndDeliver(packet, fromIE);
@@ -330,7 +327,7 @@ void IPv4::preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const 
             delete packet;
         }
         else
-            routeUnicastPacket(createForwardedPacket(packet), fromIE, destIE, nextHopAddr);
+            routeUnicastPacket(prepareForForwarding(packet), fromIE, destIE, nextHopAddr);
     }
 }
 

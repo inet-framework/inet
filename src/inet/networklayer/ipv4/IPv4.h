@@ -219,7 +219,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
 
     virtual void sendIcmpError(Packet *packet, int inputInterfaceId, ICMPType type, ICMPCode code);
 
-    virtual Packet *createForwardedPacket(Packet *packet) const;
+    virtual Packet *prepareForForwarding(Packet *packet) const;
 
   public:
     IPv4();
