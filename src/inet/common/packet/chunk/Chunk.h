@@ -34,29 +34,36 @@ using namespace units::values;
  * to represent the data bytes as is. For example, when one is using an external
  * program to send or receive the data. But most often it's better to have a
  * representation that is easy to inspect and understand during debugging.
- * Fortunately this representation can be easily generated using the omnetpp
+ * Fortunately, this representation can be easily generated using the omnetpp
  * message compiler. In any case, chunks can always be converted to and from a
  * sequence of bytes using the corresponding serializer.
  *
- * TODO: document polymorphism, nesting, automatic compacting, crc handling, implementing lossy channels
- *
  * Chunks can represent data in different ways:
- *  - ByteCountChunk contains a length field only
+ *  - BitsChunk contains a sequence of bits
+ *  - BitCountChunk contains a bit length field only
  *  - BytesChunk contains a sequence of bytes
+ *  - ByteCountChunk contains a byte length field only
  *  - SliceChunk contains a slice of another chunk
  *  - SequenceChunk contains a sequence of other chunks
- *  - cPacketChunk contains a cPacket for compatibility
- *  - message compiler generated chunks contain various user defined fields
+ *  - cPacketChunk contains a cPacket for backward compatibility
+ *  - message compiler generated chunks extending FieldsChunk contain various
+ *    user defined fields
  *
  * Chunks are initially:
- *  - mutable, then may become immutable (but never the other way around)
- *    immutable chunks cannot be changed anymore (sharing data)
- *  - complete, then may become incomplete (but never the other way around)
- *    incomplete chunks are not totally filled in (deserializing insufficient data)
- *  - correct, then may become incorrect (but never the other way around)
- *    incorrect chunks contain bit errors (using lossy channels)
- *  - properly represented, then may become improperly represented (but never the other way around)
- *    improperly represented chunks misrepresent their data (deserializing data)
+ *  - mutable, then may become immutable, but never the other way around. There
+ *    is one exception to this rule, when the chunk is exclusively owned. That
+ *    is when it has exactly one reference. Immutable chunks cannot be changed
+ *    anymore because they might be used to efficiently share data.
+ *  - complete, then may become incomplete, but never the other way around.
+ *    Incomplete chunks are not totally filled in. For example, when a chunk is
+ *    created by deserializing it from insufficient amount of data.
+ *  - correct, then may become incorrect, but never the other way around.
+ *    Incorrect chunks contain bit errors. For example, when a packet is sent
+ *    through a lossy channel causing bit errors in it.
+ *  - properly represented, then may become improperly represented, but never
+ *    the other way around. Improperly represented chunks misrepresent their
+ *    data. For example, when a chunk is created by deserializing data but the
+ *    field based representation does not fully support all possible data.
  *
  * Chunks can be safely shared using std::shared_ptr. In fact, the reason for
  * having immutable chunks is to allow for efficient sharing using shared
@@ -71,85 +78,142 @@ using namespace units::values;
  *  - copy to a new mutable chunk
  *  - convert to a human readable string
  *
+ * The chunk API supports polymorphism, so it's possible to create chunk class
+ * hierarchies with proper automatic deserialization. Chunks can be nested into
+ * each other similarly how SliceChunk and SequenceChunk does it. You can find
+ * examples for these in the tests folder of INET.
+ *
+ * Communication protocol headers often contain optional parts. There are many
+ * ways to represent optional fields with chunks. For example, the IP header
+ * contains an optional part that is a list of IP specific options. Assuming
+ * the packet already contains a SequenceChunk, the IP header can be represented
+ * in various ways. Here are a few examples:
+ *
+ * - IpHeader is a FieldsChunk subclass
+ *   - mandatory fields are directly represented in the IpHeader chunk
+ *   - each IpOption is added as an optional structure inside an array
+ *
+ * - IpHeader is a FieldsChunk subclass
+ * - IpOptions is a SequenceChunk subclass
+ *   - each IpOption is a FieldsChunk subclass inside the SequenceChunk
+ *
+ * - IpHeader is a FieldsChunk subclass
+ * - each IpOption is added as a separate FieldsChunk subclass
+ *
+ * Communication protocol headers also often contain CRC or checksum fields. In
+ * network simulations, most of the time it's unnecessary to compute the correct
+ * CRC. One can safely assume the correct CRC is present, unless the packet has
+ * to be serialized. As for the representation, a FieldsChunk subclass should
+ * contain a CRC field and possibly a CRC mode field. Please note that computing,
+ * inserting and verifying the actual CRC is not the task of the chunk serializer
+ * but rather the task of the communication protocol. You can find a few examples
+ * how to implement CRC insertion and verification in the TCP/IP protocol stack.
+ *
+ * Implementing lossy communication channels is somewhat more complicated but
+ * also more flexible with new chunk API. Whenever a packet passes through a
+ * lossy channel there are a number of options to represent errors.
+ *  - the simplest way is marking the whole packet erroneous via setBitError()
+ *  - a more detailed way would be iterating through the chunks in the packet
+ *    and marking the erroneous chunks via markIncorrect(). Note that the chunks
+ *    marked this way has to be duplicated before, and they have to be replaced
+ *    in the packet to avoid accidentally propagating the same error to multiple
+ *    receivers.
+ *  - the most detailed way is asking for the BytesChunk (or BitsChunk) of the
+ *    packet and actually changing the erroneous bytes (bits) before the packet
+ *    arrives at the receiver. Fortunately, the receiver doesn't have to worry
+ *    about receiving a packet containing bytes instead of the original chunks,
+ *    because the chunk API provides the requested chunk types either way.
+ *
+ * Representation duality is a very important aspect of the chunk API. It means
+ * that a protocol doesn't have to worry about the actual representation of the
+ * packet's data while it's processing. For example, when the IP protocol peeks
+ * the packet for the IpHeader, there are a few possiblities. The requested class
+ * is either already there to be returned, or if the packet contains the raw
+ * bytes, then it's going to be deserialized automatically and transparently.
+ *
+ * In fact, the chunk API supports turning any kind of chunk into any other kind
+ * of chunk using serialization/deserialization. This represents the fact that
+ * the protocol data is really a sequence of bits and any other representation
+ * is just a view on top of that. Of course, this could lead to all sorts of
+ * surprising things such as accidentally processing a Foo protocol header as a
+ * Bar protocol header. This can happen due bit errors (e.g. incorrect length
+ * field) or programming errors. To avoid hard to debug errors this conversion
+ * is disabled by default.
+ *
  * General rules for peeking into a chunk:
  * 1) Peeking never returns
  *    a) a SliceChunk containing
+ *       - a BitsChunk
+ *       - a BitCountChunk
  *       - a BytesChunk
  *       - a ByteCountChunk
  *       - another SliceChunk
  *       - the whole of another chunk
  *       - a SequenceChunk with superfluous elements
  *    b) a SequenceChunk containing
+ *       - connecting BitsChunks
+ *       - connecting BitCountChunks
  *       - connecting BytesChunks
  *       - connecting ByteCountChunks
- *       - connecting SliceChunks
+ *       - connecting SliceChunks of the same chunk
  *       - another SequenceChunk
  *       - only one chunk
  * 2) Peeking (various special cases)
- *    a) an empty part of the chunk returns nullptr
+ *    a) an empty part of the chunk returns nullptr if allowed
  *    b) the whole of the chunk returns the chunk
  *    c) any part that is directly represented by another chunk returns that chunk
  * 3) Peeking without providing a return type for a
- *    a) BytesChunk always returns a BytesChunk containing the bytes
- *       of the requested part
- *    b) ByteCountChunk always returns a ByteCountChunk containing the requested length
- *    c) SliceChunk always returns a SliceChunk containing the requested slice
+ *    a) BitsChunk always returns a BitsChunk containing the bits of the
+ *       requested part
+ *    b) BitCountChunk always returns a BitCountChunk containing the requested
+ *       length
+ *    c) BytesChunk always returns a BytesChunk containing the bytes of the
+ *       requested part
+ *    d) ByteCountChunk always returns a ByteCountChunk containing the requested
+ *       length
+ *    e) SliceChunk always returns a SliceChunk containing the requested slice
  *       of the chunk that is used by the original SliceChunk
- *    d) SequenceChunk may return
+ *    f) SequenceChunk may return
  *       - an element chunk
  *       - a SliceChunk of an element chunk
  *       - a SliceChunk using the original SequenceChunk
  *       - a new SequenceChunk using the elements of the original SequenceChunk
- *    e) any other chunk returns a SliceChunk
+ *    g) any other chunk returns a SliceChunk
  * 4) Peeking with providing a return type always returns a chunk of the
  *    requested type (or a subtype thereof)
- *    a) Peeking with a ByteCountChunk return type for any chunk returns a
+ *    a) Peeking with a BitCountChunk return type for any chunk returns a
+ *       BitCountChunk containing the requested bit length
+ *    b) Peeking with a BitsChunk return type for any chunk returns a
+ *       BitsChunk containing a part of the serialized bits of the
+ *       original chunk
+ *    c) Peeking with a ByteCountChunk return type for any chunk returns a
  *       ByteCountChunk containing the requested byte length
- *    b) Peeking with a BytesChunk return type for any chunk returns a
+ *    d) Peeking with a BytesChunk return type for any chunk returns a
  *       BytesChunk containing a part of the serialized bytes of the
  *       original chunk
- *    c) Peeking with a SliceChunk return type for any chunk returns a
+ *    e) Peeking with a SliceChunk return type for any chunk returns a
  *       SliceChunk containing the requested slice of the original chunk
- *    d) Peeking with a SequenceChunk return type is an error
- *    e) Peeking with a any other return type for any chunk returns a chunk of
+ *    f) Peeking with a SequenceChunk return type is an error
+ *    g) Peeking with a any other return type for any chunk returns a chunk of
  *       the requested type containing data deserialized from the bytes that
  *       were serialized from the original chunk
+ * 5) Peeking never returns a chunk that is one of the following unless it's
+ *    explicitly allowed by passing the corresponding peek flag
+ *    a) a nullptr
+ *    b) an incomplete chunk
+ *    c) an incorrect chunk
+ *    d) an improperly represented chunk
+ *    e) a chunk converted from Foo to Bar
+ *
+ * General rules for inserting a chunk into another:
+ * a) Inserting a BitsChunk into a BitsChunk merges them
+ * b) Inserting a BitCountChunk into a BitCountChunk merges them
+ * c) Inserting a BytesChunk into a BytesChunk merges them
+ * d) Inserting a ByteCountChunk into a ByteCountChunk merges them
+ * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
-// TODO: consider turning some assert into if/throw, consider potential performance penalty, make it optional with compile time macro?
+// TODO: consider turning some assert into if/throw, consider potential performance penalty even in release mode, make it optional with compile time macro?
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
-// TODO: review insert functions for the chunk->insert(chunk) case
-// TODO: consider returning a result chunk from insertAtBeginning and insertAtEnd
-// TODO: peek is misleading with BytesChunk and default length, consider introducing an enum to replace -1 length values
-// TODO: what shall we do about optional subfields such as Address2, Address3, QoS, etc.?
-//       message compiler could support @optional fields, inspectors could hide them, etc.
-// TODO: how do we represent the random subfield sequences (options) right after mandatory header part?, possible alternatives:
-// packet
-// - IpHeader
-//   - IpHeaderMandatory
-//   - IpOption1
-//   - IpOption2
-// - TcpHeader
-//   - TcpHeaderMandatory
-//   - TcpOption1
-//   - TcpOption2
-//
-// packet
-// - IpHeader
-// - IpOptions
-//   - IpOption1
-//   - IpOption2
-// - TcpHeader
-// - TcpOptions
-//   - TcpOption1
-//   - TcpOption2
-//
-// packet
-// - IpHeader
-// - IpOption1
-// - IpOption2
-// - TcpHeader
-// - TcpOption1
-// - TcpOption2
 class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
   friend class SliceChunk;
