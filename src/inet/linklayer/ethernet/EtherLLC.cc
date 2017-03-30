@@ -134,6 +134,7 @@ void EtherLLC::processPacketFromHigherLayer(Packet *packet)
 
     const auto& frame = std::make_shared<EtherFrameWithLLC>();
 
+    frame->setPayloadLength(packet->getByteLength());
     frame->setControl(0);
     frame->setSsap(ieee802SapReq->getSsap());
     frame->setDsap(ieee802SapReq->getDsap());

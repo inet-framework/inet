@@ -116,6 +116,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *msg)
 
         snapFrame->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
         snapFrame->setDest(macAddressReq->getDestAddress());
+        snapFrame->setPayloadLength(msg->getByteLength());
         snapFrame->setOrgCode(0);
         if (etherTypeTag)
             snapFrame->setLocalcode(etherTypeTag->getEtherType());
