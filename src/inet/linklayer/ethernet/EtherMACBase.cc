@@ -418,6 +418,37 @@ Packet *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
     return packet;
 }
 
+//FIXME should use it in EtherMAC, EtherMACFullDuplex, etc. modules. But should not use it in EtherBus, EtherHup.
+bool EtherMACBase::verifyCrcAndLength(Packet *packet)
+{
+    EV_STATICCONTEXT;
+
+    auto ethHeader = packet->peekHeader<EtherFrame>();          //FIXME can I use any flags?
+    const auto& ethTrailer = packet->peekTrailer<EthernetFcs>(byte(ETHER_FCS_BYTES));          //FIXME can I use any flags?
+
+    switch(ethTrailer->getFcsMode()) {
+        case FCS_DECLARED_CORRECT:
+            break;
+        case FCS_DECLARED_INCORRECT:
+            EV_ERROR << "incorrect fcs in ethernet frame\n";
+            return false;
+        case FCS_COMPUTED: {
+            bool isFcsBad = false;
+            //FIXME check the Fcs in ethTrailer
+            if (isFcsBad)
+                return false;
+            break;
+        }
+        default:
+            throw cRuntimeError("invalid FCS mode in ethernet frame");
+    }
+    bit payloadLength = bit(-1);
+    if (auto header = dynamic_cast<EtherFrameWithPayloadLength *>(ethHeader.get()))
+        payloadLength = byte(header->getPayloadLength());
+
+    return (payloadLength == bit(-1) || payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
+}
+
 void EtherMACBase::flushQueue()
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty

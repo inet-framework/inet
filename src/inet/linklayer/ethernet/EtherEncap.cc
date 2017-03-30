@@ -158,39 +158,29 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
 
 std::shared_ptr<EtherFrame> EtherEncap::decapsulate(Packet *packet)
 {
-    EV_STATICCONTEXT;
+    // EV_STATICCONTEXT;
 
-    auto ethHeader = packet->peekHeader<EtherFrame>();
-    const auto& ethTrailer = packet->peekTrailer<EthernetFcs>();
+    auto ethHeader = packet->popHeader<EtherFrame>();
+    packet->popTrailer<EthernetFcs>(byte(ETHER_FCS_BYTES));
 
-    switch(ethTrailer->getFcsMode()) {
-        case FCS_DECLARED_CORRECT:
-            break;
-        case FCS_DECLARED_INCORRECT:
-            EV_ERROR << "incorrect fcs in ethernet frame\n";
-            return nullptr;
-        case FCS_COMPUTED:
-            //FIXME check the Fcs in ethTrailer
-            break;
-        default:
-            throw cRuntimeError("invalid FCS mode in ethernet frame");
-    }
-
-    packet->popHeader<EtherFrame>();
-    packet->popTrailer<EthernetFcs>();
-
-    bit payloadLength = bit(-1);
-    //FIXME get payload length from ethHeader for drop padding
-
-    if (payloadLength == bit(-1)) {
-        //FIXME KLUDGE: when typeorlength field is type, then padding length is unknown here
-        // this code needed for unchanged fingerprints
-        while (typeid(*packet->peekTrailer<Chunk>()) == typeid(EthernetPadding))
-            packet->popTrailer<EthernetPadding>();
+    // remove Padding if possible
+    if (auto header = dynamic_cast<EtherFrameWithPayloadLength *>(ethHeader.get())) {
+        bit payloadLength = byte(header->getPayloadLength());
+        if (packet->getDataLength() < payloadLength)
+            throw cRuntimeError("incorrect payload length in ethernet frame");
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
     }
     else {
-        packet->popTrailer(packet->getDataLength() - payloadLength);
+        //FIXME KLUDGE: when type-or-length field is type, then padding length is unknown here,
+        // this code needed for unchanged fingerprints
+        for (;;) {
+            const auto& chunk = packet->peekTrailer<Chunk>();
+            if (typeid(*chunk) != typeid(EthernetPadding))
+                break;
+            packet->setTrailerPopOffset(packet->getTrailerPopOffset() - chunk->getChunkLength());
+        }
     }
+
     return ethHeader;
 }
 

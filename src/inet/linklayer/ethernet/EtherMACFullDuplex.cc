@@ -229,7 +229,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *traffic)
     Packet *packet = decapsulate(phyFrame);
     emit(packetReceivedFromLowerSignal, packet);
 
-    if (hasBitError) {
+    if (hasBitError || !verifyCrcAndLength(packet)) {
         numDroppedBitError++;
         emit(dropPkBitErrorSignal, packet);
         delete packet;

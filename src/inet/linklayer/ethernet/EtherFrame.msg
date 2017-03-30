@@ -63,8 +63,18 @@ class EtherFrame extends FieldsChunk
 //
 class EthernetIIFrame extends EtherFrame
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES - 4);    // -4 for FCS
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES - ETHER_FCS_BYTES);
     int etherType @enum(EtherType);
+}
+
+
+//
+// The base Ethernet 802.3 header: contains the payload length in type-or-length field
+// Do not create it!
+//
+class EtherFrameWithPayloadLength extends EtherFrame
+{
+    int payloadLength;
 }
 
 
@@ -73,10 +83,9 @@ class EthernetIIFrame extends EtherFrame
 //
 // Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) = 17 bytes
 //
-class EtherFrameWithLLC extends EtherFrame
+class EtherFrameWithLLC extends EtherFrameWithPayloadLength
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - 4);    // -4 for FCS
-    int payloadLength;
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH - ETHER_FCS_BYTES);
     int dsap;
     int ssap;
     int control;
@@ -94,7 +103,7 @@ class EtherFrameWithLLC extends EtherFrame
 //
 class EtherFrameWithSNAP extends EtherFrameWithLLC
 {
-    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - 4);    // -4 for FCS
+    chunkLength = byte(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH - ETHER_FCS_BYTES);
     dsap = 0xAA;
     ssap = 0xAA;
     control = 0x03;

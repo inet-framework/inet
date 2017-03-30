@@ -236,6 +236,9 @@ class INET_API EtherMACBase : public MACBase
     virtual EtherPhyFrame *encapsulate(Packet* frame);
     virtual Packet *decapsulate(EtherPhyFrame* phyFrame);   // also drops phyFrame
 
+    /// Verify ethernet packet: check FCS and payload length
+    bool verifyCrcAndLength(Packet *packet);
+
     // MACBase
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void flushQueue() override;
