@@ -360,6 +360,54 @@ static void testTrailer()
     assert(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
 
+static void testHeaderPopOffset()
+{
+    // 1. TODO
+    Packet packet1;
+    packet1.append(makeImmutableByteCountChunk(byte(10)));
+    packet1.append(makeImmutableBytesChunk(makeVector(10)));
+    packet1.append(makeImmutableApplicationHeader(42));
+    packet1.append(makeImmutableIpHeader());
+    packet1.setHeaderPopOffset(byte(0));
+    const auto& chunk1 = packet1.peekHeader();
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(chunk1));
+    packet1.setHeaderPopOffset(byte(10));
+    const auto& chunk2 = packet1.peekHeader();
+    assert(std::dynamic_pointer_cast<BytesChunk>(chunk2));
+    packet1.setHeaderPopOffset(byte(20));
+    const auto& chunk3 = packet1.peekHeader();
+    assert(std::dynamic_pointer_cast<ApplicationHeader>(chunk3));
+    packet1.setHeaderPopOffset(byte(30));
+    const auto& chunk4 = packet1.peekHeader();
+    assert(std::dynamic_pointer_cast<IpHeader>(chunk4));
+    packet1.setHeaderPopOffset(byte(50));
+    ASSERT_ERROR(packet1.peekHeader(), "empty chunk is not allowed");
+}
+
+static void testTrailerPopOffset()
+{
+    // 1. TODO
+    Packet packet1;
+    packet1.append(makeImmutableByteCountChunk(byte(10)));
+    packet1.append(makeImmutableBytesChunk(makeVector(10)));
+    packet1.append(makeImmutableApplicationHeader(42));
+    packet1.append(makeImmutableIpHeader());
+    packet1.setTrailerPopOffset(byte(50));
+    const auto& chunk1 = packet1.peekTrailer();
+    assert(std::dynamic_pointer_cast<IpHeader>(chunk1));
+    packet1.setTrailerPopOffset(byte(30));
+    const auto& chunk2 = packet1.peekTrailer();
+    assert(std::dynamic_pointer_cast<ApplicationHeader>(chunk2));
+    packet1.setTrailerPopOffset(byte(20));
+    const auto& chunk3 = packet1.peekTrailer();
+    assert(std::dynamic_pointer_cast<BytesChunk>(chunk3));
+    packet1.setTrailerPopOffset(byte(10));
+    const auto& chunk4 = packet1.peekTrailer();
+    assert(std::dynamic_pointer_cast<ByteCountChunk>(chunk4));
+    packet1.setTrailerPopOffset(byte(0));
+    ASSERT_ERROR(packet1.peekTrailer(), "empty chunk is not allowed");
+}
+
 static void testEncapsulation()
 {
     // 1. packet contains all chunks of encapsulated packet as is
@@ -1133,6 +1181,8 @@ void UnitTest::initialize()
     testImproperlyRepresented();
     testHeader();
     testTrailer();
+    testHeaderPopOffset();
+    testTrailerPopOffset();
     testEncapsulation();
     testAggregation();
     testFragmentation();
