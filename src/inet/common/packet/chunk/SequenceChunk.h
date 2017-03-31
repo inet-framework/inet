@@ -41,10 +41,8 @@ class INET_API SequenceChunk : public Chunk
     int getNumChunks() const { return chunks.size(); } // only for class descriptor
     Chunk *getChunk(int i) const { return chunks[i].get(); } // only for class descriptor
 
-    int getStartIndex(const Iterator& iterator) const { return iterator.isForward() ? 0 : chunks.size() - 1; }
-    int getEndIndex(const Iterator& iterator) const { return iterator.isForward() ? chunks.size() - 1 : 0; }
-    int getIndexIncrement(const Iterator& iterator) const { return iterator.isForward() ? 1 : -1; }
-    const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return iterator.isForward() ? chunks[iterator.getIndex()] : chunks[chunks.size() - iterator.getIndex() - 1]; }
+    int getElementIndex(bool isForward, int index) const { return isForward ? index : chunks.size() - index - 1; }
+    const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return chunks[getElementIndex(iterator.isForward(), iterator.getIndex())]; }
 
     void doInsertToBeginning(const std::shared_ptr<Chunk>& chunk);
     void doInsertToBeginning(const std::shared_ptr<SliceChunk>& chunk);

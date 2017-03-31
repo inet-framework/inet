@@ -53,7 +53,7 @@ void Packet::setHeaderPopOffset(bit offset)
         assert(contents != nullptr);
         assert(bit(0) <= offset && offset <= getTotalLength() - trailerIterator.getPosition());
         contents->seekIterator(headerIterator, offset);
-        assert(getDataLength() > bit(0));
+        assert(getDataLength() >= bit(0));
     }
 }
 
@@ -104,7 +104,7 @@ void Packet::setTrailerPopOffset(bit offset)
         assert(contents != nullptr);
         assert(headerIterator.getPosition() <= offset);
         contents->seekIterator(trailerIterator, getTotalLength() - offset);
-        assert(getDataLength() > bit(0));
+        assert(getDataLength() >= bit(0));
     }
 }
 

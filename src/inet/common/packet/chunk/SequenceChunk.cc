@@ -59,11 +59,8 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, Pee
     }
     // 4. peeking a part represented by an element chunk returns that element chunk
     bit position = bit(0);
-    int startIndex = getStartIndex(iterator);
-    int endIndex = getEndIndex(iterator);
-    int increment = getIndexIncrement(iterator);
-    for (int i = startIndex; i != endIndex + increment; i += increment) {
-        const auto& chunk = chunks[i];
+    for (size_t i = 0; i < chunks.size(); i++) {
+        const auto& chunk = chunks[getElementIndex(iterator.isForward(), i)];
         bit chunkLength = chunk->getChunkLength();
         // 4.1 peeking the whole part of an element chunk returns that element chunk
         if (iterator.getPosition() == position && (length == bit(-1) || length == chunk->getChunkLength())) {
@@ -162,22 +159,25 @@ bit SequenceChunk::getChunkLength() const
 
 void SequenceChunk::seekIterator(Iterator& iterator, bit offset) const
 {
+    assert(bit(0) <= offset && offset <= getChunkLength());
     iterator.setPosition(offset);
     if (offset == bit(0))
         iterator.setIndex(0);
     else {
-        int startIndex = getStartIndex(iterator);
-        int endIndex = getEndIndex(iterator);
-        int increment = getIndexIncrement(iterator);
         bit p = bit(0);
-        for (int i = startIndex; i != endIndex + increment; i += increment) {
-            p += chunks[i]->getChunkLength();
+        for (size_t i = 0; i < chunks.size(); i++) {
+            const auto& chunk = chunks[getElementIndex(iterator.isForward(), i)];
+            p += chunk->getChunkLength();
             if (p == offset) {
                 iterator.setIndex(i + 1);
                 return;
             }
+            else if (p > offset) {
+                iterator.setIndex(-1);
+                return;
+            }
         }
-        iterator.setIndex(-1);
+        assert(false);
     }
 }
 
