@@ -37,7 +37,6 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/MulticastTag_m.h"
-#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"

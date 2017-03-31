@@ -27,7 +27,6 @@
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-//#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram.h"
 #include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"

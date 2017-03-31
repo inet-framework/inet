@@ -28,7 +28,6 @@
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/common/OrigNetworkDatagramTag.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/contract/ipv6/IPv6ExtHeaderTag_m.h"
 #include "inet/networklayer/icmpv6/IPv6NDMessage_m.h"
