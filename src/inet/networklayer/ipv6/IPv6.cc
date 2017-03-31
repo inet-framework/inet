@@ -217,6 +217,9 @@ void IPv6::endService(cPacket *msg)
         // datagram from network or from ND: localDeliver and/or route
         auto packet = check_and_cast<Packet *>(msg);
         auto ipv6Header = packet->peekHeader<IPv6Header>();
+        if (ipv6Header->getPayloadLength() != 0) {      // payloadLength == 0 occured with Jumbo payload
+            ASSERT(byte(ipv6Header->getChunkLength()).get() + ipv6Header->getPayloadLength() <= packet->getByteLength());         //TODO ICMPv6 parameter error?
+        }
         bool fromHL = false;
         if (packet->getArrivalGate()->isName("ndIn")) {
             IPv6NDControlInfo *ctrl = check_and_cast<IPv6NDControlInfo *>(msg->removeControlInfo());
@@ -709,6 +712,14 @@ void IPv6::decapsulate(Packet *packet)
     auto ipv6HeaderPos = packet->getHeaderPopOffset();
     auto ipv6Header = packet->popHeader<IPv6Header>();
 
+    int64_t payloadLength = ipv6Header->getPayloadLength();
+    if (payloadLength != 0) {      // payloadLength == 0 occured with Jumbo payload
+        ASSERT(payloadLength <= packet->getByteLength());
+        // drop padding behind the payload:
+        if (payloadLength < packet->getByteLength())
+            packet->setTrailerPopOffset(packet->getHeaderPopOffset() + byte(payloadLength));
+    }
+
     // create and fill in control info
     packet->ensureTag<DscpInd>()->setDifferentiatedServicesCodePoint(ipv6Header->getDiffServCodePoint());
     packet->ensureTag<EcnInd>()->setExplicitCongestionNotification(ipv6Header->getExplicitCongestionNotification());
@@ -735,6 +746,8 @@ void IPv6::encapsulate(Packet *transportPacket)
     auto hopLimitReq = transportPacket->removeTag<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
+
+    datagram->setPayloadLength(transportPacket->getByteLength());
 
     // set source and destination address
     datagram->setDestAddress(dest);

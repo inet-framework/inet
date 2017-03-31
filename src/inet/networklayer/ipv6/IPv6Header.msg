@@ -55,7 +55,7 @@ class IPv6Header extends FieldsChunk
     chunkLength = byte(0);
     IPv6Address srcAddress;
     IPv6Address destAddress;
-    int payloadLength = -1; // includes extension headers and payload
+    int payloadLength = -1;    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
     unsigned char trafficClass;
     abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
