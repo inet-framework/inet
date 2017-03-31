@@ -192,7 +192,7 @@ void IPv4::endService(cPacket *packet)
     }
 }
 
-bool IPv4::verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header, Packet *packet)
+bool IPv4::verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header)
 {
     switch (ipv4Header->getCrcMode()) {
         case CRC_DECLARED_CORRECT: {
@@ -212,7 +212,7 @@ bool IPv4::verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header, Packet *pack
                 std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
                 // 2. compute the CRC
                 auto computedCrc = inet::serializer::TCPIPchecksum::checksum(buffer, bufferLength);
-                return computedCrc == 0xFFFF;
+                return computedCrc == 0;
             }
             else
                 return false;
@@ -239,7 +239,24 @@ void IPv4::handleIncomingDatagram(Packet *packet, const InterfaceEntry *fromIE)
     //
 
     const auto& ipv4Header = packet->peekHeader<IPv4Header>();
-    ASSERT(ipv4Header);
+
+    if (!verifyCrc(ipv4Header)) {
+        EV_WARN << "CRC error found, drop packet\n";
+        delete packet;
+        return;
+    }
+
+    if (ipv4Header->getTotalLengthField() > packet->getByteLength()) {
+        EV_WARN << "length error found, sending ICMP_PARAMETER_PROBLEM\n";
+        sendIcmpError(packet, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
+        return;
+    }
+
+    // remove lower layer paddings:
+    if (ipv4Header->getTotalLengthField() < packet->getByteLength()) {
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + byte(ipv4Header->getTotalLengthField()));
+    }
+
     // check for header biterror
     if (packet->hasBitError()) {
         // probability of bit error in header = size of header / size of total message

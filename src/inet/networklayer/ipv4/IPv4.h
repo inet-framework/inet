@@ -126,7 +126,7 @@ class INET_API IPv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     void arpResolutionTimedOut(IARP::Notification *entry);
 
     // utility: verifying CRC
-    bool verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header, Packet *packet);
+    bool verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header);
 
     /**
      * Encapsulate packet coming from higher layers into IPv4Header, using
