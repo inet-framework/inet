@@ -228,10 +228,11 @@ packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
 
 packet Ieee80211MsduSubframe
 {
-    bitLength = LENGTH_A_MSDU_SUBFRAME_HEADER;
+    bitLength = LENGTH_A_MSDU_SUBFRAME_HEADER; // + snap header if necessary
     MACAddress sa; // source addr.
     MACAddress da; // destination addr.
     int length;
+    int etherType @enum(EtherType); // TODO: review optional snap header (the standard does not define it: Figure 8-32—A-MSDU subframe structure) 
 }
 
 packet Ieee80211AMsdu

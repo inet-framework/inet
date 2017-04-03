@@ -66,10 +66,18 @@ Ieee80211DataFrame *MsduAggregation::aggregateFrames(std::vector<Ieee80211DataFr
     aMsdu->setSubframesArraySize(frames->size());
     for (int i = 0; i < (int)frames->size(); i++)
     {
-        auto dataFrame = check_and_cast<Ieee80211DataFrame*>(frames->at(i));
-        auto msdu = dataFrame->decapsulate();
-        aMsduLength += msdu->getByteLength() + LENGTH_A_MSDU_SUBFRAME_HEADER / 8; // sum of MSDU lengths + subframe header
         Ieee80211MsduSubframe msduSubframe;
+        auto dataFrame = frames->at(i);
+        auto msdu = dataFrame->decapsulate();
+        if (auto dataFrameWithSnap = dynamic_cast<Ieee80211DataFrameWithSNAP*>(dataFrame)) {
+            aMsduLength += msdu->getByteLength() + LENGTH_A_MSDU_SUBFRAME_HEADER / 8 + SNAP_HEADER_BYTES; // sum of MSDU lengths + subframe header + snap header
+            msduSubframe.addByteLength(SNAP_HEADER_BYTES); // TODO: review, see Ieee80211MsduSubframe
+            msduSubframe.setEtherType(dataFrameWithSnap->getEtherType()); // TODO: review, see Ieee80211MsduSubframe
+        }
+        else {
+            aMsduLength += msdu->getByteLength() + LENGTH_A_MSDU_SUBFRAME_HEADER / 8; // sum of MSDU lengths + subframe header
+            msduSubframe.setEtherType(-1); // TODO: review, see Ieee80211MsduSubframe
+        }
         setSubframeAddress(&msduSubframe, dataFrame);
         msduSubframe.encapsulate(msdu);
         aMsdu->setSubframes(i, msduSubframe);
