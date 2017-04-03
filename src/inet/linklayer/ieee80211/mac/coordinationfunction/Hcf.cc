@@ -214,13 +214,13 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
             throw cRuntimeError("Unknown frame");
         if (retryLimitReached) {
             EV_DETAIL << "The frame has reached its retry limit. Dropping it" << std::endl;
-            emit(NF_LINK_BREAK, internallyCollidedFrame);
-            emit(NF_PACKET_DROP, internallyCollidedFrame);
             if (auto dataFrame = dynamic_cast<Ieee80211DataFrame *>(internallyCollidedFrame))
                 edcaDataRecoveryProcedures[ac]->retryLimitReached(dataFrame);
             else if (auto mgmtFrame = dynamic_cast<Ieee80211ManagementFrame*>(internallyCollidedFrame))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(mgmtFrame);
             else ; // TODO: + NonQoSDataFrame
+            emit(NF_PACKET_DROP, internallyCollidedFrame);
+            emit(NF_LINK_BREAK, check_and_cast<Packet *>(internallyCollidedFrame->decapsulate())); // KLUDGE
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
             if (hasFrameToTransmit(ac))
                 edcaf->requestChannel(this);
@@ -346,8 +346,8 @@ void Hcf::originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame* protect
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(mgmtFrame);
             else ; // TODO: nonqos data
             edcaInProgressFrames[ac]->dropFrame(protectedFrame);
-            emit(NF_LINK_BREAK, protectedFrame);
             emit(NF_PACKET_DROP, protectedFrame);
+            emit(NF_LINK_BREAK, check_and_cast<Packet *>(protectedFrame->decapsulate())); // KLUDGE
             delete protectedFrame;
         }
     }
@@ -461,8 +461,8 @@ void Hcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
             else if (auto mgmtFrame = dynamic_cast<Ieee80211ManagementFrame*>(failedFrame))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(mgmtFrame);
             edcaInProgressFrames[ac]->dropFrame(failedFrame);
-            emit(NF_LINK_BREAK, failedFrame);
             emit(NF_PACKET_DROP, failedFrame);
+            emit(NF_LINK_BREAK, check_and_cast<Packet *>(failedFrame->decapsulate())); // KLUDGE
             delete failedFrame;
         }
         else

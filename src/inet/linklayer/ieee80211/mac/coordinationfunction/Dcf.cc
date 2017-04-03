@@ -226,10 +226,10 @@ void Dcf::originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame* protect
     EV_INFO << "RTS frame transmission failed\n";
     recoveryProcedure->rtsFrameTransmissionFailed(protectedFrame, stationRetryCounters);
     if (recoveryProcedure->isRtsFrameRetryLimitReached(protectedFrame)) {
-        emit(NF_LINK_BREAK, protectedFrame);
         recoveryProcedure->retryLimitReached(protectedFrame);
         inProgressFrames->dropFrame(protectedFrame);
         emit(NF_PACKET_DROP, protectedFrame);
+        emit(NF_LINK_BREAK, check_and_cast<Packet *>(protectedFrame->decapsulate())); // KLUDGE:
         delete protectedFrame;
     }
 }
@@ -287,10 +287,10 @@ void Dcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
     }
     ackHandler->processFailedFrame(failedFrame);
     if (retryLimitReached) {
-        emit(NF_LINK_BREAK, failedFrame);
         recoveryProcedure->retryLimitReached(failedFrame);
         inProgressFrames->dropFrame(failedFrame);
         emit(NF_PACKET_DROP, failedFrame);
+        emit(NF_LINK_BREAK, check_and_cast<Packet *>(failedFrame->decapsulate())); // KLUDGE:
         delete failedFrame;
     }
     else
