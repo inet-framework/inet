@@ -38,6 +38,7 @@ class INET_API UDPBasicApp : public ApplicationBase
 
     // parameters
     std::vector<L3Address> destAddresses;
+    std::vector<std::string> destAddressStr;
     int localPort = -1, destPort = -1;
     simtime_t startTime;
     simtime_t stopTime;

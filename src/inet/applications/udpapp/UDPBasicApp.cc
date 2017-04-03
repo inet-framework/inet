@@ -100,14 +100,8 @@ void UDPBasicApp::setSocketOptions()
 L3Address UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
-    if (destAddresses[k].isLinkLocal()) {    // KLUDGE for IPv6
-        const char *destAddrs = par("destAddresses");
-        cStringTokenizer tokenizer(destAddrs);
-        const char *token = nullptr;
-
-        for (int i = 0; i <= k; ++i)
-            token = tokenizer.nextToken();
-        destAddresses[k] = L3AddressResolver().resolve(token);
+    if (destAddresses[k].isUnspecified() || destAddresses[k].isLinkLocal()) {
+        L3AddressResolver().tryResolve(destAddressStr[k].c_str(), destAddresses[k]);
     }
     return destAddresses[k];
 }
@@ -140,12 +134,12 @@ void UDPBasicApp::processStart()
     const char *token;
 
     while ((token = tokenizer.nextToken()) != nullptr) {
+        destAddressStr.push_back(token);
         L3Address result;
         L3AddressResolver().tryResolve(token, result);
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;
-        else
-            destAddresses.push_back(result);
+        destAddresses.push_back(result);
     }
 
     if (!destAddresses.empty()) {
