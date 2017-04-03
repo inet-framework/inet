@@ -645,7 +645,7 @@ void RIPRouting::processRequest(Packet *packet)
     Packet *outPacket = new Packet("RIP response");
     ripPacket->markImmutable();
     outPacket->append(ripPacket);
-    socket.sendTo(outPacket, srcAddr, srcPort);   //KLUDGE
+    socket.sendTo(outPacket, srcAddr, srcPort);
 }
 
 /**
