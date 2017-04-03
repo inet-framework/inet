@@ -243,6 +243,14 @@ static void testImproperlyRepresented()
     assert(ipHeader2->isImproperlyRepresented());
 }
 
+static void testEmpty()
+{
+    // 1. peeking an empty packet is an error
+    Packet packet1;
+    ASSERT_ERROR(packet1.peekHeader<IpHeader>(), "empty chunk is not allowed");
+    ASSERT_ERROR(packet1.peekTrailer<IpHeader>(), "empty chunk is not allowed");
+}
+
 static void testHeader()
 {
     // 1. packet contains header after chunk is appended
@@ -1179,6 +1187,7 @@ void UnitTest::initialize()
     testIncorrect();
     testProperlyRepresented();
     testImproperlyRepresented();
+    testEmpty();
     testHeader();
     testTrailer();
     testHeaderPopOffset();
