@@ -117,7 +117,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         emit(rcvdPkSignal, packet);
 
         bool doClose = false;
-        while(const auto& appmsg = queue.pop<GenericAppMsg>()) {
+        while (const auto& appmsg = queue.pop<GenericAppMsg>(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
             msgsRcvd++;
             bytesRcvd += byte(appmsg->getChunkLength()).get();
             long requestedBytes = appmsg->getExpectedReplyLength();

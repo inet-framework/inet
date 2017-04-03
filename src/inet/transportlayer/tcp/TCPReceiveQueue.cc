@@ -108,7 +108,7 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
     if (chunk)
         kludgeQueue.push(chunk);
 
-    auto data = kludgeQueue.peek();
+    auto data = kludgeQueue.peek(bit(-1), Chunk::PF_ALLOW_NULLPTR);
     if (data == nullptr || data->getChunkType() == Chunk::CT_SLICE)
         return nullptr;
     chunk = kludgeQueue.pop();
