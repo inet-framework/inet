@@ -172,7 +172,7 @@ std::shared_ptr<EtherFrame> EtherEncap::decapsulate(Packet *packet)
     }
     else {
         //FIXME KLUDGE: when type-or-length field is type, then padding length is unknown here,
-        // this code needed for unchanged fingerprints
+        // this code removes ethernet padding, needed for unchanged fingerprints
         for (;;) {
             const auto& chunk = packet->peekTrailer<Chunk>();
             if (typeid(*chunk) != typeid(EthernetPadding))
