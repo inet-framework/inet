@@ -96,7 +96,7 @@ class INET_API TCPReceiveQueue : public cObject
      *
      * The method should return the sequence number to be ACKed.
      */
-    virtual uint32 insertBytesFromSegment(Packet *packet, TcpHeader *tcpseg);
+    virtual uint32 insertBytesFromSegment(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg);
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT

@@ -36,7 +36,7 @@ namespace tcp {
 // helper functions for SACK
 //
 
-bool TCPConnection::processSACKOption(TcpHeader *tcpseg, const TCPOptionSack& option)
+bool TCPConnection::processSACKOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionSack& option)
 {
     if (option.getLength() % 8 != 2) {
         EV_ERROR << "ERROR: option length incorrect\n";
@@ -438,7 +438,7 @@ void TCPConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
         tcpAlgorithm->dataSent(seqNum); // seqNum = old_snd_nxt
 }
 
-TcpHeader TCPConnection::addSacks(TcpHeader *tcpseg)
+TcpHeader TCPConnection::addSacks(const std::shared_ptr<TcpHeader>& tcpseg)
 {
     uint options_len = 0;
     uint used_options_len = tcpseg->getHeaderOptionArrayLength();

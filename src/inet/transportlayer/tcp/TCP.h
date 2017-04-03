@@ -30,6 +30,7 @@
 #include "inet/transportlayer/common/CRC_m.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "inet/transportlayer/tcp_common/TCPSegment.h"
 
 namespace inet {
 
@@ -37,7 +38,6 @@ namespace tcp {
 
 // Forward declarations:
 class TCPConnection;
-class TcpHeader;
 class TCPSendQueue;
 class TCPReceiveQueue;
 
@@ -145,9 +145,9 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual TCPConnection *createConnection(int socketId);
 
     // utility methods
-    virtual TCPConnection *findConnForSegment(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual TCPConnection *findConnForSegment(const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
     virtual TCPConnection *findConnForApp(int socketId);
-    virtual void segmentArrivalWhileClosed(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
     virtual void removeConnection(TCPConnection *conn);
     virtual void refreshDisplay() const override;
 

@@ -49,13 +49,13 @@ std::string TCPReceiveQueue::str() const
     res = buf;
 
     for (int i = 0; i < reorderBuffer.getNumRegions(); i++) {
-        sprintf(buf, " [%lu..%lu)", reorderBuffer.getRegionStartOffset(i), reorderBuffer.getRegionEndOffset(i));
+        sprintf(buf, " [%lu..%lu)", byte(reorderBuffer.getRegionStartOffset(i)).get(), byte(reorderBuffer.getRegionEndOffset(i)).get());
         res += buf;
     }
     return res;
 }
 
-uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, TcpHeader *tcpseg)
+uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg)
 {
     int64_t tcpHeaderLength = tcpseg->getHeaderLength();
     int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;
@@ -79,7 +79,7 @@ uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, TcpHeader *tcps
         uint32_t maxe = seqMax(oe, ne);
         if (seqGE(minb, oe) || seqGE(minb, ne) || seqGE(ob, maxe) || seqGE(nb, maxe))
             throw cRuntimeError("The new segment is [%u, %u) out of the acceptable range at the queue %s",
-                    nb, ne, info().c_str());
+                    nb, ne, str().c_str());
     }
 #endif // ifndef NDEBUG
     reorderBuffer.replace(seqToOffset(seq), payload);
@@ -168,7 +168,7 @@ uint32 TCPReceiveQueue::getQueueLength()
 
 void TCPReceiveQueue::getQueueStatus()
 {
-    EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << info() << "\n";
+    EV_DEBUG << "receiveQLength=" << reorderBuffer.getNumRegions() << " " << str() << "\n";
 }
 
 uint32 TCPReceiveQueue::getLE(uint32 fromSeqNum)

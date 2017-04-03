@@ -159,7 +159,6 @@ void TCP::handleMessage(cMessage *msg)
             // must be a TCPSegment
             // KLUDGE: just use a pointer instead of a shared reference
             auto tcpHeader = packet->peekHeader<TcpHeader>();
-            TcpHeader *tcpHeaderPtr = tcpHeader.get();
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;
@@ -169,14 +168,14 @@ void TCP::handleMessage(cMessage *msg)
             //interfaceId = controlInfo->getInterfaceId();
 
             // process segment
-            TCPConnection *conn = findConnForSegment(tcpHeaderPtr, srcAddr, destAddr);
+            TCPConnection *conn = findConnForSegment(tcpHeader, srcAddr, destAddr);
             if (conn) {
-                bool ret = conn->processTCPSegment(packet, tcpHeaderPtr, srcAddr, destAddr);
+                bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
             else {
-                segmentArrivalWhileClosed(packet, tcpHeaderPtr, srcAddr, destAddr);
+                segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
             }
         }
     }
@@ -207,7 +206,7 @@ TCPConnection *TCP::createConnection(int socketId)
     return new TCPConnection(this, socketId);
 }
 
-void TCP::segmentArrivalWhileClosed(Packet *packet, TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr)
+void TCP::segmentArrivalWhileClosed(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
@@ -321,7 +320,7 @@ void TCP::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TCPConnection *TCP::findConnForSegment(TcpHeader *tcpseg, L3Address srcAddr, L3Address destAddr)
+TCPConnection *TCP::findConnForSegment(const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;

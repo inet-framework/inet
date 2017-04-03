@@ -157,7 +157,7 @@ void TCPConnection::printConnBrief() const
               << "\n";
 }
 
-void TCPConnection::printSegmentBrief(TcpHeader *tcpseg)
+void TCPConnection::printSegmentBrief(const std::shared_ptr<TcpHeader>& tcpseg)
 {
     EV_STATICCONTEXT;
     EV_INFO << "." << tcpseg->getSrcPort() << " > ";
@@ -255,7 +255,7 @@ void TCPConnection::sendToIP(Packet *packet, const std::shared_ptr<TcpHeader>& t
     state->sentBytes = packet->getByteLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
-    printSegmentBrief(tcpseg.get());
+    printSegmentBrief(tcpseg);
 
     // TBD reuse next function for sending
 
@@ -277,7 +277,7 @@ void TCPConnection::sendToIP(Packet *pkt, const std::shared_ptr<TcpHeader>& tcps
 {
     EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
-    printSegmentBrief(tcpseg.get());
+    printSegmentBrief(tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
     ASSERT(byte(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
@@ -449,7 +449,7 @@ void TCPConnection::selectInitialSeqNum()
     rexmitQueue->init(state->iss + 1);    // + 1 is for SYN
 }
 
-bool TCPConnection::isSegmentAcceptable(Packet *packet, TcpHeader *tcpseg) const
+bool TCPConnection::isSegmentAcceptable(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg) const
 {
     // check that segment entirely falls in receive window
     // RFC 793, page 69:
@@ -519,7 +519,7 @@ void TCPConnection::sendSyn()
     state->snd_max = state->snd_nxt = state->iss + 1;
 
     // write header options
-    writeHeaderOptions(tcpseg.get());
+    writeHeaderOptions(tcpseg);
     Packet *fp = new Packet("SYN");
 
     // send it
@@ -540,7 +540,7 @@ void TCPConnection::sendSynAck()
     state->snd_max = state->snd_nxt = state->iss + 1;
 
     // write header options
-    writeHeaderOptions(tcpseg.get());
+    writeHeaderOptions(tcpseg);
 
     Packet *fp = new Packet("SYN+ACK");
 
@@ -604,7 +604,7 @@ void TCPConnection::sendAck()
     tcpseg->setWindow(updateRcvWnd());
 
     // write header options
-    writeHeaderOptions(tcpseg.get());
+    writeHeaderOptions(tcpseg);
     Packet *fp = new Packet("ACK");
 
     // send it
@@ -658,7 +658,7 @@ void TCPConnection::sendSegment(uint32 bytes)
     //     bytes + options_len <= snd_mss
     const auto& tcpseg_temp = std::make_shared<TcpHeader>();
     tcpseg_temp->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
-    writeHeaderOptions(tcpseg_temp.get());
+    writeHeaderOptions(tcpseg_temp);
     uint options_len = tcpseg_temp->getHeaderLength() - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
 
     ASSERT(options_len < state->snd_mss);
@@ -942,7 +942,7 @@ void TCPConnection::retransmitData()
     tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 }
 
-void TCPConnection::readHeaderOptions(TcpHeader *tcpseg)
+void TCPConnection::readHeaderOptions(const std::shared_ptr<TcpHeader>& tcpseg)
 {
     EV_INFO << "TCP Header Option(s) received:\n";
 
@@ -994,7 +994,7 @@ void TCPConnection::readHeaderOptions(TcpHeader *tcpseg)
     }
 }
 
-bool TCPConnection::processMSSOption(TcpHeader *tcpseg, const TCPOptionMaxSegmentSize& option)
+bool TCPConnection::processMSSOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionMaxSegmentSize& option)
 {
     if (option.getLength() != 4) {
         EV_ERROR << "ERROR: MSS option length incorrect\n";
@@ -1029,7 +1029,7 @@ bool TCPConnection::processMSSOption(TcpHeader *tcpseg, const TCPOptionMaxSegmen
     return true;
 }
 
-bool TCPConnection::processWSOption(TcpHeader *tcpseg, const TCPOptionWindowScale& option)
+bool TCPConnection::processWSOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionWindowScale& option)
 {
     if (option.getLength() != 3) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1054,7 +1054,7 @@ bool TCPConnection::processWSOption(TcpHeader *tcpseg, const TCPOptionWindowScal
     return true;
 }
 
-bool TCPConnection::processTSOption(TcpHeader *tcpseg, const TCPOptionTimestamp& option)
+bool TCPConnection::processTSOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionTimestamp& option)
 {
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1102,7 +1102,7 @@ bool TCPConnection::processTSOption(TcpHeader *tcpseg, const TCPOptionTimestamp&
     return true;
 }
 
-bool TCPConnection::processSACKPermittedOption(TcpHeader *tcpseg, const TCPOptionSackPermitted& option)
+bool TCPConnection::processSACKPermittedOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionSackPermitted& option)
 {
     if (option.getLength() != 2) {
         EV_ERROR << "ERROR: length incorrect\n";
@@ -1120,7 +1120,7 @@ bool TCPConnection::processSACKPermittedOption(TcpHeader *tcpseg, const TCPOptio
     return true;
 }
 
-TcpHeader TCPConnection::writeHeaderOptions(TcpHeader *tcpseg)
+TcpHeader TCPConnection::writeHeaderOptions(const std::shared_ptr<TcpHeader>& tcpseg)
 {
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpseg->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
@@ -1280,7 +1280,7 @@ TcpHeader TCPConnection::writeHeaderOptions(TcpHeader *tcpseg)
     return *tcpseg;
 }
 
-uint32 TCPConnection::getTSval(TcpHeader *tcpseg) const
+uint32 TCPConnection::getTSval(const std::shared_ptr<TcpHeader>& tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TCPOption *option = tcpseg->getHeaderOption(i);
@@ -1291,7 +1291,7 @@ uint32 TCPConnection::getTSval(TcpHeader *tcpseg) const
     return 0;
 }
 
-uint32 TCPConnection::getTSecr(TcpHeader *tcpseg) const
+uint32 TCPConnection::getTSecr(const std::shared_ptr<TcpHeader>& tcpseg) const
 {
     for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
         const TCPOption *option = tcpseg->getHeaderOption(i);
@@ -1364,7 +1364,7 @@ unsigned short TCPConnection::updateRcvWnd()
     return (unsigned short)scaled_rcv_wnd;
 }
 
-void TCPConnection::updateWndInfo(TcpHeader *tcpseg, bool doAlways)
+void TCPConnection::updateWndInfo(const std::shared_ptr<TcpHeader>& tcpseg, bool doAlways)
 {
     uint32 true_window = tcpseg->getWindow();
     // RFC 1323, page 10:

@@ -414,26 +414,26 @@ class INET_API TCPConnection : public cObject
      * Shortcut to process most common case as fast as possible. Returns false
      * if segment requires normal (slow) route.
      */
-    virtual bool tryFastRoute(TcpHeader *tcpseg);
+    virtual bool tryFastRoute(const std::shared_ptr<TcpHeader>& tcpseg);
     /**
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TCPEventCode process_RCV_SEGMENT(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInListen(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegmentInSynSent(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
-    virtual TCPEventCode processSegment1stThru8th(Packet *packet, TcpHeader *tcpseg);
-    virtual TCPEventCode processRstInSynReceived(TcpHeader *tcpseg);
-    virtual bool processAckInEstabEtc(Packet *packet, TcpHeader *tcpseg);
+    virtual TCPEventCode process_RCV_SEGMENT(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInListen(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInSynSent(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegment1stThru8th(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg);
+    virtual TCPEventCode processRstInSynReceived(const std::shared_ptr<TcpHeader>& tcpseg);
+    virtual bool processAckInEstabEtc(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg);
     //@}
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
-    virtual bool processMSSOption(TcpHeader *tcpseg, const TCPOptionMaxSegmentSize& option);
-    virtual bool processWSOption(TcpHeader *tcpseg, const TCPOptionWindowScale& option);
-    virtual bool processSACKPermittedOption(TcpHeader *tcpseg, const TCPOptionSackPermitted& option);
-    virtual bool processSACKOption(TcpHeader *tcpseg, const TCPOptionSack& option);
-    virtual bool processTSOption(TcpHeader *tcpseg, const TCPOptionTimestamp& option);
+    virtual bool processMSSOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionMaxSegmentSize& option);
+    virtual bool processWSOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionWindowScale& option);
+    virtual bool processSACKPermittedOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionSackPermitted& option);
+    virtual bool processSACKOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionSack& option);
+    virtual bool processTSOption(const std::shared_ptr<TcpHeader>& tcpseg, const TCPOptionTimestamp& option);
     //@}
 
     /** @name Processing timeouts. Invoked from processTimer(). */
@@ -457,7 +457,7 @@ class INET_API TCPConnection : public cObject
     virtual void selectInitialSeqNum();
 
     /** Utility: check if segment is acceptable (all bytes are in receive window) */
-    virtual bool isSegmentAcceptable(Packet *packet, TcpHeader *tcpseg) const;
+    virtual bool isSegmentAcceptable(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg) const;
 
     /** Utility: send SYN */
     virtual void sendSyn();
@@ -466,19 +466,19 @@ class INET_API TCPConnection : public cObject
     virtual void sendSynAck();
 
     /** Utility: readHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual void readHeaderOptions(TcpHeader *tcpseg);
+    virtual void readHeaderOptions(const std::shared_ptr<TcpHeader>& tcpseg);
 
     /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
-    virtual TcpHeader writeHeaderOptions(TcpHeader *tcpseg);
+    virtual TcpHeader writeHeaderOptions(const std::shared_ptr<TcpHeader>& tcpseg);
 
     /** Utility: adds SACKs to segments header options field */
-    virtual TcpHeader addSacks(TcpHeader *tcpseg);
+    virtual TcpHeader addSacks(const std::shared_ptr<TcpHeader>& tcpseg);
 
     /** Utility: get TSval from segments TS header option */
-    virtual uint32 getTSval(TcpHeader *tcpseg) const;
+    virtual uint32 getTSval(const std::shared_ptr<TcpHeader>& tcpseg) const;
 
     /** Utility: get TSecr from segments TS header option */
-    virtual uint32 getTSecr(TcpHeader *tcpseg) const;
+    virtual uint32 getTSecr(const std::shared_ptr<TcpHeader>& tcpseg) const;
 
     /** Utility: returns true if the connection is not yet accepted by the application */
     virtual bool isToBeAccepted() const { return listeningSocketId != -1; }
@@ -558,7 +558,7 @@ class INET_API TCPConnection : public cObject
     /** Utility: prints local/remote addr/port and app gate index/socketId */
     virtual void printConnBrief() const;
     /** Utility: prints important header fields */
-    static void printSegmentBrief(TcpHeader *tcpseg);
+    static void printSegmentBrief(const std::shared_ptr<TcpHeader>& tcpseg);
     /** Utility: returns name of TCP_S_xxx constants */
     static const char *stateName(int state);
     /** Utility: returns name of TCP_E_xxx constants */
@@ -571,7 +571,7 @@ class INET_API TCPConnection : public cObject
     virtual void updateRcvQueueVars();
 
     /** Utility: returns true when receive queue has enough space for store the tcpseg */
-    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, TcpHeader *tcpseg);
+    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg);
 
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
@@ -579,7 +579,7 @@ class INET_API TCPConnection : public cObject
     virtual unsigned short updateRcvWnd();
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
-    virtual void updateWndInfo(TcpHeader *tcpseg, bool doAlways = false);
+    virtual void updateWndInfo(const std::shared_ptr<TcpHeader>& tcpseg, bool doAlways = false);
 
   public:
     /**
@@ -610,7 +610,7 @@ class INET_API TCPConnection : public cObject
      * connection object so that it can call this method, then immediately
      * deletes it.
      */
-    virtual void segmentArrivalWhileClosed(Packet *packet, TcpHeader *tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
 
     /** @name Various getters **/
     //@{
@@ -635,7 +635,7 @@ class INET_API TCPConnection : public cObject
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    virtual bool processTCPSegment(Packet *packet, TcpHeader *tcpSeg, L3Address srcAddr, L3Address destAddr);
+    virtual bool processTCPSegment(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
 
     /**
      * Process commands from the application.
