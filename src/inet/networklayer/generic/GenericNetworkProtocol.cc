@@ -420,7 +420,6 @@ cPacket *GenericNetworkProtocol::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
-    auto nwHeaderPos = packet->getHeaderPopOffset();
     const auto& header = packet->popHeader<GenericDatagramHeader>();
 
     // create and fill in control info
@@ -433,7 +432,7 @@ cPacket *GenericNetworkProtocol::decapsulate(Packet *packet)
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(header->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(header->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
-    packet->ensureTag<NetworkProtocolInd>()->setPosition(nwHeaderPos);
+    packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSrcAddress(header->getSourceAddress());
     l3AddressInd->setDestAddress(header->getDestinationAddress());

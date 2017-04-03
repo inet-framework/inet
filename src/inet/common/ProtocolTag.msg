@@ -7,15 +7,19 @@ cplusplus{{
 #include "inet/common/Protocol.h"
 #include "inet/common/TagBase_m.h"
 #include "inet/common/Units.h"
+#include "inet/common/packet/chunk/Chunk.h"
 }}
 
 namespace inet;
 
 cplusplus{{
+typedef std::shared_ptr<Chunk> ChunkPtr;
 typedef const Protocol * ProtocolPtr;
+
 using namespace units::values;
 }}
 
+class noncobject ChunkPtr;
 class noncobject ProtocolPtr;
 class TagBase extends cObject;
 
@@ -96,7 +100,7 @@ class NetworkProtocolReq extends ProtocolTagBase
 //
 class NetworkProtocolInd extends ProtocolTagBase
 {
-    bit position = bit(-1);
+    ChunkPtr networkProtocolHeader = nullptr;
 }
 
 //

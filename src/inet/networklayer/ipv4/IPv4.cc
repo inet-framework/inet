@@ -694,7 +694,7 @@ void IPv4::decapsulate(Packet *packet)
     packet->ensureTag<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(transportProtocol);
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
-    packet->ensureTag<NetworkProtocolInd>()->setPosition(ipv4HeaderPos);
+    packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv4Header);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSrcAddress(ipv4Header->getSrcAddress());
     l3AddressInd->setDestAddress(ipv4Header->getDestAddress());

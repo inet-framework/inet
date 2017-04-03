@@ -583,8 +583,9 @@ void UDP::processUndeliverablePacket(Packet *udpPacket)
                 udpPacket->getClassName(), udpPacket->getName());
     }
 
-    //seek to network protocol header
-    udpPacket->setHeaderPopOffset(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getPosition());
+    //push back network protocol header
+    udpPacket->removePoppedChunks();
+    udpPacket->pushHeader(udpPacket->getMandatoryTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
     auto inIe = udpPacket->getMandatoryTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {

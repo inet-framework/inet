@@ -726,7 +726,7 @@ void IPv6::decapsulate(Packet *packet)
     packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
     packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ipprotocol.getProtocol(ipv6Header->getTransportProtocol()));
     packet->ensureTag<NetworkProtocolInd>()->setProtocol(&Protocol::ipv6);
-    packet->ensureTag<NetworkProtocolInd>()->setPosition(ipv6HeaderPos);
+    packet->ensureTag<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv6Header);
     auto l3AddressInd = packet->ensureTag<L3AddressInd>();
     l3AddressInd->setSrcAddress(ipv6Header->getSrcAddress());
     l3AddressInd->setDestAddress(ipv6Header->getDestAddress());
