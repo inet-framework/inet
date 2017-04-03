@@ -62,13 +62,18 @@ std::vector<Ieee80211DataFrame*> *MsduDeaggregation::deaggregateFrame(Ieee80211D
     {
         Ieee80211MsduSubframe msduSubframe = aMsdu->getSubframes(i);
         cPacket *msdu = msduSubframe.decapsulate();
-        Ieee80211DataFrame *dataFrame = new Ieee80211DataFrame();
-//            dataFrame->setType(ST_DATA_WITH_QOS); FIXME:
+        Ieee80211DataFrame *dataFrame = nullptr;
+        // TODO: review, restore snap header, see Ieee80211MsduSubframe
+        dataFrame = (msduSubframe.getEtherType() != -1) ? new Ieee80211DataFrameWithSNAP() : new Ieee80211DataFrame();
+        // dataFrame->setType(ST_DATA_WITH_QOS); FIXME:
         dataFrame->setType(ST_DATA);
         dataFrame->setTransmitterAddress(msduSubframe.getSa());
         dataFrame->setToDS(frame->getToDS());
         dataFrame->setFromDS(frame->getFromDS());
         dataFrame->setTid(tid);
+        // TODO: review, restore snap header, see Ieee80211MsduSubframe
+        if (auto dataFrameWithSnap = dynamic_cast<Ieee80211DataFrameWithSNAP*>(dataFrame))
+            dataFrameWithSnap->setEtherType(msduSubframe.getEtherType());
         dataFrame->encapsulate(msdu);
         setExplodedFrameAddress(dataFrame, &msduSubframe, frame);
         frames->push_back(dataFrame);

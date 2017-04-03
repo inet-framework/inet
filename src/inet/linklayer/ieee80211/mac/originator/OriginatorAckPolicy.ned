@@ -18,6 +18,7 @@ package inet.linklayer.ieee80211.mac.originator;
 simple OriginatorAckPolicy
 {
     parameters:
+        string rateSelectionModule;
         double ackTimeout @unit("s") = default(-1s);
         @display("i=block/control");
 }

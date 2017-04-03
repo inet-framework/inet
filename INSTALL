@@ -5,10 +5,7 @@ The INET Framework can be compiled on any platform supported by OMNeT++.
 
 PREREQUISITES
 
-You should have a working OMNeT++ installation, version 4.0 or later.
-If you are running on Windows you will have to install the winpcap driver,
-which is used by INET to capture network packets from external interfaces
-(visit http://www.winpcap.org)
+You should have a working OMNeT++ installation.
 
 General
 -------
@@ -23,11 +20,6 @@ General
    archiver has bugs and cannot extract the file correctly. Use some other archiver
    or do it from command line (tar xvfz inet-yyyymmdd-opp4-src.tgz)
 
-   NOTE: if you have cloned the github repo (i.e. are not using a tarball),
-   run the following command in the inet root directory:
-       $ cp .cproject-DEFAULT .cproject
-   because the .cproject file is NOT in the repo, for convenience reasons.
-
 
 If you are building from command line:
 --------------------------------------
@@ -38,7 +30,7 @@ If you are building from command line:
 5. Type "make" to build the inet executable (debug version). Use "make MODE=release"
    to build release version.
 
-6. you can run specific examples by changing into the example's directory and executing "./run"
+6. You can run specific examples by changing into the example's directory and executing "./run"
 
 If you are using the IDE:
 -------------------------
@@ -61,7 +53,7 @@ Change into examples/ and type "./rundemo".
 
 Note:
 -----
-- by default INET is creating a shared library (libinet.dll, libinet.so etc.)
+- by default INET is creating a shared library (libINET.dll, libINET.so etc.)
   in the "src" directory. To use the shared library you can use the "opp_run"
   command to load it dynamically. Open the "src/run_inet" script to see how
   to do it.
@@ -70,9 +62,19 @@ Note:
   from the command line. (The IDE does it for you automatically)
 
 Note to GIT users:
--------------------
-To make the installation simple, the GIT repo contains all IDE configuration files. 
-If you make local changes in the IDE you may need to disable the change tracking on 
+------------------
+
+If you want to check out INET directly from the repository, we recommend using the
+
+    $ git clone --recursive git@github.com:inet-framework/inet.git
+
+command, because the INET repository contains git submodules. If you forget to specify
+--recursive, you can initialize those submodules with:
+
+    $ git submodule update --init
+
+To make the installation simple, the GIT repo contains all IDE configuration files.
+If you make local changes in the IDE you may need to disable the change tracking on
 those files, so GIT will not insist committing those changes back on your next commit.
 You can use the _scripts/track-config-files-[on/off] scripts to enable/disable the 
 change tracking.
@@ -80,7 +82,7 @@ change tracking.
 To further ease the merging/rebasing operation the .cproject .nedfolders .oppbuildspec .project
 files are configured to be resolved using the 'ours' merge strategy.  Depending on your 
 GIT version you may need to enable the 'ours' merge driver for the project:
-    
+
     $ git config merge.ours.driver true
 
 VoIPTool feature
@@ -92,9 +94,6 @@ systems, but your milage may vary on getting it up and running.
 
 PREREQUISITES.
 
-This library is an add-on to the INET Framework for OMNeT++. It requires a working
-installation of OMNeT++ 4.1 or later, and INET Framework version 20100723.
-
 VoIPTool requires a "devel" package of the avcodec library (part of FFmpeg) 
 to be installed on your system. On Ubuntu, this package can be installed with the 
 following command:
@@ -103,20 +102,3 @@ $ sudo apt-get install libavcodec-dev
 $ sudo apt-get install libavformat-dev
 
 The package name and installation command may vary for other Linux systems.
-
-
-INSTALLATION USING THE OMNeT++ IDE.
-
-Start the IDE, and make sure you have a working INET Framework installation 
-as a project named "inet".
-
-Import the VoIPTool project into the IDE (File->Import->General->Existing 
-project into workspace), and make sure it has the "inet" project marked
-as dependency (Project->Properties->Project References).
-
-Hit Ctrl+B to build.
-
-Run the example simulations to check everything works fine.
-
----
-Andras

@@ -25,11 +25,13 @@ Define_Module(OriginatorAckPolicy);
 void OriginatorAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
         ackTimeout = par("ackTimeout");
+    }
 }
 
-bool OriginatorAckPolicy::isAckNeeded(Ieee80211Frame* frame) const
+bool OriginatorAckPolicy::isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const
 {
     if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame)) {
         return !dataOrMgmtFrame->getReceiverAddress().isMulticast(); // TODO: + mgmt with NoAck check
@@ -44,9 +46,9 @@ bool OriginatorAckPolicy::isAckNeeded(Ieee80211Frame* frame) const
 // ACKTimeout interval, the STA concludes that the transmission of the MPDU has failed, and this STA shall
 // invoke its backoff procedure upon expiration of the ACKTimeout interval.
 //
-simtime_t OriginatorAckPolicy::getAckTimeout(Ieee80211Frame *frame) const
+simtime_t OriginatorAckPolicy::getAckTimeout(Ieee80211DataOrMgmtFrame *frame) const
 {
-    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + modeSet->getPhyRxStartDelay() : ackTimeout;
+    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(frame)->getPhyRxStartDelay() : ackTimeout;
 }
 
 } /* namespace ieee80211 */

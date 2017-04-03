@@ -21,6 +21,7 @@
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IQoSRateSelection.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -28,6 +29,7 @@ namespace ieee80211 {
 class INET_API OriginatorQoSAckPolicy : public ModeSetListener, public IOriginatorQoSAckPolicy
 {
     protected:
+        IQoSRateSelection *rateSelection = nullptr;
         int maxBlockAckPolicyFrameLength = -1;
         int blockAckReqTreshold = -1;
 

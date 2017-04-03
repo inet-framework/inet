@@ -20,6 +20,7 @@
 
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IQoSRateSelection.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -27,6 +28,7 @@ namespace ieee80211 {
 class INET_API QoSRtsPolicy : public ModeSetListener, public IRtsPolicy
 {
     protected:
+        IQoSRateSelection *rateSelection = nullptr;
         int rtsThreshold = -1;
         simtime_t ctsTimeout = -1;
 

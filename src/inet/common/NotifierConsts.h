@@ -113,10 +113,13 @@ extern INET_API simsignal_t    // admin
 // - layer 7 - OverSim
     NF_OVERLAY_TRANSPORTADDRESS_CHANGED,    // OverSim
     NF_OVERLAY_NODE_GRACEFUL_LEAVE,    // OverSim
-    NF_OVERLAY_NODE_LEAVE;    // OverSim
+    NF_OVERLAY_NODE_LEAVE,    // OverSim
 
 // - layer 7 (application)
 //...
+
+// general
+    NF_PACKET_DROP;
 
 /**
  * Utility function
