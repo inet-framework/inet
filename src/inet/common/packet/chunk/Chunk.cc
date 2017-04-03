@@ -50,6 +50,19 @@ std::shared_ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const
     return deserialize(inputStream, typeInfo);
 }
 
+void Chunk::moveIterator(Iterator& iterator, bit length) const
+{
+    auto position = iterator.getPosition() + length;
+    iterator.setPosition(position);
+    iterator.setIndex(position == bit(0) ? 0 : -1);
+}
+
+void Chunk::seekIterator(Iterator& iterator, bit position) const
+{
+    iterator.setPosition(position);
+    iterator.setIndex(position == bit(0) ? 0 : -1);
+}
+
 std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     const auto& chunk = peekUnchecked(nullptr, nullptr, iterator, length, flags);

@@ -18,6 +18,7 @@
 
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/EmptyChunk.h"
 
 namespace inet {
 
@@ -49,18 +50,35 @@ class INET_API ChunkQueue : public cNamedObject
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
      */
-    std::shared_ptr<Chunk> contents = nullptr;
+    std::shared_ptr<Chunk> contents;
     Chunk::Iterator iterator;
 
   protected:
     Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
+    template <typename T>
+    std::shared_ptr<T> makeExclusivelyOwnedMutableChunk(const std::shared_ptr<T>& chunk) const {
+        if (chunk.use_count() == 1) {
+            chunk->markMutableIfExclusivelyOwned();
+            return chunk;
+        }
+        else
+            return std::static_pointer_cast<T>(chunk->dupShared());
+    }
+
+    bool isIteratorConsistent(const Chunk::Iterator& iterator) {
+        Chunk::Iterator copy(iterator);
+        contents->seekIterator(copy, iterator.getPosition());
+        return iterator.getPosition() == copy.getPosition() && iterator.getIndex() == copy.getIndex();
+    }
+
     void remove(bit length);
+    void moveIteratorOrRemove(bit length);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    ChunkQueue(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = nullptr);
+    ChunkQueue(const char *name = nullptr, const std::shared_ptr<Chunk>& contents = EmptyChunk::singleton);
     ChunkQueue(const ChunkQueue& other);
 
     virtual ChunkQueue *dup() const override { return new ChunkQueue(*this); }
@@ -71,7 +89,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns the total length of data currently available in the queue.
      */
-    bit getLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength() - iterator.getPosition(); }
+    bit getLength() const { return contents->getChunkLength() - iterator.getPosition(); }
 
     /**
      * Returns the total length of data pushed into the queue so far.
@@ -107,7 +125,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     bool has(bit length = bit(-1)) const {
-        return contents == nullptr ? false : contents->has<T>(iterator, length);
+        return contents->has<T>(iterator, length);
     }
 
     /**
@@ -117,7 +135,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     std::shared_ptr<T> peek(bit length = bit(-1), int flags = 0) const {
-        return contents == nullptr ? nullptr : contents->peek<T>(iterator, length, flags);
+        return contents->peek<T>(iterator, length, flags);
     }
 
     /**
@@ -127,7 +145,9 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
+        assert(bit(0) <= offset && offset <= getLength());
+        assert(bit(-1) <= length && offset + length <= getLength());
+        return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
     }
 
     /**
@@ -174,7 +194,7 @@ class INET_API ChunkQueue : public cNamedObject
     std::shared_ptr<T> pop(bit length = bit(-1), int flags = 0) {
         const auto& chunk = peek<T>(length, flags);
         if (chunk != nullptr)
-            remove(chunk->getChunkLength());
+            moveIteratorOrRemove(chunk->getChunkLength());
         return chunk;
     }
 
@@ -195,7 +215,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
+    virtual std::string str() const override { return contents->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }

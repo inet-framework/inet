@@ -77,6 +77,12 @@ class INET_API Packet : public cPacket
             return std::static_pointer_cast<T>(chunk->dupShared());
     }
 
+    bool isIteratorConsistent(const Chunk::Iterator& iterator) {
+        Chunk::Iterator copy(iterator);
+        contents->seekIterator(copy, iterator.getPosition());
+        return iterator.getPosition() == copy.getPosition() && iterator.getIndex() == copy.getIndex();
+    }
+
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
     Packet(const char *name, const std::shared_ptr<Chunk>& contents);
@@ -90,7 +96,7 @@ class INET_API Packet : public cPacket
      * Returns the total packet length ignoring header and trailer iterators.
      * The returned value is in the range [0, +infinity).
      */
-    bit getTotalLength() const { return contents == nullptr ? bit(0) : contents->getChunkLength(); }
+    bit getTotalLength() const { return contents->getChunkLength(); }
 
     /**
      * Returns the length in bits between the header and trailer iterators.
@@ -178,7 +184,7 @@ class INET_API Packet : public cPacket
     template <typename T>
     bool hasHeader(bit length = bit(-1)) const {
         assert(bit(-1) <= length && length <= getDataLength());
-        return contents == nullptr ? false : contents->has<T>(headerIterator, length);
+        return contents->has<T>(headerIterator, length);
     }
 
     /**
@@ -189,7 +195,7 @@ class INET_API Packet : public cPacket
     template <typename T>
     std::shared_ptr<T> peekHeader(bit length = bit(-1), int flags = 0) const {
         assert(bit(-1) <= length && length <= getDataLength());
-        return contents == nullptr ? nullptr : contents->peek<T>(headerIterator, length, flags);
+        return contents->peek<T>(headerIterator, length, flags);
     }
 
     /**
@@ -285,7 +291,7 @@ class INET_API Packet : public cPacket
     template <typename T>
     bool hasTrailer(bit length = bit(-1)) const {
         assert(bit(-1) <= length && length <= getDataLength());
-        return contents == nullptr ? nullptr : contents->has<T>(trailerIterator, length);
+        return contents->has<T>(trailerIterator, length);
     }
 
     /**
@@ -296,7 +302,7 @@ class INET_API Packet : public cPacket
     template <typename T>
     std::shared_ptr<T> peekTrailer(bit length = bit(-1), int flags = 0) const {
         assert(bit(-1) <= length && length <= getDataLength());
-        return contents == nullptr ? nullptr : contents->peek<T>(trailerIterator, length, flags);
+        return contents->peek<T>(trailerIterator, length, flags);
     }
 
     /**
@@ -362,7 +368,9 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
+        assert(bit(0) <= offset && offset <= getDataLength());
+        assert(bit(-1) <= length && offset + length <= getDataLength());
+        return contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
     }
 
     /**
@@ -410,7 +418,7 @@ class INET_API Packet : public cPacket
     template <typename T>
     bool hasAt(bit offset, bit length = bit(-1)) const {
         assert(bit(0) <= offset && offset <= getTotalLength());
-        assert(bit(-1) <= length && length <= getTotalLength());
+        assert(bit(-1) <= length && offset + length <= getTotalLength());
         return peekAt<T>(offset, length) != nullptr;
     }
 
@@ -422,8 +430,8 @@ class INET_API Packet : public cPacket
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         assert(bit(0) <= offset && offset <= getTotalLength());
-        assert(bit(-1) <= length && length <= getTotalLength());
-        return contents == nullptr ? nullptr : contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
+        assert(bit(-1) <= length && offset + length <= getTotalLength());
+        return contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
     }
 
 
@@ -505,7 +513,7 @@ class INET_API Packet : public cPacket
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return contents == nullptr ? "" : contents->str(); }
+    virtual std::string str() const override { return contents->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Packet *packet) { return os << packet->str(); }

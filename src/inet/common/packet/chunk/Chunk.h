@@ -235,6 +235,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * This enum is used to avoid std::dynamic_cast and std::dynamic_pointer_cast.
      */
     enum ChunkType {
+        CT_EMPTY,
         CT_BITCOUNT,
         CT_BITS,
         CT_BYTECOUNT,
@@ -264,19 +265,21 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         int index;
 
       public:
-        Iterator(bit position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { }
-        Iterator(byte position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { }
-        explicit Iterator(bool isForward, bit position, int index) : isForward_(isForward), position(position), index(index) { }
-        Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { }
+        Iterator(bit position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { assert(isCorrect()); }
+        Iterator(byte position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { assert(isCorrect()); }
+        explicit Iterator(bool isForward, bit position, int index) : isForward_(isForward), position(position), index(index) { assert(isCorrect()); }
+        Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { assert(isCorrect()); }
+
+        bool isCorrect() { return position >= bit(0) && index >= -1; }
 
         bool isForward() const { return isForward_; }
         bool isBackward() const { return !isForward_; }
 
         bit getPosition() const { return position; }
-        void setPosition(bit position) { this->position = position; }
+        void setPosition(bit position) { this->position = position; assert(isCorrect()); }
 
         int getIndex() const { return index; }
-        void setIndex(int index) { this->index = index; }
+        void setIndex(int index) { this->index = index; assert(isCorrect()); }
     };
 
     /**
@@ -415,8 +418,8 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     /** @name Iteration related functions */
     //@{
-    virtual void moveIterator(Iterator& iterator, bit length) const { iterator.setPosition(iterator.getPosition() + length); }
-    virtual void seekIterator(Iterator& iterator, bit offset) const { iterator.setPosition(offset); }
+    virtual void moveIterator(Iterator& iterator, bit length) const;
+    virtual void seekIterator(Iterator& iterator, bit position) const;
     //@}
 
     /** @name Inserting data related functions */
