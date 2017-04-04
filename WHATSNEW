@@ -1,6 +1,127 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-3.99.0 (Apr, 2017) - Development
+-------------------------------------
+
+This release is the first development snapshot of the upcoming INET-4.0 version.
+It contains a number of non-trivial backward incompatible changes compared to the
+INET 3.x releases. These changes may require considerable efforts from INET users
+to migrate their projects and protocols. The migration may affect INI files, NED
+files, and C++ code. Please refer to the INET-4.0 migration guide under 'doc/misc/'
+for further details.
+
+The code is still work in progress, which means some details may change until the
+final 4.0 version is released. At the moment, it requires a modified version of
+OMNeT++ 5.1. The modification is distributed as a patch file in the 'misc/patch'
+folder.
+
+The highlights of this release are:
+
+1. Redesigned network node architecture
+
+   The internal structure of network nodes has been changed considerably. These
+   changes have profound effects on how applications are using protocols, and
+   also on how protocols communicate with each other.
+
+   With the new architecture, applications (replaceable from INI files) are able
+   to use multiple protocols simultaneously, even if the protocols are part of
+   different protocol layers. For example, in the old model it was impossible
+   to configure a StandardHost application in an INI file that uses TCP and UDP
+   protocols at the same time. This old separation of applications based on the
+   transport protocols they use is eliminated. All kinds of applications are put
+   in the same application submodule vector in the network nodes independently
+   of what kind of protocols they use. In general, applications still use sockets
+   to access the protocols (even for lower layer protocols such as IP or Ethernet)
+   but they have only one gate towards said protocols. The dispatch mechanism is
+   built into the new network node architecture.
+
+   Furthermore, protocols don't have to deal with dispatching packets to other
+   protocols or applications any more. In the old architecture, many protocols
+   provided its own mechanisms to communicate with multiple applications or other
+   protocols. For example, the IP protocol has to be able to communicate with
+   all kinds of applications, transport protocols and link layer protocols at the
+   same time. With the new architecture, protocols use scalar gates to connect to
+   all higher layer and lower layer protocols, and also all applications at once.
+   Instead of providing their own dispatch mechanism, they rely on the generic
+   dispatch mechanism provided by the new network node architecture. There are
+   some transport, network and link layer protocols which are in many-to-many
+   relationship, that is any combination of them should work. The new network
+   node architecture solves this issue succinctly by replacing all connection
+   pairs with one connection per protocol towards the dispatchers.
+
+   The main component of the new network node architecture is the so called
+   MessageDipatcher module. This module is responsible for directing packets from
+   one protocol to the other and also between applications and protocols. Most
+   often the MessageDispatcher module is displayed as a thick horizontal line
+   inside the network nodes. Protocols and applications connect to this module
+   from both above and below. The MessageDispatcher learns where protocols and
+   application sockets are and directs packets based on the attached packet tags.
+
+   Please refer to the 'src/inet/node/base' and 'src/inet/node/inet' folders for
+   more details.
+
+2. Introduction of packet tags
+
+   Packets no longer carry control info data structures while being passed around
+   in a network node. They have a set of so called packet tags attached instead.
+   A packet tag is usually a very small data structure that focuses on a single
+   parameterization aspect of one or more protocols. For example, a MacAddressReq
+   tag specifies the requested transmitter and receiver MAC addresses for a MAC
+   protocol.
+
+   In general, packet tags come in three flavors: requests (top down), indications
+   (bottom up), and plain tags (meta data). The naming convention for packet tags
+   is to use the Req, Ind, or Tag suffix respectively. Tags are usually defined
+   in MSG files, so they can be inspected in the runtime environment.
+
+   Tags can pass through protocol layers and reach far away from the originator
+   protocol in both the downward and upward direction. This allows protocols to
+   implement mechanism that depends on meta data that is not directly present in
+   a packet. For example, a wireless routing protocol could make more informed
+   decisions when building the routing table by using the SignalPowerInd tag
+   attached by the physical layer. Similarly, an application could attach an
+   InterfaceReq to a packet in order to instruct the routing protocol to use a
+   particular outgoing interface.
+
+   The old control info data structures that were used by protocols with packets
+   are no longer available. They have been split into several packet tags. Other
+   control info data structures that are used with commands are left unchanged.
+   All related protocols have been updated to use the new packet tags. New tags
+   have also been introduced which don't have their counterpart in the old data
+   structures.
+
+   Please refer to the MSG files with the 'Tag.msg' suffix for more details.
+
+3. Introduction of flat packets
+
+   A new packet API is introduced that supports efficient construction, sharing,
+   duplication, encapsulation, aggregation, fragmentation and serialization. The
+   new API also supports dual representation, packet data can be accessed as raw
+   bytes and also as field based classes transparently.
+
+   The new API contains two layers, the lower layer focuses on the representation
+   of data. The primary building block of the lower layer is the Chunk class and
+   its subclasses. The upper layer builds on top of this and provides the typical
+   packet, queue and buffer abstractions used by protocols.
+
+   All the usual TCP/IP protocols have been changed to use the new packet API.
+   This includes among others TCP, UDP, IPv4, IPv6, Ethernet, PPP, etc. The most
+   notable exception is the IEEE 802.11 MAC protocol, which is not yet ported due
+   to the ongoing implementation in the master branch. Due to the flat nature of
+   the new packet data structure all old packet data structures (subclasses of
+   cPacket) have been replaced with chunks (subclasses of FieldChunk).
+   
+   TODO: dataTransferMode, TCPReceiveQueue
+
+   Furthermore, all old packet serializer classes have been changed to integrate
+   with the new packet API. This allows the transparent processing of packets
+   by protocols independently whether they are actually represented as a sequence
+   of bytes or as a sequence of field based chunks.
+
+   Please refer to the 'src/inet/common/packet' and 'test/packet' folders for
+   more details.
+
 INET-3.5.0 (Feb, 2017) - stable
 -------------------------------
 
