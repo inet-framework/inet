@@ -119,23 +119,27 @@ class ICMPv6Header extends FieldsChunk
 //
 class ICMPv6DestUnreachableMsg extends ICMPv6Header
 {
+    type = ICMPv6_DESTINATION_UNREACHABLE;
     int code @enum(ICMPv6DEST_UN);
     // unused 4 bytes
 }
 
 class ICMPv6PacketTooBigMsg extends ICMPv6Header
 {
+    type = ICMPv6_PACKET_TOO_BIG;
     int code; //Set to 0 by sender and ignored by receiver.
     int MTU; //MTU of next-hop link
 }
 
 class ICMPv6TimeExceededMsg extends ICMPv6Header
 {
+    type = ICMPv6_TIME_EXCEEDED;
     int code @enum(ICMPv6_TIME_EX);
 }
 
 class ICMPv6ParamProblemMsg extends ICMPv6Header
 {
+    type = ICMPv6_PARAMETER_PROBLEM;
     int code @enum(ICMPv6_PARAMETER_PROB);
 }
 
@@ -145,7 +149,8 @@ class ICMPv6ParamProblemMsg extends ICMPv6Header
 //
 class ICMPv6EchoRequestMsg extends ICMPv6Header
 {
-    int code; //set to 0.
+    type = ICMPv6_ECHO_REQUEST;
+    int code = 0; //set to 0.
     int identifier; // identifier to aid in matching Echo replies. May be Zero
     int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
         //Data is attached through encapsulation. See ICMPv6.cc
@@ -156,7 +161,8 @@ class ICMPv6EchoRequestMsg extends ICMPv6Header
 //
 class ICMPv6EchoReplyMsg extends ICMPv6Header
 {
-    int code; //set to 0.
+    type = ICMPv6_ECHO_REPLY;
+    int code = 0; //set to 0.
     int identifier; // identifier to aid in matching Echo replies. May be Zero
     int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
 }

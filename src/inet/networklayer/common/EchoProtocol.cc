@@ -21,7 +21,6 @@
 #include "inet/networklayer/common/EchoProtocol.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/applications/pingapp/PingPayload_m.h"
 
 namespace inet {
 
@@ -66,9 +65,11 @@ void EchoProtocol::processEchoRequest(Packet *request)
     const auto& echoReply = std::make_shared<EchoPacket>();
     echoReply->setChunkLength(echoReq->getChunkLength());
     echoReply->setType(ECHO_PROTOCOL_REPLY);
+    echoReply->setIdentifier(echoReq->getIdentifier());
+    echoReply->setSeqNumber(echoReq->getSeqNumber());
     echoReply->markImmutable();
     reply->append(echoReply);
-    reply->append(request->peekDataAt(byte(0), request->getDataLength()));
+    reply->append(request->peekData());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
 
     // swap src and dest

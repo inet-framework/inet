@@ -22,7 +22,6 @@
 
 #include "inet/networklayer/ipv4/ICMP.h"
 
-#include "inet/applications/pingapp/PingPayload_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -221,16 +220,18 @@ void ICMP::errorOut(Packet *packet)
 void ICMP::processEchoRequest(Packet *request)
 {
     // turn request into a reply
-    const auto& icmpReq = request->popHeader<ICMPHeader>();
+    const auto& icmpReq = request->popHeader<ICMPEchoRequest>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
-    const auto& icmpReply = std::make_shared<ICMPHeader>();
+    const auto& icmpReply = std::make_shared<ICMPEchoReply>();
+    icmpReply->setIdentifier(icmpReq->getIdentifier());
+    icmpReply->setSeqNumber(icmpReq->getSeqNumber());
     auto addressInd = request->getMandatoryTag<L3AddressInd>();
     IPv4Address src = addressInd->getSrcAddress().toIPv4();
     IPv4Address dest = addressInd->getDestAddress().toIPv4();
-    icmpReply->setType(ICMP_ECHO_REPLY);
+    //FIXME calculate CRC if needed
     icmpReply->markImmutable();
     reply->append(icmpReply);
-    reply->append(request->peekDataAt(byte(0), request->getDataLength()));
+    reply->append(request->peekData());
 
     // swap src and dest
     // TBD check what to do if dest was multicast etc?

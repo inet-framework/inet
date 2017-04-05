@@ -29,8 +29,6 @@
 
 namespace inet {
 
-class PingPayload;
-
 // how many ping request's send time is stored
 #define PING_HISTORY_SIZE    100
 
@@ -96,7 +94,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual bool isEnabled();
     virtual std::vector<L3Address> getAllAddresses();
     virtual void sendPingRequest();
-    virtual void processPingResponse(Packet *packet);
+    virtual void processPingResponse(int identifier, int seqNumber, Packet *packet);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

@@ -24,29 +24,33 @@ namespace inet {
 namespace serializer {
 
 Register_Serializer(ICMPHeader, ICMPHeaderSerializer);
+Register_Serializer(ICMPEchoRequest, ICMPHeaderSerializer);
+Register_Serializer(ICMPEchoReply, ICMPHeaderSerializer);
 
 void ICMPHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& icmpHeader = std::static_pointer_cast<const ICMPHeader>(chunk);
     stream.writeByte(icmpHeader->getType());
+    stream.writeByte(icmpHeader->getCode());
+    stream.writeUint16(icmpHeader->getChksum());
     switch (icmpHeader->getType()) {
-        case ICMP_ECHO_REQUEST:
-            stream.writeByte(icmpHeader->getCode());
-            stream.writeUint16(icmpHeader->getChksum());
+        case ICMP_ECHO_REQUEST: {
+            const auto& icmpEchoRq = CHK(std::dynamic_pointer_cast<const ICMPEchoRequest>(chunk));
+            stream.writeUint16(icmpEchoRq->getIdentifier());
+            stream.writeUint16(icmpEchoRq->getSeqNumber());
             break;
-        case ICMP_ECHO_REPLY:
-            stream.writeByte(icmpHeader->getCode());
-            stream.writeUint16(icmpHeader->getChksum());
+        }
+        case ICMP_ECHO_REPLY: {
+            const auto& icmpEchoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoRequest>(chunk));
+            stream.writeUint16(icmpEchoReply->getIdentifier());
+            stream.writeUint16(icmpEchoReply->getSeqNumber());
             break;
+        }
         case ICMP_DESTINATION_UNREACHABLE:
-            stream.writeByte(icmpHeader->getCode());
-            stream.writeUint16(icmpHeader->getChksum());
             stream.writeUint16(0);   // unused
             stream.writeUint16(0);   // next hop MTU
             break;
         case ICMP_TIME_EXCEEDED:
-            stream.writeByte(ICMP_TIMXCEED_INTRANS);
-            stream.writeUint16(icmpHeader->getChksum());
             stream.writeUint32(0);   // unused
             break;
         default:
@@ -61,21 +65,34 @@ std::shared_ptr<Chunk> ICMPHeaderSerializer::deserialize(ByteInputStream& stream
     icmpHeader->setType(type);
     icmpHeader->setCode(stream.readByte());
     icmpHeader->setChksum(stream.readUint16());
+    icmpHeader->setChunkLength(byte(8));
     switch (type) {
-        case ICMP_ECHO_REQUEST:
-            icmpHeader->setChunkLength(byte(4));
+        case ICMP_ECHO_REQUEST: {
+            auto echoRq = std::make_shared<ICMPEchoRequest>();
+            echoRq->setType(type);
+            echoRq->setCode(icmpHeader->getCode());
+            echoRq->setChksum(icmpHeader->getChksum());
+            echoRq->setIdentifier(stream.readUint16());
+            echoRq->setSeqNumber(stream.readUint16());
+            icmpHeader = echoRq;
             break;
-        case ICMP_ECHO_REPLY:
-            icmpHeader->setChunkLength(byte(4));
+        }
+        case ICMP_ECHO_REPLY: {
+            auto echoReply = std::make_shared<ICMPEchoReply>();
+            echoReply->setType(type);
+            echoReply->setCode(icmpHeader->getCode());
+            echoReply->setChksum(icmpHeader->getChksum());
+            echoReply->setIdentifier(stream.readUint16());
+            echoReply->setSeqNumber(stream.readUint16());
+            icmpHeader = echoReply;
             break;
+        }
         case ICMP_DESTINATION_UNREACHABLE:
             stream.readUint16();   // unused
             stream.readUint16();   // next hop MTU
-            icmpHeader->setChunkLength(byte(8));
             break;
         case ICMP_TIME_EXCEEDED:
             stream.readUint32();   // unused
-            icmpHeader->setChunkLength(byte(8));
             break;
         default:
             EV_ERROR << "Can not parse ICMP packet: type " << type << " not supported.";

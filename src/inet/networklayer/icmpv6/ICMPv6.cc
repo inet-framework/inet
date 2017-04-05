@@ -18,7 +18,6 @@
 
 #include "inet/networklayer/icmpv6/ICMPv6.h"
 
-#include "inet/applications/pingapp/PingPayload_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -144,11 +143,14 @@ void ICMPv6::processICMPv6Message(Packet *packet)
 void ICMPv6::processEchoRequest(Packet *requestPacket, const std::shared_ptr<ICMPv6EchoRequestMsg>& requestHeader)
 {
     //Create an ICMPv6 Reply Message
-    auto replyPacket = new Packet("Echo Reply");
+    auto replyPacket = new Packet();
     replyPacket->setName((std::string(requestHeader->getName()) + "-reply").c_str());
-    replyPacket->append(requestPacket->peekDataAt(bit(0), requestPacket->getDataLength()));
-    auto reply = std::make_shared<ICMPv6EchoReplyMsg>();
-    reply->setType(ICMPv6_ECHO_REPLY);
+    auto replyHeader = std::make_shared<ICMPv6EchoReplyMsg>();
+    replyHeader->setIdentifier(requestHeader->getIdentifier());
+    replyHeader->setSeqNumber(requestHeader->getSeqNumber());
+    replyHeader->markImmutable();
+    replyPacket->pushHeader(replyHeader);
+    replyPacket->append(requestPacket->peekData());
 
     auto addressInd = requestPacket->getMandatoryTag<L3AddressInd>();
     replyPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);

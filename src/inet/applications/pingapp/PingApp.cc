@@ -25,14 +25,12 @@
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
-#include "inet/applications/pingapp/PingPayload_m.h"
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/packet/chunk/cPacketChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -47,6 +45,7 @@
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
+
 
 namespace inet {
 
@@ -216,7 +215,8 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
             const auto& icmpHeader = packet->popHeader<ICMPHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
-                processPingResponse(packet);
+                const auto& echoReply = CHK(std::dynamic_pointer_cast<ICMPEchoReply>(icmpHeader));
+                processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
                 // process other icmp messages, process icmp errors
@@ -229,7 +229,8 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
             const auto& icmpHeader = packet->popHeader<ICMPv6Header>();
             if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
-                processPingResponse(packet);
+                const auto& echoReply = CHK(std::dynamic_pointer_cast<ICMPv6EchoReplyMsg>(icmpHeader));
+                processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
             }
             else {
                 // process other icmpv6 messages, process icmpv6 errors
@@ -242,7 +243,7 @@ void PingApp::handleMessage(cMessage *msg)
         if (packet->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
             const auto& icmpHeader = packet->popHeader<EchoPacket>();
             if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
-                processPingResponse(packet);
+                processPingResponse(icmpHeader->getIdentifier(), icmpHeader->getSeqNumber(), packet);
             }
             else {
                 // process other icmp messages, process icmp errors
@@ -340,31 +341,22 @@ void PingApp::sendPingRequest()
     char name[32];
     sprintf(name, "ping%ld", sendSeqNo);
 
-    PingPayload *msg = new PingPayload(name);
     ASSERT(pid != -1);
-    msg->setOriginatorId(pid);
-    msg->setSeqNo(sendSeqNo);
-    msg->setByteLength(packetSize + 4);
 
-    // store the sending time in a circular buffer so we can compute RTT when the packet returns
-    sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
-
-    emit(pingTxSeqSignal, sendSeqNo);
-    sendSeqNo++;
-    sentCount++;
     IL3AddressType *addressType = destAddr.getAddressType();
 
-    Packet *outPacket = new Packet(msg->getName());
+    Packet *outPacket = new Packet(name);
+    auto payload = std::make_shared<ByteCountChunk>(byte(packetSize));
+    payload->markImmutable();
+
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
 #ifdef WITH_IPv4
-            const auto& request = std::make_shared<ICMPHeader>();
-            request->setChunkLength(byte(4));
-            request->setType(ICMP_ECHO_REQUEST);
+            const auto& request = std::make_shared<ICMPEchoRequest>();
+            request->setIdentifier(pid);
+            request->setSeqNumber(sendSeqNo);
             request->markImmutable();
-            outPacket->prepend(request);
-            auto payload = std::make_shared<cPacketChunk>(msg);
-            payload->markImmutable();
+            outPacket->pushHeader(request);
             outPacket->append(payload);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
@@ -375,12 +367,10 @@ void PingApp::sendPingRequest()
         case L3Address::IPv6: {
 #ifdef WITH_IPv6
             const auto& request = std::make_shared<ICMPv6EchoRequestMsg>();
-            request->setChunkLength(byte(4));
-            request->setType(ICMPv6_ECHO_REQUEST);
+            request->setIdentifier(pid);
+            request->setSeqNumber(sendSeqNo);
             request->markImmutable();
-            outPacket->prepend(request);
-            auto payload = std::make_shared<cPacketChunk>(msg);
-            payload->markImmutable();
+            outPacket->pushHeader(request);
             outPacket->append(payload);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
@@ -392,12 +382,12 @@ void PingApp::sendPingRequest()
         case L3Address::MODULEPATH: {
 #ifdef WITH_GENERIC
             const auto& request = std::make_shared<EchoPacket>();
-            request->setChunkLength(byte(4));
+            request->setChunkLength(byte(8));
             request->setType(ECHO_PROTOCOL_REQUEST);
+            request->setIdentifier(pid);
+            request->setSeqNumber(sendSeqNo);
             request->markImmutable();
             outPacket->prepend(request);
-            auto payload = std::make_shared<cPacketChunk>(msg);
-            payload->markImmutable();
             outPacket->append(payload);
             outPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
@@ -413,14 +403,21 @@ void PingApp::sendPingRequest()
     addressReq->setSrcAddress(srcAddr);
     addressReq->setDestAddress(destAddr);
     outPacket->ensureTag<HopLimitReq>()->setHopLimit(hopLimit);
-    EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
+    EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
     l3Socket->send(outPacket);
+
+    // store the sending time in a circular buffer so we can compute RTT when the packet returns
+    sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
+    emit(pingTxSeqSignal, sendSeqNo);
+
+    sendSeqNo++;
+    sentCount++;
 }
 
-void PingApp::processPingResponse(Packet *packet)
+void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
 {
-    PingPayload *pingPayload = check_and_cast<PingPayload *>(std::dynamic_pointer_cast<cPacketChunk>(packet->peekDataAt(byte(0), packet->getDataLength()))->getPacket());
-    if (pingPayload->getOriginatorId() != pid) {
+    const auto& pingPayload = packet->peekDataAt(byte(0), packet->getDataLength());
+    if (originatorId != pid) {
         EV_WARN << "Received response was not sent by this application, dropping packet\n";
         return;
     }
@@ -435,19 +432,19 @@ void PingApp::processPingResponse(Packet *packet)
     // if the send time is no longer available (i.e. the packet is very old and the
     // sendTime was overwritten in the circular buffer) then we just return a 0
     // to signal that this value should not be used during the RTT statistics)
-    simtime_t rtt = sendSeqNo - pingPayload->getSeqNo() > PING_HISTORY_SIZE ?
-        0 : simTime() - sendTimeHistory[pingPayload->getSeqNo() % PING_HISTORY_SIZE];
+    simtime_t rtt = sendSeqNo - seqNo > PING_HISTORY_SIZE ?
+        0 : simTime() - sendTimeHistory[seqNo % PING_HISTORY_SIZE];
 
     if (printPing) {
-        cout << getFullPath() << ": reply of " << std::dec << pingPayload->getByteLength()
+        cout << getFullPath() << ": reply of " << std::dec << pingPayload->getChunkLength()
              << " bytes from " << src
-             << " icmp_seq=" << pingPayload->getSeqNo() << " ttl=" << msgHopCount
+             << " icmp_seq=" << seqNo << " ttl=" << msgHopCount
              << " time=" << (rtt * 1000) << " msec"
              << " (" << packet->getName() << ")" << endl;
     }
 
     // update statistics
-    countPingResponse(pingPayload->getByteLength(), pingPayload->getSeqNo(), rtt);
+    countPingResponse(byte(pingPayload->getChunkLength()).get(), seqNo, rtt);
 }
 
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)

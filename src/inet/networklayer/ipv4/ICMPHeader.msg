@@ -126,5 +126,22 @@ class ICMPHeader extends FieldsChunk
     int type = -1 @enum(ICMPType);   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
-    chunkLength = byte(4);
+    chunkLength = byte(8);
 }
+
+class ICMPEchoRequest extends ICMPHeader
+{
+    type = ICMP_ECHO_REQUEST;
+    code = 0;
+    int identifier; // sender module id   // 2 bytes
+    int seqNumber; // sequence number           // 2 bytes
+}
+
+class ICMPEchoReply extends ICMPHeader
+{
+    type = ICMP_ECHO_REPLY;
+    code = 0;
+    int identifier; // sender module id   // 2 bytes
+    int seqNumber; // sequence number           // 2 bytes
+}
+
