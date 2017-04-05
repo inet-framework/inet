@@ -151,8 +151,6 @@ EtherMACBase::~EtherMACBase()
 
 void EtherMACBase::initialize(int stage)
 {
-    connectionColoring = par("connectionColoring");
-
     MACBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
@@ -637,11 +635,8 @@ void EtherMACBase::refreshDisplay() const
 
     getDisplayString().setTagArg("i", 1, color);
 
-    if (!strcmp(getParentModule()->getClassName(), "EthernetInterface"))
+    if (!strcmp(getParentModule()->getNedTypeName(), "inet.linklayer.ethernet.EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
-
-    // connection coloring
-    updateConnectionColor(transmitState);
 
 #if 0
     // this code works but didn't turn out to be very useful
@@ -704,30 +699,6 @@ void EtherMACBase::refreshDisplay() const
             txStateName, rxStateName, backoffs, numConcurrentTransmissions);
     getDisplayString().setTagArg("t", 0, buf);
 #endif // if 0
-}
-
-void EtherMACBase::updateConnectionColor(int txState) const
-{
-    const char *color;
-
-    if (txState == TRANSMITTING_STATE)
-        color = "yellow";
-    else if (txState == JAMMING_STATE || txState == BACKOFF_STATE)
-        color = "red";
-    else
-        color = "";
-
-    if (connectionColoring) {
-        if (connected) {
-            transmissionChannel->getDisplayString().setTagArg("ls", 0, color);
-            transmissionChannel->getDisplayString().setTagArg("ls", 1, color[0] ? "3" : "1");
-        }
-        else {
-            // we are not connected: gray out our icon
-            getDisplayString().setTagArg("i", 1, "#707070");
-            getDisplayString().setTagArg("i", 2, "100");
-        }
-    }
 }
 
 int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)

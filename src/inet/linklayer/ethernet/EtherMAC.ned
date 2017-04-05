@@ -121,7 +121,6 @@ simple EtherMAC like IEtherMAC
         string queueModule = default("");   // name of optional external queue module
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu @unit("B") = default(1500B);
-        bool connectionColoring = default(true); // colors the connection when transmitting
         @display("i=block/rxtx");
 
         @signal[txPk](type=EtherFrame);
