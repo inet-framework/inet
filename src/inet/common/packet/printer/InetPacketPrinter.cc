@@ -16,35 +16,24 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/Chunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
+#include "inet/common/packet/Packet.h"
 
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetworkHeader.h"
-#include "inet/applications/pingapp/PingPayload_m.h"
-
-#ifdef WITH_IPv4
-#undef WITH_IPv4        //KLUDGE
-#endif
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
-#else // ifdef WITH_IPv4
-namespace inet {
-class ICMPHeader;
-class IPv4Header;
-} // namespace inet
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#else // ifdef WITH_TCP_COMMON
-namespace inet { namespace tcp { class TcpHeader; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader.h"
-#else // ifdef WITH_UDP
-namespace inet { class UdpHeader; }
 #endif // ifdef WITH_UDP
 
 namespace inet {
@@ -52,9 +41,16 @@ namespace inet {
 class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
-    void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TcpHeader *tcpSeg) const;
-    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UdpHeader *udpHeader) const;
-    void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPHeader *packet) const;
+#ifdef WITH_TCP_COMMON
+    void printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<tcp::TcpHeader>& tcpHeader) const;
+#endif // ifdef WITH_TCP_COMMON
+#ifdef WITH_UDP
+    void printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<UdpHeader>& udpHeader) const;
+#endif // ifdef WITH_UDP
+#ifdef WITH_IPv4
+    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<ICMPHeader>& icmpHeader) const;
+#endif // ifdef WITH_IPv4
+    void printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<Chunk>& chunk) const;
 
   public:
     InetPacketPrinter() {}
@@ -74,133 +70,130 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 {
     L3Address srcAddr, destAddr;
 
+    const char *separ = "";
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); pk; pk = pk->getEncapsulatedPacket()) {
-        if (INetworkHeader *dgram = dynamic_cast<INetworkHeader *>(pk)) {
-            srcAddr = dgram->getSourceAddress();
-            destAddr = dgram->getDestinationAddress();
-#ifdef WITH_IPv4
-            if (IPv4Header *ipv4dgram = dynamic_cast<IPv4Header *>(pk)) {
-                if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0)
-                    os << (ipv4dgram->getMoreFragments() ? "" : "last ")
-                       << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";
+        os << separ;
+        if (Packet *pck = dynamic_cast<Packet *>(pk)) {
+            auto packet = new Packet(pck->getName(), pck->peekData());
+            while (const auto& chunk = packet->popHeader(bit(-1), Chunk::PF_ALLOW_NULLPTR)) {
+                if (const auto& sliceChunk = std::dynamic_pointer_cast<SliceChunk>(chunk)) {
+                    os << "slice from " << sliceChunk->getOffset() << ", length=" << sliceChunk->getLength();  //FIXME TODO show the sliced chunk
+                }
+                else
+                    printChunk(os, srcAddr, destAddr, packet, chunk);
             }
-#endif // ifdef WITH_IPv4
+            delete packet;
         }
+        else
+            os << pk->getClassName() << ":" << pk->getByteLength() << " bytes";
+        separ = "  \t";
+    }
+    os << separ << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
+}
+
+void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<Chunk>& chunk) const
+{
+#ifdef WITH_IPv4
+    if (const auto& ipv4Header = std::dynamic_pointer_cast<IPv4Header>(chunk)) {
+        if (ipv4Header->getMoreFragments() || ipv4Header->getFragmentOffset() > 0)
+            os << (ipv4Header->getMoreFragments() ? "" : "last ")
+               << "fragment with offset=" << ipv4Header->getFragmentOffset() << " of ";
+    }
+    else
+#endif    // WITH_IPv4
 #ifdef WITH_TCP_COMMON
-        else if (tcp::TcpHeader *tcpSegment = dynamic_cast<tcp::TcpHeader *>(pk)) {
-            printTCPPacket(os, srcAddr, destAddr, tcpSegment);
-            return;
-        }
+    if (const auto& tcpHeader = std::dynamic_pointer_cast<tcp::TcpHeader>(chunk)) {
+        printTCPPacket(os, srcAddr, destAddr, packet, tcpHeader);
+        return;
+    }
+    else
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-        else if (UdpHeader *udpHeader = dynamic_cast<UdpHeader *>(pk)) {
-            printUDPPacket(os, srcAddr, destAddr, udpHeader);
-            return;
-        }
+    if (const auto& udpHeader = std::dynamic_pointer_cast<UdpHeader>(chunk)) {
+        printUDPPacket(os, srcAddr, destAddr, packet, udpHeader);
+        return;
+    }
+    else
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-        else if (ICMPHeader *icmpPacket = dynamic_cast<ICMPHeader *>(pk)) {
-            printICMPPacket(os, srcAddr, destAddr, icmpPacket);
-            return;
-        }
-#endif // ifdef WITH_IPv4
+    if (const auto &icmpHeader = std::dynamic_pointer_cast<ICMPHeader>(chunk)) {
+        printICMPPacket(os, srcAddr, destAddr, packet, icmpHeader);
+        return;
     }
-    os << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
+    else
+#endif // ifdef WITH_IPv4
+    {
+        os << chunk->getChunkLength() << " " << chunk->getClassName();
+    }
 }
 
-void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TcpHeader *tcpSeg) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<tcp::TcpHeader>& tcpHeader) const
 {
 #ifdef WITH_TCP_COMMON
-    os << " TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ": ";
+    os << " TCP: " << srcAddr << '.' << tcpHeader->getSrcPort() << " > " << destAddr << '.' << tcpHeader->getDestPort() << ": ";
     // flags
     bool flags = false;
-    if (tcpSeg->getUrgBit()) {
-        flags = true;
-        os << "U ";
-    }
-    if (tcpSeg->getAckBit()) {
-        flags = true;
-        os << "A ";
-    }
-    if (tcpSeg->getPshBit()) {
-        flags = true;
-        os << "P ";
-    }
-    if (tcpSeg->getRstBit()) {
-        flags = true;
-        os << "R ";
-    }
-    if (tcpSeg->getSynBit()) {
-        flags = true;
-        os << "S ";
-    }
-    if (tcpSeg->getFinBit()) {
-        flags = true;
-        os << "F ";
-    }
-    if (!flags) {
-        os << ". ";
-    }
+    if (tcpHeader->getUrgBit()) { flags = true; os << "U "; }
+    if (tcpHeader->getAckBit()) { flags = true; os << "A "; }
+    if (tcpHeader->getPshBit()) { flags = true; os << "P "; }
+    if (tcpHeader->getRstBit()) { flags = true; os << "R "; }
+    if (tcpHeader->getSynBit()) { flags = true; os << "S "; }
+    if (tcpHeader->getFinBit()) { flags = true; os << "F "; }
+    if (!flags) { os << ". "; }
 
     // data-seqno
-    os << tcpSeg->getSequenceNo() << " ";
+    os << tcpHeader->getSequenceNo() << " ";
 
     // ack
-    if (tcpSeg->getAckBit())
-        os << "ack " << tcpSeg->getAckNo() << " ";
+    if (tcpHeader->getAckBit())
+        os << "ack " << tcpHeader->getAckNo() << " ";
 
     // window
-    os << "win " << tcpSeg->getWindow() << " ";
+    os << "win " << tcpHeader->getWindow() << " ";
 
     // urgent
-    if (tcpSeg->getUrgBit())
-        os << "urg " << tcpSeg->getUrgentPointer() << " ";
-#else // ifdef WITH_TCP_COMMON
-    os << " TCP: " << srcAddr << ".? > " << destAddr << ".?";
+    if (tcpHeader->getUrgBit())
+        os << "urg " << tcpHeader->getUrgentPointer() << " ";
 #endif // ifdef WITH_TCP_COMMON
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UdpHeader *udpHeader) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<UdpHeader>& udpHeader) const
 {
 #ifdef WITH_UDP
 
     os << " UDP: " << srcAddr << '.' << udpHeader->getSourcePort() << " > " << destAddr << '.' << udpHeader->getDestinationPort()
        << ": (" << udpHeader->getTotalLengthField() << ")";
-#else // ifdef WITH_UDP
-    os << " UDP: " << srcAddr << ".? > " << destAddr << ".?";
 #endif // ifdef WITH_UDP
 }
 
-void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPHeader *packet) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<ICMPHeader>& icmpHeader) const
 {
 #ifdef WITH_IPv4
-    switch (packet->getType()) {
+    switch (icmpHeader->getType()) {
         case ICMP_ECHO_REQUEST: {
-            PingPayload *payload = check_and_cast<PingPayload *>(packet->getEncapsulatedPacket());
+            const auto& echoRq = CHK(std::dynamic_pointer_cast<ICMPEchoRequest>(icmpHeader));
             os << "ping " << srcAddr << " to " << destAddr
-               << " (" << packet->getByteLength() << " bytes) id=" << payload->getId() << " seq=" << payload->getSeqNo();
+               << " id=" << echoRq->getIdentifier() << " seq=" << echoRq->getSeqNumber();
             break;
         }
 
         case ICMP_ECHO_REPLY: {
-            PingPayload *payload = check_and_cast<PingPayload *>(packet->getEncapsulatedPacket());
+            const auto& echoReply = CHK(std::dynamic_pointer_cast<ICMPEchoReply>(icmpHeader));
             os << "pong " << srcAddr << " to " << destAddr
-               << " (" << packet->getByteLength() << " bytes) id=" << payload->getId() << " seq=" << payload->getSeqNo();
+               << " id=" << echoReply->getIdentifier() << " seq=" << echoReply->getSeqNumber();
             break;
         }
 
         case ICMP_DESTINATION_UNREACHABLE:
-            os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
+            os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << icmpHeader->getType() << " code=" << icmpHeader->getCode()
                << " origin: ";
-            printMessage(os, packet->getEncapsulatedPacket());
+            // printMessage(os, icmpHeader->getEncapsulatedPacket());
             break;
 
         default:
-            os << "ICMP " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode();
+            os << "ICMP " << srcAddr << " to " << destAddr << " type=" << icmpHeader->getType() << " code=" << icmpHeader->getCode();
             break;
     }
-#else // ifdef WITH_IPv4
-    os << " ICMP: " << srcAddr << " > " << destAddr;
 #endif // ifdef WITH_IPv4
 }
 
