@@ -60,6 +60,7 @@ class INET_API L3Address
 
   public:
     L3Address() { set(NONE, 0); }
+    L3Address(const L3Address& other) : hi(other.hi), lo(other.lo) { }
     explicit L3Address(const char *str) { tryParse(str); }
     L3Address(const IPv4Address& addr) { set(addr); }
     L3Address(const IPv6Address& addr) { set(addr); }
@@ -72,6 +73,7 @@ class INET_API L3Address
     void set(const MACAddress& addr) { set(MAC, addr.getInt()); }
     void set(const ModuleIdAddress& addr) { set(MODULEID, addr.getId()); }
     void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
+    void reset() { set(NONE, 0); }
 
     IPv4Address toIPv4() const { return getType() == NONE ? IPv4Address() : IPv4Address(get(IPv4)); }
     IPv6Address toIPv6() const { return getType() == NONE ? IPv6Address() : IPv6Address(hi, lo); }
@@ -95,6 +97,8 @@ class INET_API L3Address
     bool isMulticast() const;
     bool isBroadcast() const;
     bool isLinkLocal() const;
+
+    L3Address& operator=(const L3Address& other) { hi = other.hi; lo = other.lo; return *this; }
 
     bool operator<(const L3Address& other) const;
     bool operator>(const L3Address& other) const { return other < *this; };
