@@ -54,34 +54,6 @@ std::string Sack::str() const
 
 Register_Class(TcpHeader);
 
-#if 0   //FIXME KLUDGE
-void TcpHeader::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
-{
-    ASSERT(payloadLength > 0);
-
-    // must have common part:
-#ifndef NDEBUG
-    if (!(seqLess(sequenceNo, endSeqNo) && seqLess(firstSeqNo, sequenceNo + payloadLength))) {
-        throw cRuntimeError(this, "truncateSegment(%u,%u) called on [%u, %u) segment\n",
-                firstSeqNo, endSeqNo, sequenceNo, sequenceNo + payloadLength);
-    }
-#endif // ifndef NDEBUG
-
-    unsigned int truncleft = 0;
-    unsigned int truncright = 0;
-
-    if (seqLess(sequenceNo, firstSeqNo)) {
-        truncleft = firstSeqNo - sequenceNo;
-    }
-
-    if (seqGreater(sequenceNo + payloadLength, endSeqNo)) {
-        truncright = sequenceNo + payloadLength - endSeqNo;
-    }
-
-    truncateData(truncleft, truncright);
-}
-#endif
-
 unsigned short TcpHeader::getHeaderOptionArrayLength()
 {
     unsigned short usedLength = 0;
@@ -120,33 +92,6 @@ void TcpHeader::clean()
     setHeaderLength(TCP_HEADER_OCTETS);
     setChunkLength(byte(TCP_HEADER_OCTETS));
 }
-
-#if 0   //FIXME KLUDGE
-void TcpHeader::truncateData(unsigned int truncleft, unsigned int truncright)
-{
-    ASSERT(payloadLength >= truncleft + truncright);
-
-    if (0 != byteArray.getDataArraySize())
-        byteArray.truncateData(truncleft, truncright);
-
-    while (!payloadList.empty() && (payloadList.front().endSequenceNo - sequenceNo) <= truncleft) {
-        cPacket *msg = payloadList.front().msg;
-        payloadList.pop_front();
-        dropAndDelete(msg);
-    }
-
-    sequenceNo += truncleft;
-    payloadLength -= truncleft + truncright;
-    addChunkByteLength(-(truncleft + truncright));
-
-    // truncate payload data correctly
-    while (!payloadList.empty() && (payloadList.back().endSequenceNo - sequenceNo) > payloadLength) {
-        cPacket *msg = payloadList.back().msg;
-        payloadList.pop_back();
-        dropAndDelete(msg);
-    }
-}
-#endif
 
 void TcpHeader::parsimPack(cCommBuffer *b) const
 {
