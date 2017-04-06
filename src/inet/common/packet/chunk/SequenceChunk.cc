@@ -176,7 +176,7 @@ void SequenceChunk::seekIterator(Iterator& iterator, bit offset) const
                 return;
             }
         }
-        throw cRuntimeError("TODO");
+        CHUNK_CHECK_IMPLEMENTATION(false);
     }
 }
 

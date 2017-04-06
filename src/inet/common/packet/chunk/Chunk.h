@@ -461,12 +461,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("TODO"); }
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("TODO"); }
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Removing data related functions */
@@ -484,12 +484,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Removes the requested part from the beginning of this chunk and returns.
      */
-    virtual void removeFromBeginning(bit length) { throw cRuntimeError("TODO"); }
+    virtual void removeFromBeginning(bit length) { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Removes the requested part from the end of this chunk.
      */
-    virtual void removeFromEnd(bit length) { throw cRuntimeError("TODO"); }
+    virtual void removeFromEnd(bit length) { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Chunk querying related functions */
