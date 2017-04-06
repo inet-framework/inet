@@ -62,8 +62,8 @@ class INET_API ByteInputStream {
     int64_t getRemainingSize() const { return bytes.size() - position; }
     int64_t getPosition() const { return position; }
     const std::vector<uint8_t>& getBytes() { return bytes; }
-    std::vector<uint8_t> *copyBytes(int64_t offset = 0, int64_t length = -1) {
-        return new std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
+    void copyBytes(std::vector<uint8_t>& result, int64_t offset = 0, int64_t length = -1) {
+        result.assign(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
     }
 
     void seek(int64_t position) { this->position = position; }

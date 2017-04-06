@@ -29,14 +29,18 @@ void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::share
         serialize(stream, fieldsChunk);
         bit serializedLength = byte(stream.getPosition() - streamPosition);
         ChunkSerializer::totalSerializedBitCount += serializedLength;
-        fieldsChunk->setSerializedBytes(stream.copyBytes(streamPosition, byte(serializedLength).get()));
+        auto serializedBytes = new std::vector<uint8_t>();
+        stream.copyBytes(*serializedBytes, streamPosition, byte(serializedLength).get());
+        fieldsChunk->setSerializedBytes(serializedBytes);
     }
     else {
         ByteOutputStream chunkStream((fieldsChunk->getChunkLength().get() + 7) >> 3);
         serialize(chunkStream, fieldsChunk);
         stream.writeBytes(chunkStream.getBytes(), byte(offset).get(), length == bit(-1) ? -1 : byte(length).get());
         ChunkSerializer::totalSerializedBitCount += byte(chunkStream.getSize());
-        fieldsChunk->setSerializedBytes(chunkStream.copyBytes());
+        auto serializedBytes = new std::vector<uint8_t>();
+        chunkStream.copyBytes(*serializedBytes);
+        fieldsChunk->setSerializedBytes(serializedBytes);
     }
 }
 
@@ -47,7 +51,9 @@ std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(ByteInputStream& strea
     auto chunkLength = byte(stream.getPosition() - startPosition);
     ChunkSerializer::totalDeserializedBitCount += chunkLength;
     fieldsChunk->setChunkLength(chunkLength);
-    fieldsChunk->setSerializedBytes(stream.copyBytes(byte(startPosition).get(), byte(chunkLength).get()));
+    auto serializedBytes = new std::vector<uint8_t>();
+    stream.copyBytes(*serializedBytes, byte(startPosition).get(), byte(chunkLength).get());
+    fieldsChunk->setSerializedBytes(serializedBytes);
     return fieldsChunk;
 }
 
