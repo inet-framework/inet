@@ -372,7 +372,9 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasDataAt(bit offset, bit length = bit(-1)) const {
-        return peekDataAt<T>(offset, length) != nullptr;
+        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getDataLength(), "length is invalid");
+        return contents->has<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length);
     }
 
     /**
