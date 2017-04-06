@@ -27,6 +27,7 @@ Packet::Packet(const char *name, short kind) :
     headerIterator(Chunk::ForwardIterator(bit(0), 0)),
     trailerIterator(Chunk::BackwardIterator(bit(0), 0))
 {
+    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
 Packet::Packet(const char *name, const std::shared_ptr<Chunk>& contents) :
@@ -44,6 +45,7 @@ Packet::Packet(const Packet& other) :
     headerIterator(other.headerIterator),
     trailerIterator(other.trailerIterator)
 {
+    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
 void Packet::setHeaderPopOffset(bit offset)
@@ -68,8 +70,10 @@ std::shared_ptr<Chunk> Packet::popHeader(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekHeader(length, flags);
-    if (chunk != nullptr)
+    if (chunk != nullptr) {
         contents->moveIterator(headerIterator, chunk->getChunkLength());
+        CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
+    }
     return chunk;
 }
 
@@ -117,8 +121,10 @@ std::shared_ptr<Chunk> Packet::popTrailer(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
     const auto& chunk = peekTrailer(length, flags);
-    if (chunk != nullptr)
+    if (chunk != nullptr) {
         contents->moveIterator(trailerIterator, -chunk->getChunkLength());
+        CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
+    }
     return chunk;
 }
 

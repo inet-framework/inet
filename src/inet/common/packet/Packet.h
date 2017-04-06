@@ -212,8 +212,10 @@ class INET_API Packet : public cPacket
     std::shared_ptr<T> popHeader(bit length = bit(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekHeader<T>(length, flags);
-        if (chunk != nullptr)
+        if (chunk != nullptr) {
             contents->moveIterator(headerIterator, chunk->getChunkLength());
+            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
+        }
         return chunk;
     }
 
@@ -324,8 +326,10 @@ class INET_API Packet : public cPacket
     std::shared_ptr<T> popTrailer(bit length = bit(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekTrailer<T>(length, flags);
-        if (chunk != nullptr)
+        if (chunk != nullptr) {
             contents->moveIterator(trailerIterator, chunk->getChunkLength());
+            CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= bit(0));
+        }
         return chunk;
     }
 
