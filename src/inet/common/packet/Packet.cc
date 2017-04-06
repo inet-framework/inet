@@ -55,8 +55,13 @@ void Packet::setHeaderPopOffset(bit offset)
 
 std::shared_ptr<Chunk> Packet::peekHeader(bit length, int flags) const
 {
-    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
-    return contents->peek(headerIterator, length, flags);
+    auto dataLength = getDataLength();
+    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
+    const auto& chunk = contents->peek(headerIterator, length, flags);
+    if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
+        return chunk;
+    else
+        return contents->peek(headerIterator, dataLength, flags);
 }
 
 std::shared_ptr<Chunk> Packet::popHeader(bit length, int flags)
@@ -99,8 +104,13 @@ void Packet::setTrailerPopOffset(bit offset)
 
 std::shared_ptr<Chunk> Packet::peekTrailer(bit length, int flags) const
 {
-    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
-    return contents->peek(trailerIterator, length, flags);
+    auto dataLength = getDataLength();
+    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
+    const auto& chunk = contents->peek(trailerIterator, length, flags);
+    if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
+        return chunk;
+    else
+        return contents->peek(trailerIterator, dataLength, flags);
 }
 
 std::shared_ptr<Chunk> Packet::popTrailer(bit length, int flags)

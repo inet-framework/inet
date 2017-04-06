@@ -194,8 +194,13 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekHeader(bit length = bit(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
-        return contents->peek<T>(headerIterator, length, flags);
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
+        const auto& chunk = contents->peek<T>(headerIterator, length, flags);
+        if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
+            return chunk;
+        else
+            return contents->peek<T>(headerIterator, dataLength, flags);
     }
 
     /**
@@ -301,8 +306,13 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekTrailer(bit length = bit(-1), int flags = 0) const {
-        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
-        return contents->peek<T>(trailerIterator, length, flags);
+        auto dataLength = getDataLength();
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
+        const auto& chunk = contents->peek<T>(trailerIterator, length, flags);
+        if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
+            return chunk;
+        else
+            return contents->peek<T>(trailerIterator, dataLength, flags);
     }
 
     /**
