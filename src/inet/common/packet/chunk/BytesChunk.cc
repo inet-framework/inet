@@ -79,14 +79,20 @@ void BytesChunk::setByte(int index, uint8_t byte)
     bytes[index] = byte;
 }
 
-size_t BytesChunk::getBytes(uint8_t *buffer, size_t bufLen) const
+size_t BytesChunk::copyToBuffer(uint8_t *buffer, size_t bufferLength) const
 {
-    size_t numBytes = bytes.size();
-    if (bufLen < numBytes)
-        throw cRuntimeError("getBytes(): buffer is too short");
-    for (size_t i = 0; i < numBytes; i++)
-        buffer[i] = bytes[i];
-    return numBytes;
+    size_t length = bytes.size();
+    CHUNK_CHECK_USAGE(buffer != nullptr, "buffer is nullptr");
+    CHUNK_CHECK_USAGE(bufferLength >= length, "buffer is too small");
+    std::copy(bytes.begin(), bytes.end(), buffer);
+    return length;
+}
+
+void BytesChunk::copyFromBuffer(const uint8_t *buffer, size_t bufferLength)
+{
+    CHUNK_CHECK_USAGE(buffer != nullptr, "buffer is nullptr");
+    handleChange();
+    bytes.assign(buffer, buffer + bufferLength);
 }
 
 bool BytesChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)

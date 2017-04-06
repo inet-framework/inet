@@ -59,10 +59,12 @@ class INET_API BytesChunk : public Chunk
 
     uint8_t getByte(int index) const { return bytes[index]; }
     void setByte(int index, uint8_t byte);
+    //@}
 
-    size_t getBytes(uint8_t *buffer, size_t bufLen) const;
-    void setBytes(const uint8_t *buffer, size_t bufLen) { bytes.assign(buffer, buffer + bufLen); }
-
+    /** @name Utility functions */
+    //@{
+    size_t copyToBuffer(uint8_t *buffer, size_t bufferLength) const;
+    void copyFromBuffer(const uint8_t *buffer, size_t bufferLength);
     //@}
 
     /** @name Overridden chunk functions */

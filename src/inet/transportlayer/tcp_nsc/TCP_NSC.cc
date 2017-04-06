@@ -411,7 +411,7 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
     }
 
     const auto& bytes = packet->peekDataBytes();
-    totalTcpLen = bytes->getBytes((uint8_t *)tcph, totalTcpLen);
+    totalTcpLen = bytes->copyToBuffer((uint8_t *)tcph, totalTcpLen);
 
     if (conn) {
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(packet);

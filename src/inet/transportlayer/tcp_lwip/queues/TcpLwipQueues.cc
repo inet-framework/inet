@@ -64,7 +64,7 @@ unsigned int TcpLwipSendQueue::getBytesForTcpLayer(void *bufferP, unsigned int b
         return 0;
 
     const auto& bytesChunk = dataBuffer.peek<BytesChunk>(byte(length));
-    return bytesChunk->getBytes((uint8_t*)bufferP, length);
+    return bytesChunk->copyToBuffer((uint8_t*)bufferP, length);
 }
 
 void TcpLwipSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)

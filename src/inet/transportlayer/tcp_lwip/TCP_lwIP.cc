@@ -165,7 +165,7 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
     size_t totalTcpLen = maxBufferSize - ipHdrLen;
 
     const auto& bytes = packet->peekDataBytes();
-    totalTcpLen = bytes->getBytes((uint8_t *)data + ipHdrLen, totalTcpLen);
+    totalTcpLen = bytes->copyToBuffer((uint8_t *)data + ipHdrLen, totalTcpLen);
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
     ih->_chksum = 0;

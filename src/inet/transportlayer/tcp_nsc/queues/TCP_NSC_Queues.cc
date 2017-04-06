@@ -63,7 +63,7 @@ int TCP_NSC_SendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) con
         return 0;
 
     const auto& bytesChunk = dataBuffer.peek<BytesChunk>(byte(length));
-    return bytesChunk->getBytes((uint8_t*)bufferP, length);
+    return bytesChunk->copyToBuffer((uint8_t*)bufferP, length);
 }
 
 void TCP_NSC_SendQueue::dequeueTcpLayerMsg(int msgLengthP)
