@@ -34,7 +34,7 @@ ChunkQueue::ChunkQueue(const ChunkQueue& other) :
 
 void ChunkQueue::remove(bit length)
 {
-    assert(bit(0) <= length && length <= iterator.getPosition());
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= length && length <= iterator.getPosition());
     if (contents->getChunkLength() == length)
         contents = EmptyChunk::singleton;
     else if (contents->canRemoveFromBeginning(length)) {
@@ -45,7 +45,7 @@ void ChunkQueue::remove(bit length)
     else
         contents = contents->peek(length, contents->getChunkLength() - length);
     contents->seekIterator(iterator, iterator.getPosition() - length);
-    assert(isIteratorConsistent(iterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
 void ChunkQueue::moveIteratorOrRemove(bit length)
@@ -58,20 +58,20 @@ void ChunkQueue::moveIteratorOrRemove(bit length)
 
 std::shared_ptr<Chunk> ChunkQueue::peek(bit length, int flags) const
 {
-    assert(bit(-1) <= length && length <= getLength());
+    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     return contents->peek(iterator, length, flags);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
 {
-    assert(bit(0) <= offset && offset <= getLength());
-    assert(bit(-1) <= length && offset + length <= getLength());
+    CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
+    CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
     return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
 }
 
 std::shared_ptr<Chunk> ChunkQueue::pop(bit length, int flags)
 {
-    assert(bit(-1) <= length && length <= getLength());
+    CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     const auto& chunk = peek(length, flags);
     if (chunk != nullptr)
         moveIteratorOrRemove(chunk->getChunkLength());
@@ -87,8 +87,8 @@ void ChunkQueue::clear()
 
 void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk != nullptr);
-    assert(chunk->isImmutable());
+    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     pushedLength += chunk->getChunkLength();
     if (contents == EmptyChunk::singleton)
         contents = chunk;
@@ -107,7 +107,7 @@ void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
         }
         contents->markImmutable();
     }
-    assert(isIteratorConsistent(iterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
 } // namespace

@@ -33,13 +33,13 @@ ByteCountChunk::ByteCountChunk(byte length) :
     Chunk(),
     length(length)
 {
-    assert(length >= byte(0));
+    CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
 }
 
 std::shared_ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
     if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
         if (predicate == nullptr || predicate(nullptr))
@@ -65,14 +65,14 @@ std::shared_ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeIn
 {
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
-    assert(bit(0) <= resultLength && resultLength <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= resultLength && resultLength <= chunkLength);
     return std::make_shared<ByteCountChunk>(byte(resultLength));
 }
 
 void ByteCountChunk::setLength(byte length)
 {
-    assert(isMutable());
-    assert(length >= byte(0));
+    CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
+    handleChange();
     this->length = length;
 }
 
@@ -88,7 +88,7 @@ bool ByteCountChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void ByteCountChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_BYTECOUNT);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
     const auto& byteCountChunk = std::static_pointer_cast<ByteCountChunk>(chunk);
     length += byteCountChunk->length;
@@ -96,7 +96,7 @@ void ByteCountChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_BYTECOUNT);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
     const auto& byteCountChunk = std::static_pointer_cast<ByteCountChunk>(chunk);
     length += byteCountChunk->length;
@@ -104,14 +104,14 @@ void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void ByteCountChunk::removeFromBeginning(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= length && length <= getChunkLength());
     handleChange();
     this->length -= byte(length);
 }
 
 void ByteCountChunk::removeFromEnd(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= length && length <= getChunkLength());
     handleChange();
     this->length -= byte(length);
 }

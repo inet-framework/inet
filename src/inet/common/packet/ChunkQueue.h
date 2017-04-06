@@ -145,8 +145,8 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        assert(bit(0) <= offset && offset <= getLength());
-        assert(bit(-1) <= length && offset + length <= getLength());
+        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
     }
 

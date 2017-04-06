@@ -34,8 +34,8 @@ ChunkBuffer::ChunkBuffer(const ChunkBuffer& other) :
 void ChunkBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::vector<Region>::iterator end)
 {
     // NOTE: begin and end are inclusive
-    assert(begin != regions.end());
-    assert(end != regions.end());
+    CHUNK_CHECK_IMPLEMENTATION(begin != regions.end());
+    CHUNK_CHECK_IMPLEMENTATION(end != regions.end());
     regions.erase(std::remove_if(begin, end + 1, [](const Region& region) { return region.data == nullptr; }), end + 1);
 }
 
@@ -78,15 +78,15 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
                 oldRegion.offset = newRegion.getEndOffset();
             }
             else
-                assert(false);
+                CHUNK_CHECK_IMPLEMENTATION(false);
         }
     }
 }
 
 void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 {
-    assert(previousRegion.data != nullptr);
-    assert(nextRegion.data != nullptr);
+    CHUNK_CHECK_IMPLEMENTATION(previousRegion.data != nullptr);
+    CHUNK_CHECK_IMPLEMENTATION(nextRegion.data != nullptr);
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
         if (previousRegion.data->canInsertAtEnd(nextRegion.data)) {
@@ -126,9 +126,9 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
 
 void ChunkBuffer::replace(bit offset, const std::shared_ptr<Chunk>& chunk)
 {
-    assert(offset >= bit(0));
-    assert(chunk != nullptr);
-    assert(chunk->isImmutable());
+    CHUNK_CHECK_USAGE(offset >= bit(0), "offset is invalid");
+    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
+    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     Region newRegion(offset, chunk);
     sliceRegions(newRegion);
     if (regions.empty())
@@ -159,8 +159,8 @@ void ChunkBuffer::replace(bit offset, const std::shared_ptr<Chunk>& chunk)
 
 void ChunkBuffer::clear(bit offset, bit length)
 {
-    assert(offset >= bit(0));
-    assert(length >= bit(0));
+    CHUNK_CHECK_USAGE(offset >= bit(0), "offset is invalid");
+    CHUNK_CHECK_USAGE(length >= bit(0), "length is invalid");
     for (auto it = regions.begin(); it != regions.end(); it++) {
         auto region = *it;
         if (region.offset == offset && region.data->getChunkLength() == length) {

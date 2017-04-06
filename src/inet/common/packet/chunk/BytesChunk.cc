@@ -37,7 +37,7 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 std::shared_ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
     if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
         if (predicate == nullptr || predicate(nullptr))
@@ -69,13 +69,13 @@ std::shared_ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, 
 
 void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
 {
-    assert(isMutable());
+    handleChange();
     this->bytes = bytes;
 }
 
 void BytesChunk::setByte(int index, uint8_t byte)
 {
-    assert(isMutable());
+    handleChange();
     bytes[index] = byte;
 }
 
@@ -101,7 +101,7 @@ bool BytesChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_BYTES);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
     const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
     bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
@@ -109,7 +109,7 @@ void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_BYTES);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
     const auto& bytesChunk = std::static_pointer_cast<BytesChunk>(chunk);
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
@@ -117,14 +117,14 @@ void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void BytesChunk::removeFromBeginning(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     bytes.erase(bytes.begin(), bytes.begin() + byte(length).get());
 }
 
 void BytesChunk::removeFromEnd(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     bytes.erase(bytes.end() - byte(length).get(), bytes.end());
 }

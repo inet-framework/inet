@@ -40,7 +40,7 @@ cPacketChunk::~cPacketChunk()
 std::shared_ptr<Chunk> cPacketChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
     if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
         if (predicate == nullptr || predicate(nullptr))

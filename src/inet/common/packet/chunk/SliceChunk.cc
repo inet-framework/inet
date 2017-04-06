@@ -39,16 +39,15 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, bit offset, bit leng
     offset(offset),
     length(length == bit(-1) ? chunk->getChunkLength() - offset : length)
 {
-    assert(chunk->isImmutable());
     bit chunkLength = chunk->getChunkLength();
-    assert(bit(0) <= this->offset && this->offset <= chunkLength);
-    assert(bit(0) <= this->length && this->offset + this->length <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->offset && this->offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->length && this->offset + this->length <= chunkLength);
 }
 
 std::shared_ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
     if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
         if (predicate == nullptr || predicate(nullptr))
@@ -72,25 +71,24 @@ std::shared_ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekCo
 
 std::shared_ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
-    assert(chunk->isImmutable());
     bit chunkLength = chunk->getChunkLength();
     bit sliceLength = length == bit(-1) ? chunkLength - offset : length;
-    assert(bit(0) <= offset && offset <= chunkLength);
-    assert(bit(0) <= sliceLength && sliceLength <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= offset && offset <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= sliceLength && sliceLength <= chunkLength);
     return std::make_shared<SliceChunk>(chunk, offset, sliceLength);
 }
 
 void SliceChunk::setOffset(bit offset)
 {
-    assert(isMutable());
-    assert(bit(0) <= offset && offset <= chunk->getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= chunk->getChunkLength(), "offset is out of range");
+    handleChange();
     this->offset = offset;
 }
 
 void SliceChunk::setLength(bit length)
 {
-    assert(isMutable());
-    assert(bit(0) <= length && length <= chunk->getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= chunk->getChunkLength(), "length is invalid");
+    handleChange();
     this->length = length;
 }
 
@@ -116,26 +114,26 @@ bool SliceChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_SLICE);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
     const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-    assert(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
+    CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
     offset -= otherSliceChunk->length;
     length += otherSliceChunk->length;
 }
 
 void SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_SLICE);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
     const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
-    assert(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
+    CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
     length += otherSliceChunk->length;
 }
 
 void SliceChunk::removeFromBeginning(bit length)
 {
-    assert(bit(0) <= length && length <= this->length);
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= this->length, "length is invalid");
     handleChange();
     this->offset += length;
     this->length -= length;
@@ -143,7 +141,7 @@ void SliceChunk::removeFromBeginning(bit length)
 
 void SliceChunk::removeFromEnd(bit length)
 {
-    assert(bit(0) <= length && length <= this->length);
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= this->length, "length is invalid");
     handleChange();
     this->length -= length;
 }

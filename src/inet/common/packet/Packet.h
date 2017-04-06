@@ -183,7 +183,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasHeader(bit length = bit(-1)) const {
-        assert(bit(-1) <= length && length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         return contents->has<T>(headerIterator, length);
     }
 
@@ -194,7 +194,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekHeader(bit length = bit(-1), int flags = 0) const {
-        assert(bit(-1) <= length && length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         return contents->peek<T>(headerIterator, length, flags);
     }
 
@@ -205,7 +205,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> popHeader(bit length = bit(-1), int flags = 0) {
-        assert(bit(-1) <= length && length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekHeader<T>(length, flags);
         if (chunk != nullptr)
             contents->moveIterator(headerIterator, chunk->getChunkLength());
@@ -220,8 +220,8 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> removeHeader(bit length = bit(-1), int flags = 0) {
-        assert(bit(-1) <= length && length <= getDataLength());
-        assert(headerIterator.getPosition() == bit(0));
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(headerIterator.getPosition() == bit(0), "popped header length is non-zero");
         const auto& chunk = popHeader<T>(length, flags);
         removePoppedHeaders();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -290,7 +290,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasTrailer(bit length = bit(-1)) const {
-        assert(bit(-1) <= length && length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         return contents->has<T>(trailerIterator, length);
     }
 
@@ -301,7 +301,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekTrailer(bit length = bit(-1), int flags = 0) const {
-        assert(bit(-1) <= length && length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         return contents->peek<T>(trailerIterator, length, flags);
     }
 
@@ -312,7 +312,7 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> popTrailer(bit length = bit(-1), int flags = 0) {
-        assert(bit(-1) <= length && length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekTrailer<T>(length, flags);
         if (chunk != nullptr)
             contents->moveIterator(trailerIterator, chunk->getChunkLength());
@@ -327,8 +327,8 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> removeTrailer(bit length = bit(-1), int flags = 0) {
-        assert(bit(-1) <= length && length <= getDataLength());
-        assert(headerIterator.getPosition() == bit(0));
+        CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
+        CHUNK_CHECK_USAGE(trailerIterator.getPosition() == bit(0), "popped trailer length is non-zero");
         const auto& chunk = popTrailer<T>(length, flags);
         removePoppedTrailers();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -368,8 +368,8 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        assert(bit(0) <= offset && offset <= getDataLength());
-        assert(bit(-1) <= length && offset + length <= getDataLength());
+        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getDataLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
     }
 
@@ -417,9 +417,9 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     bool hasAt(bit offset, bit length = bit(-1)) const {
-        assert(bit(0) <= offset && offset <= getTotalLength());
-        assert(bit(-1) <= length && offset + length <= getTotalLength());
-        return peekAt<T>(offset, length) != nullptr;
+        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
+        return contents->has<T>(Chunk::Iterator(true, bit(offset), -1), length);
     }
 
     /**
@@ -429,8 +429,8 @@ class INET_API Packet : public cPacket
      */
     template <typename T>
     std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
-        assert(bit(0) <= offset && offset <= getTotalLength());
-        assert(bit(-1) <= length && offset + length <= getTotalLength());
+        CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength(), "offset is out of range");
+        CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
     }
 

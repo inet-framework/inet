@@ -21,6 +21,32 @@
 #include "inet/common/ByteOutputStream.h"
 #include "inet/common/Units.h"
 
+// checking chunk implementation is disabled by default
+#ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
+#define CHUNK_CHECK_IMPLEMENTATION_ENABLED 0
+#endif
+
+#if CHUNK_CHECK_IMPLEMENTATION_ENABLED
+#define CHUNK_CHECK_IMPLEMENTATION(condition) assert(condition)
+#else
+#define CHUNK_CHECK_IMPLEMENTATION(condition) ;
+#endif
+
+// checking chunk usage is enabled in debug mode and disabled in release mode by default
+#ifndef CHUNK_CHECK_USAGE_ENABLED
+#ifdef NDEBUG
+#define CHUNK_CHECK_USAGE_ENABLED 0
+#else
+#define CHUNK_CHECK_USAGE_ENABLED 1
+#endif
+#endif
+
+#if CHUNK_CHECK_USAGE_ENABLED
+#define CHUNK_CHECK_USAGE(condition, format, ...) if (!(condition)) throw cRuntimeError("Error: " format, ##__VA_ARGS__)
+#else
+#define CHUNK_CHECK_USAGE(condition, format, ...) ;
+#endif
+
 namespace inet {
 
 using namespace units::values;
@@ -212,7 +238,6 @@ using namespace units::values;
  * d) Inserting a ByteCountChunk into a ByteCountChunk merges them
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
-// TODO: consider turning some assert into if/throw, consider potential performance penalty even in release mode, make it optional with compile time macro?
 // TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk>
 {
@@ -265,10 +290,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         int index;
 
       public:
-        Iterator(bit position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { assert(isCorrect()); }
-        Iterator(byte position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { assert(isCorrect()); }
-        explicit Iterator(bool isForward, bit position, int index) : isForward_(isForward), position(position), index(index) { assert(isCorrect()); }
-        Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { assert(isCorrect()); }
+        Iterator(bit position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { CHUNK_CHECK_IMPLEMENTATION(isCorrect()); }
+        Iterator(byte position) : isForward_(true), position(position), index(position == bit(0) ? 0 : -1) { CHUNK_CHECK_IMPLEMENTATION(isCorrect()); }
+        explicit Iterator(bool isForward, bit position, int index) : isForward_(isForward), position(position), index(index) { CHUNK_CHECK_IMPLEMENTATION(isCorrect()); }
+        Iterator(const Iterator& other) : isForward_(other.isForward_), position(other.position), index(other.index) { CHUNK_CHECK_IMPLEMENTATION(isCorrect()); }
 
         bool isCorrect() { return position >= bit(0) && index >= -1; }
 
@@ -276,10 +301,10 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         bool isBackward() const { return !isForward_; }
 
         bit getPosition() const { return position; }
-        void setPosition(bit position) { this->position = position; assert(isCorrect()); }
+        void setPosition(bit position) { this->position = position; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); }
 
         int getIndex() const { return index; }
-        void setIndex(int index) { this->index = index; assert(isCorrect()); }
+        void setIndex(int index) { this->index = index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); }
     };
 
     /**
@@ -342,8 +367,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
 
     template <typename T>
     std::shared_ptr<T> peekConverted(const Iterator& iterator, bit length, int flags) const {
-        assert(isImmutable());
-        assert(iterator.isForward() || length != bit(-1));
+        CHUNK_CHECK_USAGE(iterator.isForward() || length != bit(-1), "chunk conversion using backward iterator with undefined length is invalid");
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
         const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length, flags);
         chunk->markImmutable();
@@ -387,7 +411,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     virtual void markImmutable() { flags |= CF_IMMUTABLE; }
     void markMutableIfExclusivelyOwned() {
         // NOTE: one for external reference and one for local variable
-        assert(shared_from_this().use_count() == 2);
+        CHUNK_CHECK_USAGE(shared_from_this().use_count() == 2, "chunk is not exclusively owned");
         flags &= ~CF_IMMUTABLE;
     }
     //@}
@@ -437,12 +461,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { assert(isMutable()); assert(false); }
+    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("TODO"); }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { assert(isMutable()); assert(false); }
+    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("TODO"); }
     //@}
 
     /** @name Removing data related functions */
@@ -460,12 +484,12 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Removes the requested part from the beginning of this chunk and returns.
      */
-    virtual void removeFromBeginning(bit length) { assert(isMutable()); assert(false); }
+    virtual void removeFromBeginning(bit length) { throw cRuntimeError("TODO"); }
 
     /**
      * Removes the requested part from the end of this chunk.
      */
-    virtual void removeFromEnd(bit length) { assert(isMutable()); assert(false); }
+    virtual void removeFromEnd(bit length) { throw cRuntimeError("TODO"); }
     //@}
 
     /** @name Chunk querying related functions */

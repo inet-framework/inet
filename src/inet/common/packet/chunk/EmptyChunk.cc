@@ -33,8 +33,8 @@ EmptyChunk::EmptyChunk(const EmptyChunk& other) :
 
 std::shared_ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
-    assert(iterator.getPosition() == bit(0));
-    assert(length == bit(0) || length == bit(-1));
+    CHUNK_CHECK_USAGE(iterator.getPosition() == bit(0), "iterator is out of range");
+    CHUNK_CHECK_USAGE(length == bit(0) || length == bit(-1), "length is invalid");
     // 1. peeking returns nullptr
     if (predicate == nullptr || predicate(nullptr))
         return nullptr;
@@ -48,7 +48,7 @@ std::shared_ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekCo
 
 std::shared_ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
-    assert(length == bit(0));
+    CHUNK_CHECK_IMPLEMENTATION(length == bit(0));
     return std::make_shared<EmptyChunk>();
 }
 

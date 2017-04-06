@@ -37,7 +37,7 @@ BitsChunk::BitsChunk(const std::vector<bool>& bits) :
 std::shared_ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
     if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
         if (predicate == nullptr || predicate(nullptr))
@@ -66,7 +66,7 @@ std::shared_ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, c
     std::vector<bool> bits;
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
-    assert(bit(0) <= resultLength && resultLength <= chunkLength);
+    CHUNK_CHECK_IMPLEMENTATION(bit(0) <= resultLength && resultLength <= chunkLength);
     for (bit i = bit(0); i < resultLength; i++)
         bits.push_back(outputStream.getBit(bit(offset + i).get()));
     return std::make_shared<BitsChunk>(bits);
@@ -74,13 +74,13 @@ std::shared_ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, c
 
 void BitsChunk::setBits(const std::vector<bool>& bits)
 {
-    assert(isMutable());
+    handleChange();
     this->bits = bits;
 }
 
 void BitsChunk::setBit(int index, bool bit)
 {
-    assert(isMutable());
+    handleChange();
     bits[index] = bit;
 }
 
@@ -96,7 +96,7 @@ bool BitsChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void BitsChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_BITS);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
     handleChange();
     const auto& bitsChunk = std::static_pointer_cast<BitsChunk>(chunk);
     bits.insert(bits.begin(), bitsChunk->bits.begin(), bitsChunk->bits.end());
@@ -104,7 +104,7 @@ void BitsChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void BitsChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkType() == CT_BITS);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
     handleChange();
     const auto& bitsChunk = std::static_pointer_cast<BitsChunk>(chunk);
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
@@ -112,14 +112,14 @@ void BitsChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void BitsChunk::removeFromBeginning(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     bits.erase(bits.begin(), bits.begin() + bit(length).get());
 }
 
 void BitsChunk::removeFromEnd(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     bits.erase(bits.end() - bit(length).get(), bits.end());
 }

@@ -68,7 +68,7 @@ class FieldsChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_FIELDS; }
 
     virtual bit getChunkLength() const override { return chunkLength; }
-    virtual void setChunkLength(bit chunkLength) { assert(isMutable()); handleChange(); this->chunkLength = chunkLength; }
+    virtual void setChunkLength(bit chunkLength) { handleChange(); this->chunkLength = chunkLength; }
     //@}
 };
 

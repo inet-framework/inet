@@ -37,7 +37,7 @@ SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
 std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
-    assert(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength);
+    CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
     // 1. peeking an empty part returns nullptr
     if (length == bit(0) || (iterator.getPosition() == chunkLength && length == bit(-1))) {
         if (predicate == nullptr || predicate(nullptr))
@@ -82,7 +82,6 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, Pee
 
 std::shared_ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
-    assert(chunk->isImmutable());
     auto sequenceChunk = std::make_shared<SequenceChunk>();
     sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));
     return sequenceChunk;
@@ -98,7 +97,7 @@ std::deque<std::shared_ptr<Chunk>> SequenceChunk::dupChunks() const
 
 void SequenceChunk::setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks)
 {
-    assert(isMutable());
+    handleChange();
     this->chunks = chunks;
 }
 
@@ -159,7 +158,7 @@ bit SequenceChunk::getChunkLength() const
 
 void SequenceChunk::seekIterator(Iterator& iterator, bit offset) const
 {
-    assert(bit(0) <= offset && offset <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getChunkLength(), "offset is out of range");
     iterator.setPosition(offset);
     if (offset == bit(0))
         iterator.setIndex(0);
@@ -177,7 +176,7 @@ void SequenceChunk::seekIterator(Iterator& iterator, bit offset) const
                 return;
             }
         }
-        assert(false);
+        throw cRuntimeError("TODO");
     }
 }
 
@@ -192,7 +191,7 @@ void SequenceChunk::moveIterator(Iterator& iterator, bit length) const
 
 void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkLength() > bit(0));
+    CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_front(chunk);
     else {
@@ -254,7 +253,7 @@ void SequenceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
 {
-    assert(chunk->getChunkLength() > bit(0));
+    CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_back(chunk);
     else {
@@ -315,7 +314,7 @@ void SequenceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
 
 void SequenceChunk::removeFromBeginning(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     auto it = chunks.begin();
     while (it != chunks.end()) {
@@ -337,7 +336,7 @@ void SequenceChunk::removeFromBeginning(bit length)
 
 void SequenceChunk::removeFromEnd(bit length)
 {
-    assert(bit(0) <= length && length <= getChunkLength());
+    CHUNK_CHECK_USAGE(bit(0) <= length && length <= getChunkLength(), "length is invalid");
     handleChange();
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {

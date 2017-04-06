@@ -36,7 +36,7 @@ Chunk::Chunk(const Chunk& other) :
 
 void Chunk::handleChange()
 {
-    assert(isMutable());
+    CHUNK_CHECK_USAGE(isMutable(), "chunk is mutable");
 }
 
 std::shared_ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
@@ -84,7 +84,7 @@ void Chunk::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& ch
     serializer->serialize(stream, chunk, offset, length);
     auto endPosition = byte(stream.getPosition());
     auto expectedChunkLength = length == bit(-1) ? chunk->getChunkLength() - offset : length;
-    assert(expectedChunkLength == endPosition - startPosition);
+    CHUNK_CHECK_IMPLEMENTATION(expectedChunkLength == endPosition - startPosition);
 }
 
 std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::type_info& typeInfo)
@@ -93,7 +93,7 @@ std::shared_ptr<Chunk> Chunk::deserialize(ByteInputStream& stream, const std::ty
     auto startPosition = byte(stream.getPosition());
     auto chunk = serializer->deserialize(stream, typeInfo);
     auto endPosition = byte(stream.getPosition());
-    assert(chunk->getChunkLength() == endPosition - startPosition);
+    CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkLength() == endPosition - startPosition);
     if (stream.isReadBeyondEnd())
         chunk->markIncomplete();
     return chunk;
