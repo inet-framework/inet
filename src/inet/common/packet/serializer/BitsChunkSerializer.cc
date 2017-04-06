@@ -32,10 +32,9 @@ void BitsChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_
 std::shared_ptr<Chunk> BitsChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
 {
     auto bitsChunk = std::make_shared<BitsChunk>();
-    byte length = byte(stream.getRemainingSize());
+    bit length = byte(stream.getRemainingSize());
     std::vector<bool> chunkBits;
-    for (byte i = byte(0); i < length; i++)
-        chunkBits.push_back(stream.readBit());
+    stream.readBits(chunkBits, 0, bit(length).get());
     bitsChunk->setBits(chunkBits);
     ChunkSerializer::totalDeserializedBitCount += length;
     return bitsChunk;

@@ -38,9 +38,17 @@ class INET_API ByteOutputStream {
 
     bool getBit(int64_t offset) { assert(false); return false; } // TODO:
 
+    void copyBits(std::vector<bool>& result, int64_t offset = 0, int64_t length = -1) {
+        if (length == -1)
+            length = bytes.size() * 8 - offset;
+        for (int64_t i = 0; i < length; i++)
+            result.push_back(getBit(offset + i));
+    }
+
     int8_t getByte(int64_t offset) { return bytes.at(offset); }
 
     const std::vector<uint8_t>& getBytes() { return bytes; }
+
     std::vector<uint8_t> *copyBytes(int64_t offset = 0, int64_t length = -1) {
         return new std::vector<uint8_t>(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
     }

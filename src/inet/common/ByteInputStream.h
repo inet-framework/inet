@@ -73,6 +73,11 @@ class INET_API ByteInputStream {
         assert(false);
     }
 
+    void readBits(std::vector<bool>& bits, int64_t offset = 0, int64_t length = -1) {
+        for (int64_t i = 0; i < length; i++)
+            bits[i] = readBit();
+    }
+
     void readBitRepeatedly(bool bit, int64_t count) {
         // TODO:
         assert(false);

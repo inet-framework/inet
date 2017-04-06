@@ -145,7 +145,6 @@ std::string BytesChunk::str() const
             os << ", ";
         else
             first = false;
-
         os << (int) (byte);
     }
     os << "}";

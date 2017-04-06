@@ -34,8 +34,7 @@ std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream
     auto bytesChunk = std::make_shared<BytesChunk>();
     byte length = byte(stream.getRemainingSize());
     std::vector<uint8_t> chunkBytes;
-    for (byte i = byte(0); i < length; i++)
-        chunkBytes.push_back(stream.readByte());
+    stream.readBytes(chunkBytes, 0, byte(length).get());
     bytesChunk->setBytes(chunkBytes);
     ChunkSerializer::totalDeserializedBitCount += length;
     return bytesChunk;
