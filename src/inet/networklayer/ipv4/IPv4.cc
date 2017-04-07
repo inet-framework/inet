@@ -681,7 +681,6 @@ void IPv4::reassembleAndDeliverFinish(Packet *packet, const InterfaceEntry *from
 void IPv4::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
-    auto ipv4HeaderPos = packet->getHeaderPopOffset();
     const auto& ipv4Header = packet->popHeader<IPv4Header>();
 
     // create and fill in control info
@@ -1035,7 +1034,7 @@ void IPv4::dropQueuedDatagram(const Packet *packet)
 {
     Enter_Method("dropQueuedDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
-        if (iter->datagram == packet) {
+        if (iter->packet == packet) {
             delete packet;
             queuedDatagramsForHooks.erase(iter);
             return;
@@ -1047,8 +1046,8 @@ void IPv4::reinjectQueuedDatagram(const Packet *packet)
 {
     Enter_Method("reinjectDatagram()");
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
-        if (iter->datagram == packet) {
-            auto *qPacket = iter->datagram;
+        if (iter->packet == packet) {
+            auto *qPacket = iter->packet;
             take(qPacket);
             switch (iter->hookType) {
                 case INetfilter::IHook::LOCALOUT:
@@ -1107,20 +1106,20 @@ INetfilter::IHook::Result IPv4::datagramPreRoutingHook(Packet *packet, const Int
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramForwardHook(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramForwardHook(Packet *packet, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (auto & elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
+        IHook::Result r = elem.second->datagramForwardHook(packet, inIE, outIE, nextHopAddr);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
                 break;    // continue iteration
 
             case INetfilter::IHook::DROP:
-                delete datagram;
+                delete packet;
                 return r;
 
             case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHopAddr.toIPv4(), INetfilter::IHook::FORWARD));
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, inIE, outIE, nextHopAddr.toIPv4(), INetfilter::IHook::FORWARD));
                 return r;
 
             case INetfilter::IHook::STOLEN:
@@ -1204,7 +1203,7 @@ void IPv4::flush()
 
     EV_DEBUG << "IPv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
     for (auto & elem : queuedDatagramsForHooks) {
-        delete elem.datagram;
+        delete elem.packet;
     }
     queuedDatagramsForHooks.clear();
 }
