@@ -157,7 +157,6 @@ void TCP::handleMessage(cMessage *msg)
         }
         else {
             // must be a TCPSegment
-            // KLUDGE: just use a pointer instead of a shared reference
             auto tcpHeader = packet->peekHeader<TcpHeader>();
 
             // get src/dest addresses
