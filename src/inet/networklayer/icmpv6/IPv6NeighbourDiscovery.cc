@@ -180,8 +180,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         else
             throw cRuntimeError("Unrecognized Timer"); //stops sim w/ error msg.
     }
-    else if (dynamic_cast<Packet *>(msg)) {
-        auto packet = check_and_cast<Packet *>(msg);
+    else if (auto packet = dynamic_cast<Packet *>(msg)) {
         auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::icmpv6) {
             //This information will serve as input parameters to various processors.
@@ -196,21 +195,21 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown message type received.\n");
 }
 
-void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, ICMPv6Header *msg)
+void IPv6NeighbourDiscovery::processNDMessage(Packet *packet, ICMPv6Header *icmpv6Header)
 {
-    if (IPv6RouterSolicitation *rs = dynamic_cast<IPv6RouterSolicitation *>(msg)) {
+    if (IPv6RouterSolicitation *rs = dynamic_cast<IPv6RouterSolicitation *>(icmpv6Header)) {
         processRSPacket(packet, rs);
     }
-    else if (IPv6RouterAdvertisement *ra = dynamic_cast<IPv6RouterAdvertisement *>(msg)) {
+    else if (IPv6RouterAdvertisement *ra = dynamic_cast<IPv6RouterAdvertisement *>(icmpv6Header)) {
         processRAPacket(packet, ra);
     }
-    else if (IPv6NeighbourSolicitation *ns = dynamic_cast<IPv6NeighbourSolicitation *>(msg)) {
+    else if (IPv6NeighbourSolicitation *ns = dynamic_cast<IPv6NeighbourSolicitation *>(icmpv6Header)) {
         processNSPacket(packet, ns);
     }
-    else if (IPv6NeighbourAdvertisement *na = dynamic_cast<IPv6NeighbourAdvertisement *>(msg)) {
+    else if (IPv6NeighbourAdvertisement *na = dynamic_cast<IPv6NeighbourAdvertisement *>(icmpv6Header)) {
         processNAPacket(packet, na);
     }
-    else if (IPv6Redirect *redirect = dynamic_cast<IPv6Redirect *>(msg)) {
+    else if (IPv6Redirect *redirect = dynamic_cast<IPv6Redirect *>(icmpv6Header)) {
         processRedirectPacket(redirect);
     }
     else {

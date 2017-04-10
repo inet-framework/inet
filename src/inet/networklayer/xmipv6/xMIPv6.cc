@@ -179,9 +179,8 @@ void xMIPv6::handleMessage(cMessage *msg)
     }
     // Zarrar Yousaf @ CNI Dortmund Uni on 29.05.07
     // if its a MIPv6 related mobility message
-    else if (dynamic_cast<MobilityHeader *>(msg)) {
+    else if (MobilityHeader *mipv6Msg = dynamic_cast<MobilityHeader *>(msg)) {
         EV_INFO << " Received MIPv6 related message" << endl;
-        MobilityHeader *mipv6Msg = (MobilityHeader *)(msg);
         processMobilityMessage(mipv6Msg);
     }
     // CB on 29.08.07
@@ -190,10 +189,10 @@ void xMIPv6::handleMessage(cMessage *msg)
         auto ipv6Header = packet->peekHeader<IPv6Header>();
         IPv6ExtensionHeader *eh = (IPv6ExtensionHeader *)packet->getContextPointer();
 
-        if (dynamic_cast<IPv6RoutingHeader *>(eh))
-            processType2RH(packet, (IPv6Header *)ipv6Header.get(), (IPv6RoutingHeader *)eh);
-        else if (dynamic_cast<HomeAddressOption *>(eh))
-            processHoAOpt(packet, (IPv6Header *)ipv6Header.get(), (HomeAddressOption *)eh);
+        if (auto rh = dynamic_cast<IPv6RoutingHeader *>(eh))
+            processType2RH(packet, (IPv6Header *)ipv6Header.get(), rh);
+        else if (auto hao = dynamic_cast<HomeAddressOption *>(eh))
+            processHoAOpt(packet, (IPv6Header *)ipv6Header.get(), hao);
         else
             throw cRuntimeError("Unknown Extension Header.");
     }
@@ -630,8 +629,7 @@ xMIPv6::BUTransmitIfEntry *xMIPv6::fetchBUTransmitIfEntry(InterfaceEntry *ie, co
 
     // update 13.9.07 - CB
     for (auto & elem : transmitIfList) {
-        if (dynamic_cast<BUTransmitIfEntry *>(elem.second)) {
-            BUTransmitIfEntry *buIfEntry = (BUTransmitIfEntry *)(elem.second);
+        if (BUTransmitIfEntry *buIfEntry = dynamic_cast<BUTransmitIfEntry *>(elem.second)) {
             if (buIfEntry->ifEntry->getInterfaceId() == ie->getInterfaceId() && buIfEntry->dest == dest) // update 5.9.07 - CB
                 return buIfEntry;
         }
@@ -682,10 +680,8 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
        << "InterfaceId=" << controlInfo->interfaceId() << endl;
 
     // TODO solve the HA DAD problem in a different way
-    if (dynamic_cast<BindingAcknowledgement*>(msg) && rt6->isHomeAgent())
+    if (BindingAcknowledgement *ba = dynamic_cast<BindingAcknowledgement*>(msg) && rt6->isHomeAgent())
     {
-        BindingAcknowledgement *ba = check_and_cast<BindingAcknowledgement*>(msg);
-
         if (ba->getStatus() < 128 && (ba->getLifetime() != 0))
         {
             EV << "Message is positive BA with status: " << ba->getStatus() << ", sending it with a PSEUDO DAD Delay of 60 sec" << endl;
@@ -1513,7 +1509,7 @@ void xMIPv6::createTestInitTimer(MobilityHeader *testInit, const IPv6Address& de
 
     // TODO refactor the code below, as it is also used in createBUTimer
     Key key(dest, ie->getInterfaceId(), msgType);
-    // fetch a valid TimerIfEntry obect
+    // fetch a valid TimerIfEntry object
     TestInitTransmitIfEntry *tiIfEntry = (TestInitTransmitIfEntry *)getTimerIfEntry(key, TRANSMIT_TYPE_TI);
     //delete tiIfEntry->testInitMsg;
     cancelAndDelete(tiIfEntry->timer);
@@ -2206,8 +2202,8 @@ bool xMIPv6::cancelTimerIfEntry(const IPv6Address& dest, int interfaceID, int ms
 
     TimerIfEntry *entry = (pos->second);
 
-    if (dynamic_cast<TestInitTransmitIfEntry *>(entry))
-        delete ((TestInitTransmitIfEntry *)entry)->testInitMsg;
+    if (auto testEntry = dynamic_cast<TestInitTransmitIfEntry *>(entry))
+        delete testEntry->testInitMsg;
 
     cancelAndDelete(entry->timer);    // cancels the retransmission timer
     entry->timer = nullptr;
@@ -2239,34 +2235,29 @@ xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)
     if (pos != transmitIfList.end()) {
         // there already exists an unACKed retransmission timer for that entry
         // -> overwrite the old with the new one
-        if (dynamic_cast<TestInitTransmitIfEntry *>(pos->second)) {
-            TestInitTransmitIfEntry *testInitIfEntry = (TestInitTransmitIfEntry *)pos->second;
+        if (TestInitTransmitIfEntry *testInitIfEntry = dynamic_cast<TestInitTransmitIfEntry *>(pos->second)) {
             cancelAndDelete(testInitIfEntry->timer);    // delete the corresponding timer
             delete testInitIfEntry->testInitMsg;    // delete old HoTI/CoTI, 21.9.07 - CB
             testInitIfEntry->testInitMsg = nullptr;
 
             ifEntry = testInitIfEntry;
         }
-        else if (dynamic_cast<BUTransmitIfEntry *>(pos->second)) {
-            BUTransmitIfEntry *buIfEntry = (BUTransmitIfEntry *)pos->second;
+        else if (BUTransmitIfEntry *buIfEntry = dynamic_cast<BUTransmitIfEntry *>(pos->second)) {
             cancelAndDelete(buIfEntry->timer);    // delete the corresponding timer
 
             ifEntry = buIfEntry;
         }
-        else if (dynamic_cast<BULExpiryIfEntry *>(pos->second)) {
-            BULExpiryIfEntry *bulExpIfEntry = (BULExpiryIfEntry *)pos->second;
+        else if (BULExpiryIfEntry *bulExpIfEntry = dynamic_cast<BULExpiryIfEntry *>(pos->second)) {
             cancelAndDelete(bulExpIfEntry->timer);    // delete the corresponding timer
 
             ifEntry = bulExpIfEntry;
         }
-        else if (dynamic_cast<BCExpiryIfEntry *>(pos->second)) {
-            BCExpiryIfEntry *bcExpIfEntry = (BCExpiryIfEntry *)pos->second;
+        else if (BCExpiryIfEntry *bcExpIfEntry = dynamic_cast<BCExpiryIfEntry *>(pos->second)) {
             cancelAndDelete(bcExpIfEntry->timer);    // delete the corresponding timer
 
             ifEntry = bcExpIfEntry;
         }
-        else if (dynamic_cast<TokenExpiryIfEntry *>(pos->second)) {
-            TokenExpiryIfEntry *tokenExpIfEntry = (TokenExpiryIfEntry *)pos->second;
+        else if (TokenExpiryIfEntry *tokenExpIfEntry = dynamic_cast<TokenExpiryIfEntry *>(pos->second)) {
             cancelAndDelete(tokenExpIfEntry->timer);    // delete the corresponding timer
             tokenExpIfEntry->timer = nullptr;
 
@@ -2413,8 +2404,7 @@ void xMIPv6::createBRRTimer(const IPv6Address& brDest, InterfaceEntry *ie, const
     if (pos != transmitIfList.end()) {
         // there already exists an unACKed retransmission timer for that entry
         // -> overwrite the old with the new one
-        if (dynamic_cast<BRTransmitIfEntry *>(pos->second)) {
-            brIfEntry = (BRTransmitIfEntry *)pos->second;
+        if ((brIfEntry = dynamic_cast<BRTransmitIfEntry *>(pos->second))) {
             cancelAndDelete(brIfEntry->timer);    // delete the corresponding timer
         }
         else

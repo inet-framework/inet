@@ -947,8 +947,7 @@ bool IPv6::processExtensionHeaders(Packet *packet, IPv6Header *ipv6Header)
     for (int i = 0; i < noExtHeaders; i++) {
         IPv6ExtensionHeader *eh = ipv6Header->removeFirstExtensionHeader();
 
-        if (dynamic_cast<IPv6RoutingHeader *>(eh)) {
-            IPv6RoutingHeader *rh = (IPv6RoutingHeader *)(eh);
+        if (IPv6RoutingHeader *rh = dynamic_cast<IPv6RoutingHeader *>(eh)) {
             EV_DETAIL << "Routing Header with type=" << rh->getRoutingType() << endl;
 
             // type 2 routing header should be processed by MIPv6 module
