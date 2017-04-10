@@ -22,7 +22,6 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 

@@ -24,7 +24,6 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
