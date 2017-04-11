@@ -129,7 +129,7 @@ class INET_API NetfilterBase : public INetfilter {
 
       protected:
         // TODO: move?
-        std::shared_ptr<INetworkHeader> peekNetworkHeader(Packet *packet);
+        Ptr<INetworkHeader> peekNetworkHeader(Packet *packet);
 
       public:
         virtual ~HookBase() { if (netfilter) netfilter->unregisterHook(this); };

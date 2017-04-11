@@ -488,7 +488,7 @@ void EtherMACBase::refreshConnection()
         processConnectDisconnect();
 }
 
-bool EtherMACBase::dropFrameNotForUs(Packet *packet, const std::shared_ptr<EtherFrame>& frame)
+bool EtherMACBase::dropFrameNotForUs(Packet *packet, const Ptr<EtherFrame>& frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
     // ethernet address groups. We rather accept all multicast frames (just like they were

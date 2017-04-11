@@ -32,7 +32,7 @@ class INET_API cPacketChunk : public Chunk
     cPacket *packet;
 
   protected:
-    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -42,7 +42,7 @@ class INET_API cPacketChunk : public Chunk
     ~cPacketChunk();
 
     virtual cPacketChunk *dup() const override { return new cPacketChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<cPacketChunk>(*this); }
+    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<cPacketChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */

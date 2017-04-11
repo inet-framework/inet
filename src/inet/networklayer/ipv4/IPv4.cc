@@ -191,7 +191,7 @@ void IPv4::endService(cPacket *packet)
     }
 }
 
-bool IPv4::verifyCrc(const std::shared_ptr<IPv4Header>& ipv4Header)
+bool IPv4::verifyCrc(const Ptr<IPv4Header>& ipv4Header)
 {
     switch (ipv4Header->getCrcMode()) {
         case CRC_DECLARED_CORRECT: {

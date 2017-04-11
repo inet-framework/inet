@@ -23,7 +23,7 @@ namespace serializer {
 
 Register_Serializer(GenericAppMsg, GenericAppMsgSerializer);
 
-void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     auto startPosition = stream.getLength();
     const auto& msg = std::static_pointer_cast<const GenericAppMsg>(chunk);
@@ -37,7 +37,7 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const std::s
     stream.writeByteRepeatedly('?', remainders);
 }
 
-std::shared_ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
     auto msg = std::make_shared<GenericAppMsg>();

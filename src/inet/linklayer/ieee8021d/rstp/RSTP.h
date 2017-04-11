@@ -99,9 +99,9 @@ class INET_API RSTP : public STPBase
      * Updates port information. Handles port role changes.
      */
     virtual void handleIncomingFrame(Packet *packet);
-    virtual void processBPDU(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
-    virtual bool processBetterSource(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
-    virtual bool processSameSource(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
+    virtual void processBPDU(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
+    virtual bool processBetterSource(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
+    virtual bool processSameSource(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
 
     /**
      * @brief Prints current data base info
@@ -111,13 +111,13 @@ class INET_API RSTP : public STPBase
     /**
      * @brief Update Interfacedata with the content of the BDPU frame
      */
-    virtual void updateInterfacedata(const std::shared_ptr<BPDU>& frame, unsigned int interfaceId);
+    virtual void updateInterfacedata(const Ptr<BPDU>& frame, unsigned int interfaceId);
 
     /**
      * @brief Compares the BPDU frame with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than BPDU)
      */
-    virtual CompareResult contestInterfacedata(const std::shared_ptr<BPDU>& msg, unsigned int interfaceId);
+    virtual CompareResult contestInterfacedata(const Ptr<BPDU>& msg, unsigned int interfaceId);
 
     /**
      * @brief Compares the port's best BPDU with the BPDU this module would send through that port
@@ -129,7 +129,7 @@ class INET_API RSTP : public STPBase
      * @brief Compares a port's best BPDU with a BPDU frame
      * @return (<0 if vector better than frame)
      */
-    virtual CompareResult compareInterfacedata(unsigned int interfaceId, const std::shared_ptr<BPDU>& msg, int linkCost);
+    virtual CompareResult compareInterfacedata(unsigned int interfaceId, const Ptr<BPDU>& msg, int linkCost);
 
     /**
      * @brief Compares two RSTP data
@@ -162,12 +162,12 @@ class INET_API RSTP : public STPBase
      * @brief Checks the frame TC flag.
      * Sets TCWhile if the port was forwarding and the flag is true.
      */
-    virtual void checkTC(const std::shared_ptr<BPDU>& frame, int arrivalInterfaceId);
+    virtual void checkTC(const Ptr<BPDU>& frame, int arrivalInterfaceId);
 
     /**
      * @brief Handles the switch to backup in one of the ports
      */
-    virtual void handleBackup(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
+    virtual void handleBackup(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId);
 
     /**
      * @brief schedule next upgrade self-message

@@ -59,7 +59,7 @@ class INET_API EtherEncap : public cSimpleModule
   public:
     static void addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode = FCS_DECLARED_CORRECT, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
 
-    static std::shared_ptr<EtherFrame> decapsulate(Packet *packet);
+    static Ptr<EtherFrame> decapsulate(Packet *packet);
 };
 
 } // namespace inet

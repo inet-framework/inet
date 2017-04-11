@@ -328,7 +328,7 @@ void EtherMACFullDuplex::handleEndPausePeriod()
     beginSendFrames();
 }
 
-void EtherMACFullDuplex::processReceivedDataFrame(Packet *packet, const std::shared_ptr<EtherFrame>& frame)
+void EtherMACFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<EtherFrame>& frame)
 {
     // statistics
     unsigned long curBytes = packet->getByteLength();

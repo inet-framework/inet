@@ -21,7 +21,7 @@ namespace inet {
 
 Register_Serializer(SequenceChunk, SequenceChunkSerializer);
 
-void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
+void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const
 {
     bit currentOffset = bit(0);
     bit serializeBegin = offset;
@@ -41,7 +41,7 @@ void SequenceChunkSerializer::serialize(MemoryOutputStream& stream, const std::s
     }
 }
 
-std::shared_ptr<Chunk> SequenceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+Ptr<Chunk> SequenceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     throw cRuntimeError("Invalid operation");
 }

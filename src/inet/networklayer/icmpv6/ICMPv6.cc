@@ -140,7 +140,7 @@ void ICMPv6::processICMPv6Message(Packet *packet)
  * The data received in the ICMPv6 Echo Request message MUST be returned
  * entirely and unmodified in the ICMPv6 Echo Reply message.
  */
-void ICMPv6::processEchoRequest(Packet *requestPacket, const std::shared_ptr<ICMPv6EchoRequestMsg>& requestHeader)
+void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<ICMPv6EchoRequestMsg>& requestHeader)
 {
     //Create an ICMPv6 Reply Message
     auto replyPacket = new Packet();
@@ -172,7 +172,7 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const std::shared_ptr<ICM
     sendToIP(replyPacket);
 }
 
-void ICMPv6::processEchoReply(Packet *packet, const std::shared_ptr<ICMPv6EchoReplyMsg>& reply)
+void ICMPv6::processEchoReply(Packet *packet, const Ptr<ICMPv6EchoReplyMsg>& reply)
 {
     delete packet;
 }
@@ -313,7 +313,7 @@ bool ICMPv6::validateDatagramPromptingError(Packet *packet)
     return true;
 }
 
-void ICMPv6::errorOut(const std::shared_ptr<ICMPv6Header>& icmpv6msg)
+void ICMPv6::errorOut(const Ptr<ICMPv6Header>& icmpv6msg)
 {
 }
 

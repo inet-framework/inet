@@ -1594,7 +1594,7 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
  * Neighbor Address field SHOULD be set to the sender of the Graft
  * message and SHOULD be ignored upon receipt.
  */
-void PIMDM::sendGraftAckPacket(Packet *pk, const std::shared_ptr<PIMGraft>& graftPacket)
+void PIMDM::sendGraftAckPacket(Packet *pk, const Ptr<PIMGraft>& graftPacket)
 {
     EV_INFO << "Sending GraftAck message.\n";
 

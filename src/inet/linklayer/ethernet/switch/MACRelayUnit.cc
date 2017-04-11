@@ -63,7 +63,7 @@ void MACRelayUnit::handleMessage(cMessage *msg)
     handleAndDispatchFrame(packet, frame);
 }
 
-void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const std::shared_ptr<EtherFrame>& frame)
+void MACRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<EtherFrame>& frame)
 {
     //FIXME : should handle multicast mac addresses correctly
 

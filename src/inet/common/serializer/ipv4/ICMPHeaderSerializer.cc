@@ -27,7 +27,7 @@ Register_Serializer(ICMPHeader, ICMPHeaderSerializer);
 Register_Serializer(ICMPEchoRequest, ICMPHeaderSerializer);
 Register_Serializer(ICMPEchoReply, ICMPHeaderSerializer);
 
-void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& icmpHeader = std::static_pointer_cast<const ICMPHeader>(chunk);
     stream.writeByte(icmpHeader->getType());
@@ -58,7 +58,7 @@ void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
     }
 }
 
-std::shared_ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto icmpHeader = std::make_shared<ICMPHeader>();
     uint8_t type = stream.readByte();

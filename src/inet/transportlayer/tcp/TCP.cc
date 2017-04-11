@@ -206,7 +206,7 @@ TCPConnection *TCP::createConnection(int socketId)
     return new TCPConnection(this, socketId);
 }
 
-void TCP::segmentArrivalWhileClosed(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+void TCP::segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(packet, tcpseg, srcAddr, destAddr);
@@ -320,7 +320,7 @@ void TCP::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TCPConnection *TCP::findConnForSegment(const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
+TCPConnection *TCP::findConnForSegment(const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;

@@ -216,7 +216,7 @@ void RSTP::handleHelloTime(cMessage *msg)
     scheduleAt(simTime() + helloTime, msg);    // programming next hello time
 }
 
-void RSTP::checkTC(const std::shared_ptr<BPDU>& frame, int arrivalInterfaceId)
+void RSTP::checkTC(const Ptr<BPDU>& frame, int arrivalInterfaceId)
 {
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
     if ((frame->getTcFlag() == true) && (port->getState() == Ieee8021dInterfaceData::FORWARDING)) {
@@ -235,7 +235,7 @@ void RSTP::checkTC(const std::shared_ptr<BPDU>& frame, int arrivalInterfaceId)
     }
 }
 
-void RSTP::handleBackup(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
+void RSTP::handleBackup(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "More than one port in the same LAN" << endl;
     Ieee8021dInterfaceData *port = getPortInterfaceData(arrivalInterfaceId);
@@ -274,7 +274,7 @@ void RSTP::handleBackup(const std::shared_ptr<BPDU>& frame, unsigned int arrival
 
 void RSTP::handleIncomingFrame(Packet *packet)
 {
-    const std::shared_ptr<BPDU>& frame = packet->peekHeader<BPDU>();
+    const Ptr<BPDU>& frame = packet->peekHeader<BPDU>();
     // incoming BPDU handling
     // checking message age
     int arrivalInterfaceId = packet->getMandatoryTag<InterfaceInd>()->getInterfaceId();
@@ -293,7 +293,7 @@ void RSTP::handleIncomingFrame(Packet *packet)
         EV_DETAIL << "Expired BPDU" << endl;
 }
 
-void RSTP::processBPDU(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
+void RSTP::processBPDU(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
 {
     //three challenges.
     //
@@ -314,7 +314,7 @@ void RSTP::processBPDU(const std::shared_ptr<BPDU>& frame, unsigned int arrivalI
     }
 }
 
-bool RSTP::processBetterSource(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
+bool RSTP::processBetterSource(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "Better BDPU received than the current best for this port." << endl;
     // update that port rstp info
@@ -450,7 +450,7 @@ bool RSTP::processBetterSource(const std::shared_ptr<BPDU>& frame, unsigned int 
     return false;
 }
 
-bool RSTP::processSameSource(const std::shared_ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
+bool RSTP::processSameSource(const Ptr<BPDU>& frame, unsigned int arrivalInterfaceId)
 {
     EV_DETAIL << "BDPU received from the same source than the current best for this port" << endl;
     Ieee8021dInterfaceData *arrivalPort = getPortInterfaceData(arrivalInterfaceId);
@@ -744,7 +744,7 @@ void RSTP::initPorts()
     scheduleNextUpgrade();
 }
 
-void RSTP::updateInterfacedata(const std::shared_ptr<BPDU>& frame, unsigned int portNum)
+void RSTP::updateInterfacedata(const Ptr<BPDU>& frame, unsigned int portNum)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(portNum);
     ifd->setRootPriority(frame->getRootPriority());
@@ -773,7 +773,7 @@ RSTP::CompareResult RSTP::contestInterfacedata(unsigned int portNum)
             portNum, ifd->getPortNum());
 }
 
-RSTP::CompareResult RSTP::contestInterfacedata(const std::shared_ptr<BPDU>& msg, unsigned int interfaceId)
+RSTP::CompareResult RSTP::contestInterfacedata(const Ptr<BPDU>& msg, unsigned int interfaceId)
 {
     int r = getRootInterfaceId();
     Ieee8021dInterfaceData *rootPort = getPortInterfaceData(r);
@@ -788,7 +788,7 @@ RSTP::CompareResult RSTP::contestInterfacedata(const std::shared_ptr<BPDU>& msg,
             interfaceId, msg->getPortNum());
 }
 
-RSTP::CompareResult RSTP::compareInterfacedata(unsigned int interfaceId, const std::shared_ptr<BPDU>& msg, int linkCost)
+RSTP::CompareResult RSTP::compareInterfacedata(unsigned int interfaceId, const Ptr<BPDU>& msg, int linkCost)
 {
     Ieee8021dInterfaceData *ifd = getPortInterfaceData(interfaceId);
 

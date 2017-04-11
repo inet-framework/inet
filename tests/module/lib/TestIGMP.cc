@@ -33,7 +33,7 @@ class INET_API TestIGMP : public IGMPv2, public IScriptable
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void configureInterface(InterfaceEntry *ie) override;
-    virtual void processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp) override;
+    virtual void processIgmpMessage(Packet *packet, const Ptr<IGMPMessage>& igmp) override;
     virtual void processHostGroupTimer(cMessage *msg) override;
     virtual void processQueryTimer(cMessage *msg) override;
     virtual void processLeaveTimer(cMessage *msg) override;
@@ -97,7 +97,7 @@ void TestIGMP::configureInterface(InterfaceEntry *ie)
 }
 
 
-void TestIGMP::processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp)
+void TestIGMP::processIgmpMessage(Packet *packet, const Ptr<IGMPMessage>& igmp)
 {
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     IPv4Address group = IPv4Address::UNSPECIFIED_ADDRESS;

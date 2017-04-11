@@ -122,7 +122,7 @@ Packet *IPv6FragBuf::addFragment(Packet *pk, IPv6Header *datagram, IPv6FragmentH
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
         pk->transferTagsFrom(buf->packet);
-        auto hdr = std::shared_ptr<IPv6Header>(buf->packet->peekHeader<IPv6Header>()->dup());
+        auto hdr = Ptr<IPv6Header>(buf->packet->peekHeader<IPv6Header>()->dup());
         const auto& payload = buf->buf.getData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
         hdr->setChunkLength(byte(hdr->calculateUnfragmentableHeaderByteLength()));

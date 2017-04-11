@@ -404,7 +404,7 @@ void DYMO::processUDPPacket(Packet *packet)
 // handling DYMO packets
 //
 
-void DYMO::sendDYMOPacket(const std::shared_ptr<DYMOPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay)
+void DYMO::sendDYMOPacket(const Ptr<DYMOPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay)
 {
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
@@ -429,7 +429,7 @@ void DYMO::sendDYMOPacket(const std::shared_ptr<DYMOPacket>& packet, const Inter
     sendUDPPacket(udpPacket, delay);
 }
 
-void DYMO::processDYMOPacket(Packet *packet, const std::shared_ptr<DYMOPacket>& dymoPacket)
+void DYMO::processDYMOPacket(Packet *packet, const Ptr<DYMOPacket>& dymoPacket)
 {
     auto dymoPacketCopy = dymoPacket->dupShared();
     if (auto rreq = std::dynamic_pointer_cast<RREQ>(dymoPacketCopy))
@@ -446,7 +446,7 @@ void DYMO::processDYMOPacket(Packet *packet, const std::shared_ptr<DYMOPacket>& 
 // handling RteMsg packets
 //
 
-bool DYMO::permissibleRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg)
+bool DYMO::permissibleRteMsg(Packet *packet, const Ptr<RteMsg>& rteMsg)
 {
     // 7.5. Handling a Received RteMsg
     AddressBlock& originatorNode = rteMsg->getOriginatorNode();
@@ -495,7 +495,7 @@ bool DYMO::permissibleRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteM
     return true;
 }
 
-void DYMO::processRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg)
+void DYMO::processRteMsg(Packet *packet, const Ptr<RteMsg>& rteMsg)
 {
     // 7.5. Handling a Received RteMsg
     // 1. HandlingRtr MUST process the routing information contained in the
@@ -534,7 +534,7 @@ void DYMO::processRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg)
     rteMsg->setHopCount(rteMsg->getHopCount() + 1);
 }
 
-bit DYMO::computeRteMsgLength(const std::shared_ptr<RteMsg>& rteMsg)
+bit DYMO::computeRteMsgLength(const Ptr<RteMsg>& rteMsg)
 {
     // TODO: validityTime, metric, metricType, TLVs
     // 1. <address-block> := <num-addr> <addr-flags> (<head-length><head>?)? (<tail-length><tail>?)? <mid>* <prefix-length>*
@@ -584,7 +584,7 @@ bit DYMO::computeRteMsgLength(const std::shared_ptr<RteMsg>& rteMsg)
 // handling RREQ packets
 //
 
-std::shared_ptr<RREQ> DYMO::createRREQ(const L3Address& target, int retryCount)
+Ptr<RREQ> DYMO::createRREQ(const L3Address& target, int retryCount)
 {
     auto rreq = std::make_shared<RREQ>(); // TODO: "RREQ");
     AddressBlock& originatorNode = rreq->getOriginatorNode();
@@ -640,7 +640,7 @@ std::shared_ptr<RREQ> DYMO::createRREQ(const L3Address& target, int retryCount)
     return rreq;
 }
 
-void DYMO::sendRREQ(const std::shared_ptr<RREQ> &rreq)
+void DYMO::sendRREQ(const Ptr<RREQ> &rreq)
 {
     const L3Address& target = rreq->getTargetNode().getAddress();
     const L3Address& originator = rreq->getOriginatorNode().getAddress();
@@ -649,7 +649,7 @@ void DYMO::sendRREQ(const std::shared_ptr<RREQ> &rreq)
     sendDYMOPacket(rreq, nullptr, addressType->getLinkLocalManetRoutersMulticastAddress(), uniform(0, maxJitter).dbl());
 }
 
-void DYMO::processRREQ(Packet *packet, const std::shared_ptr<RREQ>& rreqIncoming)
+void DYMO::processRREQ(Packet *packet, const Ptr<RREQ>& rreqIncoming)
 {
     const L3Address& target = rreqIncoming->getTargetNode().getAddress();
     const L3Address& originator = rreqIncoming->getOriginatorNode().getAddress();
@@ -695,7 +695,7 @@ void DYMO::processRREQ(Packet *packet, const std::shared_ptr<RREQ>& rreqIncoming
         EV_WARN << "Dropping non-permissible RREQ" << endl;
 }
 
-bit DYMO::computeRREQLength(const std::shared_ptr<RREQ>& rreq)
+bit DYMO::computeRREQLength(const Ptr<RREQ>& rreq)
 {
     return computeRteMsgLength(rreq);
 }
@@ -704,12 +704,12 @@ bit DYMO::computeRREQLength(const std::shared_ptr<RREQ>& rreq)
 // handling RREP packets
 //
 
-std::shared_ptr<RREP> DYMO::createRREP(const std::shared_ptr<RteMsg>& rteMsg)
+Ptr<RREP> DYMO::createRREP(const Ptr<RteMsg>& rteMsg)
 {
     return createRREP(rteMsg, nullptr);
 }
 
-std::shared_ptr<RREP> DYMO::createRREP(const std::shared_ptr<RteMsg>& rteMsg, IRoute *route)
+Ptr<RREP> DYMO::createRREP(const Ptr<RteMsg>& rteMsg, IRoute *route)
 {
     DYMORouteData *routeData = check_and_cast<DYMORouteData *>(route->getProtocolData());
     auto rrep = std::make_shared<RREP>(); // TODO: "RREP");
@@ -750,7 +750,7 @@ std::shared_ptr<RREP> DYMO::createRREP(const std::shared_ptr<RteMsg>& rteMsg, IR
     return rrep;
 }
 
-void DYMO::sendRREP(const std::shared_ptr<RREP>& rrep)
+void DYMO::sendRREP(const Ptr<RREP>& rrep)
 {
     const L3Address& target = rrep->getTargetNode().getAddress();
     const L3Address& originator = rrep->getOriginatorNode().getAddress();
@@ -759,7 +759,7 @@ void DYMO::sendRREP(const std::shared_ptr<RREP>& rrep)
     sendDYMOPacket(rrep, nullptr, addressType->getLinkLocalManetRoutersMulticastAddress(), 0);
 }
 
-void DYMO::sendRREP(const std::shared_ptr<RREP>& rrep, IRoute *route)
+void DYMO::sendRREP(const Ptr<RREP>& rrep, IRoute *route)
 {
     const L3Address& target = rrep->getTargetNode().getAddress();
     const L3Address& originator = rrep->getOriginatorNode().getAddress();
@@ -769,7 +769,7 @@ void DYMO::sendRREP(const std::shared_ptr<RREP>& rrep, IRoute *route)
     sendDYMOPacket(rrep, route->getInterface(), nextHop, 0);
 }
 
-void DYMO::processRREP(Packet *packet, const std::shared_ptr<RREP>& rrepIncoming)
+void DYMO::processRREP(Packet *packet, const Ptr<RREP>& rrepIncoming)
 {
     const L3Address& target = rrepIncoming->getTargetNode().getAddress();
     const L3Address& originator = rrepIncoming->getOriginatorNode().getAddress();
@@ -813,7 +813,7 @@ void DYMO::processRREP(Packet *packet, const std::shared_ptr<RREP>& rrepIncoming
         EV_WARN << "Dropping non-permissible RREQ" << endl;
 }
 
-bit DYMO::computeRREPLength(const std::shared_ptr<RREP>& rrep)
+bit DYMO::computeRREPLength(const Ptr<RREP>& rrep)
 {
     return computeRteMsgLength(rrep);
 }
@@ -822,7 +822,7 @@ bit DYMO::computeRREPLength(const std::shared_ptr<RREP>& rrep)
 // handling RERR packets
 //
 
-std::shared_ptr<RERR> DYMO::createRERR(std::vector<L3Address>& unreachableAddresses)
+Ptr<RERR> DYMO::createRERR(std::vector<L3Address>& unreachableAddresses)
 {
     auto rerr = std::make_shared<RERR>(); // TODO: "RERR");
     for (auto & unreachableAddresse : unreachableAddresses) {
@@ -848,7 +848,7 @@ std::shared_ptr<RERR> DYMO::createRERR(std::vector<L3Address>& unreachableAddres
     return rerr;
 }
 
-void DYMO::sendRERR(const std::shared_ptr<RERR>& rerr)
+void DYMO::sendRERR(const Ptr<RERR>& rerr)
 {
     rerr->setChunkLength(computeRERRLength(rerr));
     EV_DETAIL << "Sending RERR: unreachableNodeCount = " << rerr->getUnreachableNodeArraySize() << endl;
@@ -929,7 +929,7 @@ void DYMO::sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3A
         sendRERR(createRERR(unreachableAddresses));
 }
 
-void DYMO::processRERR(Packet *packet, const std::shared_ptr<RERR>& rerrIncoming)
+void DYMO::processRERR(Packet *packet, const Ptr<RERR>& rerrIncoming)
 {
     EV_DETAIL << "Processing RERR" << endl;
     // 8.4. Receiving and Handling RERR Messages
@@ -1006,7 +1006,7 @@ void DYMO::processRERR(Packet *packet, const std::shared_ptr<RERR>& rerrIncoming
     }
 }
 
-bit DYMO::computeRERRLength(const std::shared_ptr<RERR>& rerr)
+bit DYMO::computeRERRLength(const Ptr<RERR>& rerr)
 {
     // TODO: validityTime, metric, metricType, TLVs
     // 1. <address-block> := <num-addr> <addr-flags> (<head-length><head>?)? (<tail-length><tail>?)? <mid>* <prefix-length>*
@@ -1057,7 +1057,7 @@ bit DYMO::computeRERRLength(const std::shared_ptr<RERR>& rerr)
 // handling routes
 //
 
-void DYMO::updateRoutes(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock)
+void DYMO::updateRoutes(Packet *packet, const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock)
 {
     const L3Address& address = addressBlock.getAddress();
     if (address == getSelfAddress())
@@ -1110,7 +1110,7 @@ void DYMO::updateRoutes(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, A
     }
 }
 
-IRoute *DYMO::createRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock)
+IRoute *DYMO::createRoute(Packet *packet, const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock)
 {
     IRoute *route = routingTable->createRoute();
     route->setSourceType(IRoute::DYMO);
@@ -1120,7 +1120,7 @@ IRoute *DYMO::createRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg,
     return route;
 }
 
-void DYMO::updateRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock, IRoute *route)
+void DYMO::updateRoute(Packet *packet, const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock, IRoute *route)
 {
     // 6.2. Applying Route Updates To Route Table Entries
     DYMORouteData *routeData = check_and_cast<DYMORouteData *>(route->getProtocolData());
@@ -1173,7 +1173,7 @@ int DYMO::getLinkCost(const InterfaceEntry *interfaceEntry, DYMOMetricType metri
     }
 }
 
-bool DYMO::isLoopFree(const std::shared_ptr<RteMsg>& rteMsg, IRoute *route)
+bool DYMO::isLoopFree(const Ptr<RteMsg>& rteMsg, IRoute *route)
 {
     // TODO: implement
     return true;
@@ -1322,7 +1322,7 @@ bool DYMO::isClientAddress(const L3Address& address)
 // added node
 //
 
-void DYMO::addSelfNode(const std::shared_ptr<RteMsg>& rteMsg)
+void DYMO::addSelfNode(const Ptr<RteMsg>& rteMsg)
 {
     const L3Address& address = getSelfAddress();
     AddressBlock addressBlock;
@@ -1339,7 +1339,7 @@ void DYMO::addSelfNode(const std::shared_ptr<RteMsg>& rteMsg)
     addNode(rteMsg, addressBlock);
 }
 
-void DYMO::addNode(const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock)
+void DYMO::addNode(const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock)
 {
     int size = rteMsg->getAddedNodeArraySize();
     rteMsg->setAddedNodeArraySize(size + 1);

@@ -266,7 +266,7 @@ void AODVRouting::delayDatagram(Packet *datagram)
     targetAddressToDelayedPackets.insert(std::pair<L3Address, Packet *>(target, datagram));
 }
 
-void AODVRouting::sendRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive)
+void AODVRouting::sendRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive)
 {
     // In an expanding ring search, the originating node initially uses a TTL =
     // TTL_START in the RREQ packet IP header and sets the timeout for
@@ -337,7 +337,7 @@ void AODVRouting::sendRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Addres
     rreqCount++;
 }
 
-void AODVRouting::sendRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive)
+void AODVRouting::sendRREP(const Ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive)
 {
     EV_INFO << "Sending Route Reply to " << destAddr << endl;
 
@@ -372,7 +372,7 @@ void AODVRouting::sendRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Addres
     sendAODVPacket(rrep, nextHop, timeToLive, 0);
 }
 
-std::shared_ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
+Ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
 {
     auto rreqPacket = std::make_shared<AODVRREQ>(); // TODO: "AODV-RREQ");
 
@@ -427,7 +427,7 @@ std::shared_ptr<AODVRREQ> AODVRouting::createRREQ(const L3Address& destAddr)
     return rreqPacket;
 }
 
-std::shared_ptr<AODVRREP> AODVRouting::createRREP(const std::shared_ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
+Ptr<AODVRREP> AODVRouting::createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
 {
     auto rrep = std::make_shared<AODVRREP>(); // TODO: "AODV-RREP");
     rrep->setPacketType(RREP);
@@ -507,7 +507,7 @@ std::shared_ptr<AODVRREP> AODVRouting::createRREP(const std::shared_ptr<AODVRREQ
     return rrep;
 }
 
-std::shared_ptr<AODVRREP> AODVRouting::createGratuitousRREP(const std::shared_ptr<AODVRREQ>& rreq, IRoute *originatorRoute)
+Ptr<AODVRREP> AODVRouting::createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute)
 {
     ASSERT(originatorRoute != nullptr);
     auto grrep = std::make_shared<AODVRREP>(); // TODO: "AODV-GRREP");
@@ -541,7 +541,7 @@ std::shared_ptr<AODVRREP> AODVRouting::createGratuitousRREP(const std::shared_pt
     return grrep;
 }
 
-void AODVRouting::handleRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& sourceAddr)
+void AODVRouting::handleRREP(const Ptr<AODVRREP>& rrep, const L3Address& sourceAddr)
 {
     EV_INFO << "AODV Route Reply arrived with source addr: " << sourceAddr << " originator addr: " << rrep->getOriginatorAddr()
             << " destination addr: " << rrep->getDestAddr() << endl;
@@ -719,7 +719,7 @@ void AODVRouting::updateRoutingTable(IRoute *route, const L3Address& nextHop, un
     scheduleExpungeRoutes();
 }
 
-void AODVRouting::sendAODVPacket(const std::shared_ptr<AODVControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay)
+void AODVRouting::sendAODVPacket(const Ptr<AODVControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay)
 {
     ASSERT(timeToLive != 0);
 
@@ -752,7 +752,7 @@ void AODVRouting::sendAODVPacket(const std::shared_ptr<AODVControlPacket>& packe
         sendDelayed(udpPacket, delay, "ipOut");
 }
 
-void AODVRouting::handleRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& sourceAddr, unsigned int timeToLive)
+void AODVRouting::handleRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& sourceAddr, unsigned int timeToLive)
 {
     EV_INFO << "AODV Route Request arrived with source addr: " << sourceAddr << " originator addr: " << rreq->getOriginatorAddr()
             << " destination addr: " << rreq->getDestAddr() << endl;
@@ -1102,7 +1102,7 @@ void AODVRouting::handleLinkBreakSendRERR(const L3Address& unreachableAddr)
     sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, jitterPar->doubleValue());
 }
 
-std::shared_ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
+Ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
 {
     auto rerr = std::make_shared<AODVRERR>(); // TODO: "AODV-RERR");
     unsigned int destCount = unreachableNodes.size();
@@ -1122,7 +1122,7 @@ std::shared_ptr<AODVRERR> AODVRouting::createRERR(const std::vector<UnreachableN
     return rerr;
 }
 
-void AODVRouting::handleRERR(const std::shared_ptr<AODVRERR>& rerr, const L3Address& sourceAddr)
+void AODVRouting::handleRERR(const Ptr<AODVRERR>& rerr, const L3Address& sourceAddr)
 {
     EV_INFO << "AODV Route Error arrived with source addr: " << sourceAddr << endl;
 
@@ -1261,7 +1261,7 @@ void AODVRouting::handleWaitForRREP(WaitForRREP *rrepTimer)
     sendRREQ(rreq, addressType->getBroadcastAddress(), 0);
 }
 
-void AODVRouting::forwardRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive)
+void AODVRouting::forwardRREP(const Ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive)
 {
     EV_INFO << "Forwarding the Route Reply to the node " << rrep->getOriginatorAddr() << " which originated the Route Request" << endl;
 
@@ -1272,7 +1272,7 @@ void AODVRouting::forwardRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Add
     sendAODVPacket(rrep, destAddr, 100, jitterPar->doubleValue());
 }
 
-void AODVRouting::forwardRREQ(const std::shared_ptr<AODVRREQ>& rreq, unsigned int timeToLive)
+void AODVRouting::forwardRREQ(const Ptr<AODVRREQ>& rreq, unsigned int timeToLive)
 {
     EV_INFO << "Forwarding the Route Request message with TTL= " << timeToLive << endl;
     sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, jitterPar->doubleValue());
@@ -1304,7 +1304,7 @@ void AODVRouting::completeRouteDiscovery(const L3Address& target)
     waitForRREPTimers.erase(waitRREPIter);
 }
 
-void AODVRouting::sendGRREP(const std::shared_ptr<AODVRREP>& grrep, const L3Address& destAddr, unsigned int timeToLive)
+void AODVRouting::sendGRREP(const Ptr<AODVRREP>& grrep, const L3Address& destAddr, unsigned int timeToLive)
 {
     EV_INFO << "Sending gratuitous Route Reply to " << destAddr << endl;
 
@@ -1314,7 +1314,7 @@ void AODVRouting::sendGRREP(const std::shared_ptr<AODVRREP>& grrep, const L3Addr
     sendAODVPacket(grrep, nextHop, timeToLive, 0);
 }
 
-std::shared_ptr<AODVRREP> AODVRouting::createHelloMessage()
+Ptr<AODVRREP> AODVRouting::createHelloMessage()
 {
     // called a Hello message, with the RREP
     // message fields set as follows:
@@ -1370,7 +1370,7 @@ void AODVRouting::sendHelloMessagesIfNeeded()
     scheduleAt(simTime() + helloInterval - periodicJitter->doubleValue(), helloMsgTimer);
 }
 
-void AODVRouting::handleHelloMessage(const std::shared_ptr<AODVRREP>& helloMessage)
+void AODVRouting::handleHelloMessage(const Ptr<AODVRREP>& helloMessage)
 {
     const L3Address& helloOriginatorAddr = helloMessage->getDestAddr();
     IRoute *routeHelloOriginator = routingTable->findBestMatchingRoute(helloOriginatorAddr);
@@ -1599,7 +1599,7 @@ bool AODVRouting::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t 
     return false;
 }
 
-std::shared_ptr<AODVRREPACK> AODVRouting::createRREPACK()
+Ptr<AODVRREPACK> AODVRouting::createRREPACK()
 {
     auto rrepACK = std::make_shared<AODVRREPACK>(); // TODO: "AODV-RREPACK");
     rrepACK->setPacketType(RREPACK);
@@ -1607,13 +1607,13 @@ std::shared_ptr<AODVRREPACK> AODVRouting::createRREPACK()
     return rrepACK;
 }
 
-void AODVRouting::sendRREPACK(const std::shared_ptr<AODVRREPACK>& rrepACK, const L3Address& destAddr)
+void AODVRouting::sendRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& destAddr)
 {
     EV_INFO << "Sending Route Reply ACK to " << destAddr << endl;
     sendAODVPacket(rrepACK, destAddr, 100, 0);
 }
 
-void AODVRouting::handleRREPACK(const std::shared_ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr)
+void AODVRouting::handleRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr)
 {
     // Note that the RREP-ACK packet does not contain any information about
     // which RREP it is acknowledging.  The time at which the RREP-ACK is

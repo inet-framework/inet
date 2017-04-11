@@ -17,7 +17,7 @@
 
 namespace inet {
 
-std::shared_ptr<EmptyChunk> EmptyChunk::singleton = std::make_shared<EmptyChunk>();
+Ptr<EmptyChunk> EmptyChunk::singleton = std::make_shared<EmptyChunk>();
 
 EmptyChunk::EmptyChunk() :
     Chunk()
@@ -31,7 +31,7 @@ EmptyChunk::EmptyChunk(const EmptyChunk& other) :
     markImmutable();
 }
 
-std::shared_ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(iterator.getPosition() == bit(0), "iterator is out of range");
     CHUNK_CHECK_USAGE(length == bit(0) || length == bit(-1), "length is invalid");
@@ -46,7 +46,7 @@ std::shared_ptr<Chunk> EmptyChunk::peekUnchecked(PeekPredicate predicate, PeekCo
     return converter(const_cast<EmptyChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> EmptyChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     CHUNK_CHECK_IMPLEMENTATION(length == bit(0));
     return std::make_shared<EmptyChunk>();

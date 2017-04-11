@@ -207,10 +207,10 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual void processPathTearMsg(Packet *pk);
     virtual void processPathErrMsg(Packet *pk);
 
-    virtual PathStateBlock_t *createPSB(const std::shared_ptr<RSVPPathMsg>& msg);
+    virtual PathStateBlock_t *createPSB(const Ptr<RSVPPathMsg>& msg);
     virtual PathStateBlock_t *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
     virtual void removePSB(PathStateBlock_t *psb);
-    virtual ResvStateBlock_t *createRSB(const std::shared_ptr<RSVPResvMsg>& msg);
+    virtual ResvStateBlock_t *createRSB(const Ptr<RSVPResvMsg>& msg);
     virtual ResvStateBlock_t *createEgressRSB(PathStateBlock_t *psb);
     virtual void updateRSB(ResvStateBlock_t *rsb, RSVPResvMsg *msg);
     virtual void removeRSB(ResvStateBlock_t *rsb);

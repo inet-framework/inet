@@ -33,7 +33,7 @@ SliceChunk::SliceChunk(const SliceChunk& other) :
 {
 }
 
-SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, bit offset, bit length) :
+SliceChunk::SliceChunk(const Ptr<Chunk>& chunk, bit offset, bit length) :
     Chunk(),
     chunk(chunk),
     offset(offset),
@@ -44,7 +44,7 @@ SliceChunk::SliceChunk(const std::shared_ptr<Chunk>& chunk, bit offset, bit leng
     CHUNK_CHECK_IMPLEMENTATION(bit(0) <= this->length && this->offset + this->length <= chunkLength);
 }
 
-std::shared_ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -69,7 +69,7 @@ std::shared_ptr<Chunk> SliceChunk::peekUnchecked(PeekPredicate predicate, PeekCo
     return chunk->peekUnchecked(predicate, converter, ForwardIterator(iterator.getPosition() + offset, -1), length == bit(-1) ? chunkLength : length, flags);
 }
 
-std::shared_ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> SliceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     bit chunkLength = chunk->getChunkLength();
     bit sliceLength = length == bit(-1) ? chunkLength - offset : length;
@@ -92,7 +92,7 @@ void SliceChunk::setLength(bit length)
     this->length = length;
 }
 
-bool SliceChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
 {
     if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
@@ -102,7 +102,7 @@ bool SliceChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-bool SliceChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
+bool SliceChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
 {
     if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = std::static_pointer_cast<SliceChunk>(chunk);
@@ -112,7 +112,7 @@ bool SliceChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
         return false;
 }
 
-void SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+void SliceChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();
@@ -122,7 +122,7 @@ void SliceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+void SliceChunk::insertAtEnd(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_SLICE);
     handleChange();

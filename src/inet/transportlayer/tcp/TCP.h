@@ -145,9 +145,9 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual TCPConnection *createConnection(int socketId);
 
     // utility methods
-    virtual TCPConnection *findConnForSegment(const std::shared_ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
+    virtual TCPConnection *findConnForSegment(const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr);
     virtual TCPConnection *findConnForApp(int socketId);
-    virtual void segmentArrivalWhileClosed(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
+    virtual void segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest);
     virtual void removeConnection(TCPConnection *conn);
     virtual void refreshDisplay() const override;
 

@@ -28,12 +28,12 @@ class INET_API EmptyChunk : public Chunk
   friend class Chunk;
 
   public:
-    static std::shared_ptr<EmptyChunk> singleton;
+    static Ptr<EmptyChunk> singleton;
 
   protected:
-    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -42,7 +42,7 @@ class INET_API EmptyChunk : public Chunk
     EmptyChunk(const EmptyChunk& other);
 
     virtual EmptyChunk *dup() const override { return new EmptyChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<EmptyChunk>(*this); }
+    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<EmptyChunk>(*this); }
     //@}
 
     /** @name Overridden chunk functions */

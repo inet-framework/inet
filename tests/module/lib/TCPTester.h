@@ -43,7 +43,7 @@ class INET_API TCPTesterBase : public cSimpleModule
     PacketDump tcpdump;
 
   protected:
-    void dump(const std::shared_ptr<inet::tcp::TcpHeader>& seg, bool fromA, const char *comment=NULL);
+    void dump(const Ptr<inet::tcp::TcpHeader>& seg, bool fromA, const char *comment=NULL);
 
   public:
     TCPTesterBase();

@@ -55,7 +55,7 @@ std::string TCPReceiveQueue::str() const
     return res;
 }
 
-uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const std::shared_ptr<TcpHeader>& tcpseg)
+uint32_t TCPReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 {
     int64_t tcpHeaderLength = tcpseg->getHeaderLength();
     int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;

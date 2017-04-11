@@ -35,43 +35,43 @@ class INET_API SequenceChunk : public Chunk
     /**
      * The list of chunks that make up this chunk.
      */
-    std::deque<std::shared_ptr<Chunk>> chunks;
+    std::deque<Ptr<Chunk>> chunks;
 
   protected:
     int getNumChunks() const { return chunks.size(); } // only for class descriptor
     Chunk *getChunk(int i) const { return chunks[i].get(); } // only for class descriptor
 
     int getElementIndex(bool isForward, int index) const { return isForward ? index : chunks.size() - index - 1; }
-    const std::shared_ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return chunks[getElementIndex(iterator.isForward(), iterator.getIndex())]; }
+    const Ptr<Chunk>& getElementChunk(const Iterator& iterator) const { return chunks[getElementIndex(iterator.isForward(), iterator.getIndex())]; }
 
-    void doInsertToBeginning(const std::shared_ptr<Chunk>& chunk);
-    void doInsertToBeginning(const std::shared_ptr<SliceChunk>& chunk);
-    void doInsertToBeginning(const std::shared_ptr<SequenceChunk>& chunk);
+    void doInsertToBeginning(const Ptr<Chunk>& chunk);
+    void doInsertToBeginning(const Ptr<SliceChunk>& chunk);
+    void doInsertToBeginning(const Ptr<SequenceChunk>& chunk);
 
-    void doInsertToEnd(const std::shared_ptr<Chunk>& chunk);
-    void doInsertToEnd(const std::shared_ptr<SliceChunk>& chunk);
-    void doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk);
+    void doInsertToEnd(const Ptr<Chunk>& chunk);
+    void doInsertToEnd(const Ptr<SliceChunk>& chunk);
+    void doInsertToEnd(const Ptr<SequenceChunk>& chunk);
 
-    std::deque<std::shared_ptr<Chunk>> dupChunks() const;
+    std::deque<Ptr<Chunk>> dupChunks() const;
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
     SequenceChunk();
     SequenceChunk(const SequenceChunk& other);
-    SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks);
+    SequenceChunk(const std::deque<Ptr<Chunk>>& chunks);
 
     virtual SequenceChunk *dup() const override { return new SequenceChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
+    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
-    const std::deque<std::shared_ptr<Chunk>>& getChunks() const { return chunks; }
-    void setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks);
+    const std::deque<Ptr<Chunk>>& getChunks() const { return chunks; }
+    void setChunks(const std::deque<Ptr<Chunk>>& chunks);
     //@}
 
     /** @name Overridden flag functions */
@@ -98,11 +98,11 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Filling with data related functions */
     //@{
-    virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override { return true; }
-    virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override { return true; }
+    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) override { return true; }
+    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) override { return true; }
 
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) override;
+    virtual void insertAtEnd(const Ptr<Chunk>& chunk) override;
     //@}
 
     /** @name Removing data related functions */

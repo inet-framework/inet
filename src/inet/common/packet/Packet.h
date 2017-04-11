@@ -60,7 +60,7 @@ class INET_API Packet : public cPacket
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
      */
-    std::shared_ptr<Chunk> contents;
+    Ptr<Chunk> contents;
     Chunk::ForwardIterator headerIterator;
     Chunk::BackwardIterator trailerIterator;
 
@@ -68,7 +68,7 @@ class INET_API Packet : public cPacket
     Chunk *getContents() const { return contents.get(); } // only for class descriptor
 
     template <typename T>
-    std::shared_ptr<T> makeExclusivelyOwnedMutableChunk(const std::shared_ptr<T>& chunk) const {
+    Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<T>& chunk) const {
         if (chunk.use_count() == 1) {
             chunk->markMutableIfExclusivelyOwned();
             return chunk;
@@ -85,7 +85,7 @@ class INET_API Packet : public cPacket
 
   public:
     explicit Packet(const char *name = nullptr, short kind = 0);
-    Packet(const char *name, const std::shared_ptr<Chunk>& contents);
+    Packet(const char *name, const Ptr<Chunk>& contents);
     Packet(const Packet& other);
 
     virtual Packet *dup() const override { return new Packet(*this); }
@@ -145,14 +145,14 @@ class INET_API Packet : public cPacket
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
-    std::shared_ptr<Chunk> peekHeader(bit length = bit(-1), int flags = 0) const;
+    Ptr<Chunk> peekHeader(bit length = bit(-1), int flags = 0) const;
 
     /**
      * Pops the designated header and returns it as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    std::shared_ptr<Chunk> popHeader(bit length = bit(-1), int flags = 0);
+    Ptr<Chunk> popHeader(bit length = bit(-1), int flags = 0);
 
     /**
      * Removes the designated header and returns it as a mutable chunk in its
@@ -160,21 +160,21 @@ class INET_API Packet : public cPacket
      * the result is chosen according to the internal representation. The popped
      * header length must be zero before calling this function.
      */
-    std::shared_ptr<Chunk> removeHeader(bit length = bit(-1), int flags = 0);
+    Ptr<Chunk> removeHeader(bit length = bit(-1), int flags = 0);
 
     /**
      * Pushes the provided header at the beginning of the packet. The header
      * must be immutable and the popped header length must be zero before
      * calling this function.
      */
-    void pushHeader(const std::shared_ptr<Chunk>& chunk);
+    void pushHeader(const Ptr<Chunk>& chunk);
 
     /**
      * Pushes the provided header at the beginning of the packet. The pushed
      * header is automatically marked immutable. The popped header length must
      * be zero before calling this function.
      */
-    void insertHeader(const std::shared_ptr<Chunk>& chunk);
+    void insertHeader(const Ptr<Chunk>& chunk);
 
     /**
      * Returns true if the designated header is available in the requested
@@ -193,7 +193,7 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    std::shared_ptr<T> peekHeader(bit length = bit(-1), int flags = 0) const {
+    Ptr<T> peekHeader(bit length = bit(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = contents->peek<T>(headerIterator, length, flags);
@@ -209,7 +209,7 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    std::shared_ptr<T> popHeader(bit length = bit(-1), int flags = 0) {
+    Ptr<T> popHeader(bit length = bit(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekHeader<T>(length, flags);
         if (chunk != nullptr) {
@@ -226,7 +226,7 @@ class INET_API Packet : public cPacket
      * popped header length must be zero before calling this function.
      */
     template <typename T>
-    std::shared_ptr<T> removeHeader(bit length = bit(-1), int flags = 0) {
+    Ptr<T> removeHeader(bit length = bit(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         CHUNK_CHECK_USAGE(headerIterator.getPosition() == bit(0), "popped header length is non-zero");
         const auto& chunk = popHeader<T>(length, flags);
@@ -259,14 +259,14 @@ class INET_API Packet : public cPacket
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
-    std::shared_ptr<Chunk> peekTrailer(bit length = bit(-1), int flags = 0) const;
+    Ptr<Chunk> peekTrailer(bit length = bit(-1), int flags = 0) const;
 
     /**
      * Pops the designated trailer and returns it as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    std::shared_ptr<Chunk> popTrailer(bit length = bit(-1), int flags = 0);
+    Ptr<Chunk> popTrailer(bit length = bit(-1), int flags = 0);
 
     /**
      * Removes the designated trailer and returns it as a mutable chunk in its
@@ -274,21 +274,21 @@ class INET_API Packet : public cPacket
      * the result is chosen according to the internal representation. The popped
      * trailer length must be zero before calling this function.
      */
-    std::shared_ptr<Chunk> removeTrailer(bit length = bit(-1), int flags = 0);
+    Ptr<Chunk> removeTrailer(bit length = bit(-1), int flags = 0);
 
     /**
      * Pushes the provided trailer at the end of the packet. The trailer must be
      * immutable and the popped trailer length must be zero before calling this
      * function.
      */
-    void pushTrailer(const std::shared_ptr<Chunk>& chunk);
+    void pushTrailer(const Ptr<Chunk>& chunk);
 
     /**
      * Pushes the provided trailer at the end of the packet. The pushed trailer
      * is automatically marked immutable. The popped trailer length must be zero
      * before calling this function.
      */
-    void insertTrailer(const std::shared_ptr<Chunk>& chunk);
+    void insertTrailer(const Ptr<Chunk>& chunk);
 
     /**
      * Returns true if the designated trailer is available in the requested
@@ -307,7 +307,7 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    std::shared_ptr<T> peekTrailer(bit length = bit(-1), int flags = 0) const {
+    Ptr<T> peekTrailer(bit length = bit(-1), int flags = 0) const {
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = contents->peek<T>(trailerIterator, length, flags);
@@ -323,7 +323,7 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    std::shared_ptr<T> popTrailer(bit length = bit(-1), int flags = 0) {
+    Ptr<T> popTrailer(bit length = bit(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekTrailer<T>(length, flags);
         if (chunk != nullptr) {
@@ -340,7 +340,7 @@ class INET_API Packet : public cPacket
      * popped trailer length must be zero before calling this function.
      */
     template <typename T>
-    std::shared_ptr<T> removeTrailer(bit length = bit(-1), int flags = 0) {
+    Ptr<T> removeTrailer(bit length = bit(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getDataLength(), "length is invalid");
         CHUNK_CHECK_USAGE(trailerIterator.getPosition() == bit(0), "popped trailer length is non-zero");
         const auto& chunk = popTrailer<T>(length, flags);
@@ -363,7 +363,7 @@ class INET_API Packet : public cPacket
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
-    std::shared_ptr<Chunk> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const;
+    Ptr<Chunk> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns true if the designated data part is available in the requested
@@ -383,7 +383,7 @@ class INET_API Packet : public cPacket
      * result is chosen according to the internal representation.
      */
     template <typename T>
-    std::shared_ptr<T> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const {
+    Ptr<T> peekDataAt(bit offset, bit length = bit(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getDataLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, headerIterator.getPosition() + offset, -1), length, flags);
@@ -394,7 +394,7 @@ class INET_API Packet : public cPacket
      * current representation. The length of the returned chunk is the same as
      * the value returned by getDataLength().
      */
-    std::shared_ptr<Chunk> peekData(int flags = 0) const {
+    Ptr<Chunk> peekData(int flags = 0) const {
         return peekDataAt(bit(0), getDataLength(), flags);
     }
 
@@ -403,7 +403,7 @@ class INET_API Packet : public cPacket
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getDataLength().
      */
-    std::shared_ptr<BitsChunk> peekDataBits(int flags = 0) const {
+    Ptr<BitsChunk> peekDataBits(int flags = 0) const {
         return peekDataAt<BitsChunk>(bit(0), getDataLength(), flags);
     }
 
@@ -412,7 +412,7 @@ class INET_API Packet : public cPacket
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getDataLength().
      */
-    std::shared_ptr<BytesChunk> peekDataBytes(int flags = 0) const {
+    Ptr<BytesChunk> peekDataBytes(int flags = 0) const {
         return peekDataAt<BytesChunk>(bit(0), getDataLength(), flags);
     }
     //@}
@@ -424,7 +424,7 @@ class INET_API Packet : public cPacket
      * current representation. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
-    std::shared_ptr<Chunk> peekAt(bit offset, bit length = bit(-1), int flags = 0) const;
+    Ptr<Chunk> peekAt(bit offset, bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns true if the designated part of the packet is available in the
@@ -444,7 +444,7 @@ class INET_API Packet : public cPacket
      * of the result is chosen according to the internal representation.
      */
     template <typename T>
-    std::shared_ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
+    Ptr<T> peekAt(bit offset, bit length = bit(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
         return contents->peek<T>(Chunk::Iterator(true, bit(offset), -1), length, flags);
@@ -456,7 +456,7 @@ class INET_API Packet : public cPacket
      * current representation. The length of the returned chunk is the same as
      * the value returned by getTotalLength().
      */
-    std::shared_ptr<Chunk> peekAll(int flags = 0) const {
+    Ptr<Chunk> peekAll(int flags = 0) const {
         return peekAt(bit(0), getTotalLength(), flags);
     }
 
@@ -465,7 +465,7 @@ class INET_API Packet : public cPacket
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getTotalLength().
      */
-    std::shared_ptr<BitsChunk> peekAllBits(int flags = 0) const {
+    Ptr<BitsChunk> peekAllBits(int flags = 0) const {
         return peekAt<BitsChunk>(bit(0), getTotalLength(), flags);
     }
 
@@ -474,7 +474,7 @@ class INET_API Packet : public cPacket
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getTotalLength().
      */
-    std::shared_ptr<BytesChunk> peekAllBytes(int flags = 0) const {
+    Ptr<BytesChunk> peekAllBytes(int flags = 0) const {
         return peekAt<BytesChunk>(bit(0), getTotalLength(), flags);
     }
     //@}
@@ -485,13 +485,13 @@ class INET_API Packet : public cPacket
      * Inserts the provided chunk at the beginning of the packet. The popped
      * header length must be zero before calling this function.
      */
-    void prepend(const std::shared_ptr<Chunk>& chunk);
+    void prepend(const Ptr<Chunk>& chunk);
 
     /**
      * Inserts the provided chunk at the end of the packet. The popped trailer
      * length must be zero before calling this function.
      */
-    void append(const std::shared_ptr<Chunk>& chunk);
+    void append(const Ptr<Chunk>& chunk);
     //@}
 
     /** @name Removing data related functions */

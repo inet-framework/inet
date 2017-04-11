@@ -148,42 +148,42 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void processUDPPacket(Packet *packet);
 
     // handling DYMO packets
-    void sendDYMOPacket(const std::shared_ptr<DYMOPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
-    void processDYMOPacket(Packet *packet, const std::shared_ptr<DYMOPacket>& dymoPacket);
+    void sendDYMOPacket(const Ptr<DYMOPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
+    void processDYMOPacket(Packet *packet, const Ptr<DYMOPacket>& dymoPacket);
 
     // handling RteMsg packets
-    bool permissibleRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg);
-    void processRteMsg(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg);
-    bit computeRteMsgLength(const std::shared_ptr<RteMsg>& rteMsg);
+    bool permissibleRteMsg(Packet *packet, const Ptr<RteMsg>& rteMsg);
+    void processRteMsg(Packet *packet, const Ptr<RteMsg>& rteMsg);
+    bit computeRteMsgLength(const Ptr<RteMsg>& rteMsg);
 
     // handling RREQ packets
-    std::shared_ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
-    void sendRREQ(const std::shared_ptr<RREQ>& rreq);
-    void processRREQ(Packet *packet, const std::shared_ptr<RREQ>& rreq);
-    bit computeRREQLength(const std::shared_ptr<RREQ> &rreq);
+    Ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
+    void sendRREQ(const Ptr<RREQ>& rreq);
+    void processRREQ(Packet *packet, const Ptr<RREQ>& rreq);
+    bit computeRREQLength(const Ptr<RREQ> &rreq);
 
     // handling RREP packets
-    std::shared_ptr<RREP> createRREP(const std::shared_ptr<RteMsg>& rteMsg);
-    std::shared_ptr<RREP> createRREP(const std::shared_ptr<RteMsg>& rteMsg, IRoute *route);
-    void sendRREP(const std::shared_ptr<RREP>& rrep);
-    void sendRREP(const std::shared_ptr<RREP>& rrep, IRoute *route);
-    void processRREP(Packet *packet, const std::shared_ptr<RREP>& rrep);
-    bit computeRREPLength(const std::shared_ptr<RREP> &rrep);
+    Ptr<RREP> createRREP(const Ptr<RteMsg>& rteMsg);
+    Ptr<RREP> createRREP(const Ptr<RteMsg>& rteMsg, IRoute *route);
+    void sendRREP(const Ptr<RREP>& rrep);
+    void sendRREP(const Ptr<RREP>& rrep, IRoute *route);
+    void processRREP(Packet *packet, const Ptr<RREP>& rrep);
+    bit computeRREPLength(const Ptr<RREP> &rrep);
 
     // handling RERR packets
-    std::shared_ptr<RERR> createRERR(std::vector<L3Address>& addresses);
-    void sendRERR(const std::shared_ptr<RERR>& rerr);
+    Ptr<RERR> createRERR(std::vector<L3Address>& addresses);
+    void sendRERR(const Ptr<RERR>& rerr);
     void sendRERRForUndeliverablePacket(const L3Address& destination);
     void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
-    void processRERR(Packet *packet, const std::shared_ptr<RERR>& rerr);
-    bit computeRERRLength(const std::shared_ptr<RERR>& rerr);
+    void processRERR(Packet *packet, const Ptr<RERR>& rerr);
+    bit computeRERRLength(const Ptr<RERR>& rerr);
 
     // handling routes
-    IRoute *createRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
-    void updateRoutes(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
-    void updateRoute(Packet *packet, const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock, IRoute *route);
+    IRoute *createRoute(Packet *packet, const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
+    void updateRoutes(Packet *packet, const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
+    void updateRoute(Packet *packet, const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock, IRoute *route);
     int getLinkCost(const InterfaceEntry *interfaceEntry, DYMOMetricType metricType);
-    bool isLoopFree(const std::shared_ptr<RteMsg>& rteMsg, IRoute *route);
+    bool isLoopFree(const Ptr<RteMsg>& rteMsg, IRoute *route);
 
     // handling expunge timer
     void processExpungeTimer();
@@ -201,8 +201,8 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     bool isClientAddress(const L3Address& address);
 
     // added node
-    void addSelfNode(const std::shared_ptr<RteMsg>& rteMsg);
-    void addNode(const std::shared_ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
+    void addSelfNode(const Ptr<RteMsg>& rteMsg);
+    void addNode(const Ptr<RteMsg>& rteMsg, AddressBlock& addressBlock);
 
     // sequence number
     void incrementSequenceNumber();

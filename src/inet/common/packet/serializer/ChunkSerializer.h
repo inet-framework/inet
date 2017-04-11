@@ -31,8 +31,8 @@ class INET_API ChunkSerializer : public cObject
   public:
     virtual ~ChunkSerializer() { }
 
-    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const = 0;
-    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const = 0;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
 } // namespace

@@ -54,7 +54,7 @@ class INET_API ReorderBuffer : public ChunkBuffer
      * If there's no available data at the expected offset, then it returns a
      * nullptr and the buffer is not modified.
      */
-    std::shared_ptr<Chunk> popData() {
+    Ptr<Chunk> popData() {
         if (regions.size() > 0 && regions[0].offset == expectedOffset) {
             auto data = regions[0].data;
             bit length = data->getChunkLength();

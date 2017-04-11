@@ -28,13 +28,13 @@ SequenceChunk::SequenceChunk(const SequenceChunk& other) :
 {
 }
 
-SequenceChunk::SequenceChunk(const std::deque<std::shared_ptr<Chunk>>& chunks) :
+SequenceChunk::SequenceChunk(const std::deque<Ptr<Chunk>>& chunks) :
     Chunk(),
     chunks(chunks)
 {
 }
 
-std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -80,22 +80,22 @@ std::shared_ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, Pee
     return converter(const_cast<SequenceChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     auto sequenceChunk = std::make_shared<SequenceChunk>();
     sequenceChunk->insertAtEnd(std::make_shared<SliceChunk>(chunk, offset, length));
     return sequenceChunk;
 }
 
-std::deque<std::shared_ptr<Chunk>> SequenceChunk::dupChunks() const
+std::deque<Ptr<Chunk>> SequenceChunk::dupChunks() const
 {
-    std::deque<std::shared_ptr<Chunk>> copies;
+    std::deque<Ptr<Chunk>> copies;
     for (const auto& chunk : chunks)
         copies.push_back(chunk->isImmutable() ? chunk : chunk->dupShared());
     return copies;
 }
 
-void SequenceChunk::setChunks(const std::deque<std::shared_ptr<Chunk>>& chunks)
+void SequenceChunk::setChunks(const std::deque<Ptr<Chunk>>& chunks)
 {
     handleChange();
     this->chunks = chunks;
@@ -192,7 +192,7 @@ void SequenceChunk::moveIterator(Iterator& iterator, bit length) const
         iterator.setIndex(-1);
 }
 
-void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
+void SequenceChunk::doInsertToBeginning(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
     if (chunks.empty())
@@ -213,7 +213,7 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<Chunk>& chunk)
     }
 }
 
-void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertToBeginning(const Ptr<SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
@@ -237,13 +237,13 @@ void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SliceChunk>& slice
         doInsertToBeginning(std::static_pointer_cast<Chunk>(sliceChunk));
 }
 
-void SequenceChunk::doInsertToBeginning(const std::shared_ptr<SequenceChunk>& chunk)
+void SequenceChunk::doInsertToBeginning(const Ptr<SequenceChunk>& chunk)
 {
     for (auto it = chunk->chunks.rbegin(); it != chunk->chunks.rend(); it++)
         doInsertToBeginning(*it);
 }
 
-void SequenceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+void SequenceChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
 {
     handleChange();
     if (chunk->getChunkType() == CT_SLICE)
@@ -254,7 +254,7 @@ void SequenceChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
         doInsertToBeginning(chunk);
 }
 
-void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
+void SequenceChunk::doInsertToEnd(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > bit(0), "chunk is empty");
     if (chunks.empty())
@@ -275,7 +275,7 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<Chunk>& chunk)
     }
 }
 
-void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertToEnd(const Ptr<SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(sliceChunk->getChunk());
@@ -298,13 +298,13 @@ void SequenceChunk::doInsertToEnd(const std::shared_ptr<SliceChunk>& sliceChunk)
         doInsertToEnd(std::static_pointer_cast<Chunk>(sliceChunk));
 }
 
-void SequenceChunk::doInsertToEnd(const std::shared_ptr<SequenceChunk>& chunk)
+void SequenceChunk::doInsertToEnd(const Ptr<SequenceChunk>& chunk)
 {
     for (const auto& elementChunk : chunk->chunks)
         doInsertToEnd(elementChunk);
 }
 
-void SequenceChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+void SequenceChunk::insertAtEnd(const Ptr<Chunk>& chunk)
 {
     handleChange();
     if (chunk->getChunkType() == CT_SLICE)

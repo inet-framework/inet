@@ -19,7 +19,7 @@
 
 namespace inet {
 
-void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
+void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const
 {
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(chunk);
     if (fieldsChunk->getSerializedBytes() != nullptr)
@@ -44,7 +44,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const std::sha
     }
 }
 
-std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     byte startPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));

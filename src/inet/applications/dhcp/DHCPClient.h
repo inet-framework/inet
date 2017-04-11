@@ -136,12 +136,12 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     /*
      * Records configuration parameters from a DHCPACK message.
      */
-    virtual void recordLease(const std::shared_ptr<DHCPMessage>& dhcpACK);
+    virtual void recordLease(const Ptr<DHCPMessage>& dhcpACK);
 
     /*
      * Records minimal configuration parameters from a DHCPOFFER message.
      */
-    virtual void recordOffer(const std::shared_ptr<DHCPMessage>& dhcpOffer);
+    virtual void recordOffer(const Ptr<DHCPMessage>& dhcpOffer);
 
     /*
      * Assigns the IP address to the interface.
@@ -168,7 +168,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
      * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
      * in response to DHCPINFORM messages.
      */
-    virtual void handleDHCPACK(const std::shared_ptr<DHCPMessage>& msg);
+    virtual void handleDHCPACK(const Ptr<DHCPMessage>& msg);
 
     /*
      * Selects the first non-loopback interface

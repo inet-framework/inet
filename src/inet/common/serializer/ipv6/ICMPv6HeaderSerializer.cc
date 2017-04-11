@@ -37,7 +37,7 @@ Register_Serializer(ICMPv6ParamProblemMsg, ICMPv6HeaderSerializer);
 Register_Serializer(ICMPv6TimeExceededMsg, ICMPv6HeaderSerializer);
 Register_Serializer(IPv6NeighbourSolicitation, ICMPv6HeaderSerializer);
 
-void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& pkt = std::static_pointer_cast<const ICMPv6Header>(chunk);
 
@@ -97,9 +97,9 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const std::sh
     }
 }
 
-std::shared_ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    std::shared_ptr<ICMPv6Header> _pkt = nullptr;
+    Ptr<ICMPv6Header> _pkt = nullptr;
     uint8_t type = stream.readByte();     // type
     uint8_t subcode = stream.readByte();  // subcode
     uint16_t chksum = stream.readUint16();

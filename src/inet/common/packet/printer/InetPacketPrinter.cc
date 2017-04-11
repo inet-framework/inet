@@ -42,15 +42,15 @@ class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
 #ifdef WITH_TCP_COMMON
-    void printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<tcp::TcpHeader>& tcpHeader) const;
+    void printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<tcp::TcpHeader>& tcpHeader) const;
 #endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
-    void printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<UdpHeader>& udpHeader) const;
+    void printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<UdpHeader>& udpHeader) const;
 #endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
-    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<ICMPHeader>& icmpHeader) const;
+    void printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<ICMPHeader>& icmpHeader) const;
 #endif // ifdef WITH_IPv4
-    void printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<Chunk>& chunk) const;
+    void printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<Chunk>& chunk) const;
 
   public:
     InetPacketPrinter() {}
@@ -91,7 +91,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << separ << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
 
-void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<Chunk>& chunk) const
+void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<Chunk>& chunk) const
 {
 #ifdef WITH_IPv4
     if (const auto& ipv4Header = std::dynamic_pointer_cast<IPv4Header>(chunk)) {
@@ -127,7 +127,7 @@ void InetPacketPrinter::printChunk(std::ostream& os, L3Address& srcAddr, L3Addre
     }
 }
 
-void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<tcp::TcpHeader>& tcpHeader) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<tcp::TcpHeader>& tcpHeader) const
 {
 #ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << '.' << tcpHeader->getSrcPort() << " > " << destAddr << '.' << tcpHeader->getDestPort() << ": ";
@@ -157,7 +157,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address& srcAddr, L3A
 #endif // ifdef WITH_TCP_COMMON
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<UdpHeader>& udpHeader) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<UdpHeader>& udpHeader) const
 {
 #ifdef WITH_UDP
 
@@ -166,7 +166,7 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address& srcAddr, L3A
 #endif // ifdef WITH_UDP
 }
 
-void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const std::shared_ptr<ICMPHeader>& icmpHeader) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address& srcAddr, L3Address& destAddr, Packet *packet, const Ptr<ICMPHeader>& icmpHeader) const
 {
 #ifdef WITH_IPv4
     switch (icmpHeader->getType()) {

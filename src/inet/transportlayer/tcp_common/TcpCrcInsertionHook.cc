@@ -43,7 +43,7 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     return ACCEPT;
 }
 
-void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::shared_ptr<TcpHeader>& tcpHeader, Packet *packet)
+void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
 {
     tcpHeader->setCrcMode(crcMode);
     switch (crcMode) {

@@ -204,7 +204,7 @@ class INET_API IGMPv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual void processLeaveTimer(cMessage *msg);
     virtual void processRexmtTimer(cMessage *msg);
 
-    virtual void processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp);
+    virtual void processIgmpMessage(Packet *packet, const Ptr<IGMPMessage>& igmp);
     virtual void processQuery(InterfaceEntry *ie, Packet *packet);
     virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData *group, simtime_t maxRespTime);
     //virtual void processV1Report(InterfaceEntry *ie, IGMPMessage *msg);

@@ -18,7 +18,7 @@
 
 namespace inet {
 
-ChunkQueue::ChunkQueue(const char *name, const std::shared_ptr<Chunk>& contents) :
+ChunkQueue::ChunkQueue(const char *name, const Ptr<Chunk>& contents) :
     cNamedObject(name),
     contents(contents),
     iterator(Chunk::ForwardIterator(bit(0), 0))
@@ -56,20 +56,20 @@ void ChunkQueue::moveIteratorOrRemove(bit length)
         remove(iterator.getPosition());
 }
 
-std::shared_ptr<Chunk> ChunkQueue::peek(bit length, int flags) const
+Ptr<Chunk> ChunkQueue::peek(bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     return contents->peek(iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
+Ptr<Chunk> ChunkQueue::peekAt(bit offset, bit length, int flags) const
 {
     CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(bit(-1) <= length && offset + length <= getLength(), "length is invalid");
     return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
 }
 
-std::shared_ptr<Chunk> ChunkQueue::pop(bit length, int flags)
+Ptr<Chunk> ChunkQueue::pop(bit length, int flags)
 {
     CHUNK_CHECK_USAGE(bit(-1) <= length && length <= getLength(), "length is invalid");
     const auto& chunk = peek(length, flags);
@@ -85,7 +85,7 @@ void ChunkQueue::clear()
     contents = EmptyChunk::singleton;
 }
 
-void ChunkQueue::push(const std::shared_ptr<Chunk>& chunk)
+void ChunkQueue::push(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");

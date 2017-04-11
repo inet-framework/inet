@@ -29,7 +29,7 @@ namespace serializer {
 
 Register_Serializer(IGMPMessage, IGMPHeaderSerializer);
 
-void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& igmpMessage = std::static_pointer_cast<const IGMPMessage>(chunk);
 
@@ -107,9 +107,9 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
     }
 }
 
-std::shared_ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    std::shared_ptr<IGMPMessage> packet = nullptr;
+    Ptr<IGMPMessage> packet = nullptr;
     byte startPos = stream.getPosition();
     unsigned char type = stream.readByte();
     unsigned char code = stream.readByte();

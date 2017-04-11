@@ -31,7 +31,7 @@ namespace serializer {
 
 Register_Serializer(TcpHeader, TcpHeaderSerializer);
 
-void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
     struct tcphdr tcp;
@@ -158,7 +158,7 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
     }    // switch
 }
 
-std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     uint8_t buffer[TCP_HEADER_OCTETS];

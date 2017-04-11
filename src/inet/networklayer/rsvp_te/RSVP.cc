@@ -898,7 +898,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
     }
 }
 
-RSVP::ResvStateBlock_t *RSVP::createRSB(const std::shared_ptr<RSVPResvMsg>& msg)
+RSVP::ResvStateBlock_t *RSVP::createRSB(const Ptr<RSVPResvMsg>& msg)
 {
     ResvStateBlock_t rsbEle;
 
@@ -1123,7 +1123,7 @@ bool RSVP::evalNextHopInterface(IPv4Address destAddr, const EroVector& ERO, IPv4
     }
 }
 
-RSVP::PathStateBlock_t *RSVP::createPSB(const std::shared_ptr<RSVPPathMsg>& msg)
+RSVP::PathStateBlock_t *RSVP::createPSB(const Ptr<RSVPPathMsg>& msg)
 {
     const EroVector& ERO = msg->getERO();
     IPv4Address destAddr = msg->getDestAddress();

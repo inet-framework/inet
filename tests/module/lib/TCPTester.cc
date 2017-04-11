@@ -37,7 +37,7 @@ void TCPTesterBase::initialize()
     tcpdump.setOutStream(EVSTREAM);
 }
 
-void TCPTesterBase::dump(const std::shared_ptr<inet::tcp::TcpHeader>& seg, bool fromA, const char *comment)
+void TCPTesterBase::dump(const Ptr<inet::tcp::TcpHeader>& seg, bool fromA, const char *comment)
 {
 #if OMNETPP_VERSION < 0x0500
     if (getEnvir()->isDisabled())

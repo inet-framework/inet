@@ -32,7 +32,7 @@
 
 namespace inet {
 
-std::shared_ptr<INetworkHeader> NetfilterBase::HookBase::peekNetworkHeader(Packet *packet)
+Ptr<INetworkHeader> NetfilterBase::HookBase::peekNetworkHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
 

@@ -632,7 +632,7 @@ void IGMPv2::sendToIP(Packet *msg, InterfaceEntry *ie, const IPv4Address& dest)
     send(msg, "ipOut");
 }
 
-void IGMPv2::processIgmpMessage(Packet *packet, const std::shared_ptr<IGMPMessage>& igmp)
+void IGMPv2::processIgmpMessage(Packet *packet, const Ptr<IGMPMessage>& igmp)
 {
     InterfaceEntry *ie = ift->getInterfaceById(packet->getMandatoryTag<InterfaceInd>()->getInterfaceId());
     switch (igmp->getType()) {
@@ -723,7 +723,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, Packet *packet)
     numQueriesRecv++;
 
     IPv4Address& groupAddr = igmpQry->getGroupAddress();
-    const std::shared_ptr<IGMPv2Query>& v2Query = std::dynamic_pointer_cast<IGMPv2Query>(igmpQry);
+    const Ptr<IGMPv2Query>& v2Query = std::dynamic_pointer_cast<IGMPv2Query>(igmpQry);
     simtime_t maxRespTime = v2Query ? v2Query->getMaxRespTime() : 10.0;
 
     if (groupAddr.isUnspecified()) {

@@ -124,7 +124,7 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
     }
 }
 
-void ChunkBuffer::replace(bit offset, const std::shared_ptr<Chunk>& chunk)
+void ChunkBuffer::replace(bit offset, const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(offset >= bit(0), "offset is invalid");
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");

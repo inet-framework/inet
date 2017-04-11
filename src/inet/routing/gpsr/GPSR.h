@@ -110,16 +110,16 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     // handling packets
     GPSROption *createGpsrOption(L3Address destination);
     int computeOptionLength(GPSROption *gpsrOption);
-    void setGpsrOptionOnNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram);
-    void removeGpsrOptionFromNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram);
+    void setGpsrOptionOnNetworkDatagram(const Ptr<INetworkHeader>& datagram);
+    void removeGpsrOptionFromNetworkDatagram(const Ptr<INetworkHeader>& datagram);
 
     // returns nullptr if not found
-    GPSROption *findGpsrOptionInNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram);
-    const GPSROption *findGpsrOptionInNetworkDatagram(const std::shared_ptr<INetworkHeader> &datagram) const { return const_cast<GPSR *>(this)->findGpsrOptionInNetworkDatagram(datagram); }
+    GPSROption *findGpsrOptionInNetworkDatagram(const Ptr<INetworkHeader>& datagram);
+    const GPSROption *findGpsrOptionInNetworkDatagram(const Ptr<INetworkHeader> &datagram) const { return const_cast<GPSR *>(this)->findGpsrOptionInNetworkDatagram(datagram); }
 
     // throws an error when not found
-    GPSROption *getGpsrOptionFromNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram);
-    const GPSROption *getGpsrOptionFromNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram) const { return const_cast<GPSR *>(this)->getGpsrOptionFromNetworkDatagram(datagram); }
+    GPSROption *getGpsrOptionFromNetworkDatagram(const Ptr<INetworkHeader>& datagram);
+    const GPSROption *getGpsrOptionFromNetworkDatagram(const Ptr<INetworkHeader>& datagram) const { return const_cast<GPSR *>(this)->getGpsrOptionFromNetworkDatagram(datagram); }
 
     // configuration
     bool isNodeUp() const;
@@ -138,7 +138,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     // address
     std::string getHostName() const;
     L3Address getSelfAddress() const;
-    L3Address getSenderNeighborAddress(const std::shared_ptr<INetworkHeader>& datagram) const;
+    L3Address getSenderNeighborAddress(const Ptr<INetworkHeader>& datagram) const;
 
     // neighbor
     simtime_t getNextNeighborExpiration();
@@ -147,9 +147,9 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     L3Address getNextPlanarNeighborCounterClockwise(const L3Address& startNeighborAddress, double startNeighborAngle);
 
     // next hop
-    L3Address findNextHop(const std::shared_ptr<INetworkHeader>& datagram, const L3Address& destination);
-    L3Address findGreedyRoutingNextHop(const std::shared_ptr<INetworkHeader>& datagram, const L3Address& destination);
-    L3Address findPerimeterRoutingNextHop(const std::shared_ptr<INetworkHeader>& datagram, const L3Address& destination);
+    L3Address findNextHop(const Ptr<INetworkHeader>& datagram, const L3Address& destination);
+    L3Address findGreedyRoutingNextHop(const Ptr<INetworkHeader>& datagram, const L3Address& destination);
+    L3Address findPerimeterRoutingNextHop(const Ptr<INetworkHeader>& datagram, const L3Address& destination);
 
     // routing
     Result routeDatagram(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop);

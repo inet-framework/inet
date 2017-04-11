@@ -80,8 +80,11 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
     return p;
 }
 
+template<typename T>
+using Ptr = std::shared_ptr<T>;
+
 template<class T>
-std::shared_ptr<T> __checknull(const std::shared_ptr<T>& p, const char *expr, const char *file, int line)
+Ptr<T> __checknull(const Ptr<T>& p, const char *expr, const char *file, int line)
 {
     if (p == nullptr)
         throw cRuntimeError("Expression %s returned nullptr at %s:%d", expr, file, line);

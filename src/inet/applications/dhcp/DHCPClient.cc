@@ -269,7 +269,7 @@ void DHCPClient::handleTimer(cMessage *msg)
         throw cRuntimeError("Unknown self message '%s'", msg->getName());
 }
 
-void DHCPClient::recordOffer(const std::shared_ptr<DHCPMessage>& dhcpOffer)
+void DHCPClient::recordOffer(const Ptr<DHCPMessage>& dhcpOffer)
 {
     if (!dhcpOffer->getYiaddr().isUnspecified()) {
         IPv4Address ip = dhcpOffer->getYiaddr();
@@ -289,7 +289,7 @@ void DHCPClient::recordOffer(const std::shared_ptr<DHCPMessage>& dhcpOffer)
         EV_WARN << "DHCPOFFER arrived, but no IP address has been offered. Discarding it and remaining in SELECTING." << endl;
 }
 
-void DHCPClient::recordLease(const std::shared_ptr<DHCPMessage>& dhcpACK)
+void DHCPClient::recordLease(const Ptr<DHCPMessage>& dhcpACK)
 {
     if (!dhcpACK->getYiaddr().isUnspecified()) {
         IPv4Address ip = dhcpACK->getYiaddr();
@@ -645,7 +645,7 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     sendToUDP(packet, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
 }
 
-void DHCPClient::handleDHCPACK(const std::shared_ptr<DHCPMessage>& msg)
+void DHCPClient::handleDHCPACK(const Ptr<DHCPMessage>& msg)
 {
     recordLease(msg);
     cancelEvent(timerTo);

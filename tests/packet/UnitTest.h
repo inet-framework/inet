@@ -30,28 +30,28 @@ class CompoundHeader : public CompoundHeader_Base
 class CompoundHeaderSerializer : public SequenceChunkSerializer
 {
   public:
-    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
 
 class TlvHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TlvHeaderBoolSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TlvHeaderIntSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class UnitTest : public cSimpleModule

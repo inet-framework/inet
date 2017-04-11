@@ -27,12 +27,12 @@ Register_Serializer(EthernetHeader, EthernetHeaderSerializer);
 Register_Serializer(EthernetTrailer, EthernetTrailerSerializer);
 Define_Module(NewTest);
 
-static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_ptr<TcpHeader>& tcpHeader, const std::shared_ptr<BytesChunk>& tcpSegment)
+static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const Ptr<TcpHeader>& tcpHeader, const Ptr<BytesChunk>& tcpSegment)
 {
     return 42;
 }
 
-void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& applicationHeader = std::static_pointer_cast<const ApplicationHeader>(chunk);
     auto position = stream.getLength();
@@ -40,7 +40,7 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const st
     stream.writeByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-std::shared_ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto applicationHeader = std::make_shared<ApplicationHeader>();
     auto position = stream.getPosition();
@@ -49,7 +49,7 @@ std::shared_ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStrea
     return applicationHeader;
 }
 
-void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
     auto position = stream.getLength();
@@ -62,7 +62,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::share
     stream.writeByteRepeatedly(0, byte(tcpHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tcpHeader = std::make_shared<TcpHeader>();
     auto position = stream.getPosition();
@@ -81,7 +81,7 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& strea
     return tcpHeader;
 }
 
-void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& ipHeader = std::static_pointer_cast<const IpHeader>(chunk);
     auto position = stream.getLength();
@@ -89,7 +89,7 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared
     stream.writeByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ipHeader = std::make_shared<IpHeader>();
     auto position = stream.getPosition();
@@ -101,7 +101,7 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream
     return ipHeader;
 }
 
-void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& ethernetHeader = std::static_pointer_cast<const EthernetHeader>(chunk);
     auto position = stream.getLength();
@@ -109,7 +109,7 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const std::
     stream.writeByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
-std::shared_ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetHeader = std::make_shared<EthernetHeader>();
     auto position = stream.getPosition();
@@ -118,7 +118,7 @@ std::shared_ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& 
     return ethernetHeader;
 }
 
-void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& ethernetTrailer = std::static_pointer_cast<const EthernetTrailer>(chunk);
     auto position = stream.getLength();
@@ -126,7 +126,7 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const std:
     stream.writeByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
 }
 
-std::shared_ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetTrailer = std::make_shared<EthernetTrailer>();
     auto position = stream.getPosition();
@@ -212,7 +212,7 @@ void NewSender::sendIp(Packet *packet)
     sendEthernet(ipDatagram);
 }
 
-std::shared_ptr<TcpHeader> NewSender::createTcpHeader()
+Ptr<TcpHeader> NewSender::createTcpHeader()
 {
     auto tcpHeader = std::make_shared<TcpHeader>();
     tcpHeader->setChunkLength(byte(20));

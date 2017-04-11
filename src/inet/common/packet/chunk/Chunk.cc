@@ -39,7 +39,7 @@ void Chunk::handleChange()
     CHUNK_CHECK_USAGE(isMutable(), "chunk is mutable");
 }
 
-std::shared_ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     auto chunkType = chunk->getChunkType();
     if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES)
@@ -63,7 +63,7 @@ void Chunk::seekIterator(Iterator& iterator, bit position) const
     iterator.setIndex(position == bit(0) ? 0 : -1);
 }
 
-std::shared_ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> Chunk::peek(const Iterator& iterator, bit length, int flags) const
 {
     const auto& chunk = peekUnchecked(nullptr, nullptr, iterator, length, flags);
     return checkPeekResult<Chunk>(chunk, flags);
@@ -76,7 +76,7 @@ std::string Chunk::str() const
     return os.str();
 }
 
-void Chunk::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length)
+void Chunk::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length)
 {
     Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
@@ -87,7 +87,7 @@ void Chunk::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& 
     CHUNK_CHECK_IMPLEMENTATION(expectedChunkLength == endPosition - startPosition);
 }
 
-std::shared_ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo)
+Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo)
 {
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
     auto startPosition = byte(stream.getPosition());

@@ -13,7 +13,7 @@ cplusplus{{
 namespace inet;
 
 cplusplus{{
-typedef std::shared_ptr<Chunk> ChunkPtr;
+typedef Ptr<Chunk> ChunkPtr;
 typedef const Protocol * ProtocolPtr;
 
 using namespace units::values;

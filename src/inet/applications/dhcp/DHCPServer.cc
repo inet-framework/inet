@@ -283,7 +283,7 @@ void DHCPServer::processDHCPMessage(Packet *packet)
     numReceived++;
 }
 
-void DHCPServer::sendNAK(const std::shared_ptr<DHCPMessage>& msg)
+void DHCPServer::sendNAK(const Ptr<DHCPMessage>& msg)
 {
     // EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
     Packet *pk = new Packet("DHCPNAK");
@@ -314,7 +314,7 @@ void DHCPServer::sendNAK(const std::shared_ptr<DHCPMessage>& msg)
     sendToUDP(pk, serverPort, destAddr, clientPort);
 }
 
-void DHCPServer::sendACK(DHCPLease *lease, const std::shared_ptr<DHCPMessage>& packet)
+void DHCPServer::sendACK(DHCPLease *lease, const Ptr<DHCPMessage>& packet)
 {
     EV_INFO << "Sending the ACK to " << lease->mac << "." << endl;
 
@@ -382,7 +382,7 @@ void DHCPServer::sendACK(DHCPLease *lease, const std::shared_ptr<DHCPMessage>& p
     sendToUDP(pk, serverPort, destAddr, clientPort);
 }
 
-void DHCPServer::sendOffer(DHCPLease *lease, const std::shared_ptr<DHCPMessage>& packet)
+void DHCPServer::sendOffer(DHCPLease *lease, const Ptr<DHCPMessage>& packet)
 {
     EV_INFO << "Offering " << *lease << endl;
 

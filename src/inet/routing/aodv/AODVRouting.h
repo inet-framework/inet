@@ -151,29 +151,29 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
     void expungeRoutes();
 
     /* Control packet creators */
-    std::shared_ptr<AODVRREPACK> createRREPACK();
-    std::shared_ptr<AODVRREP> createHelloMessage();
-    std::shared_ptr<AODVRREQ> createRREQ(const L3Address& destAddr);
-    std::shared_ptr<AODVRREP> createRREP(const std::shared_ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
-    std::shared_ptr<AODVRREP> createGratuitousRREP(const std::shared_ptr<AODVRREQ>& rreq, IRoute *originatorRoute);
-    std::shared_ptr<AODVRERR> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
+    Ptr<AODVRREPACK> createRREPACK();
+    Ptr<AODVRREP> createHelloMessage();
+    Ptr<AODVRREQ> createRREQ(const L3Address& destAddr);
+    Ptr<AODVRREP> createRREP(const Ptr<AODVRREQ>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
+    Ptr<AODVRREP> createGratuitousRREP(const Ptr<AODVRREQ>& rreq, IRoute *originatorRoute);
+    Ptr<AODVRERR> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 
     /* Control Packet handlers */
-    void handleRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& sourceAddr);
-    void handleRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
-    void handleRERR(const std::shared_ptr<AODVRERR>& rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(const std::shared_ptr<AODVRREP>& helloMessage);
-    void handleRREPACK(const std::shared_ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr);
+    void handleRREP(const Ptr<AODVRREP>& rrep, const L3Address& sourceAddr);
+    void handleRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
+    void handleRERR(const Ptr<AODVRERR>& rerr, const L3Address& sourceAddr);
+    void handleHelloMessage(const Ptr<AODVRREP>& helloMessage);
+    void handleRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
-    void sendRREQ(const std::shared_ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive);
-    void sendRREPACK(const std::shared_ptr<AODVRREPACK>& rrepACK, const L3Address& destAddr);
-    void sendRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive);
-    void sendGRREP(const std::shared_ptr<AODVRREP>& grrep, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREQ(const Ptr<AODVRREQ>& rreq, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREPACK(const Ptr<AODVRREPACK>& rrepACK, const L3Address& destAddr);
+    void sendRREP(const Ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void sendGRREP(const Ptr<AODVRREP>& grrep, const L3Address& destAddr, unsigned int timeToLive);
 
     /* Control Packet forwarders */
-    void forwardRREP(const std::shared_ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive);
-    void forwardRREQ(const std::shared_ptr<AODVRREQ>& rreq, unsigned int timeToLive);
+    void forwardRREP(const Ptr<AODVRREP>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void forwardRREQ(const Ptr<AODVRREQ>& rreq, unsigned int timeToLive);
 
     /* Self message handlers */
     void handleRREPACKTimer();
@@ -197,7 +197,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public Net
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
-    void sendAODVPacket(const std::shared_ptr<AODVControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
+    void sendAODVPacket(const Ptr<AODVControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void clearState();
 
     /* Lifecycle */

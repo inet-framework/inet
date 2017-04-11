@@ -390,7 +390,7 @@ L3Address GPSR::getSelfAddress() const
     return ret;
 }
 
-L3Address GPSR::getSenderNeighborAddress(const std::shared_ptr<INetworkHeader>& datagram) const
+L3Address GPSR::getSenderNeighborAddress(const Ptr<INetworkHeader>& datagram) const
 {
     const GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
     return gpsrOption->getSenderAddress();
@@ -482,7 +482,7 @@ L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeig
 // next hop
 //
 
-L3Address GPSR::findNextHop(const std::shared_ptr<INetworkHeader>& datagram, const L3Address& destination)
+L3Address GPSR::findNextHop(const Ptr<INetworkHeader>& datagram, const L3Address& destination)
 {
     GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
     switch (gpsrOption->getRoutingMode()) {
@@ -492,7 +492,7 @@ L3Address GPSR::findNextHop(const std::shared_ptr<INetworkHeader>& datagram, con
     }
 }
 
-L3Address GPSR::findGreedyRoutingNextHop(const std::shared_ptr<INetworkHeader>& datagram, const L3Address& destination)
+L3Address GPSR::findGreedyRoutingNextHop(const Ptr<INetworkHeader>& datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using greedy routing: destination = " << destination << endl;
     GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
@@ -522,7 +522,7 @@ L3Address GPSR::findGreedyRoutingNextHop(const std::shared_ptr<INetworkHeader>& 
         return bestNeighbor;
 }
 
-L3Address GPSR::findPerimeterRoutingNextHop(const std::shared_ptr<INetworkHeader>& datagram, const L3Address& destination)
+L3Address GPSR::findPerimeterRoutingNextHop(const Ptr<INetworkHeader>& datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using perimeter routing: destination = " << destination << endl;
     GPSROption *gpsrOption = getGpsrOptionFromNetworkDatagram(datagram);
@@ -598,7 +598,7 @@ INetfilter::IHook::Result GPSR::routeDatagram(Packet *datagram, const InterfaceE
     }
 }
 
-void GPSR::setGpsrOptionOnNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram)
+void GPSR::setGpsrOptionOnNetworkDatagram(const Ptr<INetworkHeader>& datagram)
 {
     GPSROption *gpsrOption = createGpsrOption(datagram->getDestinationAddress());
 #ifdef WITH_IPv4
@@ -645,7 +645,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(const std::shared_ptr<INetworkHeader>&
     }
 }
 
-GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram)
+GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const Ptr<INetworkHeader>& datagram)
 {
     GPSROption *gpsrOption = nullptr;
 
@@ -679,7 +679,7 @@ GPSROption *GPSR::findGpsrOptionInNetworkDatagram(const std::shared_ptr<INetwork
     return gpsrOption;
 }
 
-GPSROption *GPSR::getGpsrOptionFromNetworkDatagram(const std::shared_ptr<INetworkHeader>& datagram)
+GPSROption *GPSR::getGpsrOptionFromNetworkDatagram(const Ptr<INetworkHeader>& datagram)
 {
     GPSROption *gpsrOption = findGpsrOptionInNetworkDatagram(datagram);
     if (gpsrOption == nullptr)

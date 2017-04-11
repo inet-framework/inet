@@ -32,8 +32,8 @@ class INET_API IPv4HeaderSerializer : public FieldsChunkSerializer
     virtual void serializeOption(MemoryOutputStream& stream, const TLVOptionBase *option) const;
     virtual TLVOptionBase *deserializeOption(MemoryInputStream& stream) const;
 
-    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     IPv4HeaderSerializer() : FieldsChunkSerializer() {}

@@ -87,7 +87,7 @@ InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule 
     return interfaceTable->getInterfaceByInterfaceModule(module);
 }
 
-void VisualizerBase::mapChunkIds(const std::shared_ptr<Chunk>& chunk, const std::function<void(int)>& thunk) const
+void VisualizerBase::mapChunkIds(const Ptr<Chunk>& chunk, const std::function<void(int)>& thunk) const
 {
     if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
         for (const auto& elementChunk : std::static_pointer_cast<SequenceChunk>(chunk)->getChunks())

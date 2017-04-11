@@ -87,7 +87,7 @@ Packet *IPv4FragBuf::addFragment(Packet *packet, simtime_t now)
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
         pk->transferTagsFrom(buf->packet);
-        auto hdr = std::shared_ptr<IPv4Header>(buf->packet->peekHeader<IPv4Header>()->dup());
+        auto hdr = Ptr<IPv4Header>(buf->packet->peekHeader<IPv4Header>()->dup());
         const auto& payload = buf->buf.getData();
         hdr->setTotalLengthField(hdr->getHeaderLength() + byte(payload->getChunkLength()).get());
         hdr->setFragmentOffset(0);

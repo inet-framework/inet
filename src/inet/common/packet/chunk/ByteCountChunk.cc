@@ -36,7 +36,7 @@ ByteCountChunk::ByteCountChunk(byte length) :
     CHUNK_CHECK_USAGE(length >= byte(0), "length is invalid");
 }
 
-std::shared_ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -61,7 +61,7 @@ std::shared_ptr<Chunk> ByteCountChunk::peekUnchecked(PeekPredicate predicate, Pe
     return converter(const_cast<ByteCountChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> ByteCountChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
@@ -76,17 +76,17 @@ void ByteCountChunk::setLength(byte length)
     this->length = length;
 }
 
-bool ByteCountChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+bool ByteCountChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-bool ByteCountChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
+bool ByteCountChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-void ByteCountChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+void ByteCountChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();
@@ -94,7 +94,7 @@ void ByteCountChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+void ByteCountChunk::insertAtEnd(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTECOUNT);
     handleChange();

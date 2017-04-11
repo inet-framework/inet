@@ -34,7 +34,7 @@ BitsChunk::BitsChunk(const std::vector<bool>& bits) :
 {
 }
 
-std::shared_ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -59,7 +59,7 @@ std::shared_ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekCon
     return converter(const_cast<BitsChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     MemoryOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
@@ -83,17 +83,17 @@ void BitsChunk::setBit(int index, bool bit)
     bits[index] = bit;
 }
 
-bool BitsChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+bool BitsChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
-bool BitsChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
+bool BitsChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
-void BitsChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+void BitsChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
     handleChange();
@@ -101,7 +101,7 @@ void BitsChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
     bits.insert(bits.begin(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+void BitsChunk::insertAtEnd(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BITS);
     handleChange();

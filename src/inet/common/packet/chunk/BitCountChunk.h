@@ -35,9 +35,9 @@ class INET_API BitCountChunk : public Chunk
     bit length;
 
   protected:
-    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -47,7 +47,7 @@ class INET_API BitCountChunk : public Chunk
     BitCountChunk(bit length);
 
     virtual BitCountChunk *dup() const override { return new BitCountChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BitCountChunk>(*this); }
+    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<BitCountChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
@@ -61,11 +61,11 @@ class INET_API BitCountChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_BITCOUNT; }
     virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= bit(0)); return length; }
 
-    virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) override;
 
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) override;
+    virtual void insertAtEnd(const Ptr<Chunk>& chunk) override;
 
     virtual bool canRemoveFromBeginning(bit length) override { return true; }
     virtual bool canRemoveFromEnd(bit length) override { return true; }

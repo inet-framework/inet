@@ -34,7 +34,7 @@ BytesChunk::BytesChunk(const std::vector<uint8_t>& bytes) :
 {
 }
 
-std::shared_ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
+Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();
     CHUNK_CHECK_USAGE(bit(0) <= iterator.getPosition() && iterator.getPosition() <= chunkLength, "iterator is out of range");
@@ -59,7 +59,7 @@ std::shared_ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekCo
     return converter(const_cast<BytesChunk *>(this)->shared_from_this(), iterator, length, flags);
 }
 
-std::shared_ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
+Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
     MemoryOutputStream outputStream(chunk->getChunkLength());
     Chunk::serialize(outputStream, chunk, offset, length);
@@ -94,17 +94,17 @@ void BytesChunk::copyFromBuffer(const uint8_t *buffer, size_t bufferLength)
     bytes.assign(buffer, buffer + bufferLength);
 }
 
-bool BytesChunk::canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::canInsertAtBeginning(const Ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == CT_BYTES;
 }
 
-bool BytesChunk::canInsertAtEnd(const std::shared_ptr<Chunk>& chunk)
+bool BytesChunk::canInsertAtEnd(const Ptr<Chunk>& chunk)
 {
     return chunk->getChunkType() == CT_BYTES;
 }
 
-void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
+void BytesChunk::insertAtBeginning(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();
@@ -112,7 +112,7 @@ void BytesChunk::insertAtBeginning(const std::shared_ptr<Chunk>& chunk)
     bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-void BytesChunk::insertAtEnd(const std::shared_ptr<Chunk>& chunk)
+void BytesChunk::insertAtEnd(const Ptr<Chunk>& chunk)
 {
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkType() == CT_BYTES);
     handleChange();

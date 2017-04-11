@@ -91,7 +91,7 @@ using namespace units::values;
  *    data. For example, when a chunk is created by deserializing data but the
  *    field based representation does not fully support all possible data.
  *
- * Chunks can be safely shared using std::shared_ptr. In fact, the reason for
+ * Chunks can be safely shared using Ptr. In fact, the reason for
  * having immutable chunks is to allow for efficient sharing using shared
  * pointers. For example, when a Packet data structure is duplicated the copy
  * can share immutable chunks with the original.
@@ -358,15 +358,15 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * and has the provided length. This function isn't a constructor to allow
      * creating instances of message compiler generated field based chunk classes.
      */
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
-    typedef bool (*PeekPredicate)(const std::shared_ptr<Chunk>&);
-    typedef std::shared_ptr<Chunk> (*PeekConverter)(const std::shared_ptr<Chunk>& chunk, const Chunk::Iterator& iterator, bit length, int flags);
+    typedef bool (*PeekPredicate)(const Ptr<Chunk>&);
+    typedef Ptr<Chunk> (*PeekConverter)(const Ptr<Chunk>& chunk, const Chunk::Iterator& iterator, bit length, int flags);
 
-    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
+    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const = 0;
 
     template <typename T>
-    std::shared_ptr<T> peekConverted(const Iterator& iterator, bit length, int flags) const {
+    Ptr<T> peekConverted(const Iterator& iterator, bit length, int flags) const {
         CHUNK_CHECK_USAGE(iterator.isForward() || length != bit(-1), "chunk conversion using backward iterator with undefined length is invalid");
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
         const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length, flags);
@@ -375,7 +375,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     }
 
     template <typename T>
-    std::shared_ptr<T> checkPeekResult(const std::shared_ptr<T>& chunk, int flags) const {
+    Ptr<T> checkPeekResult(const Ptr<T>& chunk, int flags) const {
         if (chunk == nullptr) {
             if (!(flags & PF_ALLOW_NULLPTR))
                 throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
@@ -400,7 +400,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns a mutable copy of this chunk in a shared pointer.
      */
-    virtual std::shared_ptr<Chunk> dupShared() const { return std::shared_ptr<Chunk>(static_cast<Chunk *>(dup())); };
+    virtual Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
     //@}
 
     /** @name Mutability related functions */
@@ -451,22 +451,22 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) { return false; }
 
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) { return false; }
+    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) { return false; }
 
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void insertAtEnd(const Ptr<Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     //@}
 
     /** @name Removing data related functions */
@@ -514,7 +514,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Returns the simplified representation of this chunk eliminating all potential
      * redundancies. This function may return a nullptr for emptry chunks.
      */
-    virtual std::shared_ptr<Chunk> simplify() const {
+    virtual Ptr<Chunk> simplify() const {
         return peek(bit(0), getChunkLength());
     }
 
@@ -525,7 +525,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * is mutable iff the designated part is directly represented in this chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
-    virtual std::shared_ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
+    virtual Ptr<Chunk> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const;
 
     /**
      * Returns whether if the designated part of the data is available in the
@@ -549,9 +549,9 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * by a mutable chunk, otherwise the result is immutable.
      */
     template <typename T>
-    std::shared_ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
-        const auto& predicate = [] (const std::shared_ptr<Chunk>& chunk) -> bool { return chunk == nullptr || std::dynamic_pointer_cast<T>(chunk); };
-        const auto& converter = [] (const std::shared_ptr<Chunk>& chunk, const Iterator& iterator, bit length, int flags) -> std::shared_ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
+    Ptr<T> peek(const Iterator& iterator, bit length = bit(-1), int flags = 0) const {
+        const auto& predicate = [] (const Ptr<Chunk>& chunk) -> bool { return chunk == nullptr || std::dynamic_pointer_cast<T>(chunk); };
+        const auto& converter = [] (const Ptr<Chunk>& chunk, const Iterator& iterator, bit length, int flags) -> Ptr<Chunk> { return chunk->peekConverted<T>(iterator, length, flags); };
         const auto& chunk = peekUnchecked(predicate, converter, iterator, length, flags);
         return checkPeekResult<T>(std::static_pointer_cast<T>(chunk), flags);
     }
@@ -570,7 +570,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
      */
-    static void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
+    static void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
 
     /**
      * Deserializes a chunk from the given stream. The returned chunk will be
@@ -578,7 +578,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * stream starting from the current stream position up to the length
      * required by the deserializer of the chunk.
      */
-    static std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo);
+    static Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo);
     //@}
 };
 

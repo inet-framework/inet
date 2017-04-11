@@ -1248,7 +1248,7 @@ INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *pac
     return ACCEPT;
 }
 
-void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
+void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet)
 {
     udpHeader->setCrcMode(crcMode);
     switch (crcMode) {
@@ -1281,7 +1281,7 @@ void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
     }
 }
 
-bool UDP::verifyCrc(const Protocol *networkProtocol, const std::shared_ptr<UdpHeader>& udpHeader, Packet *packet)
+bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<UdpHeader>& udpHeader, Packet *packet)
 {
     switch (udpHeader->getCrcMode()) {
         case CRC_DISABLED:

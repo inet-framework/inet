@@ -36,9 +36,9 @@ class INET_API BytesChunk : public Chunk
     std::vector<uint8_t> bytes;
 
   protected:
-    virtual std::shared_ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
+    virtual Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const override;
 
-    static std::shared_ptr<Chunk> convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags);
+    static Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags);
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -49,7 +49,7 @@ class INET_API BytesChunk : public Chunk
     BytesChunk(const uint8_t *buffer, size_t bufLen) : Chunk(), bytes(buffer, buffer + bufLen) { }
 
     virtual BytesChunk *dup() const override { return new BytesChunk(*this); }
-    virtual std::shared_ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
+    virtual Ptr<Chunk> dupShared() const override { return std::make_shared<BytesChunk>(*this); }
     //@}
 
     /** @name Field accessor functions */
@@ -72,11 +72,11 @@ class INET_API BytesChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_BYTES; }
     virtual bit getChunkLength() const override { return byte(bytes.size()); }
 
-    virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtBeginning(const Ptr<Chunk>& chunk) override;
+    virtual bool canInsertAtEnd(const Ptr<Chunk>& chunk) override;
 
-    virtual void insertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
-    virtual void insertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
+    virtual void insertAtBeginning(const Ptr<Chunk>& chunk) override;
+    virtual void insertAtEnd(const Ptr<Chunk>& chunk) override;
 
     virtual bool canRemoveFromBeginning(bit length) override { return bit(length).get() % 8 == 0; }
     virtual bool canRemoveFromEnd(bit length) override { return bit(length).get() % 8 == 0; }

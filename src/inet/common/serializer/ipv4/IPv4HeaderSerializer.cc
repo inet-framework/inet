@@ -27,7 +27,7 @@ namespace serializer {
 
 Register_Serializer(IPv4Header, IPv4HeaderSerializer);
 
-void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     auto position = stream.getLength();
     struct ip iphdr;
@@ -148,7 +148,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
     }
 }
 
-std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     uint8_t buffer[IP_HEADER_BYTES];
