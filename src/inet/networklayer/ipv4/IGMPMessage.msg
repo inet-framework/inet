@@ -99,7 +99,6 @@ class IGMPv2Leave extends IGMPMessage
 class IGMPv3Query extends IGMPv2Query
 {
     @customize(true);
-    chunkLength = bit(-1);
     // maxRespTime stored in `code` in units of 1/10 second
     //     0-127: 0-12.7s
     //   128-255: 1eeemmmm : (mant | 0x10) << (exp + 3)
@@ -128,7 +127,6 @@ struct GroupRecord
 
 class IGMPv3Report extends IGMPMessage
 {
-    chunkLength = bit(-1);
     type = IGMPV3_MEMBERSHIP_REPORT;
     GroupRecord groupRecord[];
 }

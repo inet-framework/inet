@@ -34,7 +34,6 @@ struct TELinkStateInfo;
 //
 class LinkStateMsg extends FieldsChunk
 {
-    chunkLength = bit(0);
     TELinkStateInfo linkInfo[];
 
     bool request = false; // if true, receiver is expected to send back its own link state database to the sender --FIXME really needed?

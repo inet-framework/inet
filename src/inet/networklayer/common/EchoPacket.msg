@@ -38,7 +38,6 @@ enum EchoProtocolType
 class EchoPacket extends FieldsChunk
 {
     int type @enum(EchoProtocolType);
-    chunkLength = byte(0);
     int identifier; // identifier to aid in matching Echo replies. May be Zero
     int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
 }

@@ -30,7 +30,6 @@ class FieldsChunk extends cObject;
 //
 class SimpleVoIPPacket extends FieldsChunk
 {
-    chunkLength = bit(0);
     unsigned int talkspurtID;          // identifies the talkspurt
     unsigned int talkspurtNumPackets;  // number of all packets of current talkspurt
     unsigned int packetID;             // 0..talkspurtNumPackets-1

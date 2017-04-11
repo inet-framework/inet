@@ -31,7 +31,6 @@ class noncobject L3Address;
 //
 class TransportPseudoHeader extends FieldsChunk
 {
-    chunkLength = byte(-1);
     L3Address srcAddress;
     L3Address destAddress;
     int networkProtocolId;  // inet specific value, Protocol::getId()

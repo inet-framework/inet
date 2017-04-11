@@ -46,8 +46,6 @@ class noncobject ByteArray;
 //
 class VoIPStreamPacket extends FieldsChunk
 {
-    chunkLength = bit(0);
-
     int type @enum(VoIPStreamPacketType);
 
     int codec;  // FFmpeg identifier of the codec

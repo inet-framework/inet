@@ -55,7 +55,6 @@ struct OSPFOptions
 //
 class OSPFPacket extends FieldsChunk
 {
-    chunkLength = byte(0);
     char version = 2;
     char type @enum(OSPFPacketType) = HELLO_PACKET;
 

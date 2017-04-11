@@ -119,7 +119,6 @@ class JoinPruneGroup
 // Header
 class PIMPacket extends FieldsChunk
 {
-    chunkLength = byte(0);
     short         version = 2;
     short         type @enum(PIMPacketType);
 }

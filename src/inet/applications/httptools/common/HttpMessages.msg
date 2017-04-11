@@ -83,7 +83,6 @@ class HttpBaseMessage extends FieldsChunk
 {
     @omitGetVerb(true);
     @fieldNameSuffix("_var");
-    chunkLength = byte(0);
     string targetUrl;               // The target URL - request set for browsers, echoed by servers.
     string originatorUrl = "";      // The originator URL. Only applicable for servers.
     int protocol = 11;              // 10 for http/1.0, 11 for http/1.1.

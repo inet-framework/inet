@@ -49,7 +49,6 @@ enum SAPCode;
 //
 class EtherFrame extends FieldsChunk
 {
-    chunkLength = byte(0);
     MACAddress dest;
     MACAddress src;
 }
@@ -157,7 +156,6 @@ enum EthernetFcsMode {
 
 class EthernetPadding extends FieldsChunk
 {
-    chunkLength = byte(0);
 }
 
 class EthernetFcs extends FieldsChunk
