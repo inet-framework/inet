@@ -203,6 +203,25 @@ static void testIncomplete()
     assert(tcpHeader2->getChunkLength() == byte(4));
     assert(tcpHeader2->getCrcMode() == CRC_COMPUTED);
     assert(tcpHeader2->getSrcPort() == 1000);
+
+    // 3. packet provides incomplete variable length serialized header
+    Packet packet3;
+    auto tcpHeader3 = std::make_shared<TcpHeader>();
+    tcpHeader3->setChunkLength(byte(8));
+    tcpHeader3->setLengthField(16);
+    tcpHeader3->setCrcMode(CRC_COMPUTED);
+    tcpHeader3->markImmutable();
+    packet3.append(tcpHeader3);
+    const auto& bytesChunk1 = packet3.peekAllBytes();
+    assert(bytesChunk1->getChunkLength() == byte(8));
+
+    // 4. packet provides incomplete variable length deserialized header
+    Packet packet4;
+    packet4.append(bytesChunk1);
+    const auto& tcpHeader4 = packet4.peekHeader<TcpHeader>(bit(-1), Chunk::PF_ALLOW_INCOMPLETE);
+    assert(tcpHeader4->isIncomplete());
+    assert(tcpHeader4->getChunkLength() == byte(8));
+    assert(tcpHeader4->getLengthField() == 16);
 }
 
 static void testCorrect()
