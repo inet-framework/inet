@@ -29,7 +29,7 @@ Register_Serializer(IPv4Header, IPv4HeaderSerializer);
 
 void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    auto position = stream.getPosition();
+    auto position = stream.getLength();
     struct ip iphdr;
     const auto& ipv4Header = std::static_pointer_cast<const IPv4Header>(chunk);
     unsigned int headerLength = ipv4Header->getHeaderLength();
@@ -67,12 +67,12 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
         }    // if options present
         if (ipv4Header->getHeaderLength() < (int)(IP_HEADER_BYTES + optionsLength))
             throw cRuntimeError("Serializing an IPv4 packet with wrong headerLength value: not enough for store options.\n");
-        auto writtenLength = stream.getPosition() - position;
+        auto writtenLength = byte(stream.getLength() - position).get();
         if (writtenLength < headerLength)
             stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, headerLength - writtenLength);
     }
 
-    stream.writeBytes((uint8_t *)&iphdr, IP_HEADER_BYTES);
+    stream.writeBytes((uint8_t *)&iphdr, byte(IP_HEADER_BYTES));
 }
 
 void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLVOptionBase *option) const

@@ -25,7 +25,7 @@ void BitsChunkSerializer::serialize(MemoryOutputStream& stream, const std::share
 {
     const auto& bitsChunk = std::static_pointer_cast<const BitsChunk>(chunk);
     bit serializedLength = length == bit(-1) ? bitsChunk->getChunkLength() - offset: length;
-    stream.writeBits(bitsChunk->getBits(), bit(offset).get(), bit(serializedLength).get());
+    stream.writeBits(bitsChunk->getBits(), offset, serializedLength);
     ChunkSerializer::totalSerializedBitCount += serializedLength;
 }
 

@@ -67,7 +67,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::share
         throw cRuntimeError("invalid TCP header length=%u: must be dividable by 4", tcpHeader->getHeaderLength());
     tcp.th_offs = tcpHeader->getHeaderLength() / 4;
 
-    stream.writeBytes((uint8_t *)&tcp, TCP_HEADER_OCTETS);
+    stream.writeBytes((uint8_t *)&tcp, byte(TCP_HEADER_OCTETS));
 
     unsigned short numOptions = tcpHeader->getHeaderOptionArraySize();
     unsigned int optionsLength = 0;

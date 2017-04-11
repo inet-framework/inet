@@ -723,7 +723,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         ipv4Header->setCrc(0);
         MemoryOutputStream ipv4HeaderStream;
         Chunk::serialize(ipv4HeaderStream, ipv4Header);
-        auto ipv4HeaderBytes = ipv4HeaderStream.getBytes();
+        auto ipv4HeaderBytes = ipv4HeaderStream.getData();
         auto bufferLength = ipv4HeaderBytes.size();
         auto buffer = new uint8_t[bufferLength];
         // 1. fill in the data

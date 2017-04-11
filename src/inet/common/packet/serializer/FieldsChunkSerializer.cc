@@ -23,23 +23,23 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const std::sha
 {
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(chunk);
     if (fieldsChunk->getSerializedBytes() != nullptr)
-        stream.writeBytes(*fieldsChunk->getSerializedBytes(), byte(offset).get(), length == bit(-1) ? -1 : byte(length).get());
+        stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == bit(-1) ? byte(-1) : byte(length));
     else if (offset == bit(0) && (length == bit(-1) || length == chunk->getChunkLength())) {
-        auto streamPosition = stream.getPosition();
+        auto startPosition = stream.getLength();
         serialize(stream, fieldsChunk);
-        bit serializedLength = byte(stream.getPosition() - streamPosition);
+        bit serializedLength = stream.getLength() - startPosition;
         ChunkSerializer::totalSerializedBitCount += serializedLength;
         auto serializedBytes = new std::vector<uint8_t>();
-        stream.copyBytes(*serializedBytes, streamPosition, byte(serializedLength).get());
+        stream.copyData(*serializedBytes, startPosition, serializedLength);
         fieldsChunk->setSerializedBytes(serializedBytes);
     }
     else {
-        MemoryOutputStream chunkStream((fieldsChunk->getChunkLength().get() + 7) >> 3);
+        MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
-        stream.writeBytes(chunkStream.getBytes(), byte(offset).get(), length == bit(-1) ? -1 : byte(length).get());
-        ChunkSerializer::totalSerializedBitCount += byte(chunkStream.getSize());
+        stream.writeBytes(chunkStream.getData(), offset, length == bit(-1) ? byte(-1) : byte(length));
+        ChunkSerializer::totalSerializedBitCount += chunkStream.getLength();
         auto serializedBytes = new std::vector<uint8_t>();
-        chunkStream.copyBytes(*serializedBytes);
+        chunkStream.copyData(*serializedBytes);
         fieldsChunk->setSerializedBytes(serializedBytes);
     }
 }

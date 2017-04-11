@@ -46,7 +46,7 @@ std::shared_ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const
         throw cRuntimeError("Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flat to peek)");
     MemoryOutputStream outputStream;
     serialize(outputStream, chunk, offset, length);
-    MemoryInputStream inputStream(outputStream.getBytes());
+    MemoryInputStream inputStream(outputStream.getData());
     return deserialize(inputStream, typeInfo);
 }
 
@@ -80,9 +80,9 @@ void Chunk::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& 
 {
     Chunk *chunkPointer = chunk.get();
     auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
-    auto startPosition = byte(stream.getPosition());
+    auto startPosition = stream.getLength();
     serializer->serialize(stream, chunk, offset, length);
-    auto endPosition = byte(stream.getPosition());
+    auto endPosition = stream.getLength();
     auto expectedChunkLength = length == bit(-1) ? chunk->getChunkLength() - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(expectedChunkLength == endPosition - startPosition);
 }

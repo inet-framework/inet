@@ -67,7 +67,7 @@ std::shared_ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, c
     bit chunkLength = chunk->getChunkLength();
     bit resultLength = length == bit(-1) ? chunkLength - offset : length;
     CHUNK_CHECK_IMPLEMENTATION(bit(0) <= resultLength && resultLength <= chunkLength);
-    outputStream.copyBits(bits, bit(offset).get(), bit(resultLength).get());
+    outputStream.copyData(bits, offset, resultLength);
     return std::make_shared<BitsChunk>(bits);
 }
 

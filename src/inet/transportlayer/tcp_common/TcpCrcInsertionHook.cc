@@ -61,7 +61,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
             tcpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the TCP header before computing the CRC
             MemoryOutputStream tcpHeaderStream;
             Chunk::serialize(tcpHeaderStream, tcpHeader);
-            auto tcpHeaderBytes = tcpHeaderStream.getBytes();
+            auto tcpHeaderBytes = tcpHeaderStream.getData();
             const std::vector<uint8_t> emptyData;
             auto tcpDataBytes = (packet->getDataLength() > bit(0)) ? packet->peekDataBytes()->getBytes() : emptyData;
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, tcpHeaderBytes, tcpDataBytes);

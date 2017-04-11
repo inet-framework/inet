@@ -35,9 +35,9 @@ static int16_t computeTcpCrc(const BytesChunk& pseudoHeader, const std::shared_p
 void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& applicationHeader = std::static_pointer_cast<const ApplicationHeader>(chunk);
-    int64_t position = stream.getPosition();
+    auto position = stream.getLength();
     stream.writeUint16(applicationHeader->getSomeData());
-    stream.writeByteRepeatedly(0, byte(applicationHeader->getChunkLength()).get() - stream.getPosition() + position);
+    stream.writeByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 std::shared_ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -52,14 +52,14 @@ std::shared_ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStrea
 void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
-    int64_t position = stream.getPosition();
+    auto position = stream.getLength();
     if (tcpHeader->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize TCP header");
     stream.writeUint16(tcpHeader->getLengthField());
     stream.writeUint16(tcpHeader->getSrcPort());
     stream.writeUint16(tcpHeader->getDestPort());
     stream.writeUint16(tcpHeader->getCrc());
-    stream.writeByteRepeatedly(0, byte(tcpHeader->getChunkLength()).get() - stream.getPosition() + position);
+    stream.writeByteRepeatedly(0, byte(tcpHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -84,9 +84,9 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& strea
 void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& ipHeader = std::static_pointer_cast<const IpHeader>(chunk);
-    int64_t position = stream.getPosition();
+    auto position = stream.getLength();
     stream.writeUint16((int16_t)ipHeader->getProtocol());
-    stream.writeByteRepeatedly(0, byte(ipHeader->getChunkLength()).get() - stream.getSize() + position);
+    stream.writeByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -104,9 +104,9 @@ std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream
 void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& ethernetHeader = std::static_pointer_cast<const EthernetHeader>(chunk);
-    int64_t position = stream.getPosition();
+    auto position = stream.getLength();
     stream.writeUint16((int16_t)ethernetHeader->getProtocol());
-    stream.writeByteRepeatedly(0, byte(ethernetHeader->getChunkLength()).get() - stream.getPosition() + position);
+    stream.writeByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getLength() + position).get());
 }
 
 std::shared_ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
@@ -121,9 +121,9 @@ std::shared_ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& 
 void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& ethernetTrailer = std::static_pointer_cast<const EthernetTrailer>(chunk);
-    int64_t position = stream.getPosition();
+    auto position = stream.getLength();
     stream.writeUint16(ethernetTrailer->getCrc());
-    stream.writeByteRepeatedly(0, byte(ethernetTrailer->getChunkLength()).get() - stream.getPosition() + position);
+    stream.writeByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getLength() + position).get());
 }
 
 std::shared_ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const

@@ -1270,7 +1270,7 @@ void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             udpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the UDP header before computing the CRC
             MemoryOutputStream udpHeaderStream;
             Chunk::serialize(udpHeaderStream, udpHeader);
-            auto udpHeaderBytes = udpHeaderStream.getBytes();
+            auto udpHeaderBytes = udpHeaderStream.getData();
             auto udpDataBytes = packet->peekDataBytes()->getBytes();
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
             udpHeader->setCrc(crc);

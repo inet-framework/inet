@@ -16,104 +16,147 @@
 #ifndef __INET_MEMORYOUTPUTSTREAM_H_
 #define __INET_MEMORYOUTPUTSTREAM_H_
 
-#include <assert.h>
-#include "inet/common/INETDefs.h"
+#include "inet/common/Units.h"
+#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
 
+using namespace units::values;
+
 /**
- * This class provides an efficient in memory byte output stream.
- *
+ * This class provides an efficient in memory output stream.
  * Most functions are implemented in the header to allow inlining.
- * TODO: review efficiency
  */
+// TODO: allow arbitrary mixed bit/byte writes
+// TODO: add parameter checks
+// TODO: review efficiency
 class INET_API MemoryOutputStream {
   protected:
-    std::vector<uint8_t> bytes;
+    std::vector<uint8_t> data;
+    bit length;
+
+  protected:
+    bool isByteAligned() {
+        return bit(length).get() % 8 == 0;
+    }
 
   public:
-    MemoryOutputStream(size_t initCapacity = 64) { bytes.reserve(initCapacity); }
-    int64_t getSize() const { return bytes.size(); }
-    int64_t getPosition() const { return bytes.size(); }
-
-    bool getBit(int64_t offset) { assert(false); return false; } // TODO:
-
-    void copyBits(std::vector<bool>& result, int64_t offset = 0, int64_t length = -1) {
-        if (length == -1)
-            length = bytes.size() * 8 - offset;
-        for (int64_t i = 0; i < length; i++)
-            result.push_back(getBit(offset + i));
+    MemoryOutputStream(bit initialCapacity = byte(64)) :
+        length(bit(0))
+    {
+        data.reserve((bit(initialCapacity).get() + 7) >> 3);
     }
 
-    int8_t getByte(int64_t offset) { return bytes.at(offset); }
+    /** @name Stream querying functions */
+    //@{
+    bit getLength() const { return length; }
 
-    const std::vector<uint8_t>& getBytes() { return bytes; }
+    const std::vector<uint8_t>& getData() const { return data; }
 
-    void copyBytes(std::vector<uint8_t>& result, int64_t offset = 0, int64_t length = -1) {
-        result.assign(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
+    void copyData(std::vector<bool>& result, bit offset = bit(0), bit length = bit(-1)) const {
+        size_t end = bit(length == bit(-1) ? this->length : offset + length).get();
+        for (size_t i = bit(offset).get(); i < end; i++) {
+            size_t byteIndex = i / 8;
+            size_t bitIndex = i % 8;
+            uint8_t byte = data.at(byteIndex);
+            uint8_t mask = 1 << (7 - bitIndex);
+            bool bit = byte & mask;
+            result.push_back(bit);
+        }
     }
 
-    void writeBit(bool bit) {
-        // TODO:
-        assert(false);
+    void copyData(std::vector<uint8_t>& result, byte offset = byte(0), byte length = byte(-1)) const {
+        auto end = length == byte(-1) ? byte(data.size()) : offset + length;
+        result.insert(result.begin(), data.begin() + byte(offset).get(), data.begin() + byte(end).get());
+    }
+    //@}
+
+    /** @name Bit streaming functions */
+    //@{
+    void writeBit(bool value) {
+        size_t i = bit(length).get();
+        size_t byteIndex = i / 8;
+        size_t bitIndex = i % 8;
+        if (bitIndex == 0)
+            data.push_back(0);
+        if (value)
+            data[byteIndex] |= 1 << (7 - bitIndex);
+        length += bit(1);
     }
 
-    void writeBitRepeatedly(bool bit, int64_t count) {
-        // TODO:
-        assert(false);
+    void writeBitRepeatedly(bool value, size_t count) {
+        for (size_t i = 0; i < count; i++)
+            writeBit(value);
     }
 
-    void writeBits(const std::vector<bool>& bits, int64_t offset = 0, int64_t length = -1) {
-        // TODO:
-        assert(false);
+    void writeBits(const std::vector<bool>& bits, bit offset = bit(0), bit length = bit(-1)) {
+        auto end = length == bit(-1) ? bits.size() : bit(offset + length).get();
+        for (size_t i = bit(offset).get(); i < end; i++)
+            writeBit(bits.at(i));
+    }
+    //@}
+
+    /** @name Byte streaming functions */
+    //@{
+    void writeByte(uint8_t value) {
+        assert(isByteAligned());
+        data.push_back(value);
+        length += byte(1);
     }
 
-    void writeByte(uint8_t byte) {
-        bytes.push_back(byte);
+    void writeByteRepeatedly(uint8_t value, size_t count) {
+        for (size_t i = 0; i < count; i++)
+            writeByte(value);
     }
 
-    void writeByteRepeatedly(uint8_t byte, int64_t count) {
-        for (int64_t i = 0; i < count; i++)
-            bytes.push_back(byte);
+    void writeBytes(const std::vector<uint8_t>& bytes, byte offset = byte(0), byte length = byte(-1)) {
+        assert(isByteAligned());
+        auto end = length == byte(-1) ? byte(bytes.size()) : offset + length;
+        data.insert(data.end(), bytes.begin() + byte(offset).get(), bytes.begin() + byte(end).get());
+        this->length += end - offset;
     }
 
-    void writeBytes(const std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
-        if (length == -1)
-            length = bytes.size() - offset;
-        this->bytes.insert(this->bytes.end(), bytes.begin() + offset, bytes.begin() + offset + length);
+    void writeBytes(uint8_t *buffer, byte length) {
+        assert(isByteAligned());
+        data.insert(data.end(), buffer, buffer + byte(length).get());
+        this->length += length;
     }
+    //@}
 
-    void writeBytes(uint8_t *buffer, int64_t length) {
-        bytes.insert(bytes.end(), buffer, buffer + length);
-    }
-
-    void writeUint8(uint8_t byte) {
-        writeByte(byte);
+    /** @name Basic type streaming functions */
+    //@{
+    void writeUint8(uint8_t value) {
+        writeByte(value);
     }
 
     void writeUint16(uint16_t value) {
-        bytes.push_back((uint8_t)(value >> 8));
-        bytes.push_back((uint8_t)(value >> 0));
+        writeByte((uint8_t)(value >> 8));
+        writeByte((uint8_t)(value >> 0));
     }
 
     void writeUint32(uint32_t value) {
-        bytes.push_back((uint8_t)(value >> 24));
-        bytes.push_back((uint8_t)(value >> 16));
-        bytes.push_back((uint8_t)(value >> 8));
-        bytes.push_back((uint8_t)(value >> 0));
+        writeByte((uint8_t)(value >> 24));
+        writeByte((uint8_t)(value >> 16));
+        writeByte((uint8_t)(value >> 8));
+        writeByte((uint8_t)(value >> 0));
     }
 
     void writeUint64(uint64_t value) {
-        bytes.push_back((uint8_t)(value >> 56));
-        bytes.push_back((uint8_t)(value >> 48));
-        bytes.push_back((uint8_t)(value >> 40));
-        bytes.push_back((uint8_t)(value >> 32));
-        bytes.push_back((uint8_t)(value >> 24));
-        bytes.push_back((uint8_t)(value >> 16));
-        bytes.push_back((uint8_t)(value >> 8));
-        bytes.push_back((uint8_t)(value >> 0));
+        writeByte((uint8_t)(value >> 56));
+        writeByte((uint8_t)(value >> 48));
+        writeByte((uint8_t)(value >> 40));
+        writeByte((uint8_t)(value >> 32));
+        writeByte((uint8_t)(value >> 24));
+        writeByte((uint8_t)(value >> 16));
+        writeByte((uint8_t)(value >> 8));
+        writeByte((uint8_t)(value >> 0));
     }
+    //@}
 
+    /** @name INET specific type streaming functions */
+    //@{
     void writeMACAddress(MACAddress address) {
         for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
             writeByte(address.getAddressByte(i));
@@ -127,6 +170,7 @@ class INET_API MemoryOutputStream {
         for (int i = 0; i < 4; i++)
             writeUint32(address.words()[i]);
     }
+    //@}
 };
 
 } // namespace

@@ -46,7 +46,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
 
     EV << "Serialize IPv6 packet\n";
 
-    unsigned int nextHdrCodePos = stream.getPosition() + 6;
+    unsigned int nextHdrCodePos = byte(stream.getLength()).get() + 6;
     struct ip6_hdr ip6h;
 
     flowinfo = 0x06;
@@ -68,7 +68,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
 
     ip6h.ip6_plen = htons(dgram->getPayloadLength());
 
-    stream.writeBytes((uint8_t *)&ip6h, IPv6_HEADER_BYTES);
+    stream.writeBytes((uint8_t *)&ip6h, byte(IPv6_HEADER_BYTES));
 
     //FIXME serialize extension headers
     for (i = 0; i < dgram->getExtensionHeaderArraySize(); i++) {
@@ -119,7 +119,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
                 break;
             }
         }
-        ASSERT(nextHdrCodePos + extHdr->getByteLength() == stream.getPosition());
+        ASSERT(nextHdrCodePos + extHdr->getByteLength() == byte(stream.getLength()).get());
     }
 }
 

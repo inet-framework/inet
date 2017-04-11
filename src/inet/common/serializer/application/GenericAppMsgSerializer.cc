@@ -25,21 +25,21 @@ Register_Serializer(GenericAppMsg, GenericAppMsgSerializer);
 
 void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
-    int64_t startPos = stream.getPosition();
+    auto startPosition = stream.getLength();
     const auto& msg = std::static_pointer_cast<const GenericAppMsg>(chunk);
     stream.writeUint32(byte(msg->getChunkLength()).get());
     stream.writeUint32(msg->getExpectedReplyLength());
     stream.writeUint64(SimTime(msg->getReplyDelay()).raw());
     stream.writeByte(msg->getServerClose());
-    int64_t remainders = byte(msg->getChunkLength()).get() - (stream.getPosition() - startPos);
+    int64_t remainders = byte(msg->getChunkLength() - (stream.getLength() - startPosition)).get();
     if (remainders < 0)
-        throw cRuntimeError("GenericAppMsg length = %d smaller than required %d bytes", (int)byte(msg->getChunkLength()).get(), (int)(stream.getPosition() - startPos));
+        throw cRuntimeError("GenericAppMsg length = %d smaller than required %d bytes", (int)byte(msg->getChunkLength()).get(), (int)byte(stream.getLength() - startPosition).get());
     stream.writeByteRepeatedly('?', remainders);
 }
 
 std::shared_ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
 {
-    int64_t startPos = stream.getPosition();
+    auto startPosition = stream.getPosition();
     auto msg = std::make_shared<GenericAppMsg>();
     byte chunkLength = byte(stream.readUint32());
     msg->setChunkLength(chunkLength);
@@ -47,7 +47,7 @@ std::shared_ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& s
     int64_t delayraw = stream.readUint64();
     msg->setReplyDelay(SimTime(delayraw).dbl());
     msg->setServerClose(stream.readByte() ? true : false);
-    int64_t remainders = byte(msg->getChunkLength()).get() - (stream.getPosition() - startPos);
+    int64_t remainders = byte(msg->getChunkLength()).get() - (stream.getPosition() - startPosition);
     ASSERT(remainders >= 0);
     stream.readByteRepeatedly('?', remainders);
     return msg;

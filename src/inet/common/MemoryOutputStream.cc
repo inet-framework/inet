@@ -13,4 +13,4 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/MemoryInputStream.h"
+#include "inet/common/MemoryOutputStream.h"

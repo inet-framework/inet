@@ -61,10 +61,9 @@ std::shared_ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekCo
 
 std::shared_ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
-    MemoryOutputStream outputStream((chunk->getChunkLength().get() + 7) >> 3);
+    MemoryOutputStream outputStream(chunk->getChunkLength());
     Chunk::serialize(outputStream, chunk, offset, length);
-    const std::vector<uint8_t>& bytes = outputStream.getBytes();
-    return std::make_shared<BytesChunk>(bytes);
+    return std::make_shared<BytesChunk>(outputStream.getData());
 }
 
 void BytesChunk::setBytes(const std::vector<uint8_t>& bytes)
