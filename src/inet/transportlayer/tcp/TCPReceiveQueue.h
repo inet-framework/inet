@@ -39,9 +39,6 @@ namespace tcp {
 
 class TcpHeader;
 
-#define TCPRECEIVEQUEUE_KLUDGE 1
-
-
 /**
  * Receive queue that manages Chunks.
  *
@@ -53,10 +50,8 @@ class INET_API TCPReceiveQueue : public cObject
     TCPConnection *conn = nullptr;    // the connection that owns this queue
     uint32 rcv_nxt = 0;
     ReorderBuffer reorderBuffer;
-#if TCPRECEIVEQUEUE_KLUDGE != 0
-    ChunkQueue kludgeQueue;
-#endif
 
+  protected:
     uint32_t offsetToSeq(byte offs) const { return (uint32_t)offs.get(); }
 
     byte seqToOffset(uint32_t seq) const

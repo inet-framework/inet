@@ -20,7 +20,7 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,             100s,            e044-56aa/tplx
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            f448-ab64/tplx
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            3046-82a1/tplx
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            bf31-9868/tplx
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            f448-ab64/tplx
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            f448-ab64/tplx
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            0e1d-a375/tplx
 

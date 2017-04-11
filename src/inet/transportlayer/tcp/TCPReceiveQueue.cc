@@ -94,47 +94,13 @@ cPacket *TCPReceiveQueue::extractBytesUpTo(uint32_t seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 
-#if TCPRECEIVEQUEUE_KLUDGE != 1
     if (reorderBuffer.isEmpty())
         return nullptr;
-#endif
 
     auto chunk = reorderBuffer.popData();
     ASSERT(reorderBuffer.getExpectedOffset() <= seqToOffset(seq));
 
-#if TCPRECEIVEQUEUE_KLUDGE == 1
-    // TODO: KLUDGE1: to match fingerprints with packet containing objects
-    // send up chunk by chunk
-    if (chunk)
-        kludgeQueue.push(chunk);
-
-    auto data = kludgeQueue.peek(bit(-1), Chunk::PF_ALLOW_NULLPTR);
-    if (data == nullptr || data->getChunkType() == Chunk::CT_SLICE)
-        return nullptr;
-    chunk = kludgeQueue.pop();
-    ASSERT(chunk->getChunkLength() == data->getChunkLength());
-    ASSERT(data->getChunkType() != Chunk::CT_SLICE);
-    // TODO: KLUDGE1: end
-#endif
-
     if (chunk) {
-#if TCPRECEIVEQUEUE_KLUDGE == 2
-        // TODO: KLUDGE: to match fingerprints with packet containing objects
-        kludgeQueue.push(chunk);
-        auto data = kludgeQueue.peekAt(bit(0), kludgeQueue.getLength());
-        if (data->getChunkType() == Chunk::CT_SLICE)
-            return nullptr;
-        else if (data->getChunkType() == Chunk::CT_SEQUENCE) {
-            auto sequenceChunk = std::static_pointer_cast<SequenceChunk>(data);
-            for (auto chunk : sequenceChunk->getChunks())
-                if (chunk->getChunkType() == Chunk::CT_SLICE)
-                    return nullptr;
-        }
-        else
-            kludgeQueue.clear();
-        chunk = data;
-        // TODO: KLDUGE: end
-#endif
         //std::cout << "#: " << getSimulation()->getEventNumber() << ", T: " << simTime() << ", RECEIVER: " << conn->getTcpMain()->getParentModule()->getFullName() << ", DATA: " << chunk << std::endl;
         Packet *msg = new Packet("data");
         msg->append(chunk);
