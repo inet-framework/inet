@@ -151,8 +151,11 @@ bool SequenceChunk::isImproperlyRepresented() const
 bit SequenceChunk::getChunkLength() const
 {
     bit length = bit(0);
-    for (const auto& chunk : chunks)
-        length += chunk->getChunkLength();
+    for (const auto& chunk : chunks) {
+        auto chunkLength = chunk->getChunkLength();
+        CHUNK_CHECK_IMPLEMENTATION(chunkLength > bit(0));
+        length += chunkLength;
+    }
     return length;
 }
 

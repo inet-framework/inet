@@ -59,7 +59,7 @@ class INET_API BitCountChunk : public Chunk
     /** @name Overridden chunk functions */
     //@{
     virtual ChunkType getChunkType() const override { return CT_BITCOUNT; }
-    virtual bit getChunkLength() const override { return length; }
+    virtual bit getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= bit(0)); return length; }
 
     virtual bool canInsertAtBeginning(const std::shared_ptr<Chunk>& chunk) override;
     virtual bool canInsertAtEnd(const std::shared_ptr<Chunk>& chunk) override;
