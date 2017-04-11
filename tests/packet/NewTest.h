@@ -27,36 +27,36 @@ namespace inet {
 class ApplicationHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class TcpHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class IpHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class EthernetHeaderSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class EthernetTrailerSerializer : public FieldsChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
 class NewMedium

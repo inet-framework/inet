@@ -23,11 +23,11 @@ namespace inet {
 class INET_API FieldsChunkSerializer : public ChunkSerializer
 {
   public:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const = 0;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const = 0;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const = 0;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
 
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const;
 };
 
 } // namespace

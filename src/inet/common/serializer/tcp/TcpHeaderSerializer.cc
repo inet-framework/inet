@@ -31,7 +31,7 @@ namespace serializer {
 
 Register_Serializer(TcpHeader, TcpHeaderSerializer);
 
-void TcpHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& tcpHeader = std::static_pointer_cast<const TcpHeader>(chunk);
     struct tcphdr tcp;
@@ -83,7 +83,7 @@ void TcpHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_
     ASSERT(tcpHeader->getHeaderLength() == TCP_HEADER_OCTETS + optionsLength);
 }
 
-void TcpHeaderSerializer::serializeOption(ByteOutputStream& stream, const TCPOption *option) const
+void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPOption *option) const
 {
     unsigned short kind = option->getKind();
     unsigned short length = option->getLength();    // length >= 1
@@ -158,7 +158,7 @@ void TcpHeaderSerializer::serializeOption(ByteOutputStream& stream, const TCPOpt
     }    // switch
 }
 
-std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     uint8_t buffer[TCP_HEADER_OCTETS];
@@ -199,7 +199,7 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(ByteInputStream& stream)
     return tcpHeader;
 }
 
-TCPOption *TcpHeaderSerializer::deserializeOption(ByteInputStream& stream) const
+TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) const
 {
     unsigned char kind = stream.readByte();
     unsigned char length = 0;

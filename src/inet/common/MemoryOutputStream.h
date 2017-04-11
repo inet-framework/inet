@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BYTEOUTPUTSTREAM_H_
-#define __INET_BYTEOUTPUTSTREAM_H_
+#ifndef __INET_MEMORYOUTPUTSTREAM_H_
+#define __INET_MEMORYOUTPUTSTREAM_H_
 
 #include <assert.h>
 #include "inet/common/INETDefs.h"
@@ -27,12 +27,12 @@ namespace inet {
  * Most functions are implemented in the header to allow inlining.
  * TODO: review efficiency
  */
-class INET_API ByteOutputStream {
+class INET_API MemoryOutputStream {
   protected:
     std::vector<uint8_t> bytes;
 
   public:
-    ByteOutputStream(size_t initCapacity = 64) { bytes.reserve(initCapacity); }
+    MemoryOutputStream(size_t initCapacity = 64) { bytes.reserve(initCapacity); }
     int64_t getSize() const { return bytes.size(); }
     int64_t getPosition() const { return bytes.size(); }
 
@@ -131,5 +131,5 @@ class INET_API ByteOutputStream {
 
 } // namespace
 
-#endif // #ifndef __INET_BYTEOUTPUTSTREAM_H_
+#endif // #ifndef __INET_MEMORYOUTPUTSTREAM_H_
 

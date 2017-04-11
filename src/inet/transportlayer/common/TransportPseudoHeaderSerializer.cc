@@ -24,7 +24,7 @@ namespace serializer {
 
 Register_Serializer(TransportPseudoHeader, TransportPseudoHeaderSerializer);
 
-void TransportPseudoHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     //FIXME: ipv6, generic ????
     const auto& transportPseudoHeader = std::static_pointer_cast<const TransportPseudoHeader>(chunk);
@@ -52,7 +52,7 @@ void TransportPseudoHeaderSerializer::serialize(ByteOutputStream& stream, const 
         throw cRuntimeError("Unknown network protocol: %d", nwProtId);
 }
 
-std::shared_ptr<Chunk> TransportPseudoHeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> TransportPseudoHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     throw cRuntimeError("TransportPseudoHeader is not a valid deserializable data");
 }

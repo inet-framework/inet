@@ -28,8 +28,8 @@ namespace serializer {
 class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetMacHeaderSerializer() : FieldsChunkSerializer() {}
@@ -38,8 +38,8 @@ class INET_API EthernetMacHeaderSerializer : public FieldsChunkSerializer
 class INET_API EthernetPaddingSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetPaddingSerializer() : FieldsChunkSerializer() {}
@@ -48,8 +48,8 @@ class INET_API EthernetPaddingSerializer : public FieldsChunkSerializer
 class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetFcsSerializer() : FieldsChunkSerializer() {}
@@ -61,8 +61,8 @@ class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
 class INET_API EthernetPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     EthernetPhyHeaderSerializer() : FieldsChunkSerializer() {}

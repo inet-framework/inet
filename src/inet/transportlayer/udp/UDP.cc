@@ -1268,7 +1268,7 @@ void UDP::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             udpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the UDP header before computing the CRC
-            ByteOutputStream udpHeaderStream;
+            MemoryOutputStream udpHeaderStream;
             Chunk::serialize(udpHeaderStream, udpHeader);
             auto udpHeaderBytes = udpHeaderStream.getBytes();
             auto udpDataBytes = packet->peekDataBytes()->getBytes();

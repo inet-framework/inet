@@ -26,7 +26,7 @@ namespace serializer {
 
 Register_Serializer(ARPPacket, ARPPacketSerializer);
 
-MACAddress ARPPacketSerializer::readMACAddress(ByteInputStream& stream, unsigned int size) const
+MACAddress ARPPacketSerializer::readMACAddress(MemoryInputStream& stream, unsigned int size) const
 {
     unsigned int curpos = stream.getPosition();
     MACAddress address = stream.readMACAddress();
@@ -34,7 +34,7 @@ MACAddress ARPPacketSerializer::readMACAddress(ByteInputStream& stream, unsigned
     return address;
 }
 
-IPv4Address ARPPacketSerializer::readIPv4Address(ByteInputStream& stream, unsigned int size) const
+IPv4Address ARPPacketSerializer::readIPv4Address(MemoryInputStream& stream, unsigned int size) const
 {
     unsigned int curpos = stream.getPosition();
     IPv4Address address = stream.readIPv4Address();
@@ -42,7 +42,7 @@ IPv4Address ARPPacketSerializer::readIPv4Address(ByteInputStream& stream, unsign
     return address;
 }
 
-void ARPPacketSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void ARPPacketSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& arpPacket = std::static_pointer_cast<const ARPPacket>(chunk);
     stream.writeUint16(1); //ethernet
@@ -56,7 +56,7 @@ void ARPPacketSerializer::serialize(ByteOutputStream& stream, const std::shared_
     stream.writeIPv4Address(arpPacket->getDestIPAddress());
 }
 
-std::shared_ptr<Chunk> ARPPacketSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto arpPacket = std::make_shared<ARPPacket>();
     if (stream.readUint16() != 1)

@@ -21,13 +21,13 @@ namespace inet {
 
 Register_Serializer(SliceChunk, SliceChunkSerializer);
 
-void SliceChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
+void SliceChunkSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
 {
     const auto& sliceChunk = std::static_pointer_cast<const SliceChunk>(chunk);
     Chunk::serialize(stream, sliceChunk->getChunk(), sliceChunk->getOffset() + offset, length == bit(-1) ? sliceChunk->getLength() - offset : length);
 }
 
-std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+std::shared_ptr<Chunk> SliceChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     throw cRuntimeError("Invalid operation");
 }

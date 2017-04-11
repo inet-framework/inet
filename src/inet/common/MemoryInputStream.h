@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_BYTEINPUTSTREAM_H_
-#define __INET_BYTEINPUTSTREAM_H_
+#ifndef __INET_MEMORYINPUTSTREAM_H_
+#define __INET_MEMORYINPUTSTREAM_H_
 
 #include <assert.h>
 #include "inet/linklayer/common/MACAddress.h"
@@ -29,7 +29,7 @@ namespace inet {
  * Most functions are implemented in the header to allow inlining.
  * TODO: review efficiency
  */
-class INET_API ByteInputStream {
+class INET_API MemoryInputStream {
   protected:
     std::vector<uint8_t> bytes;
     int64_t position = -1;
@@ -43,13 +43,13 @@ class INET_API ByteInputStream {
     }
 
   public:
-    ByteInputStream(const std::vector<uint8_t>& bytes, int64_t position = 0) :
+    MemoryInputStream(const std::vector<uint8_t>& bytes, int64_t position = 0) :
         bytes(bytes),
         position(position)
     {
     }
 
-    ByteInputStream(const uint8_t* buffer, size_t bufLength, int64_t position = 0) :
+    MemoryInputStream(const uint8_t* buffer, size_t bufLength, int64_t position = 0) :
         bytes(buffer, buffer + bufLength),
         position(position)
     {
@@ -186,5 +186,5 @@ class INET_API ByteInputStream {
 
 } // namespace
 
-#endif // #ifndef __INET_BYTEINPUTSTREAM_H_
+#endif // #ifndef __INET_MEMORYINPUTSTREAM_H_
 

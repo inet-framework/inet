@@ -28,11 +28,11 @@ namespace serializer {
 class INET_API ARPPacketSerializer : public FieldsChunkSerializer
 {
   protected:
-    MACAddress readMACAddress(ByteInputStream& stream, unsigned int size) const;
-    IPv4Address readIPv4Address(ByteInputStream& stream, unsigned int size) const;
+    MACAddress readMACAddress(MemoryInputStream& stream, unsigned int size) const;
+    IPv4Address readIPv4Address(MemoryInputStream& stream, unsigned int size) const;
 
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     ARPPacketSerializer() : FieldsChunkSerializer() {}

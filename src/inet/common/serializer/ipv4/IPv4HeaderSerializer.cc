@@ -27,7 +27,7 @@ namespace serializer {
 
 Register_Serializer(IPv4Header, IPv4HeaderSerializer);
 
-void IPv4HeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     auto position = stream.getPosition();
     struct ip iphdr;
@@ -75,7 +75,7 @@ void IPv4HeaderSerializer::serialize(ByteOutputStream& stream, const std::shared
     stream.writeBytes((uint8_t *)&iphdr, IP_HEADER_BYTES);
 }
 
-void IPv4HeaderSerializer::serializeOption(ByteOutputStream& stream, const TLVOptionBase *option) const
+void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLVOptionBase *option) const
 {
     unsigned short type = option->getType();
     unsigned short length = option->getLength();    // length >= 1
@@ -148,7 +148,7 @@ void IPv4HeaderSerializer::serializeOption(ByteOutputStream& stream, const TLVOp
     }
 }
 
-std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     uint8_t buffer[IP_HEADER_BYTES];
@@ -197,7 +197,7 @@ std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(ByteInputStream& stream
     return ipv4Header;
 }
 
-TLVOptionBase *IPv4HeaderSerializer::deserializeOption(ByteInputStream& stream) const
+TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
     unsigned char type = stream.readByte();

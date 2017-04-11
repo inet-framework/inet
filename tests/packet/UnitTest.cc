@@ -92,7 +92,7 @@ static std::shared_ptr<EthernetTrailer> makeImmutableEthernetTrailer()
     return chunk;
 }
 
-std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto compoundHeader = std::make_shared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
@@ -101,12 +101,12 @@ std::shared_ptr<Chunk> CompoundHeaderSerializer::deserialize(ByteInputStream& st
     return compoundHeader;
 }
 
-void TlvHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TlvHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     throw cRuntimeError("Invalid operation");
 }
 
-std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t type = stream.readUint8();
     stream.seek(stream.getPosition() - 1);
@@ -120,7 +120,7 @@ std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(ByteInputStream& stream)
     }
 }
 
-void TlvHeaderBoolSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TlvHeaderBoolSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& tlvHeader = std::static_pointer_cast<const TlvHeaderBool>(chunk);
     stream.writeUint8(tlvHeader->getType());
@@ -128,7 +128,7 @@ void TlvHeaderBoolSerializer::serialize(ByteOutputStream& stream, const std::sha
     stream.writeUint8(tlvHeader->getBoolValue());
 }
 
-std::shared_ptr<Chunk> TlvHeaderBoolSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> TlvHeaderBoolSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tlvHeader = std::make_shared<TlvHeaderBool>();
     assert(tlvHeader->getType() == stream.readUint8());
@@ -139,7 +139,7 @@ std::shared_ptr<Chunk> TlvHeaderBoolSerializer::deserialize(ByteInputStream& str
     return tlvHeader;
 }
 
-void TlvHeaderIntSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void TlvHeaderIntSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& tlvHeader = std::static_pointer_cast<const TlvHeaderInt>(chunk);
     stream.writeUint8(tlvHeader->getType());
@@ -147,7 +147,7 @@ void TlvHeaderIntSerializer::serialize(ByteOutputStream& stream, const std::shar
     stream.writeUint16(tlvHeader->getInt16Value());
 }
 
-std::shared_ptr<Chunk> TlvHeaderIntSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tlvHeader = std::make_shared<TlvHeaderInt>();
     assert(tlvHeader->getType() == stream.readUint8());
@@ -541,7 +541,7 @@ static void testPolymorphism()
 static void testSerialization()
 {
     // 1. serialized bytes is cached after serialization
-    ByteOutputStream stream1;
+    MemoryOutputStream stream1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
     auto totalSerializedBitCount = ChunkSerializer::totalSerializedBitCount;
     Chunk::serialize(stream1, applicationHeader1);
@@ -554,7 +554,7 @@ static void testSerialization()
     assert(totalSerializedBitCount == ChunkSerializer::totalSerializedBitCount);
 
     // 2. serialized bytes is cached after deserialization
-    ByteInputStream stream2(stream1.getBytes());
+    MemoryInputStream stream2(stream1.getBytes());
     auto totalDeserializedBitCount = ChunkSerializer::totalDeserializedBitCount;
     const auto& chunk1 = Chunk::deserialize(stream2, typeid(ApplicationHeader));
     assert(chunk1 != nullptr);

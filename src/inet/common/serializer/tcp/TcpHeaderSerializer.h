@@ -31,11 +31,11 @@ using namespace inet::tcp;
 class INET_API TcpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeOption(ByteOutputStream& stream, const TCPOption *option) const;
-    virtual TCPOption *deserializeOption(ByteInputStream& stream) const;
+    virtual void serializeOption(MemoryOutputStream& stream, const TCPOption *option) const;
+    virtual TCPOption *deserializeOption(MemoryInputStream& stream) const;
 
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream) const override;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const override;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     TcpHeaderSerializer() : FieldsChunkSerializer() {}

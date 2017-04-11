@@ -21,7 +21,7 @@ namespace inet {
 
 Register_Serializer(BytesChunk, BytesChunkSerializer);
 
-void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
+void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
 {
     const auto& bytesChunk = std::static_pointer_cast<const BytesChunk>(chunk);
     bit serializedLength = length == bit(-1) ? bytesChunk->getChunkLength() - offset: length;
@@ -29,7 +29,7 @@ void BytesChunkSerializer::serialize(ByteOutputStream& stream, const std::shared
     ChunkSerializer::totalSerializedBitCount += serializedLength;
 }
 
-std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto bytesChunk = std::make_shared<BytesChunk>();
     byte length = byte(stream.getRemainingSize());

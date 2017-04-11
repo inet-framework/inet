@@ -721,7 +721,7 @@ void IPv4::fragmentAndSend(Packet *packet, const InterfaceEntry *destIe, IPv4Add
         packet->removePoppedHeaders();
         const auto& ipv4Header = packet->removeHeader<IPv4Header>();
         ipv4Header->setCrc(0);
-        ByteOutputStream ipv4HeaderStream;
+        MemoryOutputStream ipv4HeaderStream;
         Chunk::serialize(ipv4HeaderStream, ipv4Header);
         auto ipv4HeaderBytes = ipv4HeaderStream.getBytes();
         auto bufferLength = ipv4HeaderBytes.size();

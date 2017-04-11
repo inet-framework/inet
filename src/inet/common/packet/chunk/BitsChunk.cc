@@ -61,7 +61,7 @@ std::shared_ptr<Chunk> BitsChunk::peekUnchecked(PeekPredicate predicate, PeekCon
 
 std::shared_ptr<Chunk> BitsChunk::convertChunk(const std::type_info& typeInfo, const std::shared_ptr<Chunk>& chunk, bit offset, bit length, int flags)
 {
-    ByteOutputStream outputStream;
+    MemoryOutputStream outputStream;
     Chunk::serialize(outputStream, chunk);
     std::vector<bool> bits;
     bit chunkLength = chunk->getChunkLength();

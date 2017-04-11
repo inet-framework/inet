@@ -19,7 +19,7 @@
 
 namespace inet {
 
-void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
+void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const
 {
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(chunk);
     if (fieldsChunk->getSerializedBytes() != nullptr)
@@ -34,7 +34,7 @@ void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::share
         fieldsChunk->setSerializedBytes(serializedBytes);
     }
     else {
-        ByteOutputStream chunkStream((fieldsChunk->getChunkLength().get() + 7) >> 3);
+        MemoryOutputStream chunkStream((fieldsChunk->getChunkLength().get() + 7) >> 3);
         serialize(chunkStream, fieldsChunk);
         stream.writeBytes(chunkStream.getBytes(), byte(offset).get(), length == bit(-1) ? -1 : byte(length).get());
         ChunkSerializer::totalSerializedBitCount += byte(chunkStream.getSize());
@@ -44,7 +44,7 @@ void FieldsChunkSerializer::serialize(ByteOutputStream& stream, const std::share
     }
 }
 
-std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto startPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));

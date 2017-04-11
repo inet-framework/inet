@@ -59,7 +59,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             tcpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the TCP header before computing the CRC
-            ByteOutputStream tcpHeaderStream;
+            MemoryOutputStream tcpHeaderStream;
             Chunk::serialize(tcpHeaderStream, tcpHeader);
             auto tcpHeaderBytes = tcpHeaderStream.getBytes();
             const std::vector<uint8_t> emptyData;

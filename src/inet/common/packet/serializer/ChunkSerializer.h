@@ -16,8 +16,8 @@
 #ifndef __INET_CHUNKSERIALIZER_H_
 #define __INET_CHUNKSERIALIZER_H_
 
-#include "inet/common/ByteInputStream.h"
-#include "inet/common/ByteOutputStream.h"
+#include "inet/common/MemoryInputStream.h"
+#include "inet/common/MemoryOutputStream.h"
 #include "inet/common/packet/chunk/Chunk.h"
 
 namespace inet {
@@ -31,8 +31,8 @@ class INET_API ChunkSerializer : public cObject
   public:
     virtual ~ChunkSerializer() { }
 
-    virtual void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const = 0;
-    virtual std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const = 0;
+    virtual void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset, bit length) const = 0;
+    virtual std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 
 } // namespace

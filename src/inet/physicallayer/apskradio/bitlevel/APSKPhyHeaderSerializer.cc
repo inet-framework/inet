@@ -24,12 +24,12 @@ namespace physicallayer {
 
 //Register_Serializer(APSKPhyHeader, APSKPhyHeaderSerializer);
 
-void APSKPhyHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
+void APSKPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, int64_t offset, int64_t length) const
 {
 
 }
 
-std::shared_ptr<Chunk> APSKPhyHeaderSerializer::deserialize(ByteInputStream& stream, const std::type_info& typeInfo) const
+std::shared_ptr<Chunk> APSKPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
 
 }

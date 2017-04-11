@@ -17,8 +17,8 @@
 #define __INET_CHUNK_H_
 
 #include <memory>
-#include "inet/common/ByteInputStream.h"
-#include "inet/common/ByteOutputStream.h"
+#include "inet/common/MemoryInputStream.h"
+#include "inet/common/MemoryOutputStream.h"
 #include "inet/common/Units.h"
 
 // checking chunk implementation is disabled by default
@@ -570,7 +570,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * Serializes a chunk into the given stream. The bytes representing the
      * chunk is written at the current position of the stream up to its length.
      */
-    static void serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
+    static void serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk, bit offset = bit(0), bit length = bit(-1));
 
     /**
      * Deserializes a chunk from the given stream. The returned chunk will be
@@ -578,7 +578,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
      * stream starting from the current stream position up to the length
      * required by the deserializer of the chunk.
      */
-    static std::shared_ptr<Chunk> deserialize(ByteInputStream& stream, const std::type_info& typeInfo);
+    static std::shared_ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo);
     //@}
 };
 

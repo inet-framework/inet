@@ -30,7 +30,7 @@ Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EtherPhyFrame, EthernetPhyHeaderSerializer);
 
-void EthernetMacHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& ethernetHeader = std::static_pointer_cast<const EtherFrame>(chunk);
     stream.writeMACAddress(ethernetHeader->getDest());
@@ -65,7 +65,7 @@ void EthernetMacHeaderSerializer::serialize(ByteOutputStream& stream, const std:
         throw cRuntimeError("Cannot serialize '%s'", ethernetHeader->getClassName());
 }
 
-std::shared_ptr<Chunk> EthernetMacHeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     std::shared_ptr<EtherFrame> ethernetMacHeader = nullptr;
     MACAddress destAddr = stream.readMACAddress();
@@ -101,19 +101,19 @@ std::shared_ptr<Chunk> EthernetMacHeaderSerializer::deserialize(ByteInputStream&
     return ethernetMacHeader;
 }
 
-void EthernetPaddingSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     stream.writeByteRepeatedly(0, byte(chunk->getChunkLength()).get());
 }
 
-std::shared_ptr<Chunk> EthernetPaddingSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetPadding = std::make_shared<EthernetPadding>();
     ethernetPadding->setChunkLength(byte(stream.getSize() - stream.getPosition()));
     return ethernetPadding;
 }
 
-void EthernetFcsSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     const auto& ethernetFcs = std::static_pointer_cast<const EthernetFcs>(chunk);
     if (ethernetFcs->getFcsMode() != FCS_COMPUTED)
@@ -121,7 +121,7 @@ void EthernetFcsSerializer::serialize(ByteOutputStream& stream, const std::share
     stream.writeUint32(ethernetFcs->getFcs());
 }
 
-std::shared_ptr<Chunk> EthernetFcsSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetFcs = std::make_shared<EthernetFcs>();
     ethernetFcs->setFcs(stream.readUint32());
@@ -129,13 +129,13 @@ std::shared_ptr<Chunk> EthernetFcsSerializer::deserialize(ByteInputStream& strea
     return ethernetFcs;
 }
 
-void EthernetPhyHeaderSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     stream.writeByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble
     stream.writeByte(0xD5); // SFD
 }
 
-std::shared_ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetPhyHeader = std::make_shared<EtherPhyFrame>();
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble

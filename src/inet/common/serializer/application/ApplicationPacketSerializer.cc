@@ -23,7 +23,7 @@ namespace serializer {
 
 Register_Serializer(ApplicationPacket, ApplicationPacketSerializer);
 
-void ApplicationPacketSerializer::serialize(ByteOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
+void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const std::shared_ptr<Chunk>& chunk) const
 {
     int64_t startPos = stream.getPosition();
     const auto& applicationPacket = std::static_pointer_cast<const ApplicationPacket>(chunk);
@@ -35,7 +35,7 @@ void ApplicationPacketSerializer::serialize(ByteOutputStream& stream, const std:
     stream.writeByteRepeatedly('?', remainders);
 }
 
-std::shared_ptr<Chunk> ApplicationPacketSerializer::deserialize(ByteInputStream& stream) const
+std::shared_ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     int64_t startPos = stream.getPosition();
     auto applicationPacket = std::make_shared<ApplicationPacket>();
