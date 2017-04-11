@@ -538,6 +538,127 @@ static void testPolymorphism()
     assert(tlvHeaderInt2->getInt16Value() == 42);
 }
 
+static void testStreaming()
+{
+    // 1. bits
+    MemoryOutputStream outputStreamBits;
+    outputStreamBits.writeBit(true);
+    outputStreamBits.writeBitRepeatedly(false, 10);
+    std::vector<bool> writeBitsVector = {true, false, true, false, true, false, true, false, true, false};
+    outputStreamBits.writeBits(writeBitsVector);
+    std::vector<bool> writeBitsData;
+    outputStreamBits.copyData(writeBitsData);
+    assert(outputStreamBits.getLength() == bit(21));
+    MemoryInputStream inputStreamBits(outputStreamBits.getData(), outputStreamBits.getLength());
+    assert(inputStreamBits.getLength() == bit(21));
+    assert(inputStreamBits.readBit() == true);
+    assert(inputStreamBits.readBitRepeatedly(false, 10));
+    std::vector<bool> readBitsVector;
+    inputStreamBits.readBits(readBitsVector, bit(10));
+    assert(std::equal(readBitsVector.begin(), readBitsVector.end(), writeBitsVector.begin()));
+    std::vector<bool> readBitsData;
+    inputStreamBits.copyData(readBitsData);
+    assert(std::equal(readBitsData.begin(), readBitsData.end(), writeBitsData.begin()));
+    assert(!inputStreamBits.isReadBeyondEnd());
+    assert(inputStreamBits.getRemainingLength() == bit(0));
+    inputStreamBits.readBit();
+    assert(inputStreamBits.isReadBeyondEnd());
+    assert(inputStreamBits.getRemainingLength() == byte(0));
+
+    // 2. bytes
+    MemoryOutputStream outputStreamBytes;
+    outputStreamBytes.writeByte(42);
+    outputStreamBytes.writeByteRepeatedly(21, 10);
+    auto writeBytesVector = makeVector(10);
+    outputStreamBytes.writeBytes(writeBytesVector);
+    uint8_t writeBytesBuffer[10] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+    outputStreamBytes.writeBytes(writeBytesBuffer, byte(10));
+    std::vector<bool> writeBytesData;
+    outputStreamBytes.copyData(writeBytesData);
+    assert(outputStreamBytes.getLength() == byte(31));
+    MemoryInputStream inputStreamBytes(outputStreamBytes.getData());
+    assert(inputStreamBytes.getLength() == byte(31));
+    assert(inputStreamBytes.readByte() == 42);
+    assert(inputStreamBytes.readByteRepeatedly(21, 10));
+    std::vector<uint8_t> readBytesVector;
+    inputStreamBytes.readBytes(readBytesVector, byte(10));
+    assert(std::equal(readBytesVector.begin(), readBytesVector.end(), writeBytesVector.begin()));
+    uint8_t readBytesBuffer[10];
+    inputStreamBytes.readBytes(readBytesBuffer, byte(10));
+    assert(!memcmp(writeBytesBuffer, readBytesBuffer, 10));
+    std::vector<bool> readBytesData;
+    inputStreamBytes.copyData(readBytesData);
+    assert(std::equal(readBytesData.begin(), readBytesData.end(), writeBytesData.begin()));
+    assert(!inputStreamBytes.isReadBeyondEnd());
+    assert(inputStreamBytes.getRemainingLength() == byte(0));
+    inputStreamBytes.readByte();
+    assert(inputStreamBytes.isReadBeyondEnd());
+    assert(inputStreamBytes.getRemainingLength() == byte(0));
+
+    // 3. uint8_t
+    uint64_t uint8 = 0x42;
+    MemoryOutputStream outputStream1;
+    outputStream1.writeUint8(uint8);
+    MemoryInputStream inputStream1(outputStream1.getData());
+    assert(inputStream1.readUint8() == uint8);
+    assert(!inputStream1.isReadBeyondEnd());
+    assert(inputStream1.getRemainingLength() == bit(0));
+
+    // 4. uint16_t
+    uint64_t uint16 = 0x4242;
+    MemoryOutputStream outputStream2;
+    outputStream2.writeUint16(uint16);
+    MemoryInputStream inputStream2(outputStream2.getData());
+    assert(inputStream2.readUint16() == uint16);
+    assert(!inputStream2.isReadBeyondEnd());
+    assert(inputStream2.getRemainingLength() == bit(0));
+
+    // 5. uint32_t
+    uint64_t uint32 = 0x42424242;
+    MemoryOutputStream outputStream3;
+    outputStream3.writeUint32(uint32);
+    MemoryInputStream inputStream3(outputStream3.getData());
+    assert(inputStream3.readUint32() == uint32);
+    assert(!inputStream3.isReadBeyondEnd());
+    assert(inputStream3.getRemainingLength() == bit(0));
+
+    // 6. uint64_t
+    uint64_t uint64 = 0x4242424242424242L;
+    MemoryOutputStream outputStream4;
+    outputStream4.writeUint64(uint64);
+    MemoryInputStream inputStream4(outputStream4.getData());
+    assert(inputStream4.readUint64() == uint64);
+    assert(!inputStream4.isReadBeyondEnd());
+    assert(inputStream4.getRemainingLength() == bit(0));
+
+    // 7. MACAddress
+    MACAddress macAddress("0A:AA:01:02:03:04");
+    MemoryOutputStream outputStream5;
+    outputStream5.writeMACAddress(macAddress);
+    MemoryInputStream inputStream5(outputStream5.getData());
+    assert(inputStream5.readMACAddress() ==macAddress);
+    assert(!inputStream5.isReadBeyondEnd());
+    assert(inputStream5.getRemainingLength() == bit(0));
+
+    // 8. IPv4Address
+    IPv4Address ipv4Address("192.168.10.1");
+    MemoryOutputStream outputStream6;
+    outputStream6.writeIPv4Address(ipv4Address);
+    MemoryInputStream inputStream6(outputStream6.getData());
+    assert(inputStream6.readIPv4Address() == ipv4Address);
+    assert(!inputStream6.isReadBeyondEnd());
+    assert(inputStream6.getRemainingLength() == bit(0));
+
+    // 9. IPv6Address
+    IPv6Address ipv6Address("1011:1213:1415:1617:1819:2021:2223:2425");
+    MemoryOutputStream outputStream7;
+    outputStream7.writeIPv6Address(ipv6Address);
+    MemoryInputStream inputStream7(outputStream7.getData());
+    assert(inputStream7.readIPv6Address() == ipv6Address);
+    assert(!inputStream7.isReadBeyondEnd());
+    assert(inputStream7.getRemainingLength() == bit(0));
+}
+
 static void testSerialization()
 {
     // 1. serialized bytes is cached after serialization
@@ -1196,6 +1317,7 @@ void UnitTest::initialize()
     testAggregation();
     testFragmentation();
     testPolymorphism();
+    testStreaming();
     testSerialization();
     testConversion();
     testIteration();
