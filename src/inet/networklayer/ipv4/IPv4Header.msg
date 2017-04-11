@@ -179,6 +179,8 @@ class IPv4Header extends FieldsChunk
 {
     @customize(true);
 
+    chunkLength = byte(IP_HEADER_BYTES);
+
     short version = 4;
     short headerLength = IP_HEADER_BYTES;
 
