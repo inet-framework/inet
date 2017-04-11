@@ -109,7 +109,7 @@ void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const std:
 std::shared_ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetPadding = std::make_shared<EthernetPadding>();
-    ethernetPadding->setChunkLength(byte(stream.getSize() - stream.getPosition()));
+    ethernetPadding->setChunkLength(byte(stream.getLength() - stream.getPosition()));
     return ethernetPadding;
 }
 

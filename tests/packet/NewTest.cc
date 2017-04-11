@@ -43,9 +43,9 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const st
 std::shared_ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto applicationHeader = std::make_shared<ApplicationHeader>();
-    int64_t position = stream.getPosition();
+    auto position = stream.getPosition();
     applicationHeader->setSomeData(stream.readUint16());
-    stream.readByteRepeatedly(0, byte(applicationHeader->getChunkLength()).get() - stream.getPosition() + position);
+    stream.readByteRepeatedly(0, byte(applicationHeader->getChunkLength() - stream.getPosition() + position).get());
     return applicationHeader;
 }
 
@@ -65,19 +65,19 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::share
 std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto tcpHeader = std::make_shared<TcpHeader>();
-    int64_t position = stream.getPosition();
-    int64_t remainingSize = stream.getRemainingSize();
-    int16_t lengthField = stream.readUint16();
-    if (lengthField > remainingSize)
+    auto position = stream.getPosition();
+    auto remainingLength = stream.getRemainingLength();
+    auto lengthField = byte(stream.readUint16());
+    if (lengthField > remainingLength)
         tcpHeader->markIncomplete();
-    int16_t length = std::min(lengthField, (int16_t)remainingSize);
+    auto length = lengthField < remainingLength ? lengthField : byte(remainingLength);
     tcpHeader->setChunkLength(byte(length));
-    tcpHeader->setLengthField(lengthField);
+    tcpHeader->setLengthField(byte(lengthField).get());
     tcpHeader->setSrcPort(stream.readUint16());
     tcpHeader->setDestPort(stream.readUint16());
     tcpHeader->setCrcMode(CRC_COMPUTED);
     tcpHeader->setCrc(stream.readUint16());
-    stream.readByteRepeatedly(0, length - stream.getPosition() + position);
+    stream.readByteRepeatedly(0, byte(length - stream.getPosition() + position).get());
     return tcpHeader;
 }
 
@@ -92,12 +92,12 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shared
 std::shared_ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ipHeader = std::make_shared<IpHeader>();
-    int64_t position = stream.getPosition();
+    auto position = stream.getPosition();
     Protocol protocol = (Protocol)stream.readUint16();
     if (protocol != Protocol::Tcp && protocol != Protocol::Ip && protocol != Protocol::Ethernet)
         ipHeader->markImproperlyRepresented();
     ipHeader->setProtocol(protocol);
-    stream.readByteRepeatedly(0, byte(ipHeader->getChunkLength()).get() - stream.getPosition() + position);
+    stream.readByteRepeatedly(0, byte(ipHeader->getChunkLength() - stream.getPosition() + position).get());
     return ipHeader;
 }
 
@@ -112,9 +112,9 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const std::
 std::shared_ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetHeader = std::make_shared<EthernetHeader>();
-    int64_t position = stream.getPosition();
+    auto position = stream.getPosition();
     ethernetHeader->setProtocol((Protocol)stream.readUint16());
-    stream.readByteRepeatedly(0, byte(ethernetHeader->getChunkLength()).get() - stream.getPosition() + position);
+    stream.readByteRepeatedly(0, byte(ethernetHeader->getChunkLength() - stream.getPosition() + position).get());
     return ethernetHeader;
 }
 
@@ -129,9 +129,9 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const std:
 std::shared_ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetTrailer = std::make_shared<EthernetTrailer>();
-    int64_t position = stream.getPosition();
+    auto position = stream.getPosition();
     ethernetTrailer->setCrc(stream.readUint16());
-    stream.readByteRepeatedly(0, byte(ethernetTrailer->getChunkLength()).get() - stream.getPosition() + position);
+    stream.readByteRepeatedly(0, byte(ethernetTrailer->getChunkLength() - stream.getPosition() + position).get());
     return ethernetTrailer;
 }
 

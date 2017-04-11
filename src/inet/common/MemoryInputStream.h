@@ -16,155 +16,211 @@
 #ifndef __INET_MEMORYINPUTSTREAM_H_
 #define __INET_MEMORYINPUTSTREAM_H_
 
-#include <assert.h>
+#include "inet/common/Units.h"
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 
 namespace inet {
 
+using namespace units::values;
+
 /**
  * This class provides an efficient in memory byte input stream.
- *
  * Most functions are implemented in the header to allow inlining.
- * TODO: review efficiency
  */
+// TODO: allow arbitrary mixed bit/byte reads
+// TODO: add parameter checks
+// TODO: review efficiency
 class INET_API MemoryInputStream {
   protected:
-    std::vector<uint8_t> bytes;
-    int64_t position = -1;
+    std::vector<uint8_t> data;
+    bit length;
+    bit position;
     bool isReadBeyondEnd_ = false;
 
   protected:
-    bool checkReadBeyondEnd() {
-        if (position == bytes.size())
-            isReadBeyondEnd_ = true;
-        return isReadBeyondEnd_;
+    bool isByteAligned() {
+        return bit(position).get() % 8 == 0;
     }
 
   public:
-    MemoryInputStream(const std::vector<uint8_t>& bytes, int64_t position = 0) :
-        bytes(bytes),
+    MemoryInputStream(const std::vector<uint8_t>& data, bit length = bit(-1), bit position = bit(0)) :
+        data(data),
+        length(length == bit(-1) ? bit(data.size() * 8) : length),
         position(position)
     {
+        assert(bit(0) <= this->length);
+        assert(bit(0) <= position && position <= this->length);
     }
 
-    MemoryInputStream(const uint8_t* buffer, size_t bufLength, int64_t position = 0) :
-        bytes(buffer, buffer + bufLength),
+    MemoryInputStream(const uint8_t *buffer, bit length, bit position = bit(0)) :
+        data(buffer, buffer + byte(length).get()),
+        length(length),
         position(position)
     {
+        assert(bit(0) <= this->length);
+        assert(bit(0) <= position && position <= this->length);
     }
 
+    /** @name Stream querying functions */
+    //@{
     bool isReadBeyondEnd() const { return isReadBeyondEnd_; }
 
-    uint8_t operator[](int64_t i) { return bytes[i]; }
-    int64_t getSize() const { return bytes.size(); }
-    int64_t getRemainingSize() const { return bytes.size() - position; }
-    int64_t getPosition() const { return position; }
-    const std::vector<uint8_t>& getBytes() { return bytes; }
-    void copyBytes(std::vector<uint8_t>& result, int64_t offset = 0, int64_t length = -1) {
-        result.assign(bytes.begin() + offset, bytes.begin() + (length == -1 ? bytes.size() : offset + length));
+    bit getLength() const { return length; }
+
+    bit getRemainingLength() const { return length - position; }
+
+    bit getPosition() const { return position; }
+
+    const std::vector<uint8_t>& getData() const { return data; }
+
+    void copyData(std::vector<bool>& result, bit offset = bit(0), bit length = bit(-1)) const {
+        size_t end = bit(length == bit(-1) ? this->length : offset + length).get();
+        for (size_t i = bit(offset).get(); i < end; i++) {
+            size_t byteIndex = i / 8;
+            size_t bitIndex = i % 8;
+            uint8_t byte = data.at(byteIndex);
+            uint8_t mask = 1 << (7 - bitIndex);
+            bool bit = byte & mask;
+            result.push_back(bit);
+        }
     }
 
-    void seek(int64_t position) { this->position = position; }
+    void copyData(std::vector<uint8_t>& result, byte offset = byte(0), byte length = byte(-1)) const {
+        auto end = length == byte(-1) ? byte(data.size()) : offset + length;
+        result.insert(result.begin(), data.begin() + byte(offset).get(), data.begin() + byte(end).get());
+    }
+    //@}
 
+    /** @name Stream updating functions */
+    //@{
+    void seek(bit position) {
+        assert(bit(0) <= position && position <= length);
+        this->position = position;
+    }
+    //@}
+
+    /** @name Bit streaming functions */
+    //@{
     bool readBit() {
-        // TODO:
-        assert(false);
-    }
-
-    void readBits(std::vector<bool>& bits, int64_t offset = 0, int64_t length = -1) {
-        for (int64_t i = 0; i < length; i++)
-            bits[i] = readBit();
-    }
-
-    void readBitRepeatedly(bool bit, int64_t count) {
-        // TODO:
-        assert(false);
-    }
-
-    uint8_t readByte() {
-        if (position == bytes.size()) {
+        if (position == length) {
             isReadBeyondEnd_ = true;
-            return 0;
+            return false;
         }
-        else return bytes[position++];
+        else {
+            size_t i = bit(position).get();
+            size_t byteIndex = i / 8;
+            size_t bitIndex = i % 8;
+            position += bit(1);
+            uint8_t byte = data.at(byteIndex);
+            uint8_t mask = 1 << (7 - bitIndex);
+            return byte & mask;
+        }
     }
 
-    bool readByteRepeatedly(uint8_t byte, int64_t count) {
+    bool readBitRepeatedly(bool value, size_t count) {
         bool success = true;
-        for (int64_t i = 0; i < count; i++) {
-            if (position == bytes.size()) {
-                isReadBeyondEnd_ = true;
-                return false;
-            }
-            auto readByte = bytes[position++];
-            success &= (byte == readByte);
-        }
+        for (size_t i = 0; i < count; i++)
+            success &= (value == readBit());
         return success;
     }
 
-    void readBytes(uint8_t *buffer, int64_t length) {
-        for (int i = 0; i < length; i++)
-            buffer[i] = readByte();
+    bit readBits(std::vector<bool>& bits, bit length) {
+        size_t i;
+        for (i = 0; i < bit(length).get(); i++) {
+            if (isReadBeyondEnd_)
+                break;
+            bits.push_back(readBit());
+        }
+        return bit(i);
     }
+    //@}
 
-    void readBytes(std::vector<uint8_t>& bytes, int64_t offset = 0, int64_t length = -1) {
-        if (length == -1)
-            length = bytes.size();
-        for (int64_t i = 0; i < length; i++) {
-            if (checkReadBeyondEnd()) return;
-            bytes[offset + i] = bytes[position++];
+    /** @name Byte streaming functions */
+    //@{
+    uint8_t readByte() {
+        assert(isByteAligned());
+        if (position + byte(1) > length) {
+            isReadBeyondEnd_ = true;
+            position = length;
+            return 0;
+        }
+        else {
+            uint8_t result = data[byte(position).get()];
+            position += byte(1);
+            return result;
         }
     }
 
+    bool readByteRepeatedly(uint8_t value, size_t count) {
+        bool success = true;
+        for (size_t i = 0; i < count; i++)
+            success &= (value == readByte());
+        return success;
+    }
+
+    byte readBytes(std::vector<uint8_t>& bytes, byte length) {
+        assert(isByteAligned());
+        if (position + length > this->length) {
+            length = this->length - position;
+            isReadBeyondEnd_ = true;
+        }
+        bytes.insert(bytes.end(), data.begin() + byte(position).get(), data.begin() + byte(position + length).get());
+        position += length;
+        return length;
+    }
+
+    byte readBytes(uint8_t *buffer, byte length) {
+        assert(isByteAligned());
+        if (position + length > this->length) {
+            length = this->length - position;
+            isReadBeyondEnd_ = true;
+        }
+        std::copy(data.begin() + byte(position).get(), data.begin() + byte(position + length).get(), buffer);
+        position += length;
+        return length;
+    }
+    //@}
+
+    /** @name Basic type streaming functions */
+    //@{
     uint8_t readUint8() {
         return readByte();
     }
 
     uint16_t readUint16() {
         uint16_t value = 0;
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint16_t)(bytes[position++]) << 8);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint16_t)(bytes[position++]) << 0);
+        value |= ((uint16_t)(readByte()) << 8);
+        value |= ((uint16_t)(readByte()) << 0);
         return value;
     }
 
     uint32_t readUint32() {
         uint32_t value = 0;
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint32_t)(bytes[position++]) << 24);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint32_t)(bytes[position++]) << 16);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint32_t)(bytes[position++]) << 8);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint32_t)(bytes[position++]) << 0);
+        value |= ((uint32_t)(readByte()) << 24);
+        value |= ((uint32_t)(readByte()) << 16);
+        value |= ((uint32_t)(readByte()) << 8);
+        value |= ((uint32_t)(readByte()) << 0);
         return value;
     }
 
     uint64_t readUint64() {
         uint64_t value = 0;
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 56);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 48);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 40);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 32);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 24);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 16);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 8);
-        if (checkReadBeyondEnd()) return 0;
-        value |= ((uint64_t)(bytes[position++]) << 0);
+        value |= ((uint64_t)(readByte()) << 56);
+        value |= ((uint64_t)(readByte()) << 48);
+        value |= ((uint64_t)(readByte()) << 40);
+        value |= ((uint64_t)(readByte()) << 32);
+        value |= ((uint64_t)(readByte()) << 24);
+        value |= ((uint64_t)(readByte()) << 16);
+        value |= ((uint64_t)(readByte()) << 8);
+        value |= ((uint64_t)(readByte()) << 0);
         return value;
     }
+    //@}
 
+    /** @name INET specific type streaming functions */
+    //@{
     MACAddress readMACAddress() {
         MACAddress address;
         for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
@@ -182,6 +238,7 @@ class INET_API MemoryInputStream {
             element = readUint32();
         return IPv6Address(d[0], d[1], d[2], d[3]);
     }
+    //@}
 };
 
 } // namespace

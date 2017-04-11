@@ -143,11 +143,11 @@ std::shared_ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& st
             auto pkt = std::make_shared<IPv6NeighbourSolicitation>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            pkt->setChunkLength(byte(stream.getSize()));
+            pkt->setChunkLength(stream.getLength());
 
             stream.readUint32(); // reserved
             pkt->setTargetAddress(stream.readIPv6Address());
-            while (stream.getRemainingSize()) {   // has options
+            while (stream.getRemainingLength() != byte(0)) {   // has options
                 unsigned char type = stream.readByte();
                 unsigned char length = stream.readByte();
                 if (type == 0 || length == 0) {

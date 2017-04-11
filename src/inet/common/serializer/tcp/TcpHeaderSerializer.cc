@@ -162,7 +162,7 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& strea
 {
     auto position = stream.getPosition();
     uint8_t buffer[TCP_HEADER_OCTETS];
-    stream.readBytes(buffer, TCP_HEADER_OCTETS);
+    stream.readBytes(buffer, byte(TCP_HEADER_OCTETS));
     auto tcpHeader = std::make_shared<TcpHeader>();
     const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
     ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
@@ -188,7 +188,7 @@ std::shared_ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& strea
     tcpHeader->setUrgentPointer(ntohs(tcp.th_urp));
 
     if (headerLength > TCP_HEADER_OCTETS) {
-        while (stream.getPosition() - position < headerLength) {
+        while (stream.getPosition() - position < byte(headerLength)) {
             TCPOption *option = deserializeOption(stream);
             tcpHeader->addHeaderOption(option);
         }

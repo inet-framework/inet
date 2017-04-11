@@ -109,7 +109,7 @@ void TlvHeaderSerializer::serialize(MemoryOutputStream& stream, const std::share
 std::shared_ptr<Chunk> TlvHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t type = stream.readUint8();
-    stream.seek(stream.getPosition() - 1);
+    stream.seek(stream.getPosition() - byte(1));
     switch (type) {
         case 1:
             return TlvHeaderBoolSerializer().deserialize(stream);

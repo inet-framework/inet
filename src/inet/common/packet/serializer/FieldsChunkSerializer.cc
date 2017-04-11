@@ -46,13 +46,13 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const std::sha
 
 std::shared_ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto startPosition = stream.getPosition();
+    byte startPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));
-    auto chunkLength = byte(stream.getPosition() - startPosition);
+    byte chunkLength = stream.getPosition() - startPosition;
     ChunkSerializer::totalDeserializedBitCount += chunkLength;
     fieldsChunk->setChunkLength(chunkLength);
     auto serializedBytes = new std::vector<uint8_t>();
-    stream.copyBytes(*serializedBytes, byte(startPosition).get(), byte(chunkLength).get());
+    stream.copyData(*serializedBytes, startPosition, chunkLength);
     fieldsChunk->setSerializedBytes(serializedBytes);
     return fieldsChunk;
 }

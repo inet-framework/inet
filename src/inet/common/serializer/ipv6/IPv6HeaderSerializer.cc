@@ -126,7 +126,7 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
 std::shared_ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint8_t buffer[IPv6_HEADER_BYTES];
-    stream.readBytes(buffer, IPv6_HEADER_BYTES);
+    stream.readBytes(buffer, byte(IPv6_HEADER_BYTES));
     auto dest = std::make_shared<IPv6Header>();
     const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
     uint32_t flowinfo = ntohl(ip6h.ip6_flow);

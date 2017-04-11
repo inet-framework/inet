@@ -47,9 +47,9 @@ std::shared_ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& s
     int64_t delayraw = stream.readUint64();
     msg->setReplyDelay(SimTime(delayraw).dbl());
     msg->setServerClose(stream.readByte() ? true : false);
-    int64_t remainders = byte(msg->getChunkLength()).get() - (stream.getPosition() - startPosition);
-    ASSERT(remainders >= 0);
-    stream.readByteRepeatedly('?', remainders);
+    byte remainders = msg->getChunkLength() - (stream.getPosition() - startPosition);
+    ASSERT(remainders >= byte(0));
+    stream.readByteRepeatedly('?', byte(remainders).get());
     return msg;
 }
 

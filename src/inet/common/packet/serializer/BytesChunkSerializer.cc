@@ -32,9 +32,9 @@ void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const std::shar
 std::shared_ptr<Chunk> BytesChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto bytesChunk = std::make_shared<BytesChunk>();
-    byte length = byte(stream.getRemainingSize());
+    byte length = stream.getRemainingLength();
     std::vector<uint8_t> chunkBytes;
-    stream.readBytes(chunkBytes, 0, byte(length).get());
+    stream.readBytes(chunkBytes, length);
     bytesChunk->setBytes(chunkBytes);
     ChunkSerializer::totalDeserializedBitCount += length;
     return bytesChunk;

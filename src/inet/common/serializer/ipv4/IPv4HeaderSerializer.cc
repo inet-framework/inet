@@ -152,9 +152,9 @@ std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stre
 {
     auto position = stream.getPosition();
     uint8_t buffer[IP_HEADER_BYTES];
-    stream.readBytes(buffer, IP_HEADER_BYTES);
+    stream.readBytes(buffer, byte(IP_HEADER_BYTES));
     auto ipv4Header = std::make_shared<IPv4Header>();
-    unsigned int bufsize = stream.getRemainingSize();
+    byte bufsize = stream.getRemainingLength();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
     unsigned int totalLength, headerLength;
 
@@ -182,7 +182,7 @@ std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stre
     ipv4Header->setHeaderLength(headerLength);
 
     if (headerLength > IP_HEADER_BYTES) {    // options present?
-        while (stream.getPosition() - position < headerLength) {
+        while (stream.getPosition() - position < byte(headerLength)) {
             TLVOptionBase *option = deserializeOption(stream);
             ipv4Header->addOption(option);
         }
@@ -190,7 +190,7 @@ std::shared_ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stre
     ipv4Header->setCrc(iphdr.ip_sum);
     ipv4Header->setCrcMode(CRC_COMPUTED);
 
-    if (totalLength > bufsize)
+    if (byte(totalLength) > bufsize)
         EV_ERROR << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
 
     ipv4Header->setHeaderLength(headerLength);

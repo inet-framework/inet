@@ -110,7 +110,7 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const std::shar
 std::shared_ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     std::shared_ptr<IGMPMessage> packet = nullptr;
-    unsigned int startPos = stream.getPosition();
+    byte startPos = stream.getPosition();
     unsigned char type = stream.readByte();
     unsigned char code = stream.readByte();
     uint16_t chksum = stream.readUint16();
@@ -123,7 +123,7 @@ std::shared_ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stre
                 pkt->setGroupAddress(stream.readIPv4Address());
                 pkt->setChunkLength(byte(8));
             }
-            else if (stream.getSize() - startPos == 8) {        // RFC 3376 Section 7.1
+            else if (stream.getLength() - startPos == byte(8)) {        // RFC 3376 Section 7.1
                 auto pkt = std::make_shared<IGMPv2Query>();
                 packet = pkt;
                 pkt->setMaxRespTime(SimTime(code, (SimTimeUnit)-1));
@@ -143,7 +143,7 @@ std::shared_ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stre
                 unsigned int vs = stream.readUint16();
                 for (unsigned int i = 0; i < vs && !stream.isReadBeyondEnd(); i++)
                     pkt->getSourceList()[i] = stream.readIPv4Address();
-                pkt->setChunkLength(byte(stream.getPosition() - startPos));
+                pkt->setChunkLength(stream.getPosition() - startPos);
             }
             break;
 
@@ -185,7 +185,7 @@ std::shared_ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stre
                 for (i = 0; i < s && !stream.isReadBeyondEnd(); i++) {
                     GroupRecord gr;
                     gr.recordType = stream.readByte();
-                    uint16_t auxDataLen = 4 * stream.readByte();
+                    byte auxDataLen = byte(4 * stream.readByte());
                     unsigned int gac = stream.readUint16();
                     gr.groupAddress = stream.readIPv4Address();
                     for (unsigned int j = 0; j < gac && !stream.isReadBeyondEnd(); j++) {

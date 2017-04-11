@@ -37,14 +37,14 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const st
 
 std::shared_ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
-    int64_t startPosition = stream.getPosition();
+    auto startPosition = stream.getPosition();
     auto applicationPacket = std::make_shared<ApplicationPacket>();
     byte chunkLength = byte(stream.readUint32());
     applicationPacket->setChunkLength(chunkLength);
     applicationPacket->setSequenceNumber(stream.readUint32());
-    int64_t remainders = byte(applicationPacket->getChunkLength()).get() - (stream.getPosition() - startPosition);
-    ASSERT(remainders >= 0);
-    stream.readByteRepeatedly('?', remainders);
+    byte remainders = applicationPacket->getChunkLength() - (stream.getPosition() - startPosition);
+    ASSERT(remainders >= byte(0));
+    stream.readByteRepeatedly('?', byte(remainders).get());
     return applicationPacket;
 }
 
