@@ -664,39 +664,39 @@ static void testSerialization()
     // 1. serialized bytes is cached after serialization
     MemoryOutputStream stream1;
     auto applicationHeader1 = std::make_shared<ApplicationHeader>();
-    auto totalSerializedBitCount = ChunkSerializer::totalSerializedBitCount;
+    auto totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader1);
     auto size = stream1.getLength();
     assert(size != byte(0));
-    assert(totalSerializedBitCount + size == ChunkSerializer::totalSerializedBitCount);
-    totalSerializedBitCount = ChunkSerializer::totalSerializedBitCount;
+    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
+    totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader1);
     assert(stream1.getLength() == size * 2);
-    assert(totalSerializedBitCount == ChunkSerializer::totalSerializedBitCount);
+    assert(totalSerializedLength == ChunkSerializer::totalSerializedLength);
 
     // 2. serialized bytes is cached after deserialization
     MemoryInputStream stream2(stream1.getData());
-    auto totalDeserializedBitCount = ChunkSerializer::totalDeserializedBitCount;
+    auto totalDeserializedLength = ChunkSerializer::totalDeserializedLength;
     const auto& chunk1 = Chunk::deserialize(stream2, typeid(ApplicationHeader));
     assert(chunk1 != nullptr);
     assert(byte(chunk1->getChunkLength()) == byte(size));
     assert(std::dynamic_pointer_cast<ApplicationHeader>(chunk1) != nullptr);
     auto applicationHeader2 = std::static_pointer_cast<ApplicationHeader>(chunk1);
-    assert(totalDeserializedBitCount + size == ChunkSerializer::totalDeserializedBitCount);
-    totalSerializedBitCount = ChunkSerializer::totalSerializedBitCount;
+    assert(totalDeserializedLength + size == ChunkSerializer::totalDeserializedLength);
+    totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader2);
     assert(stream1.getLength() == size * 3);
-    assert(totalSerializedBitCount == ChunkSerializer::totalSerializedBitCount);
+    assert(totalSerializedLength == ChunkSerializer::totalSerializedLength);
 
     // 3. serialized bytes is deleted after change
     applicationHeader1->setSomeData(42);
-    totalSerializedBitCount = ChunkSerializer::totalSerializedBitCount;
+    totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader1);
-    assert(totalSerializedBitCount + size == ChunkSerializer::totalSerializedBitCount);
+    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
     applicationHeader2->setSomeData(42);
-    totalSerializedBitCount = ChunkSerializer::totalSerializedBitCount;
+    totalSerializedLength = ChunkSerializer::totalSerializedLength;
     Chunk::serialize(stream1, applicationHeader2);
-    assert(totalSerializedBitCount + size == ChunkSerializer::totalSerializedBitCount);
+    assert(totalSerializedLength + size == ChunkSerializer::totalSerializedLength);
 }
 
 static void testConversion()

@@ -25,8 +25,8 @@ namespace inet {
 class INET_API ChunkSerializer : public cObject
 {
   public:
-    static bit totalSerializedBitCount;
-    static bit totalDeserializedBitCount;
+    static bit totalSerializedLength;
+    static bit totalDeserializedLength;
 
   public:
     virtual ~ChunkSerializer() { }

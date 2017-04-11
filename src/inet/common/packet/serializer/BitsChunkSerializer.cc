@@ -26,7 +26,7 @@ void BitsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>
     const auto& bitsChunk = std::static_pointer_cast<const BitsChunk>(chunk);
     bit serializedLength = length == bit(-1) ? bitsChunk->getChunkLength() - offset: length;
     stream.writeBits(bitsChunk->getBits(), offset, serializedLength);
-    ChunkSerializer::totalSerializedBitCount += serializedLength;
+    ChunkSerializer::totalSerializedLength += serializedLength;
 }
 
 Ptr<Chunk> BitsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
@@ -36,7 +36,7 @@ Ptr<Chunk> BitsChunkSerializer::deserialize(MemoryInputStream& stream, const std
     std::vector<bool> chunkBits;
     stream.readBits(chunkBits, length);
     bitsChunk->setBits(chunkBits);
-    ChunkSerializer::totalDeserializedBitCount += length;
+    ChunkSerializer::totalDeserializedLength += length;
     return bitsChunk;
 }
 
