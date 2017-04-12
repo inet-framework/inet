@@ -18,7 +18,6 @@
 #include <algorithm>
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
-#include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -120,10 +119,11 @@ void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
     if (signal == NF_LINK_BREAK) {
         MACAddress transmitterAddress;
         MACAddress receiverAddress;
-        if (auto frame = dynamic_cast<IMACFrame *>(object)) {
-            transmitterAddress = frame->getTransmitterAddress();
-            receiverAddress = frame->getReceiverAddress();
-        }
+        // TODO: revive
+//        if (auto frame = dynamic_cast<IMACFrame *>(object)) {
+//            transmitterAddress = frame->getTransmitterAddress();
+//            receiverAddress = frame->getReceiverAddress();
+//        }
         if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressFrame *>(object)) {
             transmitterAddress = frame->getTransmitterAddress();
             receiverAddress = frame->getReceiverAddress();

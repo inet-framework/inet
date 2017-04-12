@@ -20,7 +20,6 @@
 #include "inet/common/NotifierConsts.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
-#include "inet/linklayer/contract/IMACFrame.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
