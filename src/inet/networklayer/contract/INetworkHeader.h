@@ -31,7 +31,6 @@ class INET_API INetworkHeader
 {
   public:
     virtual ~INetworkHeader() {}
-    virtual bit getNetworkHeaderLength() const = 0;
     virtual L3Address getSourceAddress() const = 0;
     virtual void setSourceAddress(const L3Address& address) = 0;
     virtual L3Address getDestinationAddress() const = 0;

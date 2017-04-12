@@ -128,7 +128,6 @@ class INET_API IPv6Header : public IPv6Header_Base, public INetworkHeader
      */
     virtual IPv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
 
-    virtual bit getNetworkHeaderLength() const override { return getChunkLength(); }
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }

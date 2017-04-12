@@ -31,7 +31,7 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = peekNetworkHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_TCP) {
-        packet->removeFromBeginning(networkHeader->getNetworkHeaderLength());
+        packet->removeFromBeginning(check_and_cast<Chunk *>(networkHeader.get())->getChunkLength()); // TODO: looks bad
         auto tcpHeader = packet->removeHeader<TcpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();

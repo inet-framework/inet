@@ -98,7 +98,6 @@ class INET_API IPv4Header : public IPv4Header_Base, public INetworkHeader
     virtual int calculateHeaderByteLength() const;
 
 
-    virtual bit getNetworkHeaderLength() const override { return getChunkLength(); }
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv4()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }

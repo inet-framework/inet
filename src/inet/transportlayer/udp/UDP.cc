@@ -1236,7 +1236,7 @@ INetfilter::IHook::Result UDP::CrcInsertion::datagramPostRoutingHook(Packet *pac
     auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = peekNetworkHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_UDP) {
-        packet->removeFromBeginning(networkHeader->getNetworkHeaderLength());
+        packet->removeFromBeginning(check_and_cast<Chunk *>(networkHeader.get())->getChunkLength()); // TODO: looks bad
         auto udpHeader = packet->removeHeader<UdpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
