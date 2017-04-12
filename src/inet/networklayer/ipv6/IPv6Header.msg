@@ -20,7 +20,9 @@
 cplusplus {{
 #include <iostream>
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
+
 #include "inet/networklayer/common/IPProtocolId_m.h"
 }}
 
@@ -39,7 +41,7 @@ enum IPProtocolId;
 
 class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
-class FieldsChunk extends cObject;
+class NetworkHeaderBase extends cObject;
 
 //
 // IPv6 datagram. RFC 2460 Section 3.
@@ -49,7 +51,7 @@ class FieldsChunk extends cObject;
 //    - payload length: will be calculated from encapsulated message length
 //      and extension headers' length
 //
-class IPv6Header extends FieldsChunk
+class IPv6Header extends NetworkHeaderBase
 {
     @customize(true);
     IPv6Address srcAddress;
@@ -60,7 +62,7 @@ class IPv6Header extends FieldsChunk
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
-    int transportProtocol @enum(IPProtocolId);
+    int transportProtocol @enum(IPProtocolId) @override;
 
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }

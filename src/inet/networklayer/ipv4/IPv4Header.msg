@@ -20,6 +20,7 @@
 cplusplus {{
 #include "inet/common/TLVOption.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 #include "inet/transportlayer/common/CRC_m.h"
@@ -27,7 +28,7 @@ cplusplus {{
 
 namespace inet;
 
-class FieldsChunk extends cObject;
+class NetworkHeaderBase extends cObject;
 class noncobject TLVOptionBase;
 class noncobject TLVOptions;
 
@@ -175,7 +176,7 @@ class IPv4OptionUnknown extends IPv4Option
 // Only one of the option fields can exist at a time.
 //
 // TODO: cleanup order of fields
-class IPv4Header extends FieldsChunk
+class IPv4Header extends NetworkHeaderBase
 {
     @customize(true);
 
@@ -190,7 +191,7 @@ class IPv4Header extends FieldsChunk
     uint16_t crc = 0;
     int crcMode @enum(CrcMode) = -1;
 
-    int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
+    int transportProtocol  @override @enum(IPProtocolId) = IP_PROT_NONE;
     short timeToLive;
     int identification;
     bool moreFragments;

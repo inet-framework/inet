@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/base/NetworkHeaderBase_m.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 }}
 
 namespace inet;
@@ -28,9 +28,11 @@ class ProbabilisticBroadcastHeader extends NetworkHeaderBase
 {
     @customize(true);
 
+    L3Address   srcAddr;
+    L3Address   destAddr;
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
     int       nbHops;
-    int       transportProtocol = -1;
+    int       transportProtocol @override = -1;
     simtime_t appTtl;   // Message time-to-live set by application.
     L3Address   initialSrcAddr;
     L3Address   finalDestAddr;

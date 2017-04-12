@@ -32,7 +32,7 @@
 
 namespace inet {
 
-Ptr<INetworkHeader> NetfilterBase::HookBase::peekNetworkHeader(Packet *packet)
+Ptr<NetworkHeaderBase> NetfilterBase::HookBase::peekNetworkHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
 

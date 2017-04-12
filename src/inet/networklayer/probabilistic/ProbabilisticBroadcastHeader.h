@@ -18,7 +18,7 @@
 #ifndef __INET_ProbabilisticBroadcastHeader_H
 #define __INET_ProbabilisticBroadcastHeader_H
 
-#include "inet/networklayer/contract/INetworkHeader.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader_m.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace inet {
  * Represents an ProbabilisticBroadcast datagram. More info in the ProbabilisticBroadcastHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeader_Base, public INetworkHeader
+class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeader_Base
 {
   public:
     ProbabilisticBroadcastHeader() : ProbabilisticBroadcastHeader_Base() {}
@@ -36,12 +36,10 @@ class INET_API ProbabilisticBroadcastHeader : public ProbabilisticBroadcastHeade
 
     virtual ProbabilisticBroadcastHeader *dup() const override { return new ProbabilisticBroadcastHeader(*this); }
 
-    virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
-    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
-    virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
-    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const override { return ProbabilisticBroadcastHeader_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { ProbabilisticBroadcastHeader_Base::setTransportProtocol(protocol); };
+    virtual L3Address getSourceAddress() const override { return getSrcAddr(); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
+    virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
 };
 
 } // namespace inet

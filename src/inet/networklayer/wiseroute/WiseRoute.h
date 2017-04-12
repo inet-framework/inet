@@ -26,6 +26,7 @@
 #ifndef __INET_WISEROUTE_H
 #define __INET_WISEROUTE_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/contract/IARP.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"

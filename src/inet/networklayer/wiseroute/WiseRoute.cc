@@ -33,6 +33,7 @@
 #include "inet/common/INETMath.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
@@ -109,8 +110,8 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         pkt->setChunkLength(byte(headerLength));
         pkt->setInitialSrcAddr(myNetwAddr);
         pkt->setFinalDestAddr(broadcastAddress);
-        pkt->setSrcAddr(myNetwAddr);
-        pkt->setDestAddr(broadcastAddress);
+        pkt->setSourceAddress(myNetwAddr);
+        pkt->setDestinationAddress(broadcastAddress);
         pkt->setNbHops(0);
         floodTable.insert(make_pair(myNetwAddr, floodSeqNumber));
         pkt->setSeqNum(floodSeqNumber);
@@ -137,7 +138,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
     auto wiseRouteHeader = std::static_pointer_cast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
     const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
     const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
-    const L3Address& srcAddr = wiseRouteHeader->getSrcAddr();
+    const L3Address& srcAddr = wiseRouteHeader->getSourceAddress();
     // KLUDGE: TODO: get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
     double rssi = 1;    // TODO: ctrlInfo->getRSSI();
@@ -166,7 +167,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                 // at origin, as well as the MAC control info. Hence only update
                 // local hop source address.
                 packetCopy = packet->dup();
-                wiseRouteHeader->setSrcAddr(myNetwAddr);
+                wiseRouteHeader->setSourceAddress(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
@@ -194,7 +195,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
         else {
             // not for me. if flood, forward as flood. else select a route
             if (floodType == FORWARD) {
-                wiseRouteHeader->setSrcAddr(myNetwAddr);
+                wiseRouteHeader->setSourceAddress(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
@@ -214,8 +215,8 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                     nextHop = finalDestAddr;
                     nbGetRouteFailures++;
                 }
-                wiseRouteHeader->setSrcAddr(myNetwAddr);
-                wiseRouteHeader->setDestAddr(nextHop);
+                wiseRouteHeader->setSourceAddress(myNetwAddr);
+                wiseRouteHeader->setDestinationAddress(nextHop);
                 pCtrlInfo = packet->removeControlInfo();
                 MACAddress nextHopMacAddr = arp->resolveL3Address(nextHop, nullptr);    //FIXME interface entry pointer needed
                 if (nextHopMacAddr.isUnspecified())
@@ -261,7 +262,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
 
     pkt->setFinalDestAddr(finalDestAddr);
     pkt->setInitialSrcAddr(myNetwAddr);
-    pkt->setSrcAddr(myNetwAddr);
+    pkt->setSourceAddress(myNetwAddr);
     pkt->setNbHops(0);
     pkt->setTransportProtocol(ProtocolGroup::ipprotocol.getProtocolNumber(msg->getMandatoryTag<PacketProtocolTag>()->getProtocol()));
 
@@ -269,7 +270,7 @@ void WiseRoute::handleUpperPacket(cPacket *msg)
         nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
     else
         nextHopAddr = getRoute(finalDestAddr, true);
-    pkt->setDestAddr(nextHopAddr);
+    pkt->setDestinationAddress(nextHopAddr);
     if (nextHopAddr.isBroadcast()) {
         // it's a flood.
         nextHopMacAddr = MACAddress::BROADCAST_ADDRESS;

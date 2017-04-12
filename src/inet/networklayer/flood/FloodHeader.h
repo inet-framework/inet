@@ -19,7 +19,6 @@
 #define __INET_FloodHeader_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/flood/FloodHeader_m.h"
 
 namespace inet {
@@ -28,7 +27,7 @@ namespace inet {
  * Represents an flood datagram. More info in the FloodHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API FloodHeader : public FloodHeader_Base, public INetworkHeader
+class INET_API FloodHeader : public FloodHeader_Base
 {
   public:
     FloodHeader() : FloodHeader_Base() {}
@@ -38,11 +37,9 @@ class INET_API FloodHeader : public FloodHeader_Base, public INetworkHeader
     virtual FloodHeader *dup() const override { return new FloodHeader(*this); }
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
-    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
-    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const override { return FloodHeader_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { FloodHeader_Base::setTransportProtocol(protocol); };
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
 };
 
 } // namespace inet

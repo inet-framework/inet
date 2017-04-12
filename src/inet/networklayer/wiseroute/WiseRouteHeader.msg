@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/base/NetworkHeaderBase_m.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 }}
 
 namespace inet;
@@ -28,10 +28,13 @@ class WiseRouteHeader extends NetworkHeaderBase
 {
     @customize(true);
 
+    L3Address   srcAddr;
+    L3Address   destAddr;
     unsigned long seqNum = 0;
-	int     isFlood;
-	int     nbHops;
-    int     transportProtocol = -1;
+    int     isFlood;
+    int     nbHops;
+    int     transportProtocol @override = -1;
     L3Address finalDestAddr;
     L3Address initialSrcAddr;
 }
+

@@ -16,30 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INETWORKHEADER_H
-#define __INET_INETWORKHEADER_H
-
-#include "inet/common/Units.h"
-#include "inet/networklayer/common/L3Address.h"
-
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 
 namespace inet {
 
-using units::values::bit;
-
-class INET_API INetworkHeader
-{
-  public:
-    virtual ~INetworkHeader() {}
-    virtual L3Address getSourceAddress() const = 0;
-    virtual void setSourceAddress(const L3Address& address) = 0;
-    virtual L3Address getDestinationAddress() const = 0;
-    virtual void setDestinationAddress(const L3Address& address) = 0;
-    virtual int getTransportProtocol() const = 0;
-    virtual void setTransportProtocol(int protocol) = 0;
-};
+Register_Abstract_Class(NetworkHeaderBase);
 
 } // namespace inet
-
-#endif // ifndef __INET_INETWORKHEADER_H
 

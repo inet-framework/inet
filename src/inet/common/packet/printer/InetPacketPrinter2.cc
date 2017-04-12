@@ -42,7 +42,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
-#include "inet/networklayer/contract/INetworkHeader.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 
 #ifdef WITH_RIP
 #include "inet/routing/rip/RIPPacket_m.h"
@@ -142,7 +142,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
 
         //TODO slicechunk???
 
-        if (INetworkHeader *dgram = dynamic_cast<INetworkHeader *>(chunk)) {
+        if (const NetworkHeaderBase *dgram = dynamic_cast<const NetworkHeaderBase *>(chunk)) {
             srcAddr = dgram->getSourceAddress();
             destAddr = dgram->getDestinationAddress();
 #ifdef WITH_IPv4

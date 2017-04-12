@@ -19,7 +19,6 @@
 #define __INET_GENERICDATAGRAM_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
 
@@ -29,7 +28,7 @@ namespace inet {
  * Represents a generic datagram. More info in the GenericDatagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base, public INetworkHeader
+class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base
 {
   public:
     GenericDatagramHeader() : GenericDatagramHeader_Base() {}
@@ -37,12 +36,10 @@ class INET_API GenericDatagramHeader : public GenericDatagramHeader_Base, public
     GenericDatagramHeader& operator=(const GenericDatagramHeader& other) { GenericDatagramHeader_Base::operator=(other); return *this; }
     virtual GenericDatagramHeader *dup() const override { return new GenericDatagramHeader(*this); }
 
-    virtual L3Address getSourceAddress() const override { return GenericDatagramHeader_Base::_getSrcAddr(); }
-    virtual void setSourceAddress(const L3Address& addr) override { GenericDatagramHeader_Base::setSourceAddress(addr); }
-    virtual L3Address getDestinationAddress() const override { return GenericDatagramHeader_Base::_getDestAddr(); }
-    virtual void setDestinationAddress(const L3Address& addr) override { GenericDatagramHeader_Base::setDestinationAddress(addr); }
-    virtual int getTransportProtocol() const override { return GenericDatagramHeader_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { GenericDatagramHeader_Base::setTransportProtocol(protocol); }
+    virtual L3Address getSourceAddress() const override { return getSrcAddr(); }
+    virtual void setSourceAddress(const L3Address& addr) override { setSrcAddr(addr); }
+    virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
+    virtual void setDestinationAddress(const L3Address& addr) override { setDestAddr(addr); }
 };
 
 } // namespace inet

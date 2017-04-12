@@ -10,6 +10,7 @@
 
 #include <set>
 #include <map>
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcastHeader.h"

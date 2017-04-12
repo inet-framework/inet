@@ -20,7 +20,6 @@
 
 #include <list>
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/ipv6/IPv6Header_m.h"
 
 namespace inet {
@@ -29,7 +28,7 @@ namespace inet {
  * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv6Header : public IPv6Header_Base, public INetworkHeader
+class INET_API IPv6Header : public IPv6Header_Base
 {
   protected:
     typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;
@@ -132,8 +131,6 @@ class INET_API IPv6Header : public IPv6Header_Base, public INetworkHeader
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIPv6()); }
-    virtual int getTransportProtocol() const override { return IPv6Header_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { IPv6Header_Base::setTransportProtocol(protocol); }
 };
 
 std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);

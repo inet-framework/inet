@@ -18,7 +18,6 @@
 #ifndef __INET_WiseRouteHeader_H
 #define __INET_WiseRouteHeader_H
 
-#include "inet/networklayer/contract/INetworkHeader.h"
 #include "inet/networklayer/wiseroute/WiseRouteHeader_m.h"
 
 namespace inet {
@@ -27,7 +26,7 @@ namespace inet {
  * Represents an WiseRoute datagram. More info in the WiseRouteHeader.msg file
  * (and the documentation generated from it).
  */
-class INET_API WiseRouteHeader : public WiseRouteHeader_Base, public INetworkHeader
+class INET_API WiseRouteHeader : public WiseRouteHeader_Base
 {
   public:
     WiseRouteHeader() : WiseRouteHeader_Base() {}
@@ -37,11 +36,9 @@ class INET_API WiseRouteHeader : public WiseRouteHeader_Base, public INetworkHea
     virtual WiseRouteHeader *dup() const override { return new WiseRouteHeader(*this); }
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
-    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address.toModuleId()); }
+    virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
-    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address.toModuleId()); }
-    virtual int getTransportProtocol() const override { return WiseRouteHeader_Base::getTransportProtocol(); }
-    virtual void setTransportProtocol(int protocol) override { WiseRouteHeader_Base::setTransportProtocol(protocol); };
+    virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
 };
 
 } // namespace inet

@@ -16,18 +16,21 @@
 //
 
 cplusplus {{
-#include "inet/networklayer/base/NetworkHeaderBase_m.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 }}
 
 namespace inet;
 
 class NetworkHeaderBase extends cObject;
+class noncobject L3Address;
 
 class FloodHeader extends NetworkHeaderBase
 {
     @customize(true);
-
+    L3Address     srcAddr;
+    L3Address     destAddr;
     int           ttl = 1;    // time to live field
     unsigned long seqNum = 0; // sequence number
-    int           transportProtocol = -1;
+    int           transportProtocol @override = -1;
 }

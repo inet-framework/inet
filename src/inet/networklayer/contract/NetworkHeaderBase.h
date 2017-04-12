@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2012 Andras Varga
+// Copyright (C) 2017 Opensim Ltd
+// Author: Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
-}}
+#ifndef __INET_NETWORKHEADERBASE_H
+#define __INET_NETWORKHEADERBASE_H
 
-namespace inet;
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 
-class noncobject L3Address;
-class FieldsChunk extends cObject;
+#endif // ifndef __INET_NETWORKHEADERBASE_H
 
-class NetworkHeaderBase extends FieldsChunk
-{
-    L3Address srcAddr;
-    L3Address destAddr;
-}

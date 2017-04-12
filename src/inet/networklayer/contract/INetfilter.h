@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/INetworkHeader.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 
 namespace inet {
 
@@ -129,7 +129,7 @@ class INET_API NetfilterBase : public INetfilter {
 
       protected:
         // TODO: move?
-        Ptr<INetworkHeader> peekNetworkHeader(Packet *packet);
+        Ptr<NetworkHeaderBase> peekNetworkHeader(Packet *packet);
 
       public:
         virtual ~HookBase() { if (netfilter) netfilter->unregisterHook(this); };

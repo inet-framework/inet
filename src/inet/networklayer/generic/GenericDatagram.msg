@@ -17,15 +17,15 @@
 
 cplusplus {{
 #include "inet/common/TLVOption.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/contract/NetworkHeaderBase.h"
 }}
 
 namespace inet;
 
-class FieldsChunk extends cObject;
+class NetworkHeaderBase extends cObject;
 class noncobject L3Address;
 class noncobject TLVOptions;
 
@@ -44,12 +44,13 @@ enum GenericTLVOptionTypes
 //
 // Represents a generic network datagram with generic network addresses. 
 //
-class GenericDatagramHeader extends FieldsChunk
+class GenericDatagramHeader extends NetworkHeaderBase
 {
     @customize(true);
-    L3Address sourceAddress @getter(_getSrcAddr);
-    L3Address destinationAddress @getter(_getDestAddr);
-    int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
+    L3Address srcAddr;
+    L3Address destAddr;
+    int transportProtocol @override @enum(IPProtocolId) = IP_PROT_NONE;
     short hopLimit;
     TLVOptions tlvOptions;
 }
+

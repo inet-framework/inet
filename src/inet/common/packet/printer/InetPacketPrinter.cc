@@ -21,7 +21,6 @@
 #include "inet/common/packet/Packet.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/INetworkHeader.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/ICMPHeader.h"
