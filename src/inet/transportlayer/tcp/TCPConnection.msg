@@ -34,6 +34,8 @@ cplusplus {{
 namespace inet::tcp;
 
 class noncobject L3Address;
+class ChunkQueue extends cNamedObject;
+class ReorderBuffer extends cNamedObject;
 class TCPSendQueue extends cObject;
 class TCPReceiveQueue extends cObject;
 class noncobject TCPSACKRexmitQueue;
@@ -156,6 +158,20 @@ struct TCPStateVariables
     uint32_t tcpRcvQueueDrops;    // number of drops in tcp receive queue
 };
 
+class TCPSendQueue extends cObject
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    ChunkQueue dataBuffer;
+}
+
+class TCPReceiveQueue extends cObject
+{
+    @existingClass(true);
+    @descriptor(readonly);
+    ReorderBuffer reorderBuffer;
+}
+
 class TCPConnection extends cObject
 {
     @existingClass(true);
@@ -179,6 +195,5 @@ class TCPConnection extends cObject
 
     TCPAlgorithm *tcpAlgorithm;
     int fsmState @readonly;
-    TCPStateVariables *state;
 };
 

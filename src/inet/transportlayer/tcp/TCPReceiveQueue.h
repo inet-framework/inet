@@ -72,6 +72,8 @@ class INET_API TCPReceiveQueue : public cObject
      */
     virtual ~TCPReceiveQueue();
 
+    virtual ReorderBuffer& getReorderBuffer() { return reorderBuffer; }
+
     /**
      * Set the connection that owns this queue.
      */

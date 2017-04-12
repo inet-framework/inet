@@ -53,6 +53,8 @@ class INET_API TCPSendQueue : public cObject
      */
     virtual ~TCPSendQueue();
 
+    virtual ChunkQueue& getDataBuffer() { return dataBuffer; }
+
     /**
      * Set the connection that owns this queue.
      */
