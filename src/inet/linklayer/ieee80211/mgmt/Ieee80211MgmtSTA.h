@@ -122,16 +122,16 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void handleTimer(cMessage *msg) override;
 
     /** Implements abstract Ieee80211MgmtBase method */
-    virtual void handleUpperMessage(cPacket *msg) override;
+    virtual void handleUpperMessage(Packet *msg) override;
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
     /** Utility function for handleUpperMessage() */
-    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
+    virtual Ieee80211DataFrame *encapsulate(Packet *msg);
 
     /** Utility method to decapsulate a data frame */
-    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
+    virtual Packet *decapsulate(Ieee80211DataFrame *frame);
 
     /** Utility function: sends authentication request */
     virtual void startAuthentication(APInfo *ap, simtime_t timeout);

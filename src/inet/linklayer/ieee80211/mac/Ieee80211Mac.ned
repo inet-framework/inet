@@ -31,12 +31,12 @@ import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 module LayeredProtocolBase
 {
     parameters:
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[packetFromUpperDropped](type=cPacket);
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetFromLowerDropped](type=cPacket);
+        @signal[packetSentToUpper](type=Packet);
+        @signal[packetReceivedFromUpper](type=Packet);
+        @signal[packetFromUpperDropped](type=Packet);
+        @signal[packetSentToLower](type=Packet);
+        @signal[packetReceivedFromLower](type=Packet);
+        @signal[packetFromLowerDropped](type=Packet);
 }
 
 // near copy-paste of inet.linklayer.base.MACProtocolBase to work around "compound-module cannot extend a simple-module" error in OMNeT++ 4.x

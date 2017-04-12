@@ -45,7 +45,7 @@ void Ieee80211MgmtSTASimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
+void Ieee80211MgmtSTASimplified::handleUpperMessage(Packet *msg)
 {
     if (accessPointAddress.isUnspecified()) {
         EV << "STA is not associated with an access point, discarding packet " << msg << "\n";
@@ -61,7 +61,7 @@ void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
+Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(Packet *msg)
 {
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
@@ -89,9 +89,9 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
     return frame;
 }
 
-cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
+Packet *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
 {
-    cPacket *payload = frame->decapsulate();
+    Packet *payload = frame->decapsulate();
     auto macAddressInd = payload->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(frame->getAddress3());
     macAddressInd->setDestAddress(frame->getReceiverAddress());

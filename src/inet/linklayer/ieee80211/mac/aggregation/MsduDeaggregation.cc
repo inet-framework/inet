@@ -61,7 +61,7 @@ std::vector<Ieee80211DataFrame*> *MsduDeaggregation::deaggregateFrame(Ieee80211D
     for (int i = 0; i < numOfSubframes; i++)
     {
         Ieee80211MsduSubframe msduSubframe = aMsdu->getSubframes(i);
-        cPacket *msdu = msduSubframe.decapsulate();
+        Packet *msdu = msduSubframe.decapsulate();
         Ieee80211DataFrame *dataFrame = nullptr;
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
         dataFrame = (msduSubframe.getEtherType() != -1) ? new Ieee80211DataFrameWithSNAP() : new Ieee80211DataFrame();

@@ -60,13 +60,13 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     virtual void handleTimer(cMessage *frame) = 0;
 
     /** Should be redefined to encapsulate and enqueue msgs from higher layers */
-    virtual void handleUpperMessage(cPacket *msg) = 0;
+    virtual void handleUpperMessage(Packet *msg) = 0;
 
     /** Should be redefined to handle commands from the "agent" (if present) */
     virtual void handleCommand(int msgkind, cObject *ctrl) = 0;
 
     /** Utility method for implementing handleUpperMessage(): send message to MAC */
-    virtual void sendDown(cPacket *frame);
+    virtual void sendDown(Packet *frame);
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);

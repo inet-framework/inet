@@ -76,7 +76,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
         delete frame;
         return;
     }
-    cPacket *outFrame = nullptr;
+    Packet *outFrame = nullptr;
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:
 #ifdef WITH_ETHERNET
@@ -87,7 +87,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
             break;
 
         case ENCAP_DECAP_TRUE: {
-            cPacket *payload = frame->decapsulate();
+            Packet *payload = frame->decapsulate();
             auto macAddressInd = payload->ensureTag<MacAddressInd>();
             macAddressInd->setSrcAddress(frame->getTransmitterAddress());
             macAddressInd->setDestAddress(frame->getAddress3());
@@ -177,7 +177,7 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
 #endif // ifdef WITH_ETHERNET
 }
 
-Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
+Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(Packet *msg)
 {
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:

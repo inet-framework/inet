@@ -120,15 +120,15 @@ void Ieee80211Mac::handleSelfMessage(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211Mac::handleUpperPacket(cPacket *msg)
+void Ieee80211Mac::handleUpperPacket(Packet *msg)
 {
     processUpperFrame(check_and_cast<Ieee80211DataOrMgmtFrame *>(msg));
 }
 
-void Ieee80211Mac::handleLowerPacket(cPacket *msg)
+void Ieee80211Mac::handleLowerPacket(Packet *msg)
 {
     // KLUDGE: to unwrap from a Packet
-    const auto& packetChunk = check_and_cast<Packet *>(msg)->peekDataAt<cPacketChunk>(byte(0));
+    const auto& packetChunk = check_and_cast<Packet *>(msg)->peekDataAt<PacketChunk>(byte(0));
     auto frame = check_and_cast<Ieee80211Frame *>(packetChunk->getPacket()->dup());
     frame->transferTagsFrom(msg);
     if (msg->getControlInfo() != nullptr)

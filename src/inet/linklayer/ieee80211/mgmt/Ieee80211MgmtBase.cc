@@ -78,13 +78,13 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     }
     else {
         // packet from upper layers, to be sent out
-        cPacket *pk = PK(msg);
+        Packet *pk = PK(msg);
         EV << "Packet arrived from upper layers: " << pk << "\n";
         handleUpperMessage(pk);
     }
 }
 
-void Ieee80211MgmtBase::sendDown(cPacket *frame)
+void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isOperational);
     send(frame, "macOut");

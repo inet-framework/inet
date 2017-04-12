@@ -42,16 +42,16 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     virtual void handleTimer(cMessage *msg) override;
 
     /** Implements abstract Ieee80211MgmtBase method */
-    virtual void handleUpperMessage(cPacket *msg) override;
+    virtual void handleUpperMessage(Packet *msg) override;
 
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
     /** Utility function for handleUpperMessage() */
-    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
+    virtual Ieee80211DataFrame *encapsulate(Packet *msg);
 
     /** Utility method to decapsulate a data frame */
-    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
+    virtual Packet *decapsulate(Ieee80211DataFrame *frame);
 
     /** @name Processing of different frame types */
     //@{

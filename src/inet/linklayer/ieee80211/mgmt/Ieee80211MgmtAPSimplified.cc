@@ -40,7 +40,7 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
+void Ieee80211MgmtAPSimplified::handleUpperMessage(Packet *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendDown(frame);

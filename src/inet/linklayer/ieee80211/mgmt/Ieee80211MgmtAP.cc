@@ -92,7 +92,7 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
+void Ieee80211MgmtAP::handleUpperMessage(Packet *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     MACAddress macAddr = frame->getReceiverAddress();

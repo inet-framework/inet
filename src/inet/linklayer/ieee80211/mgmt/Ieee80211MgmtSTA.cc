@@ -177,7 +177,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
     }
 }
 
-void Ieee80211MgmtSTA::handleUpperMessage(cPacket *msg)
+void Ieee80211MgmtSTA::handleUpperMessage(Packet *msg)
 {
     if (!isAssociated || assocAP.address.isUnspecified()) {
         EV << "STA is not associated with an access point, discarding packet" << msg << "\n";
@@ -210,7 +210,7 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
     delete ctrl;
 }
 
-Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
+Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(Packet *msg)
 {
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
@@ -235,9 +235,9 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     return frame;
 }
 
-cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
+Packet *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
 {
-    cPacket *payload = frame->decapsulate();
+    Packet *payload = frame->decapsulate();
 
     auto macAddressInd = payload->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(frame->getAddress3());

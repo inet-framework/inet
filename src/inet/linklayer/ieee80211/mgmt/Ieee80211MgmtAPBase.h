@@ -57,7 +57,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     virtual void distributeReceivedDataFrame(Ieee80211DataFrame *frame);
 
     /** Utility function for handleUpperMessage() */
-    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
+    virtual Ieee80211DataFrame *encapsulate(Packet *msg);
 
     /**
      * Utility function: converts EtherFrame to Ieee80211Frame. This is needed

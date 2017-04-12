@@ -36,7 +36,7 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Ieee80211DataOrM
         int headerLength = 0;
         // Mgmt frames don't have payload
         if (dynamic_cast<Ieee80211DataFrame*>(frame)) {
-            cPacket *payload = frame->decapsulate();
+            Packet *payload = frame->decapsulate();
             payloadLength = payload->getByteLength();
             headerLength = frame->getByteLength();
             frame->encapsulate(payload); // restore original state

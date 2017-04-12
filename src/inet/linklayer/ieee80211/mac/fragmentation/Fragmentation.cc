@@ -31,7 +31,7 @@ std::vector<Ieee80211DataOrMgmtFrame *> *Fragmentation::fragmentFrame(Ieee80211D
     //
     std::vector<Ieee80211DataOrMgmtFrame *> *fragments = new std::vector<Ieee80211DataOrMgmtFrame *>();
 
-    cPacket *payload = frame->decapsulate();
+    Packet *payload = frame->decapsulate();
     Ieee80211DataOrMgmtFrame *fragmentHeader = frame->dup();
     frame->encapsulate(payload); // restore original state
 

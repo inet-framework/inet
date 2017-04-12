@@ -39,7 +39,7 @@ void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
+void Ieee80211MgmtAdhoc::handleUpperMessage(Packet *msg)
 {
     Ieee80211DataFrame *frame = encapsulate(msg);
     sendDown(frame);
@@ -50,7 +50,7 @@ void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
+Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(Packet *msg)
 {
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
@@ -70,9 +70,9 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
     return frame;
 }
 
-cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
+Packet *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
 {
-    cPacket *payload = frame->decapsulate();
+    Packet *payload = frame->decapsulate();
 
     auto macAddressInd = payload->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(frame->getTransmitterAddress());
