@@ -18,13 +18,17 @@
 //
 
 cplusplus {{
-#include "inet/common/geometry/common/Coord.h"
+#include "inet/common/INETDefs.h"
 #include "inet/common/TLVOption.h"
+#include "inet/common/geometry/common/Coord.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/gpsr/GPSRDefs.h"
 }}
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 class noncobject L3Address;
 
@@ -38,7 +42,8 @@ class noncobject TLVOptionBase;
 // The GPSR beacon packet is sent periodically by all GPSR routers to notify
 // the neighbors about the router's address and position.
 //
-packet GPSRBeacon {
+class GPSRBeacon extends FieldsChunk
+{
     L3Address address;
     Coord position;
 }

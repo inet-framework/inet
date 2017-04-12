@@ -103,14 +103,14 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processUDPPacket(Packet *packet);
 
     // handling beacons
-    GPSRBeacon *createBeacon();
-    void sendBeacon(GPSRBeacon *beacon, double delay);
-    void processBeacon(GPSRBeacon *beacon);
+    Ptr<GPSRBeacon> createBeacon();
+    void sendBeacon(const Ptr<GPSRBeacon>& beacon, double delay);
+    void processBeacon(Packet *packet);
 
     // handling packets
     GPSROption *createGpsrOption(L3Address destination);
     int computeOptionLength(GPSROption *gpsrOption);
-    void setGpsrOptionOnNetworkDatagram(const Ptr<INetworkHeader>& datagram);
+    void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<INetworkHeader>& datagram);
     void removeGpsrOptionFromNetworkDatagram(const Ptr<INetworkHeader>& datagram);
 
     // returns nullptr if not found

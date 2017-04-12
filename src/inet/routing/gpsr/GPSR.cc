@@ -25,7 +25,6 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -207,56 +206,50 @@ void GPSR::sendUDPPacket(Packet *packet, double delay)
 
 void GPSR::processUDPPacket(Packet *packet)
 {
-    const auto& udpHeader = packet->popHeader<UdpHeader>();
-    auto pk = packet->popHeader<cPacketChunk>();
-    cPacket *encapsulatedPacket = pk->getPacket()->dup();
-    if (auto beacon = dynamic_cast<GPSRBeacon *>(encapsulatedPacket)) {
-        beacon->transferTagsFrom(packet);
-        processBeacon(beacon);
-    }
-    else
-        throw cRuntimeError("Unknown UDP packet");
-    delete packet;
+    packet->popHeader<UdpHeader>();
+    processBeacon(packet);
 }
 
 //
 // handling beacons
 //
 
-GPSRBeacon *GPSR::createBeacon()
+Ptr<GPSRBeacon> GPSR::createBeacon()
 {
-    GPSRBeacon *beacon = new GPSRBeacon("GPSRBeacon");
+    const auto& beacon = std::make_shared<GPSRBeacon>();
     beacon->setAddress(getSelfAddress());
     beacon->setPosition(mobility->getCurrentPosition());
-    beacon->setByteLength(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength);
+    beacon->setChunkLength(byte(getSelfAddress().getAddressType()->getAddressByteLength() + positionByteLength));
     return beacon;
 }
 
-void GPSR::sendBeacon(GPSRBeacon *beacon, double delay)
+void GPSR::sendBeacon(const Ptr<GPSRBeacon>& beacon, double delay)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
-    Packet *udpPacket = new Packet(beacon->getName());
+    Packet *udpPacket = new Packet("GPRSBeacon");
+    beacon->markImmutable();
+    udpPacket->append(beacon);
     auto udpHeader = std::make_shared<UdpHeader>();
-    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
-    udpPacket->prepend(udpHeader);
-    udpPacket->transferTagsFrom(beacon);
-    udpPacket->append(std::make_shared<cPacketChunk>(beacon));
+    udpHeader->markImmutable();
+    udpPacket->pushHeader(udpHeader);
     auto addresses = udpPacket->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
     udpPacket->ensureTag<HopLimitReq>()->setHopLimit(255);
+    udpPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::manet);
+    udpPacket->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     sendUDPPacket(udpPacket, delay);
 }
 
-void GPSR::processBeacon(GPSRBeacon *beacon)
+void GPSR::processBeacon(Packet *packet)
 {
+    const auto& beacon = packet->peekHeader<GPSRBeacon>();
     EV_INFO << "Processing beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     neighborPositionTable.setPosition(beacon->getAddress(), beacon->getPosition());
-    delete beacon;
+    delete packet;
 }
-
 //
 // handling packets
 //
@@ -598,24 +591,28 @@ INetfilter::IHook::Result GPSR::routeDatagram(Packet *datagram, const InterfaceE
     }
 }
 
-void GPSR::setGpsrOptionOnNetworkDatagram(const Ptr<INetworkHeader>& datagram)
+void GPSR::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<INetworkHeader>& nwHeader)
 {
-    GPSROption *gpsrOption = createGpsrOption(datagram->getDestinationAddress());
+    packet->removePoppedHeaders();
+    GPSROption *gpsrOption = createGpsrOption(nwHeader->getDestinationAddress());
 #ifdef WITH_IPv4
-    if (auto ipv4Header = std::dynamic_pointer_cast<IPv4Header>(datagram)) {
+    if (std::dynamic_pointer_cast<IPv4Header>(nwHeader)) {
+        auto ipv4Header = packet->removeHeader<IPv4Header>();
         gpsrOption->setType(IPOPTION_TLV_GPSR);
         int oldHlen = ipv4Header->calculateHeaderByteLength();
         ASSERT(ipv4Header->getHeaderLength() == oldHlen);
         ipv4Header->addOption(gpsrOption);
         int newHlen = ipv4Header->calculateHeaderByteLength();
         ipv4Header->setHeaderLength(newHlen);
-        // TODO: it was ipv4Header->addByteLength(newHlen - oldHlen);
+        ipv4Header->setChunkLength(ipv4Header->getChunkLength() + byte(newHlen - oldHlen));  // it was ipv4Header->addByteLength(newHlen - oldHlen);
         ipv4Header->setTotalLengthField(ipv4Header->getTotalLengthField() + newHlen - oldHlen);
+        packet->insertHeader(ipv4Header);
     }
     else
 #endif
 #ifdef WITH_IPv6
-    if (auto dgram = std::dynamic_pointer_cast<IPv6Header>(datagram)) {
+    if (std::dynamic_pointer_cast<IPv6Header>(nwHeader)) {
+        auto dgram = packet->removeHeader<IPv6Header>();
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
         int oldHlen = dgram->calculateHeaderByteLength();
         IPv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<IPv6HopByHopOptionsHeader *>(dgram->findExtensionHeaderByType(IP_PROT_IPv6EXT_HOP));
@@ -627,17 +624,20 @@ void GPSR::setGpsrOptionOnNetworkDatagram(const Ptr<INetworkHeader>& datagram)
         hdr->getTlvOptions().add(gpsrOption);
         hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
         int newHlen = dgram->calculateHeaderByteLength();
-        // KLUDGE: TODO: it was dgram->addByteLength(newHlen - oldHlen);
+        dgram->setChunkLength(dgram->getChunkLength() + byte(newHlen - oldHlen));  // it was dgram->addByteLength(newHlen - oldHlen);
+        packet->insertHeader(dgram);
     }
     else
 #endif
 #ifdef WITH_GENERIC
-    if (auto dgram = std::dynamic_pointer_cast<GenericDatagramHeader>(datagram)) {
+    if (std::dynamic_pointer_cast<GenericDatagramHeader>(nwHeader)) {
+        auto dgram = packet->removeHeader<GenericDatagramHeader>();
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
         int oldHlen = dgram->getTlvOptions().getLength();
         dgram->getTlvOptions().add(gpsrOption);
         int newHlen = dgram->getTlvOptions().getLength();
-        // KLUDGE: TODO: it was dgram->addByteLength(newHlen - oldHlen);
+        dgram->setChunkLength(dgram->getChunkLength() + byte(newHlen - oldHlen));  // it was dgram->addByteLength(newHlen - oldHlen);
+        packet->insertHeader(dgram);
     }
     else
 #endif
@@ -702,16 +702,16 @@ INetfilter::IHook::Result GPSR::datagramPreRoutingHook(Packet *datagram, const I
         return routeDatagram(datagram, outputInterfaceEntry, nextHop);
 }
 
-INetfilter::IHook::Result GPSR::datagramLocalOutHook(Packet *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramLocalOutHook(Packet *packet, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
     Enter_Method("datagramLocalOutHook");
-    const auto& networkHeader = peekNetworkHeader(datagram);
+    const auto& networkHeader = peekNetworkHeader(packet);
     const L3Address& destination = networkHeader->getDestinationAddress();
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {
-        setGpsrOptionOnNetworkDatagram(networkHeader);
-        return routeDatagram(datagram, outputInterfaceEntry, nextHop);
+        setGpsrOptionOnNetworkDatagram(packet, networkHeader);
+        return routeDatagram(packet, outputInterfaceEntry, nextHop);
     }
 }
 
