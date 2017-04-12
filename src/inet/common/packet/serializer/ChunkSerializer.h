@@ -29,7 +29,14 @@ class INET_API ChunkSerializer : public cObject
     static bit totalDeserializedLength;
 
   public:
+    /**
+     * TODO
+     */
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const = 0;
+
+    /**
+     * TODO
+     */
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
 

@@ -23,11 +23,12 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chun
 {
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(chunk);
     if (fieldsChunk->getSerializedBytes() != nullptr)
-        stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == bit(-1) ? byte(-1) : byte(length));
+        stream.writeBytes(*fieldsChunk->getSerializedBytes(), offset, length == bit(-1) ? chunk->getChunkLength() - offset : length);
     else if (offset == bit(0) && (length == bit(-1) || length == chunk->getChunkLength())) {
         auto startPosition = stream.getLength();
         serialize(stream, fieldsChunk);
-        bit serializedLength = stream.getLength() - startPosition;
+        auto endPosition = stream.getLength();
+        auto serializedLength = endPosition - startPosition;
         ChunkSerializer::totalSerializedLength += serializedLength;
         auto serializedBytes = new std::vector<uint8_t>();
         stream.copyData(*serializedBytes, startPosition, serializedLength);
@@ -36,7 +37,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chun
     else {
         MemoryOutputStream chunkStream(fieldsChunk->getChunkLength());
         serialize(chunkStream, fieldsChunk);
-        stream.writeBytes(chunkStream.getData(), offset, length == bit(-1) ? byte(-1) : byte(length));
+        stream.writeBytes(chunkStream.getData(), offset, length == bit(-1) ? chunk->getChunkLength() - offset : length);
         ChunkSerializer::totalSerializedLength += chunkStream.getLength();
         auto serializedBytes = new std::vector<uint8_t>();
         chunkStream.copyData(*serializedBytes);
@@ -46,9 +47,10 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chun
 
 Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    byte startPosition = stream.getPosition();
+    auto startPosition = stream.getPosition();
     auto fieldsChunk = std::static_pointer_cast<FieldsChunk>(deserialize(stream));
-    byte chunkLength = stream.getPosition() - startPosition;
+    auto endPosition = stream.getPosition();
+    auto chunkLength = endPosition - startPosition;
     ChunkSerializer::totalDeserializedLength += chunkLength;
     fieldsChunk->setChunkLength(chunkLength);
     auto serializedBytes = new std::vector<uint8_t>();

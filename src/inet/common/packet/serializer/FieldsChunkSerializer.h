@@ -23,7 +23,14 @@ namespace inet {
 class INET_API FieldsChunkSerializer : public ChunkSerializer
 {
   public:
+    /**
+     * TODO
+     */
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const = 0;
+
+    /**
+     * TODO
+     */
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const override;
