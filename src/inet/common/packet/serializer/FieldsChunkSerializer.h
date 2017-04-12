@@ -24,12 +24,15 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
 {
   public:
     /**
-     * TODO
+     * Serializes a chunk into a stream by writing all bytes representing the
+     * chunk at the end of the stream.
      */
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const = 0;
 
     /**
-     * TODO
+     * Deserializes a chunk from a stream by reading the bytes at the current
+     * position of the stream. The current stream position is updated according
+     * to the length of the returned chunk.
      */
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
 

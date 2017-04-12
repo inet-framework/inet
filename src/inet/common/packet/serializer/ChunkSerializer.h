@@ -30,12 +30,17 @@ class INET_API ChunkSerializer : public cObject
 
   public:
     /**
-     * TODO
+     * Serializes a chunk into a stream by writing the bytes representing the
+     * chunk at the end of the stream. The offset and length parameters allow
+     * to write only a part of the data.
      */
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const = 0;
 
     /**
-     * TODO
+     * Deserializes a chunk from a stream by reading the bytes at the current
+     * position of the stream. The returned chunk will be an instance of the
+     * provided type. The current stream position is updated according to the
+     * length of the returned chunk.
      */
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const = 0;
 };
