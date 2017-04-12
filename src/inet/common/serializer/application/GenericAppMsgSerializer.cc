@@ -41,13 +41,12 @@ Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto startPosition = stream.getPosition();
     auto msg = std::make_shared<GenericAppMsg>();
-    byte chunkLength = byte(stream.readUint32());
-    msg->setChunkLength(chunkLength);
+    byte dataLength = byte(stream.readUint32());
     msg->setExpectedReplyLength(stream.readUint32());
     int64_t delayraw = stream.readUint64();
     msg->setReplyDelay(SimTime(delayraw).dbl());
     msg->setServerClose(stream.readByte() ? true : false);
-    byte remainders = msg->getChunkLength() - (stream.getPosition() - startPosition);
+    byte remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= byte(0));
     stream.readByteRepeatedly('?', byte(remainders).get());
     return msg;

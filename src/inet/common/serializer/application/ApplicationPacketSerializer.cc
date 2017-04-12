@@ -39,10 +39,9 @@ Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) c
 {
     auto startPosition = stream.getPosition();
     auto applicationPacket = std::make_shared<ApplicationPacket>();
-    byte chunkLength = byte(stream.readUint32());
-    applicationPacket->setChunkLength(chunkLength);
+    byte dataLength = byte(stream.readUint32());
     applicationPacket->setSequenceNumber(stream.readUint32());
-    byte remainders = applicationPacket->getChunkLength() - (stream.getPosition() - startPosition);
+    byte remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= byte(0));
     stream.readByteRepeatedly('?', byte(remainders).get());
     return applicationPacket;

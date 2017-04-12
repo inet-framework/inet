@@ -121,14 +121,12 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 auto pkt = std::make_shared<IGMPv1Query>();
                 packet = pkt;
                 pkt->setGroupAddress(stream.readIPv4Address());
-                pkt->setChunkLength(byte(8));
             }
             else if (stream.getLength() - startPos == byte(8)) {        // RFC 3376 Section 7.1
                 auto pkt = std::make_shared<IGMPv2Query>();
                 packet = pkt;
                 pkt->setMaxRespTime(SimTime(code, (SimTimeUnit)-1));
                 pkt->setGroupAddress(stream.readIPv4Address());
-                pkt->setChunkLength(byte(8));
             }
             else {
                 auto pkt = std::make_shared<IGMPv3Query>();
@@ -143,7 +141,6 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 unsigned int vs = stream.readUint16();
                 for (unsigned int i = 0; i < vs && !stream.isReadBeyondEnd(); i++)
                     pkt->getSourceList()[i] = stream.readIPv4Address();
-                pkt->setChunkLength(stream.getPosition() - startPos);
             }
             break;
 
@@ -152,7 +149,6 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 auto pkt = std::make_shared<IGMPv1Report>();
                 packet = pkt;
                 pkt->setGroupAddress(stream.readIPv4Address());
-                pkt->setChunkLength(byte(8));
             }
             break;
 
@@ -161,7 +157,6 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 auto pkt = std::make_shared<IGMPv2Report>();
                 packet = pkt;
                 pkt->setGroupAddress(stream.readIPv4Address());
-                pkt->setChunkLength(byte(8));
             }
             break;
 
@@ -170,7 +165,6 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 auto pkt = std::make_shared<IGMPv2Leave>();
                 packet = pkt;
                 pkt->setGroupAddress(stream.readIPv4Address());
-                pkt->setChunkLength(byte(8));
             }
             break;
 
@@ -197,7 +191,6 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 if (i < s) {
                     pkt->setGroupRecordArraySize(i);
                 }
-                pkt->setChunkLength(byte(stream.getPosition() - startPos));
             }
             break;
 

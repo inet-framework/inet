@@ -65,7 +65,6 @@ Ptr<Chunk> ICMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
     icmpHeader->setType(type);
     icmpHeader->setCode(stream.readByte());
     icmpHeader->setChksum(stream.readUint16());
-    icmpHeader->setChunkLength(byte(8));
     switch (type) {
         case ICMP_ECHO_REQUEST: {
             auto echoRq = std::make_shared<ICMPEchoRequest>();

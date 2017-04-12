@@ -70,7 +70,6 @@ Ptr<Chunk> ARPPacketSerializer::deserialize(MemoryInputStream& stream) const
     arpPacket->setSrcIPAddress(readIPv4Address(stream, ipAddressLength));    // ar_spa
     arpPacket->setDestMACAddress(readMACAddress(stream, macAddressLength));
     arpPacket->setDestIPAddress(readIPv4Address(stream, ipAddressLength));   // ar_tpa
-    // TODO: arpPacket->setChunkLength(header + m * ... n * ...);
     return arpPacket;
 }
 

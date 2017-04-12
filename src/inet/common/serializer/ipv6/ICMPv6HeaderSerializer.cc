@@ -109,7 +109,6 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<ICMPv6EchoRequestMsg>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            pkt->setChunkLength(byte(4));
             break;
         }
 
@@ -117,7 +116,6 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<ICMPv6EchoReplyMsg>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            pkt->setChunkLength(byte(4));
             break;
         }
 
@@ -125,7 +123,6 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<ICMPv6DestUnreachableMsg>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            pkt->setChunkLength(byte(8));
             stream.readUint32();        // unused
             break;
         }
@@ -134,7 +131,6 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<ICMPv6TimeExceededMsg>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            pkt->setChunkLength(byte(8));
             stream.readUint32();        // unused
             break;
         }
@@ -143,7 +139,6 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<IPv6NeighbourSolicitation>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            pkt->setChunkLength(stream.getLength());
 
             stream.readUint32(); // reserved
             pkt->setTargetAddress(stream.readIPv6Address());

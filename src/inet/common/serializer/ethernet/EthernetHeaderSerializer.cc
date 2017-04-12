@@ -108,9 +108,7 @@ void EthernetPaddingSerializer::serialize(MemoryOutputStream& stream, const Ptr<
 
 Ptr<Chunk> EthernetPaddingSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ethernetPadding = std::make_shared<EthernetPadding>();
-    ethernetPadding->setChunkLength(byte(stream.getLength() - stream.getPosition()));
-    return ethernetPadding;
+    throw cRuntimeError("Invalid operation");
 }
 
 void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const

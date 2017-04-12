@@ -150,7 +150,6 @@ Ptr<Chunk> IPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
              ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[3]));
     dest->setDestAddress(temp);
     dest->setPayloadLength(ip6h.ip6_plen);
-    dest->setChunkLength(byte(IPv6_HEADER_BYTES));
 
     return dest;
 }
