@@ -29,11 +29,12 @@ Register_Serializer(IPv4Header, IPv4HeaderSerializer);
 
 void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
-    auto position = stream.getLength();
+    auto startPosition = stream.getLength();
     struct ip iphdr;
     const auto& ipv4Header = std::static_pointer_cast<const IPv4Header>(chunk);
     unsigned int headerLength = ipv4Header->getHeaderLength();
-    ASSERT((headerLength & 3) == 0);
+    ASSERT((headerLength & 3) == 0 && headerLength >= IP_HEADER_BYTES && headerLength <= IP_MAX_HEADER_BYTES);
+    ASSERT(headerLength <= ipv4Header->getTotalLengthField());
     iphdr.ip_hl = headerLength >> 2;
     iphdr.ip_v = ipv4Header->getVersion();
     iphdr.ip_tos = ipv4Header->getTypeOfService();
@@ -53,9 +54,9 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
     if (ipv4Header->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize IPv4 header without a properly computed CRC");
     iphdr.ip_sum = htons(ipv4Header->getCrc());
+    stream.writeBytes((uint8_t *)&iphdr, byte(IP_HEADER_BYTES));
 
     if (headerLength > IP_HEADER_BYTES) {
-        throw cRuntimeError("ideiglenesen");
         unsigned short numOptions = ipv4Header->getOptionArraySize();
         unsigned int optionsLength = 0;
         if (numOptions > 0) {    // options present?
@@ -67,12 +68,10 @@ void IPv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
         }    // if options present
         if (ipv4Header->getHeaderLength() < (int)(IP_HEADER_BYTES + optionsLength))
             throw cRuntimeError("Serializing an IPv4 packet with wrong headerLength value: not enough for store options.\n");
-        auto writtenLength = byte(stream.getLength() - position).get();
+        auto writtenLength = byte(stream.getLength() - startPosition).get();
         if (writtenLength < headerLength)
             stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, headerLength - writtenLength);
     }
-
-    stream.writeBytes((uint8_t *)&iphdr, byte(IP_HEADER_BYTES));
 }
 
 void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLVOptionBase *option) const
@@ -151,10 +150,10 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
 Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
+    byte bufsize = stream.getRemainingLength();
     uint8_t buffer[IP_HEADER_BYTES];
     stream.readBytes(buffer, byte(IP_HEADER_BYTES));
     auto ipv4Header = std::make_shared<IPv4Header>();
-    byte bufsize = stream.getRemainingLength();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
     unsigned int totalLength, headerLength;
 
@@ -174,26 +173,30 @@ Ptr<Chunk> IPv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
     ipv4Header->setTotalLengthField(totalLength);
     headerLength = iphdr.ip_hl << 2;
 
+    if (iphdr.ip_v != 4)
+        ipv4Header->markIncorrect();
     if (headerLength < IP_HEADER_BYTES) {
         ipv4Header->markIncorrect();
         headerLength = IP_HEADER_BYTES;
     }
+    if (totalLength < headerLength)
+        ipv4Header->markIncorrect();
 
     ipv4Header->setHeaderLength(headerLength);
 
     if (headerLength > IP_HEADER_BYTES) {    // options present?
-        while (stream.getPosition() - position < byte(headerLength)) {
+        while (stream.getRemainingLength() > byte(0) && stream.getPosition() - position < byte(headerLength)) {
             TLVOptionBase *option = deserializeOption(stream);
             ipv4Header->addOption(option);
         }
     }
+    if (byte(headerLength) > bufsize) {
+        ipv4Header->markIncomplete();
+    }
+
     ipv4Header->setCrc(iphdr.ip_sum);
     ipv4Header->setCrcMode(CRC_COMPUTED);
 
-    if (byte(totalLength) > bufsize)
-        EV_ERROR << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
-
-    ipv4Header->setHeaderLength(headerLength);
     return ipv4Header;
 }
 
