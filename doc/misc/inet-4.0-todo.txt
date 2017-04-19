@@ -15,10 +15,14 @@ should be included in INET 4.0.
  - port *all* protocols to the new packet API (e.g. 802.11)
  - eliminate all KLUDGES introduces by the 3 main infrastructure changes
  - extract LLC from ethernet and 802.11
+ - revise and merge signals, add details parameter (e.g. packetDropped)
+ - removing ethernet padding should be done in upper protocols if length is not present
+ - revise physical layer error models wrt. how errors are represented
  - implement all necessary message compiler changes to avoid clutter in msg files
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
+ - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac?
  - nicely position submodules in compound modules, prepare for 2 info lines
  - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
  - avoid specifying module icon sizes by default, override icon size in submodules
