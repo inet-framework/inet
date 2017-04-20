@@ -15,6 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include <algorithm>
+#include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -46,33 +48,31 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     short fragNum = frame->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
     auto& value = fragmentsMap[key];
+    value.fragments.resize(16);
 
     // update entry
     uint16_t fragmentBit = 1 << fragNum;
     value.receivedFragments |= fragmentBit;
     if (!frame->getMoreFragments())
         value.allFragments = (fragmentBit << 1) - 1;
-    if (!value.frame) {
-        // TODO: even more serious review
-        value.frame = packet->dup();
-        packet->popHeader<Ieee80211DataOrMgmtFrame>();
-    }
+    if (!value.fragments[fragNum])
+        value.fragments[fragNum] = packet;
+    else
+        delete packet;
     MACAddress txAddress = frame->getTransmitterAddress();
-    delete packet;
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
-        Packet *result = value.frame;
+        Defragmentation defragmentation;
+        value.fragments.erase(std::remove(value.fragments.begin(), value.fragments.end(), nullptr), value.fragments.end());
+        auto defragmentedFrame = defragmentation.defragmentFrames(&value.fragments);
         // We need to restore some data from the carrying frame's header like TX address
         // TODO: Maybe we need to restore the fromDs, toDs fields as well when traveling through multiple APs
         // TODO: Are there any other fields that we need to restore?
-        // TODO: SET TX ADDR WHEN THE FRAME ARRIVES FROM UPPER LAYER
-        result->removePoppedHeaders();
-        auto header = result->removeHeader<Ieee80211DataOrMgmtFrame>();
-        header->setTransmitterAddress(txAddress);
-        result->insertHeader(header);
+        for (auto fragment : value.fragments)
+            delete fragment;
         fragmentsMap.erase(key);
-        return result;
+        return defragmentedFrame;
     }
     else
         return nullptr;
@@ -90,13 +90,15 @@ void BasicReassembly::purge(const MACAddress& address, int tid, int startSeqNumb
 
     if (endSeqNumber < startSeqNumber) {
         for (auto it = itStart; it != fragmentsMap.end(); ) {
-            delete it->second.frame;
+            for (auto fragment : it->second.fragments)
+                delete fragment;
             it = fragmentsMap.erase(it);
         }
         itStart = fragmentsMap.begin();
     }
     for (auto it = itStart; it != itEnd; ) {
-        delete it->second.frame;
+        for (auto fragment : it->second.fragments)
+            delete fragment;
         it = fragmentsMap.erase(it);
     }
 }
@@ -104,7 +106,8 @@ void BasicReassembly::purge(const MACAddress& address, int tid, int startSeqNumb
 BasicReassembly::~BasicReassembly()
 {
     for (auto it = fragmentsMap.begin(); it != fragmentsMap.end(); ++it)
-        delete it->second.frame;
+        for (auto fragment : it->second.fragments)
+            delete fragment;
 }
 
 } // namespace ieee80211

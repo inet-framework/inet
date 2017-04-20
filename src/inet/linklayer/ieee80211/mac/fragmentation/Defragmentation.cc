@@ -25,12 +25,17 @@ Register_Class(Defragmentation);
 
 Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
 {
-    auto frame = new Packet();
+    auto defragmentedFrame = new Packet();
+    const auto& defragmentedHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(fragmentFrames->at(0)->peekHeader<Ieee80211DataOrMgmtFrame>()->dupShared());
     for (auto fragmentFrame : *fragmentFrames) {
         fragmentFrame->popHeader<Ieee80211DataOrMgmtFrame>();
-        frame->append(fragmentFrame->peekData());
+        defragmentedFrame->append(fragmentFrame->peekData());
     }
-    return frame;
+    defragmentedHeader->setFragmentNumber(0);
+    defragmentedHeader->setMoreFragments(false);
+    defragmentedHeader->markImmutable();
+    defragmentedFrame->insertHeader(defragmentedHeader);
+    return defragmentedFrame;
 }
 
 } // namespace ieee80211

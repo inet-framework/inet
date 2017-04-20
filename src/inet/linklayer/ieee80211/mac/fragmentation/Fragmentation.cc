@@ -31,13 +31,13 @@ std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vec
     //
     byte offset = byte(0);
     std::vector<Packet *> *fragments = new std::vector<Packet *>();
-    const auto& frameHeader = frame->peekHeader<Ieee80211DataOrMgmtFrame>();
+    const auto& frameHeader = frame->popHeader<Ieee80211DataOrMgmtFrame>();
     for (int i = 0; i < (int)fragmentSizes.size(); i++) {
         bool lastFragment = i == (int)fragmentSizes.size() - 1;
         std::string name = std::string(frame->getName()) + "-frag" + std::to_string(i);
         auto fragment = new Packet(name.c_str());
         byte length = byte(fragmentSizes.at(i));
-        fragment->append(frame->peekAt(offset, length));
+        fragment->append(frame->peekDataAt(offset, length));
         offset += length;
         const auto& fragmentHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(frameHeader->dupShared());
         fragmentHeader->setFragmentNumber(i);

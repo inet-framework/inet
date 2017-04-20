@@ -22,8 +22,8 @@
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMsduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientQoSMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -34,7 +34,7 @@ namespace ieee80211 {
 class INET_API RecipientQoSMacDataService : public IRecipientQoSMacDataService, public cSimpleModule
 {
     protected:
-        BasicReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
+        IReassembly *basicReassembly = nullptr;
 
         // AMpduDeaggregation *aMpduDeaggregation = nullptr;
         // MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;

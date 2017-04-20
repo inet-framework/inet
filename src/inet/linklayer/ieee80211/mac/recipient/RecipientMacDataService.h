@@ -20,8 +20,8 @@
 
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
+#include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -35,7 +35,7 @@ class INET_API RecipientMacDataService : public cSimpleModule, public IRecipient
         typedef std::vector<Ieee80211DataOrMgmtFrame*> Fragments;
 
     protected:
-        BasicReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
+        IReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
 
         // MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
         // Address1Filtering *address1Filtering = nullptr;
