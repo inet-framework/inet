@@ -1,0 +1,11 @@
+ - rename frame classes to header where appropriate
+ - rename frame variables to header where appropriate
+ - remove frame arguments where appropriate
+ - generic cleanup, order of functions, formatting, whitespace, etc.
+ - fix errors and fingerprints
+ - logging and display strings
+ - create llc module and put it above mac
+ - packets should not go through mgmt 
+ - move encapsulation from mgmt to mac
+ - port serializers to the new API
+ - test pcap recording

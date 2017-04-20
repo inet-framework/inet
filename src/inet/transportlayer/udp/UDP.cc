@@ -1309,6 +1309,7 @@ bool UDP::verifyCrc(const Protocol *networkProtocol, const Ptr<UdpHeader>& udpHe
                 auto udpData = packet->peekDataAt<BytesChunk>(byte(0), byte(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
                 auto udpDataBytes = udpData->getBytes();
                 auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
+                // TODO: delete these isCorrect calls, rely on CRC only
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
             }
         }
