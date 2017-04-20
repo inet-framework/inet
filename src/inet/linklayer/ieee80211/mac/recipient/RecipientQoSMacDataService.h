@@ -50,13 +50,13 @@ class INET_API RecipientQoSMacDataService : public IRecipientQoSMacDataService, 
         virtual ~RecipientQoSMacDataService();
         virtual void initialize() override;
 
-        virtual Ieee80211DataFrame* defragment(std::vector<Ieee80211DataFrame *> completeFragments);
-        Ieee80211ManagementFrame* defragment(Ieee80211ManagementFrame *mgmtFragment);
+        virtual Packet *defragment(std::vector<Packet *> completeFragments);
+        virtual Packet *defragment(Packet *mgmtFragment);
 
     public:
-        virtual std::vector<Ieee80211Frame *> dataFrameReceived(Ieee80211DataFrame *dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
-        virtual std::vector<Ieee80211Frame *> controlFrameReceived(Ieee80211Frame *controlFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
-        virtual std::vector<Ieee80211Frame *> managementFrameReceived(Ieee80211ManagementFrame *mgmtFrame) override;
+        virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
+        virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<Ieee80211Frame>& controlFrame, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) override;
+        virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame) override;
 
 };
 

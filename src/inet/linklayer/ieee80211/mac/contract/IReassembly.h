@@ -40,7 +40,7 @@ class INET_API IReassembly
          * then the reassembled frame is returned (and fragments are removed from the buffer),
          * otherwise the function returns nullptr.
          */
-        virtual Ieee80211DataOrMgmtFrame *addFragment(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual Packet *addFragment(Packet *frame) = 0;
 
         /**
          * Discard fragments from the reassembly buffer. Frames are identified by the transmitter

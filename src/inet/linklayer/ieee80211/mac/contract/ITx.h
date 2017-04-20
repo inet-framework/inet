@@ -18,7 +18,7 @@
 #ifndef __INET_ITX_H
 #define __INET_ITX_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 
 namespace inet {
@@ -37,14 +37,14 @@ class INET_API ITx
         {
             public:
                 virtual ~ICallback() {}
-                virtual void transmissionComplete(Ieee80211Frame *frame) = 0;
+                virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211Frame>& frame) = 0;
         };
 
     public:
         virtual ~ITx() {}
 
-        virtual void transmitFrame(Ieee80211Frame *frame, ITx::ICallback *txCallback) = 0;
-        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, simtime_t ifs, ITx::ICallback *txCallback) = 0;
         virtual void radioTransmissionFinished() = 0;
 };
 

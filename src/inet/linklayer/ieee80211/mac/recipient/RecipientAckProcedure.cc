@@ -20,26 +20,28 @@
 namespace inet {
 namespace ieee80211 {
 
-void RecipientAckProcedure::processReceivedFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback)
+void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback)
 {
     numReceivedAckableFrame++;
     // After a successful reception of a frame requiring acknowledgment, transmission of the ACK frame
     // shall commence after a SIFS period, without regard to the busy/idle state of the medium. (See Figure 9-9.)
     if (ackPolicy->isAckNeeded(dataOrMgmtFrame)) {
         auto ackFrame = buildAck(dataOrMgmtFrame);
-        ackFrame->setDuration(ackPolicy->computeAckDurationField(dataOrMgmtFrame));
-        callback->transmitControlResponseFrame(ackFrame, dataOrMgmtFrame);
+        ackFrame->setDuration(ackPolicy->computeAckDurationField(packet, dataOrMgmtFrame));
+        ackFrame->markImmutable();
+        auto ackPacket = new Packet("ACK", ackFrame);
+        callback->transmitControlResponseFrame(ackPacket, ackFrame, packet, dataOrMgmtFrame);
     }
 }
 
-void RecipientAckProcedure::processTransmittedAck(Ieee80211ACKFrame* ack)
+void RecipientAckProcedure::processTransmittedAck(const Ptr<Ieee80211ACKFrame>& ack)
 {
     numSentAck++;
 }
 
-Ieee80211ACKFrame* RecipientAckProcedure::buildAck(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) const
+Ptr<Ieee80211ACKFrame> RecipientAckProcedure::buildAck(const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const
 {
-    Ieee80211ACKFrame *ack = new Ieee80211ACKFrame("ACK");
+    auto ack = std::make_shared<Ieee80211ACKFrame>();
     ack->setReceiverAddress(dataOrMgmtFrame->getTransmitterAddress());
     return ack;
 }

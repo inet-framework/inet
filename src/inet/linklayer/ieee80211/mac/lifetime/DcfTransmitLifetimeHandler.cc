@@ -20,7 +20,7 @@
 namespace inet {
 namespace ieee80211 {
 
-void DcfTransmitLifetimeHandler::frameGotInProgess(Ieee80211DataFrame* frame)
+void DcfTransmitLifetimeHandler::frameGotInProgess(const Ptr<Ieee80211DataFrame>& frame)
 {
     // don't care
 }
@@ -30,7 +30,7 @@ void DcfTransmitLifetimeHandler::frameGotInProgess(Ieee80211DataFrame* frame)
 // dot11MaxTransmitMSDULifetime specifies the maximum amount of time allowed to transmit an MSDU. The
 // timer starts on the initial attempt to transmit the first fragment of the MSDU.
 //
-void DcfTransmitLifetimeHandler::frameTransmitted(Ieee80211DataFrame* frame)
+void DcfTransmitLifetimeHandler::frameTransmitted(const Ptr<Ieee80211DataFrame>& frame)
 {
     if (frame->getFragmentNumber() == 0)
         lifetimes[frame->getSequenceNumber()] = simTime();
@@ -40,7 +40,7 @@ void DcfTransmitLifetimeHandler::frameTransmitted(Ieee80211DataFrame* frame)
 // If the timer exceeds dot11MaxTransmitMSDULifetime, then all remaining fragments are discarded
 // by the source STA and no attempt is made to complete transmission of the MSDU.
 //
-bool DcfTransmitLifetimeHandler::isLifetimeExpired(Ieee80211DataFrame* frame)
+bool DcfTransmitLifetimeHandler::isLifetimeExpired(const Ptr<Ieee80211DataFrame>& frame)
 {
     auto it = lifetimes.find(frame->getSequenceNumber());
     if (it == lifetimes.end())

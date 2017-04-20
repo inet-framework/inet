@@ -31,13 +31,12 @@ void OriginatorMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Ieee80211DataOrMgmtFrame* OriginatorMacDataService::assignSequenceNumber(Ieee80211DataOrMgmtFrame* frame)
+void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
 {
     sequenceNumberAssigment->assignSequenceNumber(frame);
-    return frame;
 }
 
-OriginatorMacDataService::Fragments *OriginatorMacDataService::fragmentIfNeeded(Ieee80211DataOrMgmtFrame *frame)
+OriginatorMacDataService::Fragments *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
@@ -54,16 +53,19 @@ OriginatorMacDataService::Fragments* OriginatorMacDataService::extractFramesToTr
     else {
         // if (msduRateLimiting)
         //    txRateLimitingIfNeeded();
-        Ieee80211DataOrMgmtFrame *frame = pendingQueue->pop();
-        if (sequenceNumberAssigment)
-            frame = assignSequenceNumber(frame);
+        Packet *packet = pendingQueue->pop();
+        if (sequenceNumberAssigment) {
+            auto frame = packet->removeHeader<Ieee80211DataOrMgmtFrame>();
+            assignSequenceNumber(frame);
+            packet->insertHeader(frame);
+        }
         // if (msduIntegrityAndProtection)
         //    frame = protectMsduIfNeeded(frame);
         Fragments *fragments = nullptr;
         if (fragmentationPolicy)
-            fragments = fragmentIfNeeded(frame);
+            fragments = fragmentIfNeeded(packet);
         if (!fragments)
-            fragments = new Fragments({frame});
+            fragments = new Fragments({packet});
         // if (mpduEncryptionAndIntegrity)
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)

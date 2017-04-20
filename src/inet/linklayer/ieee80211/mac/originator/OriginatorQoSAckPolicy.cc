@@ -35,7 +35,7 @@ void OriginatorQoSAckPolicy::initialize(int stage)
     }
 }
 
-bool OriginatorQoSAckPolicy::isAckNeeded(Ieee80211ManagementFrame* frame) const
+bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211ManagementFrame>& frame) const
 {
     return !frame->getReceiverAddress().isMulticast();
 }
@@ -104,11 +104,11 @@ std::tuple<MACAddress, SequenceNumber, Tid> OriginatorQoSAckPolicy::computeBlock
     return std::make_tuple(MACAddress::UNSPECIFIED_ADDRESS, -1, -1);
 }
 
-AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Ieee80211DataFrame* frame, OriginatorBlockAckAgreement *agreement) const
+AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Packet *packet, const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const
 {
     if (agreement == nullptr)
         return AckPolicy::NORMAL_ACK;
-    if (agreement->getIsAddbaResponseReceived() && isBlockAckPolicyEligibleFrame(frame)) {
+    if (agreement->getIsAddbaResponseReceived() && isBlockAckPolicyEligibleFrame(packet, frame)) {
         if (checkAgreementPolicy(frame, agreement))
             return AckPolicy::BLOCK_ACK;
         else
@@ -118,12 +118,12 @@ AckPolicy OriginatorQoSAckPolicy::computeAckPolicy(Ieee80211DataFrame* frame, Or
         return AckPolicy::NORMAL_ACK;
 }
 
-bool OriginatorQoSAckPolicy::isBlockAckPolicyEligibleFrame(Ieee80211DataFrame* frame) const
+bool OriginatorQoSAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) const
 {
-    return frame->getByteLength() < maxBlockAckPolicyFrameLength;
+    return packet->getByteLength() < maxBlockAckPolicyFrameLength;
 }
 
-bool OriginatorQoSAckPolicy::checkAgreementPolicy(Ieee80211DataFrame* frame, OriginatorBlockAckAgreement *agreement) const
+bool OriginatorQoSAckPolicy::checkAgreementPolicy(const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const
 {
     bool bufferFull = agreement->getBufferSize() == agreement->getNumSentBaPolicyFrames();
     bool aMsduOk = agreement->getIsAMsduSupported() || !frame->getAMsduPresent();
@@ -138,14 +138,14 @@ bool OriginatorQoSAckPolicy::checkAgreementPolicy(Ieee80211DataFrame* frame, Ori
 // ACKTimeout interval, the STA concludes that the transmission of the MPDU has failed, and this STA shall
 // invoke its backoff procedure upon expiration of the ACKTimeout interval.
 //
-simtime_t OriginatorQoSAckPolicy::getAckTimeout(Ieee80211DataOrMgmtFrame* dataOrMgmtFrame) const
+simtime_t OriginatorQoSAckPolicy::getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const
 {
-    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(dataOrMgmtFrame)->getPhyRxStartDelay() : ackTimeout;
+    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtFrame)->getPhyRxStartDelay() : ackTimeout;
 }
 
-simtime_t OriginatorQoSAckPolicy::getBlockAckTimeout(Ieee80211BlockAckReq* blockAckReq) const
+simtime_t OriginatorQoSAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) const
 {
-    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(blockAckReq)->getPhyRxStartDelay() : blockAckTimeout;
+    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getPhyRxStartDelay() : blockAckTimeout;
 }
 
 } /* namespace ieee80211 */

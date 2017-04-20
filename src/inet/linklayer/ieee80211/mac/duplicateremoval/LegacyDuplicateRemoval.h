@@ -32,7 +32,7 @@ class INET_API LegacyDuplicateRemoval : public IDuplicateRemoval
         std::map<MACAddress, SequenceControlField> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
 
     public:
-        virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual bool isDuplicate(const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
 };
 
 } // namespace ieee80211

@@ -35,15 +35,15 @@ class INET_API RecipientQoSAckPolicy : public ModeSetListener, public IRecipient
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        simtime_t computeBasicBlockAckDuration(Ieee80211BlockAckReq* blockAckReq) const;
-        simtime_t computeAckDuration(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) const;
+        simtime_t computeBasicBlockAckDuration(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) const;
+        simtime_t computeAckDuration(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const;
 
     public:
-        virtual bool isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const override;
-        virtual bool isBlockAckNeeded(Ieee80211BlockAckReq *blockAckReq, RecipientBlockAckAgreement *agreement) const override;
+        virtual bool isAckNeeded(const Ptr<Ieee80211DataOrMgmtFrame>& frame) const override;
+        virtual bool isBlockAckNeeded(const Ptr<Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const override;
 
-        virtual simtime_t computeAckDurationField(Ieee80211DataOrMgmtFrame *frame) const override;
-        virtual simtime_t computeBasicBlockAckDurationField(Ieee80211BasicBlockAckReq *basicBlockAckReq) const override;
+        virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame) const override;
+        virtual simtime_t computeBasicBlockAckDurationField(Packet *packet, const Ptr<Ieee80211BasicBlockAckReq>& basicBlockAckReq) const override;
 };
 
 } /* namespace ieee80211 */

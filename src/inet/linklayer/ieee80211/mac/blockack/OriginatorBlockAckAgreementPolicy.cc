@@ -43,18 +43,18 @@ simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
     throw cRuntimeError("Unimplemented");
 }
 
-bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Ieee80211DataFrame* frame)
+bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
 {
-    return ackPolicy->isBlockAckPolicyEligibleFrame(frame);
+    return ackPolicy->isBlockAckPolicyEligibleFrame(packet, frame);
 }
 
-bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(Ieee80211AddbaResponse* addbaResp, OriginatorBlockAckAgreement* agreement)
+bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement)
 {
     ASSERT(agreement);
     return true;
 }
 
-bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(Ieee80211Delba* delba)
+bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<Ieee80211Delba>& delba)
 {
     return true;
 }

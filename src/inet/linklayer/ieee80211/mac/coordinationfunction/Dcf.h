@@ -103,44 +103,44 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
 
-        virtual void sendUp(const std::vector<Ieee80211Frame*>& completeFrames);
+        virtual void sendUp(const std::vector<Packet*>& completeFrames);
         virtual bool hasFrameToTransmit();
         virtual bool isReceptionInProgress();
         virtual FrameSequenceContext *buildContext();
 
-        virtual void recipientProcessReceivedFrame(Ieee80211Frame *frame);
-        virtual void recipientProcessControlFrame(Ieee80211Frame *frame);
-        virtual void recipientProcessTransmittedControlResponseFrame(Ieee80211Frame *frame);
+        virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
+        virtual void recipientProcessControlFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
+        virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211Frame>& frame);
 
     protected:
         // IChannelAccess::ICallback
         virtual void channelGranted(IChannelAccess *channelAccess) override;
 
         // IFrameSequenceHandler::ICallback
-        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs) override;
-        virtual void originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame *protectedFrame) override;
-        virtual void originatorProcessTransmittedFrame(Ieee80211Frame* transmittedFrame) override;
-        virtual void originatorProcessReceivedFrame(Ieee80211Frame *frame, Ieee80211Frame *lastTransmittedFrame) override;
-        virtual void originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame) override;
+        virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
+        virtual void originatorProcessRtsProtectionFailed(Packet *packet) override;
+        virtual void originatorProcessTransmittedFrame(Packet *packet) override;
+        virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override;
+        virtual void originatorProcessFailedFrame(Packet *packet) override;
         virtual void frameSequenceFinished() override;
         virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
         // ITx::ICallback
-        virtual void transmissionComplete(Ieee80211Frame *frame) override;
+        virtual void transmissionComplete(Packet *packet, const Ptr<Ieee80211Frame>& frame) override;
 
         // IProcedureCallback
-       virtual void transmitControlResponseFrame(Ieee80211Frame* responseFrame, Ieee80211Frame* receivedFrame) override;
-       virtual void processMgmtFrame(Ieee80211ManagementFrame *mgmtFrame) override;
+       virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame) override;
+       virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame) override;
 
-       virtual bool isSentByUs(Ieee80211Frame *frame) const;
-       virtual bool isForUs(Ieee80211Frame *frame) const;
+       virtual bool isSentByUs(const Ptr<Ieee80211Frame>& frame) const;
+       virtual bool isForUs(const Ptr<Ieee80211Frame>& frame) const;
 
     public:
         virtual ~Dcf();
 
         // ICoordinationFunction
-        virtual void processUpperFrame(Ieee80211DataOrMgmtFrame *frame) override;
-        virtual void processLowerFrame(Ieee80211Frame *frame) override;
+        virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
+        virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame) override;
         virtual void corruptedFrameReceived() override;
 };
 

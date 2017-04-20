@@ -50,9 +50,12 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
 {
     switch (step) {
         case 0: {
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
-            return new RtsTransmitStep(dataOrMgmtFrame, rtsFrame, context->getIfs());
+            auto dataOrMgmtPacket = context->getInProgressFrames()->getFrameToTransmit();
+            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekHeader<Ieee80211DataOrMgmtFrame>());
+            auto rtsPacket = new Packet("RTS");
+            rtsFrame->markImmutable();
+            rtsPacket->append(rtsFrame);
+            return new RtsTransmitStep(dataOrMgmtPacket, rtsPacket, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -83,8 +86,8 @@ IFrameSequenceStep* CtsFs::prepareStep(FrameSequenceContext* context)
     switch (step) {
         case 0: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
-            auto rtsFrame = check_and_cast<Ieee80211RTSFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getCtsTimeout(rtsFrame));
+            auto rtsPacket = txStep->getFrameToTransmit();
+            return new ReceiveStep(context->getCtsTimeout(rtsPacket, rtsPacket->peekHeader<Ieee80211RTSFrame>()));
         }
         case 1:
             return nullptr;
@@ -99,7 +102,8 @@ bool CtsFs::completeStep(FrameSequenceContext* context)
         case 0: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
         }
         default:
@@ -117,8 +121,8 @@ IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto frame = check_and_cast<Ieee80211DataFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(frame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            return new TransmitStep(packet, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -148,13 +152,14 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            return new TransmitStep(packet, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
-            auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(mgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto mgmtFrame = packet->peekHeader<Ieee80211ManagementFrame>();
+            return new ReceiveStep(context->getAckTimeout(packet, mgmtFrame));
         }
         case 2:
             return nullptr;
@@ -173,7 +178,8 @@ bool ManagementAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -191,8 +197,8 @@ IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            return new TransmitStep(packet, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -223,8 +229,9 @@ IFrameSequenceStep *AckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(dataOrMgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
         }
         case 1:
             return nullptr;
@@ -239,7 +246,8 @@ bool AckFs::completeStep(FrameSequenceContext *context)
         case 0: {
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -257,14 +265,19 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(context->getInProgressFrames()->getFrameToTransmit());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
-            return new RtsTransmitStep(dataOrMgmtFrame, rtsFrame, context->getIfs());
+            auto rtsPacket = new Packet("RTS");
+            rtsFrame->markImmutable();
+            rtsPacket->append(rtsFrame);
+            return new RtsTransmitStep(packet, rtsPacket, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
-            auto rtsFrame = check_and_cast<Ieee80211RTSFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getCtsTimeout(rtsFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto rtsFrame = packet->peekHeader<Ieee80211RTSFrame>();
+            return new ReceiveStep(context->getCtsTimeout(packet, rtsFrame));
         }
         case 2:
             return nullptr;
@@ -282,7 +295,8 @@ bool RtsCtsFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
         }
         default:
@@ -305,8 +319,9 @@ IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(dataOrMgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
         }
         case 2:
             return nullptr;
@@ -324,7 +339,8 @@ bool FragFrameAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -347,8 +363,9 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(dataOrMgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto dataOrMgmtFrame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtFrame));
         }
         case 2:
             return nullptr;
@@ -366,7 +383,8 @@ bool LastFrameAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
         }
         default:
@@ -389,12 +407,15 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
             auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
-            return new TransmitStep(blockAckReq, context->getIfs());
+            blockAckReq->markImmutable();
+            auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
+            return new TransmitStep(blockAckPacket, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<ITransmitStep *>(context->getLastStep());
-            auto blockAckReq = check_and_cast<Ieee80211BlockAckReq*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getQoSContext()->ackPolicy->getBlockAckTimeout(blockAckReq));
+            auto packet = txStep->getFrameToTransmit();
+            auto blockAckReq = packet->peekHeader<Ieee80211BlockAckReq>();
+            return new ReceiveStep(context->getQoSContext()->ackPolicy->getBlockAckTimeout(packet, blockAckReq));
         }
         case 2:
             return nullptr;
@@ -412,7 +433,8 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedFrame = receivedPacket->peekHeader<Ieee80211Frame>();
             return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_BLOCKACK;
         }
         default:

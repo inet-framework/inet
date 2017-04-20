@@ -22,7 +22,7 @@ namespace ieee80211 {
 
 Register_Class(MsduDeaggregation);
 
-void MsduDeaggregation::setExplodedFrameAddress(Ieee80211DataFrame* frame, Ieee80211MsduSubframe* subframe, Ieee80211DataFrame *aMsduFrame)
+void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataFrame>& frame, const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataFrame>& aMsduFrame)
 {
     bool toDS = aMsduFrame->getToDS();
     bool fromDS = aMsduFrame->getFromDS();
@@ -52,33 +52,35 @@ void MsduDeaggregation::setExplodedFrameAddress(Ieee80211DataFrame* frame, Ieee8
     }
 }
 
-std::vector<Ieee80211DataFrame*> *MsduDeaggregation::deaggregateFrame(Ieee80211DataFrame* frame)
+std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
-    std::vector<Ieee80211DataFrame *> *frames = new std::vector<Ieee80211DataFrame *>();
-    Ieee80211AMsdu *aMsdu = check_and_cast<Ieee80211AMsdu *>(frame->getEncapsulatedPacket());
-    int tid = frame->getTid();
-    int numOfSubframes = aMsdu->getSubframesArraySize();
-    for (int i = 0; i < numOfSubframes; i++)
+    std::vector<Packet *> *frames = new std::vector<Packet *>();
+    const auto& amsduHeader = aggregatedFrame->popHeader<Ieee80211DataFrame>();
+    int tid = amsduHeader->getTid();
+    while (aggregatedFrame->hasHeader<Ieee80211MsduSubframe>())
     {
-        Ieee80211MsduSubframe msduSubframe = aMsdu->getSubframes(i);
-        Packet *msdu = msduSubframe.decapsulate();
-        Ieee80211DataFrame *dataFrame = nullptr;
+        const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframe>();
+        const auto& msdu = aggregatedFrame->peekDataAt(bit(0), byte(msduSubframeHeader->getLength()));
+        aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
-        dataFrame = (msduSubframe.getEtherType() != -1) ? new Ieee80211DataFrameWithSNAP() : new Ieee80211DataFrame();
+        auto frame = new Packet();
+        frame->append(msdu);
+        auto header = (msduSubframeHeader->getEtherType() != -1) ? std::make_shared<Ieee80211DataFrameWithSNAP>() : std::make_shared<Ieee80211DataFrame>();
         // dataFrame->setType(ST_DATA_WITH_QOS); FIXME:
-        dataFrame->setType(ST_DATA);
-        dataFrame->setTransmitterAddress(msduSubframe.getSa());
-        dataFrame->setToDS(frame->getToDS());
-        dataFrame->setFromDS(frame->getFromDS());
-        dataFrame->setTid(tid);
+        header->setType(ST_DATA);
+        header->setTransmitterAddress(msduSubframeHeader->getSa());
+        header->setToDS(amsduHeader->getToDS());
+        header->setFromDS(amsduHeader->getFromDS());
+        header->setTid(tid);
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
-        if (auto dataFrameWithSnap = dynamic_cast<Ieee80211DataFrameWithSNAP*>(dataFrame))
-            dataFrameWithSnap->setEtherType(msduSubframe.getEtherType());
-        dataFrame->encapsulate(msdu);
-        setExplodedFrameAddress(dataFrame, &msduSubframe, frame);
-        frames->push_back(dataFrame);
+        if (auto dataFrameWithSnap = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(header))
+            dataFrameWithSnap->setEtherType(msduSubframeHeader->getEtherType());
+        setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
+        header->markImmutable();
+        frame->pushHeader(header);
+        frames->push_back(frame);
     }
-    delete frame;
+    delete aggregatedFrame;
     return frames;
 }
 

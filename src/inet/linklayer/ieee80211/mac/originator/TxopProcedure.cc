@@ -99,19 +99,19 @@ simtime_t TxopProcedure::getRemaining() const
 }
 
 // FIXME: implement!
-bool TxopProcedure::isFinalFragment(Ieee80211Frame* frame) const
+bool TxopProcedure::isFinalFragment(const Ptr<Ieee80211Frame>& frame) const
 {
     return false;
 }
 
 // FIXME: implement!
-bool TxopProcedure::isTxopInitiator(Ieee80211Frame* frame) const
+bool TxopProcedure::isTxopInitiator(const Ptr<Ieee80211Frame>& frame) const
 {
     return false;
 }
 
 // FIXME: implement!
-bool TxopProcedure::isTxopTerminator(Ieee80211Frame* frame) const
+bool TxopProcedure::isTxopTerminator(const Ptr<Ieee80211Frame>& frame) const
 {
     return false;
 }

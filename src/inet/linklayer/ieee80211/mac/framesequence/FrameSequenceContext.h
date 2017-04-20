@@ -91,12 +91,12 @@ class INET_API FrameSequenceContext
         virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
         virtual QoSContext *getQoSContext() const { return qosContext; }
 
-        virtual simtime_t getAckTimeout(Ieee80211DataOrMgmtFrame *dataOrMgmtframe) const;
-        virtual simtime_t getCtsTimeout(Ieee80211RTSFrame *rtsFrame) const;
+        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtframe) const;
+        virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) const;
         virtual simtime_t getIfs() const;
 
-        virtual bool isForUs(Ieee80211Frame *frame) const;
-        virtual bool isSentByUs(Ieee80211Frame *frame) const;
+        virtual bool isForUs(const Ptr<Ieee80211Frame>& frame) const;
+        virtual bool isSentByUs(const Ptr<Ieee80211Frame>& frame) const;
 };
 
 } // namespace ieee80211

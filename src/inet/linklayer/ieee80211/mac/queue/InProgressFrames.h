@@ -39,9 +39,10 @@ class INET_API InProgressFrames
                 SequenceControlPredicate(const std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>>& seqAndFragNums) :
                     seqAndFragNums(seqAndFragNums) {}
 
-                bool operator() (const Ieee80211DataOrMgmtFrame *frame) {
+                bool operator() (Packet *packet) {
+                    const auto& frame = packet->peekHeader<Ieee80211Frame>();
                     if (frame->getType() == ST_DATA_WITH_QOS) {
-                        auto dataFrame = check_and_cast<const Ieee80211DataFrame*>(frame);
+                        auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame);
                         return seqAndFragNums.count(std::make_pair(dataFrame->getReceiverAddress(), std::make_pair(dataFrame->getTid(), SequenceControlField(dataFrame->getSequenceNumber(), dataFrame->getFragmentNumber())))) != 0;
                     }
                     else
@@ -53,7 +54,7 @@ class INET_API InProgressFrames
         PendingQueue *pendingQueue = nullptr;
         IOriginatorMacDataService *dataService = nullptr;
         IAckHandler *ackHandler = nullptr;
-        std::list<Ieee80211DataOrMgmtFrame *> inProgressFrames;
+        std::list<Packet*> inProgressFrames;
 
     protected:
         void ensureHasFrameToTransmit();
@@ -67,9 +68,9 @@ class INET_API InProgressFrames
             ackHandler(ackHandler)
         { }
 
-        virtual Ieee80211DataOrMgmtFrame *getFrameToTransmit();
-        virtual Ieee80211DataOrMgmtFrame *getPendingFrameFor(Ieee80211Frame *frame);
-        virtual void dropFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
+        virtual Packet *getFrameToTransmit();
+        virtual Packet *getPendingFrameFor(Packet *frame);
+        virtual void dropFrame(Packet *packet);
         virtual void dropFrames(std::set<std::pair<MACAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
         virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }

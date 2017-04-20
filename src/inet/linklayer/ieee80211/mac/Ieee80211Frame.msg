@@ -108,7 +108,7 @@ enum AckPolicy
 //
 class Ieee80211Frame extends FieldsChunk
 {
-    byteLength = LENGTH_ACK / 8;
+    chunkLength = bit(LENGTH_ACK);
     short type @enum(Ieee80211FrameType); // type and subtype
     bool toDS;
     bool fromDS;
@@ -133,7 +133,7 @@ class Ieee80211OneAddressFrame extends Ieee80211Frame
 //
 class Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 {
-    byteLength = LENGTH_ACK / 8;
+    chunkLength = bit(LENGTH_ACK);
     type = ST_ACK;
 }
 
@@ -142,7 +142,7 @@ class Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 //
 class Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 {
-    byteLength = LENGTH_RTS / 8;
+    chunkLength = bit(LENGTH_RTS);
     MACAddress transmitterAddress; // aka address2
 }
 
@@ -151,7 +151,7 @@ class Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 //
 class Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 {
-    byteLength = LENGTH_RTS / 8;
+    chunkLength = bit(LENGTH_RTS);
     type = ST_RTS;
 }
 
@@ -160,7 +160,7 @@ class Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 //
 class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 {
-    byteLength = LENGTH_CTS / 8;
+    chunkLength = bit(LENGTH_CTS);
     type = ST_CTS;
 }
 
@@ -169,7 +169,7 @@ class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 //
 class Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 {
-    byteLength = LENGTH_MGMT / 8;
+    chunkLength = bit(LENGTH_MGMT);
     MACAddress address3;
     short fragmentNumber;
     uint16 sequenceNumber;
@@ -183,11 +183,11 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
 //  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
 //  field is set to 1 (8.3.2.1 Data frame format)
-//  FIXME: byteLength is not a constant value (DATAFRAME_HEADER_MINLENGTH / 8 = 28).
+//  FIXME: chunkLength is not a constant value (DATAFRAME_HEADER_MINLENGTH / 8 = 28).
 //  For example, with Address 4 and without QoS the correct length is 34 bytes.
 //  Without Address 4 and QoS the correct value is indeed 28.
 //  With Address 4 and QoS the correct value is indeed 36.
-    byteLength = DATAFRAME_HEADER_MINLENGTH / 8;
+    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
     uint16 qos;             // TODO nobody uses this currently, only its parts like tid below... 
@@ -200,7 +200,7 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //class Ieee80211QoSDataFrame extends Ieee80211DataFrame
 //{
 //    type = ST_DATA_WITH_QOS;
-//    byteLength = (DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) / 8;
+//    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS);
 //    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
 //    uint8 tid;
 //    // TODO: other QoS control field parts
@@ -211,7 +211,7 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //
 class Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 {
-    byteLength = DATAFRAME_HEADER_MINLENGTH / 8 + SNAP_HEADER_BYTES; // TODO: LLC(SNAP) headers should be in a separate packet
+    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + SNAP_HEADER_BYTES * 8); // TODO: LLC(SNAP) headers should be in a separate packet
     int etherType @enum(EtherType);
 }
 
@@ -231,18 +231,13 @@ class Ieee80211ActionFrame extends Ieee80211ManagementFrame
     //short action @enum(WirelessNetworkManagementAction); // action TODO: remove it
 }
 
-class Ieee80211MsduSubframe
+class Ieee80211MsduSubframe extends FieldsChunk
 {
-    bitLength = LENGTH_A_MSDU_SUBFRAME_HEADER; // + snap header if necessary
+    chunkLength = bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // + snap header if necessary
     MACAddress sa; // source addr.
     MACAddress da; // destination addr.
     int length;
     int etherType @enum(EtherType); // TODO: review optional snap header (the standard does not define it: Figure 8-32—A-MSDU subframe structure) 
-}
-
-class Ieee80211AMsdu
-{
-    Ieee80211MsduSubframe subframes[];
 }
 
 //
@@ -250,7 +245,7 @@ class Ieee80211AMsdu
 //
 class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 {
-    byteLength = LENGTH_ADDBAREQ / 8;
+    chunkLength = bit(LENGTH_ADDBAREQ);
     category = 3; // representing Block Ack
     int blockAckAction = 0; // representing ADDBA request
     int dialogToken = 1; // nonzero, arbitrary
@@ -277,7 +272,7 @@ class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 
 class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 {
-    // byteLength TODO
+    // chunkLength TODO
     category = 3; // representing Block Ack
     int blockAckAction = 1; // representing ADDBA response
     int dialogToken = 1; // The Dialog Token field value is copied from the corresponding received ADDBA Request frame.
@@ -301,7 +296,7 @@ class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 //
 class Ieee80211Delba extends Ieee80211ActionFrame
 {
-    // byteLength TODO
+    // chunkLength TODO
     category = 3;
     int blockAckAction = 2; // representing DELBA
 
@@ -326,7 +321,7 @@ class Ieee80211Delba extends Ieee80211ActionFrame
 //
 class Ieee80211BlockAckReq extends Ieee80211TwoAddressFrame
 {
-    // byteLength TODO
+    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK_REQ;
@@ -338,7 +333,7 @@ class Ieee80211BlockAckReq extends Ieee80211TwoAddressFrame
 
 class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
-    // byteLength TODO
+    // chunkLength TODO
 
     int tidInfo; //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
@@ -356,7 +351,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 
 class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
-    // byteLength TODO
+    // chunkLength TODO
 
     int tidInfo; // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
 
@@ -378,7 +373,7 @@ class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 
 class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
 {
-    // byteLength TODO
+    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK_REQ;
@@ -400,7 +395,7 @@ class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
 //
 class Ieee80211BlockAck extends Ieee80211TwoAddressFrame
 {
-    // byteLength TODO
+    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK;
@@ -418,7 +413,7 @@ class Ieee80211BlockAck extends Ieee80211TwoAddressFrame
 //
 class Ieee80211BasicBlockAck extends Ieee80211BlockAck
 {
-    // byteLength TODO
+    // chunkLength TODO
     multiTid = 0;
     compressedBitmap = 0;
 
@@ -446,7 +441,7 @@ class Ieee80211BasicBlockAck extends Ieee80211BlockAck
 //
 class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
 {
-    // byteLength TODO
+    // chunkLength TODO
     multiTid = 0;
     compressedBitmap = 1;
 
@@ -467,7 +462,7 @@ class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
 //
 class Ieee80211MultiTidBlockAck extends Ieee80211BlockAck
 {
-    // byteLength TODO
+    // chunkLength TODO
     multiTid = 1;
     compressedBitmap = 1;
 

@@ -18,7 +18,7 @@
 #ifndef __INET_IFRAMESEQUENCE_H
 #define __INET_IFRAMESEQUENCE_H
 
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -52,7 +52,7 @@ class INET_API ITransmitStep : public IFrameSequenceStep
     public:
         virtual Type getType() override { return Type::TRANSMIT; }
 
-        virtual Ieee80211Frame *getFrameToTransmit() = 0;
+        virtual Packet *getFrameToTransmit() = 0;
         virtual simtime_t getIfs() = 0;
 };
 
@@ -62,8 +62,8 @@ class INET_API IReceiveStep : public IFrameSequenceStep
         virtual Type getType() override { return Type::RECEIVE; }
 
         virtual simtime_t getTimeout() = 0;
-        virtual Ieee80211Frame *getReceivedFrame() = 0;
-        virtual void setFrameToReceive(Ieee80211Frame *frame) = 0;
+        virtual Packet *getReceivedFrame() = 0;
+        virtual void setFrameToReceive(Packet *frame) = 0;
 };
 
 class INET_API IFrameSequence

@@ -54,24 +54,24 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      * STA to the wireless LAN, after tweaking fromDS/toDS bits and shuffling
      * addresses as needed.
      */
-    virtual void distributeReceivedDataFrame(Ieee80211DataFrame *frame);
+    virtual void distributeReceivedDataFrame(Packet *packet);
 
     /** Utility function for handleUpperMessage() */
-    virtual Ieee80211DataFrame *encapsulate(Packet *msg);
+    virtual void encapsulate(Packet *msg);
 
     /**
      * Utility function: converts EtherFrame to Ieee80211Frame. This is needed
      * because MACRelayUnit which we use for LAN bridging functionality deals
      * with EtherFrames.
      */
-    virtual Ieee80211DataFrame *convertFromEtherFrame(Packet *packet);
+    virtual const Ptr<Ieee80211DataFrame>& convertFromEtherFrame(Packet *packet);
 
     /**
      * Utility function: converts Ieee80211Frame to EtherFrame. This is needed
      * because MACRelayUnit which we use for LAN bridging functionality deals
      * with EtherFrames.
      */
-    virtual Packet *convertToEtherFrame(Ieee80211DataFrame *frame);
+    virtual void convertToEtherFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame);
 
     /**
      * Utility function: send a frame to upperLayerOut.
@@ -80,7 +80,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      * This function is needed for LAN bridging functionality:
      * MACRelayUnit deals with EtherFrames.
      */
-    virtual void sendToUpperLayer(Ieee80211DataFrame *frame);
+    virtual void sendToUpperLayer(Packet *packet);
 };
 
 } // namespace ieee80211

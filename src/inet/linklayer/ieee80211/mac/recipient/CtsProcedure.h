@@ -33,11 +33,11 @@ class INET_API CtsProcedure : public ICtsProcedure
         int numSentCts = 0;
 
     protected:
-        virtual Ieee80211CTSFrame *buildCts(Ieee80211RTSFrame* rtsFrame) const;
+        virtual Ptr<Ieee80211CTSFrame> buildCts(const Ptr<Ieee80211RTSFrame>& rtsFrame) const;
 
     public:
-        virtual void processReceivedRts(Ieee80211RTSFrame *rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) override;
-        virtual void processTransmittedCts(Ieee80211CTSFrame *ctsFrame) override;
+        virtual void processReceivedRts(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) override;
+        virtual void processTransmittedCts(const Ptr<Ieee80211CTSFrame>& ctsFrame) override;
 };
 
 } /* namespace ieee80211 */

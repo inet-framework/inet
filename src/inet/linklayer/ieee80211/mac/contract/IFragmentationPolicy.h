@@ -30,7 +30,7 @@ class INET_API IFragmentationPolicy
     public:
         virtual ~IFragmentationPolicy() {}
 
-        virtual std::vector<int> computeFragmentSizes(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual std::vector<int> computeFragmentSizes(Packet *frame) = 0;
 };
 
 } // namespace ieee80211

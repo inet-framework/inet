@@ -32,12 +32,12 @@ void RecipientBlockAckAgreementPolicy::initialize(int stage)
     }
 }
 
-bool RecipientBlockAckAgreementPolicy::isAddbaReqAccepted(Ieee80211AddbaRequest* addbaReq)
+bool RecipientBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<Ieee80211AddbaRequest>& addbaReq)
 {
     return true;
 }
 
-bool RecipientBlockAckAgreementPolicy::isDelbaAccepted(Ieee80211Delba* delba)
+bool RecipientBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<Ieee80211Delba>& delba)
 {
     return true;
 }

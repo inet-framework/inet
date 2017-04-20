@@ -83,17 +83,20 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual void handleSelfMessage(cMessage *msg) override;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(Packet *msg) override;
+    virtual void handleUpperPacket(cPacket *msg) override;
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerPacket(Packet *msg) override;
+    virtual void handleLowerPacket(cPacket *msg) override;
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
-    virtual void processUpperFrame(Ieee80211DataOrMgmtFrame *frame);
-    virtual void processLowerFrame(Ieee80211Frame *frame);
+    virtual void encapsulate(Packet *packet);
+    virtual void decapsulate(Packet *packet);
+
+    virtual void processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
+    virtual void processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
 
   public:
     Ieee80211Mac();
@@ -101,7 +104,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     virtual const MACAddress& getAddress() const { return address; }
     virtual void sendUp(cMessage *message) override;
-    virtual void sendFrame(Ieee80211Frame *frameToSend);
+    virtual void sendFrame(Packet *frameToSend);
     virtual void sendDownPendingRadioConfigMsg();
 };
 

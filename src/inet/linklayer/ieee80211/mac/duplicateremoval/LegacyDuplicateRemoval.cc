@@ -21,7 +21,7 @@
 namespace inet {
 namespace ieee80211 {
 
-bool LegacyDuplicateRemoval::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
+bool LegacyDuplicateRemoval::isDuplicate(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
 {
     ASSERT(frame->getType() != ST_DATA_WITH_QOS);
     const MACAddress& address = frame->getTransmitterAddress();

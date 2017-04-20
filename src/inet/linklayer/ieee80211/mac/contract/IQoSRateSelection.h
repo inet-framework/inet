@@ -18,7 +18,7 @@
 #ifndef __INET_IQOSRATESELECTION_H
 #define __INET_IQOSRATESELECTION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
@@ -38,11 +38,11 @@ class INET_API IQoSRateSelection
     public:
         virtual ~IQoSRateSelection() {}
 
-        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Ieee80211RTSFrame *rtsFrame) = 0;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) = 0;
-        virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Ieee80211BlockAckReq *blockAckReq) = 0;
+        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) = 0;
+        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) = 0;
+        virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) = 0;
 
-        virtual const IIeee80211Mode *computeMode(Ieee80211Frame *frame, TxopProcedure *txopProcedure) = 0;
+        virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame, TxopProcedure *txopProcedure) = 0;
 };
 
 } // namespace ieee80211

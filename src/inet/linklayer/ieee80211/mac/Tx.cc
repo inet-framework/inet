@@ -50,21 +50,20 @@ void Tx::initialize(int stage)
     }
 }
 
-void Tx::transmitFrame(Ieee80211Frame *frame, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, ITx::ICallback *txCallback)
 {
-    transmitFrame(frame, SIMTIME_ZERO, txCallback);
+    transmitFrame(packet, frame, SIMTIME_ZERO, txCallback);
 }
 
-void Tx::transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *txCallback)
+void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, simtime_t ifs, ITx::ICallback *txCallback)
 {
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", frame->getName());
-    take(frame);
-    auto frameToTransmit = inet::utils::dupPacketAndControlInfo(frame);
+    take(packet);
+    auto frameToTransmit = packet->dup();
     this->frame = frameToTransmit;
-    if (auto twoAddrFrame = dynamic_cast<Ieee80211TwoAddressFrame*>(frameToTransmit))
-        twoAddrFrame->setTransmitterAddress(address);
+    header = frame;
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
     if (hasGUI())
@@ -77,12 +76,12 @@ void Tx::radioTransmissionFinished()
     if (transmitting) {
         EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         transmitting = false;
-        auto transmittedFrame = inet::utils::dupPacketAndControlInfo(frame);
-        frame = nullptr;
         ASSERT(txCallback != nullptr);
         ITx::ICallback *tmpTxCallback = txCallback;
         txCallback = nullptr;
-        tmpTxCallback->transmissionComplete(transmittedFrame);
+        tmpTxCallback->transmissionComplete(frame->dup(), header);
+        frame = nullptr;
+        header = nullptr;
         rx->frameTransmitted(durationField);
         if (hasGUI())
             refreshDisplay();
@@ -94,7 +93,7 @@ void Tx::handleMessage(cMessage *msg)
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
         transmitting = true;
-        durationField = frame->getDuration();
+        durationField = header->getDuration();
         mac->sendFrame(frame);
         if (hasGUI())
             refreshDisplay();

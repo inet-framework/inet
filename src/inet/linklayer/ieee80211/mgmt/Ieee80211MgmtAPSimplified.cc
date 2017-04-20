@@ -40,10 +40,11 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAPSimplified::handleUpperMessage(Packet *msg)
+void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = encapsulate(msg);
-    sendDown(frame);
+    auto packet = check_and_cast<Packet *>(msg);
+    encapsulate(packet);
+    sendDown(packet);
 }
 
 void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)
@@ -51,70 +52,70 @@ void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
+void Ieee80211MgmtAPSimplified::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
 {
     // check toDS bit
     if (!frame->getToDS()) {
         // looks like this is not for us - discard
-        delete frame;
+        delete packet;
         return;
     }
 
     if (isConnectedToHL)
-        sendToUpperLayer(frame->dup());
+        sendToUpperLayer(packet->dup());
 
     // send it out to the destination STA
-    distributeReceivedDataFrame(frame);
+    distributeReceivedDataFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
+void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
+void Ieee80211MgmtAPSimplified::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
+void Ieee80211MgmtAPSimplified::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
+void Ieee80211MgmtAPSimplified::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
+void Ieee80211MgmtAPSimplified::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
+void Ieee80211MgmtAPSimplified::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
+void Ieee80211MgmtAPSimplified::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleBeaconFrame(Ieee80211BeaconFrame *frame)
+void Ieee80211MgmtAPSimplified::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
+void Ieee80211MgmtAPSimplified::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
+void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
 } // namespace ieee80211

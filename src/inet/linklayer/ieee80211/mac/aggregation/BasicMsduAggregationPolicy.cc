@@ -36,7 +36,7 @@ bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragat
             (aggregationLengthThreshold == -1 || aggregationLengthThreshold <= aMsduLength));
 }
 
-bool BasicMsduAggregationPolicy::isEligible(Ieee80211DataFrame* frame, Ieee80211DataFrame* testFrame, int aMsduLength)
+bool BasicMsduAggregationPolicy::isEligible(const Ptr<Ieee80211DataFrame>& frame, Packet *testPacket, const Ptr<Ieee80211DataFrame>& testFrame, int aMsduLength)
 {
 //   Only QoS data frames have a TID.
     if (qOsCheck && frame->getType() != ST_DATA_WITH_QOS)
@@ -45,7 +45,7 @@ bool BasicMsduAggregationPolicy::isEligible(Ieee80211DataFrame* frame, Ieee80211
 //    The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An
 //    A-MSDU cannot be fragmented. Therefore, an A-MSDU of a length that exceeds 4065 octets (
 //    4095 minus the QoS data MPDU overhead) cannot be transported in an A-MPDU.
-    if (aMsduLength + testFrame->getEncapsulatedPacket()->getByteLength() + LENGTH_A_MSDU_SUBFRAME_HEADER / 8 > maxAMsduSize) // default value of maxAMsduSize is 4065
+    if (aMsduLength + byte(testPacket->getTotalLength() - testFrame->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER)).get() > maxAMsduSize) // default value of maxAMsduSize is 4065
         return false;
 
 //    The value of TID present in the QoS Control field of the MPDU carrying the A-MSDU indicates the TID for
@@ -66,21 +66,27 @@ bool BasicMsduAggregationPolicy::isEligible(Ieee80211DataFrame* frame, Ieee80211
     return true;
 }
 
-std::vector<Ieee80211DataFrame *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue *queue)
+std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue *queue)
 {
     ASSERT(!queue->isEmpty());
-    int aMsduLength = 0;
-    auto firstFrame = dynamic_cast<Ieee80211DataFrame *>(queue->front());
-    auto frames = new std::vector<Ieee80211DataFrame *>();
+    bit aMsduLength = bit(0);
+    auto firstPacket = check_and_cast<Packet *>(queue->front());
+    Ptr<Ieee80211DataOrMgmtFrame> firstFrame = nullptr;
+    auto frames = new std::vector<Packet*>();
     for (cQueue::Iterator it(*queue); !it.end(); it++)
     {
-        auto dataFrame = dynamic_cast<Ieee80211DataFrame *>(*it);
-        if (!dataFrame || !isEligible(dataFrame, firstFrame, aMsduLength))
+        auto dataPacket = check_and_cast<Packet *>(*it);
+        const auto& dataFrame = dataPacket->peekHeader<Ieee80211DataOrMgmtFrame>();
+        if (!std::dynamic_pointer_cast<Ieee80211DataFrame>(dataFrame))
             break;
-        frames->push_back(dataFrame);
-        aMsduLength += dataFrame->getEncapsulatedPacket()->getByteLength() + LENGTH_A_MSDU_SUBFRAME_HEADER / 8; // sum of MSDU lengths + subframe header
+        if (!firstFrame)
+            firstFrame = dataFrame;
+        if (!isEligible(std::static_pointer_cast<Ieee80211DataFrame>(dataFrame), firstPacket, std::static_pointer_cast<Ieee80211DataFrame>(firstFrame), byte(aMsduLength).get()))
+            break;
+        frames->push_back(dataPacket);
+        aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
-    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength)) {
+    if (frames->size() <= 1 || !isAggregationPossible(frames->size(), byte(aMsduLength).get())) {
         delete frames;
         return nullptr;
     }

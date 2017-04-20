@@ -35,10 +35,10 @@ class INET_API DcfTransmitLifetimeHandler : public ITransmitLifetimeHandler
         DcfTransmitLifetimeHandler(simtime_t maxTransmitLifetime) : maxTransmitLifetime(maxTransmitLifetime)
         { }
 
-        virtual void frameGotInProgess(Ieee80211DataFrame *frame);
-        virtual void frameTransmitted(Ieee80211DataFrame *frame);
+        virtual void frameGotInProgess(const Ptr<Ieee80211DataFrame>& frame);
+        virtual void frameTransmitted(const Ptr<Ieee80211DataFrame>& frame);
 
-        virtual bool isLifetimeExpired(Ieee80211DataFrame *frame);
+        virtual bool isLifetimeExpired(const Ptr<Ieee80211DataFrame>& frame);
 };
 
 } /* namespace ieee80211 */

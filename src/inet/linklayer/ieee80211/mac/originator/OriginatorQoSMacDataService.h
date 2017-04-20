@@ -49,9 +49,9 @@ class INET_API OriginatorQoSMacDataService : public IOriginatorMacDataService, p
     protected:
         virtual void initialize() override;
 
-        virtual Ieee80211DataOrMgmtFrame *assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame);
-        virtual Fragments *fragmentIfNeeded(Ieee80211DataOrMgmtFrame *frame);
-        virtual Ieee80211DataOrMgmtFrame *aMsduAggregateIfNeeded(PendingQueue *pendingQueue);
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame);
+        virtual Fragments *fragmentIfNeeded(Packet *frame);
+        virtual Packet *aMsduAggregateIfNeeded(PendingQueue *pendingQueue);
 
     public:
         virtual ~OriginatorQoSMacDataService();

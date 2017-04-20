@@ -18,6 +18,7 @@
 #ifndef __INET_NONQOSRECOVERYPROCEDURE_H
 #define __INET_NONQOSRECOVERYPROCEDURE_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/common/AccessCategory.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
@@ -49,10 +50,10 @@ class INET_API NonQoSRecoveryProcedure : public cSimpleModule, public IRecoveryP
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual void incrementCounter(Ieee80211DataOrMgmtFrame* frame, std::map<SequenceControlField, int>& retryCounter);
+        virtual void incrementCounter(const Ptr<Ieee80211DataOrMgmtFrame>& frame, std::map<SequenceControlField, int>& retryCounter);
         virtual void resetContentionWindow();
-        virtual int getRc(Ieee80211DataOrMgmtFrame* frame, std::map<SequenceControlField, int>& retryCounter);
-        virtual bool isMulticastFrame(Ieee80211Frame *frame);
+        virtual int getRc(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame, std::map<SequenceControlField, int>& retryCounter);
+        virtual bool isMulticastFrame(const Ptr<Ieee80211Frame>& frame);
         virtual void incrementStationSrc(StationRetryCounters *stationCounters);
         virtual void incrementStationLrc(StationRetryCounters *stationCounters);
 
@@ -60,16 +61,16 @@ class INET_API NonQoSRecoveryProcedure : public cSimpleModule, public IRecoveryP
         virtual void multicastFrameTransmitted(StationRetryCounters *stationCounters);
 
         virtual void ctsFrameReceived(StationRetryCounters *stationCounters);
-        virtual void ackFrameReceived(Ieee80211DataOrMgmtFrame *ackedFrame, StationRetryCounters *stationCounters);
+        virtual void ackFrameReceived(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& ackedFrame, StationRetryCounters *stationCounters);
 
-        virtual void rtsFrameTransmissionFailed(Ieee80211DataOrMgmtFrame *protectedFrame, StationRetryCounters *stationCounters);
-        virtual void dataOrMgmtFrameTransmissionFailed(Ieee80211DataOrMgmtFrame *failedFrame, StationRetryCounters *stationCounters);
-        virtual int getRetryCount(Ieee80211DataOrMgmtFrame* frame);
+        virtual void rtsFrameTransmissionFailed(const Ptr<Ieee80211DataOrMgmtFrame>& protectedFrame, StationRetryCounters *stationCounters);
+        virtual void dataOrMgmtFrameTransmissionFailed(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& failedFrame, StationRetryCounters *stationCounters);
+        virtual int getRetryCount(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
 
-        virtual bool isRetryLimitReached(Ieee80211DataOrMgmtFrame* failedFrame);
-        virtual bool isRtsFrameRetryLimitReached(Ieee80211DataOrMgmtFrame* protectedFrame);
+        virtual bool isRetryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& failedFrame);
+        virtual bool isRtsFrameRetryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& protectedFrame);
 
-        virtual void retryLimitReached(Ieee80211DataOrMgmtFrame *frame);
+        virtual void retryLimitReached(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
 
         virtual int getLongRetryLimit() { return longRetryLimit; }
         virtual int getShortRetryLimit() { return shortRetryLimit; }

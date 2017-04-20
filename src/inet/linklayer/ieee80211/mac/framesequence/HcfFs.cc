@@ -45,15 +45,16 @@ HcfFs::HcfFs() :
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    return frameToTransmit->getReceiverAddress().isMulticast() ? 0 : 1;
+    return frameToTransmit->peekHeader<Ieee80211Frame>()->getReceiverAddress().isMulticast() ? 0 : 1;
 }
 
 int HcfFs::selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    if (dynamic_cast<Ieee80211DataFrame*>(frameToTransmit))
+    const auto& header = frameToTransmit->peekHeader<Ieee80211Frame>();
+    if (std::dynamic_pointer_cast<Ieee80211DataFrame>(header))
         return 0;
-    else if (dynamic_cast<Ieee80211ManagementFrame*>(frameToTransmit))
+    else if (std::dynamic_pointer_cast<Ieee80211ManagementFrame>(header))
         return 1;
     else
         throw cRuntimeError("frameToTransmit must be either a Data or a Management frame");
@@ -69,14 +70,15 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     bool hasFrameToTransmit = context->getInProgressFrames()->hasInProgressFrames();
     if (hasFrameToTransmit) {
         auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-        return frameSequence->getCount() == 0 || (!nextFrameToTransmit->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
+        const auto& nextHeader = nextFrameToTransmit->peekHeader<Ieee80211Frame>();
+        return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
     }
     return false;
 }
 
 bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->getReceiverAddress().isMulticast();
+    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->peekHeader<Ieee80211Frame>()->getReceiverAddress().isMulticast();
 }
 
 } // namespace ieee80211

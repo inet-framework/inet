@@ -37,7 +37,7 @@ void FrameSequenceHandler::handleStartRxTimeout()
     }
 }
 
-void FrameSequenceHandler::processResponse(Ieee80211Frame* frame)
+void FrameSequenceHandler::processResponse(Packet *frame)
 {
     ASSERT(callback != nullptr);
     auto lastStep = context->getLastStep();
@@ -96,7 +96,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << "\n";
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
                 // TODO: lifetime
-                // if (auto dataFrame = dynamic_cast<Ieee80211DataFrame *>(transmitStep->getFrameToTransmit()))
+                // if (auto dataFrame = dynamic_cast<const Ptr<Ieee80211DataFrame>& >(transmitStep->getFrameToTransmit()))
                 //    transmitLifetimeHandler->frameTransmitted(dataFrame);
                 break;
             }
@@ -173,15 +173,16 @@ void FrameSequenceHandler::abortFrameSequence()
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep*>(dynamic_cast<IReceiveStep*>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
-    if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frameToTransmit))
-        callback->originatorProcessFailedFrame(dataOrMgmtFrame);
-    else if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frameToTransmit)) {
+    auto headerToTransmit = frameToTransmit->peekHeader<Ieee80211Frame>();
+    if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(headerToTransmit))
+        callback->originatorProcessFailedFrame(const_cast<Packet *>(frameToTransmit));
+    else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(headerToTransmit)) {
         auto rtsTxStep = dynamic_cast<RtsTransmitStep*>(failedTxStep);
-        callback->originatorProcessRtsProtectionFailed(rtsTxStep->getProtectedFrame());
-        delete rtsFrame;
+        callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));
+        delete frameToTransmit;
     }
-    else if (auto blockAckReq = dynamic_cast<Ieee80211BlockAckReq *>(frameToTransmit))
-        delete blockAckReq;
+    else if (auto blockAckReq = std::dynamic_pointer_cast<Ieee80211BlockAckReq>(headerToTransmit))
+        delete frameToTransmit;
     else ; // TODO: etc ?
     finishFrameSequence(false);
 }

@@ -43,10 +43,10 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
         SequenceNumber lastSentSharedCounterSeqNum = 0;
 
     protected:
-        virtual CacheType getCacheType(Ieee80211DataOrMgmtFrame *frame, bool incoming);
+        virtual CacheType getCacheType(const Ptr<Ieee80211DataOrMgmtFrame>& frame, bool incoming);
 
     public:
-        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame) override;
 };
 
 } /* namespace ieee80211 */

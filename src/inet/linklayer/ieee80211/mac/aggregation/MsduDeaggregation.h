@@ -26,10 +26,10 @@ namespace ieee80211 {
 class INET_API MsduDeaggregation : public IMsduDeaggregation, public cObject
 {
     protected:
-        virtual void setExplodedFrameAddress(Ieee80211DataFrame* frame, Ieee80211MsduSubframe* subframe, Ieee80211DataFrame *aMsduFrame);
+        virtual void setExplodedFrameAddress(const Ptr<Ieee80211DataFrame>& frame, const Ptr<Ieee80211MsduSubframe>& subframe, const Ptr<Ieee80211DataFrame>& aMsduFrame);
 
     public:
-        virtual std::vector<Ieee80211DataFrame *> *deaggregateFrame(Ieee80211DataFrame *frame) override;
+        virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) override;
 };
 
 } /* namespace ieee80211 */

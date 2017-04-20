@@ -54,7 +54,7 @@ void AARFRateControl::updateDisplayString()
     getDisplayString().setTagArg("t", 0, currentMode->getName());
 }
 
-void AARFRateControl::frameTransmitted(const Ieee80211Frame* frame, int retryCount, bool isSuccessful, bool isGivenUp)
+void AARFRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
     increaseRateIfTimerIsExpired();
 
@@ -120,7 +120,7 @@ void AARFRateControl::increaseRateIfTimerIsExpired()
     }
 }
 
-void AARFRateControl::frameReceived(const Ieee80211Frame* frame)
+void AARFRateControl::frameReceived(Packet *frame)
 {
 }
 

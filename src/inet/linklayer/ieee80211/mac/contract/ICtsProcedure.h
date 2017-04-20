@@ -18,6 +18,7 @@
 #ifndef __INET_ICTSPROCEDURE_H
 #define __INET_ICTSPROCEDURE_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IProcedureCallback.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -29,8 +30,8 @@ class INET_API ICtsProcedure
 {
     public:
         virtual ~ICtsProcedure() { }
-        virtual void processReceivedRts(Ieee80211RTSFrame *rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
-        virtual void processTransmittedCts(Ieee80211CTSFrame *ctsFrame) = 0;
+        virtual void processReceivedRts(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, ICtsPolicy *ctsPolicy, IProcedureCallback *callback) = 0;
+        virtual void processTransmittedCts(const Ptr<Ieee80211CTSFrame>& ctsFrame) = 0;
 };
 
 } /* namespace ieee80211 */

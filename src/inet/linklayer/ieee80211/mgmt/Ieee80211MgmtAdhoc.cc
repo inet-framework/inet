@@ -39,10 +39,11 @@ void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAdhoc::handleUpperMessage(Packet *msg)
+void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = encapsulate(msg);
-    sendDown(frame);
+    auto packet = check_and_cast<Packet *>(msg);
+    encapsulate(packet);
+    sendDown(packet);
 }
 
 void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
@@ -50,9 +51,9 @@ void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(Packet *msg)
+void Ieee80211MgmtAdhoc::encapsulate(Packet *msg)
 {
-    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
+    const Ptr<Ieee80211DataFrameWithSNAP>& frame = std::make_shared<Ieee80211DataFrameWithSNAP>();
 
     // copy receiver address from the control info (sender address will be set in MAC)
     frame->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
@@ -62,92 +63,88 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(Packet *msg)
     if (userPriorityReq != nullptr) {
         // make it a QoS frame, and set TID
         frame->setType(ST_DATA_WITH_QOS);
-        frame->addBitLength(QOSCONTROL_BITS);
+        frame->setChunkLength(frame->getChunkLength() + bit(QOSCONTROL_BITS));
         frame->setTid(userPriorityReq->getUserPriority());
     }
 
-    frame->encapsulate(msg);
-    return frame;
+    msg->insertHeader(frame);
 }
 
-Packet *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
+void Ieee80211MgmtAdhoc::decapsulate(Packet *packet)
 {
-    Packet *payload = frame->decapsulate();
-
-    auto macAddressInd = payload->ensureTag<MacAddressInd>();
+    const auto& frame = packet->popHeader<Ieee80211DataFrame>();
+    auto macAddressInd = packet->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(frame->getTransmitterAddress());
     macAddressInd->setDestAddress(frame->getReceiverAddress());
     int tid = frame->getTid();
     if (tid < 8)
-        payload->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
-    payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
+        packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
+    const Ptr<Ieee80211DataFrameWithSNAP>& frameWithSNAP = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(frame);
     if (frameWithSNAP) {
         int etherType = frameWithSNAP->getEtherType();
         if (etherType != -1) {
-            payload->ensureTag<EtherTypeInd>()->setEtherType(etherType);
-            payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
-            payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
+            packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
+            packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
+            packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         }
     }
-
-    delete frame;
-    return payload;
 }
 
-void Ieee80211MgmtAdhoc::handleDataFrame(Ieee80211DataFrame *frame)
+void Ieee80211MgmtAdhoc::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
 {
-    sendUp(decapsulate(frame));
+    decapsulate(packet);
+    sendUp(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
+void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
+void Ieee80211MgmtAdhoc::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
+void Ieee80211MgmtAdhoc::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
+void Ieee80211MgmtAdhoc::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
+void Ieee80211MgmtAdhoc::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
+void Ieee80211MgmtAdhoc::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
+void Ieee80211MgmtAdhoc::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleBeaconFrame(Ieee80211BeaconFrame *frame)
+void Ieee80211MgmtAdhoc::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
+void Ieee80211MgmtAdhoc::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
+void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
 } // namespace ieee80211

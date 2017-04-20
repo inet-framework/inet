@@ -26,20 +26,21 @@ Register_Class(BasicReassembly);
 /*
  * FIXME: this function needs a serious review
  */
-Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame *frame)
+Packet *BasicReassembly::addFragment(Packet *packet)
 {
+    const auto& frame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
     // Frame is not fragmented
     if (!frame->getMoreFragments() && frame->getFragmentNumber() == 0)
-        return frame;
+        return packet;
     // FIXME: temporary fix for mgmt frames
-    if (dynamic_cast<Ieee80211ManagementFrame*>(frame))
-        return frame;
+    if (std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame))
+        return packet;
     // find entry for this frame
     Key key;
     key.macAddress = frame->getTransmitterAddress();
     key.tid = -1;
     if (frame->getType() == ST_DATA_WITH_QOS)
-        if (Ieee80211DataFrame *qosDataFrame = dynamic_cast<Ieee80211DataFrame *>(frame))
+        if (const Ptr<Ieee80211DataFrame>& qosDataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame))
             key.tid = qosDataFrame->getTid();
     key.seqNum = frame->getSequenceNumber();
     short fragNum = frame->getFragmentNumber();
@@ -52,20 +53,24 @@ Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame 
     if (!frame->getMoreFragments())
         value.allFragments = (fragmentBit << 1) - 1;
     if (!value.frame) {
-        frame->setByteLength(0);  // needed for decapsulation of larger packet
-        value.frame = check_and_cast_nullable<Ieee80211DataOrMgmtFrame *>(frame->decapsulate());
+        // TODO: even more serious review
+        value.frame = packet->dup();
+        packet->popHeader<Ieee80211DataOrMgmtFrame>();
     }
     MACAddress txAddress = frame->getTransmitterAddress();
-    delete frame;
+    delete packet;
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
-        Ieee80211DataOrMgmtFrame *result = value.frame;
+        Packet *result = value.frame;
         // We need to restore some data from the carrying frame's header like TX address
         // TODO: Maybe we need to restore the fromDs, toDs fields as well when traveling through multiple APs
         // TODO: Are there any other fields that we need to restore?
         // TODO: SET TX ADDR WHEN THE FRAME ARRIVES FROM UPPER LAYER
-        result->setTransmitterAddress(txAddress);
+        result->removePoppedHeaders();
+        auto header = result->removeHeader<Ieee80211DataOrMgmtFrame>();
+        header->setTransmitterAddress(txAddress);
+        result->insertHeader(header);
         fragmentsMap.erase(key);
         return result;
     }

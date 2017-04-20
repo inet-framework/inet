@@ -18,6 +18,7 @@
 #ifndef __INET_BASICFRAGMENTATIONPOLICY_H
 #define __INET_BASICFRAGMENTATIONPOLICY_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFragmentationPolicy.h"
 
 namespace inet {
@@ -32,7 +33,7 @@ class INET_API BasicFragmentationPolicy : public IFragmentationPolicy, public cS
         virtual void initialize() override;
 
     public:
-        virtual std::vector<int> computeFragmentSizes(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual std::vector<int> computeFragmentSizes(Packet *frame) override;
 };
 
 } // namespace ieee80211

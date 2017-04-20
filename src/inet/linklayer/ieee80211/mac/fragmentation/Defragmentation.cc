@@ -23,9 +23,14 @@ namespace ieee80211 {
 
 Register_Class(Defragmentation);
 
-Ieee80211DataOrMgmtFrame *Defragmentation::defragmentFrames(std::vector<Ieee80211DataOrMgmtFrame *> *fragmentFrames)
+Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
 {
-    return check_and_cast<Ieee80211DataOrMgmtFrame *>(fragmentFrames->at(fragmentFrames->size() - 1)->decapsulate());
+    auto frame = new Packet();
+    for (auto fragmentFrame : *fragmentFrames) {
+        fragmentFrame->popHeader<Ieee80211DataOrMgmtFrame>();
+        frame->append(fragmentFrame->peekData());
+    }
+    return frame;
 }
 
 } // namespace ieee80211

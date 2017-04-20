@@ -18,7 +18,7 @@
 #ifndef __INET_IRATESELECTION_H
 #define __INET_IRATESELECTION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
@@ -37,10 +37,10 @@ class INET_API IRateSelection
 {
     public:
         virtual ~IRateSelection() {}
-        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Ieee80211RTSFrame *rtsFrame) = 0;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) = 0;
+        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<Ieee80211RTSFrame>& rtsFrame) = 0;
+        virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) = 0;
 
-        virtual const IIeee80211Mode *computeMode(Ieee80211Frame *frame) = 0;
+        virtual const IIeee80211Mode *computeMode(Packet *packet, const Ptr<Ieee80211Frame>& frame) = 0;
 };
 
 } // namespace ieee80211

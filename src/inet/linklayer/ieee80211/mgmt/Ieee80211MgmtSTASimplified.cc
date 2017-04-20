@@ -45,15 +45,16 @@ void Ieee80211MgmtSTASimplified::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtSTASimplified::handleUpperMessage(Packet *msg)
+void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
 {
     if (accessPointAddress.isUnspecified()) {
         EV << "STA is not associated with an access point, discarding packet " << msg << "\n";
         delete msg;
         return;
     }
-    Ieee80211DataFrame *frame = encapsulate(msg);
-    sendDown(frame);
+    auto packet = check_and_cast<Packet *>(msg);
+    encapsulate(packet);
+    sendDown(packet);
 }
 
 void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cObject *ctrl)
@@ -61,9 +62,9 @@ void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
-Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(Packet *msg)
+void Ieee80211MgmtSTASimplified::encapsulate(Packet *packet)
 {
-    Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
+    auto frame = std::make_shared<Ieee80211DataFrameWithSNAP>();
 
     // frame goes to the AP
     frame->setToDS(true);
@@ -72,99 +73,96 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(Packet *msg)
     frame->setReceiverAddress(accessPointAddress);
 
     // destination address is in address3
-    MACAddress dest = msg->getMandatoryTag<MacAddressReq>()->getDestAddress();
+    MACAddress dest = packet->getMandatoryTag<MacAddressReq>()->getDestAddress();
     ASSERT(!dest.isUnspecified());
     frame->setAddress3(dest);
-    auto ethTypeTag = msg->getTag<EtherTypeReq>();
+    auto ethTypeTag = packet->getTag<EtherTypeReq>();
     frame->setEtherType(ethTypeTag ? ethTypeTag->getEtherType() : -1);
-    auto userPriorityReq = msg->getTag<UserPriorityReq>();
+    auto userPriorityReq = packet->getTag<UserPriorityReq>();
     if (userPriorityReq != nullptr) {
         // make it a QoS frame, and set TID
         frame->setType(ST_DATA_WITH_QOS);
-        frame->addBitLength(QOSCONTROL_BITS);
+        frame->setChunkLength(frame->getChunkLength() + bit(QOSCONTROL_BITS));
         frame->setTid(userPriorityReq->getUserPriority());
     }
 
-    frame->encapsulate(msg);
-    return frame;
+    packet->insertHeader(frame);
 }
 
-Packet *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
+void Ieee80211MgmtSTASimplified::decapsulate(Packet *packet)
 {
-    Packet *payload = frame->decapsulate();
-    auto macAddressInd = payload->ensureTag<MacAddressInd>();
+    const auto& frame = packet->popHeader<Ieee80211DataFrame>();
+    auto macAddressInd = packet->ensureTag<MacAddressInd>();
     macAddressInd->setSrcAddress(frame->getAddress3());
     macAddressInd->setDestAddress(frame->getReceiverAddress());
     if (frame->getType() == ST_DATA_WITH_QOS) {
         int tid = frame->getTid();
         if (tid < 8)
-            payload->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
+            packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
     }
-    payload->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
+    auto frameWithSNAP = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(frame);
     if (frameWithSNAP) {
-        payload->ensureTag<EtherTypeInd>()->setEtherType(frameWithSNAP->getEtherType());
-        payload->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
-        payload->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+        packet->ensureTag<EtherTypeInd>()->setEtherType(frameWithSNAP->getEtherType());
+        packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
+        packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(frameWithSNAP->getEtherType()));
     }
-
-    delete frame;
-    return payload;
 }
 
-void Ieee80211MgmtSTASimplified::handleDataFrame(Ieee80211DataFrame *frame)
+void Ieee80211MgmtSTASimplified::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
 {
-    sendUp(decapsulate(frame));
+    decapsulate(packet);
+    sendUp(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
+void Ieee80211MgmtSTASimplified::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
+void Ieee80211MgmtSTASimplified::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
+void Ieee80211MgmtSTASimplified::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame)
+void Ieee80211MgmtSTASimplified::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
+void Ieee80211MgmtSTASimplified::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame)
+void Ieee80211MgmtSTASimplified::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleDisassociationFrame(Ieee80211DisassociationFrame *frame)
+void Ieee80211MgmtSTASimplified::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleBeaconFrame(Ieee80211BeaconFrame *frame)
+void Ieee80211MgmtSTASimplified::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
+void Ieee80211MgmtSTASimplified::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame)
+void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame)
 {
-    dropManagementFrame(frame);
+    dropManagementFrame(packet);
 }
 
 } // namespace ieee80211

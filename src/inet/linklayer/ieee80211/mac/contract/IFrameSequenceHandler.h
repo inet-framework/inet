@@ -32,12 +32,12 @@ class INET_API IFrameSequenceHandler
             public:
                 virtual ~ICallback() {}
 
-                virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs) = 0;
+                virtual void transmitFrame(Packet *packet, simtime_t ifs) = 0;
 
-                virtual void originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame *protectedFrame) = 0;
-                virtual void originatorProcessTransmittedFrame(Ieee80211Frame* transmittedFrame) = 0;
-                virtual void originatorProcessReceivedFrame(Ieee80211Frame *frame, Ieee80211Frame *lastTransmittedFrame) = 0;
-                virtual void originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame) = 0;
+                virtual void originatorProcessRtsProtectionFailed(Packet *packet) = 0;
+                virtual void originatorProcessTransmittedFrame(Packet *packet) = 0;
+                virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedFrame) = 0;
+                virtual void originatorProcessFailedFrame(Packet *packet) = 0;
                 virtual void frameSequenceFinished() = 0;
                 virtual void scheduleStartRxTimer(simtime_t timeout) = 0;
         };
@@ -46,7 +46,7 @@ class INET_API IFrameSequenceHandler
         virtual ~IFrameSequenceHandler() { }
 
         virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
-        virtual void processResponse(Ieee80211Frame *frame) = 0;
+        virtual void processResponse(Packet *frame) = 0;
         virtual void transmissionComplete() = 0;
         virtual bool isSequenceRunning() = 0;
         virtual void handleStartRxTimeout() = 0;

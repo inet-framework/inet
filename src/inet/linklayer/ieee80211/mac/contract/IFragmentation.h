@@ -30,7 +30,7 @@ class INET_API IFragmentation
     public:
         virtual ~IFragmentation() {}
 
-        virtual std::vector<Ieee80211DataOrMgmtFrame *> *fragmentFrame(Ieee80211DataOrMgmtFrame *frame, const std::vector<int>& fragmentSizes) = 0;
+        virtual std::vector<Packet*> *fragmentFrame(Packet *frame, const std::vector<int>& fragmentSizes) = 0;
 };
 
 } // namespace ieee80211

@@ -38,7 +38,8 @@ class INET_API Tx : public cSimpleModule, public ITx
         Ieee80211Mac *mac = nullptr;
         IRx *rx = nullptr;
         IStatistics *statistics = nullptr;
-        Ieee80211Frame *frame = nullptr;
+        Packet *frame = nullptr;
+        Ptr<Ieee80211Frame> header = nullptr;
         cMessage *endIfsTimer = nullptr;
         simtime_t durationField = -1;
         bool transmitting = false;
@@ -53,8 +54,8 @@ class INET_API Tx : public cSimpleModule, public ITx
         Tx() {}
         ~Tx();
 
-        virtual void transmitFrame(Ieee80211Frame *frame, ITx::ICallback *txCallback) override;
-        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *txCallback) override;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, ITx::ICallback *txCallback) override;
+        virtual void transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, simtime_t ifs, ITx::ICallback *txCallback) override;
         virtual void radioTransmissionFinished() override;
 };
 

@@ -32,7 +32,7 @@ ReceiveBuffer::ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber) :
 // data frame, unless the sequence number of the frame is older than the NextExpectedSequenceNumber for that
 // Block Ack agreement, in which case the frame is discarded because it is either old or a duplicate.
 //
-bool ReceiveBuffer::insertFrame(Ieee80211DataFrame* dataFrame)
+bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame)
 {
     int sequenceNumber = dataFrame->getSequenceNumber();
     // The total number of MPDUs in these MSDUs may not
@@ -41,10 +41,10 @@ bool ReceiveBuffer::insertFrame(Ieee80211DataFrame* dataFrame)
         auto it = buffer.find(sequenceNumber);
         if (it != buffer.end()) {
             auto &fragments = it->second;
-            fragments.push_back(dataFrame);
+            fragments.push_back(dataPacket);
         }
         else {
-            buffer[sequenceNumber].push_back(dataFrame);
+            buffer[sequenceNumber].push_back(dataPacket);
         }
         // The total number of frames that can be sent depends on the total
         // number of MPDUs in all the outstanding MSDUs.

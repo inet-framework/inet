@@ -35,7 +35,7 @@ void OriginatorQoSMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Ieee80211DataOrMgmtFrame *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendingQueue)
+Packet *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(PendingQueue *pendingQueue)
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
     if (subframes) {
@@ -48,13 +48,12 @@ Ieee80211DataOrMgmtFrame *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(Pe
     return nullptr;
 }
 
-Ieee80211DataOrMgmtFrame* OriginatorQoSMacDataService::assignSequenceNumber(Ieee80211DataOrMgmtFrame* frame)
+void OriginatorQoSMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtFrame>& frame)
 {
     sequenceNumberAssigment->assignSequenceNumber(frame);
-    return frame;
 }
 
-OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::fragmentIfNeeded(Ieee80211DataOrMgmtFrame* frame)
+OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::fragmentIfNeeded(Packet *frame)
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
@@ -71,26 +70,29 @@ OriginatorQoSMacDataService::Fragments* OriginatorQoSMacDataService::extractFram
     else {
         // if (msduRateLimiting)
         //    txRateLimitingIfNeeded();
-        Ieee80211DataOrMgmtFrame *frame = nullptr;
+        Packet *packet = nullptr;
         if (aMsduAggregationPolicy)
-            frame = aMsduAggregateIfNeeded(pendingQueue);
-        if (!frame)
-            frame = pendingQueue->pop();
+            packet = aMsduAggregateIfNeeded(pendingQueue);
+        if (!packet)
+            packet = pendingQueue->pop();
         // PS Defer Queueing
-        if (sequenceNumberAssigment)
-            frame = assignSequenceNumber(frame);
+        if (sequenceNumberAssigment) {
+            auto header = packet->removeHeader<Ieee80211DataOrMgmtFrame>();
+            assignSequenceNumber(header);
+            packet->insertHeader(header);
+        }
         // if (msduIntegrityAndProtection)
         //    frame = protectMsduIfNeeded(frame);
         Fragments *fragments = nullptr;
         if (fragmentationPolicy)
-            fragments = fragmentIfNeeded(frame);
+            fragments = fragmentIfNeeded(packet);
         if (!fragments)
-            fragments = new Fragments({frame});
+            fragments = new Fragments({packet});
         // if (mpduEncryptionAndIntegrity)
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)
         //    fragments = mpduCrcFooBarIfNeeded(fragments);
-        // Ieee80211DataOrMgmtFrame *aMpdu = nullptr;
+        // const Ptr<Ieee80211DataOrMgmtFrame>& aMpdu = nullptr;
         // if (aMpduAggregation)
         //    aMpdu = aMpduAggregateIfNeeded(fragments);
         // if (aMpdu)

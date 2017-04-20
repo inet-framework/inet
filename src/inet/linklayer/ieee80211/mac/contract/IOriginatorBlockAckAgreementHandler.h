@@ -18,6 +18,7 @@
 #ifndef __INET_IORIGINATORBLOCKACKAGREEMENTHANDLER_H
 #define __INET_IORIGINATORBLOCKACKAGREEMENTHANDLER_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementHandlerCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/IProcedureCallback.h"
@@ -33,12 +34,12 @@ class INET_API IOriginatorBlockAckAgreementHandler
     public:
         virtual ~IOriginatorBlockAckAgreementHandler() { }
 
-        virtual void processReceivedBlockAck(Ieee80211BlockAck *blockAck, IBlockAckAgreementHandlerCallback *callback) = 0;
-        virtual void processTransmittedAddbaReq(Ieee80211AddbaRequest *addbaReq) = 0;
-        virtual void processTransmittedDataFrame(Ieee80211DataFrame *dataFrame, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;
-        virtual void processReceivedAddbaResp(Ieee80211AddbaResponse *addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
-        virtual void processReceivedDelba(Ieee80211Delba *delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
-        virtual void processTransmittedDelba(Ieee80211Delba *delba) = 0;
+        virtual void processReceivedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) = 0;
+        virtual void processTransmittedAddbaReq(const Ptr<Ieee80211AddbaRequest>& addbaReq) = 0;
+        virtual void processTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& dataFrame, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;
+        virtual void processReceivedAddbaResp(const Ptr<Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
+        virtual void processReceivedDelba(const Ptr<Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
+        virtual void processTransmittedDelba(const Ptr<Ieee80211Delba>& delba) = 0;
         virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
         virtual OriginatorBlockAckAgreement *getAgreement(MACAddress receiverAddr, Tid tid) = 0;

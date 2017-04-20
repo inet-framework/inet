@@ -26,22 +26,24 @@ namespace ieee80211 {
 // STA shall transmit a BlockAck frame after a SIFS period, without regard to the busy/idle state of the medium.
 // The rules that specify the contents of this BlockAck frame are defined in 9.21.
 //
-void RecipientBlockAckProcedure::processReceivedBlockAckReq(Ieee80211BlockAckReq* blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback)
+void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPacket, const Ptr<Ieee80211BlockAckReq>& blockAckReq, IRecipientQoSAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler* blockAckAgreementHandler, IProcedureCallback *callback)
 {
     numReceivedBlockAckReq++;
-    if (auto basicBlockAckReq = dynamic_cast<Ieee80211BasicBlockAckReq*>(blockAckReq)) {
+    if (auto basicBlockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(blockAckReq)) {
         auto agreement = blockAckAgreementHandler->getAgreement(basicBlockAckReq->getTidInfo(), basicBlockAckReq->getTransmitterAddress());
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
-            blockAck->setDuration(ackPolicy->computeBasicBlockAckDurationField(basicBlockAckReq));
-            callback->transmitControlResponseFrame(blockAck, basicBlockAckReq);
+            blockAck->setDuration(ackPolicy->computeBasicBlockAckDurationField(blockAckPacket, basicBlockAckReq));
+            blockAck->markImmutable();
+            auto blockAckPacket = new Packet("BasicBlockAck", blockAck);
+            callback->transmitControlResponseFrame(blockAckPacket, blockAck, blockAckPacket, basicBlockAckReq);
         }
     }
     else
         throw cRuntimeError("Unsupported BlockAckReq");
 }
 
-void RecipientBlockAckProcedure::processTransmittedBlockAck(Ieee80211BlockAck* blockAck)
+void RecipientBlockAckProcedure::processTransmittedBlockAck(const Ptr<Ieee80211BlockAck>& blockAck)
 {
     numSentBlockAck++;
 }
@@ -52,11 +54,11 @@ void RecipientBlockAckProcedure::processTransmittedBlockAck(Ieee80211BlockAck* b
 // until the MPDU with the highest sequence number that has been received, and the STA shall set bits in the
 // Block Ack bitmap corresponding to all other MPDUs to 0.
 //
-Ieee80211BlockAck* RecipientBlockAckProcedure::buildBlockAck(Ieee80211BlockAckReq* blockAckReq, RecipientBlockAckAgreement *agreement)
+Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr<Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
 {
-    if (auto basicBlockAckReq = dynamic_cast<Ieee80211BasicBlockAckReq*>(blockAckReq)) {
+    if (auto basicBlockAckReq = std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(blockAckReq)) {
         ASSERT(agreement != nullptr);
-        Ieee80211BasicBlockAck *blockAck = new Ieee80211BasicBlockAck("BasicBlockAck");
+        auto blockAck = std::make_shared<Ieee80211BasicBlockAck>();
         int startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
         for (SequenceNumber seqNum = startingSequenceNumber; seqNum < startingSequenceNumber + 64; seqNum++) {
             BitVector &bitmap = blockAck->getBlockAckBitmap(seqNum - startingSequenceNumber);

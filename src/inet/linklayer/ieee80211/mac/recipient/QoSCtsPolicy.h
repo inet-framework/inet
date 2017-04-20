@@ -34,11 +34,11 @@ class INET_API QoSCtsPolicy : public ModeSetListener, public ICtsPolicy
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
-        virtual simtime_t computeCtsDuration(Ieee80211RTSFrame *rtsFrame) const;
+        virtual simtime_t computeCtsDuration(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame) const;
 
     public:
-        virtual simtime_t computeCtsDurationField(Ieee80211RTSFrame *frame) const override;
-        virtual bool isCtsNeeded(Ieee80211RTSFrame* rtsFrame) const override;
+        virtual simtime_t computeCtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& frame) const override;
+        virtual bool isCtsNeeded(const Ptr<Ieee80211RTSFrame>& rtsFrame) const override;
 
 };
 

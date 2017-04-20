@@ -23,7 +23,10 @@ cplusplus {{
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 }}
 
+namespace inet;
+
 class noncobject MACAddress;
+class FieldsChunk extends cObject;
 
 namespace inet::ieee80211;
 
@@ -32,7 +35,7 @@ cplusplus {{
 #define PERRElemLen 13
 }}
 
-packet Ieee80211ManagementFrame;
+class Ieee80211ManagementFrame extends FieldsChunk;
 
 //
 // Capability Information field format. This field is not used
@@ -254,110 +257,110 @@ class Ieee80211ActionFrameBody extends Ieee80211FrameBody
 //
 // Authentication frame format (management frame + body)
 //
-packet Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
+class Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 {
     type = ST_AUTHENTICATION;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211AuthenticationFrameBody body;
 }
 
 //
 // De-authentication frame format (management frame + body)
 //
-packet Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
+class Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 {
     type = ST_DEAUTHENTICATION;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211DeauthenticationFrameBody body;
 }
 
 //
 // Dis-association frame format (management frame + body) (same as De-authentication)
 //
-packet Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
+class Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 {
     type = ST_DISASSOCIATION;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211DisassociationFrameBody body;
 }
 
 //
 // Probe request frame format (management frame + body)
 //
-packet Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
+class Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_PROBEREQUEST;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211ProbeRequestFrameBody body;
 }
 
 //
 // Association request frame format (management frame + body)
 //
-packet Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
+class Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_ASSOCIATIONREQUEST;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211AssociationRequestFrameBody body;
 }
 
 //
 // Re-association request frame format (management frame + body) (same as association)
 //
-packet Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
+class Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_REASSOCIATIONREQUEST;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211ReassociationRequestFrameBody body;
 }
 
 //
 // Association response frame format (management frame + body)
 //
-packet Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
+class Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_ASSOCIATIONRESPONSE;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211AssociationResponseFrameBody body;
 }
 
 //
 // Re-association response frame format (management frame + body)
 //
-packet Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
+class Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_REASSOCIATIONRESPONSE;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211ReassociationResponseFrameBody body;
 }
 
 //
 // Beacon frame format (management frame + body)
 //
-packet Ieee80211BeaconFrame extends Ieee80211ManagementFrame
+class Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 {
     type = ST_BEACON;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211BeaconFrameBody body;
 }
 
 //
 // Probe response frame format (management frame + body); same as Beacon
 //
-packet Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
+class Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_PROBERESPONSE;
-    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
     Ieee80211ProbeResponseFrameBody body;
 }
 
 // TODO
 // Action frames
 //
-//packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
+//class Ieee80211ActionFrame extends Ieee80211ManagementFrame
 //{
 //    type = ST_ACTION;
-//    byteLength = 28+getBody().getBodyLength();   //FIXME variable bodyLength
+//    chunkLength = byte(28+getBody().getBodyLength());   //FIXME variable bodyLength
 //    Ieee80211ActionFrameBody body;
 //}
 //

@@ -56,7 +56,7 @@ module Hcf
         @class(Hcf);
         @display("i=block/queue");
         @signal[NF_LINK_BREAK](type=Packet);
-        @signal[NF_PACKET_DROP](type=Ieee80211Frame);
+        @signal[NF_PACKET_DROP](type=Packet);
 
     submodules:
         edca: Edca {

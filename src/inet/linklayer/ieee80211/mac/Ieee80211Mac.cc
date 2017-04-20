@@ -119,15 +119,20 @@ void Ieee80211Mac::handleSelfMessage(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211Mac::handleUpperPacket(Packet *msg)
+void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 {
-    processUpperFrame(check_and_cast<Ieee80211DataOrMgmtFrame *>(msg));
+    auto packet = check_and_cast<Packet *>(msg);
+    encapsulate(packet);
+    auto frame = packet->peekHeader<Ieee80211DataOrMgmtFrame>();
+    processUpperFrame(packet, frame);
 }
 
-void Ieee80211Mac::handleLowerPacket(Packet *msg)
+void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
-    if (rx->lowerFrameReceived(frame)) {
-        processLowerFrame(frame);
+    auto packet = check_and_cast<Packet *>(msg);
+    auto frame = packet->peekHeader<Ieee80211Frame>();
+    if (rx->lowerFrameReceived(packet, frame)) {
+        processLowerFrame(packet, frame);
     }
     else { // corrupted frame received
         if (qosSta)
@@ -172,6 +177,20 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
     }
 }
 
+void Ieee80211Mac::encapsulate(Packet *packet)
+{
+    // KLUDGE: TODO: move encapsulate from MGMT to MAC
+    auto h = packet->removeHeader<Ieee80211Frame>();
+    if (auto twoAddrFrame = std::dynamic_pointer_cast<Ieee80211TwoAddressFrame>(h))
+        twoAddrFrame->setTransmitterAddress(address);
+    packet->insertHeader(h);
+}
+
+void Ieee80211Mac::decapsulate(Packet *packet)
+{
+    // TODO: move encapsulate from MGMT to MAC
+}
+
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent("receiveSignal()");
@@ -209,15 +228,16 @@ void Ieee80211Mac::sendUp(cMessage *msg)
 {
     Enter_Method("sendUp(\"%s\")", msg->getName());
     take(msg);
+    decapsulate(check_and_cast<Packet *>(msg));
     MACProtocolBase::sendUp(msg);
 }
 
-void Ieee80211Mac::sendFrame(Ieee80211Frame *frame)
+void Ieee80211Mac::sendFrame(Packet *frame)
 {
     Enter_Method("sendFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    sendDown(packet);
+    sendDown(frame);
 }
 
 void Ieee80211Mac::sendDownPendingRadioConfigMsg()
@@ -228,26 +248,26 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
     }
 }
 
-void Ieee80211Mac::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
+void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame)
 {
     Enter_Method("processUpperFrame(\"%s\")", frame->getName());
-    take(frame);
+    take(packet);
     EV_INFO << "Frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << "\n";
     ASSERT(!frame->getReceiverAddress().isUnspecified());
     if (qosSta)
-        hcf->processUpperFrame(frame);
+        hcf->processUpperFrame(packet, frame);
     else
-        dcf->processUpperFrame(frame);
+        dcf->processUpperFrame(packet, frame);
 }
 
-void Ieee80211Mac::processLowerFrame(Ieee80211Frame* frame)
+void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame)
 {
     Enter_Method("processLowerFrame(\"%s\")", frame->getName());
-    take(frame);
+    take(packet);
     if (qosSta)
-        hcf->processLowerFrame(frame);
+        hcf->processLowerFrame(packet, frame);
     else
-        dcf->processLowerFrame(frame);
+        dcf->processLowerFrame(packet, frame);
 }
 
 // FIXME

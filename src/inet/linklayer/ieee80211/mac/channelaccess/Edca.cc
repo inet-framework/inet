@@ -33,7 +33,7 @@ void Edca::initialize(int stage)
     }
 }
 
-AccessCategory Edca::classifyFrame(Ieee80211DataFrame *frame)
+AccessCategory Edca::classifyFrame(const Ptr<Ieee80211DataFrame>& frame)
 {
     return mapTidToAc(frame->getTid());
 }

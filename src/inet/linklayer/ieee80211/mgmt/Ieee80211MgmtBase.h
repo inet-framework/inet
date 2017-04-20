@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE80211MGMTBASE_H
 #define __INET_IEEE80211MGMTBASE_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/linklayer/common/MACAddress.h"
@@ -60,7 +61,7 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     virtual void handleTimer(cMessage *frame) = 0;
 
     /** Should be redefined to encapsulate and enqueue msgs from higher layers */
-    virtual void handleUpperMessage(Packet *msg) = 0;
+    virtual void handleUpperMessage(cPacket *msg) = 0;
 
     /** Should be redefined to handle commands from the "agent" (if present) */
     virtual void handleCommand(int msgkind, cObject *ctrl) = 0;
@@ -69,27 +70,27 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     virtual void sendDown(Packet *frame);
 
     /** Utility method to dispose of an unhandled frame */
-    virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);
+    virtual void dropManagementFrame(Packet *frame);
 
     /** Utility method: sends the packet to the upper layer */
     virtual void sendUp(cMessage *msg);
 
     /** Dispatch to frame processing methods according to frame type */
-    virtual void processFrame(Ieee80211DataOrMgmtFrame *frame);
+    virtual void processFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame);
 
     /** @name Processing of different frame types */
     //@{
-    virtual void handleDataFrame(Ieee80211DataFrame *frame) = 0;
-    virtual void handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame) = 0;
-    virtual void handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame) = 0;
-    virtual void handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame) = 0;
-    virtual void handleAssociationResponseFrame(Ieee80211AssociationResponseFrame *frame) = 0;
-    virtual void handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame) = 0;
-    virtual void handleReassociationResponseFrame(Ieee80211ReassociationResponseFrame *frame) = 0;
-    virtual void handleDisassociationFrame(Ieee80211DisassociationFrame *frame) = 0;
-    virtual void handleBeaconFrame(Ieee80211BeaconFrame *frame) = 0;
-    virtual void handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame) = 0;
-    virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame) = 0;
+    virtual void handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) = 0;
+    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame) = 0;
+    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame) = 0;
+    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame) = 0;
+    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame) = 0;
+    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame) = 0;
+    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame) = 0;
+    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame) = 0;
+    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame) = 0;
+    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame) = 0;
+    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame) = 0;
     //@}
 
     /** lifecycle support */

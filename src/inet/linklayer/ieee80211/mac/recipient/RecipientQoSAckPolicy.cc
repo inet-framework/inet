@@ -31,14 +31,14 @@ void RecipientQoSAckPolicy::initialize(int stage)
     }
 }
 
-simtime_t RecipientQoSAckPolicy::computeBasicBlockAckDuration(Ieee80211BlockAckReq* blockAckReq) const
+simtime_t RecipientQoSAckPolicy::computeBasicBlockAckDuration(Packet *packet, const Ptr<Ieee80211BlockAckReq>& blockAckReq) const
 {
-    return rateSelection->computeResponseBlockAckFrameMode(blockAckReq)->getDuration(LENGTH_BASIC_BLOCKACK);
+    return rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(LENGTH_BASIC_BLOCKACK);
 }
 
-simtime_t RecipientQoSAckPolicy::computeAckDuration(Ieee80211DataOrMgmtFrame* dataOrMgmtFrame) const
+simtime_t RecipientQoSAckPolicy::computeAckDuration(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& dataOrMgmtFrame) const
 {
-    return rateSelection->computeResponseAckFrameMode(dataOrMgmtFrame)->getDuration(LENGTH_ACK);
+    return rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtFrame)->getDuration(LENGTH_ACK);
 }
 
 //
@@ -46,10 +46,10 @@ simtime_t RecipientQoSAckPolicy::computeAckDuration(Ieee80211DataOrMgmtFrame* da
 // Annex G. On receipt of a management frame of subtype Action NoAck, a STA shall not send an ACK frame
 // in response.
 //
-bool RecipientQoSAckPolicy::isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const
+bool RecipientQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211DataOrMgmtFrame>& frame) const
 {
     // TODO: add mgmt frame NoAck check
-    if (auto dataFrame = dynamic_cast<Ieee80211DataFrame*>(frame))
+    if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame))
         if (dataFrame->getAckPolicy() != NORMAL_ACK)
             return false;
     return !frame->getReceiverAddress().isMulticast();
@@ -68,9 +68,9 @@ bool RecipientQoSAckPolicy::isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const
 // TXOP’s frame exchange. If delayed Block Ack policy is used and if the HC is the originator, then the HC may
 // respond with a +CF-Ack frame if the Basic BlockAck frame is the final frame of the TXOP’s frame exchange.
 //
-bool RecipientQoSAckPolicy::isBlockAckNeeded(Ieee80211BlockAckReq* blockAckReq, RecipientBlockAckAgreement *agreement) const
+bool RecipientQoSAckPolicy::isBlockAckNeeded(const Ptr<Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const
 {
-    if (dynamic_cast<Ieee80211BasicBlockAckReq*>(blockAckReq)) {
+    if (std::dynamic_pointer_cast<Ieee80211BasicBlockAckReq>(blockAckReq)) {
         return agreement != nullptr;
         // TODO: The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
@@ -85,9 +85,9 @@ bool RecipientQoSAckPolicy::isBlockAckNeeded(Ieee80211BlockAckReq* blockAckReq, 
 // that elicited the response minus the time, in microseconds between the end of the PPDU carrying the frame
 // that elicited the response and the end of the PPDU carrying the ACK frame.
 //
-simtime_t RecipientQoSAckPolicy::computeAckDurationField(Ieee80211DataOrMgmtFrame* frame) const
+simtime_t RecipientQoSAckPolicy::computeAckDurationField(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>& frame) const
 {
-    simtime_t duration = frame->getDuration() - modeSet->getSifsTime() - computeAckDuration(frame);
+    simtime_t duration = frame->getDuration() - modeSet->getSifsTime() - computeAckDuration(packet, frame);
     return duration < 0 ? 0 : duration;
 }
 
@@ -98,9 +98,9 @@ simtime_t RecipientQoSAckPolicy::computeAckDurationField(Ieee80211DataOrMgmtFram
 // the PPDU carrying the frame that elicited the response and the end of the PPDU carrying the BlockAck
 // frame.
 //
-simtime_t RecipientQoSAckPolicy::computeBasicBlockAckDurationField(Ieee80211BasicBlockAckReq* basicBlockAckReq) const
+simtime_t RecipientQoSAckPolicy::computeBasicBlockAckDurationField(Packet *packet, const Ptr<Ieee80211BasicBlockAckReq>& basicBlockAckReq) const
 {
-    return basicBlockAckReq->getDuration() - modeSet->getSifsTime() - computeBasicBlockAckDuration(basicBlockAckReq);
+    return basicBlockAckReq->getDuration() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
 }
 
 } /* namespace ieee80211 */
