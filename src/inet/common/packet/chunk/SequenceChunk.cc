@@ -34,6 +34,12 @@ SequenceChunk::SequenceChunk(const std::deque<Ptr<Chunk>>& chunks) :
 {
 }
 
+void SequenceChunk::forEachChild(cVisitor *v)
+{
+    for (const auto& chunk : chunks)
+        v->visit(chunk.get());
+}
+
 Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, bit length, int flags) const
 {
     bit chunkLength = getChunkLength();

@@ -89,6 +89,7 @@ class INET_API Packet : public cPacket
     Packet(const Packet& other);
 
     virtual Packet *dup() const override { return new Packet(*this); }
+    virtual void forEachChild(cVisitor *v) override;
 
     /** @name Length querying related functions */
     //@{

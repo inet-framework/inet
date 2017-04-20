@@ -48,6 +48,11 @@ Packet::Packet(const Packet& other) :
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
 }
 
+void Packet::forEachChild(cVisitor *v)
+{
+    v->visit(contents.get());
+}
+
 void Packet::setHeaderPopOffset(bit offset)
 {
     CHUNK_CHECK_USAGE(bit(0) <= offset && offset <= getTotalLength() - trailerIterator.getPosition(), "offset is out of range");

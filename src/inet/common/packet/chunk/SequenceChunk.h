@@ -69,6 +69,8 @@ class INET_API SequenceChunk : public Chunk
     virtual Ptr<Chunk> dupShared() const override { return std::make_shared<SequenceChunk>(*this); }
     //@}
 
+    virtual void forEachChild(cVisitor *v) override;
+
     /** @name Field accessor functions */
     const std::deque<Ptr<Chunk>>& getChunks() const { return chunks; }
     void setChunks(const std::deque<Ptr<Chunk>>& chunks);
