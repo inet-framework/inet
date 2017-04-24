@@ -16,10 +16,13 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/NetworkHeaderBase.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/applications/tunapp/TunLoopbackApp.h"
 #include "inet/transportlayer/contract/TransportHeaderBase_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
 
 namespace inet {
 
@@ -60,14 +63,14 @@ void TunLoopbackApp::handleMessage(cMessage *message)
         EV_INFO << "Message " << message->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
         packetsReceived++;
 
-        //FIXME KLUDGE next lines obsoleted
-        NetworkHeaderBase *networkDatagram = check_and_cast<NetworkHeaderBase *>(message);
-        TransportHeaderBase *transportPacket = check_and_cast<TransportHeaderBase *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
+        Packet *packet = check_and_cast<Packet *>(message);
+        const auto& networkHeader = removeNetworkHeader(packet);
+        const auto& transportHeader = removeTransportHeader(ProtocolGroup::ipprotocol.getProtocol(networkHeader->getTransportProtocol()), packet);
 
-        transportPacket->setDestinationPort(transportPacket->getSourcePort());
-        transportPacket->setSourcePort(transportPacket->getDestinationPort());
-        networkDatagram->setSourceAddress(networkDatagram->getDestinationAddress());
-        networkDatagram->setDestinationAddress(networkDatagram->getSourceAddress());
+        transportHeader->setDestinationPort(transportHeader->getSourcePort());
+        transportHeader->setSourcePort(transportHeader->getDestinationPort());
+        networkHeader->setSourceAddress(networkHeader->getDestinationAddress());
+        networkHeader->setDestinationAddress(networkHeader->getSourceAddress());
         delete message->removeControlInfo();
         message->clearTags();
         tunSocket.send(check_and_cast<Packet*>(message));
