@@ -10,17 +10,22 @@ The new INET 4.0 release contains changes related to three main topics:
 Additionally, all other changes that are backward incompatible but easy to do
 should be included in INET 4.0.
 
- - revise all network node module base class hierarchy (e.g. mpls nodes)
- - eliminate all control infos attached to packets
  - port *all* protocols to the new packet API (e.g. 802.11)
  - eliminate all KLUDGES introduces by the 3 main infrastructure changes
- - extract LLC from ethernet and 802.11
- - revise and merge signals, add details parameter (e.g. packetDropped)
+ - eliminate all control infos attached to packets
  - removing ethernet padding should be done in upper protocols if length is not present
+
+ - extract LLC from ethernet and 802.11
+ - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
+ - revise and merge signals, add details parameter (e.g. packetDropped)
  - revise physical layer error models wrt. how errors are represented
+
+ - revise all network node module base class hierarchy (e.g. mpls nodes)
  - implement all necessary message compiler changes to avoid clutter in msg files
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
+
+ - update all NED and C++ documentation
  - rename all upper case abbreviations to camel case (e.g. TCPConnection -> TcpConnection)
  - rename IdealRadio to UnitDiskRadio, IdealMac to MaMac?
  - nicely position submodules in compound modules, prepare for 2 info lines
