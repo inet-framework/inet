@@ -56,5 +56,5 @@ packet Packet
     bit headerPoppedLength;
     bit dataLength;
     bit trailerPoppedLength;
-    Chunk* contents @getter(getContents);
+    Chunk* contents @packetData @getter(getContents);
 }

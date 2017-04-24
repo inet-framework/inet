@@ -20,19 +20,21 @@ cplusplus {{
 #include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/chunk/SliceChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 }}
 
 namespace inet;
 
 class Chunk extends cObject
 {
+    @packetData;
     @existingClass(true);
     @descriptor(readonly);
-    bool mutable @getter("isMutable");
-    bool complete @getter("isComplete");
-    bool correct @getter("isCorrect");
-    bool properlyRepresented @getter("isProperlyRepresented");
-    bit chunkLength;
+    bool mutable @packetData(false) @getter("isMutable");
+    bool complete @packetData(false) @getter("isComplete");
+    bool correct @packetData(false) @getter("isCorrect");
+    bool properlyRepresented @packetData(false) @getter("isProperlyRepresented");
+    bit chunkLength @packetData(false);
 }
 
 class BitsChunk extends Chunk
@@ -70,4 +72,10 @@ class cPacketChunk extends Chunk
     @existingClass(true);
     @descriptor(readonly);
     cPacket* _packet @getter(getPacket) @getval(.getPacket());
+}
+
+class FieldsChunk extends Chunk
+{
+    @existingClass(true);
+    @descriptor(readonly);
 }
