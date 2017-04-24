@@ -22,7 +22,7 @@ namespace inet {
 
 class INET_API FieldsChunkSerializer : public ChunkSerializer
 {
-  public:
+  protected:
     /**
      * Serializes a chunk into a stream by writing all bytes representing the
      * chunk at the end of the stream.
@@ -36,6 +36,7 @@ class INET_API FieldsChunkSerializer : public ChunkSerializer
      */
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const = 0;
 
+  public:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk, bit offset, bit length) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
