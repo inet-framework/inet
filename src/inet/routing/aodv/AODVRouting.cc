@@ -23,6 +23,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/ipv4/ICMPHeader.h"
 #include "inet/networklayer/ipv4/IPv4Route.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"

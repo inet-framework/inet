@@ -18,7 +18,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/common/L3Tools.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Header.h"
@@ -32,10 +32,14 @@
 
 namespace inet {
 
-Ptr<NetworkHeaderBase> NetfilterBase::HookBase::peekNetworkHeader(Packet *packet)
+Ptr<NetworkHeaderBase> peekNetworkHeader(Packet *packet)
 {
     auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    return peekNetworkHeader(protocol, packet);
+}
 
+Ptr<NetworkHeaderBase> peekNetworkHeader(const Protocol *protocol, Packet *packet)
+{
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4)
         return packet->peekHeader<IPv4Header>();
@@ -48,9 +52,37 @@ Ptr<NetworkHeaderBase> NetfilterBase::HookBase::peekNetworkHeader(Packet *packet
     if (protocol == &Protocol::gnp)
         return packet->peekHeader<GenericDatagramHeader>();
 #endif
+
+    //TODO add other L3 protocols
+
+    throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
+}
+
+Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet)
+{
+    auto protocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
+    return removeNetworkHeader(protocol, packet);
+}
+
+Ptr<NetworkHeaderBase> removeNetworkHeader(const Protocol *protocol, Packet *packet)
+{
+#ifdef WITH_IPv4
+    if (protocol == &Protocol::ipv4)
+        return packet->removeHeader<IPv4Header>();
+#endif
+#ifdef WITH_IPv6
+    if (protocol == &Protocol::ipv6)
+        return packet->removeHeader<IPv6Header>();
+#endif
+#ifdef WITH_GENERIC
+    if (protocol == &Protocol::gnp)
+        return packet->removeHeader<GenericDatagramHeader>();
+#endif
+
+    //TODO add other L3 protocols
+
     throw cRuntimeError("Unacceptable protocol %s", protocol->getName());
 }
 
 } // namespace inet
-
 

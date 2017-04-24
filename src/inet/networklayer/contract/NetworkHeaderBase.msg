@@ -44,9 +44,7 @@ class INET_API NetworkHeaderBase : public FieldsChunk
 
 namespace inet;
 
-class noncobject L3Address;
 class FieldsChunk extends cObject;
-
 class noncobject L3Address;
 
 class NetworkHeaderBase extends FieldsChunk

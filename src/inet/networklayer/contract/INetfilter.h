@@ -127,10 +127,6 @@ class INET_API NetfilterBase : public INetfilter {
       protected:
         INetfilter *netfilter = nullptr;
 
-      protected:
-        // TODO: move?
-        Ptr<NetworkHeaderBase> peekNetworkHeader(Packet *packet);
-
       public:
         virtual ~HookBase() { if (netfilter) netfilter->unregisterHook(this); };
 

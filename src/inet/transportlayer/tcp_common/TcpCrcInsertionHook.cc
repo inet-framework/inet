@@ -17,6 +17,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/serializer/TCPIPchecksum.h"
 #include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
@@ -31,14 +32,14 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     auto networkProtocol = packet->getMandatoryTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = peekNetworkHeader(packet);
     if (networkHeader->getTransportProtocol() == IP_PROT_TCP) {
-        packet->removeFromBeginning(check_and_cast<Chunk *>(networkHeader.get())->getChunkLength()); // TODO: looks bad
+        packet->removeFromBeginning(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeHeader<TcpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
         tcpHeader->markImmutable();
         packet->pushHeader(tcpHeader);
-        packet->pushHeader(CHK(std::dynamic_pointer_cast<Chunk>(networkHeader)));
+        packet->pushHeader(networkHeader);
     }
     return ACCEPT;
 }
