@@ -25,7 +25,7 @@
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/networklayer/ipv4/IPv4Header.h"
 #include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/common/packet/PacketDump.h"
+#include "inet/common/packet/recorder/PacketDump.h"
 
 namespace inet {
 

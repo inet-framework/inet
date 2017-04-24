@@ -18,7 +18,10 @@
 
 #include "Ieee80211TesterMac.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+#if 0 //FIXME KLUDGE
 #include "inet/linklayer/ieee80211/mac/IRx.h"
+#endif
 
 namespace inet {
 
@@ -26,6 +29,7 @@ Define_Module(Ieee80211TesterMac);
 
 void Ieee80211TesterMac::handleLowerPacket(cPacket *msg)
 {
+#if 0 //FIXME KLUDGE
     actions = par("actions").stringValue();
     int len = strlen(actions);
     if (msgCounter >= len)
@@ -37,6 +41,7 @@ void Ieee80211TesterMac::handleLowerPacket(cPacket *msg)
     else
         throw cRuntimeError("Unknown action = %c", actions[msgCounter]);
     msgCounter++;
+#endif
 }
 
 } // namespace inet

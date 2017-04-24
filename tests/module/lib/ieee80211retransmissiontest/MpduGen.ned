@@ -15,12 +15,12 @@
 
 package ieee80211retransmissiontest;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 //
 // A very simple MPDU generator module
 //
-simple MpduGen like IUDPApp
+simple MpduGen like IApp
 {
     // List of packets genereted by this module.
     // S means short data packet (SendDataWithACKFrame)
@@ -44,6 +44,6 @@ simple MpduGen like IUDPApp
     @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UDPControlInfo/up);
+        output socketOut @labels(UDPControlInfo/down);
 }

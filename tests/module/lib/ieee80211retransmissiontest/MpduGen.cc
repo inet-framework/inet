@@ -19,6 +19,7 @@
 
 #include "MpduGen.h"
 
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
 
@@ -29,7 +30,8 @@ Define_Module(MpduGen);
 simsignal_t MpduGen::sentPkSignal = registerSignal("sentPk");
 simsignal_t MpduGen::rcvdPkSignal = registerSignal("rcvdPk");
 
-void MpduGen::initialize(int stage) {
+void MpduGen::initialize(int stage)
+{
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         localPort = par("localPort");
@@ -41,14 +43,16 @@ void MpduGen::initialize(int stage) {
     }
 }
 
-void MpduGen::processPacket(cPacket *pk) {
+void MpduGen::processPacket(cPacket *pk)
+{
     emit(rcvdPkSignal, pk);
     EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
 }
 
-void MpduGen::sendPackets() {
+void MpduGen::sendPackets()
+{
     socket.setOutputGate(gate("udpOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
@@ -60,23 +64,25 @@ void MpduGen::sendPackets() {
     for (int i = 0; i < len; i++) {
         std::ostringstream str;
         str << packetName << "-" << i;
-        cPacket *payload = new cPacket(str.str().c_str());
+        Packet *packet = new Packet(str.str().c_str());
+        auto payload = std::make_shared<ByteCountChunk>();
         if (packets[i] == 'L') {
-            payload->setByteLength(par("longPacketSize").longValue());
+            payload->setLength(byte(par("longPacketSize").longValue()));
         }
         else if (packets[i] == 'S') {
-            payload->setByteLength(par("shortPacketSize").longValue());
+            payload->setLength(byte(par("shortPacketSize").longValue()));
         }
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);
-        emit(sentPkSignal, payload);
-        socket.sendTo(payload, destAddr, destPort);
+        emit(sentPkSignal, packet);
+        socket.sendTo(packet, destAddr, destPort);
         numSent++;
     }
     socket.close();
 }
 
-void MpduGen::handleMessageWhenUp(cMessage *msg) {
+void MpduGen::handleMessageWhenUp(cMessage *msg)
+{
     if (msg->isSelfMessage()) {
         ASSERT(msg == selfMsg);
         sendPackets();
