@@ -19,8 +19,8 @@
 #define __INET_TCPSEGMENT_H
 
 #include <list>
+
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/transportlayer/tcp_common/TCPSegment_m.h"
 
 namespace inet {
@@ -57,7 +57,7 @@ class INET_API Sack : public Sack_Base
  * Represents a TCP segment. More info in the TCPSegment.msg file
  * (and the documentation generated from it).
  */
-class INET_API TcpHeader : public TcpHeader_Base, public ITransportPacket
+class INET_API TcpHeader : public TcpHeader_Base
 {
   protected:
     typedef std::vector<TCPOption *> OptionList;

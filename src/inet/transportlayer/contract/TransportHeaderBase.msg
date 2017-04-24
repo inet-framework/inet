@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Andras Varga
+// Copyright (C) 2017 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,20 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ITRANSPORTPACKET_H
-#define __INET_ITRANSPORTPACKET_H
-
+cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 
 namespace inet {
 
-/**
- * This interface provides an abstraction for different transport layer packets.
- */
-class INET_API ITransportPacket
+class INET_API TransportHeaderBase : public FieldsChunk
 {
+  protected:
+    virtual TransportHeaderBase *dup() const override { throw omnetpp::cRuntimeError("You forgot to manually add a dup() function to class %s", getClassName()); }
   public:
-    virtual ~ITransportPacket() {}
     virtual unsigned int getSourcePort() const = 0;
     virtual void setSourcePort(unsigned int port) = 0;
     virtual unsigned int getDestinationPort() const = 0;
@@ -37,5 +34,19 @@ class INET_API ITransportPacket
 
 } // namespace inet
 
-#endif // ifndef __INET_ITRANSPORTPACKET_H
+}}
+
+namespace inet;
+
+class FieldsChunk extends cObject;
+
+//
+// This base class provides an abstraction for different transport layer packets.
+//
+class TransportHeaderBase extends FieldsChunk
+{
+    @existingClass(true);
+    unsigned int sourcePort;
+    unsigned int destinationPort;
+};
 

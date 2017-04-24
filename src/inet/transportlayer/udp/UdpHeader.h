@@ -18,12 +18,11 @@
 #ifndef __INET_UDPPACKET_H
 #define __INET_UDPPACKET_H
 
-#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 
-class INET_API UdpHeader : public UdpHeader_Base, public ITransportPacket
+class INET_API UdpHeader : public UdpHeader_Base
 {
   private:
     void copy(const UdpHeader& other) {}
@@ -41,10 +40,10 @@ class INET_API UdpHeader : public UdpHeader_Base, public ITransportPacket
      */
     //int getTotalLengthField() const override { if (totalLengthField == -1) throw cRuntimeError("invalid totalLength field value=-1 in UDP header"); return totalLengthField; }
 
-    virtual unsigned int getSourcePort() const override { return UdpHeader_Base::getSrcPort(); }
-    virtual void setSourcePort(unsigned int port) override { UdpHeader_Base::setSrcPort(port); }
-    virtual unsigned int getDestinationPort() const override { return UdpHeader_Base::getDestPort(); }
-    virtual void setDestinationPort(unsigned int port) override { UdpHeader_Base::setDestPort(port); }
+    virtual unsigned int getSourcePort() const override { return getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
 };
 
 } // namespace inet

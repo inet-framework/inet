@@ -22,6 +22,7 @@ cplusplus {{
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 namespace inet {
 namespace tcp {
@@ -34,7 +35,7 @@ typedef TCPOption *TCPOptionPtr;
 }}
 
 namespace inet;
-class FieldsChunk extends cObject;
+class TransportHeaderBase extends cObject;
 enum CrcMode;
 
 namespace inet::tcp;
@@ -183,7 +184,7 @@ class TCPOptionUnknown extends TCPOption
 // cMessage::getKind() may be set to an arbitrary value: TCP entities will
 // ignore it and use only the header fields (synBit, ackBit, rstBit).
 //
-class TcpHeader extends FieldsChunk
+class TcpHeader extends TransportHeaderBase
 {
     @customize(true);
     chunkLength = byte(TCP_HEADER_OCTETS);
@@ -235,3 +236,4 @@ class TcpHeader extends FieldsChunk
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
     abstract TCPOptionPtr headerOption[];
 }
+

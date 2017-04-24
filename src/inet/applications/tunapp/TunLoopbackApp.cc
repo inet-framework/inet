@@ -18,8 +18,8 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/NetworkHeaderBase.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/transportlayer/contract/ITransportPacket.h"
 #include "inet/applications/tunapp/TunLoopbackApp.h"
+#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
 namespace inet {
 
@@ -59,8 +59,11 @@ void TunLoopbackApp::handleMessage(cMessage *message)
     if (message->arrivedOn("socketIn")) {
         EV_INFO << "Message " << message->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
         packetsReceived++;
+
+        //FIXME KLUDGE next lines obsoleted
         NetworkHeaderBase *networkDatagram = check_and_cast<NetworkHeaderBase *>(message);
-        ITransportPacket *transportPacket = check_and_cast<ITransportPacket *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
+        TransportHeaderBase *transportPacket = check_and_cast<TransportHeaderBase *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
+
         transportPacket->setDestinationPort(transportPacket->getSourcePort());
         transportPacket->setSourcePort(transportPacket->getDestinationPort());
         networkDatagram->setSourceAddress(networkDatagram->getDestinationAddress());

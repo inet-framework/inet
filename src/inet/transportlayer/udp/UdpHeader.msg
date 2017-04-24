@@ -19,8 +19,8 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 }}
 
 namespace inet;
@@ -29,12 +29,12 @@ enum UdpConstants{
     UDP_HEADER_BYTES = 8;
 };
 
-class FieldsChunk extends cObject;
+class TransportHeaderBase extends cObject;
 enum CrcMode;
 //
 // Represents an UDP header, to be used with the ~UDP module.
 //
-class UdpHeader extends FieldsChunk
+class UdpHeader extends TransportHeaderBase
 {
     @customize(true);
     unsigned short srcPort;
