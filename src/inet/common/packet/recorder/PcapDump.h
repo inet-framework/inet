@@ -69,8 +69,7 @@ class INET_API PcapDump
      * Records the given packet into the output file if it is open,
      * and throws an exception otherwise.
      */
-    void writeFrame(simtime_t time, const Packet *ipPacket);
-    void writeIPv6Frame(simtime_t stime, const IPv6Header *ipPacket);
+    void writeFrame(simtime_t time, const Packet *packet);
 
     /**
      * Closes the output file if it is open.
