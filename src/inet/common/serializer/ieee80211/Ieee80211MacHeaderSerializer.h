@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211MACHEADERSERIALIZER_H
 #define __INET_IEEE80211MACHEADERSERIALIZER_H
 
-#include "inet/common/packet/serializer/ChunkSerializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
@@ -30,12 +30,23 @@ namespace serializer {
 class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-//    void parseDataOrMgmtFrame(const Buffer &b, inet::ieee80211::Ieee80211DataOrMgmtFrame *Frame, short type);
-//    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-//    virtual cPacket* deserialize(const Buffer &b, Context& context) override;
+    // virtual void parseDataOrMgmtFrame(const Buffer &b, inet::ieee80211::Ieee80211DataOrMgmtFrame *Frame, short type);
+
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     Ieee80211MacHeaderSerializer() : FieldsChunkSerializer() {}
+};
+
+class INET_API Ieee80211FcsSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    Ieee80211FcsSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer
