@@ -131,7 +131,7 @@ class INET_API MemoryOutputStream {
         writeByte(value);
     }
 
-    void writeUint16(uint16_t value) {
+    void writeUint16Be(uint16_t value) {
         writeByte((uint8_t)(value >> 8));
         writeByte((uint8_t)(value >> 0));
     }
@@ -141,7 +141,7 @@ class INET_API MemoryOutputStream {
         writeByte((uint8_t)(value >> 8));
     }
 
-    void writeUint32(uint32_t value) {
+    void writeUint32Be(uint32_t value) {
         writeByte((uint8_t)(value >> 24));
         writeByte((uint8_t)(value >> 16));
         writeByte((uint8_t)(value >> 8));
@@ -155,7 +155,7 @@ class INET_API MemoryOutputStream {
         writeByte((uint8_t)(value >> 24));
     }
 
-    void writeUint64(uint64_t value) {
+    void writeUint64Be(uint64_t value) {
         writeByte((uint8_t)(value >> 56));
         writeByte((uint8_t)(value >> 48));
         writeByte((uint8_t)(value >> 40));
@@ -186,12 +186,12 @@ class INET_API MemoryOutputStream {
     }
 
     void writeIPv4Address(IPv4Address address) {
-        writeUint32(address.getInt());
+        writeUint32Be(address.getInt());
     }
 
     void writeIPv6Address(IPv6Address address) {
         for (int i = 0; i < 4; i++)
-            writeUint32(address.words()[i]);
+            writeUint32Be(address.words()[i]);
     }
     //@}
 };

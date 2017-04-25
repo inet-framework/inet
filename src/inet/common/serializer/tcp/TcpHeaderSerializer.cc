@@ -115,7 +115,7 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
         case TCPOPTION_MAXIMUM_SEGMENT_SIZE: {
             auto *opt = check_and_cast<const TCPOptionMaxSegmentSize *>(option);
             ASSERT(length == 4);
-            stream.writeUint16(opt->getMaxSegmentSize());
+            stream.writeUint16Be(opt->getMaxSegmentSize());
             break;
         }
 
@@ -137,8 +137,8 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
             ASSERT(length == 2 + opt->getSackItemArraySize() * 8);
             for (unsigned int i = 0; i < opt->getSackItemArraySize(); i++) {
                 SackItem si = opt->getSackItem(i);
-                stream.writeUint32(si.getStart());
-                stream.writeUint32(si.getEnd());
+                stream.writeUint32Be(si.getStart());
+                stream.writeUint32Be(si.getEnd());
             }
             break;
         }
@@ -146,8 +146,8 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TCPO
         case TCPOPTION_TIMESTAMP: {
             auto *opt = check_and_cast<const TCPOptionTimestamp *>(option);
             ASSERT(length == 10);
-            stream.writeUint32(opt->getSenderTimestamp());
-            stream.writeUint32(opt->getEchoedTimestamp());
+            stream.writeUint32Be(opt->getSenderTimestamp());
+            stream.writeUint32Be(opt->getEchoedTimestamp());
             break;
         }
 
@@ -216,7 +216,7 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
             if (length == 4) {
                 auto *option = new TCPOptionMaxSegmentSize();
                 option->setLength(length);
-                option->setMaxSegmentSize(stream.readUint16());
+                option->setMaxSegmentSize(stream.readUint16Be());
                 return option;
             }
             break;
@@ -249,8 +249,8 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
                 unsigned int count = 0;
                 for (unsigned int i = 2; i < length; i += 8) {
                     SackItem si;
-                    si.setStart(stream.readUint32());
-                    si.setEnd(stream.readUint32());
+                    si.setStart(stream.readUint32Be());
+                    si.setEnd(stream.readUint32Be());
                     option->setSackItem(count++, si);
                 }
                 return option;
@@ -262,8 +262,8 @@ TCPOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
             if (length == 10) {
                 auto *option = new TCPOptionTimestamp();
                 option->setLength(length);
-                option->setSenderTimestamp(stream.readUint32());
-                option->setEchoedTimestamp(stream.readUint32());
+                option->setSenderTimestamp(stream.readUint32Be());
+                option->setEchoedTimestamp(stream.readUint32Be());
                 return option;
             }
             break;

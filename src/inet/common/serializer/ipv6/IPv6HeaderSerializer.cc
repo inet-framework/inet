@@ -100,8 +100,8 @@ void IPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
             case IP_PROT_IPv6EXT_FRAGMENT: {
                 const IPv6FragmentHeader *hdr = check_and_cast<const IPv6FragmentHeader *>(extHdr);
                 ASSERT((hdr->getFragmentOffset() & 7) == 0);
-                stream.writeUint16(hdr->getFragmentOffset() | (hdr->getMoreFragments() ? 1 : 0));
-                stream.writeUint32(hdr->getIdentification());
+                stream.writeUint16Be(hdr->getFragmentOffset() | (hdr->getMoreFragments() ? 1 : 0));
+                stream.writeUint32Be(hdr->getIdentification());
                 break;
             }
             case IP_PROT_IPv6EXT_AUTH: {

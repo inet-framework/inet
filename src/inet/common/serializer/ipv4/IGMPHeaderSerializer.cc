@@ -43,7 +43,7 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
             }
             else if (auto v2pkt = std::dynamic_pointer_cast<const IGMPv2Query>(igmpMessage))
                 stream.writeByte(v2pkt->getMaxRespTime().inUnit((SimTimeUnit)-1));
-            stream.writeUint16(igmpMessage->getCrc());
+            stream.writeUint16Be(igmpMessage->getCrc());
             stream.writeIPv4Address(check_and_cast<const IGMPQuery*>(igmpMessage.get())->getGroupAddress());
             if (auto v3pkt = std::dynamic_pointer_cast<const IGMPv3Query>(igmpMessage))
             {
@@ -51,7 +51,7 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
                 stream.writeByte((v3pkt->getSuppressRouterProc() ? 0x8 : 0) | v3pkt->getRobustnessVariable());
                 stream.writeByte(v3pkt->getQueryIntervalCode());
                 unsigned int vs = v3pkt->getSourceList().size();
-                stream.writeUint16(vs);
+                stream.writeUint16Be(vs);
                 for (unsigned int i = 0; i < vs; i++)
                     stream.writeIPv4Address(v3pkt->getSourceList()[i]);
             }
@@ -61,21 +61,21 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
         case IGMPV1_MEMBERSHIP_REPORT:
             stream.writeByte(IGMPV1_MEMBERSHIP_REPORT);    // type
             stream.writeByte(0);    // unused
-            stream.writeUint16(igmpMessage->getCrc());
+            stream.writeUint16Be(igmpMessage->getCrc());
             stream.writeIPv4Address(check_and_cast<const IGMPv1Report*>(igmpMessage.get())->getGroupAddress());
             break;
 
         case IGMPV2_MEMBERSHIP_REPORT:
             stream.writeByte(IGMPV2_MEMBERSHIP_REPORT);    // type
             stream.writeByte(0);    // code
-            stream.writeUint16(igmpMessage->getCrc());
+            stream.writeUint16Be(igmpMessage->getCrc());
             stream.writeIPv4Address(check_and_cast<const IGMPv2Report*>(igmpMessage.get())->getGroupAddress());
             break;
 
         case IGMPV2_LEAVE_GROUP:
             stream.writeByte(IGMPV2_LEAVE_GROUP);    // type
             stream.writeByte(0);    // code
-            stream.writeUint16(igmpMessage->getCrc());
+            stream.writeUint16Be(igmpMessage->getCrc());
             stream.writeIPv4Address(check_and_cast<const IGMPv2Leave*>(igmpMessage.get())->getGroupAddress());
             break;
 
@@ -83,16 +83,16 @@ void IGMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
             const IGMPv3Report* v3pkt = check_and_cast<const IGMPv3Report*>(igmpMessage.get());
             stream.writeByte(IGMPV3_MEMBERSHIP_REPORT);    // type
             stream.writeByte(0);    // code
-            stream.writeUint16(igmpMessage->getCrc());
-            stream.writeUint16(0);    // reserved
+            stream.writeUint16Be(igmpMessage->getCrc());
+            stream.writeUint16Be(0);    // reserved
             unsigned int s = v3pkt->getGroupRecordArraySize();
-            stream.writeUint16(s);    // number of groups
+            stream.writeUint16Be(s);    // number of groups
             for (unsigned int i = 0; i < s; i++) {
                 // serialize one group:
                 const GroupRecord& gr = v3pkt->getGroupRecord(i);
                 stream.writeByte(gr.recordType);
                 stream.writeByte(0);  // aux data len: RFC 3376 Section 4.2.6
-                stream.writeUint16(gr.sourceList.size());
+                stream.writeUint16Be(gr.sourceList.size());
                 stream.writeIPv4Address(gr.groupAddress);
                 for (auto src: gr.sourceList) {
                     stream.writeIPv4Address(src);
@@ -113,7 +113,7 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
     byte startPos = stream.getPosition();
     unsigned char type = stream.readByte();
     unsigned char code = stream.readByte();
-    uint16_t chksum = stream.readUint16();
+    uint16_t chksum = stream.readUint16Be();
 
     switch (type) {
         case IGMP_MEMBERSHIP_QUERY:
@@ -138,7 +138,7 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
                 pkt->setSuppressRouterProc((x & 0x8) != 0);
                 pkt->setRobustnessVariable(x & 7);
                 pkt->setQueryIntervalCode(stream.readByte());
-                unsigned int vs = stream.readUint16();
+                unsigned int vs = stream.readUint16Be();
                 for (unsigned int i = 0; i < vs && !stream.isReadBeyondEnd(); i++)
                     pkt->getSourceList()[i] = stream.readIPv4Address();
             }
@@ -172,15 +172,15 @@ Ptr<Chunk> IGMPHeaderSerializer::deserialize(MemoryInputStream& stream) const
             {
                 auto pkt = std::make_shared<IGMPv3Report>();
                 packet = pkt;
-                stream.readUint16(); //reserved
-                unsigned int s = stream.readUint16();
+                stream.readUint16Be(); //reserved
+                unsigned int s = stream.readUint16Be();
                 pkt->setGroupRecordArraySize(s);
                 unsigned int i;
                 for (i = 0; i < s && !stream.isReadBeyondEnd(); i++) {
                     GroupRecord gr;
                     gr.recordType = stream.readByte();
                     byte auxDataLen = byte(4 * stream.readByte());
-                    unsigned int gac = stream.readUint16();
+                    unsigned int gac = stream.readUint16Be();
                     gr.groupAddress = stream.readIPv4Address();
                     for (unsigned int j = 0; j < gac && !stream.isReadBeyondEnd(); j++) {
                         gr.sourceList.push_back(stream.readIPv4Address());

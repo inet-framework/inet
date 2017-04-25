@@ -189,7 +189,7 @@ class INET_API MemoryInputStream {
         return readByte();
     }
 
-    uint16_t readUint16() {
+    uint16_t readUint16Be() {
         uint16_t value = 0;
         value |= ((uint16_t)(readByte()) << 8);
         value |= ((uint16_t)(readByte()) << 0);
@@ -203,7 +203,7 @@ class INET_API MemoryInputStream {
         return value;
     }
 
-    uint32_t readUint32() {
+    uint32_t readUint32Be() {
         uint32_t value = 0;
         value |= ((uint32_t)(readByte()) << 24);
         value |= ((uint32_t)(readByte()) << 16);
@@ -221,7 +221,7 @@ class INET_API MemoryInputStream {
         return value;
     }
 
-    uint64_t readUint64() {
+    uint64_t readUint64Be() {
         uint64_t value = 0;
         value |= ((uint64_t)(readByte()) << 56);
         value |= ((uint64_t)(readByte()) << 48);
@@ -258,13 +258,13 @@ class INET_API MemoryInputStream {
     }
 
     IPv4Address readIPv4Address() {
-        return IPv4Address(readUint32());
+        return IPv4Address(readUint32Be());
     }
 
     IPv6Address readIPv6Address() {
         uint32_t d[4];
         for (auto & element : d)
-            element = readUint32();
+            element = readUint32Be();
         return IPv6Address(d[0], d[1], d[2], d[3]);
     }
     //@}

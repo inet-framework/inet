@@ -46,7 +46,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chu
             const ICMPv6EchoRequestMsg *frame = check_and_cast<const ICMPv6EchoRequestMsg *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
-            stream.writeUint16(frame->getChksum());
+            stream.writeUint16Be(frame->getChksum());
             break;
         }
 
@@ -54,7 +54,7 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chu
             const ICMPv6EchoReplyMsg *frame = check_and_cast<const ICMPv6EchoReplyMsg *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
-            stream.writeUint16(frame->getChksum());
+            stream.writeUint16Be(frame->getChksum());
             break;
         }
 
@@ -62,8 +62,8 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chu
             auto frame = check_and_cast<const ICMPv6DestUnreachableMsg *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
-            stream.writeUint16(frame->getChksum());
-            stream.writeUint32(0);   // unused
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0);   // unused
             break;
         }
 
@@ -71,8 +71,8 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chu
             auto frame = check_and_cast<const ICMPv6TimeExceededMsg *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
-            stream.writeUint16(frame->getChksum());
-            stream.writeUint32(0);   // unused
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0);   // unused
             break;
         }
 
@@ -80,8 +80,8 @@ void ICMPv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chu
             auto frame = check_and_cast<const IPv6NeighbourSolicitation *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
-            stream.writeUint16(frame->getChksum());
-            stream.writeUint32(0);   // unused
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(0);   // unused
             stream.writeIPv6Address(frame->getTargetAddress());
             if (frame->getChunkLength() > byte(8 + 16)) {   // has optional sourceLinkLayerAddress    (TLB options)
                 stream.writeByte(IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION);
@@ -102,7 +102,7 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
     Ptr<ICMPv6Header> _pkt = nullptr;
     uint8_t type = stream.readByte();     // type
     uint8_t subcode = stream.readByte();  // subcode
-    uint16_t chksum = stream.readUint16();
+    uint16_t chksum = stream.readUint16Be();
 
     switch (type) {
         case ICMPv6_ECHO_REQUEST: {
@@ -123,7 +123,7 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<ICMPv6DestUnreachableMsg>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            stream.readUint32();        // unused
+            stream.readUint32Be();        // unused
             break;
         }
 
@@ -131,7 +131,7 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             auto pkt = std::make_shared<ICMPv6TimeExceededMsg>(); _pkt = pkt;
             pkt->setType(type);
             pkt->setCode(subcode);
-            stream.readUint32();        // unused
+            stream.readUint32Be();        // unused
             break;
         }
 
@@ -140,7 +140,7 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             pkt->setType(type);
             pkt->setCode(subcode);
 
-            stream.readUint32(); // reserved
+            stream.readUint32Be(); // reserved
             pkt->setTargetAddress(stream.readIPv6Address());
             while (stream.getRemainingLength() != byte(0)) {   // has options
                 unsigned char type = stream.readByte();
@@ -161,7 +161,7 @@ Ptr<Chunk> ICMPv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
             return nullptr;
         }
     }
-    _pkt->setChksum(stream.readUint16());
+    _pkt->setChksum(stream.readUint16Be());
     return _pkt;
 }
 

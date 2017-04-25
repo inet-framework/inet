@@ -106,7 +106,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
         case IPOPTION_STREAM_ID: {
             auto *opt = check_and_cast<const IPv4OptionStreamId *>(option);
             ASSERT(length == 4);
-            stream.writeUint16(opt->getStreamId());
+            stream.writeUint16Be(opt->getStreamId());
             break;
         }
 
@@ -121,7 +121,7 @@ void IPv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TLV
             for (unsigned int count = 0; count < opt->getRecordTimestampArraySize(); count++) {
                 if (bytes == 8)
                     stream.writeIPv4Address(opt->getRecordAddress(count));
-                stream.writeUint32(opt->getRecordTimestamp(count).inUnit(SIMTIME_MS));
+                stream.writeUint32Be(opt->getRecordTimestamp(count).inUnit(SIMTIME_MS));
             }
             break;
         }
@@ -219,7 +219,7 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 auto *option = new IPv4OptionStreamId();
                 option->setType(type);
                 option->setLength(length);
-                option->setStreamId(stream.readUint16());
+                option->setStreamId(stream.readUint16Be());
                 return option;
             }
             break;
@@ -250,7 +250,7 @@ TLVOptionBase *IPv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
                     if (bytes == 8)
                         option->setRecordAddress(count, stream.readIPv4Address());
-                    option->setRecordTimestamp(count, SimTime(stream.readUint32(), SIMTIME_MS));
+                    option->setRecordTimestamp(count, SimTime(stream.readUint32Be(), SIMTIME_MS));
                 }
                 return option;
             }

@@ -58,14 +58,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeByte(0xD4);
         stream.writeByte(0);
-        stream.writeUint16(ackFrame->getDuration().inUnit(SIMTIME_MS));
+        stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_MS));
         stream.writeMACAddress(ackFrame->getReceiverAddress());
     }
     else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(chunk))
     {
         stream.writeByte(0xB4);
         stream.writeByte(0);
-        stream.writeUint16(rtsFrame->getDuration().inUnit(SIMTIME_MS));
+        stream.writeUint16Be(rtsFrame->getDuration().inUnit(SIMTIME_MS));
         stream.writeMACAddress(rtsFrame->getReceiverAddress());
         stream.writeMACAddress(rtsFrame->getTransmitterAddress());
     }
@@ -73,7 +73,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeByte(0xC4);
         stream.writeByte(0);
-        stream.writeUint16(ctsFrame->getDuration().inUnit(SIMTIME_MS));
+        stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_MS));
         stream.writeMACAddress(ctsFrame->getReceiverAddress());
     }
     else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(chunk))
@@ -87,7 +87,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 | (dataOrMgmtFrame->getFromDS() ? 2 : 0)
                 | (dataOrMgmtFrame->getToDS() ? 1 : 0);
         stream.writeByte(fc1);
-        stream.writeUint16(dataOrMgmtFrame->getDuration().inUnit(SIMTIME_US));
+        stream.writeUint16Be(dataOrMgmtFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(dataOrMgmtFrame->getReceiverAddress());
         stream.writeMACAddress(dataOrMgmtFrame->getTransmitterAddress());
         stream.writeMACAddress(dataOrMgmtFrame->getAddress3());
@@ -109,29 +109,29 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeByte(0xAA);    // snap_hdr.ssap
             stream.writeByte(0x03);    // snap_hdr.ctrl
             stream.writeByteRepeatedly(0, 3);   // snap_hdr.oui
-            stream.writeUint16(dataFrame->getEtherType());  // snap_hdr.ethertype
+            stream.writeUint16Be(dataFrame->getEtherType());  // snap_hdr.ethertype
         }
         else if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
         {
             //type = ST_AUTHENTICATION;
             // 1    Authentication algorithm number
-            stream.writeUint16(0);
+            stream.writeUint16Be(0);
             // 2    Authentication transaction sequence number
-            stream.writeUint16(authenticationFrame->getBody().getSequenceNumber());
+            stream.writeUint16Be(authenticationFrame->getBody().getSequenceNumber());
             // 3    Status code                                 The status code information is reserved in certain Authentication frames as defined in Table 7-17.
-            stream.writeUint16(authenticationFrame->getBody().getStatusCode());
+            stream.writeUint16Be(authenticationFrame->getBody().getStatusCode());
             // 4    Challenge text                              The challenge text information is present only in certain Authentication frames as defined in Table 7-17.
             // Last Vendor Specific                             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
         else if (auto deauthenticationFrame = std::dynamic_pointer_cast<Ieee80211DeauthenticationFrame>(chunk))
         {
             //type = ST_DEAUTHENTICATION;
-            stream.writeUint16(deauthenticationFrame->getBody().getReasonCode());
+            stream.writeUint16Be(deauthenticationFrame->getBody().getReasonCode());
         }
         else if (auto disassociationFrame =std::dynamic_pointer_cast<Ieee80211DisassociationFrame>(chunk))
         {
             //type = ST_DISASSOCIATION;
-            stream.writeUint16(disassociationFrame->getBody().getReasonCode());
+            stream.writeUint16Be(disassociationFrame->getBody().getReasonCode());
         }
         else if (auto probeRequestFrame = std::dynamic_pointer_cast<Ieee80211ProbeRequestFrame>(chunk))
         {
@@ -160,9 +160,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         {
             //type = ST_ASSOCIATIONREQUEST;
             // 1    Capability
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 2    Listen interval
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 3    SSID
             const char *SSID = associationRequestFrame->getBody().getSSID();
             unsigned int length = strlen(SSID);
@@ -189,9 +189,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         {
             //type = ST_REASSOCIATIONREQUEST;
             // 1    Capability
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 2    Listen interval
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 3    Current AP address
             stream.writeMACAddress(reassociationRequestFrame->getBody().getCurrentAP());
             // 4    SSID
@@ -222,11 +222,11 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         {
             //type = ST_ASSOCIATIONRESPONSE;
             // 1    Capability
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 2    Status code
-            stream.writeUint16(associationResponseFrame->getBody().getStatusCode());
+            stream.writeUint16Be(associationResponseFrame->getBody().getStatusCode());
             // 3    AID
-            stream.writeUint16(associationResponseFrame->getBody().getAid());
+            stream.writeUint16Be(associationResponseFrame->getBody().getAid());
             // 4    Supported rates
             stream.writeByte(1);
             stream.writeByte(associationResponseFrame->getBody().getSupportedRates().numRates);
@@ -244,11 +244,11 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         {
             //type = ST_REASSOCIATIONRESPONSE;
             // 1    Capability
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 2    Status code
-            stream.writeUint16(reassociationResponseFrame->getBody().getStatusCode());
+            stream.writeUint16Be(reassociationResponseFrame->getBody().getStatusCode());
             // 3    AID
-            stream.writeUint16(reassociationResponseFrame->getBody().getAid());
+            stream.writeUint16Be(reassociationResponseFrame->getBody().getAid());
             // 4    Supported rates
             stream.writeByte(1);
             stream.writeByte(reassociationResponseFrame->getBody().getSupportedRates().numRates);
@@ -266,11 +266,11 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         {
             //type = ST_BEACON;
             // 1    Timestamp
-            stream.writeUint64(simTime().raw());   //FIXME
+            stream.writeUint64Be(simTime().raw());   //FIXME
             // 2    Beacon interval
-            stream.writeUint16((uint16_t)(beaconFrame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
+            stream.writeUint16Be((uint16_t)(beaconFrame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
             // 3    Capability
-            stream.writeUint16(0);    //FIXME set  capability
+            stream.writeUint16Be(0);    //FIXME set  capability
             // 4    Service Set Identifier (SSID)
             const char *SSID = beaconFrame->getBody().getSSID();
             unsigned int length = strlen(SSID);
@@ -311,11 +311,11 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         {
             //type = ST_PROBERESPONSE;
             // 1      Timestamp
-            stream.writeUint64(simTime().raw());   //FIXME
+            stream.writeUint64Be(simTime().raw());   //FIXME
             // 2      Beacon interval
-            stream.writeUint16((uint16_t)(probeResponseFrame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
+            stream.writeUint16Be((uint16_t)(probeResponseFrame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
             // 3      Capability
-            stream.writeUint16(0);    //FIXME
+            stream.writeUint16Be(0);    //FIXME
             // 4      SSID
             const char *SSID = probeResponseFrame->getBody().getSSID();
             unsigned int length = strlen(SSID);
@@ -362,13 +362,13 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeMACAddress(msduSubframe->getDa());
         stream.writeMACAddress(msduSubframe->getSa());
-        stream.writeUint16(msduSubframe->getLength());
+        stream.writeUint16Be(msduSubframe->getLength());
         if (msduSubframe->getEtherType() != -1) {
             stream.writeByte(0xAA);    // snap_hdr.dsap
             stream.writeByte(0xAA);    // snap_hdr.ssap
             stream.writeByte(0x03);    // snap_hdr.ctrl
             stream.writeByteRepeatedly(0, 3);   // snap_hdr.oui
-            stream.writeUint16(msduSubframe->getEtherType());  // snap_hdr.ethertype
+            stream.writeUint16Be(msduSubframe->getEtherType());  // snap_hdr.ethertype
         }
     }
     else
@@ -721,7 +721,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 void Ieee80211FcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     // CRC
-    stream.writeUint32(0);
+    stream.writeUint32Be(0);
     // stream.writeUint32(ethernetCRC(stream._getBuf(), stream.getPos()));
 }
 

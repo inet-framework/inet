@@ -26,22 +26,22 @@ Register_Serializer(UdpHeader, UdpHeaderSerializer);
 void UdpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& udpHeader = std::static_pointer_cast<const UdpHeader>(chunk);
-    stream.writeUint16(udpHeader->getSourcePort());
-    stream.writeUint16(udpHeader->getDestinationPort());
-    stream.writeUint16(udpHeader->getTotalLengthField());
+    stream.writeUint16Be(udpHeader->getSourcePort());
+    stream.writeUint16Be(udpHeader->getDestinationPort());
+    stream.writeUint16Be(udpHeader->getTotalLengthField());
     auto crcMode = udpHeader->getCrcMode();
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize UDP header without turned off or properly computed CRC, try changing the value of crcMode parameter for UDP");
-    stream.writeUint16(udpHeader->getCrc());
+    stream.writeUint16Be(udpHeader->getCrc());
 }
 
 Ptr<Chunk> UdpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto udpHeader = std::make_shared<UdpHeader>();
-    udpHeader->setSourcePort(stream.readUint16());
-    udpHeader->setDestinationPort(stream.readUint16());
-    udpHeader->setTotalLengthField(stream.readUint16());
-    auto crc = stream.readUint16();
+    udpHeader->setSourcePort(stream.readUint16Be());
+    udpHeader->setDestinationPort(stream.readUint16Be());
+    udpHeader->setTotalLengthField(stream.readUint16Be());
+    auto crc = stream.readUint16Be();
     udpHeader->setCrc(crc);
     udpHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
     return udpHeader;
