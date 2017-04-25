@@ -56,11 +56,15 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
 {
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     const auto& amsduHeader = aggregatedFrame->popHeader<Ieee80211DataFrame>();
+    aggregatedFrame->popTrailer<Ieee80211Fcs>();
     int tid = amsduHeader->getTid();
-    while (aggregatedFrame->hasHeader<Ieee80211MsduSubframe>())
+    int paddingLength = 0;
+    while (aggregatedFrame->getDataLength() > bit(0))
     {
+        aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + byte(paddingLength == 4 ? 0 : paddingLength));
         const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframe>();
-        const auto& msdu = aggregatedFrame->peekDataAt(bit(0), byte(msduSubframeHeader->getLength()));
+        const auto& msdu = aggregatedFrame->peekDataAt(bit(0), byte(msduSubframeHeader->getLength() - (msduSubframeHeader->getEtherType() != -1 ? SNAP_HEADER_BYTES : 0)));
+        paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
         auto frame = new Packet();
