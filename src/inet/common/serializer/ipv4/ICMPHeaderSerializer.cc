@@ -41,7 +41,7 @@ void ICMPHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk
             break;
         }
         case ICMP_ECHO_REPLY: {
-            const auto& icmpEchoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoRequest>(chunk));
+            const auto& icmpEchoReply = CHK(std::dynamic_pointer_cast<const ICMPEchoReply>(chunk));
             stream.writeUint16(icmpEchoReply->getIdentifier());
             stream.writeUint16(icmpEchoReply->getSeqNumber());
             break;
