@@ -169,6 +169,14 @@ static void testImmutable()
     auto byteCountChunk1 = std::make_shared<ByteCountChunk>(byte(10));
     byteCountChunk1->markImmutable();
     assert(byteCountChunk1->isImmutable());
+
+    // 2. chunk is not modifiable when it is immutable
+    auto byteCountChunk2 = makeImmutableByteCountChunk(byte(10));
+    ASSERT_ERROR(byteCountChunk2->setLength(byte(1)), "chunk is immutable");
+    auto bytesChunk1 = makeImmutableBytesChunk(makeVector(10));
+    ASSERT_ERROR(bytesChunk1->setByte(1, 0), "chunk is immutable");
+    auto applicationHeader1 = makeImmutableApplicationHeader(42);
+    ASSERT_ERROR(applicationHeader1->setSomeData(0), "chunk is immutable");
 }
 
 static void testComplete()
