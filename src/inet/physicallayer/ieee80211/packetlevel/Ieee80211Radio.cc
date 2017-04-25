@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
@@ -141,6 +142,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     packet->popHeader<Ieee80211PhyHeader>();
+    packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
 }
 
 } // namespace physicallayer

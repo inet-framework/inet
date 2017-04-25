@@ -15,9 +15,10 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/packet/Packet.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -237,6 +238,7 @@ void Ieee80211Mac::sendFrame(Packet *frame)
     Enter_Method("sendFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
     frame->insertTrailer(std::make_shared<Ieee80211Fcs>());
     sendDown(frame);
 }
