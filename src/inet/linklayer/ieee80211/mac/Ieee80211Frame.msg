@@ -24,9 +24,12 @@ cplusplus {{
 #include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h" // for ~EtherType
+#include "inet/transportlayer/common/CRC_m.h"
 }}
 
 namespace inet;
+
+enum CrcMode;
 
 class noncobject MACAddress;
 class noncobject BitVector;
@@ -98,6 +101,13 @@ enum AckPolicy
     BLOCK_ACK = 3;
 }
 
+class Ieee80211Fcs extends FieldsChunk
+{
+    chunkLength = byte(4);
+    uint32_t crc = 0;
+    int crcMode @enum(CrcMode) = -1;
+}
+
 //
 // The common part of 802.11 frames.
 //
@@ -108,7 +118,7 @@ enum AckPolicy
 //
 class Ieee80211Frame extends FieldsChunk
 {
-    chunkLength = bit(LENGTH_ACK);
+    chunkLength = bit(LENGTH_ACK) - byte(4);
     short type @enum(Ieee80211FrameType); // type and subtype
     bool toDS;
     bool fromDS;
@@ -133,7 +143,7 @@ class Ieee80211OneAddressFrame extends Ieee80211Frame
 //
 class Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 {
-    chunkLength = bit(LENGTH_ACK);
+    chunkLength = bit(LENGTH_ACK) - byte(4);
     type = ST_ACK;
 }
 
@@ -142,7 +152,7 @@ class Ieee80211ACKFrame extends Ieee80211OneAddressFrame
 //
 class Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 {
-    chunkLength = bit(LENGTH_RTS);
+    chunkLength = bit(LENGTH_RTS) - byte(4);
     MACAddress transmitterAddress; // aka address2
 }
 
@@ -151,7 +161,7 @@ class Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
 //
 class Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 {
-    chunkLength = bit(LENGTH_RTS);
+    chunkLength = bit(LENGTH_RTS) - byte(4);
     type = ST_RTS;
 }
 
@@ -160,7 +170,7 @@ class Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
 //
 class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 {
-    chunkLength = bit(LENGTH_CTS);
+    chunkLength = bit(LENGTH_CTS) - byte(4);
     type = ST_CTS;
 }
 
@@ -169,7 +179,7 @@ class Ieee80211CTSFrame extends Ieee80211OneAddressFrame
 //
 class Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 {
-    chunkLength = bit(LENGTH_MGMT);
+    chunkLength = bit(LENGTH_MGMT) - byte(4);
     MACAddress address3;
     short fragmentNumber;
     uint16 sequenceNumber;
@@ -187,7 +197,7 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //  For example, with Address 4 and without QoS the correct length is 34 bytes.
 //  Without Address 4 and QoS the correct value is indeed 28.
 //  With Address 4 and QoS the correct value is indeed 36.
-    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH);
+    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH) - byte(4);
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MACAddress address4;    // optional field, exists when toDS and fromDS are true
     uint16 qos;             // TODO nobody uses this currently, only its parts like tid below... 
@@ -200,7 +210,7 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //class Ieee80211QoSDataFrame extends Ieee80211DataFrame
 //{
 //    type = ST_DATA_WITH_QOS;
-//    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS);
+//    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) - byte(4);
 //    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
 //    uint8 tid;
 //    // TODO: other QoS control field parts
@@ -211,7 +221,7 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //
 class Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 {
-    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + SNAP_HEADER_BYTES * 8); // TODO: LLC(SNAP) headers should be in a separate packet
+    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + SNAP_HEADER_BYTES * 8) - byte(4); // TODO: LLC(SNAP) headers should be in a separate packet
     int etherType @enum(EtherType);
 }
 
@@ -245,7 +255,7 @@ class Ieee80211MsduSubframe extends FieldsChunk
 //
 class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 {
-    chunkLength = bit(LENGTH_ADDBAREQ);
+    chunkLength = bit(LENGTH_ADDBAREQ) - byte(4);
     category = 3; // representing Block Ack
     int blockAckAction = 0; // representing ADDBA request
     int dialogToken = 1; // nonzero, arbitrary

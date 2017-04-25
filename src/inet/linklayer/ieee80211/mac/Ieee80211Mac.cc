@@ -237,6 +237,7 @@ void Ieee80211Mac::sendFrame(Packet *frame)
     Enter_Method("sendFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    frame->insertTrailer(std::make_shared<Ieee80211Fcs>());
     sendDown(frame);
 }
 
