@@ -36,7 +36,7 @@ Chunk::Chunk(const Chunk& other) :
 
 void Chunk::handleChange()
 {
-    CHUNK_CHECK_USAGE(isMutable(), "chunk is mutable");
+    CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable");
 }
 
 Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, bit offset, bit length, int flags)
