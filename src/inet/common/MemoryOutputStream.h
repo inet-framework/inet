@@ -136,11 +136,23 @@ class INET_API MemoryOutputStream {
         writeByte((uint8_t)(value >> 0));
     }
 
+    void writeUint16Le(uint16_t value) {
+        writeByte((uint8_t)(value >> 0));
+        writeByte((uint8_t)(value >> 8));
+    }
+
     void writeUint32(uint32_t value) {
         writeByte((uint8_t)(value >> 24));
         writeByte((uint8_t)(value >> 16));
         writeByte((uint8_t)(value >> 8));
         writeByte((uint8_t)(value >> 0));
+    }
+
+    void writeUint32Le(uint32_t value) {
+        writeByte((uint8_t)(value >> 0));
+        writeByte((uint8_t)(value >> 8));
+        writeByte((uint8_t)(value >> 16));
+        writeByte((uint8_t)(value >> 24));
     }
 
     void writeUint64(uint64_t value) {
@@ -152,6 +164,17 @@ class INET_API MemoryOutputStream {
         writeByte((uint8_t)(value >> 16));
         writeByte((uint8_t)(value >> 8));
         writeByte((uint8_t)(value >> 0));
+    }
+
+    void writeUint64Le(uint64_t value) {
+        writeByte((uint8_t)(value >> 0));
+        writeByte((uint8_t)(value >> 8));
+        writeByte((uint8_t)(value >> 16));
+        writeByte((uint8_t)(value >> 24));
+        writeByte((uint8_t)(value >> 32));
+        writeByte((uint8_t)(value >> 40));
+        writeByte((uint8_t)(value >> 48));
+        writeByte((uint8_t)(value >> 56));
     }
     //@}
 
