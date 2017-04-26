@@ -100,11 +100,11 @@ enum AckPolicy
     BLOCK_ACK = 3;
 }
 
-class Ieee80211Fcs extends FieldsChunk
+class Ieee80211FcsTrailer extends FieldsChunk
 {
     chunkLength = byte(4);
-    uint32_t crc = 0;
-    int crcMode @enum(CrcMode) = -1;
+    uint32_t fcs = 0;
+    int fcsMode @enum(CrcMode) = -1;
 }
 
 //

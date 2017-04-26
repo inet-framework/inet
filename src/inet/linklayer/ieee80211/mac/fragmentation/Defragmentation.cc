@@ -29,14 +29,14 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
     const auto& defragmentedHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(fragmentFrames->at(0)->peekHeader<Ieee80211DataOrMgmtFrame>()->dupShared());
     for (auto fragmentFrame : *fragmentFrames) {
         fragmentFrame->popHeader<Ieee80211DataOrMgmtFrame>();
-        fragmentFrame->popTrailer<Ieee80211Fcs>();
+        fragmentFrame->popTrailer<Ieee80211FcsTrailer>();
         defragmentedFrame->append(fragmentFrame->peekData());
     }
     defragmentedHeader->setFragmentNumber(0);
     defragmentedHeader->setMoreFragments(false);
     defragmentedHeader->markImmutable();
     defragmentedFrame->insertHeader(defragmentedHeader);
-    defragmentedFrame->insertTrailer(std::make_shared<Ieee80211Fcs>());
+    defragmentedFrame->insertTrailer(std::make_shared<Ieee80211FcsTrailer>());
     return defragmentedFrame;
 }
 

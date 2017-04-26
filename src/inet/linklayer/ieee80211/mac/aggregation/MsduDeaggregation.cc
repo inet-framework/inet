@@ -56,7 +56,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
 {
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     const auto& amsduHeader = aggregatedFrame->popHeader<Ieee80211DataFrame>();
-    aggregatedFrame->popTrailer<Ieee80211Fcs>();
+    aggregatedFrame->popTrailer<Ieee80211FcsTrailer>();
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
     while (aggregatedFrame->getDataLength() > bit(0))

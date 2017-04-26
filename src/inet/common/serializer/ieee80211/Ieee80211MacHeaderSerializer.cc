@@ -49,7 +49,7 @@ Register_Serializer(Ieee80211BasicBlockAck, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211CompressedBlockAck, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MultiTidBlockAck, Ieee80211MacHeaderSerializer);
 
-Register_Serializer(Ieee80211Fcs, Ieee80211FcsSerializer);
+Register_Serializer(Ieee80211FcsTrailer, Ieee80211FcsSerializer);
 
 void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {

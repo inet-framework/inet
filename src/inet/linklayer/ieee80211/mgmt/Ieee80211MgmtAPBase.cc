@@ -124,7 +124,7 @@ void Ieee80211MgmtAPBase::convertToEtherFrame(Packet *packet)
 #ifdef WITH_ETHERNET
     const auto& ieee80211MacHeader = packet->removeHeader<Ieee80211DataFrame>();
     const auto& ieee802SnapHeader = packet->removeHeader<Ieee802SnapHeader>();
-    packet->removeTrailer<Ieee80211Fcs>();
+    packet->removeTrailer<Ieee80211FcsTrailer>();
 
     // create a matching ethernet frame
     const auto& ethframe = std::make_shared<EthernetIIFrame>();    //TODO option to use EtherFrameWithSNAP instead
@@ -170,7 +170,7 @@ void Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
     packet->removePoppedChunks();
     packet->insertHeader(ieee802SnapHeader);
     packet->insertHeader(ieee80211MacHeader);
-    packet->insertTrailer(std::make_shared<Ieee80211Fcs>());
+    packet->insertTrailer(std::make_shared<Ieee80211FcsTrailer>());
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET
