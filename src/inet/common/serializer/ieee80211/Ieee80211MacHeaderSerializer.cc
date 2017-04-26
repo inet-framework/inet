@@ -17,13 +17,11 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ieee80211/Ieee80211MacHeaderSerializer.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
 
 namespace inet {
-namespace serializer {
 
-using namespace ieee80211;
+namespace serializer {
 
 Register_Serializer(Ieee80211DataFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MsduSubframe, Ieee80211MacHeaderSerializer);
@@ -57,14 +55,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeByte(0xD4);
         stream.writeByte(0);
-        stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_MS));
+        stream.writeUint16Be(ackFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ackFrame->getReceiverAddress());
     }
     else if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(chunk))
     {
         stream.writeByte(0xB4);
         stream.writeByte(0);
-        stream.writeUint16Be(rtsFrame->getDuration().inUnit(SIMTIME_MS));
+        stream.writeUint16Be(rtsFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(rtsFrame->getReceiverAddress());
         stream.writeMACAddress(rtsFrame->getTransmitterAddress());
     }
@@ -72,7 +70,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     {
         stream.writeByte(0xC4);
         stream.writeByte(0);
-        stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_MS));
+        stream.writeUint16Be(ctsFrame->getDuration().inUnit(SIMTIME_US));
         stream.writeMACAddress(ctsFrame->getReceiverAddress());
     }
     else if (auto dataOrMgmtFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(chunk))
@@ -358,347 +356,321 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
 }
 
-//void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(const Buffer &b, Ieee80211DataOrMgmtFrame *Frame, short type)
-//{
-//    Frame->setType(type);
-//    stream.seek(0);
-//    stream.readByte();   // i_fc[0]
-//    uint8_t fc1 = stream.readByte();   // i_fc[1]
-//    Frame->setToDS(fc1 & 0x1);
-//    Frame->setFromDS(fc1 & 0x2);
-//    Frame->setMoreFragments(fc1 & 0x4);
-//    Frame->setRetry(fc1 & 0x8);
-//    Frame->setDuration(SimTime(stream.readUint16() / 1000.0)); // i_dur
-//    Frame->setReceiverAddress(stream.readMACAddress());
-//    Frame->setTransmitterAddress(stream.readMACAddress());
-//    Frame->setAddress3(stream.readMACAddress());
-//    uint16_t seq = stream.readUint16();   // i_seq
-//    Frame->setSequenceNumber(seq >> 4);
-//    Frame->setFragmentNumber(seq & 0x0F);
-//
-//    if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && Frame->getFromDS() && Frame->getToDS())
-//    {
-//        check_and_cast<Ieee80211DataFrame*>(Frame)->setAddress4(stream.readMACAddress());
-//    }
-//    if (type == ST_DATA_WITH_QOS) {
-//        check_and_cast<Ieee80211DataFrame*>(Frame)->setQos(stream.readUint16());
-//    }
-//}
+void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &stream, Ptr<Ieee80211DataOrMgmtFrame> frame, short type, uint8_t fc1) const
+{
+    frame->setType(type);
+    frame->setToDS(fc1 & 0x1);
+    frame->setFromDS(fc1 & 0x2);
+    frame->setMoreFragments(fc1 & 0x4);
+    frame->setRetry(fc1 & 0x8);
+    frame->setDuration(SimTime(stream.readUint16Be() / 1000.0)); // i_dur
+    frame->setReceiverAddress(stream.readMACAddress());
+    frame->setTransmitterAddress(stream.readMACAddress());
+    frame->setAddress3(stream.readMACAddress());
+    uint16_t seq = stream.readUint16Be();   // i_seq
+    frame->setSequenceNumber(seq >> 4);
+    frame->setFragmentNumber(seq & 0x0F);
+
+    if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && frame->getFromDS() && frame->getToDS())
+        std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setAddress4(stream.readMACAddress());
+    if (type == ST_DATA_WITH_QOS)
+        std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setQos(stream.readUint16Be());
+}
 
 Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-//    ASSERT(stream.getPos() == 0);
-//    cPacket *frame = nullptr;
-//
-//    uint8_t type = stream.readByte();
-//    uint8_t fc_1 = stream.readByte();  (void)fc_1; // fc_1
-//    switch(type)
-//    {
-//        case 0xD4: // ST_ACK    //TODO ((ST_ACK & 0x0F) << 4) | ((ST_ACK & 0x30) >> 2)
-//        {
-//            Ieee80211ACKFrame *ackFrame = new Ieee80211ACKFrame();
-//            ackFrame->setType(ST_ACK);
-//            ackFrame->setToDS(false);
-//            ackFrame->setFromDS(false);
-//            ackFrame->setRetry(false);
-//            ackFrame->setMoreFragments(false);
-//            ackFrame->setDuration(SimTime((double)stream.readUint16()/1000.0));    //i_dur
-//            ackFrame->setReceiverAddress(stream.readMACAddress());
-//            frame = ackFrame;
-//            break;
-//        }
-//        case 0xB4: // ST_RTS
-//        {
-//            Ieee80211RTSFrame *rtsFrame = new Ieee80211RTSFrame();
-//            rtsFrame->setType(ST_RTS);
-//            rtsFrame->setToDS(false);
-//            rtsFrame->setFromDS(false);
-//            rtsFrame->setRetry(false);
-//            rtsFrame->setMoreFragments(false);
-//            rtsFrame->setDuration(SimTime(stream.readUint16(), SIMTIME_MS));    //i_dur
-//            rtsFrame->setReceiverAddress(stream.readMACAddress());
-//            rtsFrame->setTransmitterAddress(stream.readMACAddress());
-//            frame = rtsFrame;
-//            break;
-//        }
-//        case 0xC4: // ST_CTS
-//        {
-//            Ieee80211CTSFrame *ctsFrame = new Ieee80211CTSFrame();
-//            ctsFrame->setType(ST_CTS);
-//            ctsFrame->setToDS(false);
-//            ctsFrame->setFromDS(false);
-//            ctsFrame->setRetry(false);
-//            ctsFrame->setMoreFragments(false);
-//            ctsFrame->setDuration(SimTime(stream.readUint16(),SIMTIME_MS));    //i_dur
-//            ctsFrame->setReceiverAddress(stream.readMACAddress());
-//            frame = ctsFrame;
-//            break;
-//        }
-//        case 0x08: // ST_DATA
-//        case 0x88: // ST_DATA_WITH_QOS
-//        {
-//            Ieee80211DataFrameWithSNAP *dataFrame = new Ieee80211DataFrameWithSNAP();
-//            parseDataOrMgmtFrame(b, dataFrame, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS);
-//
-//            // snap_header:
-//            stream.accessNBytes(6);
-//            dataFrame->setEtherType(stream.readUint16());    // ethertype
-//
-//            cPacket *encapPacket = SerializerBase::lookupAndDeserialize(b, c, ETHERTYPE, dataFrame->getEtherType(), stream.getRemainingSize(4));
-//            if (encapPacket) {
-//                dataFrame->encapsulate(encapPacket);
-//                dataFrame->setName(encapPacket->getName());
-//            }
-//            frame = dataFrame;
-//            break;
-//        }
-//
-//        case 0xB0: // ST_AUTHENTICATION
-//        {
-//            Ieee80211AuthenticationFrame *pkt = new Ieee80211AuthenticationFrame();
-//            parseDataOrMgmtFrame(b, pkt, ST_AUTHENTICATION);
-//            Ieee80211AuthenticationFrameBody body;
-//            stream.readUint16();
-//            body.setSequenceNumber(stream.readUint16());
-//            body.setStatusCode(stream.readUint16());
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0xC0: //ST_ST_DEAUTHENTICATION
-//        {
-//            Ieee80211DeauthenticationFrame *pkt = new Ieee80211DeauthenticationFrame();
-//            parseDataOrMgmtFrame(b, pkt, ST_DEAUTHENTICATION);
-//            Ieee80211DeauthenticationFrameBody body;
-//
-//            body.setReasonCode(stream.readUint16());
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0xA0: // ST_DISASSOCIATION
-//        {
-//            Ieee80211DisassociationFrame *pkt = new Ieee80211DisassociationFrame();
-//            parseDataOrMgmtFrame(b, pkt, ST_DISASSOCIATION);
-//            Ieee80211DisassociationFrameBody body;
-//
-//            body.setReasonCode(stream.readUint16());
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x40: // ST_PROBEREQUEST
-//        {
-//            Ieee80211ProbeRequestFrame *pkt = new Ieee80211ProbeRequestFrame();
-//            parseDataOrMgmtFrame(b, pkt, ST_PROBEREQUEST);
-//            Ieee80211ProbeRequestFrameBody body;
-//
-//            char SSID[256];
-//            stream.readByte();
-//            unsigned int length = stream.readByte();
-//            stream.readNBytes(length, SSID);
-//            SSID[length] = '\0';
-//            body.setSSID(SSID);
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x00: // ST_ASSOCIATIONREQUEST
-//        {
-//            Ieee80211AssociationRequestFrame *pkt = new Ieee80211AssociationRequestFrame;
-//            parseDataOrMgmtFrame(b, pkt, ST_ASSOCIATIONREQUEST);
-//            Ieee80211AssociationRequestFrameBody body;
-//
-//            char SSID[256];
-//            stream.readByte();
-//            unsigned int length = stream.readByte();
-//            stream.readNBytes(length, SSID);
-//            SSID[length] = '\0';
-//            body.setSSID(SSID);
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x02: // ST_REASSOCIATIONREQUEST
-//        {
-//            Ieee80211ReassociationRequestFrame *pkt = new Ieee80211ReassociationRequestFrame;
-//            parseDataOrMgmtFrame(b, pkt, ST_REASSOCIATIONREQUEST);
-//            Ieee80211ReassociationRequestFrameBody body;
-//            stream.readUint16();
-//            stream.readUint16();
-//
-//            body.setCurrentAP(stream.readMACAddress());
-//
-//            char SSID[256];
-//            stream.readByte();
-//            unsigned int length = stream.readByte();
-//            stream.readNBytes(length, SSID);
-//            SSID[length] = '\0';
-//            body.setSSID(SSID);
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x01: // ST_ASSOCIATIONRESPONSE
-//        {
-//            Ieee80211AssociationResponseFrame *pkt = new Ieee80211AssociationResponseFrame;
-//            parseDataOrMgmtFrame(b, pkt, ST_ASSOCIATIONRESPONSE);
-//            Ieee80211AssociationResponseFrameBody body;
-//            stream.readUint16();
-//            body.setStatusCode(stream.readUint16());
-//            body.setAid(stream.readUint16());
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x03: // ST_REASSOCIATIONRESPONSE
-//        {
-//            Ieee80211ReassociationResponseFrame *pkt = new Ieee80211ReassociationResponseFrame;
-//            parseDataOrMgmtFrame(b, pkt, ST_REASSOCIATIONRESPONSE);
-//            Ieee80211ReassociationResponseFrameBody body;
-//            stream.readUint16();
-//            body.setStatusCode(stream.readUint16());
-//            body.setAid(stream.readUint16());
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x80: // ST_BEACON
-//        {
-//            Ieee80211BeaconFrame *pkt = new Ieee80211BeaconFrame();
-//            parseDataOrMgmtFrame(b, pkt, ST_BEACON);
-//            Ieee80211BeaconFrameBody body;
-//
-//            simtime_t t; t.setRaw(stream.readUint64()); pkt->setTimestamp(t);  //timestamp   //FIXME
-//
-//            body.setBeaconInterval(SimTime((int64_t)stream.readUint16()*1024, SIMTIME_US));
-//            stream.readUint16();     // Capability
-//
-//            char SSID[256];
-//            stream.readByte();
-//            unsigned int length = stream.readByte();
-//            stream.readNBytes(length, SSID);
-//            SSID[length] = '\0';
-//            body.setSSID(SSID);
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0x50: // ST_PROBERESPONSE
-//        {
-//            Ieee80211ProbeResponseFrame *pkt = new Ieee80211ProbeResponseFrame();
-//            parseDataOrMgmtFrame(b, pkt, ST_PROBERESPONSE);
-//            Ieee80211ProbeResponseFrameBody body;
-//
-//            simtime_t t; t.setRaw(stream.readUint64()); pkt->setTimestamp(t);  //timestamp   //FIXME
-//
-//            body.setBeaconInterval(SimTime((int64_t)stream.readUint16() * 1024, SIMTIME_US));
-//            stream.readUint16();
-//
-//            char SSID[256];
-//            stream.readByte();
-//            unsigned int length = stream.readByte();
-//            stream.readNBytes(length, SSID);
-//            SSID[length] = '\0';
-//            body.setSSID(SSID);
-//
-//            Ieee80211SupportedRatesElement supRat;
-//            stream.readByte();
-//            supRat.numRates = stream.readByte();
-//            for (int i = 0; i < supRat.numRates; i++)
-//                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-//            body.setSupportedRates(supRat);
-//
-//            pkt->setBody(body);
-//            frame = pkt;
-//            break;
-//        }
-//
-//        case 0xD0: // type = ST_ACTION
-//        {
-//            // Ieee80211ActionFrame
-//            return nullptr;
-//        }
-//
-//        default:
-//        {
-//            EV_ERROR << "Cannot deserialize Ieee80211 packet: type " << type << " not supported.";
-//            stream.setError();
-//            return nullptr;
-//        }
-//    }
-//    uint32_t calculatedCrc = ethernetCRC(stream._getBuf(), stream.getPos());
-//    uint32_t receivedCrc = stream.readUint32();
-//    EV_DEBUG << "Calculated CRC: " << calculatedCrc << ", received CRC: " << receivedCrc << endl;
-//    if (receivedCrc != calculatedCrc)
-//        frame->setBitError(true);
-//
-//    // TODO: don't set this directly, it should be computed above separately in each case
-//    if (frame->getByteLength() != stream.getPos()) {
-//        throw cRuntimeError("ieee802.11 deserializer: packet length error: generated=%i v.s. read=%i", (int)frame->getByteLength(), stream.getPos());
-//    }
-//    //frame->setByteLength(stream.getPos());
-//    return frame;
+    Ptr<Ieee80211Frame> frame = nullptr;
+
+    uint8_t type = stream.readByte();
+    uint8_t fc_1 = stream.readByte();  (void)fc_1; // fc_1
+    switch(type)
+    {
+        case 0xD4: // ST_ACK    //TODO ((ST_ACK & 0x0F) << 4) | ((ST_ACK & 0x30) >> 2)
+        {
+            auto ackFrame = std::make_shared<Ieee80211ACKFrame>();
+            ackFrame->setType(ST_ACK);
+            ackFrame->setToDS(false);
+            ackFrame->setFromDS(false);
+            ackFrame->setRetry(false);
+            ackFrame->setMoreFragments(false);
+            ackFrame->setDuration(SimTime((double)stream.readUint16Be()/1000.0));    //i_dur
+            ackFrame->setReceiverAddress(stream.readMACAddress());
+            frame = ackFrame;
+            break;
+        }
+        case 0xB4: // ST_RTS
+        {
+            auto rtsFrame = std::make_shared<Ieee80211RTSFrame>();
+            rtsFrame->setType(ST_RTS);
+            rtsFrame->setToDS(false);
+            rtsFrame->setFromDS(false);
+            rtsFrame->setRetry(false);
+            rtsFrame->setMoreFragments(false);
+            rtsFrame->setDuration(SimTime(stream.readUint16Be(), SIMTIME_US));    //i_dur
+            rtsFrame->setReceiverAddress(stream.readMACAddress());
+            rtsFrame->setTransmitterAddress(stream.readMACAddress());
+            frame = rtsFrame;
+            break;
+        }
+        case 0xC4: // ST_CTS
+        {
+            auto ctsFrame = std::make_shared<Ieee80211CTSFrame>();
+            ctsFrame->setType(ST_CTS);
+            ctsFrame->setToDS(false);
+            ctsFrame->setFromDS(false);
+            ctsFrame->setRetry(false);
+            ctsFrame->setMoreFragments(false);
+            ctsFrame->setDuration(SimTime(stream.readUint16Be(),SIMTIME_US));    //i_dur
+            ctsFrame->setReceiverAddress(stream.readMACAddress());
+            frame = ctsFrame;
+            break;
+        }
+        case 0x08: // ST_DATA
+        case 0x88: // ST_DATA_WITH_QOS
+        {
+            auto dataFrame = std::make_shared<Ieee80211DataFrame>();
+            parseDataOrMgmtFrame(stream, dataFrame, type == 0x08 ? ST_DATA : ST_DATA_WITH_QOS, fc_1);
+            frame = dataFrame;
+            break;
+        }
+
+        case 0xB0: // ST_AUTHENTICATION
+        {
+            auto pkt = std::make_shared<Ieee80211AuthenticationFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_AUTHENTICATION, fc_1);
+            Ieee80211AuthenticationFrameBody body;
+            stream.readUint16Be();
+            body.setSequenceNumber(stream.readUint16Be());
+            body.setStatusCode(stream.readUint16Be());
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0xC0: //ST_ST_DEAUTHENTICATION
+        {
+            auto pkt = std::make_shared<Ieee80211DeauthenticationFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_DEAUTHENTICATION, fc_1);
+            Ieee80211DeauthenticationFrameBody body;
+
+            body.setReasonCode(stream.readUint16Be());
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0xA0: // ST_DISASSOCIATION
+        {
+            auto pkt = std::make_shared<Ieee80211DisassociationFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_DISASSOCIATION, fc_1);
+            Ieee80211DisassociationFrameBody body;
+
+            body.setReasonCode(stream.readUint16Be());
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x40: // ST_PROBEREQUEST
+        {
+            auto pkt = std::make_shared<Ieee80211ProbeRequestFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_PROBEREQUEST, fc_1);
+            Ieee80211ProbeRequestFrameBody body;
+
+            char SSID[256];
+            stream.readByte();
+            unsigned int length = stream.readByte();
+            stream.readBytes((uint8_t *)SSID, byte(length));
+            SSID[length] = '\0';
+            body.setSSID(SSID);
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x00: // ST_ASSOCIATIONREQUEST
+        {
+            auto pkt = std::make_shared<Ieee80211AssociationRequestFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONREQUEST, fc_1);
+            Ieee80211AssociationRequestFrameBody body;
+
+            char SSID[256];
+            stream.readByte();
+            unsigned int length = stream.readByte();
+            stream.readBytes((uint8_t *)SSID, byte(length));
+            SSID[length] = '\0';
+            body.setSSID(SSID);
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x02: // ST_REASSOCIATIONREQUEST
+        {
+            auto pkt = std::make_shared<Ieee80211ReassociationRequestFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONREQUEST, fc_1);
+            Ieee80211ReassociationRequestFrameBody body;
+            stream.readUint16Be();
+            stream.readUint16Be();
+
+            body.setCurrentAP(stream.readMACAddress());
+
+            char SSID[256];
+            stream.readByte();
+            unsigned int length = stream.readByte();
+            stream.readBytes((uint8_t *)SSID, byte(length));
+            SSID[length] = '\0';
+            body.setSSID(SSID);
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x01: // ST_ASSOCIATIONRESPONSE
+        {
+            auto pkt = std::make_shared<Ieee80211AssociationResponseFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONRESPONSE, fc_1);
+            Ieee80211AssociationResponseFrameBody body;
+            stream.readUint16Be();
+            body.setStatusCode(stream.readUint16Be());
+            body.setAid(stream.readUint16Be());
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x03: // ST_REASSOCIATIONRESPONSE
+        {
+            auto pkt = std::make_shared<Ieee80211ReassociationResponseFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONRESPONSE, fc_1);
+            Ieee80211ReassociationResponseFrameBody body;
+            stream.readUint16Be();
+            body.setStatusCode(stream.readUint16Be());
+            body.setAid(stream.readUint16Be());
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x80: // ST_BEACON
+        {
+            auto pkt = std::make_shared<Ieee80211BeaconFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_BEACON, fc_1);
+            Ieee80211BeaconFrameBody body;
+
+            simtime_t timetstamp;
+            timetstamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
+
+            body.setBeaconInterval(SimTime((int64_t)stream.readUint16Be()*1024, SIMTIME_US));
+            stream.readUint16Be();     // Capability
+
+            char SSID[256];
+            stream.readByte();
+            unsigned int length = stream.readByte();
+            stream.readBytes((uint8_t *)SSID, byte(length));
+            SSID[length] = '\0';
+            body.setSSID(SSID);
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0x50: // ST_PROBERESPONSE
+        {
+            auto pkt = std::make_shared<Ieee80211ProbeResponseFrame>();
+            parseDataOrMgmtFrame(stream, pkt, ST_PROBERESPONSE, fc_1);
+            Ieee80211ProbeResponseFrameBody body;
+
+            simtime_t timestamp;
+            timestamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
+
+            body.setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
+            stream.readUint16Be();
+
+            char SSID[256];
+            stream.readByte();
+            unsigned int length = stream.readByte();
+            stream.readBytes((uint8_t *)SSID, byte(length));
+            SSID[length] = '\0';
+            body.setSSID(SSID);
+
+            Ieee80211SupportedRatesElement supRat;
+            stream.readByte();
+            supRat.numRates = stream.readByte();
+            for (int i = 0; i < supRat.numRates; i++)
+                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            body.setSupportedRates(supRat);
+
+            pkt->setBody(body);
+            frame = pkt;
+            break;
+        }
+
+        case 0xD0: // type = ST_ACTION
+        {
+            // Ieee80211ActionFrame
+            return nullptr;
+        }
+
+        default:
+        {
+            EV_ERROR << "Cannot deserialize Ieee80211 packet: type " << type << " not supported.";
+            frame->markImproperlyRepresented();
+            return frame;
+        }
+    }
+    return frame;
 }
 
 void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const

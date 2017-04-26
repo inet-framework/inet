@@ -239,7 +239,9 @@ void Ieee80211Mac::sendFrame(Packet *frame)
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     frame->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211);
-    frame->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+    auto macTrailer = std::make_shared<Ieee80211MacTrailer>();
+    macTrailer->setFcsMode(CRC_COMPUTED); // TODO:
+    frame->insertTrailer(macTrailer);
     sendDown(frame);
 }
 

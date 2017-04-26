@@ -19,10 +19,13 @@
 #define __INET_IEEE80211MACHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 
 namespace serializer {
+
+using namespace ieee80211;
 
 /**
  * Converts between Ieee80211MacHeader and binary network byte order IEEE 802.11 mac header.
@@ -30,7 +33,7 @@ namespace serializer {
 class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    // virtual void parseDataOrMgmtFrame(const Buffer &b, inet::ieee80211::Ieee80211DataOrMgmtFrame *Frame, short type);
+    virtual void parseDataOrMgmtFrame(MemoryInputStream &stream, Ptr<Ieee80211DataOrMgmtFrame> frame, short type, uint8_t fc1) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
