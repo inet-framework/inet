@@ -98,7 +98,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeMACAddress(dataFrame->getAddress4());
 
             if (dataOrMgmtFrame->getType() == ST_DATA_WITH_QOS)
-                stream.writeUint16Le(dataFrame->getQos() | (dataFrame->getAMsduPresent() ? 0x0080 : 0x0000));
+                stream.writeUint16Le(dataFrame->getQos() | dataFrame->getTid() | (dataFrame->getAMsduPresent() ? 0x0080 : 0x0000));
         }
 
         if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
