@@ -91,9 +91,10 @@ std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *data
         for (auto frame : defragmentedFrames) {
             auto dataFrame = frame->peekHeader<Ieee80211DataFrame>();
             if (dataFrame->getAMsduPresent()) {
-                auto subframes = aMsduDeaggregation->deaggregateFrame(frame); // FIXME
+                auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                 for (auto subframe : *subframes)
                     deaggregatedFrames.push_back(subframe);
+                delete subframes;
             }
             else
                 deaggregatedFrames.push_back(frame);
