@@ -39,14 +39,14 @@ class INET_API Ieee80211MacHeaderSerializer : public FieldsChunkSerializer
     Ieee80211MacHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-class INET_API Ieee80211FcsTrailerSerializer : public FieldsChunkSerializer
+class INET_API Ieee80211MacTrailerSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    Ieee80211FcsTrailerSerializer() : FieldsChunkSerializer() {}
+    Ieee80211MacTrailerSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer

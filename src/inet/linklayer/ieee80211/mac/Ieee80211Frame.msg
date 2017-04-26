@@ -100,7 +100,7 @@ enum AckPolicy
     BLOCK_ACK = 3;
 }
 
-class Ieee80211FcsTrailer extends FieldsChunk
+class Ieee80211MacTrailer extends FieldsChunk
 {
     chunkLength = byte(4);
     uint32_t fcs = 0;
