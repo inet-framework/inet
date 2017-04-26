@@ -46,9 +46,8 @@ const unsigned int LENGTH_ACK = 112;    //bits
 const unsigned int LENGTH_MGMT = 28 * 8;    //bits
 const unsigned int LENGTH_ADDBAREQ = LENGTH_MGMT + 9*8; // mgmt length + action body length
 const unsigned int LENGTH_BASIC_BLOCKACK = (16 + 2 + (2 + 128) + 4) * 8; // header + ba control + ba information + fcs
-const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4, without SNAP: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
+const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
 const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field length (bits)
-const unsigned int SNAP_HEADER_BYTES = 8;
 const short int MAX_NUM_FRAGMENTS = 16;
 const unsigned int LENGTH_A_MSDU_SUBFRAME_HEADER = 14 * 8; //48 + 48 + 16 bits
 }}
@@ -217,15 +216,6 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //}
 
 //
-// 802.11 data frame with the 8-byte SNAP header (AA AA 03, 00 00 00, <2-byte ~EtherType>)
-//
-class Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
-{
-    chunkLength = bit(DATAFRAME_HEADER_MINLENGTH + SNAP_HEADER_BYTES * 8) - byte(4); // TODO: LLC(SNAP) headers should be in a separate packet
-    int etherType @enum(EtherType);
-}
-
-//
 // Base class for 802.11 management frames (subclasses will add frame body contents)
 //
 class Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
@@ -243,11 +233,10 @@ class Ieee80211ActionFrame extends Ieee80211ManagementFrame
 
 class Ieee80211MsduSubframe extends FieldsChunk
 {
-    chunkLength = bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // + snap header if necessary
+    chunkLength = bit(LENGTH_A_MSDU_SUBFRAME_HEADER);
     MACAddress sa; // source addr.
     MACAddress da; // destination addr.
     int length;
-    int etherType @enum(EtherType); // TODO: review optional snap header (the standard does not define it: Figure 8-32—A-MSDU subframe structure) 
 }
 
 //

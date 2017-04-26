@@ -15,8 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
-
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NotifierConsts.h"
@@ -26,11 +24,13 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/ieee802/Ieee802Header_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -213,26 +213,27 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
 
 void Ieee80211MgmtSTA::encapsulate(Packet *msg)
 {
-    const Ptr<Ieee80211DataFrameWithSNAP>& frame = std::make_shared<Ieee80211DataFrameWithSNAP>();
+    const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
+    ieee802SnapHeader->setOui(0);
+    ieee802SnapHeader->setProtocolId(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
+    msg->insertHeader(ieee802SnapHeader);
 
+    const auto& ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
     // frame goes to the AP
-    frame->setToDS(true);
-
+    ieee80211MacHeader->setToDS(true);
     // receiver is the AP
-    frame->setReceiverAddress(assocAP.address);
-
+    ieee80211MacHeader->setReceiverAddress(assocAP.address);
     // destination address is in address3
-    frame->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
-    frame->setEtherType(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
+    ieee80211MacHeader->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
     auto userPriorityReq = msg->getTag<UserPriorityReq>();
     if (userPriorityReq != nullptr) {
         // make it a QoS frame, and set TID
-        frame->setType(ST_DATA_WITH_QOS);
-        frame->setChunkLength(frame->getChunkLength() + bit(QOSCONTROL_BITS));
-        frame->setTid(userPriorityReq->getUserPriority());
+        ieee80211MacHeader->setType(ST_DATA_WITH_QOS);
+        ieee80211MacHeader->setChunkLength(ieee80211MacHeader->getChunkLength() + bit(QOSCONTROL_BITS));
+        ieee80211MacHeader->setTid(userPriorityReq->getUserPriority());
     }
 
-    msg->insertHeader(frame);
+    msg->insertHeader(ieee80211MacHeader);
 }
 
 void Ieee80211MgmtSTA::decapsulate(Packet *packet)
@@ -247,9 +248,9 @@ void Ieee80211MgmtSTA::decapsulate(Packet *packet)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
     }
     packet->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    const Ptr<Ieee80211DataFrameWithSNAP>& frameWithSNAP = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(frame);
-    if (frameWithSNAP) {
-        int etherType = frameWithSNAP->getEtherType();
+    const auto& snapHeader = packet->popHeader<Ieee802SnapHeader>();
+    if (snapHeader) {
+        int etherType = snapHeader->getProtocolId();
         packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));

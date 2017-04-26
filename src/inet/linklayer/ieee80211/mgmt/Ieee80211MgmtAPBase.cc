@@ -15,14 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
+#include <string.h>
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include <string.h>
+#include "inet/linklayer/ieee802/Ieee802Header_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAPBase.h"
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
@@ -81,26 +82,26 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
         delete packet;
         return;
     }
-    const auto& frame = packet->peekHeader<Ieee80211DataFrame>();
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:
 #ifdef WITH_ETHERNET
-            convertToEtherFrame(packet, frame);
+            convertToEtherFrame(packet);
 #else // ifdef WITH_ETHERNET
             throw cRuntimeError("INET compiled without ETHERNET feature, but the 'encapDecap' parameter is set to 'eth'!");
 #endif // ifdef WITH_ETHERNET
             break;
 
         case ENCAP_DECAP_TRUE: {
+            const auto& frame = packet->peekHeader<Ieee80211DataFrame>();
             auto macAddressInd = packet->ensureTag<MacAddressInd>();
             macAddressInd->setSrcAddress(frame->getTransmitterAddress());
             macAddressInd->setDestAddress(frame->getAddress3());
             int tid = frame->getTid();
             if (tid < 8)
                 packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
-            const Ptr<Ieee80211DataFrameWithSNAP>& frameWithSNAP = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(frame);
-            if (frameWithSNAP) {
-                int etherType = frameWithSNAP->getEtherType();
+            const auto& snapHeader = packet->popHeader<Ieee802SnapHeader>();
+            if (snapHeader) {
+                int etherType = snapHeader->getProtocolId();
                 packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
                 packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
                 packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
@@ -118,20 +119,21 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
     sendUp(packet);
 }
 
-void Ieee80211MgmtAPBase::convertToEtherFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame_)
+void Ieee80211MgmtAPBase::convertToEtherFrame(Packet *packet)
 {
 #ifdef WITH_ETHERNET
-    const Ptr<Ieee80211DataFrameWithSNAP>& frame = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(frame_);
+    const auto& ieee80211MacHeader = packet->removeHeader<Ieee80211DataFrame>();
+    const auto& ieee802SnapHeader = packet->removeHeader<Ieee802SnapHeader>();
+    packet->removeTrailer<Ieee80211Fcs>();
 
     // create a matching ethernet frame
     const auto& ethframe = std::make_shared<EthernetIIFrame>();    //TODO option to use EtherFrameWithSNAP instead
-    ethframe->setDest(frame->getAddress3());
-    ethframe->setSrc(frame->getTransmitterAddress());
-    ethframe->setEtherType(frame->getEtherType());
+    ethframe->setDest(ieee80211MacHeader->getAddress3());
+    ethframe->setSrc(ieee80211MacHeader->getTransmitterAddress());
+    ethframe->setEtherType(ieee802SnapHeader->getProtocolId());
     ethframe->setChunkLength(byte(ETHER_MAC_FRAME_BYTES - 4)); // subtract FCS
 
     // encapsulate the payload in there
-    packet->removeHeader<Ieee80211DataFrame>();
     ethframe->markImmutable();
     packet->pushHeader(ethframe);
     EtherEncap::addPaddingAndFcs(packet);
@@ -143,32 +145,32 @@ void Ieee80211MgmtAPBase::convertToEtherFrame(Packet *packet, const Ptr<Ieee8021
 #endif // ifdef WITH_ETHERNET
 }
 
-const Ptr<Ieee80211DataFrame>& Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
+void Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
 {
 #ifdef WITH_ETHERNET
     auto ethframe = EtherEncap::decapsulate(packet);       // do not use const auto& : removePoppedChunks() delete it from packet
-    // create new frame
-    const Ptr<Ieee80211DataFrameWithSNAP>& frame = std::make_shared<Ieee80211DataFrameWithSNAP>();
-    frame->setFromDS(true);
-    packet->removePoppedChunks();
 
-    // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
-    frame->setReceiverAddress(ethframe->getDest());
-    frame->setAddress3(ethframe->getSrc());
-
-    // copy EtherType from original frame
+    const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
+    ieee802SnapHeader->setOui(0);
+    // copy EtherType from original ieee80211MacHeader
     if (const auto& eth2frame = std::dynamic_pointer_cast<EthernetIIFrame>(ethframe))
-        frame->setEtherType(eth2frame->getEtherType());
+        ieee802SnapHeader->setProtocolId(eth2frame->getEtherType());
     else if (const auto& snapframe = std::dynamic_pointer_cast<EtherFrameWithSNAP>(ethframe))
-        frame->setEtherType(snapframe->getLocalcode());
+        ieee802SnapHeader->setProtocolId(snapframe->getLocalcode());
     else
         throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", ethframe->getClassName());
 
-    // encapsulate payload
-    packet->insertHeader(frame);
+    const auto& ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
+    ieee80211MacHeader->setFromDS(true);
+    // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
+    ieee80211MacHeader->setReceiverAddress(ethframe->getDest());
+    ieee80211MacHeader->setAddress3(ethframe->getSrc());
 
-    // done
-    return frame;
+    // encapsulate payload
+    packet->removePoppedChunks();
+    packet->insertHeader(ieee802SnapHeader);
+    packet->insertHeader(ieee80211MacHeader);
+    packet->insertTrailer(std::make_shared<Ieee80211Fcs>());
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET
@@ -186,23 +188,27 @@ void Ieee80211MgmtAPBase::encapsulate(Packet *msg)
             break;
 
         case ENCAP_DECAP_TRUE: {
-            const Ptr<Ieee80211DataFrameWithSNAP>& frame = std::make_shared<Ieee80211DataFrameWithSNAP>();
-            frame->setFromDS(true);
+            const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
+            ieee802SnapHeader->setOui(0);
+            ieee802SnapHeader->setProtocolId(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
+            msg->insertHeader(ieee802SnapHeader);
 
-            // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
-            frame->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getSrcAddress());
-            frame->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
-            frame->setEtherType(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
+            const auto& ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
+            ieee80211MacHeader->setFromDS(true);
+
+            // copy addresses from ethernet ieee80211MacHeader (transmitter addr will be set to our addr by MAC)
+            ieee80211MacHeader->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getSrcAddress());
+            ieee80211MacHeader->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
             auto userPriorityReq = msg->getTag<UserPriorityReq>();
             if (userPriorityReq != nullptr) {
-                // make it a QoS frame, and set TID
-                frame->setType(ST_DATA_WITH_QOS);
-                frame->setChunkLength(frame->getChunkLength() + bit(QOSCONTROL_BITS));
-                frame->setTid(userPriorityReq->getUserPriority());
+                // make it a QoS ieee80211MacHeader, and set TID
+                ieee80211MacHeader->setType(ST_DATA_WITH_QOS);
+                ieee80211MacHeader->setChunkLength(ieee80211MacHeader->getChunkLength() + bit(QOSCONTROL_BITS));
+                ieee80211MacHeader->setTid(userPriorityReq->getUserPriority());
             }
 
             // encapsulate payload
-            msg->insertHeader(frame);
+            msg->insertHeader(ieee80211MacHeader);
         }
         break;
 

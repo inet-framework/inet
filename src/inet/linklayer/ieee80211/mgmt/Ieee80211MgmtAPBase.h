@@ -64,14 +64,14 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      * because MACRelayUnit which we use for LAN bridging functionality deals
      * with EtherFrames.
      */
-    virtual const Ptr<Ieee80211DataFrame>& convertFromEtherFrame(Packet *packet);
+    virtual void convertFromEtherFrame(Packet *packet);
 
     /**
      * Utility function: converts Ieee80211Frame to EtherFrame. This is needed
      * because MACRelayUnit which we use for LAN bridging functionality deals
      * with EtherFrames.
      */
-    virtual void convertToEtherFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame);
+    virtual void convertToEtherFrame(Packet *packet);
 
     /**
      * Utility function: send a frame to upperLayerOut.

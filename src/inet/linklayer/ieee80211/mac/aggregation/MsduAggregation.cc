@@ -70,15 +70,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
         auto frame = frames->at(i);
         const auto& header = frame->peekHeader<Ieee80211DataFrame>();
         auto msdu = frame->peekAt(header->getChunkLength(), frame->getTotalLength() - header->getChunkLength());
-        if (auto dataFrameWithSnap = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(header)) {
-            msduSubframeHeader->setChunkLength(msduSubframeHeader->getChunkLength() + byte(SNAP_HEADER_BYTES)); // TODO: review, see Ieee80211MsduSubframe
-            msduSubframeHeader->setEtherType(dataFrameWithSnap->getEtherType()); // TODO: review, see Ieee80211MsduSubframe
-            msduSubframeHeader->setLength(byte(msdu->getChunkLength() + byte(SNAP_HEADER_BYTES)).get());
-        }
-        else {
-            msduSubframeHeader->setEtherType(-1); // TODO: review, see Ieee80211MsduSubframe
-            msduSubframeHeader->setLength(byte(msdu->getChunkLength()).get());
-        }
+        msduSubframeHeader->setLength(byte(msdu->getChunkLength()).get());
         std::cout << "MSDU: " << msdu << std::endl;
         setSubframeAddress(msduSubframeHeader, header);
         msduSubframeHeader->markImmutable();
