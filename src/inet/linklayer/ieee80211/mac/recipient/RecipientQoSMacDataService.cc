@@ -88,9 +88,10 @@ std::vector<Ieee80211Frame*> RecipientQoSMacDataService::dataFrameReceived(Ieee8
         for (auto frame : defragmentedFrames) {
             auto dataFrame = check_and_cast<Ieee80211DataFrame *>(frame);
             if (dataFrame->getAMsduPresent()) {
-                auto subframes = aMsduDeaggregation->deaggregateFrame(dataFrame); // FIXME
+                auto subframes = aMsduDeaggregation->deaggregateFrame(dataFrame);
                 for (auto subframe : *subframes)
                     deaggregatedFrames.push_back(subframe);
+                delete subframes;
             }
             else
                 deaggregatedFrames.push_back(dataFrame);
