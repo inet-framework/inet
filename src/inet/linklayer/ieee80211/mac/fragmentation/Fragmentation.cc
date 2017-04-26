@@ -40,6 +40,7 @@ std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vec
         fragment->append(frame->peekDataAt(offset, length));
         offset += length;
         const auto& fragmentHeader = std::static_pointer_cast<Ieee80211DataOrMgmtFrame>(frameHeader->dupShared());
+        fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());
         fragmentHeader->setFragmentNumber(i);
         fragmentHeader->setMoreFragments(!lastFragment);
         fragmentHeader->markImmutable();
