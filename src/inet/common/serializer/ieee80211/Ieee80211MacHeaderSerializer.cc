@@ -49,7 +49,7 @@ Register_Serializer(Ieee80211BasicBlockAck, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211CompressedBlockAck, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MultiTidBlockAck, Ieee80211MacHeaderSerializer);
 
-Register_Serializer(Ieee80211FcsTrailer, Ieee80211FcsSerializer);
+Register_Serializer(Ieee80211FcsTrailer, Ieee80211FcsTrailerSerializer);
 
 void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
@@ -701,16 +701,22 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 //    return frame;
 }
 
-void Ieee80211FcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee80211FcsTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
-    // CRC
-    stream.writeUint32Be(0);
-    // stream.writeUint32(ethernetCRC(stream._getBuf(), stream.getPos()));
+    const auto& fcsTrailer = std::dynamic_pointer_cast<Ieee80211FcsTrailer>(chunk);
+    auto fcsMode = fcsTrailer->getFcsMode();
+    if (fcsMode != CRC_COMPUTED)
+        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
+    stream.writeUint32Be(fcsTrailer->getFcs());
 }
 
-Ptr<Chunk> Ieee80211FcsSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> Ieee80211FcsTrailerSerializer::deserialize(MemoryInputStream& stream) const
 {
-    // TODO:
+    auto fcsTrailer = std::make_shared<Ieee80211FcsTrailer>();
+    auto fcs = stream.readUint32Be();
+    fcsTrailer->setFcs(fcs);
+    fcsTrailer->setFcsMode(CRC_COMPUTED);
+    return fcsTrailer;
 }
 
 } // namespace serializer
