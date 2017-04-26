@@ -26,7 +26,6 @@ namespace serializer {
 using namespace ieee80211;
 
 Register_Serializer(Ieee80211DataFrame, Ieee80211MacHeaderSerializer);
-Register_Serializer(Ieee80211DataFrameWithSNAP, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MsduSubframe, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MacHeaderSerializer);
@@ -102,16 +101,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeUint16Le(dataFrame->getQos() | (dataFrame->getAMsduPresent() ? 0x0080 : 0x0000));
         }
 
-        if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrameWithSNAP>(chunk))
-        {
-            // snap header:
-            stream.writeByte(0xAA);    // snap_hdr.dsap
-            stream.writeByte(0xAA);    // snap_hdr.ssap
-            stream.writeByte(0x03);    // snap_hdr.ctrl
-            stream.writeByteRepeatedly(0, 3);   // snap_hdr.oui
-            stream.writeUint16Be(dataFrame->getEtherType());  // snap_hdr.ethertype
-        }
-        else if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
+        if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
         {
             //type = ST_AUTHENTICATION;
             // 1    Authentication algorithm number
@@ -363,13 +353,6 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeMACAddress(msduSubframe->getDa());
         stream.writeMACAddress(msduSubframe->getSa());
         stream.writeUint16Be(msduSubframe->getLength());
-        if (msduSubframe->getEtherType() != -1) {
-            stream.writeByte(0xAA);    // snap_hdr.dsap
-            stream.writeByte(0xAA);    // snap_hdr.ssap
-            stream.writeByte(0x03);    // snap_hdr.ctrl
-            stream.writeByteRepeatedly(0, 3);   // snap_hdr.oui
-            stream.writeUint16Be(msduSubframe->getEtherType());  // snap_hdr.ethertype
-        }
     }
     else
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
