@@ -257,7 +257,7 @@
 
 ### /examples/manetrouting/* : see manet.csv
 
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             4da8-0423/tplx
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    500s,             7073-84f2/tplx
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          72f8-5c0b/tplx
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          ce84-30b6/tplx

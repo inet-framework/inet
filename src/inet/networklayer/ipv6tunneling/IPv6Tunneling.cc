@@ -448,7 +448,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
             EV_INFO << "Added Home Address Option header." << endl;
         }
 
-        auto addresses = packet->ensureTag<L3AddressInd>();
+        auto addresses = packet->ensureTag<L3AddressReq>();
         // new src is tunnel entry (either CoA or CN)
         addresses->setSrcAddress(src);
         // copy old dest addr
@@ -458,11 +458,11 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
     }
     else {
 #endif    // WITH_xMIPv6
-          // normal tunnel - just modify controlInfo and send
-          // datagram back to IPv6 module for encapsulation
+      // normal tunnel - just modify controlInfo and send
+      // datagram back to IPv6 module for encapsulation
 
     packet->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
-    auto addresses = packet->ensureTag<L3AddressInd>();
+    auto addresses = packet->ensureTag<L3AddressReq>();
     addresses->setSrcAddress(tunnels[vIfIndex].entry);
     addresses->setDestAddress(tunnels[vIfIndex].exit);
 
@@ -475,7 +475,7 @@ void IPv6Tunneling::encapsulateDatagram(Packet *packet)
 
 void IPv6Tunneling::decapsulateDatagram(Packet *packet)
 {
-    auto ipv6Header = packet->popHeader<IPv6Header>();
+    auto ipv6Header = packet->peekHeader<IPv6Header>();
     // decapsulation is performed in IPv6 module
     IPv6Address srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress().toIPv6();
 

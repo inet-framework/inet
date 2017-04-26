@@ -31,7 +31,7 @@
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 #include "inet/networklayer/ipv6tunneling/IPv6Tunneling.h"
-#include "inet/networklayer/xmipv6/MobilityHeader.h"    // for HAOpt & RH2
+#include "inet/networklayer/xmipv6/MobilityHeader_m.h"    // for HAOpt & RH2
 
 namespace inet {
 
@@ -44,24 +44,22 @@ class IPv6NeighbourDiscovery;
 class IPv6Tunneling;
 class IPv6RoutingTable;
 
-// 13.9.07
 // Keys for timer list (=message type)
 #define KEY_BU               0 // Binding Update
 #define KEY_HI               1 // HoTI
 #define KEY_CI               2 // CoTI
 #define KEY_BR               3 // Binding Refresh Request
-#define KEY_BUL_EXP          4 // BUL entry expiry // 12.06.08 - CB
-#define KEY_BC_EXP           5 // BC entry expiry // 17.06.08 - CB
-#define KEY_HTOKEN_EXP       6 // home token expiry // 10.07.08 - CB
-#define KEY_CTOKEN_EXP       7 // care-of token expiry // 10.07.08 - CB
+#define KEY_BUL_EXP          4 // BUL entry expiry
+#define KEY_BC_EXP           5 // BC entry expiry
+#define KEY_HTOKEN_EXP       6 // home token expiry
+#define KEY_CTOKEN_EXP       7 // care-of token expiry
 
-// 21.9.07
 #define TRANSMIT_TYPE_BU     51 // BUTransmitIfEntry
 #define TRANSMIT_TYPE_TI     52 // TestInitTransmitIfEntry
-// 12.06.08 - CB
+
 #define EXPIRY_TYPE_BUL      61 // BULExpiryIfEntry
 #define EXPIRY_TYPE_BC       62 // BCExpiryIfEntry
-// 10.07.08 - CB
+
 #define EXPIRY_TYPE_TOKEN    63 // {Home, CareOf}TokenExpiryIfEntry
 
 /**
@@ -75,9 +73,9 @@ class INET_API xMIPv6 : public cSimpleModule
   protected:
     IInterfaceTable *ift;
     IPv6RoutingTable *rt6;
-    BindingUpdateList *bul;    //31.07.07
-    BindingCache *bc;    //31.07.07
-    IPv6Tunneling *tunneling;    // 21.08.07 - CB
+    BindingUpdateList *bul;
+    BindingCache *bc;
+    IPv6Tunneling *tunneling;
     IPv6NeighbourDiscovery *ipv6nd;
 
     // statistic collection
@@ -107,7 +105,6 @@ class INET_API xMIPv6 : public cSimpleModule
         InterfaceEntry *ifEntry;    // interface from which the message will be transmitted
     };
 
-    // 13.9.07 - CB
     struct Key
     {
         int type;    // type of the message (BU, HoTI, CoTI) stored in the map, indexed by this key
@@ -137,7 +134,7 @@ class INET_API xMIPv6 : public cSimpleModule
     typedef std::map<int, IPv6Address> InterfaceCoAList;
     InterfaceCoAList interfaceCoAList;
 
-    // A vector that will contain and maintain a list of all the CN(s) that the MN is in communication with. Although this is a quick fix, but this list should be populated and depopulated in sync with the destination cache. Final version should rely on the destinaion cache for acquiring the CN(s) address for use in Correspodent Registeration (Zarrar 27.07.07)
+    // A vector that will contain and maintain a list of all the CN(s) that the MN is in communication with. Although this is a quick fix, but this list should be populated and depopulated in sync with the destination cache. Final version should rely on the destinaion cache for acquiring the CN(s) address for use in Correspodent Registeration
     typedef std::vector<IPv6Address> CNList;
     CNList cnList;
     CNList::iterator itCNList;    // declaring an iterator over the cnList vector
@@ -147,28 +144,24 @@ class INET_API xMIPv6 : public cSimpleModule
     {
       public:
         uint buSequenceNumber;    // sequence number of the BU sent
-        uint lifeTime;    // lifetime of the BU sent, 4.9.07 - CB
+        uint lifeTime;    // lifetime of the BU sent
         //Time variable related to the time at which BU was sent
         simtime_t presentSentTimeBU;    //stores the present time at which BU is/was sent
-        bool homeRegistration;    // indicates whether this goes to HA or CN; Added by CB
+        bool homeRegistration;    // indicates whether this goes to HA or CN;
     };
 
-    //##############################Added by Christian, 27.08.07#################################
     class TestInitTransmitIfEntry : public TimerIfEntry
     {
       public:
-        MobilityHeader *testInitMsg;    // either the HoTI or CoTI
+        Ptr<MobilityHeader> testInitMsg;    // either the HoTI or CoTI
     };
-    //##############################End Christian#################################
-    //##############################Added by Christian, 27.08.07#################################
+
     class BRTransmitIfEntry : public TimerIfEntry
     {
       public:
         uint retries;    // number of BRRs already sent
     };
-    //##############################End Christian#################################
 
-    // Added 11.06.08 - CB
     class BULExpiryIfEntry : public TimerIfEntry
     {
       public:
@@ -199,31 +192,31 @@ class INET_API xMIPv6 : public cSimpleModule
      * This is where all the mobility messages are sifted through and sent to appropriate functions
      * for processing.
      */
-    void processMobilityMessage(MobilityHeader *mipv6Msg);
+    void processMobilityMessage(Packet *inPacket);
 
     /**
      * This method finally creates the timer structure and schedules the message for sending.
      */
     void createBUTimer(const IPv6Address& buDest, InterfaceEntry *ie, const uint lifeTime,
-            bool homeRegistration);    // 4.9.07 - CB
+            bool homeRegistration);
 
     /**
      * Similiar to the previous one, this method creates an BU timer with registration lifetime equal to 0.
      */
-    void createDeregisterBUTimer(const IPv6Address& buDest, InterfaceEntry *ie);    // 4.9.07 - CB
+    void createDeregisterBUTimer(const IPv6Address& buDest, InterfaceEntry *ie);
 
     /*
      * This method creates and starts a timer for an advertising interface over which BUs will be sent until it gets acknowledged
      * by an appropriate BA. This routine also "intialises" the necessary variables in a struct BUTransmitIfEntry that is created to
      * keep these variables for access.
      */
-    void createBUTimer(const IPv6Address& buDest, InterfaceEntry *ie);    //05.06.07, update 28.08.07 - CB, 14.9.07 - CB
+    void createBUTimer(const IPv6Address& buDest, InterfaceEntry *ie);
 
     /**
      * This method is called when the timer created in createBUTimer() has fired.
      * The BU is created and the appropriate method for sending it called. The timer structure is updated and rescheduled.
      */
-    void sendPeriodicBU(cMessage *msg);    //06.06.07
+    void sendPeriodicBU(cMessage *msg);
 
     /**
      * Method for creating and sending a BU by a MN.
@@ -235,18 +228,18 @@ class INET_API xMIPv6 : public cSimpleModule
      * Update the an entry of the BUL with the provided parameters.
      */
     void updateBUL(BindingUpdate *bu, const IPv6Address& dest, const IPv6Address& CoA,
-            InterfaceEntry *ie, const simtime_t sendTime);    //04.06.07
+            InterfaceEntry *ie, const simtime_t sendTime);
 
     /**
      * This method takes an interface and a destination address and returns the appropriate IfEntry for an BU.
      * Is supposed to be used until the valid BA is received for the respective BU.
      */
-    xMIPv6::BUTransmitIfEntry *fetchBUTransmitIfEntry(InterfaceEntry *ie, const IPv6Address& dest);    //08.06.07
+    xMIPv6::BUTransmitIfEntry *fetchBUTransmitIfEntry(InterfaceEntry *ie, const IPv6Address& dest);
 
     /**
      * Append an IPv6ControlInfo object to the Mobility Messages (BU, BA etc) and send it out to the IPv6 Module
      */
-    void sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr,
+    void sendMobilityMessageToIPv6Module(Packet *msg, const IPv6Address& destAddr,
             const IPv6Address& srcAddr = IPv6Address::UNSPECIFIED_ADDRESS, int interfaceId = -1,
             simtime_t sendTime = 0);    // overloaded for use at CN - CB
     //void sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
@@ -254,57 +247,57 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Process a BU - only applicable to HAs and CNs.
      */
-    void processBUMessage(BindingUpdate *bu);
+    void processBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu);
 
     /**
      * Validate a BU - only applicable to HAs and CNs
      */
-    bool validateBUMessage(BindingUpdate *bu);
+    bool validateBUMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu);
 
     /**
      * Similiar to validateBUMessage(). However, this one is used only by HA to verify deregistration BU.
      */
-    bool validateBUderegisterMessage(BindingUpdate *bu);    // 4.9.07 - CB
+    bool validateBUderegisterMessage(Packet *inPacket, const Ptr<BindingUpdate>& bu);
 
     /**
      * Constructs and send a BA to the IPv6 module. Only applicable to HAs and CNs.
      */
     void createAndSendBAMessage(const IPv6Address& src,
             const IPv6Address& dest, int interfaceId, const BAStatus& baStatus, const uint baSeq,
-            const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0);    // 14.9.07 - CB
+            const int bindingAuthorizationData, const uint lifeTime, simtime_t sendTime = 0);
 
     /**
      * Processes the received BA and creates tunnels or mobility header paths if appropriate.
      */
-    void processBAMessage(BindingAcknowledgement *ba);
+    void processBAMessage(Packet *inPacket, const Ptr<BindingAcknowledgement>& ba);
 
     /**
      * Validates a Binding Acknowledgement for a mobile node.
      */
-    bool validateBAck(BindingAcknowledgement& ba);    // update 12.9.07
+    bool validateBAck(Packet *inPacket, BindingAcknowledgement& ba);
 
     /**
      * Creates and sends Binding Error message.
      */
-    void createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beStatus);    // update 12.9.07 - CB
+    void createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beStatus);
 
   public:
     /**
      * Initiates the Mobile IP protocol.
      * Method to be used when we have moved to a new access network and the new CoA is available for that interface.
      */
-    void initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA);    //27.07.07
+    void initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA);
 
     /**
      * This method destroys all tunnels associated to the previous CoA
      * and sends appropriate BU(s) to HA and CN(s).
      */
-    void returningHome(const IPv6Address& CoA, InterfaceEntry *ie);    // 4.9.07 - CB
+    void returningHome(const IPv6Address& CoA, InterfaceEntry *ie);
 
 //
 // Route Optimization related functions
 //
-    /** Alain Tigyo, 21.03.2008
+    /**
      *  The following method is used for triggering RO to a CN.
      */
     virtual void triggerRouteOptimization(const IPv6Address& destAddress,
@@ -315,19 +308,18 @@ class INET_API xMIPv6 : public cSimpleModule
      * Creates HoTI and CoTI messages and sends them to the CN if timers are not already existing.
      * If home and care-of tokens are already available a BU is directly sent to the CN.
      */
-    virtual void initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry *ie);    // 27.08.07 - CB
+    virtual void initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry *ie);
 
     /**
      * Creates and schedules a timer for either a HoTI or a CoTI transmission.
      */
-    void createTestInitTimer(MobilityHeader *testInit, const IPv6Address& dest,
-            InterfaceEntry *ie, simtime_t sendTime = 0);    // 27.08.07 - CB
+    void createTestInitTimer(Ptr<MobilityHeader> testInit, const IPv6Address& dest, InterfaceEntry *ie, simtime_t sendTime = 0);
 
     /**
      * If a TestInit timer was fired, this method gets called. The message is sent and the Binding Update List accordingly updated.
      * Afterwards the transmission timer is rescheduled.
      */
-    void sendTestInit(cMessage *msg);    // 27.08.07 - CB
+    void sendTestInit(cMessage *msg);
 
     /**
      * Cancels the current existing timer and reschedules it with initial values.
@@ -338,7 +330,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Similiar to the other resetTestInitIfEntry() method, but this one searches for the appropriate
      * transmission structure first as the interfaceID is not known but needed as lookup key.
      */
-    /*void resetTestInitIfEntry(const IPv6Address& dest, int msgType); // 14.01.08 - CB*/
+    //void resetTestInitIfEntry(const IPv6Address& dest, int msgType);
 
     /**
      * Reset the transmission structure for a BU and reschedule it for the provided time.
@@ -358,33 +350,33 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Create and send a HoT message.
      */
-    void processHoTIMessage(HomeTestInit *HoTI);    // 27.08.07 - CB
+    void processHoTIMessage(Packet *inPacket, const Ptr<HomeTestInit>& HoTI);
 
     /**
      * Create and send a CoT message.
      */
-    void processCoTIMessage(CareOfTestInit *CoTI);    // 27.08.07 - CB
+    void processCoTIMessage(Packet *inPacket, const Ptr<CareOfTestInit>& CoTI);
 
     /**
      * First verifies a received HoT message and sends a BU to the CN if the care-of keygen token
      * is available as well. Retransmission of HoTI message is rescheduled.
      */
-    void processHoTMessage(HomeTest *HoT);    // 28.07.07 - CB
+    void processHoTMessage(Packet *inPacket, const Ptr<HomeTest>& HoT);
 
     /**
      * Verifies a HoT according to the RFC, Section 11.6.2
      */
-    bool validateHoTMessage(HomeTest& HoT);    // 27.08.07 - CB
+    bool validateHoTMessage(Packet *inPacket, HomeTest& HoT);
 
     /**
      * Like processHoTMessage(), but related to CoT.
      */
-    void processCoTMessage(CareOfTest *CoT);    // 28.07.07 - CB
+    void processCoTMessage(Packet *inPacket, const Ptr<CareOfTest>& CoT);
 
     /**
      * Like validateHoTMessage(), but related to CoT.
      */
-    bool validateCoTMessage(CareOfTest& CoT);    // 27.08.07 - CB
+    bool validateCoTMessage(Packet *inPacket, CareOfTest& CoT);
 
     /**
      * Send a BU depending on current status of:
@@ -398,7 +390,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates a timer for sending a BU.
      */
-    void sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, InterfaceEntry *ie);    // 28.07.07 - CB
+    void sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, InterfaceEntry *ie);
 
     /**
      * Process the Type 2 Routing Header which belongs to the provided datagram.
@@ -428,24 +420,24 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * Creates a timer for a Binding Refresh Request message that is going to be fired in scheduledTime seconds.
      */
-    void createBRRTimer(const IPv6Address& brDest, InterfaceEntry *ie, const uint scheduledTime);    // 18.9.07 - CB
+    void createBRRTimer(const IPv6Address& brDest, InterfaceEntry *ie, const uint scheduledTime);
 
     /**
      * Handles a fired BRR message transmission structure.
      * Creates and sends and appropriate Binding Refresh Request.
      * Transmission structure is rescheduled afterwards.
      */
-    void sendPeriodicBRR(cMessage *msg);    // 18.09.07 - CB
+    void sendPeriodicBRR(cMessage *msg);
 
     /**
      * Creates a Binding Refresh Request and sends it to the IPv6 module.
      */
-    void createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry *ie);    // 18.09.07 - CB
+    void createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry *ie);
 
     /**
      * Processes the Binding Refresh Message.
      */
-    void processBRRMessage(BindingRefreshRequest *brr);    // 18.9.07 - CB
+    void processBRRMessage(Packet *inPacket, const Ptr<BindingRefreshRequest>& brr);
 
   protected:
 //

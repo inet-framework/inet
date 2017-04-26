@@ -23,12 +23,15 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/networklayer/contract/ipv6/IPv6Address.h"
 #include "inet/networklayer/ipv6/IPv6Header.h" // added by CB
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
 }}
 
 namespace inet;
+
+class FieldsChunk extends cObject;
 
 class noncobject IPv6Address;
 
@@ -49,13 +52,13 @@ enum MobilityHeaderType
     BINDING_ERROR = 7;
 }
 
-packet MobilityHeader // extends IPv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of IPv6ExtensionHeader
+class MobilityHeader extends FieldsChunk  // extends IPv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of IPv6ExtensionHeader
 {
     int mobilityHeaderType @enum(MobilityHeaderType);
 }
 
 
-packet BindingUpdate extends MobilityHeader
+class BindingUpdate extends MobilityHeader
 {
     unsigned int lifetime;
     unsigned int sequence;
@@ -94,7 +97,7 @@ enum BAStatus
 
 //==================Defining Binding Acknowledgement Message===================
 
-packet BindingAcknowledgement extends MobilityHeader
+class BindingAcknowledgement extends MobilityHeader
 {
     int status @enum(BAStatus);
     unsigned int sequenceNumber;
@@ -117,7 +120,7 @@ enum BEStatus
 
 //==================Defining Binding Error Message===================
 
-packet BindingError extends MobilityHeader
+class BindingError extends MobilityHeader
 {
     int status @enum(BEStatus);
     IPv6Address homeAddress;
@@ -127,14 +130,14 @@ packet BindingError extends MobilityHeader
 
 //=============Message definition of Home Test Init Message ==========
 
-packet HomeTestInit extends MobilityHeader
+class HomeTestInit extends MobilityHeader
 {
     unsigned int homeInitCookie;
 }
 
 //=============Message definition of Home Test Message ==========
 
-packet HomeTest extends MobilityHeader
+class HomeTest extends MobilityHeader
 {
     unsigned int homeInitCookie;
     unsigned int homeKeyGenToken;
@@ -143,14 +146,14 @@ packet HomeTest extends MobilityHeader
 
 //=============Message definition of Care-of Test Init Message ==========
 
-packet CareOfTestInit extends MobilityHeader
+class CareOfTestInit extends MobilityHeader
 {
     unsigned int careOfInitCookie;
 }
 
 //=============Message definition of Care-of Test Message ==========
 
-packet CareOfTest extends MobilityHeader
+class CareOfTest extends MobilityHeader
 {
     unsigned int careOfInitCookie;
     unsigned int careOfKeyGenToken;
@@ -161,7 +164,7 @@ packet CareOfTest extends MobilityHeader
 ///////////////////////////////////////////
 // 18.09.07 - CB
 ///////////////////////////////////////////
-packet BindingRefreshRequest extends MobilityHeader
+class BindingRefreshRequest extends MobilityHeader
 {
 }
 
@@ -169,8 +172,8 @@ packet BindingRefreshRequest extends MobilityHeader
 ///////////////////////////////////////////
 // 17.10.07 - CB
 ///////////////////////////////////////////
-packet HomeAddressOption extends IPv6DestinationOptionsHeader
+class HomeAddressOption extends IPv6DestinationOptionsHeader
 {
-    @customize(true);
     IPv6Address homeAddress;
 }
+

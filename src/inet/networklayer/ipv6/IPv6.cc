@@ -42,7 +42,7 @@
 #include "inet/networklayer/icmpv6/ICMPv6Header_m.h"
 
 #ifdef WITH_xMIPv6
-#include "inet/networklayer/xmipv6/MobilityHeader.h"
+#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
 #endif /* WITH_xMIPv6 */
 
 
@@ -196,7 +196,7 @@ void IPv6::endService(cPacket *msg)
         || (msg->getArrivalGate()->isName("ndIn") && msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
         || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->getArrivalGate()->isName("xMIPv6In") && dynamic_cast<MobilityHeader *>(msg))    // Zarrar
+        || (msg->getArrivalGate()->isName("xMIPv6In") && msg->getMandatoryTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
         )
     {
@@ -653,12 +653,12 @@ void IPv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
         handleReceivedICMP(packet);
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
 #ifdef WITH_xMIPv6
-    else if (protocol == IP_PROT_IPv6EXT_MOB && dynamic_cast<MobilityHeader *>(packet)) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
+    else if (protocol == IP_PROT_IPv6EXT_MOB) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
         // added check for MIPv6 support to prevent nodes w/o the
         // xMIP module from processing related messages, 4.9.07 - CB
         if (rt->hasMIPv6Support()) {
             EV_INFO << "MIPv6 packet: passing it to xMIPv6 module\n";
-            send(check_and_cast<MobilityHeader *>(packet), "xMIPv6Out");
+            send(packet, "xMIPv6Out");
         }
         else {
             // update 12.9.07 - CB
@@ -784,6 +784,7 @@ void IPv6::encapsulate(Packet *transportPacket)
     }
 
     ipv6Header->setChunkLength(byte(ipv6Header->calculateHeaderByteLength()));
+    transportPacket->removePoppedHeaders();
     transportPacket->insertHeader(ipv6Header);
 
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);

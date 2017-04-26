@@ -94,6 +94,7 @@ const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 89, &Protocol::ospf },
     { 103, &Protocol::pim },
     { 132, &Protocol::sctp},
+    { 135, &Protocol::mobileipv6},
     { 138, &Protocol::manet },
 
     { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol
