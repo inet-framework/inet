@@ -536,7 +536,7 @@ class INET_API Chunk : public cObject, public std::enable_shared_from_this<Chunk
         if (length != bit(-1) && getChunkLength() < iterator.getPosition() + length)
             return false;
         else {
-            const auto& chunk = peek<T>(iterator, length, PF_ALLOW_NULLPTR + PF_ALLOW_INCOMPLETE);
+            const auto& chunk = peek<T>(iterator, length, PF_ALLOW_NULLPTR | PF_ALLOW_INCOMPLETE);
             return chunk != nullptr && chunk->isComplete();
         }
     }
