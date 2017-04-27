@@ -136,7 +136,10 @@ void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211M
     frame->setReceiverAddress(destAddr);
     frame->setAddress3(myAddress);
     frame->markImmutable();
-    sendDown(new Packet(name, frame));
+    auto packet = new Packet(name);
+    packet->insertHeader(frame);
+    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+    sendDown(packet);
 }
 
 void Ieee80211MgmtAP::sendBeacon()
@@ -149,13 +152,8 @@ void Ieee80211MgmtAP::sendBeacon()
     body.setBeaconInterval(beaconInterval);
     body.setChannelNumber(channelNumber);
     body.setBodyLength(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates));
-
     frame->setChunkLength(byte(24 + body.getBodyLength()));
-    frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);
-    frame->setFromDS(true);
-    frame->markImmutable();
-
-    sendDown(new Packet("Beacon", frame));
+    sendManagementFrame("Beacon", frame, MACAddress::BROADCAST_ADDRESS);
 }
 
 void Ieee80211MgmtAP::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)

@@ -301,7 +301,10 @@ void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211
     frame->setReceiverAddress(address);
     //XXX set sequenceNumber?
     frame->markImmutable();
-    sendDown(new Packet(name, frame));
+    auto packet = new Packet(name);
+    packet->insertHeader(frame);
+    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+    sendDown(packet);
 }
 
 void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
