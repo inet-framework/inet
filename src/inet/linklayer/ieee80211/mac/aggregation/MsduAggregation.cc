@@ -96,7 +96,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     amsduHeader->setTransmitterAddress(ta);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
-    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + byte(2));
+    // KLUDGE: TODO: revive amsduHeader->setChunkLength(amsduHeader->getChunkLength() + byte(2));
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     amsduHeader->markImmutable();
     aggregatedFrame->pushHeader(amsduHeader);
