@@ -45,6 +45,8 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
         virtual void transmissionComplete() override;
         virtual void handleStartRxTimeout() override;
         virtual bool isSequenceRunning() override { return frameSequence != nullptr; }
+
+        virtual ~FrameSequenceHandler();
 };
 
 } /* namespace ieee80211 */
