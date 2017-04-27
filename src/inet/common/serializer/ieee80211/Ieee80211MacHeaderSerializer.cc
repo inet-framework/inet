@@ -367,14 +367,14 @@ void Ieee80211MacHeaderSerializer::parseDataOrMgmtFrame(MemoryInputStream &strea
     frame->setReceiverAddress(stream.readMACAddress());
     frame->setTransmitterAddress(stream.readMACAddress());
     frame->setAddress3(stream.readMACAddress());
-    uint16_t seq = stream.readUint16Be();   // i_seq
+    uint16_t seq = stream.readUint16Le();   // i_seq
     frame->setSequenceNumber(seq >> 4);
     frame->setFragmentNumber(seq & 0x0F);
 
     if ((type == ST_DATA || type == ST_DATA_WITH_QOS) && frame->getFromDS() && frame->getToDS())
         std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setAddress4(stream.readMACAddress());
     if (type == ST_DATA_WITH_QOS)
-        std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setQos(stream.readUint16Be());
+        std::dynamic_pointer_cast<Ieee80211DataFrame>(frame)->setQos(stream.readUint16Le());
 }
 
 Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) const
