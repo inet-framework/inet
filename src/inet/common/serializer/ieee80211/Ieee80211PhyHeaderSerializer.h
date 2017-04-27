@@ -18,7 +18,7 @@
 #ifndef __INET_IEEE80211PHYHEADERSERIALIZER_H
 #define __INET_IEEE80211PHYHEADERSERIALIZER_H
 
-#include "inet/common/packet/serializer/ChunkSerializer.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
@@ -27,12 +27,13 @@ namespace serializer {
 /**
  * Converts between Ieee80211PhyHeader and binary network byte order IEEE 802.11 phy header.
  */
-class INET_API Ieee80211PhyHeaderSerializer
+class INET_API Ieee80211PhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
 //    void writeToBitVector(unsigned char *buf, unsigned int bufSize, BitVector *bitVector) const;
-//    bool serialize(const inet::physicallayer::Ieee80211PLCPFrame *plcpHeader, BitVector *serializedPacket) const;
-//    inet::physicallayer::Ieee80211PLCPFrame *deserialize(BitVector *serializedPacket) const;
+
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
+    virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
     Ieee80211PhyHeaderSerializer() : FieldsChunkSerializer() {}
