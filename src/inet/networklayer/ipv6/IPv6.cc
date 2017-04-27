@@ -692,7 +692,7 @@ void IPv6::handleReceivedICMP(Packet *msg)
 {
     const auto& icmpHeader = msg->peekHeader<ICMPv6Header>();
     if (std::dynamic_pointer_cast<IPv6NDMessage>(icmpHeader) != nullptr) {
-        EV_INFO << "Neigbour Discovery packet: passing it to ND module\n";
+        EV_INFO << "Neighbour Discovery packet: passing it to ND module\n";
         send(msg, "ndOut");
     }
     else {
@@ -784,8 +784,7 @@ void IPv6::encapsulate(Packet *transportPacket)
     }
 
     ipv6Header->setChunkLength(byte(ipv6Header->calculateHeaderByteLength()));
-    ipv6Header->markImmutable();
-    transportPacket->pushHeader(ipv6Header);
+    transportPacket->insertHeader(ipv6Header);
 
     transportPacket->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     // setting IP options is currently not supported

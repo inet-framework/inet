@@ -327,7 +327,6 @@ IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(Inte
 IPv6NeighbourDiscovery::RDEntry *IPv6NeighbourDiscovery::fetchRDEntry(InterfaceEntry *ie)
 {
     for (auto rdEntry : rdList) {
-        
         if (rdEntry->interfaceId == ie->getInterfaceId()) {
             return rdEntry;
         }
