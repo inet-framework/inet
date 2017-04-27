@@ -23,7 +23,10 @@ namespace inet {
 
 namespace serializer {
 
+Register_Serializer(Ieee80211Frame, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211DataOrMgmtFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataFrame, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211ManagementFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MsduSubframe, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MacHeaderSerializer);
