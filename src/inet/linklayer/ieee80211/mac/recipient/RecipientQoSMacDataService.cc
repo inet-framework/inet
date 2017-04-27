@@ -48,7 +48,7 @@ Packet *RecipientQoSMacDataService::defragment(std::vector<Packet *> completeFra
 Packet *RecipientQoSMacDataService::defragment(Packet *mgmtFragment)
 {
     auto packet = basicReassembly->addFragment(mgmtFragment);
-    if (packet->hasHeader<Ieee80211ManagementFrame>())
+    if (packet && packet->hasHeader<Ieee80211DataOrMgmtFrame>())
         return packet;
     else
         return nullptr;

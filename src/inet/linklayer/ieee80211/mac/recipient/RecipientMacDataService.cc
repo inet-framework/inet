@@ -32,9 +32,9 @@ void RecipientMacDataService::initialize()
 
 Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 {
-    Packet *result = basicReassembly->addFragment(dataOrMgmtFrame);
-    if (auto completeFrame = std::dynamic_pointer_cast<Ieee80211DataOrMgmtFrame>(result->peekHeader<Ieee80211Frame>()))
-        return result;
+    Packet *packet = basicReassembly->addFragment(dataOrMgmtFrame);
+    if (packet && packet->peekHeader<Ieee80211DataOrMgmtFrame>())
+        return packet;
     else
         return nullptr;
 }
