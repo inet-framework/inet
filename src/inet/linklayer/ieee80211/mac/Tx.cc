@@ -61,8 +61,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, simtime
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", frame->getName());
     take(packet);
-    auto frameToTransmit = packet->dup();
-    this->frame = frameToTransmit;
+    this->frame = packet->dup();
     header = frame;
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
@@ -79,7 +78,7 @@ void Tx::radioTransmissionFinished()
         ASSERT(txCallback != nullptr);
         ITx::ICallback *tmpTxCallback = txCallback;
         txCallback = nullptr;
-        tmpTxCallback->transmissionComplete(frame->dup(), header);
+        tmpTxCallback->transmissionComplete(frame, header);
         frame = nullptr;
         header = nullptr;
         rx->frameTransmitted(durationField);
@@ -94,7 +93,7 @@ void Tx::handleMessage(cMessage *msg)
         EV_DETAIL << "Tx: endIfsTimer expired\n";
         transmitting = true;
         durationField = header->getDuration();
-        mac->sendFrame(frame);
+        mac->sendFrame(frame->dup());
         if (hasGUI())
             refreshDisplay();
     }
