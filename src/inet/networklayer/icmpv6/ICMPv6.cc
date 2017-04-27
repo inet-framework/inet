@@ -144,7 +144,7 @@ void ICMPv6::processEchoRequest(Packet *requestPacket, const Ptr<ICMPv6EchoReque
 {
     //Create an ICMPv6 Reply Message
     auto replyPacket = new Packet();
-    replyPacket->setName((std::string(requestHeader->getName()) + "-reply").c_str());
+    replyPacket->setName((std::string(requestPacket->getName()) + "-reply").c_str());
     auto replyHeader = std::make_shared<ICMPv6EchoReplyMsg>();
     replyHeader->setIdentifier(requestHeader->getIdentifier());
     replyHeader->setSeqNumber(requestHeader->getSeqNumber());
@@ -234,14 +234,14 @@ void ICMPv6::sendErrorMessage(Packet *origDatagram, ICMPv6Type type, int code)
 void ICMPv6::sendToIP(Packet *msg, const IPv6Address& dest)
 {
     msg->ensureTag<L3AddressReq>()->setDestAddress(dest);
-    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-
-    send(msg, "ipv6Out");
+    sendToIP(msg);
 }
 
 void ICMPv6::sendToIP(Packet *msg)
 {
     // assumes IPv6ControlInfo is already attached
+    msg->ensureTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+    msg->ensureTag<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     send(msg, "ipv6Out");
 }
 
