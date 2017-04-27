@@ -123,6 +123,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
 void Ieee80211MgmtAPBase::convertToEtherFrame(Packet *packet)
 {
 #ifdef WITH_ETHERNET
+    packet->removePoppedHeaders();
     const auto& ieee80211MacHeader = packet->removeHeader<Ieee80211DataFrame>();
     const auto& ieee802SnapHeader = packet->removeHeader<Ieee802SnapHeader>();
     packet->removeTrailer<Ieee80211MacTrailer>();

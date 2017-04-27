@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee802/Ieee802Header_m.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
@@ -300,6 +301,12 @@ void Dcf::originatorProcessFailedFrame(Packet *packet)
     if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(packet, failedFrame);
         inProgressFrames->dropFrame(packet);
+        // KLUDGE: removed headers and trailers to allow higher layer protocols to process the packet
+        packet->popHeader<Ieee80211DataOrMgmtFrame>();
+        const auto& nextHeader = packet->peekHeader();
+        if (std::dynamic_pointer_cast<Ieee802LlcHeader>(nextHeader))
+            packet->popHeader<Ieee802LlcHeader>();
+        packet->popTrailer<Ieee80211MacTrailer>();
         emit(NF_PACKET_DROP, packet);
         emit(NF_LINK_BREAK, packet);
         delete packet;

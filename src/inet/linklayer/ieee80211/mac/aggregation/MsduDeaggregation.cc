@@ -64,7 +64,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + byte(paddingLength == 4 ? 0 : paddingLength));
         const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframe>();
         const auto& msdu = aggregatedFrame->peekDataAt(bit(0), byte(msduSubframeHeader->getLength()));
-        paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        paddingLength = 0; // TODO: KLUDGE: kept fingerprints, revive: 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
         // TODO: review, restore snap header, see Ieee80211MsduSubframe
         auto frame = new Packet();

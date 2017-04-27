@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee802/Ieee802Header_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
@@ -465,6 +466,12 @@ void Hcf::originatorProcessFailedFrame(Packet *packet)
             else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211ManagementFrame>(failedFrame))
                 edcaMgmtAndNonQoSRecoveryProcedure->retryLimitReached(packet, mgmtFrame);
             edcaInProgressFrames[ac]->dropFrame(packet);
+            // KLUDGE: removed headers and trailers to allow higher layer protocols to process the packet
+            packet->popHeader<Ieee80211DataOrMgmtFrame>();
+            const auto& nextHeader = packet->peekHeader();
+            if (std::dynamic_pointer_cast<Ieee802LlcHeader>(nextHeader))
+                packet->popHeader<Ieee802LlcHeader>();
+            packet->popTrailer<Ieee80211MacTrailer>();
             emit(NF_PACKET_DROP, packet);
             emit(NF_LINK_BREAK, packet);
             delete packet;

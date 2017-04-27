@@ -77,7 +77,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
         msduSubframeHeader->markImmutable();
         aggregatedFrame->append(msduSubframeHeader);
         aggregatedFrame->append(msdu);
-        int paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        int paddingLength = 4; // TODO: KLUDGE: kept fingerprints, revive: 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
             auto padding = std::make_shared<ByteCountChunk>(byte(paddingLength));
             padding->markImmutable();

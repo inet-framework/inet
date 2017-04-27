@@ -84,9 +84,11 @@ void Ieee80211MgmtAdhoc::decapsulate(Packet *packet)
     if (tid < 8)
         packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
     packet->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    const auto& snapHeader = packet->popHeader<Ieee802SnapHeader>();
-    int etherType = snapHeader->getProtocolId();
-    if (etherType != -1) {
+    // KLUDGE: this will not work with serialized packets
+    const auto& nextHeader = packet->peekHeader();
+    if (std::dynamic_pointer_cast<Ieee802SnapHeader>(nextHeader)) {
+        const auto& snapHeader = packet->popHeader<Ieee802SnapHeader>();
+        int etherType = snapHeader->getProtocolId();
         packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
