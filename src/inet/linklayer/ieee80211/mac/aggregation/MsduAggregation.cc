@@ -81,7 +81,7 @@ Ieee80211DataFrame *MsduAggregation::aggregateFrames(std::vector<Ieee80211DataFr
         setSubframeAddress(&msduSubframe, dataFrame);
         msduSubframe.encapsulate(msdu);
         aMsdu->setSubframes(i, msduSubframe);
-        // FIXME: delete dataFrame; ownership problem
+        delete dataFrame;
     }
     aMsdu->setByteLength(aMsduLength);
 //    The MPDU containing the A-MSDU is carried in any of the following data frame subtypes: QoS Data,

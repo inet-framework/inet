@@ -39,9 +39,9 @@ Ieee80211DataOrMgmtFrame *OriginatorQoSMacDataService::aMsduAggregateIfNeeded(Pe
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
     if (subframes) {
-        auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
         for (auto f : *subframes)
             pendingQueue->remove(f);
+        auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
         delete subframes;
         return aggregatedFrame;
     }
