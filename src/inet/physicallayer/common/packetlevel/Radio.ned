@@ -61,6 +61,8 @@ module Radio like IRadio
 
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
 
+        bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
+
         bool separateTransmissionParts = default(false); // when enabled the transmission of preamble, header and data part are simulated separately
         bool separateReceptionParts = default(false);    // when enabled the reception of preamble, header and data part are simulated separately 
 

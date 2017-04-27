@@ -97,6 +97,10 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      */
     simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
     /**
+     * When true packets are serialized into a sequence of bytes before sending out.
+     */
+    bool sendRawBytes = false;
+    /**
      * Determines whether the transmission of the preamble, header and data part
      * are simulated separately or not.
      */

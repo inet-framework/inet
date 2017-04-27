@@ -61,6 +61,7 @@ void Radio::initialize(int stage)
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
         radioIn->setDeliverOnReceptionStart(true);
+        sendRawBytes = par("sendRawBytes");
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");
         WATCH(radioMode);
@@ -408,6 +409,11 @@ void Radio::abortTransmission()
 RadioFrame *Radio::createRadioFrame(Packet *packet) const
 {
     encapsulate(packet);
+    if (sendRawBytes) {
+        auto rawPacket = new Packet(packet->getName(), packet->peekAllBytes());
+        delete packet;
+        packet = rawPacket;
+    }
     RadioFrame *radioFrame = check_and_cast<RadioFrame *>(medium->transmitPacket(this, packet));
     ASSERT(radioFrame->getDuration() != 0);
     return radioFrame;
