@@ -26,6 +26,7 @@ namespace ieee80211 {
 class INET_API HcfFs : public AlternativesFs {
     public:
         HcfFs();
+        virtual ~HcfFs() { }
 
         virtual int selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
         virtual int selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
