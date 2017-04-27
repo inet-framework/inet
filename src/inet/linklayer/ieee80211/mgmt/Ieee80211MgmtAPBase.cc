@@ -178,12 +178,12 @@ void Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
 #endif // ifdef WITH_ETHERNET
 }
 
-void Ieee80211MgmtAPBase::encapsulate(Packet *msg)
+void Ieee80211MgmtAPBase::encapsulate(Packet *packet)
 {
     switch (encapDecap) {
         case ENCAP_DECAP_ETH:
 #ifdef WITH_ETHERNET
-            convertFromEtherFrame(check_and_cast<Packet *>(msg));
+            convertFromEtherFrame(check_and_cast<Packet *>(packet));
 #else // ifdef WITH_ETHERNET
             throw cRuntimeError("INET compiled without ETHERNET feature, but the 'encapDecap' parameter is set to 'eth'!");
 #endif // ifdef WITH_ETHERNET
@@ -192,16 +192,16 @@ void Ieee80211MgmtAPBase::encapsulate(Packet *msg)
         case ENCAP_DECAP_TRUE: {
             const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
             ieee802SnapHeader->setOui(0);
-            ieee802SnapHeader->setProtocolId(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
-            msg->insertHeader(ieee802SnapHeader);
+            ieee802SnapHeader->setProtocolId(packet->getMandatoryTag<EtherTypeReq>()->getEtherType());
+            packet->insertHeader(ieee802SnapHeader);
 
             const auto& ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
             ieee80211MacHeader->setFromDS(true);
 
             // copy addresses from ethernet ieee80211MacHeader (transmitter addr will be set to our addr by MAC)
-            ieee80211MacHeader->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getSrcAddress());
-            ieee80211MacHeader->setReceiverAddress(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
-            auto userPriorityReq = msg->getTag<UserPriorityReq>();
+            ieee80211MacHeader->setAddress3(packet->getMandatoryTag<MacAddressReq>()->getSrcAddress());
+            ieee80211MacHeader->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+            auto userPriorityReq = packet->getTag<UserPriorityReq>();
             if (userPriorityReq != nullptr) {
                 // make it a QoS ieee80211MacHeader, and set TID
                 ieee80211MacHeader->setType(ST_DATA_WITH_QOS);
@@ -210,8 +210,8 @@ void Ieee80211MgmtAPBase::encapsulate(Packet *msg)
             }
 
             // encapsulate payload
-            msg->insertHeader(ieee80211MacHeader);
-            msg->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+            packet->insertHeader(ieee80211MacHeader);
+            packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
         }
         break;
 

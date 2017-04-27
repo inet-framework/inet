@@ -211,12 +211,13 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
     delete ctrl;
 }
 
-void Ieee80211MgmtSTA::encapsulate(Packet *msg)
+void Ieee80211MgmtSTA::encapsulate(Packet *packet)
 {
+    auto ethTypeTag = packet->getTag<EtherTypeReq>();
     const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
     ieee802SnapHeader->setOui(0);
-    ieee802SnapHeader->setProtocolId(msg->getMandatoryTag<EtherTypeReq>()->getEtherType());
-    msg->insertHeader(ieee802SnapHeader);
+    ieee802SnapHeader->setProtocolId(ethTypeTag ? ethTypeTag->getEtherType() : -1);
+    packet->insertHeader(ieee802SnapHeader);
 
     const auto& ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
     // frame goes to the AP
@@ -224,8 +225,8 @@ void Ieee80211MgmtSTA::encapsulate(Packet *msg)
     // receiver is the AP
     ieee80211MacHeader->setReceiverAddress(assocAP.address);
     // destination address is in address3
-    ieee80211MacHeader->setAddress3(msg->getMandatoryTag<MacAddressReq>()->getDestAddress());
-    auto userPriorityReq = msg->getTag<UserPriorityReq>();
+    ieee80211MacHeader->setAddress3(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+    auto userPriorityReq = packet->getTag<UserPriorityReq>();
     if (userPriorityReq != nullptr) {
         // make it a QoS frame, and set TID
         ieee80211MacHeader->setType(ST_DATA_WITH_QOS);
@@ -233,25 +234,25 @@ void Ieee80211MgmtSTA::encapsulate(Packet *msg)
         ieee80211MacHeader->setTid(userPriorityReq->getUserPriority());
     }
 
-    msg->insertHeader(ieee80211MacHeader);
-    msg->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
+    packet->insertHeader(ieee80211MacHeader);
+    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
 }
 
 void Ieee80211MgmtSTA::decapsulate(Packet *packet)
 {
-    const auto& frame = packet->popHeader<Ieee80211DataFrame>();
+    const auto& ieee80211MacHeader = packet->popHeader<Ieee80211DataFrame>();
     auto macAddressInd = packet->ensureTag<MacAddressInd>();
-    macAddressInd->setSrcAddress(frame->getAddress3());
-    macAddressInd->setDestAddress(frame->getReceiverAddress());
-    if (frame->getType() == ST_DATA_WITH_QOS) {
-        int tid = frame->getTid();
+    macAddressInd->setSrcAddress(ieee80211MacHeader->getAddress3());
+    macAddressInd->setDestAddress(ieee80211MacHeader->getReceiverAddress());
+    if (ieee80211MacHeader->getType() == ST_DATA_WITH_QOS) {
+        int tid = ieee80211MacHeader->getTid();
         if (tid < 8)
             packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
     }
     packet->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    const auto& snapHeader = packet->popHeader<Ieee802SnapHeader>();
-    if (snapHeader) {
-        int etherType = snapHeader->getProtocolId();
+    const auto& ieee802SnapHeader = packet->popHeader<Ieee802SnapHeader>();
+    int etherType = ieee802SnapHeader->getProtocolId();
+    if (etherType != -1) {
         packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
