@@ -58,7 +58,7 @@ void Ieee80211MgmtAdhoc::encapsulate(Packet *packet)
     if (ethTypeTag) {
         auto ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
         ieee802SnapHeader->setOui(0);
-        ieee802SnapHeader->setProtocolId(ethTypeTag ? ethTypeTag->getEtherType() : -1);
+        ieee802SnapHeader->setProtocolId(ethTypeTag->getEtherType());
         packet->insertHeader(ieee802SnapHeader);
     }
     auto ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
@@ -71,6 +71,7 @@ void Ieee80211MgmtAdhoc::encapsulate(Packet *packet)
         ieee80211MacHeader->setTid(userPriorityReq->getUserPriority());
     }
     packet->insertHeader(ieee80211MacHeader);
+    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
 }
 
 void Ieee80211MgmtAdhoc::decapsulate(Packet *packet)
@@ -90,6 +91,7 @@ void Ieee80211MgmtAdhoc::decapsulate(Packet *packet)
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
     }
+    packet->popTrailer<Ieee80211MacTrailer>();
 }
 
 void Ieee80211MgmtAdhoc::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)

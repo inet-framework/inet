@@ -77,8 +77,8 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         header->setFromDS(amsduHeader->getFromDS());
         header->setTid(tid);
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
-        header->markImmutable();
-        frame->pushHeader(header);
+        frame->insertHeader(header);
+        frame->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
         frames->push_back(frame);
     }
     delete aggregatedFrame;

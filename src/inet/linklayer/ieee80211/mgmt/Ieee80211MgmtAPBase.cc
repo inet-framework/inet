@@ -92,7 +92,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
             break;
 
         case ENCAP_DECAP_TRUE: {
-            const auto& frame = packet->peekHeader<Ieee80211DataFrame>();
+            const auto& frame = packet->popHeader<Ieee80211DataFrame>();
             auto macAddressInd = packet->ensureTag<MacAddressInd>();
             macAddressInd->setSrcAddress(frame->getTransmitterAddress());
             macAddressInd->setDestAddress(frame->getAddress3());
@@ -106,6 +106,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
                 packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
                 packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
             }
+            packet->popTrailer<Ieee80211MacTrailer>();
         }
         break;
 
@@ -209,6 +210,7 @@ void Ieee80211MgmtAPBase::encapsulate(Packet *msg)
 
             // encapsulate payload
             msg->insertHeader(ieee80211MacHeader);
+            msg->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
         }
         break;
 

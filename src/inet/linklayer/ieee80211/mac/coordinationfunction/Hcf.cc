@@ -627,6 +627,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
 
 void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame)
 {
+    responsePacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(receivedFrame))
         responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame);
@@ -658,6 +659,7 @@ void Hcf::recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211Fra
 
 void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame)
 {
+    mgmtPacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     processUpperFrame(mgmtPacket, mgmtFrame);
 }
 

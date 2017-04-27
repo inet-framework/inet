@@ -32,6 +32,7 @@ std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vec
     byte offset = byte(0);
     std::vector<Packet *> *fragments = new std::vector<Packet *>();
     const auto& frameHeader = frame->popHeader<Ieee80211DataOrMgmtFrame>();
+    frame->popTrailer<Ieee80211MacTrailer>();
     for (int i = 0; i < (int)fragmentSizes.size(); i++) {
         bool lastFragment = i == (int)fragmentSizes.size() - 1;
         std::string name = std::string(frame->getName()) + "-frag" + std::to_string(i);
@@ -43,8 +44,8 @@ std::vector<Packet*> *Fragmentation::fragmentFrame(Packet *frame, const std::vec
         fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());
         fragmentHeader->setFragmentNumber(i);
         fragmentHeader->setMoreFragments(!lastFragment);
-        fragmentHeader->markImmutable();
-        fragment->pushHeader(fragmentHeader);
+        fragment->insertHeader(fragmentHeader);
+        fragment->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
         fragments->push_back(fragment);
     }
     delete frame;

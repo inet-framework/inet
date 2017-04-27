@@ -36,17 +36,19 @@ std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
         int headerLength = 0;
         // Mgmt frames don't have payload
         const auto& header = frame->peekHeader<Ieee80211Frame>();
+        const auto& trailer = frame->peekTrailer<Ieee80211MacTrailer>();
+        int trailerLength = byte(trailer->getChunkLength()).get();
         if (std::dynamic_pointer_cast<Ieee80211DataFrame>(header)) {
             headerLength = byte(header->getChunkLength()).get();
-            payloadLength = frame->getByteLength() - headerLength;
+            payloadLength = frame->getByteLength() - headerLength - trailerLength;
         }
         else
             headerLength = frame->getByteLength();
-        int maxFragmentPayload = fragmentationThreshold - headerLength;
+        int maxFragmentPayload = fragmentationThreshold - headerLength - trailerLength;
         if (payloadLength >= maxFragmentPayload * MAX_NUM_FRAGMENTS)
             throw cRuntimeError("Fragmentation: frame \"%s\" too large, won't fit into %d fragments", frame->getName(), MAX_NUM_FRAGMENTS);
-        for(int i = 0; headerLength + payloadLength > fragmentationThreshold; i++) {
-            sizes.push_back(fragmentationThreshold - headerLength);
+        for(int i = 0; headerLength + trailerLength + payloadLength > fragmentationThreshold; i++) {
+            sizes.push_back(fragmentationThreshold - headerLength - trailerLength);
             payloadLength -= maxFragmentPayload;
         }
         sizes.push_back(payloadLength);

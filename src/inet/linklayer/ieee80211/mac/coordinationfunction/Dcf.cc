@@ -92,6 +92,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<Ieee80211DataOrMgmtFrame>&
 
 void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame)
 {
+    responsePacket->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = std::dynamic_pointer_cast<Ieee80211RTSFrame>(receivedFrame))
         responseMode = rateSelection->computeResponseCtsFrameMode(responsePacket, rtsFrame);
