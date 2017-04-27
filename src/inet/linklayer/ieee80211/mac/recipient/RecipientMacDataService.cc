@@ -39,8 +39,10 @@ Ieee80211DataOrMgmtFrame* RecipientMacDataService::defragment(Ieee80211DataOrMgm
 
 std::vector<Ieee80211Frame*> RecipientMacDataService::dataOrMgmtFrameReceived(Ieee80211DataOrMgmtFrame* frame)
 {
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(frame))
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(frame)) {
+        delete frame;
         return std::vector<Ieee80211Frame*>();
+    }
     Ieee80211DataOrMgmtFrame *defragmentedFrame = nullptr;
     if (basicReassembly) { // FIXME: defragmentation
         defragmentedFrame = defragment(frame);
