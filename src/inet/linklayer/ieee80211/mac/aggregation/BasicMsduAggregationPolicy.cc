@@ -15,6 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/linklayer/ieee802/Ieee802Header_m.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
 
 namespace inet {
@@ -38,6 +39,7 @@ bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragat
 
 bool BasicMsduAggregationPolicy::isEligible(const Ptr<Ieee80211DataFrame>& frame, Packet *testPacket, const Ptr<Ieee80211DataFrame>& testFrame, int aMsduLength)
 {
+    const auto& testTrailer = testPacket->peekTrailer<Ieee80211MacTrailer>();
 //   Only QoS data frames have a TID.
     if (qOsCheck && frame->getType() != ST_DATA_WITH_QOS)
         return false;
@@ -45,7 +47,7 @@ bool BasicMsduAggregationPolicy::isEligible(const Ptr<Ieee80211DataFrame>& frame
 //    The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An
 //    A-MSDU cannot be fragmented. Therefore, an A-MSDU of a length that exceeds 4065 octets (
 //    4095 minus the QoS data MPDU overhead) cannot be transported in an A-MPDU.
-    if (aMsduLength + byte(testPacket->getTotalLength() - testFrame->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER)).get() > maxAMsduSize) // default value of maxAMsduSize is 4065
+    if (aMsduLength + byte(testPacket->getTotalLength() - testFrame->getChunkLength() - testTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER)).get() > maxAMsduSize) // default value of maxAMsduSize is 4065
         return false;
 
 //    The value of TID present in the QoS Control field of the MPDU carrying the A-MSDU indicates the TID for
@@ -77,6 +79,7 @@ std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue 
     {
         auto dataPacket = check_and_cast<Packet *>(*it);
         const auto& dataFrame = dataPacket->peekHeader<Ieee80211DataOrMgmtFrame>();
+        const auto& macTrailer = dataPacket->peekTrailer<Ieee80211MacTrailer>();
         if (!std::dynamic_pointer_cast<Ieee80211DataFrame>(dataFrame))
             break;
         if (!firstFrame)
@@ -84,7 +87,8 @@ std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue 
         if (!isEligible(std::static_pointer_cast<Ieee80211DataFrame>(dataFrame), firstPacket, std::static_pointer_cast<Ieee80211DataFrame>(firstFrame), byte(aMsduLength).get()))
             break;
         frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        // KLUDGE: remove Ieee802SnapHeader length from computation
+        aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() - macTrailer->getChunkLength() - Ieee802SnapHeader().getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), byte(aMsduLength).get())) {
         delete frames;
