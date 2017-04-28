@@ -29,7 +29,7 @@ namespace inet {
 class INET_API RSVPResvMsg : public RSVPResvMsg_Base
 {
   public:
-    RSVPResvMsg(/* const char *name = nullptr, int kind = RESV_MESSAGE */) : RSVPResvMsg_Base(/* name, kind */) {}      //FIXME KLUDGE
+    RSVPResvMsg() : RSVPResvMsg_Base() {}
     RSVPResvMsg(const RSVPResvMsg& other) : RSVPResvMsg_Base(other) {}
     RSVPResvMsg& operator=(const RSVPResvMsg& other) { RSVPResvMsg_Base::operator=(other); return *this; }
     virtual RSVPResvMsg *dup() const override { return new RSVPResvMsg(*this); }

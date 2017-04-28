@@ -54,7 +54,7 @@ class INET_API RSVPPathMsg : public RSVPPathMsg_Base
 class INET_API RSVPPathTear : public RSVPPathTear_Base
 {
   public:
-    RSVPPathTear(/* const char *name = nullptr, int kind = PTEAR_MESSAGE */) : RSVPPathTear_Base(/* name, kind */) {}   //FIXME KLUDGE
+    RSVPPathTear() : RSVPPathTear_Base() {}
     RSVPPathTear(const RSVPPathTear& other) : RSVPPathTear_Base(other) {}
     RSVPPathTear& operator=(const RSVPPathTear& other) { RSVPPathTear_Base::operator=(other); return *this; }
     virtual RSVPPathTear *dup() const override { return new RSVPPathTear(*this); }
@@ -74,7 +74,7 @@ class INET_API RSVPPathTear : public RSVPPathTear_Base
 class INET_API RSVPPathError : public RSVPPathError_Base
 {
   public:
-    RSVPPathError(/* const char *name = nullptr, int kind = PERROR_MESSAGE */) : RSVPPathError_Base(/* name, kind */) {}        //FIXME KLUDGE
+    RSVPPathError() : RSVPPathError_Base(/* name, kind */) {}
     RSVPPathError(const RSVPPathError& other) : RSVPPathError_Base(other) {}
     RSVPPathError& operator=(const RSVPPathError& other) { RSVPPathError_Base::operator=(other); return *this; }
     virtual RSVPPathError *dup() const override { return new RSVPPathError(*this); }

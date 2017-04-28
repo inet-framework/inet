@@ -31,7 +31,7 @@ namespace inet {
 class INET_API RSVPPacket : public RSVPPacket_Base
 {
   public:
-    RSVPPacket() : RSVPPacket_Base() { /*this->rsvpKind = kind;*/ }     //FIXME KLUDGE kind? rsvpKind?
+    RSVPPacket() : RSVPPacket_Base() {}
     RSVPPacket(const RSVPPacket& other) : RSVPPacket_Base(other) {}
     RSVPPacket& operator=(const RSVPPacket& other) { RSVPPacket_Base::operator=(other); return *this; }
     virtual RSVPPacket *dup() const override { return new RSVPPacket(*this); }
