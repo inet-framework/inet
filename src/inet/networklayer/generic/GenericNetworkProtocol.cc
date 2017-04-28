@@ -204,13 +204,10 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     if (routingTable->isLocalAddress(destAddr)) {
         EV_INFO << "local delivery\n";
         if (fromHL && header->getSourceAddress().isUnspecified()) {
-            // KLUDGE: TODO: factor out
-            datagram->removeFromBeginning(header->getChunkLength());
-            header = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
-            // TODO: dup or mark header->markMutableIfExclusivelyOwned();
+            datagram->removePoppedHeaders();
+            header = datagram->removeHeader<GenericDatagramHeader>();
             header->setSourceAddress(destAddr); // allows two apps on the same host to communicate
-            header->markImmutable();
-            datagram->pushHeader(header);
+            datagram->insertHeader(header);
         }
         numLocalDeliver++;
 
@@ -259,19 +256,18 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     }
 
     if (!fromHL) {
-        datagram->removeFromBeginning(header->getChunkLength());
-        header = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
+        datagram->removePoppedHeaders();
+        header = datagram->removeHeader<GenericDatagramHeader>();
         header->setHopLimit(header->getHopLimit() - 1);
-        header->markImmutable();
-        datagram->pushHeader(header);
+        datagram->insertHeader(header);
     }
+
     // set datagram source address if not yet set
     if (header->getSourceAddress().isUnspecified()) {
-        datagram->removeFromBeginning(header->getChunkLength());
-        header = std::static_pointer_cast<GenericDatagramHeader>(header->dupShared());
+        datagram->removePoppedHeaders();
+        header = datagram->removeHeader<GenericDatagramHeader>();
         header->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
-        header->markImmutable();
-        datagram->pushHeader(header);
+        datagram->insertHeader(header);
     }
 
     // default: send datagram to fragmentation
@@ -287,7 +283,6 @@ void GenericNetworkProtocol::routeMulticastPacket(Packet *datagram, const Interf
     L3Address destAddr = header->getDestinationAddress();
     // if received from the network...
     if (fromIE != nullptr) {
-
         //TODO: decrement hopLimit before forward frame to another host
 
         // check for local delivery
