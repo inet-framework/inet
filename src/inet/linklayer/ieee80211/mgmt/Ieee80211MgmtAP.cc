@@ -234,7 +234,9 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
         const Ptr<Ieee80211AuthenticationFrame>& resp = std::make_shared<Ieee80211AuthenticationFrame>();
-        resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        auto& body = resp->getBody();
+        body.setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        resp->setChunkLength(byte(24 + body.getBodyLength()));
         sendManagementFrame("Auth-ERROR", resp, frame->getTransmitterAddress());
         delete packet;
         sta->authSeqExpected = 1;    // go back to start square
@@ -248,10 +250,12 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     // successful authentication every time)
     EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq + 1) << "\n";
     const Ptr<Ieee80211AuthenticationFrame>& resp = std::make_shared<Ieee80211AuthenticationFrame>();
-    resp->getBody().setSequenceNumber(frameAuthSeq + 1);
-    resp->getBody().setStatusCode(SC_SUCCESSFUL);
-    resp->getBody().setIsLast(isLast);
+    auto& body = resp->getBody();
+    body.setSequenceNumber(frameAuthSeq + 1);
+    body.setStatusCode(SC_SUCCESSFUL);
+    body.setIsLast(isLast);
     // XXX frame length could be increased to account for challenge text length etc.
+    resp->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame(isLast ? "Auth-OK" : "Auth", resp, frame->getTransmitterAddress());
 
     delete packet;
@@ -294,7 +298,9 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const Ptr<Ieee80211DeauthenticationFrame>& resp = std::make_shared<Ieee80211DeauthenticationFrame>();
-        resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        auto& body = resp->getBody();
+        body.setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        resp->setChunkLength(byte(24 + body.getBodyLength()));
         sendManagementFrame("Deauth", resp, frame->getTransmitterAddress());
         delete packet;
         return;
@@ -332,7 +338,9 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const Ptr<Ieee80211DeauthenticationFrame>& resp = std::make_shared<Ieee80211DeauthenticationFrame>();
-        resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        auto& body = resp->getBody();
+        body.setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        resp->setChunkLength(byte(24 + body.getBodyLength()));
         sendManagementFrame("Deauth", resp, frame->getTransmitterAddress());
         delete packet;
         return;
@@ -349,6 +357,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0);    //XXX
     body.setSupportedRates(supportedRates);
+    resp->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("ReassocResp-OK", resp, sta->address);
 }
 

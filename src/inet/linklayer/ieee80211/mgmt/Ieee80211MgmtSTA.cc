@@ -321,8 +321,10 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
 
     // create and send first authentication frame
     const Ptr<Ieee80211AuthenticationFrame>& frame = std::make_shared<Ieee80211AuthenticationFrame>();
-    frame->getBody().setSequenceNumber(1);
+    auto& body = frame->getBody();
+    body.setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
+    frame->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("Auth", frame, ap->address);
 
     ap->authSeqExpected = 2;
@@ -351,7 +353,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     // string SSID
     // Ieee80211SupportedRatesElement supportedRates;
 
-    auto body = frame->getBody();
+    auto& body = frame->getBody();
     // KLUDGE: TODO: revive body.setBodyLength(2 + 2 + strlen(body.getSSID()) + 2 + body.getSupportedRates().numRates + 2);
     frame->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("Assoc", frame, ap->address);
@@ -475,7 +477,7 @@ void Ieee80211MgmtSTA::sendProbeRequest()
 {
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
     const Ptr<Ieee80211ProbeRequestFrame>& frame = std::make_shared<Ieee80211ProbeRequestFrame>();
-    auto body = frame->getBody();
+    auto& body = frame->getBody();
     body.setSSID(scanning.ssid.c_str());
     // KLUDGE: TODO: revive body.setBodyLength((2 + scanning.ssid.length()) + (2 + body.getSupportedRates().numRates));
     frame->setChunkLength(byte(24 + body.getBodyLength()));
@@ -535,7 +537,9 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
 
     // create and send deauthentication request
     const Ptr<Ieee80211DeauthenticationFrame>& frame = std::make_shared<Ieee80211DeauthenticationFrame>();
-    frame->getBody().setReasonCode(ctrl->getReasonCode());
+    auto& body = frame->getBody();
+    body.setReasonCode(ctrl->getReasonCode());
+    frame->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("Deauth", frame, address);
 }
 
@@ -570,7 +574,9 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
 
     // create and send disassociation request
     const Ptr<Ieee80211DisassociationFrame>& frame = std::make_shared<Ieee80211DisassociationFrame>();
-    frame->getBody().setReasonCode(ctrl->getReasonCode());
+    auto& body = frame->getBody();
+    body.setReasonCode(ctrl->getReasonCode());
+    frame->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("Disass", frame, address);
 }
 
@@ -655,7 +661,9 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
         const Ptr<Ieee80211AuthenticationFrame>& resp = std::make_shared<Ieee80211AuthenticationFrame>();
-        resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        auto& body = resp->getBody();
+        body.setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        resp->setChunkLength(byte(24 + body.getBodyLength()));
         sendManagementFrame("Auth-ERROR", resp, frame->getTransmitterAddress());
         delete packet;
 
@@ -674,9 +682,11 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
 
         // more steps required, send another Authentication frame
         const Ptr<Ieee80211AuthenticationFrame>& resp = std::make_shared<Ieee80211AuthenticationFrame>();
-        resp->getBody().setSequenceNumber(frameAuthSeq + 1);
-        resp->getBody().setStatusCode(SC_SUCCESSFUL);
+        auto& body = resp->getBody();
+        body.setSequenceNumber(frameAuthSeq + 1);
+        body.setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.
+        resp->setChunkLength(byte(24 + body.getBodyLength()));
         sendManagementFrame("Auth", resp, address);
         ap->authSeqExpected += 2;
     }
