@@ -9,8 +9,8 @@
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             f9f5-385c/tplx
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             e4f0-f8ea/tplx
 # /examples/adhoc/qos/,                -f omnetpp.ini -c Edca -r 0,                   100s,            0000-0000   # Edca extended
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             93c6-30b8/tplx
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             dce1-ffed/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             d96b-e4bc/tplx
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             a0a1-e4a5/tplx
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          c6b2-6216/tplx
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          d70a-9a91/tplx
@@ -424,7 +424,7 @@
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            a8c8-93a6/tplx
 
 /examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         0000-0000 32f1-2fb1/tplx
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         01da-ad50/tplx
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         94e5-9951/tplx
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         9ef3-7841/tplx
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            a797-ed58/tplx

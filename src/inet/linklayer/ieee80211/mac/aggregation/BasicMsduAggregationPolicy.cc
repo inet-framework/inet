@@ -87,8 +87,7 @@ std::vector<Packet*> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue 
         if (!isEligible(std::static_pointer_cast<Ieee80211DataFrame>(dataFrame), firstPacket, std::static_pointer_cast<Ieee80211DataFrame>(firstFrame), byte(aMsduLength).get()))
             break;
         frames->push_back(dataPacket);
-        // KLUDGE: remove Ieee802SnapHeader length from computation
-        aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() - macTrailer->getChunkLength() - Ieee802SnapHeader().getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        aMsduLength += dataPacket->getTotalLength() - dataFrame->getChunkLength() - macTrailer->getChunkLength() + bit(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), byte(aMsduLength).get())) {
         delete frames;

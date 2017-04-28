@@ -76,7 +76,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
         msduSubframeHeader->markImmutable();
         aggregatedFrame->append(msduSubframeHeader);
         aggregatedFrame->append(msdu);
-        int paddingLength = 4; // TODO: KLUDGE: kept fingerprints, revive: 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        int paddingLength = 4 - byte(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
             auto padding = std::make_shared<ByteCountChunk>(byte(paddingLength));
             padding->markImmutable();
@@ -95,7 +95,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
     amsduHeader->setTransmitterAddress(ta);
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
-    // KLUDGE: TODO: revive amsduHeader->setChunkLength(amsduHeader->getChunkLength() + byte(2));
+    amsduHeader->setChunkLength(amsduHeader->getChunkLength() + byte(2));
     // TODO: set addr3 and addr4 according to fromDS and toDS.
     amsduHeader->markImmutable();
     aggregatedFrame->pushHeader(amsduHeader);
