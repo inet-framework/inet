@@ -72,7 +72,6 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet*> *frames)
         frame->popTrailer<Ieee80211MacTrailer>();
         auto msdu = frame->peekData();
         msduSubframeHeader->setLength(byte(msdu->getChunkLength()).get());
-        std::cout << "MSDU: " << msdu << std::endl;
         setSubframeAddress(msduSubframeHeader, header);
         msduSubframeHeader->markImmutable();
         aggregatedFrame->append(msduSubframeHeader);
