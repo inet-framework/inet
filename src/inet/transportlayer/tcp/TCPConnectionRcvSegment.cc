@@ -39,7 +39,7 @@ bool TCPConnection::tryFastRoute(const Ptr<TcpHeader>& tcpseg)
 void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     EV_INFO << "Seg arrived: ";
-    printSegmentBrief(tcpseg);
+    printSegmentBrief(packet, tcpseg);
 
     // This segment doesn't belong to any connection, so this object
     // must be a temp object created solely for the purpose of calling us
@@ -89,7 +89,7 @@ void TCPConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<TcpHeade
 TCPEventCode TCPConnection::process_RCV_SEGMENT(Packet *packet, const Ptr<TcpHeader>& tcpseg, L3Address src, L3Address dest)
 {
     EV_INFO << "Seg arrived: ";
-    printSegmentBrief(tcpseg);
+    printSegmentBrief(packet, tcpseg);
     EV_DETAIL << "TCB: " << state->info() << "\n";
 
     if (rcvSeqVector)

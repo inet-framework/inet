@@ -141,10 +141,27 @@ void TCP_lwIP::handleIpInputMessage(Packet *packet)
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    const auto& tcpsegP = packet->peekHeader<TcpHeader>();
+    auto tcpsegP = packet->peekHeader<TcpHeader>();
     srcAddr = packet->getMandatoryTag<L3AddressInd>()->getSrcAddress();
     destAddr = packet->getMandatoryTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getMandatoryTag<InterfaceInd>())->getInterfaceId();
+
+    switch(tcpsegP->getCrcMode()) {
+        case CRC_DECLARED_INCORRECT:
+            EV_WARN << "CRC error, packet dropped\n";
+            delete packet;
+            return;
+        case CRC_DECLARED_CORRECT:
+            // modify to calculated, for serializing
+            packet->removePoppedHeaders();
+            tcpsegP = packet->removeHeader<TcpHeader>();
+            tcpsegP->setCrcMode(CRC_COMPUTED);
+            tcpsegP->setCrc(0);
+            packet->insertHeader(tcpsegP);
+            break;
+        default:
+            break;
+    }
 
     // process segment
     size_t ipHdrLen = sizeof(ip_hdr);

@@ -345,7 +345,7 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
                 unsigned int value = mssOption->getMaxSegmentSize();
                 value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
                 mssOption->setMaxSegmentSize(value);
-                newTcpHdr->handleChange();      //FIXME KLUDGE: why not called handleChange() automatically?
+                newTcpHdr->handleChange();      //the handleChange() not called automatically when tcp header options modified
                 packet->popHeader<TcpHeader>();
                 packet->removePoppedChunks();
                 newTcpHdr->markImmutable();
@@ -355,7 +355,24 @@ void TCP_NSC::handleIpInputMessage(Packet *packet)
         }
     }
 
-    const auto& tcpHdr = packet->peekHeader<TcpHeader>();
+    auto tcpHdr = packet->peekHeader<TcpHeader>();
+
+    switch(tcpHdr->getCrcMode()) {
+        case CRC_DECLARED_INCORRECT:
+            EV_WARN << "CRC error, packet dropped\n";
+            delete packet;
+            return;
+        case CRC_DECLARED_CORRECT:
+            // modify to calculated, for serializing
+            packet->removePoppedHeaders();
+            tcpHdr = packet->removeHeader<TcpHeader>();
+            tcpHdr->setCrcMode(CRC_COMPUTED);
+            tcpHdr->setCrc(0);
+            packet->insertHeader(tcpHdr);
+            break;
+        default:
+            break;
+    }
 
     // statistics:
     if (rcvSeqVector)

@@ -558,7 +558,7 @@ class INET_API TCPConnection : public cObject
     /** Utility: prints local/remote addr/port and app gate index/socketId */
     virtual void printConnBrief() const;
     /** Utility: prints important header fields */
-    static void printSegmentBrief(const Ptr<TcpHeader>& tcpseg);
+    static void printSegmentBrief(Packet *packet, const Ptr<TcpHeader>& tcpseg);
     /** Utility: returns name of TCP_S_xxx constants */
     static const char *stateName(int state);
     /** Utility: returns name of TCP_E_xxx constants */

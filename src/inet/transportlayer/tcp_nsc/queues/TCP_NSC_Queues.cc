@@ -134,7 +134,7 @@ void TCP_NSC_ReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet)
 
 void TCP_NSC_ReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
-    const auto& bytes = std::make_shared<BytesChunk>((uint8_t *)dataP, dataLengthP);        //FIXME KLUDGE
+    const auto& bytes = std::make_shared<BytesChunk>((uint8_t *)dataP, dataLengthP);
     bytes->markImmutable();
     dataBuffer.push(bytes);
 }

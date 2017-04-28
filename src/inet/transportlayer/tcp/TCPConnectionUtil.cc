@@ -157,7 +157,7 @@ void TCPConnection::printConnBrief() const
               << "\n";
 }
 
-void TCPConnection::printSegmentBrief(const Ptr<TcpHeader>& tcpseg)
+void TCPConnection::printSegmentBrief(Packet *packet, const Ptr<TcpHeader>& tcpseg)
 {
     EV_STATICCONTEXT;
     EV_INFO << "." << tcpseg->getSrcPort() << " > ";
@@ -175,10 +175,11 @@ void TCPConnection::printSegmentBrief(const Ptr<TcpHeader>& tcpseg)
     if (tcpseg->getPshBit())
         EV_INFO << "PSH ";
 
-#if 0   // KLUDGE
-    if (tcpseg->getPayloadLength() > 0 || tcpseg->getSynBit()) {
-        EV_INFO << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo() + tcpseg->getPayloadLength()) << ") ";
-        EV_INFO << "(l=" << tcpseg->getPayloadLength() << ") ";
+#if 1
+    auto payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    if (payloadLength > 0 || tcpseg->getSynBit()) {
+        EV_INFO << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo() + payloadLength) << ") ";
+        EV_INFO << "(l=" << payloadLength << ") ";
     }
 #endif
 
@@ -255,7 +256,7 @@ void TCPConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     state->sentBytes = packet->getByteLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
-    printSegmentBrief(tcpseg);
+    printSegmentBrief(packet, tcpseg);
 
     // TBD reuse next function for sending
 
@@ -277,7 +278,7 @@ void TCPConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
 {
     EV_STATICCONTEXT;
     EV_INFO << "Sending: ";
-    printSegmentBrief(tcpseg);
+    printSegmentBrief(pkt, tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
     ASSERT(byte(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
