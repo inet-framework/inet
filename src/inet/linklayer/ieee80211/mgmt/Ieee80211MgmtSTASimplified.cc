@@ -89,7 +89,6 @@ void Ieee80211MgmtSTASimplified::encapsulate(Packet *packet)
     }
 
     packet->insertHeader(ieee80211MacHeader);
-    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
 }
 
 void Ieee80211MgmtSTASimplified::decapsulate(Packet *packet)
@@ -111,7 +110,6 @@ void Ieee80211MgmtSTASimplified::decapsulate(Packet *packet)
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
     }
-    packet->popTrailer<Ieee80211MacTrailer>();
 }
 
 void Ieee80211MgmtSTASimplified::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)

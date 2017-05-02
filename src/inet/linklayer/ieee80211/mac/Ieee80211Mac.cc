@@ -185,11 +185,16 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     if (auto twoAddrFrame = std::dynamic_pointer_cast<Ieee80211TwoAddressFrame>(h))
         twoAddrFrame->setTransmitterAddress(address);
     packet->insertHeader(h);
+    const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
+    // TODO: add module parameter, implement fcs computing
+    // TODO: trailer->setFcsMode(FCS_COMPUTED);
+    packet->insertTrailer(trailer);
 }
 
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
     // TODO: move encapsulate from MGMT to MAC
+    packet->popTrailer<Ieee80211MacTrailer>();
 }
 
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)

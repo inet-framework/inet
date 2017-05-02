@@ -140,7 +140,6 @@ void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211M
     body->markImmutable();
     packet->append(body);
     packet->insertHeader(frame);
-    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     sendDown(packet);
 }
 

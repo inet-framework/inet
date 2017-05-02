@@ -235,7 +235,6 @@ void Ieee80211MgmtSTA::encapsulate(Packet *packet)
     }
 
     packet->insertHeader(ieee80211MacHeader);
-    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
 }
 
 void Ieee80211MgmtSTA::decapsulate(Packet *packet)
@@ -257,7 +256,6 @@ void Ieee80211MgmtSTA::decapsulate(Packet *packet)
         packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
         packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
     }
-    packet->popTrailer<Ieee80211MacTrailer>();
 }
 
 Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
@@ -306,7 +304,6 @@ void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211
     body->markImmutable();
     packet->append(body);
     packet->insertHeader(frame);
-    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     sendDown(packet);
 }
 

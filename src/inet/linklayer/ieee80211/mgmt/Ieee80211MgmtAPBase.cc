@@ -106,7 +106,6 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Packet *packet)
                 packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
                 packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
             }
-            packet->popTrailer<Ieee80211MacTrailer>();
         }
         break;
 
@@ -126,7 +125,6 @@ void Ieee80211MgmtAPBase::convertToEtherFrame(Packet *packet)
     packet->removePoppedHeaders();
     const auto& ieee80211MacHeader = packet->removeHeader<Ieee80211DataFrame>();
     const auto& ieee802SnapHeader = packet->removeHeader<Ieee802SnapHeader>();
-    packet->removeTrailer<Ieee80211MacTrailer>();
 
     // create a matching ethernet frame
     const auto& ethframe = std::make_shared<EthernetIIFrame>();    //TODO option to use EtherFrameWithSNAP instead
@@ -172,7 +170,6 @@ void Ieee80211MgmtAPBase::convertFromEtherFrame(Packet *packet)
     packet->removePoppedChunks();
     packet->insertHeader(ieee802SnapHeader);
     packet->insertHeader(ieee80211MacHeader);
-    packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET
@@ -211,7 +208,6 @@ void Ieee80211MgmtAPBase::encapsulate(Packet *packet)
 
             // encapsulate payload
             packet->insertHeader(ieee80211MacHeader);
-            packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
         }
         break;
 
