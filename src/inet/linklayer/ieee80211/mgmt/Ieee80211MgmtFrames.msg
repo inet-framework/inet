@@ -243,7 +243,3 @@ class Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 class Ieee80211ProbeResponseFrame extends Ieee80211BeaconFrame
 {
 }
-
-class Ieee80211ActionFrameBody extends Ieee80211ManagementFrame
-{
-}
