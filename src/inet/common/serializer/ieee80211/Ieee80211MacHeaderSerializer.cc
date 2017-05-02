@@ -92,7 +92,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeUint16Le(dataFrame->getQos() | dataFrame->getTid() | (dataFrame->getAMsduPresent() ? 0x0080 : 0x0000));
         }
 
-        if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrameBody>(chunk))
+        if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
         {
             //type = ST_AUTHENTICATION;
             // 1    Authentication algorithm number
@@ -104,17 +104,17 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 4    Challenge text                              The challenge text information is present only in certain Authentication frames as defined in Table 7-17.
             // Last Vendor Specific                             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto deauthenticationFrame = std::dynamic_pointer_cast<Ieee80211DeauthenticationFrameBody>(chunk))
+        else if (auto deauthenticationFrame = std::dynamic_pointer_cast<Ieee80211DeauthenticationFrame>(chunk))
         {
             //type = ST_DEAUTHENTICATION;
             stream.writeUint16Be(deauthenticationFrame->getReasonCode());
         }
-        else if (auto disassociationFrame =std::dynamic_pointer_cast<Ieee80211DisassociationFrameBody>(chunk))
+        else if (auto disassociationFrame =std::dynamic_pointer_cast<Ieee80211DisassociationFrame>(chunk))
         {
             //type = ST_DISASSOCIATION;
             stream.writeUint16Be(disassociationFrame->getReasonCode());
         }
-        else if (auto probeRequestFrame = std::dynamic_pointer_cast<Ieee80211ProbeRequestFrameBody>(chunk))
+        else if (auto probeRequestFrame = std::dynamic_pointer_cast<Ieee80211ProbeRequestFrame>(chunk))
         {
             //type = ST_PROBEREQUEST;
             // 1    SSID
@@ -137,7 +137,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
             // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto associationRequestFrame = std::dynamic_pointer_cast<Ieee80211AssociationRequestFrameBody>(chunk))
+        else if (auto associationRequestFrame = std::dynamic_pointer_cast<Ieee80211AssociationRequestFrame>(chunk))
         {
             //type = ST_ASSOCIATIONREQUEST;
             // 1    Capability
@@ -166,7 +166,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 9    QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto reassociationRequestFrame = std::dynamic_pointer_cast<Ieee80211ReassociationRequestFrameBody>(chunk))
+        else if (auto reassociationRequestFrame = std::dynamic_pointer_cast<Ieee80211ReassociationRequestFrame>(chunk))
         {
             //type = ST_REASSOCIATIONREQUEST;
             // 1    Capability
@@ -199,7 +199,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 10   QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto associationResponseFrame = std::dynamic_pointer_cast<Ieee80211AssociationResponseFrameBody>(chunk))
+        else if (auto associationResponseFrame = std::dynamic_pointer_cast<Ieee80211AssociationResponseFrame>(chunk))
         {
             //type = ST_ASSOCIATIONRESPONSE;
             // 1    Capability
@@ -221,7 +221,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 6    EDCA Parameter Set
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto reassociationResponseFrame = std::dynamic_pointer_cast<Ieee80211ReassociationResponseFrameBody>(chunk))
+        else if (auto reassociationResponseFrame = std::dynamic_pointer_cast<Ieee80211ReassociationResponseFrame>(chunk))
         {
             //type = ST_REASSOCIATIONRESPONSE;
             // 1    Capability
@@ -243,7 +243,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 6    EDCA Parameter Set
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto beaconFrame = std::dynamic_pointer_cast<Ieee80211BeaconFrameBody>(chunk))
+        else if (auto beaconFrame = std::dynamic_pointer_cast<Ieee80211BeaconFrame>(chunk))
         {
             //type = ST_BEACON;
             // 1    Timestamp
@@ -288,7 +288,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 24   QoS Capability                         The QoS Capability element is present when dot11QosOption- Implemented is true and EDCA Parameter Set element is not present.
             // Last Vendor Specific                        One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto probeResponseFrame = std::dynamic_pointer_cast<Ieee80211ProbeResponseFrameBody>(chunk))
+        else if (auto probeResponseFrame = std::dynamic_pointer_cast<Ieee80211ProbeResponseFrame>(chunk))
         {
             //type = ST_PROBERESPONSE;
             // 1      Timestamp
@@ -431,7 +431,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_AUTHENTICATION, fc_1);
-            auto body = std::make_shared<Ieee80211AuthenticationFrameBody>();
+            auto body = std::make_shared<Ieee80211AuthenticationFrame>();
             stream.readUint16Be();
             body->setSequenceNumber(stream.readUint16Be());
             body->setStatusCode(stream.readUint16Be());
@@ -445,7 +445,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_DEAUTHENTICATION, fc_1);
-            auto body = std::make_shared<Ieee80211DeauthenticationFrameBody>();
+            auto body = std::make_shared<Ieee80211DeauthenticationFrame>();
 
             body->setReasonCode(stream.readUint16Be());
 
@@ -458,7 +458,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_DISASSOCIATION, fc_1);
-            auto body = std::make_shared<Ieee80211DisassociationFrameBody>();
+            auto body = std::make_shared<Ieee80211DisassociationFrame>();
 
             body->setReasonCode(stream.readUint16Be());
 
@@ -471,7 +471,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_PROBEREQUEST, fc_1);
-            auto body = std::make_shared<Ieee80211ProbeRequestFrameBody>();
+            auto body = std::make_shared<Ieee80211ProbeRequestFrame>();
 
             char SSID[256];
             stream.readByte();
@@ -496,7 +496,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONREQUEST, fc_1);
-            auto body = std::make_shared<Ieee80211AssociationRequestFrameBody>();
+            auto body = std::make_shared<Ieee80211AssociationRequestFrame>();
 
             char SSID[256];
             stream.readByte();
@@ -521,7 +521,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONREQUEST, fc_1);
-            auto body = std::make_shared<Ieee80211ReassociationRequestFrameBody>();
+            auto body = std::make_shared<Ieee80211ReassociationRequestFrame>();
             stream.readUint16Be();
             stream.readUint16Be();
 
@@ -550,7 +550,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONRESPONSE, fc_1);
-            auto body = std::make_shared<Ieee80211AssociationResponseFrameBody>();
+            auto body = std::make_shared<Ieee80211AssociationResponseFrame>();
             stream.readUint16Be();
             body->setStatusCode(stream.readUint16Be());
             body->setAid(stream.readUint16Be());
@@ -571,7 +571,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONRESPONSE, fc_1);
-            auto body = std::make_shared<Ieee80211ReassociationResponseFrameBody>();
+            auto body = std::make_shared<Ieee80211ReassociationResponseFrame>();
             stream.readUint16Be();
             body->setStatusCode(stream.readUint16Be());
             body->setAid(stream.readUint16Be());
@@ -592,7 +592,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_BEACON, fc_1);
-            auto body = std::make_shared<Ieee80211BeaconFrameBody>();
+            auto body = std::make_shared<Ieee80211BeaconFrame>();
 
             simtime_t timetstamp;
             timetstamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
@@ -623,7 +623,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_PROBERESPONSE, fc_1);
-            auto body = std::make_shared<Ieee80211ProbeResponseFrameBody>();
+            auto body = std::make_shared<Ieee80211ProbeResponseFrame>();
 
             simtime_t timestamp;
             timestamp.setRaw(stream.readUint64Be()); // TODO: store timestamp

@@ -156,7 +156,7 @@ class Ieee80211ManagementFrame extends FieldsChunk
 // the authentication procedure has completed and it does not need to
 // send any more Authentication frames.
 //
-class Ieee80211AuthenticationFrameBody extends Ieee80211ManagementFrame
+class Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 {
     chunkLength = byte(6); // add 2+len bytes for challenge text if present
     unsigned short sequenceNumber;
@@ -167,7 +167,7 @@ class Ieee80211AuthenticationFrameBody extends Ieee80211ManagementFrame
 //
 // De-authentication frame body format
 //
-class Ieee80211DeauthenticationFrameBody extends Ieee80211ManagementFrame
+class Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 {
     chunkLength = byte(2);
     int reasonCode @enum(Ieee80211ReasonCode);
@@ -176,7 +176,7 @@ class Ieee80211DeauthenticationFrameBody extends Ieee80211ManagementFrame
 //
 // Dis-association frame body format (same as De-authentication)
 //
-class Ieee80211DisassociationFrameBody extends Ieee80211ManagementFrame
+class Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 {
     chunkLength = byte(2);
     int reasonCode @enum(Ieee80211ReasonCode);
@@ -185,7 +185,7 @@ class Ieee80211DisassociationFrameBody extends Ieee80211ManagementFrame
 //
 // Probe request frame body format
 //
-class Ieee80211ProbeRequestFrameBody extends Ieee80211ManagementFrame
+class Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 {
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
@@ -194,7 +194,7 @@ class Ieee80211ProbeRequestFrameBody extends Ieee80211ManagementFrame
 //
 // Association request frame body format
 //
-class Ieee80211AssociationRequestFrameBody extends Ieee80211ManagementFrame
+class Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 {
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
@@ -203,7 +203,7 @@ class Ieee80211AssociationRequestFrameBody extends Ieee80211ManagementFrame
 //
 // Re-association request frame body format (same as association)
 //
-class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequestFrameBody
+class Ieee80211ReassociationRequestFrame extends Ieee80211AssociationRequestFrame
 {
     MACAddress currentAP;
 }
@@ -211,7 +211,7 @@ class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequest
 //
 // Association response frame body format
 //
-class Ieee80211AssociationResponseFrameBody extends Ieee80211ManagementFrame
+class Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 {
     int statusCode @enum(Ieee80211StatusCode);
     short aid;
@@ -221,14 +221,14 @@ class Ieee80211AssociationResponseFrameBody extends Ieee80211ManagementFrame
 //
 // Re-association response frame body format (same as AssociationResponse)
 //
-class Ieee80211ReassociationResponseFrameBody extends Ieee80211AssociationResponseFrameBody
+class Ieee80211ReassociationResponseFrame extends Ieee80211AssociationResponseFrame
 {
 }
 
 //
 // Beacon frame body format.
 //
-class Ieee80211BeaconFrameBody extends Ieee80211ManagementFrame
+class Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 {
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
@@ -240,7 +240,7 @@ class Ieee80211BeaconFrameBody extends Ieee80211ManagementFrame
 //
 // Probe response frame body format (same as Beacon)
 //
-class Ieee80211ProbeResponseFrameBody extends Ieee80211BeaconFrameBody
+class Ieee80211ProbeResponseFrame extends Ieee80211BeaconFrame
 {
 }
 

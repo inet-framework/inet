@@ -149,7 +149,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(const MACAddress& address, const Ptr<Ieee80211BeaconFrameBody>& body);
+    virtual void storeAPInfo(const MACAddress& address, const Ptr<Ieee80211BeaconFrame>& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
