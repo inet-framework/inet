@@ -122,7 +122,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
     bool mgmtFrame = false;
     bool mgmtFrameWithNoAck = false;
     bool groupAddressed = dataOrMgmtFrame->getReceiverAddress().isMulticast();
-    if (std::dynamic_pointer_cast<Ieee80211ManagementFrame>(dataOrMgmtFrame)) {
+    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(dataOrMgmtFrame)) {
         mgmtFrame = true;
         mgmtFrameWithNoAck = false; // FIXME: ack policy?
     }

@@ -176,7 +176,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
 
     /** Utility function: sends a management frame */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& address);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& address);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
@@ -188,16 +188,16 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     /** @name Processing of different frame types */
     //@{
     virtual void handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) override;
-    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
-    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
+    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame) override;
     //@}
 
     /** @name Processing of different agent commands */

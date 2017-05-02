@@ -104,7 +104,7 @@ std::vector<Packet *> RecipientQoSMacDataService::dataFrameReceived(Packet *data
     return deaggregatedFrames;
 }
 
-std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame)
+std::vector<Packet *> RecipientQoSMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame)
 {
     // TODO: MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtFrame))

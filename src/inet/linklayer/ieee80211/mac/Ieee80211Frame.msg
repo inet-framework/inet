@@ -218,12 +218,12 @@ class Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 //
 // Base class for 802.11 management frames (subclasses will add frame body contents)
 //
-class Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
+class Ieee80211ManagementHeader extends Ieee80211DataOrMgmtFrame
 {
 }
 
 // 8.3.3.13 Action frame format -- mgmt frame with subtype action
-class Ieee80211ActionFrame extends Ieee80211ManagementFrame
+class Ieee80211ActionFrame extends Ieee80211ManagementHeader
 {
     type = ST_ACTION;
     short category;

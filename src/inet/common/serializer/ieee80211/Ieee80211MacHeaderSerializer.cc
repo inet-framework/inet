@@ -26,7 +26,7 @@ namespace serializer {
 Register_Serializer(Ieee80211Frame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataOrMgmtFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataFrame, Ieee80211MacHeaderSerializer);
-Register_Serializer(Ieee80211ManagementFrame, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211ManagementHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MsduSubframe, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211ACKFrame, Ieee80211MacHeaderSerializer);
@@ -429,7 +429,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0xB0: // ST_AUTHENTICATION
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_AUTHENTICATION, fc_1);
             auto body = std::make_shared<Ieee80211AuthenticationFrameBody>();
             stream.readUint16Be();
@@ -443,7 +443,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0xC0: //ST_ST_DEAUTHENTICATION
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_DEAUTHENTICATION, fc_1);
             auto body = std::make_shared<Ieee80211DeauthenticationFrameBody>();
 
@@ -456,7 +456,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0xA0: // ST_DISASSOCIATION
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_DISASSOCIATION, fc_1);
             auto body = std::make_shared<Ieee80211DisassociationFrameBody>();
 
@@ -469,7 +469,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x40: // ST_PROBEREQUEST
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_PROBEREQUEST, fc_1);
             auto body = std::make_shared<Ieee80211ProbeRequestFrameBody>();
 
@@ -494,7 +494,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x00: // ST_ASSOCIATIONREQUEST
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONREQUEST, fc_1);
             auto body = std::make_shared<Ieee80211AssociationRequestFrameBody>();
 
@@ -519,7 +519,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x02: // ST_REASSOCIATIONREQUEST
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONREQUEST, fc_1);
             auto body = std::make_shared<Ieee80211ReassociationRequestFrameBody>();
             stream.readUint16Be();
@@ -548,7 +548,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x01: // ST_ASSOCIATIONRESPONSE
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONRESPONSE, fc_1);
             auto body = std::make_shared<Ieee80211AssociationResponseFrameBody>();
             stream.readUint16Be();
@@ -569,7 +569,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x03: // ST_REASSOCIATIONRESPONSE
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONRESPONSE, fc_1);
             auto body = std::make_shared<Ieee80211ReassociationResponseFrameBody>();
             stream.readUint16Be();
@@ -590,7 +590,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x80: // ST_BEACON
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_BEACON, fc_1);
             auto body = std::make_shared<Ieee80211BeaconFrameBody>();
 
@@ -621,7 +621,7 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
 
         case 0x50: // ST_PROBERESPONSE
         {
-            auto pkt = std::make_shared<Ieee80211ManagementFrame>();
+            auto pkt = std::make_shared<Ieee80211ManagementHeader>();
             parseDataOrMgmtFrame(stream, pkt, ST_PROBERESPONSE, fc_1);
             auto body = std::make_shared<Ieee80211ProbeResponseFrameBody>();
 

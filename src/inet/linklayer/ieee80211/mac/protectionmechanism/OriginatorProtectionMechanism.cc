@@ -85,7 +85,7 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
 //     individual address, the duration value is set to the time, in microseconds, required to transmit the
 //     next fragment of this management frame, plus two ACK frames, plus three SIFS intervals.
 //
-simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame)
 {
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtFrame)->getDuration(LENGTH_ACK);
     if (mgmtFrame->getReceiverAddress().isMulticast())
@@ -105,7 +105,7 @@ simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, co
         return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingFrame);
     else if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame))
         return computeDataFrameDurationField(packet, dataFrame, pendingPacket, pendingFrame);
-    else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame))
+    else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frame))
         return computeMgmtFrameDurationField(packet, mgmtFrame, pendingPacket, pendingFrame);
     else
         throw cRuntimeError("Unknown frame");

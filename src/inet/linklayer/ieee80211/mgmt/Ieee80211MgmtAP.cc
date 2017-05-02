@@ -124,13 +124,13 @@ void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, lo
     }
 }
 
-Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211ManagementFrame>& frame)
+Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211ManagementHeader>& frame)
 {
     auto it = staList.find(frame->getTransmitterAddress());
     return it == staList.end() ? nullptr : &(it->second);
 }
 
-void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& destAddr)
+void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& destAddr)
 {
     frame->setFromDS(true);
     frame->setReceiverAddress(destAddr);
@@ -147,7 +147,7 @@ void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211M
 void Ieee80211MgmtAP::sendBeacon()
 {
     EV << "Sending beacon\n";
-    const auto& frame = std::make_shared<Ieee80211ManagementFrame>();
+    const auto& frame = std::make_shared<Ieee80211ManagementHeader>();
     frame->setType(ST_BEACON);
     const auto& body = std::make_shared<Ieee80211BeaconFrameBody>();
     body->setSSID(ssid.c_str());
@@ -203,7 +203,7 @@ void Ieee80211MgmtAP::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFra
     }
 }
 
-void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     const auto& requestBody = packet->peekDataAt<Ieee80211AuthenticationFrameBody>(frame->getChunkLength());
     int frameAuthSeq = requestBody->getSequenceNumber();
@@ -237,7 +237,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     if (frameAuthSeq != sta->authSeqExpected) {
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
-        const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+        const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
         resp->setType(ST_AUTHENTICATION);
         const auto& body = std::make_shared<Ieee80211AuthenticationFrameBody>();
         body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
@@ -254,7 +254,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     // send OK response (we don't model the cryptography part, just assume
     // successful authentication every time)
     EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq + 1) << "\n";
-    const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+    const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
     resp->setType(ST_AUTHENTICATION);
     const auto& body = std::make_shared<Ieee80211AuthenticationFrameBody>();
     body->setSequenceNumber(frameAuthSeq + 1);
@@ -279,7 +279,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80
     }
 }
 
-void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     EV << "Processing Deauthentication frame\n";
 
@@ -295,7 +295,7 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee
     }
 }
 
-void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     EV << "Processing AssociationRequest frame\n";
 
@@ -303,7 +303,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     STAInfo *sta = lookupSenderSTA(frame);
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
-        const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+        const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
         resp->setType(ST_DEAUTHENTICATION);
         const auto& body = std::make_shared<Ieee80211DeauthenticationFrameBody>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
@@ -321,7 +321,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     sta->status = ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+    const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
     resp->setType(ST_ASSOCIATIONRESPONSE);
     const auto& body = std::make_shared<Ieee80211AssociationResponseFrameBody>();
     body->setStatusCode(SC_SUCCESSFUL);
@@ -332,12 +332,12 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     sendManagementFrame("AssocResp-OK", resp, body, sta->address);
 }
 
-void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     EV << "Processing ReassociationRequest frame\n";
 
@@ -345,7 +345,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     STAInfo *sta = lookupSenderSTA(frame);
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
-        const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+        const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
         resp->setType(ST_DEAUTHENTICATION);
         const auto& body = std::make_shared<Ieee80211DeauthenticationFrameBody>();
         body->setReasonCode(RC_NONAUTH_ASS_REQUEST);
@@ -361,7 +361,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sta->status = ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+    const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
     resp->setType(ST_REASSOCIATIONRESPONSE);
     const auto& body = std::make_shared<Ieee80211ReassociationResponseFrameBody>();
     body->setStatusCode(SC_SUCCESSFUL);
@@ -372,12 +372,12 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     sendManagementFrame("ReassocResp-OK", resp, body, sta->address);
 }
 
-void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     STAInfo *sta = lookupSenderSTA(frame);
     delete packet;
@@ -389,12 +389,12 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80
     }
 }
 
-void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     EV << "Processing ProbeRequest frame\n";
 
@@ -409,7 +409,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
     delete packet;
 
     EV << "Sending ProbeResponse frame\n";
-    const auto& resp = std::make_shared<Ieee80211ManagementFrame>();
+    const auto& resp = std::make_shared<Ieee80211ManagementHeader>();
     resp->setType(ST_PROBERESPONSE);
     const auto& body = std::make_shared<Ieee80211ProbeResponseFrameBody>();
     body->setSSID(ssid.c_str());
@@ -421,7 +421,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
     sendManagementFrame("ProbeResp", resp, body, staAddress);
 }
 
-void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
+void Ieee80211MgmtAP::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
 {
     dropManagementFrame(packet);
 }

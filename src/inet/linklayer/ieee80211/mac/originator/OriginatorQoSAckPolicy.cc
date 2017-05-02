@@ -35,7 +35,7 @@ void OriginatorQoSAckPolicy::initialize(int stage)
     }
 }
 
-bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211ManagementFrame>& frame) const
+bool OriginatorQoSAckPolicy::isAckNeeded(const Ptr<Ieee80211ManagementHeader>& frame) const
 {
     return !frame->getReceiverAddress().isMulticast();
 }

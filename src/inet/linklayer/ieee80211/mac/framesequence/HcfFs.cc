@@ -54,7 +54,7 @@ int HcfFs::selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSe
     const auto& header = frameToTransmit->peekHeader<Ieee80211Frame>();
     if (std::dynamic_pointer_cast<Ieee80211DataFrame>(header))
         return 0;
-    else if (std::dynamic_pointer_cast<Ieee80211ManagementFrame>(header))
+    else if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(header))
         return 1;
     else
         throw cRuntimeError("frameToTransmit must be either a Data or a Management frame");

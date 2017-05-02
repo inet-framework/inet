@@ -128,7 +128,7 @@ const IIeee80211Mode* QoSRateSelection::computeDataOrMgmtFrameMode(const Ptr<Iee
 {
     if (std::dynamic_pointer_cast<Ieee80211DataFrame>(dataOrMgmtFrame) && dataFrameMode)
         return dataFrameMode;
-    if (std::dynamic_pointer_cast<Ieee80211ManagementFrame>(dataOrMgmtFrame) && mgmtFrameMode)
+    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(dataOrMgmtFrame) && mgmtFrameMode)
         return mgmtFrameMode;
     // This subclause describes the rate selection rules for group addressed data and management frames, excluding
     // the following:

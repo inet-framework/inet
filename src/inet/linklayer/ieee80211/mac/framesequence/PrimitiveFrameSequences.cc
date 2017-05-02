@@ -158,7 +158,7 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
-            auto mgmtFrame = packet->peekHeader<Ieee80211ManagementFrame>();
+            auto mgmtFrame = packet->peekHeader<Ieee80211ManagementHeader>();
             return new ReceiveStep(context->getAckTimeout(packet, mgmtFrame));
         }
         case 2:

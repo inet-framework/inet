@@ -35,7 +35,7 @@ cplusplus {{
 #define PERRElemLen 13
 }}
 
-class Ieee80211ManagementFrame extends FieldsChunk;
+class Ieee80211ManagementHeader extends FieldsChunk;
 
  //
 // Capability Information field format. This field is not used

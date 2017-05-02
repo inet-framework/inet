@@ -57,7 +57,7 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
     if (context->getQoSContext()->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), context->getQoSContext()->txopProcedure))
         return 2;
-    if (dynamic_cast<Ieee80211ManagementFrame*>(frameToTransmit))
+    if (dynamic_cast<Ieee80211ManagementHeader*>(frameToTransmit))
         return 3;
     else {
         auto dataFrameToTransmit = std::dynamic_pointer_cast<Ieee80211DataFrame>(frameToTransmit->peekHeader<Ieee80211Frame>());

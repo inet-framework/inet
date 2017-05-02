@@ -55,7 +55,7 @@ std::vector<Packet*> RecipientMacDataService::dataFrameReceived(Packet *dataPack
     return dataOrMgmtFrameReceived(dataPacket, dataFrame);
 }
 
-std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame)
+std::vector<Packet*> RecipientMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame)
 {
     return dataOrMgmtFrameReceived(mgmtPacket, mgmtFrame);
 }

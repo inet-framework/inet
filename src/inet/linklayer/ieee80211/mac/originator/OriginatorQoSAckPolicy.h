@@ -46,7 +46,7 @@ class INET_API OriginatorQoSAckPolicy : public ModeSetListener, public IOriginat
         virtual bool isCompressedBlockAckReq(const std::vector<Ieee80211DataFrame*>& outstandingFrames, int startingSequenceNumber) const;
 
     public:
-        virtual bool isAckNeeded(const Ptr<Ieee80211ManagementFrame>& frame) const override;
+        virtual bool isAckNeeded(const Ptr<Ieee80211ManagementHeader>& frame) const override;
         virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<Ieee80211DataFrame>& frame, OriginatorBlockAckAgreement *agreement) const override;
         virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) const override;
         virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const override;

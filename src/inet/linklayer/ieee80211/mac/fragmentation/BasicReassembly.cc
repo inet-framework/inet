@@ -35,7 +35,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     if (!frame->getMoreFragments() && frame->getFragmentNumber() == 0)
         return packet;
     // FIXME: temporary fix for mgmt frames
-    if (std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame))
+    if (std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frame))
         return packet;
     // find entry for this frame
     Key key;

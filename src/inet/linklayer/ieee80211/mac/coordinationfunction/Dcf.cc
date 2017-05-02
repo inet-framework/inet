@@ -106,7 +106,7 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee802
     delete responsePacket;
 }
 
-void Dcf::processMgmtFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& mgmtFrame)
+void Dcf::processMgmtFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& mgmtFrame)
 {
     throw cRuntimeError("Unknown management frame");
 }
@@ -186,7 +186,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211Frame
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtFrame, recipientAckPolicy, this);
     if (auto dataFrame = std::dynamic_pointer_cast<Ieee80211DataFrame>(frame))
         sendUp(recipientDataService->dataFrameReceived(packet, dataFrame));
-    else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame))
+    else if (auto mgmtFrame = std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frame))
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtFrame));
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, frame));

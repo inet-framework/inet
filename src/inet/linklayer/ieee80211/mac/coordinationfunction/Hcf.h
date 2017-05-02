@@ -140,14 +140,14 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         // Recipient
         virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
         virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame);
-        virtual void recipientProcessReceivedManagementFrame(const Ptr<Ieee80211ManagementFrame>& frame);
+        virtual void recipientProcessReceivedManagementFrame(const Ptr<Ieee80211ManagementHeader>& frame);
         virtual void recipientProcessTransmittedControlResponseFrame(const Ptr<Ieee80211Frame>& frame);
 
         // Originator
-        virtual void originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211ManagementFrame>& mgmtFrame, AccessCategory ac);
+        virtual void originatorProcessTransmittedManagementFrame(const Ptr<Ieee80211ManagementHeader>& mgmtFrame, AccessCategory ac);
         virtual void originatorProcessTransmittedControlFrame(const Ptr<Ieee80211Frame>& controlFrame, AccessCategory ac);
         virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& dataFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedManagementFrame(const Ptr<Ieee80211ManagementFrame>& frame, const Ptr<Ieee80211Frame>& lastTransmittedFrame, AccessCategory ac);
+        virtual void originatorProcessReceivedManagementFrame(const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211Frame>& lastTransmittedFrame, AccessCategory ac);
         virtual void originatorProcessReceivedControlFrame(Packet *packet, const Ptr<Ieee80211Frame>& frame, Packet *lastTransmittedPacket, const Ptr<Ieee80211Frame>& lastTransmittedFrame, AccessCategory ac);
         virtual void originatorProcessReceivedDataFrame(const Ptr<Ieee80211DataFrame>& frame, const Ptr<Ieee80211Frame>& lastTransmittedFrame, AccessCategory ac);
 
@@ -173,7 +173,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
         // IProcedureCallback
         virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<Ieee80211Frame>& responseFrame, Packet *receivedPacket, const Ptr<Ieee80211Frame>& receivedFrame) override;
-        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame) override;
+        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame) override;
 
         // IProcedureCallback
         virtual void scheduleInactivityTimer(simtime_t timeout) override;

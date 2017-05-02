@@ -95,7 +95,7 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
 int DcfFs::selectMulticastDataOrMgmt(AlternativesFs* frameSequence, FrameSequenceContext* context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    return std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frameToTransmit->peekHeader<Ieee80211Frame>()) ? 0 : 1;
+    return std::dynamic_pointer_cast<Ieee80211ManagementHeader>(frameToTransmit->peekHeader<Ieee80211Frame>()) ? 0 : 1;
 }
 
 bool DcfFs::isFragFrameSequenceNeeded(AlternativesFs *frameSequence, FrameSequenceContext *context)

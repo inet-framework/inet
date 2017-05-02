@@ -36,7 +36,7 @@ class INET_API OriginatorProtectionMechanism : public ModeSetListener
 
         virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<Ieee80211RTSFrame>& rtsFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame);
         virtual simtime_t computeDataFrameDurationField(Packet *dataPacket, const Ptr<Ieee80211DataFrame>& dataFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame);
-        virtual simtime_t computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<Ieee80211ManagementFrame>& mgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame);
+        virtual simtime_t computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<Ieee80211ManagementHeader>& mgmtFrame, Packet *pendingPacket, const Ptr<Ieee80211DataOrMgmtFrame>& pendingFrame);
 
     public:
         virtual ~OriginatorProtectionMechanism() { }
