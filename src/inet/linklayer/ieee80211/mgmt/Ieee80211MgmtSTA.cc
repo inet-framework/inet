@@ -295,7 +295,7 @@ void Ieee80211MgmtSTA::beaconLost()
     emit(NF_L2_BEACON_LOST, myIface);
 }
 
-void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& address)
+void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& address)
 {
     // frame goes to the specified AP
     frame->setToDS(true);

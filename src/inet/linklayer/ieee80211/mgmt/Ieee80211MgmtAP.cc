@@ -130,7 +130,7 @@ Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211Ma
     return it == staList.end() ? nullptr : &(it->second);
 }
 
-void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& destAddr)
+void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& destAddr)
 {
     frame->setFromDS(true);
     frame->setReceiverAddress(destAddr);
