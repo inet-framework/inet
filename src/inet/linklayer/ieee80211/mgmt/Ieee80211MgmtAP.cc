@@ -319,7 +319,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Packet *packet, const Ptr<Ie
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0);    //XXX
     body.setSupportedRates(supportedRates);
-    // KLUDGE: TODO: revive body.setBodyLength(2 + 2 + 2 + body.getSupportedRates().numRates + 2);
+    body.setBodyLength(2 + 2 + 2 + body.getSupportedRates().numRates + 2);
     resp->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("AssocResp-OK", resp, sta->address);
 }
@@ -357,6 +357,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Packet *packet, const Ptr<
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0);    //XXX
     body.setSupportedRates(supportedRates);
+    body.setBodyLength(2 + (2 + ssid.length()) + (2 + supportedRates.numRates) + 6);
     resp->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("ReassocResp-OK", resp, sta->address);
 }
@@ -403,7 +404,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee8021
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);
     body.setChannelNumber(channelNumber);
-    // KLUDGE: TODO: revive body.setBodyLength(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates));
+    body.setBodyLength(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates));
     resp->setChunkLength(byte(24 + body.getBodyLength()));
     sendManagementFrame("ProbeResp", resp, staAddress);
 }

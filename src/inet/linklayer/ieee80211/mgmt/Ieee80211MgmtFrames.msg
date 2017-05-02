@@ -188,7 +188,6 @@ class Ieee80211DisassociationFrameBody extends Ieee80211FrameBody
 //
 class Ieee80211ProbeRequestFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 12; // assuming a 8-character SSID     //FIXME bodyLength = 2 + length(SSID) + 2 + supportedRates.numRates
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
 }
@@ -198,7 +197,6 @@ class Ieee80211ProbeRequestFrameBody extends Ieee80211FrameBody
 //
 class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 16; // assuming a 8-character SSID     //FIXME bodyLength = 2 + length(SSID) + 2 + supportedRates.numRates
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
 }
@@ -208,7 +206,6 @@ class Ieee80211AssociationRequestFrameBody extends Ieee80211FrameBody
 //
 class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequestFrameBody
 {
-    bodyLength = 26; // assuming a 8-character SSID and 4 supported datarates     //FIXME bodyLength = 2 + length(SSID) + 2 + supportedRates.numRates + 2 + 6
     MACAddress currentAP;
 }
 
@@ -217,7 +214,6 @@ class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequest
 //
 class Ieee80211AssociationResponseFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 26; // assuming a 8-character SSID and 4 supported datarates       //FIXME not a static value
     int statusCode @enum(Ieee80211StatusCode);
     short aid;
     Ieee80211SupportedRatesElement supportedRates;
@@ -235,7 +231,6 @@ class Ieee80211ReassociationResponseFrameBody extends Ieee80211AssociationRespon
 //
 class Ieee80211BeaconFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 50; // assuming a 8-character SSID, 4 supported datarate plus TIM     //FIXME bodyLength = 8 + 2 + 2 + (2 + length(SSID)) + (2 + supportedRates.numRates) + ???
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
     simtime_t beaconInterval;
