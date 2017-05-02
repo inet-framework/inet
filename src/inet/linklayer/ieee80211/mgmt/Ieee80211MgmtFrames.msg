@@ -37,7 +37,7 @@ cplusplus {{
 
 class Ieee80211ManagementFrame extends FieldsChunk;
 
-//
+ //
 // Capability Information field format. This field is not used
 // by the model (and is omitted from management frame formats too),
 // because its fields are related to features not supported by this model
@@ -142,9 +142,8 @@ struct Ieee80211SupportedRatesElement
 //
 // Frame body base class used to hide various frame body types
 //
-class Ieee80211FrameBody
+class Ieee80211FrameBody extends FieldsChunk
 {
-    short bodyLength; // not an actual frame field
 }
 
 //
@@ -159,7 +158,7 @@ class Ieee80211FrameBody
 //
 class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 6; // add 2+len bytes for challenge text if present
+    chunkLength = byte(6); // add 2+len bytes for challenge text if present
     unsigned short sequenceNumber;
     int statusCode @enum(Ieee80211StatusCode);
     bool isLast; // not part of the standard; see above
@@ -170,7 +169,7 @@ class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 //
 class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 2;
+    chunkLength = byte(2);
     int reasonCode @enum(Ieee80211ReasonCode);
 }
 
@@ -179,7 +178,7 @@ class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 //
 class Ieee80211DisassociationFrameBody extends Ieee80211FrameBody
 {
-    bodyLength = 2;
+    chunkLength = byte(2);
     int reasonCode @enum(Ieee80211ReasonCode);
 }
 
@@ -255,7 +254,6 @@ class Ieee80211ActionFrameBody extends Ieee80211FrameBody
 class Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 {
     type = ST_AUTHENTICATION;
-    Ieee80211AuthenticationFrameBody body;
 }
 
 //
@@ -264,7 +262,6 @@ class Ieee80211AuthenticationFrame extends Ieee80211ManagementFrame
 class Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 {
     type = ST_DEAUTHENTICATION;
-    Ieee80211DeauthenticationFrameBody body;
 }
 
 //
@@ -273,7 +270,6 @@ class Ieee80211DeauthenticationFrame extends Ieee80211ManagementFrame
 class Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 {
     type = ST_DISASSOCIATION;
-    Ieee80211DisassociationFrameBody body;
 }
 
 //
@@ -282,7 +278,6 @@ class Ieee80211DisassociationFrame extends Ieee80211ManagementFrame
 class Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_PROBEREQUEST;
-    Ieee80211ProbeRequestFrameBody body;
 }
 
 //
@@ -291,7 +286,6 @@ class Ieee80211ProbeRequestFrame extends Ieee80211ManagementFrame
 class Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_ASSOCIATIONREQUEST;
-    Ieee80211AssociationRequestFrameBody body;
 }
 
 //
@@ -300,7 +294,6 @@ class Ieee80211AssociationRequestFrame extends Ieee80211ManagementFrame
 class Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 {
     type = ST_REASSOCIATIONREQUEST;
-    Ieee80211ReassociationRequestFrameBody body;
 }
 
 //
@@ -309,7 +302,6 @@ class Ieee80211ReassociationRequestFrame extends Ieee80211ManagementFrame
 class Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_ASSOCIATIONRESPONSE;
-    Ieee80211AssociationResponseFrameBody body;
 }
 
 //
@@ -318,7 +310,6 @@ class Ieee80211AssociationResponseFrame extends Ieee80211ManagementFrame
 class Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_REASSOCIATIONRESPONSE;
-    Ieee80211ReassociationResponseFrameBody body;
 }
 
 //
@@ -327,7 +318,6 @@ class Ieee80211ReassociationResponseFrame extends Ieee80211ManagementFrame
 class Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 {
     type = ST_BEACON;
-    Ieee80211BeaconFrameBody body;
 }
 
 //
@@ -336,7 +326,6 @@ class Ieee80211BeaconFrame extends Ieee80211ManagementFrame
 class Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
 {
     type = ST_PROBERESPONSE;
-    Ieee80211ProbeResponseFrameBody body;
 }
 
 // TODO
@@ -345,6 +334,5 @@ class Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
 //class Ieee80211ActionFrame extends Ieee80211ManagementFrame
 //{
 //    type = ST_ACTION;
-//    Ieee80211ActionFrameBody body;
 //}
 //

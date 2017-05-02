@@ -149,7 +149,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(const MACAddress& address, const Ieee80211BeaconFrameBody& body);
+    virtual void storeAPInfo(const MACAddress& address, const Ptr<Ieee80211BeaconFrameBody>& body);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
@@ -176,7 +176,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, int resultCode);
 
     /** Utility function: sends a management frame */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& frame, const MACAddress& address);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& address);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;

@@ -295,7 +295,7 @@ void Ieee80211MgmtSTA::beaconLost()
     emit(NF_L2_BEACON_LOST, myIface);
 }
 
-void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& frame, const MACAddress& address)
+void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementFrame>& frame, const Ptr<Ieee80211FrameBody>& body, const MACAddress& address)
 {
     // frame goes to the specified AP
     frame->setToDS(true);
@@ -303,6 +303,8 @@ void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211
     //XXX set sequenceNumber?
     frame->markImmutable();
     auto packet = new Packet(name);
+    body->markImmutable();
+    packet->append(body);
     packet->insertHeader(frame);
     packet->insertTrailer(std::make_shared<Ieee80211MacTrailer>());
     sendDown(packet);
@@ -320,12 +322,12 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
     EV << "Sending initial Authentication frame with seqNum=1\n";
 
     // create and send first authentication frame
-    const Ptr<Ieee80211AuthenticationFrame>& frame = std::make_shared<Ieee80211AuthenticationFrame>();
-    auto& body = frame->getBody();
-    body.setSequenceNumber(1);
+    const auto& frame = std::make_shared<Ieee80211AuthenticationFrame>();
+    const auto& body = std::make_shared<Ieee80211AuthenticationFrameBody>();
+    body->setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
-    frame->setChunkLength(byte(24 + body.getBodyLength()));
-    sendManagementFrame("Auth", frame, ap->address);
+    frame->setChunkLength(byte(24));
+    sendManagementFrame("Auth", frame, body, ap->address);
 
     ap->authSeqExpected = 2;
 
@@ -347,16 +349,16 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     changeChannel(ap->channel);
 
     // create and send association request
-    const Ptr<Ieee80211AssociationRequestFrame>& frame = std::make_shared<Ieee80211AssociationRequestFrame>();
+    const auto& frame = std::make_shared<Ieee80211AssociationRequestFrame>();
+    const auto& body = std::make_shared<Ieee80211AssociationRequestFrameBody>();
 
     //XXX set the following too?
     // string SSID
     // Ieee80211SupportedRatesElement supportedRates;
 
-    auto& body = frame->getBody();
-    body.setBodyLength(2 + 2 + strlen(body.getSSID()) + 2 + body.getSupportedRates().numRates + 2);
-    frame->setChunkLength(byte(24 + body.getBodyLength()));
-    sendManagementFrame("Assoc", frame, ap->address);
+    body->setChunkLength(byte(2 + 2 + strlen(body->getSSID()) + 2 + body->getSupportedRates().numRates + 2));
+    frame->setChunkLength(byte(24));
+    sendManagementFrame("Assoc", frame, body, ap->address);
 
     // schedule timeout
     ASSERT(assocTimeoutMsg == nullptr);
@@ -476,12 +478,12 @@ bool Ieee80211MgmtSTA::scanNextChannel()
 void Ieee80211MgmtSTA::sendProbeRequest()
 {
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
-    const Ptr<Ieee80211ProbeRequestFrame>& frame = std::make_shared<Ieee80211ProbeRequestFrame>();
-    auto& body = frame->getBody();
-    body.setSSID(scanning.ssid.c_str());
-    body.setBodyLength((2 + scanning.ssid.length()) + (2 + body.getSupportedRates().numRates));
-    frame->setChunkLength(byte(24 + body.getBodyLength()));
-    sendManagementFrame("ProbeReq", frame, scanning.bssid);
+    const auto& frame = std::make_shared<Ieee80211ProbeRequestFrame>();
+    const auto& body = std::make_shared<Ieee80211ProbeRequestFrameBody>();
+    body->setSSID(scanning.ssid.c_str());
+    body->setChunkLength(byte((2 + scanning.ssid.length()) + (2 + body->getSupportedRates().numRates)));
+    frame->setChunkLength(byte(24));
+    sendManagementFrame("ProbeReq", frame, body, scanning.bssid);
 }
 
 void Ieee80211MgmtSTA::sendScanConfirm()
@@ -536,11 +538,11 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     }
 
     // create and send deauthentication request
-    const Ptr<Ieee80211DeauthenticationFrame>& frame = std::make_shared<Ieee80211DeauthenticationFrame>();
-    auto& body = frame->getBody();
-    body.setReasonCode(ctrl->getReasonCode());
-    frame->setChunkLength(byte(24 + body.getBodyLength()));
-    sendManagementFrame("Deauth", frame, address);
+    const auto& frame = std::make_shared<Ieee80211DeauthenticationFrame>();
+    const auto& body = std::make_shared<Ieee80211DeauthenticationFrameBody>();
+    body->setReasonCode(ctrl->getReasonCode());
+    frame->setChunkLength(byte(24));
+    sendManagementFrame("Deauth", frame, body, address);
 }
 
 void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl)
@@ -573,11 +575,11 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     }
 
     // create and send disassociation request
-    const Ptr<Ieee80211DisassociationFrame>& frame = std::make_shared<Ieee80211DisassociationFrame>();
-    auto& body = frame->getBody();
-    body.setReasonCode(ctrl->getReasonCode());
-    frame->setChunkLength(byte(24 + body.getBodyLength()));
-    sendManagementFrame("Disass", frame, address);
+    const auto& frame = std::make_shared<Ieee80211DisassociationFrame>();
+    const auto& body = std::make_shared<Ieee80211DisassociationFrameBody>();
+    body->setReasonCode(ctrl->getReasonCode());
+    frame->setChunkLength(byte(24));
+    sendManagementFrame("Disass", frame, body, address);
 }
 
 void Ieee80211MgmtSTA::disassociate()
@@ -631,8 +633,9 @@ void Ieee80211MgmtSTA::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFr
 
 void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame)
 {
+    const auto& requestBody = packet->peekDataAt<Ieee80211AuthenticationFrameBody>(frame->getChunkLength());
     MACAddress address = frame->getTransmitterAddress();
-    int frameAuthSeq = frame->getBody().getSequenceNumber();
+    int frameAuthSeq = requestBody->getSequenceNumber();
     EV << "Received Authentication frame from address=" << address << ", seqNum=" << frameAuthSeq << "\n";
 
     APInfo *ap = lookupAP(address);
@@ -660,11 +663,11 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
     if (frameAuthSeq != ap->authSeqExpected) {
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
-        const Ptr<Ieee80211AuthenticationFrame>& resp = std::make_shared<Ieee80211AuthenticationFrame>();
-        auto& body = resp->getBody();
-        body.setStatusCode(SC_AUTH_OUT_OF_SEQ);
-        resp->setChunkLength(byte(24 + body.getBodyLength()));
-        sendManagementFrame("Auth-ERROR", resp, frame->getTransmitterAddress());
+        const auto& resp = std::make_shared<Ieee80211AuthenticationFrame>();
+        const auto& body = std::make_shared<Ieee80211AuthenticationFrameBody>();
+        body->setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        resp->setChunkLength(byte(24));
+        sendManagementFrame("Auth-ERROR", resp, body, frame->getTransmitterAddress());
         delete packet;
 
         // cancel timeout, send error to agent
@@ -675,19 +678,19 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee8
     }
 
     // check if more exchanges are needed for auth to be complete
-    int statusCode = frame->getBody().getStatusCode();
+    int statusCode = requestBody->getStatusCode();
 
-    if (statusCode == SC_SUCCESSFUL && !frame->getBody().getIsLast()) {
+    if (statusCode == SC_SUCCESSFUL && !requestBody->getIsLast()) {
         EV << "More steps required, sending another Authentication frame\n";
 
         // more steps required, send another Authentication frame
-        const Ptr<Ieee80211AuthenticationFrame>& resp = std::make_shared<Ieee80211AuthenticationFrame>();
-        auto& body = resp->getBody();
-        body.setSequenceNumber(frameAuthSeq + 1);
-        body.setStatusCode(SC_SUCCESSFUL);
+        const auto& resp = std::make_shared<Ieee80211AuthenticationFrame>();
+        const auto& body = std::make_shared<Ieee80211AuthenticationFrameBody>();
+        body->setSequenceNumber(frameAuthSeq + 1);
+        body->setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.
-        resp->setChunkLength(byte(24 + body.getBodyLength()));
-        sendManagementFrame("Auth", resp, address);
+        resp->setChunkLength(byte(24));
+        sendManagementFrame("Auth", resp, body, address);
         ap->authSeqExpected += 2;
     }
     else {
@@ -745,8 +748,9 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Packet *packet, const Ptr<
     }
 
     // extract frame contents
+    const auto& responseBody = packet->peekDataAt<Ieee80211AssociationResponseFrameBody>(frame->getChunkLength());
     MACAddress address = frame->getTransmitterAddress();
-    int statusCode = frame->getBody().getStatusCode();
+    int statusCode = responseBody->getStatusCode();
     //XXX short aid;
     //XXX Ieee80211SupportedRatesElement supportedRates;
     delete packet;
@@ -823,7 +827,8 @@ void Ieee80211MgmtSTA::handleDisassociationFrame(Packet *packet, const Ptr<Ieee8
 void Ieee80211MgmtSTA::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame)
 {
     EV << "Received Beacon frame\n";
-    storeAPInfo(frame->getTransmitterAddress(), frame->getBody());
+    const auto& beaconBody = packet->peekDataAt<Ieee80211BeaconFrameBody>(frame->getChunkLength());
+    storeAPInfo(frame->getTransmitterAddress(), beaconBody);
 
     // if it is out associate AP, restart beacon timeout
     if (isAssociated && frame->getTransmitterAddress() == assocAP.address) {
@@ -847,27 +852,28 @@ void Ieee80211MgmtSTA::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee802
 void Ieee80211MgmtSTA::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame)
 {
     EV << "Received Probe Response frame\n";
-    storeAPInfo(frame->getTransmitterAddress(), frame->getBody());
+    const auto& probeResponseBody = packet->peekDataAt<Ieee80211ProbeResponseFrameBody>(frame->getChunkLength());
+    storeAPInfo(frame->getTransmitterAddress(), probeResponseBody);
     delete packet;
 }
 
-void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211BeaconFrameBody& body)
+void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ptr<Ieee80211BeaconFrameBody>& body)
 {
     APInfo *ap = lookupAP(address);
     if (ap) {
-        EV << "AP address=" << address << ", SSID=" << body.getSSID() << " already in our AP list, refreshing the info\n";
+        EV << "AP address=" << address << ", SSID=" << body->getSSID() << " already in our AP list, refreshing the info\n";
     }
     else {
-        EV << "Inserting AP address=" << address << ", SSID=" << body.getSSID() << " into our AP list\n";
+        EV << "Inserting AP address=" << address << ", SSID=" << body->getSSID() << " into our AP list\n";
         apList.push_back(APInfo());
         ap = &apList.back();
     }
 
-    ap->channel = body.getChannelNumber();
+    ap->channel = body->getChannelNumber();
     ap->address = address;
-    ap->ssid = body.getSSID();
-    ap->supportedRates = body.getSupportedRates();
-    ap->beaconInterval = body.getBeaconInterval();
+    ap->ssid = body->getSSID();
+    ap->supportedRates = body->getSupportedRates();
+    ap->beaconInterval = body->getBeaconInterval();
 
     //XXX where to get this from?
     //ap->rxPower = ...

@@ -102,39 +102,39 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeUint16Le(dataFrame->getQos() | dataFrame->getTid() | (dataFrame->getAMsduPresent() ? 0x0080 : 0x0000));
         }
 
-        if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(chunk))
+        if (auto authenticationFrame = std::dynamic_pointer_cast<Ieee80211AuthenticationFrameBody>(chunk))
         {
             //type = ST_AUTHENTICATION;
             // 1    Authentication algorithm number
             stream.writeUint16Be(0);
             // 2    Authentication transaction sequence number
-            stream.writeUint16Be(authenticationFrame->getBody().getSequenceNumber());
+            stream.writeUint16Be(authenticationFrame->getSequenceNumber());
             // 3    Status code                                 The status code information is reserved in certain Authentication frames as defined in Table 7-17.
-            stream.writeUint16Be(authenticationFrame->getBody().getStatusCode());
+            stream.writeUint16Be(authenticationFrame->getStatusCode());
             // 4    Challenge text                              The challenge text information is present only in certain Authentication frames as defined in Table 7-17.
             // Last Vendor Specific                             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto deauthenticationFrame = std::dynamic_pointer_cast<Ieee80211DeauthenticationFrame>(chunk))
+        else if (auto deauthenticationFrame = std::dynamic_pointer_cast<Ieee80211DeauthenticationFrameBody>(chunk))
         {
             //type = ST_DEAUTHENTICATION;
-            stream.writeUint16Be(deauthenticationFrame->getBody().getReasonCode());
+            stream.writeUint16Be(deauthenticationFrame->getReasonCode());
         }
-        else if (auto disassociationFrame =std::dynamic_pointer_cast<Ieee80211DisassociationFrame>(chunk))
+        else if (auto disassociationFrame =std::dynamic_pointer_cast<Ieee80211DisassociationFrameBody>(chunk))
         {
             //type = ST_DISASSOCIATION;
-            stream.writeUint16Be(disassociationFrame->getBody().getReasonCode());
+            stream.writeUint16Be(disassociationFrame->getReasonCode());
         }
-        else if (auto probeRequestFrame = std::dynamic_pointer_cast<Ieee80211ProbeRequestFrame>(chunk))
+        else if (auto probeRequestFrame = std::dynamic_pointer_cast<Ieee80211ProbeRequestFrameBody>(chunk))
         {
             //type = ST_PROBEREQUEST;
             // 1    SSID
-            const char *SSID = probeRequestFrame->getBody().getSSID();
+            const char *SSID = probeRequestFrame->getSSID();
             unsigned int length = strlen(SSID);
             stream.writeByte(0);    //FIXME dummy, what is it?
             stream.writeByte(length);
             stream.writeBytes((uint8_t *)SSID, byte(length));
             // 2    Supported rates
-            const Ieee80211SupportedRatesElement& supportedRates = probeRequestFrame->getBody().getSupportedRates();
+            const Ieee80211SupportedRatesElement& supportedRates = probeRequestFrame->getSupportedRates();
             stream.writeByte(1);
             stream.writeByte(supportedRates.numRates);
             for (int i = 0; i < supportedRates.numRates; i++)
@@ -147,7 +147,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
             // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto associationRequestFrame = std::dynamic_pointer_cast<Ieee80211AssociationRequestFrame>(chunk))
+        else if (auto associationRequestFrame = std::dynamic_pointer_cast<Ieee80211AssociationRequestFrameBody>(chunk))
         {
             //type = ST_ASSOCIATIONREQUEST;
             // 1    Capability
@@ -155,13 +155,13 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 2    Listen interval
             stream.writeUint16Be(0);    //FIXME
             // 3    SSID
-            const char *SSID = associationRequestFrame->getBody().getSSID();
+            const char *SSID = associationRequestFrame->getSSID();
             unsigned int length = strlen(SSID);
             stream.writeByte(0);    //FIXME dummy, what is it?
             stream.writeByte(length);
             stream.writeBytes((uint8_t *)SSID, byte(length));
             // 4    Supported rates
-            const Ieee80211SupportedRatesElement& supportedRates = associationRequestFrame->getBody().getSupportedRates();
+            const Ieee80211SupportedRatesElement& supportedRates = associationRequestFrame->getSupportedRates();
             stream.writeByte(1);
             stream.writeByte(supportedRates.numRates);
             for (int i = 0; i < supportedRates.numRates; i++) {
@@ -176,7 +176,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 9    QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto reassociationRequestFrame = std::dynamic_pointer_cast<Ieee80211ReassociationRequestFrame>(chunk))
+        else if (auto reassociationRequestFrame = std::dynamic_pointer_cast<Ieee80211ReassociationRequestFrameBody>(chunk))
         {
             //type = ST_REASSOCIATIONREQUEST;
             // 1    Capability
@@ -184,16 +184,16 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 2    Listen interval
             stream.writeUint16Be(0);    //FIXME
             // 3    Current AP address
-            stream.writeMACAddress(reassociationRequestFrame->getBody().getCurrentAP());
+            stream.writeMACAddress(reassociationRequestFrame->getCurrentAP());
             // 4    SSID
-            const char *SSID = reassociationRequestFrame->getBody().getSSID();
+            const char *SSID = reassociationRequestFrame->getSSID();
             unsigned int length = strlen(SSID);
             //FIXME buffer.writeByte(buf + packetLength, ???);
             stream.writeByte(0);    //FIXME
             stream.writeByte(length);
             stream.writeBytes((uint8_t *)SSID, byte(length));
             // 5    Supported rates
-            const Ieee80211SupportedRatesElement& supportedRates = reassociationRequestFrame->getBody().getSupportedRates();
+            const Ieee80211SupportedRatesElement& supportedRates = reassociationRequestFrame->getSupportedRates();
             stream.writeByte(1);
             stream.writeByte(supportedRates.numRates);
             for (int i = 0; i < supportedRates.numRates; i++)
@@ -209,21 +209,21 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 10   QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto associationResponseFrame = std::dynamic_pointer_cast<Ieee80211AssociationResponseFrame>(chunk))
+        else if (auto associationResponseFrame = std::dynamic_pointer_cast<Ieee80211AssociationResponseFrameBody>(chunk))
         {
             //type = ST_ASSOCIATIONRESPONSE;
             // 1    Capability
             stream.writeUint16Be(0);    //FIXME
             // 2    Status code
-            stream.writeUint16Be(associationResponseFrame->getBody().getStatusCode());
+            stream.writeUint16Be(associationResponseFrame->getStatusCode());
             // 3    AID
-            stream.writeUint16Be(associationResponseFrame->getBody().getAid());
+            stream.writeUint16Be(associationResponseFrame->getAid());
             // 4    Supported rates
             stream.writeByte(1);
-            stream.writeByte(associationResponseFrame->getBody().getSupportedRates().numRates);
-            for (int i = 0; i < associationResponseFrame->getBody().getSupportedRates().numRates; i++)
+            stream.writeByte(associationResponseFrame->getSupportedRates().numRates);
+            for (int i = 0; i < associationResponseFrame->getSupportedRates().numRates; i++)
             {
-                uint8_t rate = ceil(associationResponseFrame->getBody().getSupportedRates().rate[i]/0.5);
+                uint8_t rate = ceil(associationResponseFrame->getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
                 stream.writeByte(rate);
             }
@@ -231,21 +231,21 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 6    EDCA Parameter Set
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto reassociationResponseFrame = std::dynamic_pointer_cast<Ieee80211ReassociationResponseFrame>(chunk))
+        else if (auto reassociationResponseFrame = std::dynamic_pointer_cast<Ieee80211ReassociationResponseFrameBody>(chunk))
         {
             //type = ST_REASSOCIATIONRESPONSE;
             // 1    Capability
             stream.writeUint16Be(0);    //FIXME
             // 2    Status code
-            stream.writeUint16Be(reassociationResponseFrame->getBody().getStatusCode());
+            stream.writeUint16Be(reassociationResponseFrame->getStatusCode());
             // 3    AID
-            stream.writeUint16Be(reassociationResponseFrame->getBody().getAid());
+            stream.writeUint16Be(reassociationResponseFrame->getAid());
             // 4    Supported rates
             stream.writeByte(1);
-            stream.writeByte(reassociationResponseFrame->getBody().getSupportedRates().numRates);
-            for (int i = 0; i < reassociationResponseFrame->getBody().getSupportedRates().numRates; i++)
+            stream.writeByte(reassociationResponseFrame->getSupportedRates().numRates);
+            for (int i = 0; i < reassociationResponseFrame->getSupportedRates().numRates; i++)
             {
-                uint8_t rate = ceil(reassociationResponseFrame->getBody().getSupportedRates().rate[i]/0.5);
+                uint8_t rate = ceil(reassociationResponseFrame->getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
                 stream.writeByte(rate);
             }
@@ -253,27 +253,27 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 6    EDCA Parameter Set
             // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto beaconFrame = std::dynamic_pointer_cast<Ieee80211BeaconFrame>(chunk))
+        else if (auto beaconFrame = std::dynamic_pointer_cast<Ieee80211BeaconFrameBody>(chunk))
         {
             //type = ST_BEACON;
             // 1    Timestamp
             stream.writeUint64Be(simTime().raw());   //FIXME
             // 2    Beacon interval
-            stream.writeUint16Be((uint16_t)(beaconFrame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
+            stream.writeUint16Be((uint16_t)(beaconFrame->getBeaconInterval().inUnit(SIMTIME_US)/1024));
             // 3    Capability
             stream.writeUint16Be(0);    //FIXME set  capability
             // 4    Service Set Identifier (SSID)
-            const char *SSID = beaconFrame->getBody().getSSID();
+            const char *SSID = beaconFrame->getSSID();
             unsigned int length = strlen(SSID);
             stream.writeByte(0);    //FIXME
             stream.writeByte(length);
             stream.writeBytes((uint8_t *)SSID, byte(length));
             // 5    Supported rates
             stream.writeByte(1);
-            stream.writeByte(beaconFrame->getBody().getSupportedRates().numRates);
-            for (int i = 0; i < beaconFrame->getBody().getSupportedRates().numRates; i++)
+            stream.writeByte(beaconFrame->getSupportedRates().numRates);
+            for (int i = 0; i < beaconFrame->getSupportedRates().numRates; i++)
             {
-                uint8_t rate = ceil(beaconFrame->getBody().getSupportedRates().rate[i]/0.5);
+                uint8_t rate = ceil(beaconFrame->getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
                 stream.writeByte(rate);
             }
@@ -298,27 +298,27 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             // 24   QoS Capability                         The QoS Capability element is present when dot11QosOption- Implemented is true and EDCA Parameter Set element is not present.
             // Last Vendor Specific                        One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
         }
-        else if (auto probeResponseFrame = std::dynamic_pointer_cast<Ieee80211ProbeResponseFrame>(chunk))
+        else if (auto probeResponseFrame = std::dynamic_pointer_cast<Ieee80211ProbeResponseFrameBody>(chunk))
         {
             //type = ST_PROBERESPONSE;
             // 1      Timestamp
             stream.writeUint64Be(simTime().raw());   //FIXME
             // 2      Beacon interval
-            stream.writeUint16Be((uint16_t)(probeResponseFrame->getBody().getBeaconInterval().inUnit(SIMTIME_US)/1024));
+            stream.writeUint16Be((uint16_t)(probeResponseFrame->getBeaconInterval().inUnit(SIMTIME_US)/1024));
             // 3      Capability
             stream.writeUint16Be(0);    //FIXME
             // 4      SSID
-            const char *SSID = probeResponseFrame->getBody().getSSID();
+            const char *SSID = probeResponseFrame->getSSID();
             unsigned int length = strlen(SSID);
             stream.writeByte(0);    //FIXME
             stream.writeByte(length);
             stream.writeBytes((uint8_t *)SSID, byte(length));
             // 5      Supported rates
             stream.writeByte(1);
-            stream.writeByte(probeResponseFrame->getBody().getSupportedRates().numRates);
-            for (int i = 0; i < probeResponseFrame->getBody().getSupportedRates().numRates; i++)
+            stream.writeByte(probeResponseFrame->getSupportedRates().numRates);
+            for (int i = 0; i < probeResponseFrame->getSupportedRates().numRates; i++)
             {
-                uint8_t rate = ceil(probeResponseFrame->getBody().getSupportedRates().rate[i]/0.5);
+                uint8_t rate = ceil(probeResponseFrame->getSupportedRates().rate[i]/0.5);
                 // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
                 stream.writeByte(rate);
             }
@@ -441,12 +441,12 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211AuthenticationFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_AUTHENTICATION, fc_1);
-            Ieee80211AuthenticationFrameBody body;
+            auto body = std::make_shared<Ieee80211AuthenticationFrameBody>();
             stream.readUint16Be();
-            body.setSequenceNumber(stream.readUint16Be());
-            body.setStatusCode(stream.readUint16Be());
+            body->setSequenceNumber(stream.readUint16Be());
+            body->setStatusCode(stream.readUint16Be());
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -455,11 +455,11 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211DeauthenticationFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_DEAUTHENTICATION, fc_1);
-            Ieee80211DeauthenticationFrameBody body;
+            auto body = std::make_shared<Ieee80211DeauthenticationFrameBody>();
 
-            body.setReasonCode(stream.readUint16Be());
+            body->setReasonCode(stream.readUint16Be());
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -468,11 +468,11 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211DisassociationFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_DISASSOCIATION, fc_1);
-            Ieee80211DisassociationFrameBody body;
+            auto body = std::make_shared<Ieee80211DisassociationFrameBody>();
 
-            body.setReasonCode(stream.readUint16Be());
+            body->setReasonCode(stream.readUint16Be());
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -481,23 +481,23 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ProbeRequestFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_PROBEREQUEST, fc_1);
-            Ieee80211ProbeRequestFrameBody body;
+            auto body = std::make_shared<Ieee80211ProbeRequestFrameBody>();
 
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
             stream.readBytes((uint8_t *)SSID, byte(length));
             SSID[length] = '\0';
-            body.setSSID(SSID);
+            body->setSSID(SSID);
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -506,23 +506,23 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211AssociationRequestFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONREQUEST, fc_1);
-            Ieee80211AssociationRequestFrameBody body;
+            auto body = std::make_shared<Ieee80211AssociationRequestFrameBody>();
 
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
             stream.readBytes((uint8_t *)SSID, byte(length));
             SSID[length] = '\0';
-            body.setSSID(SSID);
+            body->setSSID(SSID);
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -531,27 +531,27 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ReassociationRequestFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONREQUEST, fc_1);
-            Ieee80211ReassociationRequestFrameBody body;
+            auto body = std::make_shared<Ieee80211ReassociationRequestFrameBody>();
             stream.readUint16Be();
             stream.readUint16Be();
 
-            body.setCurrentAP(stream.readMACAddress());
+            body->setCurrentAP(stream.readMACAddress());
 
             char SSID[256];
             stream.readByte();
             unsigned int length = stream.readByte();
             stream.readBytes((uint8_t *)SSID, byte(length));
             SSID[length] = '\0';
-            body.setSSID(SSID);
+            body->setSSID(SSID);
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -560,19 +560,19 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211AssociationResponseFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_ASSOCIATIONRESPONSE, fc_1);
-            Ieee80211AssociationResponseFrameBody body;
+            auto body = std::make_shared<Ieee80211AssociationResponseFrameBody>();
             stream.readUint16Be();
-            body.setStatusCode(stream.readUint16Be());
-            body.setAid(stream.readUint16Be());
+            body->setStatusCode(stream.readUint16Be());
+            body->setAid(stream.readUint16Be());
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -581,19 +581,19 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ReassociationResponseFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_REASSOCIATIONRESPONSE, fc_1);
-            Ieee80211ReassociationResponseFrameBody body;
+            auto body = std::make_shared<Ieee80211ReassociationResponseFrameBody>();
             stream.readUint16Be();
-            body.setStatusCode(stream.readUint16Be());
-            body.setAid(stream.readUint16Be());
+            body->setStatusCode(stream.readUint16Be());
+            body->setAid(stream.readUint16Be());
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -602,12 +602,12 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211BeaconFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_BEACON, fc_1);
-            Ieee80211BeaconFrameBody body;
+            auto body = std::make_shared<Ieee80211BeaconFrameBody>();
 
             simtime_t timetstamp;
             timetstamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
 
-            body.setBeaconInterval(SimTime((int64_t)stream.readUint16Be()*1024, SIMTIME_US));
+            body->setBeaconInterval(SimTime((int64_t)stream.readUint16Be()*1024, SIMTIME_US));
             stream.readUint16Be();     // Capability
 
             char SSID[256];
@@ -615,16 +615,16 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
             unsigned int length = stream.readByte();
             stream.readBytes((uint8_t *)SSID, byte(length));
             SSID[length] = '\0';
-            body.setSSID(SSID);
+            body->setSSID(SSID);
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -633,12 +633,12 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
         {
             auto pkt = std::make_shared<Ieee80211ProbeResponseFrame>();
             parseDataOrMgmtFrame(stream, pkt, ST_PROBERESPONSE, fc_1);
-            Ieee80211ProbeResponseFrameBody body;
+            auto body = std::make_shared<Ieee80211ProbeResponseFrameBody>();
 
             simtime_t timestamp;
             timestamp.setRaw(stream.readUint64Be()); // TODO: store timestamp
 
-            body.setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
+            body->setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
             stream.readUint16Be();
 
             char SSID[256];
@@ -646,16 +646,16 @@ Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& stream) 
             unsigned int length = stream.readByte();
             stream.readBytes((uint8_t *)SSID, byte(length));
             SSID[length] = '\0';
-            body.setSSID(SSID);
+            body->setSSID(SSID);
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
             supRat.numRates = stream.readByte();
             for (int i = 0; i < supRat.numRates; i++)
                 supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            body.setSupportedRates(supRat);
+            body->setSupportedRates(supRat);
 
-            pkt->setBody(body);
+            // REVIVE: pkt->setBody(body);
             frame = pkt;
             break;
         }
@@ -680,8 +680,8 @@ void Ieee80211MacTrailerSerializer::serialize(MemoryOutputStream& stream, const 
 {
     const auto& macTrailer = std::dynamic_pointer_cast<Ieee80211MacTrailer>(chunk);
     auto fcsMode = macTrailer->getFcsMode();
-    if (fcsMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
+//    if (fcsMode != CRC_COMPUTED)
+//        throw cRuntimeError("Cannot serialize Ieee80211FcsTrailer without properly computed FCS, try changing the value of the fcsMode parameter (e.g. in the Ieee80211Mac module)");
     stream.writeUint32Be(macTrailer->getFcs());
 }
 
