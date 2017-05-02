@@ -68,52 +68,52 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Packet *packet, const Ptr<Ieee80
     distributeReceivedDataFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }
 
-void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame)
+void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame)
 {
     dropManagementFrame(packet);
 }

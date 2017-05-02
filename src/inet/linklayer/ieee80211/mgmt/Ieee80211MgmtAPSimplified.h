@@ -51,16 +51,16 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     /** @name Processing of different frame types */
     //@{
     virtual void handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) override;
-    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame) override;
-    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame) override;
-    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame) override;
-    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame) override;
-    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame) override;
-    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame) override;
-    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame) override;
-    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame) override;
-    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame) override;
-    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame) override;
+    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
+    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) override;
     //@}
 };
 

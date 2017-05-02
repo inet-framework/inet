@@ -116,52 +116,52 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<Ieee80211DataOrMg
 
         case ST_AUTHENTICATION:
             numMgmtFramesReceived++;
-            handleAuthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211AuthenticationFrame>(frame));
+            handleAuthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_DEAUTHENTICATION:
             numMgmtFramesReceived++;
-            handleDeauthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211DeauthenticationFrame>(frame));
+            handleDeauthenticationFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_ASSOCIATIONREQUEST:
             numMgmtFramesReceived++;
-            handleAssociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211AssociationRequestFrame>(frame));
+            handleAssociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_ASSOCIATIONRESPONSE:
             numMgmtFramesReceived++;
-            handleAssociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211AssociationResponseFrame>(frame));
+            handleAssociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_REASSOCIATIONREQUEST:
             numMgmtFramesReceived++;
-            handleReassociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211ReassociationRequestFrame>(frame));
+            handleReassociationRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_REASSOCIATIONRESPONSE:
             numMgmtFramesReceived++;
-            handleReassociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211ReassociationResponseFrame>(frame));
+            handleReassociationResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_DISASSOCIATION:
             numMgmtFramesReceived++;
-            handleDisassociationFrame(packet, std::dynamic_pointer_cast<Ieee80211DisassociationFrame>(frame));
+            handleDisassociationFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_BEACON:
             numMgmtFramesReceived++;
-            handleBeaconFrame(packet, std::dynamic_pointer_cast<Ieee80211BeaconFrame>(frame));
+            handleBeaconFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_PROBEREQUEST:
             numMgmtFramesReceived++;
-            handleProbeRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211ProbeRequestFrame>(frame));
+            handleProbeRequestFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         case ST_PROBERESPONSE:
             numMgmtFramesReceived++;
-            handleProbeResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211ProbeResponseFrame>(frame));
+            handleProbeResponseFrame(packet, std::dynamic_pointer_cast<Ieee80211ManagementFrame>(frame));
             break;
 
         default:

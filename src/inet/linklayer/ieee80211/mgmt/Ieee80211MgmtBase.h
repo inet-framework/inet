@@ -81,16 +81,16 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     /** @name Processing of different frame types */
     //@{
     virtual void handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame) = 0;
-    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211AuthenticationFrame>& frame) = 0;
-    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211DeauthenticationFrame>& frame) = 0;
-    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211AssociationRequestFrame>& frame) = 0;
-    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211AssociationResponseFrame>& frame) = 0;
-    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ReassociationRequestFrame>& frame) = 0;
-    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ReassociationResponseFrame>& frame) = 0;
-    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211DisassociationFrame>& frame) = 0;
-    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211BeaconFrame>& frame) = 0;
-    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ProbeRequestFrame>& frame) = 0;
-    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ProbeResponseFrame>& frame) = 0;
+    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleDisassociationFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleBeaconFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
+    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<Ieee80211ManagementFrame>& frame) = 0;
     //@}
 
     /** lifecycle support */
