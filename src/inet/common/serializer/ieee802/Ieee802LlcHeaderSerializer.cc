@@ -16,17 +16,17 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/ieee802/Ieee802HeaderSerializer.h"
+#include "inet/common/serializer/ieee802/Ieee802LlcHeaderSerializer.h"
 #include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
 
 namespace inet {
 
 namespace serializer {
 
-Register_Serializer(Ieee802LlcHeader, Ieee802HeaderSerializer);
-Register_Serializer(Ieee802SnapHeader, Ieee802HeaderSerializer);
+Register_Serializer(Ieee802LlcHeader, Ieee802LlcHeaderSerializer);
+Register_Serializer(Ieee802SnapHeader, Ieee802LlcHeaderSerializer);
 
-void Ieee802HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
+void Ieee802LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const
 {
     const auto& llcHeader = CHK(std::dynamic_pointer_cast<const Ieee802LlcHeader>(chunk));
     stream.writeByte(llcHeader->getSsap());
@@ -40,7 +40,7 @@ void Ieee802HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<Ch
     }
 }
 
-Ptr<Chunk> Ieee802HeaderSerializer::deserialize(MemoryInputStream& stream) const
+Ptr<Chunk> Ieee802LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<Ieee802LlcHeader> llcHeader = nullptr;
     uint8_t ssap = stream.readByte();

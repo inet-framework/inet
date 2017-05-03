@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE802HEADERSERIALIZER_H
-#define __INET_IEEE802HEADERSERIALIZER_H
+#ifndef __INET_IEEE802LLCHEADERSERIALIZER_H
+#define __INET_IEEE802LLCHEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
@@ -24,19 +24,19 @@ namespace inet {
 
 namespace serializer {
 
-class INET_API Ieee802HeaderSerializer : public FieldsChunkSerializer
+class INET_API Ieee802LlcHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<Chunk>& chunk) const override;
     virtual Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    Ieee802HeaderSerializer() : FieldsChunkSerializer() {}
+    Ieee802LlcHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace serializer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE802HEADERSERIALIZER_H
+#endif // ifndef __INET_IEEE802LLCHEADERSERIALIZER_H
 
