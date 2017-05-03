@@ -19,6 +19,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MACAddressTag_m.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -180,11 +183,36 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 
 void Ieee80211Mac::encapsulate(Packet *packet)
 {
-    // KLUDGE: TODO: move encapsulate from MGMT to MAC
-    auto h = packet->removeHeader<Ieee80211Frame>();
-    if (auto twoAddrFrame = std::dynamic_pointer_cast<Ieee80211TwoAddressFrame>(h))
-        twoAddrFrame->setTransmitterAddress(address);
-    packet->insertHeader(h);
+    // 1. Adhoc Data
+    const auto& header = std::make_shared<Ieee80211DataFrame>();
+    header->setTransmitterAddress(address);
+    header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+
+//    // 2. STA Data or STA simplified Data
+//    header->setToDS(true);
+//    header->setReceiverAddress(apAddress);
+//    header->setAddress3(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+//
+//    // 3. STA Mgmt
+//    header->setReceiverAddress(destAddress);
+//
+//    // 4. AP Data
+//    header->setFromDS(true);
+//    header->setAddress3(packet->getMandatoryTag<MacAddressReq>()->getSrcAddress());
+//    header->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
+//
+//    // 5. AP Mgmt
+//    header->setReceiverAddress(destAddress);
+//    header->setAddress3(apAddress);
+
+    // common
+    if (auto userPriorityReq = packet->getTag<UserPriorityReq>()) {
+        // make it a QoS frame, and set TID
+        header->setType(ST_DATA_WITH_QOS);
+        header->setChunkLength(header->getChunkLength() + bit(QOSCONTROL_BITS));
+        header->setTid(userPriorityReq->getUserPriority());
+    }
+    packet->insertHeader(header);
     const auto& trailer = std::make_shared<Ieee80211MacTrailer>();
     // TODO: add module parameter, implement fcs computing
     // TODO: trailer->setFcsMode(FCS_COMPUTED);
@@ -193,7 +221,16 @@ void Ieee80211Mac::encapsulate(Packet *packet)
 
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
-    // TODO: move encapsulate from MGMT to MAC
+    const auto& header = packet->popHeader<Ieee80211DataOrMgmtFrame>();
+    auto macAddressInd = packet->ensureTag<MacAddressInd>();
+    macAddressInd->setSrcAddress(header->getTransmitterAddress());
+    macAddressInd->setDestAddress(header->getReceiverAddress());
+    if (auto dataHeader = std::dynamic_pointer_cast<Ieee80211DataFrame>(header)) {
+        int tid = dataHeader->getTid();
+        if (tid < 8)
+            packet->ensureTag<UserPriorityInd>()->setUserPriority(tid);
+    }
+    packet->ensureTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->popTrailer<Ieee80211MacTrailer>();
 }
 

@@ -40,60 +40,9 @@ void Ieee80211MgmtAdhoc::handleTimer(cMessage *msg)
     ASSERT(false);
 }
 
-void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
-{
-    auto packet = check_and_cast<Packet *>(msg);
-    encapsulate(packet);
-    sendDown(packet);
-}
-
 void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
 {
     throw cRuntimeError("handleCommand(): no commands supported");
-}
-
-void Ieee80211MgmtAdhoc::encapsulate(Packet *packet)
-{
-    auto ethTypeTag = packet->getTag<EtherTypeReq>();
-    const auto& ieee802SnapHeader = std::make_shared<Ieee802SnapHeader>();
-    ieee802SnapHeader->setOui(0);
-    ieee802SnapHeader->setProtocolId(ethTypeTag ? ethTypeTag->getEtherType() : -1);
-    packet->insertHeader(ieee802SnapHeader);
-    const auto& ieee80211MacHeader = std::make_shared<Ieee80211DataFrame>();
-    ieee80211MacHeader->setReceiverAddress(packet->getMandatoryTag<MacAddressReq>()->getDestAddress());
-    auto userPriorityReq = packet->getTag<UserPriorityReq>();
-    if (userPriorityReq != nullptr) {
-        // make it a QoS frame, and set TID
-        ieee80211MacHeader->setType(ST_DATA_WITH_QOS);
-        ieee80211MacHeader->setChunkLength(ieee80211MacHeader->getChunkLength() + bit(QOSCONTROL_BITS));
-        ieee80211MacHeader->setTid(userPriorityReq->getUserPriority());
-    }
-    packet->insertHeader(ieee80211MacHeader);
-}
-
-void Ieee80211MgmtAdhoc::decapsulate(Packet *packet)
-{
-    const auto& ieee80211MacHeader = packet->popHeader<Ieee80211DataFrame>();
-    auto macAddressInd = packet->ensureTag<MacAddressInd>();
-    macAddressInd->setSrcAddress(ieee80211MacHeader->getTransmitterAddress());
-    macAddressInd->setDestAddress(ieee80211MacHeader->getReceiverAddress());
-    int tid = ieee80211MacHeader->getTid();
-    if (tid < 8)
-        packet->ensureTag<UserPriorityInd>()->setUserPriority(tid); // TID values 0..7 are UP
-    packet->ensureTag<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    const auto& ieee802SnapHeader = packet->popHeader<Ieee802SnapHeader>();
-    int etherType = ieee802SnapHeader->getProtocolId();
-    if (etherType != -1) {
-        packet->ensureTag<EtherTypeInd>()->setEtherType(etherType);
-        packet->ensureTag<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
-        packet->ensureTag<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(etherType));
-    }
-}
-
-void Ieee80211MgmtAdhoc::handleDataFrame(Packet *packet, const Ptr<Ieee80211DataFrame>& frame)
-{
-    decapsulate(packet);
-    sendUp(packet);
 }
 
 void Ieee80211MgmtAdhoc::handleAuthenticationFrame(Packet *packet, const Ptr<Ieee80211ManagementHeader>& frame)
