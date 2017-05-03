@@ -107,6 +107,9 @@ module Ieee80211Mac extends MACProtocolBase like IIeee80211Mac
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
         @signal[NF_MODESET_CHANGED](type=inet::physicallayer::Ieee80211ModeSet);
+    gates:
+        input mgmtIn;
+        output mgmtOut;
     submodules:
         dcf: Dcf {
             parameters:

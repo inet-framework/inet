@@ -28,4 +28,7 @@ moduleinterface IIeee80211Mac extends IMACProtocol
 {
     parameters:
         @display("i=block/layer");
+    gates:
+        input mgmtIn;
+        output mgmtOut;
 }
