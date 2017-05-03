@@ -24,7 +24,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MACAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
-#include "inet/linklayer/ieee802/Ieee802Header_m.h"
+#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSTA.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"

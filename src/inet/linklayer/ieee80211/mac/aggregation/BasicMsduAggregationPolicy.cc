@@ -15,7 +15,7 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/linklayer/ieee802/Ieee802Header_m.h"
+#include "inet/linklayer/ieee802/Ieee802LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
 
 namespace inet {
