@@ -132,7 +132,6 @@ Ieee80211MgmtAP::STAInfo *Ieee80211MgmtAP::lookupSenderSTA(const Ptr<Ieee80211Ma
 
 void Ieee80211MgmtAP::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& destAddr)
 {
-    frame->setFromDS(true);
     frame->setReceiverAddress(destAddr);
     frame->setAddress3(myAddress);
     frame->markImmutable();

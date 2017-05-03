@@ -296,7 +296,6 @@ void Ieee80211MgmtSTA::beaconLost()
 void Ieee80211MgmtSTA::sendManagementFrame(const char *name, const Ptr<Ieee80211ManagementHeader>& frame, const Ptr<Ieee80211ManagementFrame>& body, const MACAddress& address)
 {
     // frame goes to the specified AP
-    frame->setToDS(true);
     frame->setReceiverAddress(address);
     //XXX set sequenceNumber?
     frame->markImmutable();
